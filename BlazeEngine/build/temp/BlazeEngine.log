@@ -1,0 +1,41 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(476,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
+  Engine.cpp
+  Input.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(25,23): warning C4251: 'Blaze::Window::lockedMousePos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Window' (compiling source file engine\source\BlazeEngine\Input\Input.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(174): message : see declaration of 'Blaze::Vector<int,2>' (compiling source file engine\source\BlazeEngine\Input\Input.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(31,41): warning C4251: 'Blaze::Window::allWindows': class 'std::vector<Blaze::Window *,std::allocator<Blaze::Window *>>' needs to have dll-interface to be used by clients of class 'Blaze::Window' (compiling source file engine\source\BlazeEngine\Input\Input.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(31): message : see declaration of 'std::vector<Blaze::Window *,std::allocator<Blaze::Window *>>' (compiling source file engine\source\BlazeEngine\Input\Input.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Input\Input.cpp(6,1): warning C4005: 'SDL_MAIN_HANDLED': macro redefinition
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Input\Input.cpp : message : see previous definition of 'SDL_MAIN_HANDLED'
+     Creating library C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.lib and object C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.exp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+Application.obj : error LNK2001: unresolved external symbol "unsigned int Blaze::state" (?state@Blaze@@3IA)
+Application.obj : error LNK2001: unresolved external symbol "unsigned int Blaze::initState" (?initState@Blaze@@3IA)
+Application.obj : error LNK2001: unresolved external symbol "class Blaze::BaseApplication * Blaze::instance" (?instance@Blaze@@3PEAVBaseApplication@1@EA)
+Application.obj : error LNK2001: unresolved external symbol "void (__cdecl* Blaze::constructInstance)(class Blaze::BaseApplication *)" (?constructInstance@Blaze@@3P6AXPEAVBaseApplication@1@@ZEA)
+Application.obj : error LNK2001: unresolved external symbol "void (__cdecl* Blaze::destructInstance)(class Blaze::BaseApplication *)" (?destructInstance@Blaze@@3P6AXPEAVBaseApplication@1@@ZEA)
+Application.obj : error LNK2001: unresolved external symbol "unsigned __int64 Blaze::instanceSize" (?instanceSize@Blaze@@3_KA)
+Application.obj : error LNK2001: unresolved external symbol "void * Blaze::initWindow" (?initWindow@Blaze@@3PEAXEA)
+Input.obj : error LNK2001: unresolved external symbol "void * Blaze::initWindow" (?initWindow@Blaze@@3PEAXEA)
+Window.obj : error LNK2001: unresolved external symbol "void * Blaze::initWindow" (?initWindow@Blaze@@3PEAXEA)
+Application.obj : error LNK2001: unresolved external symbol "void * Blaze::openGLContext" (?openGLContext@Blaze@@3PEAXEA)
+Renderer.obj : error LNK2001: unresolved external symbol "void * Blaze::openGLContext" (?openGLContext@Blaze@@3PEAXEA)
+Application.obj : error LNK2001: unresolved external symbol "struct FT_LibraryRec_ * Blaze::ft_library" (?ft_library@Blaze@@3PEAUFT_LibraryRec_@@EA)
+TextRenderer.obj : error LNK2001: unresolved external symbol "struct FT_LibraryRec_ * Blaze::ft_library" (?ft_library@Blaze@@3PEAUFT_LibraryRec_@@EA)
+Application.obj : error LNK2001: unresolved external symbol "struct Blaze::Vector<int,2> Blaze::Input::mousePos" (?mousePos@Input@Blaze@@3U?$Vector@H$01@2@A)
+Input.obj : error LNK2001: unresolved external symbol "struct Blaze::Vector<int,2> Blaze::Input::mousePos" (?mousePos@Input@Blaze@@3U?$Vector@H$01@2@A)
+Logger.obj : error LNK2001: unresolved external symbol "class std::mutex Blaze::Logger::queueMutex" (?queueMutex@Logger@Blaze@@3Vmutex@std@@A)
+Logger.obj : error LNK2001: unresolved external symbol "class std::queue<struct Blaze::Log,class std::deque<struct Blaze::Log,class std::allocator<struct Blaze::Log> > > Blaze::Logger::logs" (?logs@Logger@Blaze@@3V?$queue@ULog@Blaze@@V?$deque@ULog@Blaze@@V?$allocator@ULog@Blaze@@@std@@@std@@@std@@A)
+Key.obj : error LNK2001: unresolved external symbol "class std::map<enum Blaze::Key,unsigned int,struct std::less<enum Blaze::Key>,class std::allocator<struct std::pair<enum Blaze::Key const ,unsigned int> > > Blaze::Input::scancodemap" (?scancodemap@Input@Blaze@@3V?$map@W4Key@Blaze@@IU?$less@W4Key@Blaze@@@std@@V?$allocator@U?$pair@$$CBW4Key@Blaze@@I@std@@@4@@std@@A)
+Input.obj : error LNK2001: unresolved external symbol "class std::map<unsigned int,enum Blaze::Key,struct std::less<unsigned int>,class std::allocator<struct std::pair<unsigned int const ,enum Blaze::Key> > > Blaze::Input::keymap" (?keymap@Input@Blaze@@3V?$map@IW4Key@Blaze@@U?$less@I@std@@V?$allocator@U?$pair@$$CBIW4Key@Blaze@@@std@@@4@@std@@A)
+Input.obj : error LNK2001: unresolved external symbol "enum Blaze::KeyState * Blaze::Input::keyStates" (?keyStates@Input@Blaze@@3PAW4KeyState@2@A)
+Input.obj : error LNK2001: unresolved external symbol "void * * Blaze::Input::eventFunctions" (?eventFunctions@Input@Blaze@@3PAPEAXA)
+Input.obj : error LNK2001: unresolved external symbol "struct Blaze::Vector<int,2> Blaze::Input::lastMouseRealPos" (?lastMouseRealPos@Input@Blaze@@3U?$Vector@H$01@2@A)
+Input.obj : error LNK2001: unresolved external symbol "struct Blaze::Vector<int,2> Blaze::Input::mouseMovement" (?mouseMovement@Input@Blaze@@3U?$Vector@H$01@2@A)
+Input.obj : error LNK2001: unresolved external symbol "int Blaze::Input::mouseScroll" (?mouseScroll@Input@Blaze@@3HA)
+Input.obj : error LNK2001: unresolved external symbol "class Blaze::Window * Blaze::Input::focusedWindow" (?focusedWindow@Input@Blaze@@3PEAVWindow@2@EA)
+Renderer.obj : error LNK2001: unresolved external symbol "void * Blaze::Renderer::target" (?target@Renderer@Blaze@@3PEAXEA)
+Renderer.obj : error LNK2001: unresolved external symbol "struct Blaze::Vector<int,2> Blaze::Renderer::viewportPos" (?viewportPos@Renderer@Blaze@@3U?$Vector@H$01@2@A)
+Renderer.obj : error LNK2001: unresolved external symbol "struct Blaze::Vector<int,2> Blaze::Renderer::viewportSize" (?viewportSize@Renderer@Blaze@@3U?$Vector@H$01@2@A)
+Time.obj : error LNK2001: unresolved external symbol "class std::chrono::time_point<struct std::chrono::steady_clock,class std::chrono::duration<__int64,struct std::ratio<1,1000000000> > > Blaze::Time::engineStartTime" (?engineStartTime@Time@Blaze@@3V?$time_point@Usteady_clock@chrono@std@@V?$duration@_JU?$ratio@$00$0DLJKMKAA@@std@@@23@@chrono@std@@A)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll : fatal error LNK1120: 24 unresolved externals

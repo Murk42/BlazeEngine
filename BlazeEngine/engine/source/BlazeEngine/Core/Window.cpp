@@ -1,0 +1,126 @@
+#include "BlazeEngine/Core/Window.h"
+
+#include <SDL/SDL.h>
+
+namespace Blaze
+{		
+	namespace Input
+	{
+		extern Vec2i mousePos;
+	}
+
+	std::vector<Window*> Window::allWindows;
+	extern void* initWindow;			
+
+	Window::Window()
+	{
+		allWindows.push_back(this);
+		if (initWindow != nullptr)
+		{
+			ptr = initWindow;
+			initWindow = nullptr;
+		}
+		else
+			ptr = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+	}
+
+	Window::~Window()
+	{
+		auto i = std::find(allWindows.begin(), allWindows.end(), this);		
+
+		if (i != allWindows.end())
+			allWindows.erase(i);
+
+		SDL_DestroyWindow((SDL_Window*)ptr);
+	}
+
+	Vec2i Window::GetPos() const
+	{
+		Vec2i pos;
+		SDL_GetWindowPosition((SDL_Window*)ptr, &pos.x, &pos.y);
+		return pos;
+	}
+	Vec2i Window::GetSize() const
+	{
+		Vec2i size;
+		SDL_GetWindowSize((SDL_Window*)ptr, &size.x, &size.y);
+		return size;
+	}
+	String Window::GetTitle() const
+	{
+		return SDL_GetWindowTitle((SDL_Window*)ptr);
+	}
+
+	void Window::SetPos(const Vec2i& s)
+	{
+		SDL_SetWindowPosition((SDL_Window*)ptr, s.x, s.y);
+	}
+	void Window::SetSize(const Vec2i& s)
+	{
+		SDL_SetWindowSize((SDL_Window*)ptr, s.x, s.y);
+	}
+	void Window::SetTitle(const String& title)
+	{
+		SDL_SetWindowTitle((SDL_Window*)ptr, title.Ptr());
+	}
+	void Window::Minimize()
+	{
+		SDL_MinimizeWindow((SDL_Window*)ptr);
+	}
+	void Window::Maximize()
+	{
+		SDL_MaximizeWindow((SDL_Window*)ptr);
+	}
+	void Window::Raise()
+	{
+		SDL_RaiseWindow((SDL_Window*)ptr);
+	}
+	void Window::ShowWindow(bool show)
+	{
+		if (show)
+			SDL_ShowWindow((SDL_Window*)ptr);
+		else
+			SDL_HideWindow((SDL_Window*)ptr);
+	}
+	void Window::ShowCursor(bool show)
+	{
+		SDL_ShowCursor(show);
+	}
+	void Window::LockCursor(const Vec2i& pos)
+	{
+		lockedMousePos = pos;
+		lockedMouse = true;		
+	}
+	void Window::UnlockCursor()
+	{
+		lockedMouse = false;
+	}
+
+
+	void Window::SetFullscreen()
+	{		
+		SDL_SetWindowFullscreen((SDL_Window*)ptr, SDL_WINDOW_FULLSCREEN_DESKTOP);		
+	}
+	void Window::SetBorderless(bool lockMouseInside)
+	{
+		SDL_SetWindowFullscreen((SDL_Window*)ptr, 0);
+		SDL_SetWindowBordered((SDL_Window*)ptr, SDL_FALSE);
+		SDL_SetWindowGrab((SDL_Window*)ptr, (SDL_bool)lockMouseInside);
+	}
+	void Window::SetWindowed(bool resizable, bool lockMouseInside)
+	{
+		SDL_SetWindowFullscreen((SDL_Window*)ptr, 0);		
+		SDL_SetWindowBordered((SDL_Window*)ptr, SDL_TRUE);
+		SDL_SetWindowResizable((SDL_Window*)ptr, (SDL_bool)resizable);
+		SDL_SetWindowGrab((SDL_Window*)ptr, (SDL_bool)lockMouseInside);
+	}
+
+	bool Window::IsFullscreen() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_FULLSCREEN_DESKTOP; }
+	bool Window::IsBorderless() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_BORDERLESS; }
+	bool Window::IsWindowed() { return !(SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_BORDERLESS); }
+	bool Window::IsResizable() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_RESIZABLE; }
+	bool Window::IsMouseLockedInside() { return SDL_GetWindowGrab((SDL_Window*)ptr); }
+	bool Window::IsMinmized() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_MINIMIZED; }
+	bool Window::IsMaximized() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_MAXIMIZED; }
+	bool Window::IsShown() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_SHOWN; }
+}

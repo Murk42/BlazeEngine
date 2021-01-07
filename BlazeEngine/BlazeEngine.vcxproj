@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{5C88A884-6F27-4382-83A4-5A3EF438D83B}</ProjectGuid>
+    <RootNamespace>BlazeEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)build\bin\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)build\temp</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)build\bin\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)build\temp</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)build\bin\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)build\temp</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)build\bin\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)build\temp</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Programming\Libraries\DevIL\include;C:\Programming\Libraries\SDL\SDL2-2.0.10\include;C:\Programming\Libraries\PDCurses\include;C:\Programming\Libraries\FreeType\include;C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget);C:\Programming\Libraries\PDCurses\lib\$(PlatformTarget);C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\lib\$(PlatformTarget)\;C:\Programming\Libraries\FreeType\lib\$(PlatformTarget)\;C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Programming\Libraries\DevIL\include;C:\Programming\Libraries\SDL\SDL2-2.0.10\include;C:\Programming\Libraries\PDCurses\include;C:\Programming\Libraries\FreeType\include;C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget);C:\Programming\Libraries\PDCurses\lib\$(PlatformTarget);C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\lib\$(PlatformTarget)\;C:\Programming\Libraries\FreeType\lib\$(PlatformTarget)\;C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Programming\Libraries\DevIL\include;C:\Programming\Libraries\SDL\SDL2-2.0.10\include;C:\Programming\Libraries\PDCurses\include;C:\Programming\Libraries\FreeType\include;C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget);C:\Programming\Libraries\PDCurses\lib\$(PlatformTarget);C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\lib\$(PlatformTarget)\;C:\Programming\Libraries\FreeType\lib\$(PlatformTarget)\;C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Programming\Libraries\DevIL\include;C:\Programming\Libraries\SDL\SDL2-2.0.10\include;C:\Programming\Libraries\PDCurses\include;C:\Programming\Libraries\FreeType\include;C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget);C:\Programming\Libraries\PDCurses\lib\$(PlatformTarget);C:\Programming\Libraries\glew-2.1.0\glew-2.1.0\lib\$(PlatformTarget)\;C:\Programming\Libraries\FreeType\lib\$(PlatformTarget)\;C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="engine\include\BlazeEngine\BlazeEngine.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Console\Frame.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Console\LogList.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Core\Application.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Core\Logger.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\ArrayView.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\AxisAngle.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\ByteStream.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Common.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Guard.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Matrix.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\OrderedTuple.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Quaternion.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Rect.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Serializer.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Stream.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\StringStream.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\TypeTraits.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Vector.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Bitmap.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\TextRenderer.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Texture.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Buffer.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Console\Console.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Core\EngineCore.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Material.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Mesh.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Input\Key.h" />
+    <ClInclude Include="engine\source\BlazeEngine\Internal\Engine.h" />
+    <ClInclude Include="engine\source\BlazeEngine\Internal\SafeTerminate.h" />
+    <ClInclude Include="engine\source\BlazeEngine\Internal\TypeStructs.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Utilities\File.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Input\Input.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Renderer.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Shader.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\ShaderProgram.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Color.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\StringView.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Math\Random.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\String.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Utilities\ThreadWorker.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\VertexLayout.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Core\Window.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Math\Math.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Utilities\Time.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Utilities\Timer.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="engine\source\BlazeEngine\Console\LogList.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Console\Frame.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Core\Application.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Core\EngineCore.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Internal\Engine.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Core\Logger.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Core\ByteStream.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\StringStream.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Bitmap.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Material.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\TextRenderer.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Texture.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Buffer.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Console\Console.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\StringView.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Mesh.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Input\Key.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Utilities\File.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Input\Input.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Shader.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\ShaderProgram.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\VertexLayout.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Core\Window.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Math\Random.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\String.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Utilities\Time.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Utilities\Timer.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\Types.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="engine\assets\default\fragmentDiffuse.glsl" />
+    <None Include="engine\assets\default\vertexDiffuse.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="engine\assets\default\cubemap\cubemap_column.png" />
+    <Image Include="engine\assets\default\cubemap\cubemap_horizontal_cross.png" />
+    <Image Include="engine\assets\default\cubemap\cubemap_row.png" />
+    <Image Include="engine\assets\default\cubemap\cubemap_vertical_cross.png" />
+    <Image Include="engine\assets\default\default.png" />
+    <Image Include="engine\assets\default\logo.png" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

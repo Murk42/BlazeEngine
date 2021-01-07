@@ -1,0 +1,36 @@
+#pragma once
+#include <vector>
+#include "BlazeEngine/Core/EngineCore.h"
+
+namespace Blaze
+{
+	class String;
+	class BLAZE_API StringView
+	{
+		const char* ptr;
+		size_t size;
+	public:
+		StringView();
+		constexpr StringView(const StringView&);						
+		StringView(const String&);
+
+		constexpr StringView(const char*);
+		constexpr StringView(const char*, int count);
+
+		inline const char* Ptr() const { return ptr; }
+		inline size_t Size() const { return size; }
+
+		int Find(char val) const;
+		int Find(const std::vector<char>& val);
+		int Count(char val) const;
+
+		constexpr void operator= (const StringView&);				
+		void operator= (const String&);
+		constexpr void operator= (const char*);
+
+		constexpr bool operator==(const StringView& s) const;				
+		constexpr bool operator!=(const StringView& s) const;		
+		
+		constexpr inline const char& operator[](int index) const { return ptr[index]; }
+	};
+}
