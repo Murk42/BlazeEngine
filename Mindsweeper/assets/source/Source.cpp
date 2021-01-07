@@ -74,6 +74,8 @@ public:
 	{
 		Input::Update();		
 
+		//vau
+
 		Renderer::ClearTarget();
 
 		Renderer::RenderPointArray(material, mesh);
