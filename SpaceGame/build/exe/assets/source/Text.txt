@@ -1,0 +1,27 @@
+Material "Default Material",
+	vertex = "assets/shaders/vertex.glsl"
+	fragment = "assets/shaders/fragment.glsl"
+}
+Texture "Default Texture" {
+	path = "assets/default/default.png"
+	mipmaps = false
+	xWrap = ClampToEdge
+	yWrap = ClampToEdge
+	minSampling = Linear
+	maxSampling = Linear
+	mipSampling = Linear
+}
+Model "ShipModel" {
+	path = "assets/meshes/untitled.obj"
+}
+Camera "Main Camera" {
+	FOV = 90
+	Near = 0.1
+	Far = 10000
+}
+Camera "UI camera" {
+	Scale = 1
+	Near = -1
+	Far = 1
+	LockX = false
+}

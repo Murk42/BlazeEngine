@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <ExecutableDir>$(ProjectDir)build\exe\</ExecutableDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>$(ProjectDir)build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)build\temp</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngine\engine\include</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\BlazeEngine.lib $(ExecutableDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\BlazeEngine.dll $(ExecutableDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\SDL2.dll $(ExecutableDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\DevIL.dll $(ExecutableDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\ILU.dll $(ExecutableDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\BlazeEngine.lib $(ProjectDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\BlazeEngine.dll $(ProjectDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\SDL2.dll $(ProjectDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\DevIL.dll $(ProjectDir)
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\ILU.dll $(ProjectDir)
+xcopy /y /e $(SolutionDir)BlazeEngine\engine\assets $(ProjectDir)assets\
+xcopy /y /e $(ProjectDir)assets $(ExecutableDir)assets\
+xcopy /y $(OutDir)$(TargetName).exe $(ExecutableDir)</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>BlazeEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="ExecutableDir">
+      <Value>$(ExecutableDir)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

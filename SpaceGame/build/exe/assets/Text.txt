@@ -1,0 +1,14 @@
+Material "Default Material" {
+	vertex = "assets/shaders/vertex.glsl"
+	fragment = "assets/shaders/fragment.glsl"
+}
+Texture "Default Texture" {
+	path = "assets/default/default.png"
+	mipmaps = false
+	xWrap = ClampToEdge
+	yWrap = ClampToEdge
+	minSampling = Linear
+	maxSampling = Linear
+	mipSampling = Linear
+}
+
