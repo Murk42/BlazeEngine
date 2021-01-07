@@ -74,11 +74,6 @@ public:
 	{
 		Input::Update();		
 
-		//test2
-		// vazi
-		//molim te najlaganije
-		// aje aje
-
 		Renderer::ClearTarget();
 
 		Renderer::RenderPointArray(material, mesh);
