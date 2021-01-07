@@ -74,7 +74,7 @@ public:
 	{
 		Input::Update();		
 
-		//vau
+		//vau ide gas
 
 		Renderer::ClearTarget();
 
