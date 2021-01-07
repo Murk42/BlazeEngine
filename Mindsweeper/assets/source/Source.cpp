@@ -75,6 +75,7 @@ public:
 		Input::Update();		
 
 		//test2
+		// vazi
 
 		Renderer::ClearTarget();
 
