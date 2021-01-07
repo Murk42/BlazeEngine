@@ -76,6 +76,7 @@ public:
 
 		//test2
 		// vazi
+		//molim te najlaganije
 
 		Renderer::ClearTarget();
 
