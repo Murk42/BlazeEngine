@@ -110,9 +110,9 @@
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+      <Command>xcopy /y $(LibrariesDir)SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -132,9 +132,9 @@ xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)<
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+      <Command>xcopy /y $(LibrariesDir)SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -158,9 +158,9 @@ xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)<
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+      <Command>xcopy /y $(LibrariesDir)SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -184,9 +184,9 @@ xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)<
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32s.lib;pdcurses.lib;SDL2.lib;SDL2main.lib;DevIL.lib;ILU.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y C:\Programming\Libraries\SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
-xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
+      <Command>xcopy /y $(LibrariesDir)SDL\SDL2-2.0.10\lib\$(PlatformTarget)\SDL2.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\DevIL.dll $(OutDir)
+xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
