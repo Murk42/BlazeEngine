@@ -1,47 +1,134 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(476,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.lib
+  Source.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(25,23): warning C4251: 'Blaze::Window::lockedMousePos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Window'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(174): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\Frame.h(14,16): warning C4251: 'Blaze::Console::Frame::cursor': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Console::Frame'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(174): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\Frame.h(15,14): warning C4251: 'Blaze::Console::Frame::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Console::Frame'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(174): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\Frame.h(16,13): warning C4251: 'Blaze::Console::Frame::pos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Console::Frame'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(174): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\LogList.h(18,30): warning C4251: 'Blaze::Console::LogList::logs': class 'std::vector<Blaze::Console::LogList::LogCache,std::allocator<Blaze::Console::LogList::LogCache>>' needs to have dll-interface to be used by clients of class 'Blaze::Console::LogList'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\LogList.h(18): message : see declaration of 'std::vector<Blaze::Console::LogList::LogCache,std::allocator<Blaze::Console::LogList::LogCache>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49,30): warning C4251: 'Blaze::UniformBlock::members': class 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>' needs to have dll-interface to be used by clients of struct 'Blaze::UniformBlock'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49): message : see declaration of 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66,32): warning C4251: 'Blaze::ShaderProgram::uniforms': class 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>' needs to have dll-interface to be used by clients of class 'Blaze::ShaderProgram'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66): message : see declaration of 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(70,56): warning C4251: 'Blaze::ShaderProgram::uniformBlocks': class 'std::vector<Blaze::UniformBlock,std::allocator<Blaze::UniformBlock>>' needs to have dll-interface to be used by clients of class 'Blaze::ShaderProgram'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(70): message : see declaration of 'std::vector<Blaze::UniformBlock,std::allocator<Blaze::UniformBlock>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(14,27): warning C4251: 'Blaze::VertexLayout::layout': class 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>' needs to have dll-interface to be used by clients of class 'Blaze::VertexLayout'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(14): message : see declaration of 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(32,139): warning C4244: 'initializing': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(32,124): warning C4244: 'initializing': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(32,109): warning C4244: 'initializing': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(32,94): warning C4244: 'initializing': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(36,61): warning C4244: '=': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(36,76): warning C4244: '=': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(36,91): warning C4244: '=': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Color.h(36,106): warning C4244: '=': conversion from 'float' to 'Blaze::ubyte', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Bitmap.h(23,13): warning C4251: 'Blaze::Bitmap::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Bitmap'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(174): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(85,13): warning C4251: 'Blaze::Texture2D::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Texture2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(174): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(147,13): warning C4251: 'Blaze::TextureArray2D::size': struct 'Blaze::Vector<int,3>' needs to have dll-interface to be used by clients of class 'Blaze::TextureArray2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(249): message : see declaration of 'Blaze::Vector<int,3>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\TextRenderer.h(34,27): warning C4251: 'Blaze::Font::sizes': class 'std::vector<Blaze::Font::Size *,std::allocator<Blaze::Font::Size *>>' needs to have dll-interface to be used by clients of class 'Blaze::Font'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\TextRenderer.h(34): message : see declaration of 'std::vector<Blaze::Font::Size *,std::allocator<Blaze::Font::Size *>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\TextRenderer.h(54,66): warning C4251: 'Blaze::TextRenderer::vertices': class 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,float>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,float>>>' needs to have dll-interface to be used by clients of class 'Blaze::TextRenderer'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\TextRenderer.h(54): message : see declaration of 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,float>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,float>>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Utilities\Timer.h(9,51): warning C4251: 'Blaze::Timer::timerStart': class 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' needs to have dll-interface to be used by clients of class 'Blaze::Timer'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\chrono(603): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>'
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(89,107): warning C4244: '=': conversion from 'Blaze::uint' to 'float', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(126,66): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(126,60): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(156,81): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(38): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(38): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(156,5): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(194,21): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(124): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(124): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Material.h(163,2): warning C4018: '<': signed/unsigned mismatch
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Material.h(154): message : while compiling class template member function 'void Blaze::Material<MatProps>::UpdateShaderProgramCompability(void)'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Material.h(217): message : see reference to function template instantiation 'void Blaze::Material<MatProps>::UpdateShaderProgramCompability(void)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(19): message : see reference to class template instantiation 'Blaze::Material<MatProps>' being compiled
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.lib
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\SDL2.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\SDL2.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\DevIL.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\DevIL.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\ILU.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\ILU.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.lib
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.lib
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\BlazeEngine.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\SDL2.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\SDL2.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\DevIL.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\DevIL.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x86\ILU.dll
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x86\ILU.dll
   1 File(s) copied
-  Mindsweeper.vcxproj -> D:\Minesweaper\BlazeEngine\Mindsweeper\build\Debug\x86\Mindsweeper.exe
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\default.png
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\fragmentDiffuse.glsl
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\logo.png
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\vertexDiffuse.glsl
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_column.png
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_horizontal_cross.png
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_row.png
-  D:\Minesweaper\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_vertical_cross.png
+  Mindsweeper.vcxproj -> C:\Programming\Projects\BlazeEngine\Mindsweeper\build\Debug\x86\Mindsweeper.exe
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\default.png
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\fragmentDiffuse.glsl
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\logo.png
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\vertexDiffuse.glsl
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_column.png
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_horizontal_cross.png
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_row.png
+  C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\assets\default\cubemap\cubemap_vertical_cross.png
   8 File(s) copied
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\default.png
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\fragmentDiffuse.glsl
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\logo.png
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\vertexDiffuse.glsl
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_column.png
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_horizontal_cross.png
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_row.png
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_vertical_cross.png
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\shaders\sprite\fragment.glsl
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\shaders\sprite\geometry.glsl
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\shaders\sprite\vertex.glsl
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\source\Source.cpp
-  D:\Minesweaper\BlazeEngine\Mindsweeper\assets\sprites\sprites.png
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\default.png
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\fragmentDiffuse.glsl
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\logo.png
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\vertexDiffuse.glsl
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_column.png
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_horizontal_cross.png
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_row.png
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\cubemap\cubemap_vertical_cross.png
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\shaders\sprite\fragment.glsl
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\shaders\sprite\geometry.glsl
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\shaders\sprite\vertex.glsl
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\sprites\sprites.png
   13 File(s) copied
-  D:\Minesweaper\BlazeEngine\Mindsweeper\build\Debug\x86\Mindsweeper.exe
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\build\Debug\x86\Mindsweeper.exe
   1 File(s) copied
