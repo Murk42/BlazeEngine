@@ -1,8 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?> 
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
-  <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Label="UserMacros">
+    <LibrariesDir>$(SolutionDir)Libraries\</LibrariesDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>
+    </OutDir>
+    <IntDir>
+    </IntDir>
+    <_PropertySheetDisplayName>BlazeEngineLibrariesPropertySheet</_PropertySheetDisplayName>
+  </PropertyGroup>
   <ItemDefinitionGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <BuildMacro Include="LibrariesDir">
+      <Value>$(LibrariesDir)</Value>
+    </BuildMacro>
+  </ItemGroup>
 </Project>
