@@ -66,7 +66,7 @@ public:
 			material.SetShaders(vertexShader, fragmentShader, geometryShader);
 
 
-			mesh.SetVertices(vertices, sizeX * sizeY);
+				mesh.SetVertices(vertices, sizeX * sizeY);
 		}		
 		
 	}
