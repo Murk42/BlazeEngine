@@ -1,24 +1,17 @@
 #include "BlazeEngine/Core/Window.h"
+#include "Engine.h"
 
 #include <SDL/SDL.h>
 
 namespace Blaze
-{		
-	namespace Input
-	{
-		extern Vec2i mousePos;
-	}
-
-	std::vector<Window*> Window::allWindows;
-	extern void* initWindow;			
-
+{				
 	Window::Window()
 	{
-		allWindows.push_back(this);
-		if (initWindow != nullptr)
+		engine->Application.allWindows.push_back(this);
+		if (engine->Application.initWindow != nullptr)
 		{
-			ptr = initWindow;
-			initWindow = nullptr;
+			ptr = engine->Application.initWindow;
+			engine->Application.initWindow = nullptr;
 		}
 		else
 			ptr = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
@@ -26,10 +19,10 @@ namespace Blaze
 
 	Window::~Window()
 	{
-		auto i = std::find(allWindows.begin(), allWindows.end(), this);		
+		auto i = std::find(engine->Application.allWindows.begin(), engine->Application.allWindows.end(), this);
 
-		if (i != allWindows.end())
-			allWindows.erase(i);
+		if (i != engine->Application.allWindows.end())
+			engine->Application.allWindows.erase(i);
 
 		SDL_DestroyWindow((SDL_Window*)ptr);
 	}

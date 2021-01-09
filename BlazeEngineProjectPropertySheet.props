@@ -15,6 +15,15 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <PostBuildEvent>
+      <Command>xcopy /y /e $(SolutionDir)BlazeEngine\engine\assets $(ProjectDir)assets\
+xcopy /y /e $(ProjectDir)assets $(ExecutableDir)assets\
+xcopy /y $(OutDir)$(TargetName).exe $(ExecutableDir)</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>BlazeEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreLinkEvent>
       <Command>xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\BlazeEngine.lib $(ExecutableDir)
 xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\BlazeEngine.dll $(ExecutableDir)
 xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\SDL2.dll $(ExecutableDir)
@@ -24,15 +33,8 @@ xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\
 xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\BlazeEngine.dll $(ProjectDir)
 xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\SDL2.dll $(ProjectDir)
 xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\DevIL.dll $(ProjectDir)
-xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\ILU.dll $(ProjectDir)
-xcopy /y /e $(SolutionDir)BlazeEngine\engine\assets $(ProjectDir)assets\
-xcopy /y /e $(ProjectDir)assets $(ExecutableDir)assets\
-xcopy /y $(OutDir)$(TargetName).exe $(ExecutableDir)</Command>
-    </PostBuildEvent>
-    <Link>
-      <AdditionalLibraryDirectories>C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
+xcopy /y $(SolutionDir)BlazeEngine\build\bin\$(Configuration)\$(PlatformTarget)\ILU.dll $(ProjectDir)</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="ExecutableDir">

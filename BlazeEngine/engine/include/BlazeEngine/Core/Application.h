@@ -4,10 +4,10 @@
 int BLAZE_API main();
 
 namespace Blaze
-{			
+{				
 	class BLAZE_API BaseApplication
 	{			
-		static void Setup(void(*a)(BaseApplication*), void(*b)(BaseApplication*), size_t);		
+		static void Setup(void(*a)(BaseApplication*), void(*b)(BaseApplication*), size_t size);
 	public:		
 		virtual void Startup() { }
 		virtual void Cleanup() { }
@@ -18,6 +18,7 @@ namespace Blaze
 		
 		template<typename>
 		friend class Application;
+		friend void InitializeBlaze();
 	};
 
 	template<typename Derived>
@@ -27,10 +28,10 @@ namespace Blaze
 		static void Destruct(BaseApplication* app) { ((Derived*)app)->~Derived(); }		
 
 		struct Init
-		{
-			Init()
-			{
-				BaseApplication::Setup(Construct, Destruct, sizeof(Derived));
+		{			
+			Init()				 
+			{		
+				Setup(Construct, Destruct, sizeof(Derived));
 			}			
 		} inline static init;
 	public:			

@@ -215,8 +215,6 @@ xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)<
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Mesh.h" />
     <ClInclude Include="engine\include\BlazeEngine\Input\Key.h" />
     <ClInclude Include="engine\source\BlazeEngine\Internal\Engine.h" />
-    <ClInclude Include="engine\source\BlazeEngine\Internal\SafeTerminate.h" />
-    <ClInclude Include="engine\source\BlazeEngine\Internal\TypeStructs.h" />
     <ClInclude Include="engine\include\BlazeEngine\Utilities\File.h" />
     <ClInclude Include="engine\include\BlazeEngine\Input\Input.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Renderer.h" />
@@ -239,6 +237,7 @@ xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)<
     <ClCompile Include="engine\source\BlazeEngine\Console\Frame.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\Application.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\EngineCore.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Internal\Engine.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\Logger.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\ByteStream.cpp" />
@@ -254,7 +253,6 @@ xcopy /y C:\Programming\Libraries\DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)<
     <ClCompile Include="engine\source\BlazeEngine\Input\Key.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Utilities\File.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Input\Input.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Shader.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\ShaderProgram.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\VertexLayout.cpp" />

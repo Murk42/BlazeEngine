@@ -1,20 +1,18 @@
 #include "BlazeEngine/Input/Key.h"
 #include "BlazeEngine/DataStructures/Common.h"
 
+#include "Engine.h"
+
 #define SDL_MAIN_HANDLED
 #include "SDL/SDL.h"
 
 #include <map>
 
 namespace Blaze
-{
-	namespace Input
-	{
-		extern std::map<Key, uint> scancodemap;
-	}
+{	
 	char KeyToChar(Key key)
 	{		
-		SDL_Keycode v = SDL_GetKeyFromScancode((SDL_Scancode)Input::scancodemap[key]);
+		SDL_Keycode v = SDL_GetKeyFromScancode((SDL_Scancode)engine->Input.scancodemap[key]);
 		if (v > 127 || v < 32)
 			v = 0;
 		return v;

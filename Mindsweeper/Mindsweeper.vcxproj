@@ -153,9 +153,6 @@
   <ItemGroup>
     <Image Include="assets\sprites\sprites.png" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="assets\source\DynamicMatrix.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

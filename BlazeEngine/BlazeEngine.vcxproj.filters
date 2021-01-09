@@ -147,12 +147,6 @@
     <ClInclude Include="engine\include\BlazeEngine\Console\LogList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\source\BlazeEngine\Internal\SafeTerminate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\source\BlazeEngine\Internal\TypeStructs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\source\BlazeEngine\Internal\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -183,9 +177,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Shader.cpp">
@@ -243,6 +234,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Internal\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

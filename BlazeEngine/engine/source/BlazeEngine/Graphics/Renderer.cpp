@@ -1,9 +1,11 @@
+#include "Engine.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "BlazeEngine/Core/Logger.h"
 #include "BlazeEngine/Core/Window.h"
 #include "BlazeEngine/Graphics/Buffer.h"
 #include "BlazeEngine/Graphics/VertexLayout.h"
 #include "BlazeEngine/Graphics/ShaderProgram.h"
+#include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/Core/Application.h"
 
 #define SDL_MAIN_HANDLED
@@ -12,20 +14,12 @@
 
 namespace Blaze
 {	
-	extern void* initWindow;
-	extern void* openGLContext;
-
 	namespace Renderer
-	{
-		extern void* target;		
-
-		extern Vec2i viewportPos;
-		extern Vec2i viewportSize;
-
+	{		
 		void SetViewport(const Vec2i& pos, const Vec2i& size)
 		{
-			viewportPos = pos;
-			viewportSize = size;
+			engine->Renderer.viewportPos = pos;
+			engine->Renderer.viewportSize = size;
 			glViewport(pos.x, pos.y, size.x, size.y);			
 		}
 
@@ -48,10 +42,10 @@ namespace Blaze
 		}
 		void UpdateTarget()
 		{
-			if (target == nullptr)
+			if (engine->Renderer.target == nullptr)
 				Logger::AddLog(LogType::Warning, "UpdateTarget", "No target was selected!");
 			else
-				SDL_GL_SwapWindow((SDL_Window*)target);
+				SDL_GL_SwapWindow((SDL_Window*)engine->Renderer.target);
 			}
 		void SwapInterval(bool vsync)
 		{
@@ -60,24 +54,24 @@ namespace Blaze
 		}
 		void SetTarget(Window& win)
 		{
-			if (target != win.ptr)
+			if (engine->Renderer.target != win.ptr)
 			{
-				target = win.ptr;
-				SDL_GL_MakeCurrent((SDL_Window*)win.ptr, (SDL_GLContext)openGLContext);
+				engine->Renderer.target = win.ptr;
+				SDL_GL_MakeCurrent((SDL_Window*)win.ptr, (SDL_GLContext)engine->Application.openGLContext);
 			}
 		}
 
 		Vec2i GetViewportPos()
 		{
-			return viewportPos;
+			return engine->Renderer.viewportPos;
 		}
 		Vec2i GetViewportSize()
 		{
-			return viewportSize;
+			return engine->Renderer.viewportSize;
 		}
 		float GetViewportRatio()
 		{
-			return (float)viewportSize.x / viewportSize.y;
+			return (float)engine->Renderer.viewportSize.x / engine->Renderer.viewportSize.y;
 		}
 
 		void UseDepthBuffer(bool use)
@@ -92,7 +86,7 @@ namespace Blaze
 				glDisable(GL_CULL_FACE);
 		}
 
-		inline void RenderPointArray(const ShaderProgram& sp, const VertexLayout& vl, uint count, uint offset)
+		void RenderPointArray(const ShaderProgram& sp, const VertexLayout& vl, uint count, uint offset)
 		{
 			if (vl.GetLayout().size() != 0)
 			{
@@ -127,7 +121,7 @@ namespace Blaze
 			RenderPointArray(material.GetShaderProgram(), mesh.vl, count, offset);
 		}
 
-		inline void RenderPoints(const ShaderProgram& sp, const VertexLayout& vl, uint pointCount, uint indexOffset)
+		void RenderPoints(const ShaderProgram& sp, const VertexLayout& vl, uint pointCount, uint indexOffset)
 		{
 			if (vl.GetLayout().size() != 0)
 			{
@@ -142,18 +136,18 @@ namespace Blaze
 				vl.Unbind();
 			}
 		}
-		inline void RenderPoints(const ShaderProgram& sp, const Mesh& mesh, uint pointCount, uint indexOffset)
+		void RenderPoints(const ShaderProgram& sp, const Mesh& mesh, uint pointCount, uint indexOffset)
 		{
 			RenderPoints(sp, mesh.vl, pointCount, indexOffset);			
 		}
-		inline void RenderPoints(BaseMaterial& material, const VertexLayout& vl, uint pointCount, uint indexOffset)
+		void RenderPoints(BaseMaterial& material, const VertexLayout& vl, uint pointCount, uint indexOffset)
 		{
 			material.UpdateShaderProgramUniforms();
 			material.BindTextures();
 
 			RenderPoints(material.GetShaderProgram(), vl, pointCount, indexOffset);
 		}
-		inline void RenderPoints(BaseMaterial& material, const Mesh& mesh, uint pointCount, uint indexOffset)
+		void RenderPoints(BaseMaterial& material, const Mesh& mesh, uint pointCount, uint indexOffset)
 		{			
 			material.UpdateShaderProgramUniforms();
 			material.BindTextures();
@@ -198,6 +192,6 @@ namespace Blaze
 			Type indexType = mesh.ib.GetIndexType();
 			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(indexOffset * SizeOf(indexType)));
 			mesh.vl.Unbind();
-		}
+		}		
 	}
 }

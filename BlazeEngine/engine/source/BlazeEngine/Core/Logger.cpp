@@ -1,6 +1,8 @@
 #include "BlazeEngine/Core/Logger.h"
 #include "GL/glew.h"
 
+#include "Engine.h"
+
 namespace Blaze
 {
 	Log::Log(LogType type, String&& source, String&& message)
@@ -19,11 +21,7 @@ namespace Blaze
 	}
 
 	namespace Logger
-	{
-		extern std::mutex queueMutex;
-		extern std::queue<Log> logs;
-
-
+	{		
 		void OpenGLCallbackFunc(unsigned source, unsigned type, int id, unsigned severity, unsigned lenght, const char* message)
 		{
 			String _source;
@@ -43,17 +41,17 @@ namespace Blaze
 
 		void AddLog(LogType type, String&& source, String&& message)
 		{
-			std::lock_guard<std::mutex> lk(queueMutex);
-			logs.emplace(type, std::move(source), std::move(message));
+			std::lock_guard<std::mutex> lk(engine->Logger.queueMutex);
+			engine->Logger.logs.emplace(type, std::move(source), std::move(message));
 		}
 
 		bool GetNextLog(Log& log)
 		{
-			std::lock_guard<std::mutex> lk(queueMutex);
-			if (logs.size() == 0)
+			std::lock_guard<std::mutex> lk(engine->Logger.queueMutex);
+			if (engine->Logger.logs.size() == 0)
 				return false;
-			log = logs.front();
-			logs.pop();
+			log = engine->Logger.logs.front();
+			engine->Logger.logs.pop();
 			return true;
 		}
 	}

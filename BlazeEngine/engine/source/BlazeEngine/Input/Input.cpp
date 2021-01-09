@@ -1,6 +1,7 @@
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Core/Window.h"
 #include "BlazeEngine/Core/Logger.h"
+#include "Engine.h"
 #include <map>
 
 #define SDL_MAIN_HANDLED
@@ -14,47 +15,36 @@ namespace Blaze
 	
 	namespace Input
 	{
-		extern std::map<uint, Key> keymap;		
-
-		extern KeyState keyStates[];
-		extern void* eventFunctions[];
-		
-		extern Vec2i mousePos;
-		extern Vec2i lastMouseRealPos;
-		extern Vec2i mouseMovement;
-		extern int mouseScroll;
-		
-		extern Window* focusedWindow;
 		
 		inline void CallEventFunction(InputEvent event)
 		{
-			if (eventFunctions[(int)event] != nullptr)
-				((void(*)())eventFunctions[(int)event])();
+			if (engine->Input.eventFunctions[(int)event] != nullptr)
+				((void(*)())engine->Input.eventFunctions[(int)event])();
 		}
 		inline void CallEventFunction(InputEvent event, Key key)
 		{
-			if (eventFunctions[(int)event] != nullptr)
-				((void(*)(Key))eventFunctions[(int)event])(key);
+			if (engine->Input.eventFunctions[(int)event] != nullptr)
+				((void(*)(Key))engine->Input.eventFunctions[(int)event])(key);
 		}
 		inline void CallEventFunction(InputEvent event, int x)
 		{
-			if (eventFunctions[(int)event] != nullptr)
-				((void(*)(int))eventFunctions[(int)event])(x);
+			if (engine->Input.eventFunctions[(int)event] != nullptr)
+				((void(*)(int))engine->Input.eventFunctions[(int)event])(x);
 		}
 		inline void CallEventFunction(InputEvent event, int x, int y)
 		{
-			if (eventFunctions[(int)event] != nullptr)
-				((void(*)(int, int))eventFunctions[(int)event])(x, y);
+			if (engine->Input.eventFunctions[(int)event] != nullptr)
+				((void(*)(int, int))engine->Input.eventFunctions[(int)event])(x, y);
 		}
 		inline void CallEventFunction(InputEvent event, Window* win)
 		{
-			if (eventFunctions[(int)event] != nullptr)
-				((void(*)(Window*))eventFunctions[(int)event])(win);
+			if (engine->Input.eventFunctions[(int)event] != nullptr)
+				((void(*)(Window*))engine->Input.eventFunctions[(int)event])(win);
 		}
 		inline void CallEventFunction(InputEvent event, int x, int y, Window* win)
 		{
-			if (eventFunctions[(int)event] != nullptr)
-				((void(*)(int, int, Window*))eventFunctions[(int)event])(x, y, win);
+			if (engine->Input.eventFunctions[(int)event] != nullptr)
+				((void(*)(int, int, Window*))engine->Input.eventFunctions[(int)event])(x, y, win);
 		}
 
 
@@ -64,7 +54,7 @@ namespace Blaze
 			auto GetWindowFromSDLid = [](uint32 id) -> Window*
 			{
 				void* win = SDL_GetWindowFromID(id);
-				for (auto& w : Window::allWindows)
+				for (auto& w : engine->Application.allWindows)
 					if (w->ptr == win)
 						return w;
 				return nullptr;
@@ -72,7 +62,7 @@ namespace Blaze
 
 			for (uint i = 0; i < (int)Key::Key_Count; ++i)
 			{
-				KeyState& state = keyStates[i];
+				KeyState& state = engine->Input.keyStates[i];
 
 				//the state of the key coresponds to its event				
 				CallEventFunction((InputEvent)state, (Key)i);					
@@ -86,18 +76,18 @@ namespace Blaze
 			SDL_Event event;			
 			uint scancode;
 
-			mouseScroll = 0;
+			engine->Input.mouseScroll = 0;
 			while (SDL_PollEvent(&event))
 				switch (event.type)
 				{
 				case SDL_MOUSEWHEEL: {
 					CallEventFunction(InputEvent::MouseWheel, event.wheel.y);					
-					mouseScroll += event.wheel.y;
+					engine->Input.mouseScroll += event.wheel.y;
 					break;
 				}
 				case SDL_MOUSEBUTTONDOWN: {
 					scancode = event.button.button - 1 + (int)Key::MouseLeft;
-					KeyState& state = keyStates[scancode];
+					KeyState& state = engine->Input.keyStates[scancode];
 
 					if (state == KeyState::Up)					
 						state = KeyState::Pressed;											
@@ -105,7 +95,7 @@ namespace Blaze
 				}
 				case SDL_MOUSEBUTTONUP: {
 					scancode = event.button.button - 1 + (int)Key::MouseLeft;					
-					KeyState& state = keyStates[scancode];
+					KeyState& state = engine->Input.keyStates[scancode];
 
 					if (state == KeyState::Down)
 						state = KeyState::Released;
@@ -113,11 +103,11 @@ namespace Blaze
 				}
 				case SDL_KEYDOWN: {
 					scancode = event.key.keysym.scancode;
-					auto it = keymap.find(scancode);
-					if (it != keymap.end())
+					auto it = engine->Input.keymap.find(scancode);
+					if (it != engine->Input.keymap.end())
 					{
 						Key key = it->second;
-						KeyState& state = keyStates[(int)key];
+						KeyState& state = engine->Input.keyStates[(int)key];
 
 						if (state == KeyState::Up)
 							state = KeyState::Pressed;
@@ -126,11 +116,11 @@ namespace Blaze
 				}
 				case SDL_KEYUP: {
 					scancode = event.key.keysym.scancode;
-					auto it = keymap.find(scancode);
-					if (it != keymap.end())
+					auto it = engine->Input.keymap.find(scancode);
+					if (it != engine->Input.keymap.end())
 					{
 						Key key = it->second;
-						KeyState& state = keyStates[(int)key];
+						KeyState& state = engine->Input.keyStates[(int)key];
 
 						if (state == KeyState::Down)
 							state = KeyState::Released;
@@ -138,7 +128,7 @@ namespace Blaze
 					break;
 				}
 				case SDL_WINDOWEVENT:
-					if (initWindow == nullptr)
+					if (engine->Application.initWindow == nullptr)
 						switch (event.window.event) {
 						case SDL_WINDOWEVENT_MOVED: {	
 							Window* win = GetWindowFromSDLid(event.window.windowID);
@@ -172,13 +162,13 @@ namespace Blaze
 						}						
 						case SDL_WINDOWEVENT_FOCUS_GAINED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							focusedWindow = win;
+							engine->Input.focusedWindow = win;
 							CallEventFunction(InputEvent::WindowFocusGained, win);															
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_LOST: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							focusedWindow = nullptr;
+							engine->Input.focusedWindow = nullptr;
 							CallEventFunction(InputEvent::WindowFocusLost, win);
 							break;
 						}
@@ -204,72 +194,72 @@ namespace Blaze
 				Vec2i mouseRealPos;
 				SDL_GetGlobalMouseState(&mouseRealPos.x, &mouseRealPos.y);
 
-				if (focusedWindow != nullptr && focusedWindow->lockedMouse)
+				if (engine->Input.focusedWindow != nullptr && engine->Input.focusedWindow->lockedMouse)
 				{
-					Vec2i wpos = focusedWindow->GetPos();
-					if (mousePos == focusedWindow->lockedMousePos + wpos)
-						mouseMovement = Vec2i(0);
+					Vec2i wpos = engine->Input.focusedWindow->GetPos();
+					if (engine->Input.mousePos == engine->Input.focusedWindow->lockedMousePos + wpos)
+						engine->Input.mouseMovement = Vec2i(0);
 					else
 					{
-						mouseMovement = mouseRealPos - (focusedWindow->lockedMousePos + wpos);
-						SetMousePos(focusedWindow->lockedMousePos);
+						engine->Input.mouseMovement = mouseRealPos - (engine->Input.focusedWindow->lockedMousePos + wpos);
+						SetMousePos(engine->Input.focusedWindow->lockedMousePos);
 					}
 				}
 				else
 				{
-					mouseMovement = mouseRealPos - lastMouseRealPos;
-					lastMouseRealPos = mouseRealPos;
+					engine->Input.mouseMovement = mouseRealPos - engine->Input.lastMouseRealPos;
+					engine->Input.lastMouseRealPos = mouseRealPos;
 
-					if (focusedWindow != nullptr)
-						mousePos = mouseRealPos - focusedWindow->GetPos();
+					if (engine->Input.focusedWindow != nullptr)
+						engine->Input.mousePos = mouseRealPos - engine->Input.focusedWindow->GetPos();
 					else
-						mousePos = mouseRealPos;
+						engine->Input.mousePos = mouseRealPos;
 				}
 
 				static bool first = true;
 				if (first)
-					mouseMovement = Vec2i(0);
+					engine->Input.mouseMovement = Vec2i(0);
 				first = false;
 
-				if (mouseMovement != Vec2i(0))
-					CallEventFunction(InputEvent::MouseMotion, mouseMovement.x, mouseMovement.y);
+				if (engine->Input.mouseMovement != Vec2i(0))
+					CallEventFunction(InputEvent::MouseMotion, engine->Input.mouseMovement.x, engine->Input.mouseMovement.y);
 			}
 		}
 
 		const KeyState GetKeyState(Key code)
 		{
-			return keyStates[(int)code];
+			return engine->Input.keyStates[(int)code];
 		}
 		
 		void SetEventFunction(InputEvent event, void* function)
 		{			
-			eventFunctions[(int)event] = function;
+			engine->Input.eventFunctions[(int)event] = function;
 		}				
 
 		int GetMouseScroll() 
 		{
-			return mouseScroll;
+			return engine->Input.mouseScroll;
 		}
 		Vec2i GetMousePos()
 		{
-			return mousePos;
+			return engine->Input.mousePos;
 		}
 		Vec2i GetMouseMovement()
 		{
-			return mouseMovement;
+			return engine->Input.mouseMovement;
 		}
 		Window* GetFocusedWindow()
 		{
-			return focusedWindow;
+			return engine->Input.focusedWindow;
 		}
 
 		void SetMousePos(const Vec2i& p)
 		{
-			if (focusedWindow != nullptr)
-				SDL_WarpMouseInWindow((SDL_Window*)focusedWindow->ptr, p.x, p.y);
+			if (engine->Input.focusedWindow != nullptr)
+				SDL_WarpMouseInWindow((SDL_Window*)engine->Input.focusedWindow->ptr, p.x, p.y);
 			else
 				SDL_WarpMouseGlobal(p.x, p.y);
-			mousePos = p;
+			engine->Input.mousePos = p;
 		}
 	}
 }

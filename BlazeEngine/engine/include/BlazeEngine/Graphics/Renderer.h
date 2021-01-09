@@ -2,8 +2,11 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Color.h"
 #include "BlazeEngine/DataStructures/Vector.h"
-#include "BlazeEngine/Graphics/Mesh.h"
 #include "BlazeEngine/Graphics/Material.h"
+#include "BlazeEngine/DataStructures/Common.h"
+#include "BlazeEngine/Graphics/ShaderProgram.h"
+#include "BlazeEngine/Graphics/Mesh.h"
+#include "BlazeEngine/Graphics/VertexLayout.h"
 
 namespace Blaze
 {
@@ -39,6 +42,6 @@ namespace Blaze
 		
 		void BLAZE_API RenderTriangles(ShaderProgram& sp, VertexLayout& vl, uint triangleCount = 0, uint indexOffset = 0);		
 		void BLAZE_API RenderTriangles(ShaderProgram& sp, Mesh& mesh, uint triangleCount = 0, uint indexOffset = 0);		
-		void BLAZE_API RenderTriangles(BaseMaterial& material, Mesh& mesh, uint triangleCount = 0, uint indexOffset = 0);
+		void BLAZE_API RenderTriangles(BaseMaterial& material, Mesh& mesh, uint triangleCount = 0, uint indexOffset = 0);		
 	}
 }

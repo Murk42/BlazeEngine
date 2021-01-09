@@ -5,7 +5,7 @@
 #include "BlazeEngine/DataStructures/Vector.h"
 
 namespace Blaze
-{	
+{		
 	enum class PixelFormat {
 		Red = 0x1903,
 		RG = 0x8227,

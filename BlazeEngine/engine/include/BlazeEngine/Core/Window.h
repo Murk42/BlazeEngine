@@ -27,8 +27,7 @@ namespace Blaze
 
 		Window(const Window&) = delete;
 		Window& operator=(const Window&) = delete;		
-	public:
-		static std::vector<Window*> allWindows;
+	public:		
 		Window();
 		~Window();
 

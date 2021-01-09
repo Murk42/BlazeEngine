@@ -1,60 +1,62 @@
 #include "BlazeEngine/BlazeEngine.h"
 using namespace Blaze;
 
-#include "DynamicMatrix.h"
-
-
 void CloseWindowEvent(Window* win);
 void ResizeWindowEvent(int w, int h, Window* win);
  
 struct MatProps : MaterialProperties<Mat4f, TextureArray2D>
-{
+{	
 	Property<Mat4f> mvp = "u_MVP";
 	Property<TextureArray2D> texture = "u_texture";
 };
-
+   
 class App : public Application<App>
-{
-public:
+{   
+public: 
 	Console::LogList logList = Console::LogList(Vec2i(0, 0), Vec2i(200, 20)); 
 	Window window;	
 
 	Material<MatProps> material;
 	Mesh mesh;			
-
+	 
 	TextureArray2D texture; 
 
-	static constexpr int sizeX = 10, sizeY = 10;
-	Vertex<Vec2f, Vec2f, float, float> vertices[sizeX * sizeY];		
+	static constexpr int sizeX = 32, sizeY = 16;
+	static constexpr int tileSizeX = 32, tileSizeY = 32;
+	Vertex<Vec2f, Vec2f, float, float> vertices[sizeX * sizeY];	
+
+	Mat4f canvasProjection;
+	Mat4f tilesTrans;
 
 	void Startup() override
-	{		
-		int offsetX = 5, offsetY = 5;
+	{				
+		int offsetX = 0, offsetY = 0;
 		for (int y = 0; y < sizeY; ++y)
 		{
 			for (int x = 0; x < sizeX; ++x)
 			{
 				vertices[x + y * sizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
-				vertices[x + y * sizeX].GetValue<1>() = Vec2i(offsetX + 100, offsetY + 100);
-				vertices[x + y * sizeX].GetValue<2>() = (x + y) % 10;
+				vertices[x + y * sizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);
+				vertices[x + y * sizeX].GetValue<2>() = 9;
 				vertices[x + y * sizeX].GetValue<3>() = 0;
 
-				offsetX += 105;
+				offsetX += tileSizeX;
 			}
 			offsetX = 0;
-			offsetY += 105;
+			offsetY += tileSizeY;
 		}
 
 		Input::SetEventFunction(InputEvent::WindowClosed, CloseWindowEvent);
-		Input::SetEventFunction(InputEvent::WindowResized, ResizeWindowEvent);
+		Input::SetEventFunction(InputEvent::WindowSizeChanged, ResizeWindowEvent);
 
-		window.SetSize(Vec2i(800, 800));
+		window.SetSize(Vec2i(tileSizeX * sizeX, tileSizeY * sizeY));
 		window.SetWindowed(true, false);
 		window.ShowWindow(true);
 		
 		Renderer::SetViewport(Vec2i(), window.GetSize());
 		Renderer::SetTarget(window);
 
+		//Loading files
 		{
 			texture.Load("assets/sprites/sprites.png", Vec2i(16, 16));
 
@@ -63,23 +65,38 @@ public:
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
 			material.SetShaders(vertexShader, fragmentShader, geometryShader);
 
-			material.properties.mvp = Math::OrthographicMatrix<float>(0, window.GetSize().x, 0, window.GetSize().y, -1, 1);
-			material.properties.texture = &texture;
 
 			mesh.SetVertices(vertices, sizeX * sizeY);
-		}
+		}		
+		
 	}
 
-	void Frame() override
+	void Frame() override 
 	{
-		Input::Update();		
-
+		Input::Update();				
 
 		Renderer::ClearTarget();
 
-		Renderer::RenderPointArray(material, mesh);
+		if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed)
+		{ 
+			Vec2i mp = Input::GetMousePos();
+			if (mp.x > (window.GetSize().x - sizeX * tileSizeX) / 2 &&
+				mp.y > (window.GetSize().y - sizeY * tileSizeY) / 2)
+			{
+				mp -= window.GetSize() - Vec2i(sizeX * tileSizeX, sizeY * tileSizeY);
+				mp /= Vec2i(tileSizeX, tileSizeY);
+				mp.y = sizeY - mp.y - 1;
+				vertices[mp.x + sizeX * mp.y].GetValue<2>() = ((uint)vertices[mp.x + sizeX * mp.y].GetValue<2>() + 1) % 10;
 
-		Renderer::UpdateTarget();		
+				mesh.ChangeVertices(vertices, sizeX * sizeY, 0);
+			}
+		}
+			
+		material.properties.mvp = canvasProjection * tilesTrans;
+		material.properties.texture = &texture;
+		Renderer::RenderPointArray(material, mesh.vl);
+
+		Renderer::UpdateTarget();				
 
 		ProcessLogs();
 	}
@@ -100,11 +117,12 @@ void CloseWindowEvent(Window* win)
 {
 	App::Stop();
 }
-
 void ResizeWindowEvent(int w, int h, Window* win)
-{
-	App& app = App::Instance();
+{	
+	App& app = App::Instance();	
 
-	app.material.properties.mvp = Math::OrthographicMatrix<float>(0, w, 0, h, -1, 1);
+ 	app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(w - App::tileSizeX * App::sizeX, h - App::tileSizeY * App::sizeY) / 2);
+
+	app.canvasProjection = Math::OrthographicMatrix<float>(0, w, 0, h, -1, 1);	
 	Renderer::SetViewport(Vec2i(), Vec2i(w, h));
 }

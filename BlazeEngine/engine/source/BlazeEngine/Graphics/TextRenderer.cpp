@@ -1,11 +1,10 @@
 #include "BlazeEngine/Graphics/TextRenderer.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "freetype/freetype.h"
+#include "Engine.h"
 
 namespace Blaze
-{
-	extern FT_Library ft_library;
-
+{	
 	Font::Size* Font::AddSize(uint height)
 	{
 		Size& size = *new Size;
@@ -77,7 +76,7 @@ namespace Blaze
 			FT_Done_Face((FT_Face)ptr);
 
 		FT_Face face;
-		if (FT_New_Face(ft_library, path.Ptr(), 0, &face) != 0)		
+		if (FT_New_Face(engine->ft_library, path.Ptr(), 0, &face) != 0)
 			return false;		
 		ptr = face;
 

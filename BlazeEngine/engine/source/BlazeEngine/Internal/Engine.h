@@ -4,30 +4,37 @@
 #include "BlazeEngine/Core/Logger.h"
 #include "BlazeEngine/Input/Input.h"
 
-#include "SDL/SDL.h"
 #include "freetype/freetype.h"
+#include "SDL/SDL.h"
 
 #include <map>
 #include <mutex>
 #include <queue>
+#include <vector>
 
 namespace Blaze
 {	
+	class Window;
+
 	class Engine
 	{
 	public:
-		uint32 state;
-		uint32 initState = 0;
-
-		BaseApplication* instance = nullptr;
-		void (*constructInstance)(BaseApplication*) = nullptr;
-		void (*destructInstance)(BaseApplication*) = nullptr;
-		size_t instanceSize;
-
-		void* initWindow;
-		void* openGLContext = nullptr;
-
 		FT_Library ft_library;
+
+		struct {
+			uint32 state;
+			uint32 initState = 0;
+
+			BaseApplication* instance = nullptr;
+			void (*constructInstance)(BaseApplication*) = nullptr;
+			void (*destructInstance)(BaseApplication*) = nullptr;
+			size_t instanceSize;
+
+			void* initWindow;
+			void* openGLContext = nullptr;
+
+			std::vector<Window*> allWindows;
+		} Application;
 
 		struct
 		{
