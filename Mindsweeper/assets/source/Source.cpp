@@ -16,11 +16,10 @@ struct TextMatProps : MaterialProperties<Mat4f, Texture2D>
 };
 
 
-class UIElement
+class Button
 {
 public:
-	inline static UIElement* focused = nullptr;
-	Recti rect;
+	Vertex<Vec2f, Vec2f, float>
 };
 
 enum class Scene
@@ -53,10 +52,14 @@ public:
 	Mat4f tilesTrans;
 	 
 	struct {  
+		TextRenderer menuTitle;
+		Mat4f menuTitleTrans;
+
 		TextRenderer title;
 		Mat4f titleTrans;
 		TextRenderer details;
 		Mat4f detailsTrans;
+
 	} text;
 
 	void Startup() override
@@ -128,6 +131,22 @@ public:
 
 			text.details.SetFont(&font, 20);
 			text.details.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
+
+			text.menuTitle.SetFont(&font, 100);
+			text.menuTitle.SetString("Minesweeper");
+			text.menuTitle.SetColors({
+					Color(148, 0, 211),
+					Color(75, 0, 130),
+					Color(0, 0, 255),
+					Color(0, 255, 0),
+					Color(255, 255, 0),
+					Color(255, 127, 0),
+					Color(255, 0, 0),
+					Color(148, 0, 211),
+					Color(75, 0, 130),
+					Color(0, 0, 255),
+					Color(0, 255, 0),
+				});
 		}				
 	}
 
@@ -140,7 +159,13 @@ public:
 		switch (scene)
 		{
 		case Scene::Menu: {
+			textMaterial.properties.mvp = canvasProjection * text.menuTitleTrans;
+			textMaterial.properties.texture = text.menuTitle.GetTexture();
+			Renderer::RenderPointArray(textMaterial, text.menuTitle.GetMesh());
 
+			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Down)
+				ChangeToGameScene();
+			break;
 		}
 		case Scene::Game: {
 			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed)
@@ -172,6 +197,7 @@ public:
 			textMaterial.properties.mvp = canvasProjection * text.detailsTrans;
 			textMaterial.properties.texture = text.details.GetTexture();
 			Renderer::RenderPointArray(textMaterial, text.details.GetMesh());
+			break;
 		}
 		}
 
@@ -190,6 +216,18 @@ public:
 
 		logList.Refresh();
 	}
+
+	void ChangeToMenuScene()
+	{
+		scene = Scene::Menu;
+		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
+	}
+
+	void ChangeToGameScene() 
+	{
+		scene = Scene::Game;
+		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
+	}
 };
 
 void CloseWindowEvent(Window* win)
@@ -200,9 +238,19 @@ void ResizeWindowEvent(int w, int h, Window* win)
 {	
 	App& app = App::Instance();	
 
- 	app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
-	app.text.titleTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.text.title.GetSize().y));
-	app.text.detailsTrans = app.text.titleTrans * Math::TranslationMatrix<float>(Vec2i(app.text.title.GetSize().x + 30, 0));
+	switch (app.scene)
+	{
+	case Scene::Menu : {
+		app.text.menuTitleTrans = Math::TranslationMatrix<float>(Vec2i((w - app.text.menuTitle.GetSize().x) / 2, h - app.text.menuTitle.GetSize().y - 50));
+		break;
+		}
+	case Scene::Game: {
+		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
+		app.text.titleTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.text.title.GetSize().y));
+		app.text.detailsTrans = app.text.titleTrans * Math::TranslationMatrix<float>(Vec2i(app.text.title.GetSize().x + 30, 0));
+		break;
+	}
+	}
 
 	app.canvasProjection = Math::OrthographicMatrix<float>(0, w, 0, h, -1, 1);	
 	Renderer::SetViewport(Vec2i(), Vec2i(w, h));
