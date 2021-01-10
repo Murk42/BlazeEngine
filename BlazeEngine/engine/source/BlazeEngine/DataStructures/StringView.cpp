@@ -21,14 +21,14 @@ namespace Blaze
 	{
 		for (; ptr[size] != '\0'; size++);
 	}
-	constexpr StringView::StringView(const char* ptr, int size)
+	constexpr StringView::StringView(const char* ptr, size_t size)
 		: ptr(ptr), size(size)
 	{
 		if (size == 0)
 			ptr = nullptr;
 	}	
 
-	int StringView::Find(char val) const
+	size_t StringView::Find(char val) const
 	{
 		if (ptr == nullptr) return -1;
 
@@ -36,7 +36,7 @@ namespace Blaze
 		if (i - ptr == size) return -1;
 		return i - ptr;
 	}
-	int StringView::Find(const std::vector<char>& val)
+	size_t StringView::Find(const std::vector<char>& val)
 	{
 		if (ptr == nullptr) return -1;
 
@@ -44,7 +44,7 @@ namespace Blaze
 		if (i - ptr == size) return -1;
 		return i - ptr;
 	}
-	int StringView::Count(char val) const
+	size_t StringView::Count(char val) const
 	{
 		if (ptr == nullptr) return 0;
 

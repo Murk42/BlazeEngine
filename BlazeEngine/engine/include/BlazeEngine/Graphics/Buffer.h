@@ -5,14 +5,14 @@
 
 namespace Blaze
 {
-	enum class BLAZE_API BufferType
+	enum class BufferType
 	{		
 		ArrayBuffer = 0x8892,
 		IndexBuffer = 0x8893,
 		UniformBuffer = 0x8A11
 	};
 
-	enum BLAZE_API BufferUsageType
+	enum class BufferUsage
 	{
 		Stream = 0x88E0,
 		Static = 0x88E4,
@@ -21,42 +21,40 @@ namespace Blaze
 		Read = 0x0001,
 		Copy = 0x0002,
 	};
-	BufferUsageType BLAZE_API operator| (const BufferUsageType& a, const BufferUsageType& b);
+	BufferUsage BLAZE_API operator| (const BufferUsage& a, const BufferUsage& b);
 
 	class BLAZE_API Buffer
 	{
 		uint id;
 		BufferType type;
-		BufferUsageType usage;
-		uint size;				
-		
-		static Buffer* boundUniformBuffer;
+		BufferUsage usage;
+		size_t size;						
 	public:
 		Buffer(BufferType type);
 		Buffer(const Buffer&);
-		Buffer(Buffer&&);
-		Buffer(BufferType type, const void* ptr, unsigned size, BufferUsageType usage);
+		Buffer(Buffer&&) noexcept;
+		Buffer(BufferType type, const void* ptr, unsigned size, BufferUsage usage);
 		~Buffer();
 
 		/*
 		Allocates new memory and deletes old if any. Size is measured in bytes.
 		*/
-		void AllocateData(const void* ptr, unsigned size, BufferUsageType usage);
+		void AllocateData(const void* ptr, unsigned size, BufferUsage usage);
 		/*
 		Changes the existing memory block. Size and offset are measured in bytes.
 		*/
-		void ChangeData(const void* ptr, unsigned size, unsigned offset);
+		void ChangeData(const void* ptr, unsigned size, size_t offset);
 
 		inline BufferType GetType() const { return type; }
-		inline unsigned GetSize() const { return size; }
-		inline BufferUsageType GetUsage() const { return usage; }
+		inline size_t GetSize() const { return size; }
+		inline BufferUsage GetUsage() const { return usage; }
 
 		void Bind() const;
 		static void Unbind(BufferType type);
 		static Buffer* GetBound(BufferType type);
 
-		void operator=(const Buffer&);
-		void operator=(Buffer&&);
+		Buffer& operator=(const Buffer&);
+		Buffer& operator=(Buffer&&) noexcept;
 
 		friend class ShaderProgram;
 		friend class VertexLayout;
@@ -67,11 +65,11 @@ namespace Blaze
 	public:
 		VertexBuffer();
 		VertexBuffer(const VertexBuffer&);
-		VertexBuffer(VertexBuffer&&);
-		VertexBuffer(const void* ptr, unsigned size, BufferUsageType usage);		
+		VertexBuffer(VertexBuffer&&) noexcept;
+		VertexBuffer(const void* ptr, unsigned size, BufferUsage usage);		
 
-		void operator=(const VertexBuffer&);
-		void operator=(VertexBuffer&&);
+		VertexBuffer& operator=(const VertexBuffer&);
+		VertexBuffer& operator=(VertexBuffer&&) noexcept;
 	};
 
 	class BLAZE_API IndexBuffer : public Buffer
@@ -80,19 +78,19 @@ namespace Blaze
 	public:			
 		IndexBuffer();
 		IndexBuffer(const IndexBuffer&);
-		IndexBuffer(IndexBuffer&&);
-		IndexBuffer(const void* ptr, unsigned count, BufferUsageType usage, Type indexType);
+		IndexBuffer(IndexBuffer&&) noexcept;
+		IndexBuffer(const void* ptr, unsigned count, BufferUsage usage, Type indexType);
 
 		/*
 		Allocates new memory and deletes old if any. Size is measured in bytes.
 		*/
-		void AllocateData(const void* ptr, unsigned size, BufferUsageType usage, Type indexType);		
+		void AllocateData(const void* ptr, unsigned size, BufferUsage usage, Type indexType);		
 		
 		inline Type GetIndexType() const { return indexType; }
-		inline unsigned GetIndexCount() const { return GetSize() / SizeOf(indexType); }
+		inline uint GetIndexCount() const { return uint(GetSize() / SizeOf(indexType)); }
 
-		void operator=(const IndexBuffer&);
-		void operator=(IndexBuffer&&);
+		IndexBuffer& operator=(const IndexBuffer&);
+		IndexBuffer& operator=(IndexBuffer&&) noexcept;
 		
 	};
 }

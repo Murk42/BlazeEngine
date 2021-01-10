@@ -19,7 +19,7 @@ void MainScene::Load()
 		terrainMaterial.SetShaders({ &vertex, &fragment });
 	}
 
-	terrain.Setup();	
+	terrain.Initialize();	
 	terrain.SetMaterial(&terrainMaterial, { Type::Float });
 
 	cameraEntity = CreateEntity<Transform3D, Camera, Controller>("Main Camera");

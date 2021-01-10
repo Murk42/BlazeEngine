@@ -1,6 +1,6 @@
 #include "BlazeEngine/Graphics/Texture.h"
 #include "BlazeEngine/Utilities/File.h"
-#include "BlazeEngine/Graphics/Bitmap.h""
+#include "BlazeEngine/Graphics/Bitmap.h"
 
 #include "GL/glew.h"
 #include "IL/il.h"
@@ -23,16 +23,16 @@ namespace Blaze
 	{		
 		glGenTextures(1, &id);
 		glBindTexture((GLenum)type, id);
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, ClampToEdge);
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, ClampToEdge);
-		glTexParameteri((GLenum)type, GL_TEXTURE_MIN_FILTER, Nearest);
-		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, Nearest);
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, (uint)TextureWrapping::ClampToEdge);
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, (uint)TextureWrapping::ClampToEdge);
+		glTexParameteri((GLenum)type, GL_TEXTURE_MIN_FILTER, (uint)TextureSampling::Nearest);
+		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, (uint)TextureSampling::Nearest);
 
-		settings.xWrap = ClampToEdge;
-		settings.yWrap = ClampToEdge;
-		settings.min = Nearest;
-		settings.mag = Nearest;
-		settings.mag = Nearest;
+		settings.xWrap = TextureWrapping::ClampToEdge;
+		settings.yWrap = TextureWrapping::ClampToEdge;
+		settings.min = TextureSampling::Nearest;
+		settings.mag = TextureSampling::Nearest;
+		settings.mag = TextureSampling::Nearest;
 	}
 	Texture::~Texture()
 	{
@@ -58,8 +58,8 @@ namespace Blaze
 	{
 		Bind();		
 
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, xWrap);
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, yWrap);				
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, (uint)xWrap);
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, (uint)yWrap);				
 
 		settings.xWrap = xWrap;
 		settings.yWrap = yWrap;		
@@ -67,8 +67,8 @@ namespace Blaze
 	void Texture::SetSettings(TextureSampling min, TextureSampling mag)
 	{		
 		Bind();
-		unsigned _min = !hasMipmaps ? min : (min == Nearest ? (settings.mip == Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
-			(settings.mip == Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
+		unsigned _min = !hasMipmaps ? (uint)min : (min == TextureSampling::Nearest ? (settings.mip == TextureSampling::Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
+			(settings.mip == TextureSampling::Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
 		/*
 			GL_NEAREST = 0x2600 = 9728
 			GL_LINEAR = 0x2601 = 9729
@@ -80,7 +80,7 @@ namespace Blaze
 			
 		
 		glTexParameteri((GLenum)type, GL_TEXTURE_MIN_FILTER, _min);
-		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, mag);
+		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, (uint)mag);
 		
 		settings.min = min;
 		settings.mag = mag;		
@@ -89,13 +89,13 @@ namespace Blaze
 	{
 		Bind();
 		
-		unsigned _min = !hasMipmaps ? min : (min == Nearest ? (settings.mip == Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
-			(settings.mip == Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
+		unsigned _min = !hasMipmaps ? (uint)min : (min == TextureSampling::Nearest ? (settings.mip == TextureSampling::Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
+			(settings.mip == TextureSampling::Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
 
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, xWrap);
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, yWrap);
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, (uint)xWrap);
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, (uint)yWrap);
 		glTexParameteri((GLenum)type, GL_TEXTURE_MIN_FILTER, _min);
-		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, mag);
+		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, uint(mag));
 
 		settings.xWrap = xWrap;
 		settings.yWrap = yWrap;
@@ -106,11 +106,11 @@ namespace Blaze
 	{
 		Bind();
 
-		unsigned _min = !hasMipmaps ? min : (min == Nearest ? (settings.mip == Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
-			(settings.mip == Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
+		unsigned _min = !hasMipmaps ? (uint)min : (min == TextureSampling::Nearest ? (settings.mip == TextureSampling::Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
+			(settings.mip == TextureSampling::Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
 
 		glTexParameteri((GLenum)type, GL_TEXTURE_MIN_FILTER, _min);
-		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, mag);
+		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, (uint)mag);
 		
 		settings.min = min;
 		settings.mag = mag;
@@ -120,13 +120,13 @@ namespace Blaze
 	{
 		Bind();
 
-		unsigned _min = !hasMipmaps ? min : (min == Nearest ? (settings.mip == Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
-			(settings.mip == Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
+		unsigned _min = !hasMipmaps ? (uint)min : (min == TextureSampling::Nearest ? (settings.mip == TextureSampling::Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR) :
+			(settings.mip == TextureSampling::Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR));
 
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, xWrap);
-		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, yWrap);
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_S, (uint)xWrap);
+		glTexParameteri((GLenum)type, GL_TEXTURE_WRAP_T, (uint)yWrap);
 		glTexParameteri((GLenum)type, GL_TEXTURE_MIN_FILTER, _min);
-		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, mag);
+		glTexParameteri((GLenum)type, GL_TEXTURE_MAG_FILTER, (uint)mag);
 
 		settings.xWrap = xWrap;
 		settings.yWrap = yWrap;
@@ -152,7 +152,7 @@ namespace Blaze
 		Bind();
 	}
 
-	Texture& Texture::operator=(Texture&& tex)
+	Texture& Texture::operator=(Texture&& tex) noexcept
 	{
 		id = tex.id;
 		settings = tex.settings;
@@ -209,15 +209,9 @@ namespace Blaze
 		glGetTexImage(GL_TEXTURE_2D, 0, (uint)format, GL_UNSIGNED_BYTE, bm.GetPixels());
 	}
 
-	Texture2D& Texture2D::operator=(const Texture2D& tex) noexcept
-	{
-		operator=(std::move(tex));
-		return *this;
-	}
-
 	Texture2D& Texture2D::operator=(Texture2D&& tex) noexcept
 	{
-		(Texture&)*this = std::move((Texture&&)tex);
+		((Texture*)this)->operator=(std::move(tex));		
 		size = tex.size;
 		format = tex.format;		
 		return *this;
@@ -248,7 +242,7 @@ namespace Blaze
 	TextureCubemap::TextureCubemap()
 		: Texture(TextureType::Cubemap), format(PixelFormat::RGBA), size(0)
 	{
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, ClampToEdge);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, (uint)TextureWrapping::ClampToEdge);
 	}
 	TextureCubemap::TextureCubemap(const String& xp, const String& xn, const String& yp, const String& yn, const String& zp, const String& zn)
 		: TextureCubemap()

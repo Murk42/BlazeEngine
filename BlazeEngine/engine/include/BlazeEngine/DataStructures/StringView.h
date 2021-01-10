@@ -15,14 +15,14 @@ namespace Blaze
 		StringView(const String&);
 
 		constexpr StringView(const char*);
-		constexpr StringView(const char*, int count);
+		constexpr StringView(const char*, size_t count);
 
 		inline const char* Ptr() const { return ptr; }
 		inline size_t Size() const { return size; }
 
-		int Find(char val) const;
-		int Find(const std::vector<char>& val);
-		int Count(char val) const;
+		size_t Find(char val) const;
+		size_t Find(const std::vector<char>& val);
+		size_t Count(char val) const;
 
 		constexpr void operator= (const StringView&);				
 		void operator= (const String&);

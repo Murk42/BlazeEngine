@@ -8,7 +8,7 @@ namespace Blaze
 	class BLAZE_API ByteStream
 	{
 	protected:
-		uint offset;
+		size_t offset;
 		std::vector<uint8> data;
 	public:
 		ByteStream();
@@ -19,7 +19,7 @@ namespace Blaze
 		ByteStream(void* data, size_t size, uint offet = 0);
 		~ByteStream();
 
-		inline uint GetOffset() const { return offset; }
+		inline size_t GetOffset() const { return offset; }
 		inline std::vector<uint8>& GetData() { return data; }
 		inline size_t GetSize() { return data.size(); }
 		inline const std::vector<uint8>& GetData() const { return data; }

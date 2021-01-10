@@ -3,14 +3,14 @@
 #include "BlazeEngine/Core/Logger.h"
 #include "GL/glew.h"
 
+#include "Engine.h"
+
 namespace Blaze
 {
-	BufferUsageType operator| (const BufferUsageType& a, const BufferUsageType& b) { return (BufferUsageType)((int)a | (int)b); }	
-	
-	Buffer* Buffer::boundUniformBuffer = nullptr;
+	BufferUsage operator| (const BufferUsage& a, const BufferUsage& b) { return (BufferUsage)((int)a | (int)b); }		
 
 	Buffer::Buffer(BufferType type)	
-		: id(0), type(type)
+		: id(0), type(type), size(0), usage((BufferUsage)0)
 	{
 		glGenBuffers(1, &id);
 	}
@@ -20,18 +20,18 @@ namespace Blaze
 		glGenVertexArrays(1, &id);
 
 		Bind();
-		glBufferData((int)type, b.size, nullptr, b.usage);
+		glBufferData((int)type, b.size, nullptr, (uint)b.usage);
 
 		glBindBuffer(GL_COPY_WRITE_BUFFER, id);
 		glBindBuffer(GL_COPY_READ_BUFFER, b.id);
 		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, b.size);
 	}
-	Buffer::Buffer(Buffer&& b)
+	Buffer::Buffer(Buffer&& b) noexcept
 		: id(std::exchange(b.id, 0)), type(b.type), size(b.size), usage(b.usage)
 	{
 
 	}
-	Buffer::Buffer(BufferType type, const void* ptr, unsigned size, BufferUsageType usage)		
+	Buffer::Buffer(BufferType type, const void* ptr, unsigned size, BufferUsage usage)		
 		: type(type)
 	{
 		glGenBuffers(1, &id);
@@ -43,15 +43,15 @@ namespace Blaze
 			glDeleteBuffers(1, &id);
 	}
 
-	void Buffer::AllocateData(const void* ptr, unsigned size, BufferUsageType usage)
+	void Buffer::AllocateData(const void* ptr, unsigned size, BufferUsage usage)
 	{
 		this->size = size;		
 		this->usage = usage;
 		Bind();
-		glBufferData((int)type, size, ptr, usage);
+		glBufferData((int)type, size, ptr, (uint)usage);
 	}
 
-	void Buffer::ChangeData(const void* ptr, unsigned size, unsigned offset)
+	void Buffer::ChangeData(const void* ptr, unsigned size, size_t offset)
 	{		
 		Bind();
 		glBufferSubData((int)type, offset, size, ptr);
@@ -63,9 +63,9 @@ namespace Blaze
 
 		switch (type)
 		{
-		case BufferType::ArrayBuffer: VertexLayout::boundVertexLayout->vertexBuffer = (VertexBuffer*)this; break;
-		case BufferType::IndexBuffer: VertexLayout::boundVertexLayout->indexBuffer = (IndexBuffer*)this; break;
-		case BufferType::UniformBuffer: boundUniformBuffer = (Buffer*)this; break;
+		case BufferType::ArrayBuffer: engine->Renderer.boundVertexLayout->vertexBuffer = (VertexBuffer*)this; break;
+		case BufferType::IndexBuffer: engine->Renderer.boundVertexLayout->indexBuffer = (IndexBuffer*)this; break;
+		case BufferType::UniformBuffer: engine->Renderer.boundUniformBuffer = (Buffer*)this; break;
 		}
 	}
 	void Buffer::Unbind(BufferType type)
@@ -74,41 +74,46 @@ namespace Blaze
 
 		switch (type)
 		{
-		case BufferType::ArrayBuffer: VertexLayout::boundVertexLayout->vertexBuffer = nullptr; break;
-		case BufferType::IndexBuffer: VertexLayout::boundVertexLayout->indexBuffer = nullptr; break;
-		case BufferType::UniformBuffer: boundUniformBuffer = nullptr; break;
+		case BufferType::ArrayBuffer: engine->Renderer.boundVertexLayout->vertexBuffer = nullptr; break;
+		case BufferType::IndexBuffer: engine->Renderer.boundVertexLayout->indexBuffer = nullptr; break;
+		case BufferType::UniformBuffer: engine->Renderer.boundUniformBuffer = nullptr; break;
 		}
 	}
 	Buffer* Buffer::GetBound(BufferType type)
 	{
 		switch (type)
 		{
-		case BufferType::ArrayBuffer: return VertexLayout::boundVertexLayout->vertexBuffer;
-		case BufferType::IndexBuffer: return VertexLayout::boundVertexLayout->indexBuffer;
-		case BufferType::UniformBuffer: return boundUniformBuffer;		
+		case BufferType::ArrayBuffer: return engine->Renderer.boundVertexLayout->vertexBuffer;
+		case BufferType::IndexBuffer: return engine->Renderer.boundVertexLayout->indexBuffer;
+		case BufferType::UniformBuffer: return engine->Renderer.boundUniformBuffer;
 		}
+		return nullptr;
 	}
 
-	void Buffer::operator=(const Buffer& b)
+	Buffer& Buffer::operator=(const Buffer& b)
 	{
 		size = b.size;
 		type = b.type;
 		usage = b.usage;
 
 		Bind();
-		glBufferData((int)type, b.size, nullptr, b.usage);
+		glBufferData((int)type, b.size, nullptr, (uint)b.usage);
 
 		glBindBuffer(GL_COPY_WRITE_BUFFER, id);
 		glBindBuffer(GL_COPY_READ_BUFFER, b.id);
 		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, b.size);
+
+		return *this;
 	}
 
-	void Buffer::operator=(Buffer&& b)		
+	Buffer& Buffer::operator=(Buffer&& b) noexcept
 	{
 		id = std::exchange(b.id, 0);
 		size = b.size;
 		type = b.type;
 		usage = b.usage;
+
+		return *this;
 	}
 
 	VertexBuffer::VertexBuffer()
@@ -119,21 +124,23 @@ namespace Blaze
 		: Buffer(vb)
 	{
 	}
-	VertexBuffer::VertexBuffer(VertexBuffer&& vb)
+	VertexBuffer::VertexBuffer(VertexBuffer&& vb) noexcept
 		: Buffer(std::move(vb))
 	{
 	}
-	void VertexBuffer::operator=(const VertexBuffer& vb)
+	VertexBuffer& VertexBuffer::operator=(const VertexBuffer& vb)
 	{
 		Buffer::operator=(vb);
+		return *this;
 	}
-	void VertexBuffer::operator=(VertexBuffer&& vb)
+	VertexBuffer& VertexBuffer::operator=(VertexBuffer&& vb) noexcept
 	{
 		Buffer::operator=(std::move(vb));
+		return *this;
 	}
 
 	IndexBuffer::IndexBuffer()
-		: Buffer(BufferType::IndexBuffer)
+		: Buffer(BufferType::IndexBuffer), indexType((Type)0)
 	{
 
 	}
@@ -141,30 +148,32 @@ namespace Blaze
 		: Buffer(ib), indexType(ib.indexType)
 	{
 	}
-	IndexBuffer::IndexBuffer(IndexBuffer&& ib)
+	IndexBuffer::IndexBuffer(IndexBuffer&& ib) noexcept
 		: Buffer(std::move(ib)), indexType(ib.indexType)
 	{
 	}
-	IndexBuffer::IndexBuffer(const void* ptr, unsigned count, BufferUsageType usage, Type indexType)
+	IndexBuffer::IndexBuffer(const void* ptr, unsigned count, BufferUsage usage, Type indexType)
 		: Buffer(BufferType::IndexBuffer, ptr, count* SizeOf(indexType), usage), indexType(indexType)
 	{
 	}
 
-	void IndexBuffer::AllocateData(const void* ptr, unsigned size, BufferUsageType usage, Type indexType)
+	void IndexBuffer::AllocateData(const void* ptr, unsigned size, BufferUsage usage, Type indexType)
 	{		
 		this->indexType = indexType;
 		Buffer::AllocateData(ptr, size, usage);
 	}	
 
-	void IndexBuffer::operator=(const IndexBuffer& ib)
+	IndexBuffer& IndexBuffer::operator=(const IndexBuffer& ib)
 	{
 		indexType = ib.indexType;
 		Buffer::operator=(ib);
+		return *this;
 	}
 
-	void IndexBuffer::operator=(IndexBuffer&& ib)
+	IndexBuffer& IndexBuffer::operator=(IndexBuffer&& ib) noexcept
 	{
 		indexType = ib.indexType;
 		Buffer::operator=(std::move(ib));
+		return *this;
 	}	
 }

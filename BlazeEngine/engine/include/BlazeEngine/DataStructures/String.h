@@ -15,11 +15,12 @@ namespace Blaze
 	public:
 		String();		
 		String(const String& s);
-		String(String&& s);
+		String(String&& s) noexcept;
 
+		String(size_t size);
 		String(const char* ptr);
 		String(char* ptr, size_t size, bool copy = true);
-		String(const char& c, const unsigned& size);
+		String(const char& c, size_t size);
 		String(const StringView& c);
 
 		template<typename ... T>
@@ -46,9 +47,9 @@ namespace Blaze
 
 		void Replace(char oldVal, char newVal);
 		void Reverse();
-		int Find(char val) const;
-		int Find(const std::vector<char>& val);
-		int Count(char val) const;
+		size_t Find(char val) const;
+		size_t Find(const std::vector<char>& val);
+		size_t Count(char val) const;
 
 		void operator+= (const String& s) ;
 		void operator+= (const char* _ptr);
@@ -58,9 +59,9 @@ namespace Blaze
 		String operator+ (const char* _ptr);
 		String operator+ (const char& c);
 
-		void operator= (const String& s);
-		void operator= (String&& s);
-		void operator= (const char* _ptr);		
+		String& operator= (const String& s);
+		String& operator= (String&& s) noexcept;
+		String& operator= (const char* _ptr);		
 
 		bool operator==(const String& s) const;
 		bool operator==(const char* _ptr) const;				

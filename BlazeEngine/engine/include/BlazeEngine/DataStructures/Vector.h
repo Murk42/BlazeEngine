@@ -118,8 +118,9 @@ namespace Blaze
 		{
 			for (size_t i = 0; i != (S < 2 ? S : 2); ++i)
 				arr[i] = v.arr[i];
-			for (size_t i = (S < 2 ? S : 2); i < 2; ++i)
-				arr[i] = 0;
+			if constexpr (2 > S)
+				for (size_t i = S; i < 2; ++i)
+					arr[i] = 0;
 		}
 		template<typename T2>
 		constexpr explicit Vector(const T2& v) : x(v), y(v) { }
@@ -192,8 +193,9 @@ namespace Blaze
 		{
 			for (size_t i = 0; i != (S < 3 ? S : 3); ++i)
 				arr[i] = v.arr[i];
-			for (size_t i = (S < 3 ? S : 3); i < 3; ++i)
-				arr[i] = 0;
+			if constexpr (3 > S)
+				for (size_t i = S; i < 3; ++i)
+					arr[i] = 0;
 		}
 		template<typename ... Ts>
 		constexpr Vector(Ts ... values)
@@ -267,8 +269,9 @@ namespace Blaze
 		{
 			for (size_t i = 0; i != (S < 4 ? S : 4); ++i)
 				arr[i] = v.arr[i];
-			for (size_t i = (S < 4 ? S : 4); i < 4; ++i)
-				arr[i] = 0;
+			if constexpr (4 > S)
+				for (size_t i = S; i < 4; ++i)
+					arr[i] = 0;
 		}
 		template<typename ... Ts>
 		constexpr Vector(Ts ... values)

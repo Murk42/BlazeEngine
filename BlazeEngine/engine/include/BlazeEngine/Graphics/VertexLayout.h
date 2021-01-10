@@ -6,20 +6,15 @@
 namespace Blaze
 {
 	class BLAZE_API VertexLayout
-	{
-		static VertexLayout defaultVAO;
-		static VertexLayout* boundVertexLayout;
-
+	{		
 		uint id;
 		std::vector<Type> layout;
 		VertexBuffer* vertexBuffer;
-		IndexBuffer* indexBuffer;
-
-		VertexLayout(uint);
+		IndexBuffer* indexBuffer;		
 	public:
 		VertexLayout();
 		VertexLayout(const VertexLayout&);
-		VertexLayout(VertexLayout&&);
+		VertexLayout(VertexLayout&&) noexcept;
 		VertexLayout(const std::vector<Type>& layout, VertexBuffer* vertexBuffer, IndexBuffer* indexBuffer);
 		~VertexLayout();
 
@@ -42,7 +37,7 @@ namespace Blaze
 		static VertexLayout* GetBound();
 
 		void operator=(const VertexLayout&);
-		void operator=(VertexLayout&&);
+		void operator=(VertexLayout&&) noexcept;
 
 		friend class Buffer;
 	};		

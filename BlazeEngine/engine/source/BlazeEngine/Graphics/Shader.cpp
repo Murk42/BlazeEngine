@@ -10,16 +10,16 @@ namespace Blaze
 {
 	Shader::Shader(ShaderType type)
 		: type(type)
-	{
-		id = glCreateShader(type);
+	{		
+		id = glCreateShader((uint)type);
 	}
 	Shader::Shader(ShaderType type, const StringView& path)
 		: type(type)
 	{
-		id = glCreateShader(type);
+		id = glCreateShader((uint)type);
 		LoadShader(path);
 	}
-	Shader::Shader(Shader&& s)
+	Shader::Shader(Shader&& s) noexcept
 		: id(std::exchange(s.id, 0)), type(s.type), path(std::move(s.path))
 	{
 	}
@@ -46,8 +46,8 @@ namespace Blaze
 	}
 	bool Shader::SetSource(char* data, size_t size)
 	{				
-		int lenght = size;
-		glShaderSource(id, 1, &data, &lenght);
+		int lenght = int(size);
+		glShaderSource(id, 1, &data, (int*)&lenght);
 
 		glCompileShader(id);
 
@@ -57,14 +57,14 @@ namespace Blaze
 		{
 			int lenght;
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
-			char* message = (char*)alloca(lenght * sizeof(char));
-			glGetShaderInfoLog(id, lenght, &lenght, message);
-			Logger::AddLog(LogType::Error, "Shader::LoadShader", message);
+			String message(lenght);			
+			glGetShaderInfoLog(id, lenght, &lenght, message.Ptr());
+			Logger::AddLog(LogType::Error, "Shader::LoadShader", message.Ptr());
 			return false;		
 		}		
 		return true;
 	}
-	void Shader::operator=(Shader&& s)
+	void Shader::operator=(Shader&& s) noexcept
 	{
 		id = std::exchange(s.id, 0);
 		type = s.type;

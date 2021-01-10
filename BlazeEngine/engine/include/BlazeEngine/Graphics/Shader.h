@@ -5,7 +5,7 @@
 
 namespace Blaze
 {	
-	enum ShaderType
+	enum class ShaderType
 	{
 		FragmentShader = 0x8B30,
 		VertexShader = 0x8B31,
@@ -23,7 +23,7 @@ namespace Blaze
 	public:		
 		Shader(ShaderType);
 		Shader(ShaderType, const StringView&);
-		Shader(Shader&&);
+		Shader(Shader&&) noexcept;
 		~Shader();
 
 		bool LoadShader(const StringView& path);
@@ -32,7 +32,7 @@ namespace Blaze
 		inline ShaderType GetType() const { return type; }
 		inline String GetPath() const { return path; }
 
-		void operator=(Shader&&);
+		void operator=(Shader&&) noexcept;
 
 		friend class ShaderProgram;
 	};	

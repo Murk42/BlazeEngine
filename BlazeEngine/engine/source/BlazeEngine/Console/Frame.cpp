@@ -6,7 +6,7 @@ namespace Blaze
 {
 	namespace Console
 	{
-        uint Frame::Apply(const char* ptr)
+        size_t Frame::Apply(const char* ptr)
         {
             switch (*ptr)
             {
@@ -44,10 +44,11 @@ namespace Blaze
                 return 0;
                 break;
             }
+            return 0;
         }
-        void Frame::WriteRaw(const char* ptr, uint count)
+        void Frame::WriteRaw(const char* ptr, size_t count)
         {
-            uint _count = count;
+            size_t _count = count;
             Vec2i cur(0, cursor.y);
             if (count == 0 || cursor.x + count < 0 || cursor.x > size.x)
                 return;
@@ -57,16 +58,16 @@ namespace Blaze
                 ptr -= cursor.x;
                 count += cursor.x;
             }
-            else if (cursor.x + count < size.x)
+            else if (cursor.x + int(count) < size.x)
                 cur.x = cursor.x;
             else if (cursor.x < size.x)
             {
                 cur.x = cursor.x;
-                count = size.x - cursor.x;
+                count = size_t(size.x) - size_t(cursor.x);
             }
             wmove((WINDOW*)this->ptr, cur.y + 1, cur.x + 1);
-            waddnstr((WINDOW*)this->ptr, ptr, count);
-            cursor.x += _count;
+            waddnstr((WINDOW*)this->ptr, ptr, (int)count);
+            cursor.x += (int)_count;
             wmove((WINDOW*)this->ptr, cursor.y + 1, cursor.x + 1);
         }
 
@@ -77,7 +78,7 @@ namespace Blaze
             //    throw "newwin returned nullptr. Maybe the requested size of the frame is too big";
             Refresh();
         }
-        Frame::Frame(Frame&& f)
+        Frame::Frame(Frame&& f) noexcept
             : ptr(std::exchange(f.ptr, nullptr)), pos(f.pos), size(f.size), color(f.color)
         {
 
@@ -97,7 +98,7 @@ namespace Blaze
         {
             Write(s.Ptr(), s.Size());
         }
-        void Frame::Write(const char* ptr, uint count)
+        void Frame::Write(const char* ptr, size_t count)
         {
             const char* begin = ptr;
             const char* end = ptr;
@@ -137,7 +138,7 @@ namespace Blaze
             wrefresh((WINDOW*)ptr);
         }   
 
-        void Frame::operator=(Frame&& f)
+        void Frame::operator=(Frame&& f) noexcept
         {
             ptr = std::exchange(f.ptr, nullptr);
             pos = f.pos;

@@ -3,6 +3,8 @@
 #include "BlazeEngine/Core/Application.h"
 #include "BlazeEngine/Core/Logger.h"
 #include "BlazeEngine/Input/Input.h"
+#include "BlazeEngine/Graphics/ShaderProgram.h"
+#include "BlazeEngine/Graphics/VertexLayout.h"
 
 #include "freetype/freetype.h"
 #include "SDL/SDL.h"
@@ -14,7 +16,8 @@
 
 namespace Blaze
 {	
-	class Window;
+	class Window;	
+	class Buffer;
 
 	class Engine
 	{
@@ -22,19 +25,21 @@ namespace Blaze
 		FT_Library ft_library;
 
 		struct {
-			uint32 state;
-			uint32 initState = 0;
+			BaseApplication* ptr = nullptr;
+			void (*constructor)(BaseApplication*) = nullptr;
+			void (*destructor)(BaseApplication*) = nullptr;
+			size_t size;
+		} AppInstance;
 
-			BaseApplication* instance = nullptr;
-			void (*constructInstance)(BaseApplication*) = nullptr;
-			void (*destructInstance)(BaseApplication*) = nullptr;
-			size_t instanceSize;
+		struct {
+			uint32 initState = 0;			
+			uint32 state = 0;
 
-			void* initWindow;
+			void* initWindow = nullptr;
 			void* openGLContext = nullptr;
 
 			std::vector<Window*> allWindows;
-		} Application;
+		} App;
 
 		struct
 		{
@@ -320,9 +325,9 @@ namespace Blaze
 			Vec2i mousePos;
 			Vec2i lastMouseRealPos;
 			Vec2i mouseMovement;
-			int mouseScroll;
+			int mouseScroll = 0;
 
-			Window* focusedWindow;
+			Window* focusedWindow = nullptr;
 		} Input;
 
 		struct
@@ -333,6 +338,13 @@ namespace Blaze
 
 		struct
 		{
+			VertexLayout defaultVAO;
+			VertexLayout* boundVertexLayout = nullptr;
+			ShaderProgram* boundShaderProgram = nullptr;
+			Buffer* boundUniformBuffer;
+
+			std::vector<UniformBlock> uniformBlocks;
+
 			void* target = nullptr;
 
 			Vec2i viewportPos;
@@ -343,6 +355,9 @@ namespace Blaze
 		{
 			std::chrono::steady_clock::time_point engineStartTime = std::chrono::steady_clock::now();
 		} Time;		
+
+		Engine();
+		~Engine();
 	};
 
 	extern Engine* engine;

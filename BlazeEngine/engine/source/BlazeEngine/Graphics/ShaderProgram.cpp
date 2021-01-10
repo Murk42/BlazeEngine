@@ -5,6 +5,8 @@
 #include "BlazeEngine/DataStructures/Guard.h"
 #include "BlazeEngine/DataStructures/ByteStream.h"
 
+#include "Engine.h"
+
 #include "GL/glew.h"
 #include <unordered_map>
 
@@ -27,8 +29,13 @@ namespace Blaze
 		return false;
 	}
 
-	Uniform::Uniform(Uniform&& u)
-		: name(std::move(u.name)), type(u.type), pos(u.pos), count(u.count), sampler(sampler)
+	Uniform::Uniform()
+		: type((Type)0), pos(0), count(0), sampler(false)
+	{
+	}
+
+	Uniform::Uniform(Uniform&& u) noexcept
+		: name(std::move(u.name)), type(u.type), pos(u.pos), count(u.count), sampler(u.sampler)
 	{
 
 	}
@@ -37,11 +44,11 @@ namespace Blaze
    	}	
 
 	UniformBlock::UniformBlock()
-		: buffer(BufferType::UniformBuffer)
+		: index(0), size(0), data(nullptr), buffer(BufferType::UniformBuffer)
 	{
 	}
 
-	UniformBlock::UniformBlock(UniformBlock&& u)
+	UniformBlock::UniformBlock(UniformBlock&& u) noexcept
 		: name(std::move(u.name)), index(u.index), size(u.size), members(std::move(u.members)), data(std::exchange(u.data, nullptr)), buffer(std::move(u.buffer))
 	{
 	}
@@ -61,8 +68,7 @@ namespace Blaze
 			char* uniformName = new char[uniformMaxNameLenght];
 			int uniformNameLenght;
 			int uniformSize;
-			int uniformLocation;
-			int uniformBlockIndex;
+			int uniformLocation;			
 			unsigned uniformType;
 
 			uniforms.resize(uniformCount);
@@ -93,7 +99,7 @@ namespace Blaze
 			constexpr const unsigned props2[]{ GL_ACTIVE_VARIABLES };
 			constexpr const unsigned props3[]{ GL_NAME_LENGTH, GL_OFFSET, GL_TYPE, GL_ARRAY_SIZE };
 
-			uniformBlocks.resize(uniformBlockCount);
+			engine->Renderer.uniformBlocks.resize(uniformBlockCount);
 
 			char* uniformBlockName = new char[uniformBlockMaxNameLenght];
 			int uniformBlockNameLenght;
@@ -112,13 +118,13 @@ namespace Blaze
 
 
 				glGetProgramResourceiv(id, GL_UNIFORM_BLOCK, uniformBlockIndex, 2, props1, 2, &lenghtBuffer, (int*)&v1);
-				uniformBlocks[i].members.resize(v1.uniformBlockVariableCount);
+				engine->Renderer.uniformBlocks[i].members.resize(v1.uniformBlockVariableCount);
 				uniformBlockVariableIndices = new int[v1.uniformBlockVariableCount];
 				glGetProgramResourceiv(id, GL_UNIFORM_BLOCK, uniformBlockIndex, 1, props2, v1.uniformBlockVariableCount, &lenghtBuffer, uniformBlockVariableIndices);
 
-				uniformBlocks[i].name = String(uniformBlockName, (size_t)uniformBlockNameLenght);
-				uniformBlocks[i].size = v1.uniformBlockSize;
-				uniformBlocks[i].index = uniformBlockIndex;
+				engine->Renderer.uniformBlocks[i].name = String(uniformBlockName, (size_t)uniformBlockNameLenght);
+				engine->Renderer.uniformBlocks[i].size = v1.uniformBlockSize;
+				engine->Renderer.uniformBlocks[i].index = uniformBlockIndex;
 
 				for (int j = 0; j < v1.uniformBlockVariableCount; j++)
 				{
@@ -134,12 +140,12 @@ namespace Blaze
 					uniformBlockVariableName = new char[v2.uniformBlockVariableNameLenght];
 					glGetActiveUniformName(id, uniformBlockVariableIndices[j], v2.uniformBlockVariableNameLenght, &lenghtBuffer, uniformBlockVariableName);
 
-					uniformBlocks[i].members[j].offset = v2.uniformBlockVariableOfbset;
-					uniformBlocks[i].members[j].u.name = uniformBlockVariableName;
-					uniformBlocks[i].members[j].u.pos = uniformBlockVariableIndices[j];
-					uniformBlocks[i].members[j].u.count = v2.uniformBlockVariableSize;
-					uniformBlocks[i].members[j].u.sampler = (v2.uniformBlockVariableType == GL_SAMPLER_2D);
-					uniformBlocks[i].members[j].u.type = (v2.uniformBlockVariableType == GL_SAMPLER_2D ? Type::Int : (Type)v2.uniformBlockVariableType);
+					engine->Renderer.uniformBlocks[i].members[j].offset = v2.uniformBlockVariableOfbset;
+					engine->Renderer.uniformBlocks[i].members[j].u.name = uniformBlockVariableName;
+					engine->Renderer.uniformBlocks[i].members[j].u.pos = uniformBlockVariableIndices[j];
+					engine->Renderer.uniformBlocks[i].members[j].u.count = v2.uniformBlockVariableSize;
+					engine->Renderer.uniformBlocks[i].members[j].u.sampler = (v2.uniformBlockVariableType == GL_SAMPLER_2D);
+					engine->Renderer.uniformBlocks[i].members[j].u.type = (v2.uniformBlockVariableType == GL_SAMPLER_2D ? Type::Int : (Type)v2.uniformBlockVariableType);
 
 					delete[] uniformBlockVariableName;
 				}
@@ -150,12 +156,12 @@ namespace Blaze
 
 		//Bind uniform block buffers
 		{
-			for (int i = 0; i < uniformBlocks.size(); i++)
+			for (int i = 0; i < engine->Renderer.uniformBlocks.size(); i++)
 			{
-				UniformBlock& u = uniformBlocks[i];
+				UniformBlock& u = engine->Renderer.uniformBlocks[i];
 				u.data = new byte[u.size];
 				memset(u.data, 0, u.size);
-				u.buffer.AllocateData(u.data, u.size, Dynamic | Draw);
+				u.buffer.AllocateData(u.data, u.size, BufferUsage::Dynamic | BufferUsage::Draw);
 				glUniformBlockBinding(id, u.index, i);
 				glBindBufferBase(GL_UNIFORM_BUFFER, i, u.buffer.id);
 			}
@@ -179,7 +185,7 @@ namespace Blaze
 				
 		glProgramBinary(id, format, binary.ptr, binarySize);
 	}
-	ShaderProgram::ShaderProgram(ShaderProgram&& sp)
+	ShaderProgram::ShaderProgram(ShaderProgram&& sp) noexcept
 		: id(std::exchange(sp.id, 0)), uniforms(std::move(sp.uniforms))
 	{
 	}
@@ -228,10 +234,15 @@ namespace Blaze
 	}
 	UniformBlock* ShaderProgram::GetUniformBlock(const String& name)
 	{
-		for (auto& uniform : uniformBlocks)
+		for (auto& uniform : engine->Renderer.uniformBlocks)
 			if (uniform.name == name)
 				return (UniformBlock*)&uniform;
 		return nullptr;
+	}
+
+	const std::vector<UniformBlock>& ShaderProgram::GetUniformBlocks()
+	{
+		return engine->Renderer.uniformBlocks;
 	}
 
 	void ShaderProgram::SetUniform(const Uniform* uniform, const void* ptr) const
@@ -326,7 +337,7 @@ namespace Blaze
 
 		glProgramBinary(id, format, binary.ptr, binarySize);
 	}
-	void ShaderProgram::operator=(ShaderProgram&& sp)
+	void ShaderProgram::operator=(ShaderProgram&& sp) noexcept
 	{
 		glDeleteProgram(id);
 		id = std::exchange(sp.id, 0);
@@ -336,15 +347,15 @@ namespace Blaze
 	void ShaderProgram::Bind() const
 	{
 		glUseProgram(id);
-		boundShaderProgram = (ShaderProgram*)this;
+		engine->Renderer.boundShaderProgram = (ShaderProgram*)this;
 	}
 	void ShaderProgram::Unbind()
 	{
 		glUseProgram(0);
-		boundShaderProgram = nullptr;
+		engine->Renderer.boundShaderProgram = nullptr;
 	}
 	ShaderProgram* ShaderProgram::GetBound()
 	{
-		return boundShaderProgram;
+		return engine->Renderer.boundShaderProgram;
 	}
 }

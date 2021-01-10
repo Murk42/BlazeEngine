@@ -17,7 +17,7 @@ namespace Blaze
 		
 
 		Bitmap bitmaps[128];
-		Vec2i resultSize;
+		Vec2<uint> resultSize;
 
 		FT_Set_Pixel_Sizes(face, 0, height);
 
@@ -85,7 +85,7 @@ namespace Blaze
 
 	
 	TextRenderer::TextRenderer()
-		: font(nullptr), width(0)
+		: font(nullptr), size(nullptr), width(0)
 	{
 	}
 	TextRenderer::~TextRenderer()
@@ -124,12 +124,12 @@ namespace Blaze
 	
 	Font::Size::Size(const Size& s)
 	{
-		*this = std::move(s);
+		*this = std::move(*(Size*)&s);
 	}
 	Font::Size& Font::Size::operator=(const Size& s) noexcept
 	{
 		memcpy(characters, s.characters, sizeof(characters));
-		texture.operator=(std::move(s.texture));
+		texture.operator=(std::move(*(Texture2D*)&s.texture));
 		height = s.height;
 		useCount = s.useCount;
 

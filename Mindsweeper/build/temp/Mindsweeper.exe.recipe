@@ -2,7 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Programming\Projects\BlazeEngine\Mindsweeper\build\Debug\x86\Mindsweeper.exe</FullPath>
+      <FullPath>C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Release\x64\BlazeEngine.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\Programming\Projects\BlazeEngine\Mindsweeper\build\Release\x64\Mindsweeper.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

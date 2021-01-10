@@ -7,11 +7,11 @@ namespace Blaze
 {				
 	Window::Window()
 	{
-		engine->Application.allWindows.push_back(this);
-		if (engine->Application.initWindow != nullptr)
+		engine->App.allWindows.push_back(this);
+		if (engine->App.initWindow != nullptr)
 		{
-			ptr = engine->Application.initWindow;
-			engine->Application.initWindow = nullptr;
+			ptr = engine->App.initWindow;
+			engine->App.initWindow = nullptr;
 		}
 		else
 			ptr = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
@@ -19,10 +19,10 @@ namespace Blaze
 
 	Window::~Window()
 	{
-		auto i = std::find(engine->Application.allWindows.begin(), engine->Application.allWindows.end(), this);
+		auto i = std::find(engine->App.allWindows.begin(), engine->App.allWindows.end(), this);
 
-		if (i != engine->Application.allWindows.end())
-			engine->Application.allWindows.erase(i);
+		if (i != engine->App.allWindows.end())
+			engine->App.allWindows.erase(i);
 
 		SDL_DestroyWindow((SDL_Window*)ptr);
 	}

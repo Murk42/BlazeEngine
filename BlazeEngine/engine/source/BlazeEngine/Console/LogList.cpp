@@ -62,7 +62,7 @@ namespace Blaze
 				default: prefix = F_WHITE;
 				}
 
-				int t = logs[i].time;
+				int t = int(logs[i].time);
 				int s = t % 60;
 				int m = (t / 60) % 60;
 				int h = (t / 3600) % 24;

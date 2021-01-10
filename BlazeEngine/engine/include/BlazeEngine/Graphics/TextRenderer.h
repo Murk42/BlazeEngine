@@ -20,13 +20,13 @@ namespace Blaze
 			{
 				Vec2i size;
 				Vec2i offset;
-				uint advance;
-				uint uv_offset;
+				uint advance = 0;
+				uint uv_offset = 0;
 			} characters[128];
 
 			Texture2D texture;
-			uint height;
-			uint useCount;
+			uint height = 0;
+			uint useCount = 0;
 
 			Size& operator=(const Size&) noexcept;
 		};

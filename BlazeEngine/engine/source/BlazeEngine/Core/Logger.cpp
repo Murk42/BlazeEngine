@@ -5,6 +5,10 @@
 
 namespace Blaze
 {
+	Log::Log()
+		: type(LogType::Message)
+	{
+	}
 	Log::Log(LogType type, String&& source, String&& message)
 		: type(type), source(source), message(message)
 	{

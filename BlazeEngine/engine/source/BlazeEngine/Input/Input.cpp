@@ -4,7 +4,6 @@
 #include "Engine.h"
 #include <map>
 
-#define SDL_MAIN_HANDLED
 #include "SDL/SDL.h"
 
 #include "BlazeEngine/Utilities/Time.h"
@@ -54,7 +53,7 @@ namespace Blaze
 			auto GetWindowFromSDLid = [](uint32 id) -> Window*
 			{
 				void* win = SDL_GetWindowFromID(id);
-				for (auto& w : engine->Application.allWindows)
+				for (auto& w : engine->App.allWindows)
 					if (w->ptr == win)
 						return w;
 				return nullptr;
@@ -128,7 +127,7 @@ namespace Blaze
 					break;
 				}
 				case SDL_WINDOWEVENT:
-					if (engine->Application.initWindow == nullptr)
+					if (engine->App.initWindow == nullptr)
 						switch (event.window.event) {
 						case SDL_WINDOWEVENT_MOVED: {	
 							Window* win = GetWindowFromSDLid(event.window.windowID);

@@ -8,7 +8,6 @@
 #include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/Core/Application.h"
 
-#define SDL_MAIN_HANDLED
 #include "SDL/SDL.h"
 #include "GL/glew.h"
 
@@ -57,7 +56,7 @@ namespace Blaze
 			if (engine->Renderer.target != win.ptr)
 			{
 				engine->Renderer.target = win.ptr;
-				SDL_GL_MakeCurrent((SDL_Window*)win.ptr, (SDL_GLContext)engine->Application.openGLContext);
+				SDL_GL_MakeCurrent((SDL_Window*)win.ptr, (SDL_GLContext)engine->App.openGLContext);
 			}
 		}
 
@@ -86,7 +85,7 @@ namespace Blaze
 				glDisable(GL_CULL_FACE);
 		}
 
-		void RenderPointArray(const ShaderProgram& sp, const VertexLayout& vl, uint count, uint offset)
+		void RenderPointArray(const ShaderProgram& sp, const VertexLayout& vl, uint count, size_t offset)
 		{
 			if (vl.GetLayout().size() != 0)
 			{
@@ -94,26 +93,26 @@ namespace Blaze
 				vl.Bind();
 
 				if (count == 0)
-					count = vl.GetVertexBuffer()->GetSize() / vl.GetStride();
+					count = uint(vl.GetVertexBuffer()->GetSize() / vl.GetStride());
 
-				glDrawArrays(GL_POINTS, offset, count);
+				glDrawArrays(GL_POINTS, int(offset), count);
 				vl.Unbind();
 			}
 			else
 				Logger::AddLog(LogType::Warning, __FUNCTION__, "Trying to render a VertexLayout object that has no layout set");
 		}
-		void RenderPointArray(const ShaderProgram& sp, const Mesh& mesh, uint count, uint offset)
+		void RenderPointArray(const ShaderProgram& sp, const Mesh& mesh, uint count, size_t offset)
 		{
 			RenderPointArray(sp, mesh.vl, count, offset);
 		}
-		void RenderPointArray(BaseMaterial& material, const VertexLayout& vl, uint count, uint offset)
+		void RenderPointArray(BaseMaterial& material, const VertexLayout& vl, uint count, size_t offset)
 		{			
 			material.UpdateShaderProgramUniforms();
 			material.BindTextures();			
 
 			RenderPointArray(material.GetShaderProgram(), vl, count, offset);
 		}
-		void RenderPointArray(BaseMaterial& material, const Mesh& mesh, uint count, uint offset)
+		void RenderPointArray(BaseMaterial& material, const Mesh& mesh, uint count, size_t offset)
 		{
 			material.UpdateShaderProgramUniforms();
 			material.BindTextures();
@@ -121,7 +120,7 @@ namespace Blaze
 			RenderPointArray(material.GetShaderProgram(), mesh.vl, count, offset);
 		}
 
-		void RenderPoints(const ShaderProgram& sp, const VertexLayout& vl, uint pointCount, uint indexOffset)
+		void RenderPoints(const ShaderProgram& sp, const VertexLayout& vl, uint pointCount, size_t offset)
 		{
 			if (vl.GetLayout().size() != 0)
 			{
@@ -132,30 +131,30 @@ namespace Blaze
 					pointCount = vl.GetIndexBuffer()->GetIndexCount();
 
 				Type indexType = vl.GetIndexBuffer()->GetIndexType();
-				glDrawElements(GL_POINTS, pointCount, (unsigned)indexType, (void*)(indexOffset * SizeOf(indexType)));
+				glDrawElements(GL_POINTS, pointCount, (unsigned)indexType, (void*)(offset * SizeOf(indexType)));
 				vl.Unbind();
 			}
 		}
-		void RenderPoints(const ShaderProgram& sp, const Mesh& mesh, uint pointCount, uint indexOffset)
+		void RenderPoints(const ShaderProgram& sp, const Mesh& mesh, uint pointCount, size_t offset)
 		{
-			RenderPoints(sp, mesh.vl, pointCount, indexOffset);			
+			RenderPoints(sp, mesh.vl, pointCount, offset);			
 		}
-		void RenderPoints(BaseMaterial& material, const VertexLayout& vl, uint pointCount, uint indexOffset)
+		void RenderPoints(BaseMaterial& material, const VertexLayout& vl, uint pointCount, size_t offset)
 		{
 			material.UpdateShaderProgramUniforms();
 			material.BindTextures();
 
-			RenderPoints(material.GetShaderProgram(), vl, pointCount, indexOffset);
+			RenderPoints(material.GetShaderProgram(), vl, pointCount, offset);
 		}
-		void RenderPoints(BaseMaterial& material, const Mesh& mesh, uint pointCount, uint indexOffset)
+		void RenderPoints(BaseMaterial& material, const Mesh& mesh, uint pointCount, size_t offset)
 		{			
 			material.UpdateShaderProgramUniforms();
 			material.BindTextures();
 			
-			RenderPoints(material.GetShaderProgram(), mesh.vl, pointCount, indexOffset);			
+			RenderPoints(material.GetShaderProgram(), mesh.vl, pointCount, offset);			
 		}
 
-		void RenderTriangles(ShaderProgram& sp, VertexLayout& vl, uint triangleCount, uint indexOffset)
+		void RenderTriangles(ShaderProgram& sp, VertexLayout& vl, uint triangleCount, size_t offset)
 		{
 			sp.Bind();
 			vl.Bind();
@@ -164,10 +163,10 @@ namespace Blaze
 				triangleCount = vl.GetIndexBuffer()->GetIndexCount() / 3;
 
 			Type indexType = vl.GetIndexBuffer()->GetIndexType();
-			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(indexOffset * SizeOf(indexType)));
+			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(offset * SizeOf(indexType)));
 			vl.Unbind();
 		}
-		void RenderTriangles(ShaderProgram& sp, Mesh& mesh, uint triangleCount, uint indexOffset)
+		void RenderTriangles(ShaderProgram& sp, Mesh& mesh, uint triangleCount, size_t offset)
 		{
 			sp.Bind();
 			mesh.vl.Bind();
@@ -176,10 +175,10 @@ namespace Blaze
 				triangleCount = mesh.ib.GetIndexCount() / 3;
 
 			Type indexType = mesh.ib.GetIndexType();
-			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(indexOffset * SizeOf(indexType)));
+			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(offset * SizeOf(indexType)));
 			mesh.vl.Unbind();
 		}
-		void RenderTriangles(BaseMaterial& material, Mesh& mesh, uint triangleCount, uint indexOffset)
+		void RenderTriangles(BaseMaterial& material, Mesh& mesh, uint triangleCount, size_t offset)
 		{
 			material.GetShaderProgram().Bind();
 			material.UpdateShaderProgramUniforms();
@@ -190,7 +189,7 @@ namespace Blaze
 				triangleCount = mesh.ib.GetIndexCount() / 3;
 			
 			Type indexType = mesh.ib.GetIndexType();
-			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(indexOffset * SizeOf(indexType)));
+			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(offset * SizeOf(indexType)));
 			mesh.vl.Unbind();
 		}		
 	}

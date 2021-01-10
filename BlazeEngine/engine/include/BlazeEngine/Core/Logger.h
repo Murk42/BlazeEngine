@@ -19,8 +19,8 @@ namespace Blaze
 		LogType type;
 		String source;
 		String message;
-
-		Log() = default;
+			
+		Log();
 		Log(LogType, String&&, String&&);
 
 		bool operator==(const Log&);

@@ -5,7 +5,6 @@
 
 #include "BlazeEngine/Core/Logger.h"
 
-#define SDL_MAIN_HANDLED
 #include "SDL/SDL.h"
 #include "PDC/curses.h"
 #include "GL/glew.h"
@@ -19,15 +18,18 @@
 
 namespace Blaze
 {
-	void(*construct)(BaseApplication*) = nullptr;
-	void(*destruct)(BaseApplication*) = nullptr;
-	size_t size = 0;
+	namespace EngineInitialization
+	{
+		void(*construct)(BaseApplication*) = nullptr;
+		void(*destruct)(BaseApplication*) = nullptr;
+		size_t size = 0;
+	}
 
-	void BaseApplication::Setup(void(*a)(BaseApplication*), void(*b)(BaseApplication*), size_t size)
+	void BaseApplication::Initialize(Constructor c, Destructor d, size_t size)
 	{		
-		construct = a;
-		destruct = b;
-		Blaze::size = size;
+		EngineInitialization::construct = c;
+		EngineInitialization::destruct = d;
+		EngineInitialization::size = size;
 	}
 
 	enum class StateFlags
@@ -53,12 +55,12 @@ namespace Blaze
 
 	void BaseApplication::Stop()
 	{
-		engine->Application.state ^= (uint32)StateFlags::Running;
+		engine->App.state ^= (uint32)StateFlags::Running;
 	}
 
-	BaseApplication* BaseApplication::Instance()
+	BaseApplication& BaseApplication::Instance()
 	{
-		return engine->Application.instance;
+		return *engine->AppInstance.ptr;
 	}
 
 	using namespace Blaze;
@@ -108,16 +110,16 @@ namespace Blaze
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-		engine->Application.initWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+		engine->App.initWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
 
-		if (engine->Application.initWindow == nullptr)
+		if (engine->App.initWindow == nullptr)
 			throw String(format_string,
 				"Failed to create initialization window!\n"
 				"SDL error code: %i", SDL_GetError());
 
-		engine->Application.openGLContext = SDL_GL_CreateContext((SDL_Window*)engine->Application.initWindow);
+		engine->App.openGLContext = SDL_GL_CreateContext((SDL_Window*)engine->App.initWindow);
 
-		if (engine->Application.openGLContext == nullptr)
+		if (engine->App.openGLContext == nullptr)
 			throw String(format_string,
 				"Failed to create OpenGL context!\n"
 				"SDL error code: %i", SDL_GetError());
@@ -133,9 +135,9 @@ namespace Blaze
 	}
 	void TerminateGLEW()
 	{
-		SDL_GL_DeleteContext((SDL_GLContext)engine->Application.openGLContext);
-		if (engine->Application.initWindow != nullptr)
-			SDL_DestroyWindow((SDL_Window*)engine->Application.initWindow);
+		SDL_GL_DeleteContext((SDL_GLContext)engine->App.openGLContext);
+		if (engine->App.initWindow != nullptr)
+			SDL_DestroyWindow((SDL_Window*)engine->App.initWindow);
 	}
 	void InitializePDC()
 	{
@@ -169,40 +171,40 @@ namespace Blaze
 			for (short b = 0; b < 8; b++)
 				init_pair(f + b * 8, f, b);
 
-		engine->Application.constructInstance = construct;
-		engine->Application.destructInstance = destruct;
-		engine->Application.instanceSize = size;
-		engine->Application.instance = (BaseApplication*)new uint8[engine->Application.instanceSize];
-		engine->Application.constructInstance(engine->Application.instance);
+		engine->AppInstance.constructor = EngineInitialization::construct;		
+		engine->AppInstance.destructor = EngineInitialization::destruct;
+		engine->AppInstance.size = EngineInitialization::size;
+		BaseApplication* instance = (BaseApplication*)new uint8[engine->AppInstance.size];
+		engine->AppInstance.ptr = instance;
+		engine->AppInstance.constructor(instance);
 	}
 	void TerminateBlaze()
 	{		
-		engine->Application.destructInstance(engine->Application.instance);
-		delete[](uint8*)engine->Application.instance;
+		engine->AppInstance.destructor(engine->AppInstance.ptr);
+		delete[] (uint8*)engine->AppInstance.ptr;
 	}
-
 
 	void Initialize()
 	{
 		try
 		{
 			InitializeDevIL();
-			engine->Application.initState |= (uint32)InitFlags::DevIL;
+			engine->App.initState |= (uint32)InitFlags::DevIL;
 
 			InitializeSDL();
-			engine->Application.initState |= (uint32)InitFlags::SDL;
+			engine->App.initState |= (uint32)InitFlags::SDL;
 
 			InitializeGLEW();
-			engine->Application.initState |= (uint32)InitFlags::GLEW;
+			engine->App.initState |= (uint32)InitFlags::GLEW;
 
 			InitializePDC();
-			engine->Application.initState |= (uint32)InitFlags::PDC;
+			engine->App.initState |= (uint32)InitFlags::PDC;
 
 			InitializeFreeType();
-			engine->Application.initState |= (uint32)InitFlags::FreeType;
+			engine->App.initState |= (uint32)InitFlags::FreeType;
 
 			InitializeBlaze();
-			engine->Application.initState |= (uint32)InitFlags::Blaze;
+			engine->App.initState |= (uint32)InitFlags::Blaze;
 		}
 		catch (const String& message)
 		{
@@ -211,46 +213,46 @@ namespace Blaze
 	}
 	void Terminate()
 	{
-		if (engine->Application.initState & (uint32)InitFlags::Blaze)
+		if (engine->App.initState & (uint32)InitFlags::Blaze)
 		{
 			TerminateBlaze();
-			engine->Application.initState ^= (uint32)InitFlags::Blaze;
+			engine->App.initState ^= (uint32)InitFlags::Blaze;
 		}
-		if (engine->Application.initState & (uint32)InitFlags::FreeType)
+		if (engine->App.initState & (uint32)InitFlags::FreeType)
 		{
 			TerminateFreeType();
-			engine->Application.initState ^= (uint32)InitFlags::FreeType;
+			engine->App.initState ^= (uint32)InitFlags::FreeType;
 		}
-		if (engine->Application.initState & (uint32)InitFlags::PDC)
+		if (engine->App.initState & (uint32)InitFlags::PDC)
 		{
 			TerminatePDC();
-			engine->Application.initState ^= (uint32)InitFlags::PDC;
+			engine->App.initState ^= (uint32)InitFlags::PDC;
 		}
-		if (engine->Application.initState & (uint32)InitFlags::GLEW)
+		if (engine->App.initState & (uint32)InitFlags::GLEW)
 		{
 			TerminateGLEW();
-			engine->Application.initState ^= (uint32)InitFlags::GLEW;
+			engine->App.initState ^= (uint32)InitFlags::GLEW;
 		}
-		if (engine->Application.initState & (uint32)InitFlags::SDL)
+		if (engine->App.initState & (uint32)InitFlags::SDL)
 		{
 			TerminateSDL();
-			engine->Application.initState ^= (uint32)InitFlags::SDL;
+			engine->App.initState ^= (uint32)InitFlags::SDL;
 		}
-		if (engine->Application.initState & (uint32)InitFlags::DevIL)
+		if (engine->App.initState & (uint32)InitFlags::DevIL)
 		{
 			TerminateDevIL();
-			engine->Application.initState ^= (uint32)InitFlags::DevIL;
+			engine->App.initState ^= (uint32)InitFlags::DevIL;
 		}
 	}
 
 	void Run()
 	{
-		engine->Application.instance->Startup();
+		engine->AppInstance.ptr->Startup();
 
-		while (engine->Application.state & (uint32)StateFlags::Running)
-			engine->Application.instance->Frame();
+		while (engine->App.state & (uint32)StateFlags::Running)
+			engine->AppInstance.ptr->Frame();
 
-		engine->Application.instance->Cleanup();
+		engine->AppInstance.ptr->Cleanup();
 	}
 }
 
@@ -261,8 +263,8 @@ int main()
 	try
 	{
 		Blaze::Initialize();
-		Blaze::engine->Application.state |= (Blaze::uint32)Blaze::StateFlags::Initialized;
-		Blaze::engine->Application.state |= (Blaze::uint32)Blaze::StateFlags::Running;
+		Blaze::engine->App.state |= (Blaze::uint32)Blaze::StateFlags::Initialized;
+		Blaze::engine->App.state |= (Blaze::uint32)Blaze::StateFlags::Running;
 
 		Blaze::Run();
 
@@ -300,4 +302,6 @@ int main()
 #endif
 		return 0;
 	}
+
+	return 0;
 }

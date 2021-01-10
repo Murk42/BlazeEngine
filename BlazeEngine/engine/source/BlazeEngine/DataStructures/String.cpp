@@ -14,7 +14,7 @@ namespace Blaze
 	{
 		memcpy(ptr, s.ptr, size + 1);
 	}
-	String::String(String&& s)
+	String::String(String&& s) noexcept
 		: ptr(std::exchange(s.ptr, nullptr)), size(s.size)
 	{
 
@@ -26,6 +26,11 @@ namespace Blaze
 		ptr[size] = '\0';
 	}
 
+	String::String(size_t size)
+		: ptr(new char[size + 1]), size(size)
+	{
+		ptr[size] = '\0';
+	}
 	String::String(const char* _ptr)
 		: ptr(nullptr), size(0)
 	{
@@ -45,8 +50,8 @@ namespace Blaze
 		else		
 			this->ptr = ptr;		
 	}
-	String::String(const char& c, const unsigned& size)
-		: ptr(new char[size + 1]), size(size)
+	String::String(const char& c, size_t size)
+		: ptr(new char[size + size_t(1)]), size(size)
 	{
 		memset(ptr, c, size);
 		ptr[size] = '\0';
@@ -194,7 +199,7 @@ namespace Blaze
 		std::reverse(ptr, ptr + size);
 	}
 
-	int String::Find(char val) const
+	size_t String::Find(char val) const
 	{
 		if (ptr == nullptr) return -1;
 
@@ -202,7 +207,7 @@ namespace Blaze
 		if (i - ptr == size) return -1;
 		return i - ptr;
 	}
-	int String::Find(const std::vector<char>& val)
+	size_t String::Find(const std::vector<char>& val)
 	{
 		if (ptr == nullptr) return -1;
 
@@ -211,7 +216,7 @@ namespace Blaze
 		return i - ptr;
 	}
 
-	int String::Count(char val) const
+	size_t String::Count(char val) const
 	{
 		if (ptr == nullptr) return -1;
 
@@ -267,21 +272,24 @@ namespace Blaze
 		return String(newPtr, size + 1, false);
 	}
 
-	void String::operator= (const String& s)
+	String& String::operator= (const String& s)
 	{
 		delete[] ptr;
 
 		size = s.size;
 		ptr = new char[size + 1];
 		memcpy(ptr, s.ptr, size + 1);
+
+		return *this;
 	}
-	void String::operator= (String&& s)
+	String& String::operator= (String&& s) noexcept
 	{
 		delete[] ptr;
 		ptr = std::exchange(s.ptr, nullptr);
 		size = s.size;
+		return *this;
 	}
-	void String::operator= (const char* _ptr)
+	String& String::operator= (const char* _ptr)
 	{		
 		delete[] ptr;
 		
@@ -289,6 +297,7 @@ namespace Blaze
 		while(_ptr[size] != '\0') ++size;
 		ptr = new char[size + 1];
 		memcpy(ptr, _ptr, size + 1);
+		return *this;
 	}
 
 	bool String::operator==(const String& s) const

@@ -3,7 +3,6 @@
 
 #include "Engine.h"
 
-#define SDL_MAIN_HANDLED
 #include "SDL/SDL.h"
 
 #include <map>

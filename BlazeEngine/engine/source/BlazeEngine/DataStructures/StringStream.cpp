@@ -5,7 +5,7 @@
 
 namespace Blaze
 {
-	inline void StringStream::ResizeToFit(int size)
+	inline void StringStream::ResizeToFit(size_t size)
 	{
 		if (data.size() < offset + size)
 			data.resize(offset + size);
@@ -20,12 +20,12 @@ namespace Blaze
 	{
 
 	}
-	StringStream::StringStream(StringStream&& ss)
+	StringStream::StringStream(StringStream&& ss) noexcept
 		: ByteStream(std::move(ss))
 	{
 
 	}
-	StringStream::StringStream(ByteStream&& bs)
+	StringStream::StringStream(ByteStream&& bs) noexcept
 		: ByteStream(std::move(bs))
 	{
 	}
@@ -88,9 +88,9 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::GetLine(String& value)
 	{
-		register char* startPtr = (char*)data.data() + offset;
-		register char* endPtr = startPtr;
-		register char* lastPtr = (char*)data.data() + data.size() - 1;
+		char* startPtr = (char*)data.data() + offset;
+		char* endPtr = startPtr;
+		char* lastPtr = (char*)data.data() + data.size() - 1;
 		while (*endPtr != '\n' && endPtr != lastPtr) endPtr++;
 		endPtr++;
 		value.Resize(endPtr - startPtr);
@@ -102,9 +102,9 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::GetLine(StringView& value)
 	{
-		register char* startPtr = (char*)data.data() + offset;
-		register char* endPtr = startPtr;
-		register char* lastPtr = (char*)data.data() + data.size() - 1;
+		char* startPtr = (char*)data.data() + offset;
+		char* endPtr = startPtr;
+		char* lastPtr = (char*)data.data() + data.size() - 1;
 		while (*endPtr != '\n' && endPtr != lastPtr) endPtr++;
 		endPtr++;
 		value = StringView(startPtr, endPtr - startPtr);				
@@ -134,10 +134,10 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::Get(String& value)
 	{
-		register char* startPtr = (char*)data.data() + offset;
+		char* startPtr = (char*)data.data() + offset;
 		while (*startPtr < ' ' + 1) ++startPtr;
-		register char* endPtr = startPtr;
-		register char* lastPtr = (char*)data.data() + data.size();
+		char* endPtr = startPtr;
+		char* lastPtr = (char*)data.data() + data.size();
 		while (endPtr != lastPtr && *endPtr > ' ') endPtr++;
 
 		value.Resize(endPtr - startPtr);
@@ -156,10 +156,10 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::Get(StringView& value)
 	{
-		register char* startPtr = (char*)data.data() + offset;
+		char* startPtr = (char*)data.data() + offset;
 		while (*startPtr < ' ' + 1) ++startPtr;
-		register char* endPtr = startPtr + 1;
-		register char* lastPtr = (char*)data.data() + data.size();
+		char* endPtr = startPtr + 1;
+		char* lastPtr = (char*)data.data() + data.size();
 		while (endPtr != lastPtr && *endPtr > ' ') endPtr++;
 
 		value = StringView(startPtr, endPtr - startPtr);		
@@ -177,18 +177,18 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::Get(uint8& value)
 	{		
-		value = Get<uint64>();
+		value = Get<uint8>();
 		return *this;		
 	}
 	template<>
 	StringStream& StringStream::Set(const uint8& value)
-	{
+	{		
 		return Set<uint64>(value);
 	}
 	template<>
 	StringStream& StringStream::Get(uint16& value)
 	{
-		value = Get<uint64>();
+		value = Get<uint16>();
 		return *this;
 	}
 	template<>
@@ -199,7 +199,7 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::Get(uint32& value)
 	{
-		value = Get<uint64>();
+		value = Get<uint32>();
 		return *this;
 	}
 	template<>
@@ -232,7 +232,7 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::Get(int8& value)
 	{
-		value = Get<int64>();
+		value = int8(Get<int64>());
 		return *this;
 	}
 	template<>
@@ -243,7 +243,7 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::Get(int16& value)
 	{
-		value = Get<int64>();
+		value = int16(Get<int64>());
 		return *this;
 	}
 	template<>
@@ -254,7 +254,7 @@ namespace Blaze
 	template<>
 	StringStream& StringStream::Get(int32& value)
 	{
-		value = Get<int64>();
+		value = int32(Get<int64>());
 		return *this;
 	}
 	template<>
@@ -274,7 +274,7 @@ namespace Blaze
 		ptr += negative;
 		while (*ptr > '0' - 1 && *ptr < '9' + 1)
 			value = value * 10 + *ptr - '0';
-		value = (negative * 2 - 1) * value;
+		value = (int64(negative) * 2 - 1) * value;
 		offset = ptr - (char*)data.data() + 1;
 		return *this;
 	}
@@ -351,7 +351,7 @@ namespace Blaze
 	{
 		ByteStream::operator=(ss);
 	}
-	void StringStream::operator=(StringStream&& ss)
+	void StringStream::operator=(StringStream&& ss) noexcept
 	{
 		ByteStream::operator=(std::move(ss));
 	}

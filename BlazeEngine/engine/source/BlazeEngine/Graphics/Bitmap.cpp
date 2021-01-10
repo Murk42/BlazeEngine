@@ -16,7 +16,9 @@ namespace Blaze
 		case PixelFormat::BGR: return IL_BGR;
 		case PixelFormat::BGRA: return IL_BGRA;
 		}
+		return 0;
 	}
+
 
 	PixelFormat ToBlazeFormat(uint format)
 	{
@@ -29,6 +31,7 @@ namespace Blaze
 		case IL_BGR:			return PixelFormat::BGR;
 		case IL_BGRA:			return PixelFormat::BGRA;
 		}
+		return (PixelFormat)0;
 	}
 
 	uint GetFormatDepth(PixelFormat format)

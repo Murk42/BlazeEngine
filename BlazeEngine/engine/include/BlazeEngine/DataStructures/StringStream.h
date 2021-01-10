@@ -8,12 +8,12 @@ namespace Blaze
 	class StringView;
 	class BLAZE_API StringStream : private ByteStream
 	{
-		inline void ResizeToFit(int size);		
+		inline void ResizeToFit(size_t size);		
 	public:
 		StringStream();
 		StringStream(const StringStream&);
-		StringStream(StringStream&&);		
-		StringStream(ByteStream&&);
+		StringStream(StringStream&&) noexcept;		
+		StringStream(ByteStream&&) noexcept;
 		StringStream(const String&);
 		StringStream(const StringView&);
 		~StringStream();
@@ -85,7 +85,7 @@ namespace Blaze
 		template<> StringStream& Set<long double>(const long double& value);
 
 		void operator=(const StringStream&);
-		void operator=(StringStream&&);
+		void operator=(StringStream&&) noexcept;
 
 		using ByteStream::GetOffset;		
 		using ByteStream::GetSize;

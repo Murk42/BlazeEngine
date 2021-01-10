@@ -24,8 +24,8 @@ namespace Blaze
 		void operator=(const Uniform&) = delete;
 		void operator=(Uniform&&) = delete;
 	public:			
-		Uniform() = default;		
-		Uniform(Uniform&&);
+		Uniform();		
+		Uniform(Uniform&&) noexcept;
 		~Uniform();
 
 		inline Type GetType() const { return type; }
@@ -40,7 +40,7 @@ namespace Blaze
 		struct Member
 		{
 			Uniform u;
-			int offset;
+			int offset = 0;
 		};
 
 		String name;
@@ -55,7 +55,7 @@ namespace Blaze
 		void operator=(UniformBlock&&) = delete;
 	public:		
 		UniformBlock();
-		UniformBlock(UniformBlock&&);
+		UniformBlock(UniformBlock&&) noexcept;
 		~UniformBlock();		
 
 		friend class ShaderProgram;				
@@ -64,16 +64,13 @@ namespace Blaze
 	class BLAZE_API ShaderProgram
 	{		
 		std::vector<Uniform> uniforms;				
-		unsigned id;
-
-		inline static ShaderProgram* boundShaderProgram = nullptr;
-		inline static std::vector<UniformBlock> uniformBlocks;		
+		unsigned id;			
 
 		void GatherUniformData();
 	public:
 		ShaderProgram();		
 		ShaderProgram(const ShaderProgram&);
-		ShaderProgram(ShaderProgram&&);
+		ShaderProgram(ShaderProgram&&) noexcept;
 		~ShaderProgram();		
 
 		void Bind() const;
@@ -85,8 +82,8 @@ namespace Blaze
 		const Uniform* GetUniform(const String& name) const;
 		inline const std::vector<Uniform>& GetUniforms() const { return uniforms; }
 
-		static  UniformBlock* GetUniformBlock(const String& name);
-		inline static const std::vector<UniformBlock>& GetUniformBlocks() { return uniformBlocks; }
+		static UniformBlock* GetUniformBlock(const String& name);
+		static const std::vector<UniformBlock>& GetUniformBlocks();
 
 		void SetUniform(const Uniform* uniform, const void* ptr) const;
 		template<typename T>
@@ -107,6 +104,6 @@ namespace Blaze
 		static bool SetUniformBlock(const String& name, const void* ptr);
 
 		void operator=(const ShaderProgram&);
-		void operator=(ShaderProgram&&);
+		void operator=(ShaderProgram&&) noexcept;
 	};
 }

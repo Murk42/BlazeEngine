@@ -6,7 +6,7 @@
 
 namespace Blaze
 {
-	enum TextureWrapping
+	enum class TextureWrapping
 	{		
 		ClampToBorder = 0x812D,
 		ClampToEdge = 0x812F,
@@ -14,7 +14,7 @@ namespace Blaze
 		Repeat = 0x2901,
 	};
 
-	enum TextureSampling
+	enum class TextureSampling
 	{		
 		Nearest = 0x2600,
 		Linear = 0x2601,
@@ -22,11 +22,11 @@ namespace Blaze
 	
 	struct TextureSettings
 	{
-		TextureWrapping xWrap = ClampToEdge;
-		TextureWrapping yWrap = ClampToEdge;
-		TextureSampling min = Linear;
-		TextureSampling mag = Linear;
-		TextureSampling mip = Linear;
+		TextureWrapping xWrap = TextureWrapping::ClampToEdge;
+		TextureWrapping yWrap = TextureWrapping::ClampToEdge;
+		TextureSampling min = TextureSampling::Linear;
+		TextureSampling mag = TextureSampling::Linear;
+		TextureSampling mip = TextureSampling::Linear;
 	};	
 
 	enum class TextureType
@@ -67,7 +67,7 @@ namespace Blaze
 		void Bind() const;
 		void Bind(unsigned slot) const;		
 
-		Texture& operator=(Texture&&);
+		Texture& operator=(Texture&&) noexcept;
 
 		template<TextureType>
 		class Base;
@@ -99,8 +99,7 @@ namespace Blaze
 		
 		Vec2i GetSize() const { return size; }
 		PixelFormat GetFormat() const { return format; }
-
-		Texture2D& operator=(const Texture2D&) noexcept;
+		
 		Texture2D& operator=(Texture2D&&) noexcept;
 	};
 

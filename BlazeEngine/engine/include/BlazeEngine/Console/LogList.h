@@ -11,8 +11,8 @@ namespace Blaze
 			struct LogCache
 			{
 				Log log;
-				double time;
-				uint count;
+				double time = 0;
+				uint count = 0;
 			};
 
 			std::vector<LogCache> logs;

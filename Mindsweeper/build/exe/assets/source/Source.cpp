@@ -20,7 +20,7 @@ public:
 	Mesh mesh;			
 	 
 	TextureArray2D texture; 
-
+	   
 	static constexpr int sizeX = 32, sizeY = 16;
 	static constexpr int tileSizeX = 32, tileSizeY = 32;
 	Vertex<Vec2f, Vec2f, float, float> vertices[sizeX * sizeY];	
@@ -65,8 +65,7 @@ public:
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
 			material.SetShaders(vertexShader, fragmentShader, geometryShader);
 
-
-				mesh.SetVertices(vertices, sizeX * sizeY);
+			mesh.SetVertices(vertices, sizeX * sizeY);
 		}		
 		
 	}

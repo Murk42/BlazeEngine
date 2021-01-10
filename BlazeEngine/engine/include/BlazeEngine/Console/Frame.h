@@ -19,16 +19,16 @@ namespace Blaze
 			Frame(const Frame&) = delete;
 			void operator=(const Frame&) = delete;
 
-			uint Apply(const char*);
-			void WriteRaw(const char*, uint);
+			size_t Apply(const char*);
+			void WriteRaw(const char*, size_t);
 		public:
 			Frame(const Vec2i& pos, const Vec2i& size);
-			Frame(Frame&&);
+			Frame(Frame&&) noexcept;
 			~Frame();
 
 			void Write(const String& s, const Vec2i& pos);
 			void Write(const String& s);
-			void Write(const char*, uint);
+			void Write(const char*, size_t);
 			void MoveCursor(const Vec2i& pos);
 
 			void Clear();
@@ -37,7 +37,7 @@ namespace Blaze
 			inline Vec2i GetSize() const { return size; }
 			inline Vec2i GetPos() const { return pos; }
 
-			void operator=(Frame&&);
+			void operator=(Frame&&) noexcept;
 
 			friend class Console;
 		};

@@ -47,7 +47,7 @@ namespace Blaze
 		Double = 0x140A,
 	};
 
-	constexpr unsigned SizeOf(const Type& type)
+	constexpr size_t SizeOf(const Type& type)
 	{
 		switch (type)
 		{

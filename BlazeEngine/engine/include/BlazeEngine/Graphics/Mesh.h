@@ -44,19 +44,19 @@ namespace Blaze
 		Mesh();
 
 		template<typename ... T>
-		void SetVertices(const Vertex<T...>* ptr, uint count)
+		void SetVertices(const Vertex<T...>* ptr, size_t count)
 		{
 			SetVertices(ptr, count, { GetType<T>()... });
 		}
 		void SetVertices(const void* ptr, uint count, const std::vector<Type>& layout);		
-		void ChangeVertices(const void* ptr, uint count, uint offset);
+		void ChangeVertices(const void* ptr, uint count, size_t offset);
 
 		template<typename T>
 		void SetIndicies(const T* ptr, uint count)
 		{
-			ib.AllocateData(ptr, count * SizeOf(GetType<T>()), Static | Draw, GetType<T>());
+			ib.AllocateData(ptr, count * SizeOf(GetType<T>()), BufferUsage::Static | BufferUsage::Draw, GetType<T>());
 		}
 		void SetIndicies(const void* ptr, uint count, Type indexType);
-		void ChangeIndicies(const void* ptr, uint count, uint offset);
+		void ChangeIndicies(const void* ptr, uint count, size_t offset);
 	};
 }

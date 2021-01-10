@@ -1,23 +1,19 @@
 #include "BlazeEngine/Graphics/VertexLayout.h"
-
 #include "BlazeEngine/Graphics/Buffer.h"
+
+#include "Engine.h"
 
 #include "GL/glew.h"
 
 namespace Blaze
-{
-	VertexLayout VertexLayout::defaultVAO = VertexLayout(0);
-	VertexLayout* VertexLayout::boundVertexLayout = &defaultVAO;
-
-	VertexLayout::VertexLayout(uint)
-		: id(0), layout(), vertexBuffer(nullptr), indexBuffer(nullptr)
-	{
-
-	}
+{		
 	VertexLayout::VertexLayout()
 		: vertexBuffer(nullptr), indexBuffer(nullptr)
 	{
-		glGenVertexArrays(1, &id);
+		if (engine == nullptr)
+			id = 0;
+		else	
+			glGenVertexArrays(1, &id);
 	}
 	VertexLayout::VertexLayout(const VertexLayout& vl)
 	{
@@ -26,7 +22,7 @@ namespace Blaze
 		BindVertexBuffer(vl.vertexBuffer);
 		BindIndexBuffer(vl.indexBuffer);
 	}
-	VertexLayout::VertexLayout(VertexLayout&& vl)
+	VertexLayout::VertexLayout(VertexLayout&& vl) noexcept
 		: id(std::exchange(vl.id, 0)), vertexBuffer(vl.vertexBuffer), indexBuffer(vl.indexBuffer)
 	{
 
@@ -67,10 +63,10 @@ namespace Blaze
 		for (auto& t : layout) stride += SizeOf(t);
 		this->layout = layout;		
 
-		uint offset = 0;
+		size_t offset = 0;
 		for (int i = 0; i < layout.size(); i++)
 		{
-			Type type;
+			Type type = (Type)0;
 			int count = 0;			
 			switch (layout[i])
 			{
@@ -115,16 +111,16 @@ namespace Blaze
 	void VertexLayout::Bind() const
 	{
 		glBindVertexArray(id);
-		boundVertexLayout = (VertexLayout*)this;
+		engine->Renderer.boundVertexLayout = (VertexLayout*)this;
 	}
 	void VertexLayout::Unbind()
 	{
 		glBindVertexArray(0);
-		boundVertexLayout = &defaultVAO;
+		engine->Renderer.boundVertexLayout = &engine->Renderer.defaultVAO;
 	}
 	VertexLayout* VertexLayout::GetBound()
 	{
-		return boundVertexLayout;
+		return engine->Renderer.boundVertexLayout;
 	}
 	void VertexLayout::operator=(const VertexLayout& vl)
 	{
@@ -132,7 +128,7 @@ namespace Blaze
 		BindVertexBuffer(vl.vertexBuffer);
 		BindIndexBuffer(vl.indexBuffer);
 	}
-	void VertexLayout::operator=(VertexLayout&& vl)
+	void VertexLayout::operator=(VertexLayout&& vl) noexcept
 	{
 		glDeleteVertexArrays(1, &id);
 		id = std::exchange(vl.id, 0);

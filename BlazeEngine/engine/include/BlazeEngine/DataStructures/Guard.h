@@ -78,7 +78,7 @@ namespace Blaze
 		void* ptr;
 
 		Guard() : ptr(nullptr) { }
-		Guard(Guard<void, true>&& g) : ptr(g.ptr) { g.ptr = nullptr; }
+		Guard(Guard<void, true>&& g) noexcept : ptr(g.ptr) { g.ptr = nullptr; }
 		Guard(void* ptr) : ptr(ptr) { }
 		~Guard()
 		{
@@ -87,16 +87,18 @@ namespace Blaze
 
 		inline void* operator->() const { return ptr; }		
 
-		void operator=(void* ptr)
+		Guard& operator=(void* ptr)
 		{
 			delete[] this->ptr;
 			this->ptr = ptr;
+			return *this;
 		}
-		void operator=(Guard<void, true>&& g)
+		Guard& operator=(Guard<void, true>&& g) noexcept
 		{
 			void* buf = ptr;
 			ptr = g.ptr;
 			g.ptr = buf;
+			return *this;
 		}
 	};
 }
