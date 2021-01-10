@@ -47,7 +47,7 @@ namespace Blaze
 			offset += bitmaps[i].GetSize().x;
 		}
 
-		resultBitmap.FlipVerticaly();
+		resultBitmap.FlipVerticaly();		
 
 		size.texture.Create(resultBitmap);
 
@@ -90,9 +90,12 @@ namespace Blaze
 	}
 	TextRenderer::~TextRenderer()
 	{
-		--size->useCount;
-		if (size->useCount == 0)
-			font->RemoveSize(size);
+		if (size != nullptr)
+		{
+			--size->useCount;
+			if (size->useCount == 0)
+				font->RemoveSize(size);
+		}
 	}	
 	void TextRenderer::SetFont(Font* font, uint height)
 	{
@@ -112,12 +115,19 @@ namespace Blaze
 			vertices[i].GetValue<0>() = Vec2f(Vec2i(offset, 0) + c.offset);
 			vertices[i].GetValue<1>() = Vec2f(Vec2i(offset, 0) + c.offset + c.size);
 			vertices[i].GetValue<2>() = Vec2f(c.uv_offset, 0) / size->texture.GetSize().x;
-			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / size->texture.GetSize();
-			vertices[i].GetValue<4>() = 0.0f;
+			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / size->texture.GetSize();			
+			vertices[i].GetValue<4>() = Vec4f(1, 1, 1, 1);
 			offset += c.advance;
 		}		
 
 		width = offset;
+
+		mesh.SetVertices(vertices.data(), vertices.size());
+	}
+	void TextRenderer::SetColors(const std::vector<Color>& colors)
+	{
+		for (int i = 0; i < (vertices.size() < colors.size() ? vertices.size() : colors.size()); ++i)
+			vertices[i].GetValue<4>() = colors[i].ToVector();
 
 		mesh.SetVertices(vertices.data(), vertices.size());
 	}

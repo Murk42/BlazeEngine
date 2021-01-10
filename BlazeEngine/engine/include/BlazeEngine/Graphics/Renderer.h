@@ -29,6 +29,7 @@ namespace Blaze
 
 		void BLAZE_API UseDepthBuffer(bool use);
 		void BLAZE_API UseFaceCulling(bool use);		
+		void BLAZE_API UseBlending(bool use);
 		
 		void BLAZE_API RenderPointArray(const ShaderProgram& material, const VertexLayout& vl, uint count = 0, size_t offset = 0);
 		void BLAZE_API RenderPointArray(const ShaderProgram& material, const Mesh& mesh, uint count = 0, size_t offset = 0);

@@ -51,7 +51,7 @@ namespace Blaze
 		Font::Size* size;	
 		int width;
 		
-		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f, float>> vertices;
+		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f, Vec4f>> vertices;
 		Mesh mesh;
 	public:		
 		TextRenderer();
@@ -59,9 +59,15 @@ namespace Blaze
 				
 		void SetFont(Font* font, uint characterHeight);
 		void SetString(StringView text);
+		void SetColors(const std::vector<Color>& colors);
 		
 		Mesh& GetMesh() { return mesh; }
 		Vec2i GetSize() { return Vec2i(width, size->height); }
-		Texture2D* GetTexture() { return &size->texture; }
+		Texture2D* GetTexture() 
+		{
+			if (size != nullptr)				
+				return &size->texture; 
+			return nullptr;
+		}
 	};
 }

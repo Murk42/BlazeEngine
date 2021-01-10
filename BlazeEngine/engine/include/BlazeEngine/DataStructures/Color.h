@@ -11,7 +11,8 @@ namespace Blaze
 	{
 		float r, g, b, a;
 		constexpr Color() : r(0), g(0), b(0), a(1) { }
-		constexpr Color(const float& c) : r (c), g(c), b(c), a(c) { }
+		constexpr Color(const float& c) : r (c), g(c), b(c), a(1) { }
+		constexpr Color(const int& c) : r(float(c) / 255), g(float(c) / 255), b(float(c) / 255), a(1) { }
 		constexpr Color(const float& r, const float& g, const float& b, const float& a = 1.0f) : r(r), g(g), b(b), a(a) { }
 		constexpr Color(const int& r, const int& g, const int& b, const int& a = 255) : r(float(r) / 256.0f), g(float(g) / 256.0f), b(float(b) / 256.0f), a(float(a) / 256.0f) { }
 

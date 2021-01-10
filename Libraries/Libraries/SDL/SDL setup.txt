@@ -1,4 +1,0 @@
-1. In project properties in "C++/General/Additional Include Directories" write the path to the "include" folder.
-2. In "Linker/General/Additional Library Directories" write the path to the "lib" folder.
-3. In "Linker/Input/Additional Dependecies" write "SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_net.lib;".
-4. In "Debugging/Environment" in the DEBUG CONFIGURATION write "PATH=%PATH%;" and then path to the "lib" folder.

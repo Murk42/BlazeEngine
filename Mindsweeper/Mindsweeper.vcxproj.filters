@@ -18,6 +18,10 @@
     <None Include="assets\shaders\sprite\fragment.glsl" />
     <None Include="assets\shaders\sprite\geometry.glsl" />
     <None Include="assets\shaders\sprite\vertex.glsl" />
+    <None Include="assets\materials\textMaterial.mat" />
+    <None Include="assets\shaders\text\fragment.glsl" />
+    <None Include="assets\shaders\text\geometry.glsl" />
+    <None Include="assets\shaders\text\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="assets\source\Source.cpp">
