@@ -36,10 +36,14 @@ public:
 	Font font;
 	TextureArray2D texture; 
 	   
-	static constexpr int posX = 10, posY = 10;
-	static constexpr int sizeX = 32, sizeY = 16;
-	static constexpr int tileSizeX = 32, tileSizeY = 32;
-	Vertex<Vec2f, Vec2f, float, float> vertices[sizeX * sizeY];	
+	static constexpr int maxPosX = 10, maxPosY = 10;
+	static constexpr int maxSizeX = 16, maxSizeY = 8;
+	static constexpr int tileSizeX = 64, tileSizeY = 64;
+
+	Vertex<Vec2f, Vec2f, float, float> vertices[maxSizeX * maxSizeY];	
+	int matrix[maxSizeX * maxSizeY];
+
+	int sizeX, sizeY;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
@@ -58,14 +62,14 @@ public:
 	void Startup() override
 	{				
 		int offsetX = 0, offsetY = 0;
-		for (int y = 0; y < sizeY; ++y)
+		for (int y = 0; y < maxSizeY; ++y)
 		{
-			for (int x = 0; x < sizeX; ++x)
+			for (int x = 0; x < maxSizeX; ++x)
 			{
-				vertices[x + y * sizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
-				vertices[x + y * sizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);
-				vertices[x + y * sizeX].GetValue<2>() = 9;
-				vertices[x + y * sizeX].GetValue<3>() = 0;
+				vertices[x + y * maxSizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
+				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);
+				vertices[x + y * maxSizeX].GetValue<2>() = 13;
+				vertices[x + y * maxSizeX].GetValue<3>() = 0;
 
 				offsetX += tileSizeX;
 			}
@@ -76,7 +80,7 @@ public:
 		Input::SetEventFunction(InputEvent::WindowClosed, CloseWindowEvent);
 		Input::SetEventFunction(InputEvent::WindowSizeChanged, ResizeWindowEvent);
 
-		window.SetSize(Vec2i(10 + tileSizeX * sizeX + 10, 10 + tileSizeY * sizeY + 10 + 50 + 10));
+		window.SetSize(Vec2i(10 + tileSizeX * maxSizeX + 10, 10 + tileSizeY * maxSizeY + 10 + 50 + 10));
 		window.SetWindowed(true, false);
 		window.ShowWindow(true);
 		
@@ -89,7 +93,7 @@ public:
 		{
 			font.Load("assets/fonts/Roboto-Regular.ttf");
 
-			texture.Load("assets/sprites/sprites.png", Vec2i(16, 16));
+			texture.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
 
 			{
 				Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
@@ -104,7 +108,7 @@ public:
 				Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/text/geometry.glsl");
 				textMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
 			}			
-			mesh.SetVertices(vertices, sizeX * sizeY);
+			mesh.SetVertices(vertices, maxSizeX * maxSizeY);
 
 			text.title.SetFont(&font, 50);
 			text.title.SetString("Minesweeper");
@@ -123,7 +127,7 @@ public:
 				});
 
 			text.details.SetFont(&font, 20);
-			text.details.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
+			text.details.SetString(String(format_string, "Size is %dx%d", maxSizeX, maxSizeY));
 
 			text.menuTitle.SetFont(&font, 100);
 			text.menuTitle.SetString("Minesweeper");
@@ -165,17 +169,17 @@ public:
 			{
 				Vec2i mp = Input::GetMousePos();
 				mp.y = window.GetSize().y - mp.y;
-				mp -= Vec2i(posX, posY);
+				mp -= Vec2i(maxPosX, maxPosY);
 				mp /= Vec2i(tileSizeX, tileSizeY);
 
 				if (mp.x >= 0 &&
-					mp.x < sizeX &&
+					mp.x < maxSizeX &&
 					mp.y >= 0 &&
-					mp.y < sizeY)
+					mp.y < maxSizeY)
 				{
-					vertices[mp.x + sizeX * mp.y].GetValue<2>() = ((uint)vertices[mp.x + sizeX * mp.y].GetValue<2>() + 1) % 10;
+					vertices[mp.x + maxSizeX * mp.y].GetValue<2>() = ((uint)vertices[mp.x + maxSizeX * mp.y].GetValue<2>() + 1) % 14;
 
-					mesh.ChangeVertices(vertices, sizeX * sizeY, 0);
+					mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
 				}
 			}
 
@@ -220,6 +224,25 @@ public:
 	{
 		scene = Scene::Game;
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
+	}	
+
+	void UpdateTiles()
+	{
+		for (int y = 0; y < sizeY; ++y)
+			for (int x = 0; x < sizeX; ++x)			
+				vertices[x + maxSizeX * y].GetValue<2>() = matrix[x + maxSizeX * y];
+
+		mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
+	}
+
+	void GenetateTiles()
+	{
+
+	}
+
+	void ClickOnTile(int x, int y)
+	{
+
 	}
 };
 
@@ -238,7 +261,7 @@ void ResizeWindowEvent(int w, int h, Window* win)
 		break;
 		}
 	case Scene::Game: {
-		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
+		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::maxPosX, App::maxPosY));
 		app.text.titleTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.text.title.GetSize().y));
 		app.text.detailsTrans = app.text.titleTrans * Math::TranslationMatrix<float>(Vec2i(app.text.title.GetSize().x + 30, 0));
 		break;

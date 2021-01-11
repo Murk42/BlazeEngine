@@ -37,8 +37,8 @@ public:
 	TextureArray2D texture; 
 	   
 	static constexpr int posX = 10, posY = 10;
-	static constexpr int sizeX = 32, sizeY = 16;
-	static constexpr int tileSizeX = 32, tileSizeY = 32;
+	static constexpr int sizeX = 16, sizeY = 8;
+	static constexpr int tileSizeX = 64, tileSizeY = 64;
 	Vertex<Vec2f, Vec2f, float, float> vertices[sizeX * sizeY];	
 	 
 	Mat4f canvasProjection;
@@ -64,7 +64,7 @@ public:
 			{
 				vertices[x + y * sizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
 				vertices[x + y * sizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);
-				vertices[x + y * sizeX].GetValue<2>() = 9;
+				vertices[x + y * sizeX].GetValue<2>() = 13;
 				vertices[x + y * sizeX].GetValue<3>() = 0;
 
 				offsetX += tileSizeX;
@@ -89,7 +89,7 @@ public:
 		{
 			font.Load("assets/fonts/Roboto-Regular.ttf");
 
-			texture.Load("assets/sprites/sprites.png", Vec2i(16, 16));
+			texture.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
 
 			{
 				Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
@@ -173,7 +173,7 @@ public:
 					mp.y >= 0 &&
 					mp.y < sizeY)
 				{
-					vertices[mp.x + sizeX * mp.y].GetValue<2>() = ((uint)vertices[mp.x + sizeX * mp.y].GetValue<2>() + 1) % 10;
+					vertices[mp.x + sizeX * mp.y].GetValue<2>() = ((uint)vertices[mp.x + sizeX * mp.y].GetValue<2>() + 1) % 14;
 
 					mesh.ChangeVertices(vertices, sizeX * sizeY, 0);
 				}

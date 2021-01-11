@@ -32,5 +32,13 @@
     <Image Include="assets\sprites\sprites.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="assets\sprites\SpriteSheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="assets\source\Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
