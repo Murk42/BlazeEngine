@@ -243,6 +243,12 @@
   <ItemGroup>
     <None Include="engine\assets\default\vertexDiffuse.glsl" />
     <None Include="engine\assets\default\fragmentDiffuse.glsl" />
+    <None Include="engine\assets\default\shaders\coloredText\fragment.glsl" />
+    <None Include="engine\assets\default\shaders\coloredText\geometry.glsl" />
+    <None Include="engine\assets\default\shaders\coloredText\vertex.glsl" />
+    <None Include="engine\assets\default\shaders\normalText\fragment.glsl" />
+    <None Include="engine\assets\default\shaders\normalText\geometry.glsl" />
+    <None Include="engine\assets\default\shaders\normalText\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="engine\assets\default\default.png">

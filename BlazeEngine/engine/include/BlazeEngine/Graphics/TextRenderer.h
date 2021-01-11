@@ -24,29 +24,41 @@ namespace Blaze
 
 		bool Load(const StringView& path);
 
-		friend class TextRenderer;
+		friend class Text;
 	};	
 
-	class BLAZE_API TextRenderer
-	{			
+	class BLAZE_API Text
+	{
+	protected:
 		Font* font;
-		void* fontSizePtr;		
+		void* fontSizePtr;
 		Vec2i size;
 
 		String string;
-		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f, Vec4f>> vertices;
 		Mesh mesh;
-	public:		
-		TextRenderer();
-		~TextRenderer();
-				
-		void SetFont(Font* font, uint characterHeight);
-		void SetString(StringView text);
-		void SetColors(const std::vector<Color>& colors);
-		
+	public:
+		Text();
+		~Text();
+
+		void SetFont(Font* font, uint height);
+
 		const Mesh& GetMesh() const { return mesh; }
 		String GetString() const { return string; }
 		Vec2i GetSize() const { return size; }
-		const Texture2D* GetTexture() const;
+		const Texture2D* GetTexture() const;		
+	};	
+
+	class BLAZE_API NormalText : public Text
+	{
+		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f>> vertices;
+	public:
+		void SetString(StringView text);		
+	};
+
+	class BLAZE_API ColoredText : public Text
+	{					
+		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f, Vec4f>> vertices;		
+	public:						
+		void SetString(StringView text, const std::vector<Color>& colors);
 	};
 }

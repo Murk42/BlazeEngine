@@ -106,14 +106,13 @@ namespace Blaze
 		ptr = face;
 
 		return true;
-	}
+	}	
 
-	
-	TextRenderer::TextRenderer()
+	Text::Text()
 		: font(nullptr), fontSizePtr(nullptr), size(0, 0)
 	{
 	}
-	TextRenderer::~TextRenderer()
+	Text::~Text()
 	{
 		FontSize* fontSize = (FontSize*)fontSizePtr;
 		if (fontSize != nullptr)
@@ -123,18 +122,40 @@ namespace Blaze
 				font->RemoveSize(fontSize);
 		}
 	}	
-	void TextRenderer::SetFont(Font* font, uint height)
+
+	const Texture2D* Text::GetTexture() const
+	{
+		if (fontSizePtr != nullptr)
+			return &((FontSize*)fontSizePtr)->texture;
+		return nullptr;
+	}	
+	void Text::SetFont(Font* font, uint height)
 	{		
+		if (fontSizePtr != nullptr)
+		{
+			FontSize* fontSize = (FontSize*)fontSizePtr;
+			--fontSize->useCount;
+			if (fontSize->useCount == 0)
+				font->RemoveSize(fontSize);
+		}
+
 		this->font = font;
 
 		fontSizePtr = font->AddSize(height);
 		++((FontSize*)fontSizePtr)->useCount;
 	}
-	void TextRenderer::SetString(StringView text)
-	{						
+
+	void NormalText::SetString(StringView text)
+	{
+		if (font == nullptr)
+		{
+			Logger::AddLog(LogType::Warning, __FUNCTION__, "No font has been set");
+			return;
+		}
 		vertices.resize(text.Size());
 		FontSize* fontSize = (FontSize*)fontSizePtr;
 
+		size = Vec2i(0);
 		int offset = 0;
 		for (int i = 0; i < text.Size(); ++i)
 		{
@@ -143,27 +164,43 @@ namespace Blaze
 			vertices[i].GetValue<1>() = Vec2f(Vec2i(offset, 0) + c.offset + c.size);
 			vertices[i].GetValue<2>() = Vec2f(c.uv_offset, 0) / fontSize->texture.GetSize().x;
 			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / fontSize->texture.GetSize();			
-			vertices[i].GetValue<4>() = Vec4f(1, 1, 1, 1);
 			offset += c.advance;
+			size.x += c.advance;
+			size.y = std::max<int>(size.y, c.size.y);
+		}
+
+		size.x = offset;
+
+		mesh.SetVertices(vertices.data(), vertices.size());
+	}
+
+	void ColoredText::SetString(StringView text, const std::vector<Color>& colors)
+	{				
+		if (font == nullptr)
+		{
+			Logger::AddLog(LogType::Warning, __FUNCTION__, "No font has been set");
+			return;
+		}
+		vertices.resize(text.Size());
+		FontSize* fontSize = (FontSize*)fontSizePtr;		
+
+		size = Vec2i(0);
+		int offset = 0;
+		for (int i = 0; i < text.Size(); ++i)
+		{
+			auto& c = fontSize->characters[text[i]];
+			vertices[i].GetValue<0>() = Vec2f(Vec2i(offset, 0) + c.offset);
+			vertices[i].GetValue<1>() = Vec2f(Vec2i(offset, 0) + c.offset + c.size);
+			vertices[i].GetValue<2>() = Vec2f(c.uv_offset, 0) / fontSize->texture.GetSize().x;
+			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / fontSize->texture.GetSize();			
+			vertices[i].GetValue<4>() = colors[i].ToVector();
+			offset += c.advance;
+			size.x += c.advance;
+			size.y = std::max<int>(size.y, c.size.y);
 		}		
 
 		size.x = offset;
 
 		mesh.SetVertices(vertices.data(), vertices.size());
 	}
-	void TextRenderer::SetColors(const std::vector<Color>& colors)
-	{
-		for (int i = 0; i < (vertices.size() < colors.size() ? vertices.size() : colors.size()); ++i)
-			vertices[i].GetValue<4>() = colors[i].ToVector();
-
-		mesh.SetVertices(vertices.data(), vertices.size());
-	}	
-
-	const Texture2D* TextRenderer::GetTexture() const
-	{
-		if (fontSizePtr != nullptr)
-			return &((FontSize*)fontSizePtr)->texture;
-		return nullptr;
-	}
-
 }

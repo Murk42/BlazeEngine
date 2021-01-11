@@ -20,9 +20,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\Text\fragment.glsl" />
-    <None Include="assets\Text\geometry.glsl" />
-    <None Include="assets\Text\vertex.glsl" />
     <None Include="assets\textMaterial.mat" />
+    <None Include="assets\normalText\fragment.glsl" />
+    <None Include="assets\normalText\geometry.glsl" />
+    <None Include="assets\normalText\vertex.glsl" />
+    <None Include="assets\coloredText\fragment.glsl" />
+    <None Include="assets\coloredText\geometry.glsl" />
+    <None Include="assets\coloredText\vertex.glsl" />
   </ItemGroup>
 </Project>

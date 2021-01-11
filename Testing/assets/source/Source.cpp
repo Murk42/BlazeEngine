@@ -5,11 +5,18 @@ static void WindowCloseEvent(Window* win);
 static void WindowSizeChangedEvent(int w, int h, Window* win);
 static void KeyPressedEvent(Key key, Window* win);
 
-struct TextMatProp : MaterialProperties<Mat4f, Texture2D>
+struct ColoredTextMatProp : MaterialProperties<Mat4f, Texture2D>
 {
 	Property<Mat4f> mvp = "u_MVP";
 	Property<Texture2D> texture = "u_texture";
 };
+struct NormalTextMatProp : MaterialProperties<Mat4f, Texture2D, Vec4f>
+{
+	Property<Mat4f> mvp = "u_MVP";
+	Property<Texture2D> texture = "u_texture";
+	Property<Vec4f> color = "u_color";
+};
+
 
 class App : public Application<App>
 {
@@ -18,9 +25,21 @@ public:
 	Window window;
 	   
 	Font font;  
-	Material<TextMatProp> textMaterial;
-	TextRenderer text;	
-	TextRenderer dataText;
+	Material<NormalTextMatProp> normalTextMaterial;
+	Material<ColoredTextMatProp> coloredTextMaterial;
+	ColoredText text;	
+	NormalText dataText;
+
+	std::vector<Color> colors {
+		Color(1, 0, 0),
+		Color(1, 1, 0),
+		Color(0, 1, 0),
+		Color(0, 1, 1),
+		Color(0, 0, 1),
+		Color(0, 0, 0),
+		Color(1, 0, 1),
+		Color(1, 0, 0),
+	};
 
 	Mat4f canvasProjMatrix;
 	Mat4f textTransform;	
@@ -40,12 +59,23 @@ public:
 		Renderer::SetTarget(window);		
 		 
 		font.Load("assets/fonts/VertigoFLF.ttf");
-		textMaterial.Load("assets/textMaterial.mat");		
+		{
+			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/normalText/vertex.glsl");
+			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/normalText/fragment.glsl");
+			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/normalText/geometry.glsl");
+			normalTextMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
+		}
+		{
+			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/coloredText/vertex.glsl");
+			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/coloredText/fragment.glsl");
+			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/coloredText/geometry.glsl");						
+			coloredTextMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);			
+		}
 				
 		dataText.SetFont(&font, 40);
 
 		text.SetFont(&font, 50); 
-		text.SetString("Marko :)");
+		text.SetString("Marko :)", colors);
 
 	} 
 	
@@ -74,20 +104,22 @@ public:
 		}
 		++FPScount;
 
-		dataText.SetString(String(format_string, "FPS: %d  dt: %fms dta: %fms rdta: %f", FPS, dt * 1000, dtAverege * 1000, 1.0f / dtAverege));
+		String formatedString = String(format_string, "FPS: %d  dt: %fms dta: %fms rdta: %f", FPS, dt * 1000, dtAverege * 1000, 1.0f / dtAverege);
+		dataText.SetString(formatedString);
 
 		Input::Update();					
 
 		  
 		Renderer::ClearTarget();
 
-		textMaterial.properties.mvp = canvasProjMatrix;
-		textMaterial.properties.texture = dataText.GetTexture();
-		Renderer::RenderPointArray(textMaterial, dataText.GetMesh());
+		normalTextMaterial.properties.mvp = canvasProjMatrix;
+		normalTextMaterial.properties.texture = dataText.GetTexture();
+		normalTextMaterial.properties.color = Color(1, 1, 0, 1).ToVector();
+		Renderer::RenderPointArray(normalTextMaterial, dataText.GetMesh());
 
-		textMaterial.properties.mvp = canvasProjMatrix * textTransform;
-		textMaterial.properties.texture = text.GetTexture();
-		Renderer::RenderPointArray(textMaterial, text.GetMesh());		
+		coloredTextMaterial.properties.mvp = canvasProjMatrix * textTransform;
+		coloredTextMaterial.properties.texture = text.GetTexture();
+		Renderer::RenderPointArray(coloredTextMaterial, text.GetMesh());		
 
 
 		Renderer::UpdateTarget();
@@ -135,7 +167,7 @@ static void KeyPressedEvent(Key key, Window* win)
 		if (app.inputString.Size() > 0)
 		{
 			app.inputString.Resize(app.inputString.Size() - 1);
-			app.text.SetString(app.inputString);
+			app.text.SetString(app.inputString, app.colors);
 			app.textTransform = Math::TranslationMatrix<float>(Renderer::GetViewportSize() - app.text.GetSize());
 		}
 		break;
@@ -145,7 +177,7 @@ static void KeyPressedEvent(Key key, Window* win)
 		if (c != '\0')
 		{
 			app.inputString += c;
-			app.text.SetString(app.inputString);
+			app.text.SetString(app.inputString, app.colors);
 			app.textTransform = Math::TranslationMatrix<float>(Renderer::GetViewportSize() - app.text.GetSize());
 		}
 		break;

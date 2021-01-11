@@ -8,9 +8,10 @@ uniform sampler2D u_texture;
 void main()
 {		
 	vec4 color = texture(u_texture, p_uv);
-	color = vec4(color.r, color.r, color.r, 1);
-	if (color.r == 0)
-		discard;
-	else
-		gl_FragColor = color;	
+	
+	color.a = color.r;
+	color.rgb = vec3(1, 1, 1);
+	color *= p_color;
+		
+	gl_FragColor = color;	
 }

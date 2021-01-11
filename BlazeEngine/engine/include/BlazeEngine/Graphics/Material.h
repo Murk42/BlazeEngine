@@ -24,6 +24,7 @@ namespace Blaze
 		private:
 			StorageType value;
 			bool changed;
+			uint uniformIndex;
 		public:
 
 			const char* const name;
@@ -63,6 +64,8 @@ namespace Blaze
 
 	class BLAZE_API BaseMaterial
 	{		
+		bool valid = false;
+
 		BaseMaterial();
 		BaseMaterial(const BaseMaterial&);
 		BaseMaterial(BaseMaterial&&);
@@ -84,11 +87,19 @@ namespace Blaze
 		template<typename T>
 		BaseMaterialProperties::Property<T>* GetProperty(StringView name)
 		{
-			return (BaseMaterialProperties::Property<T>*)GetProperty(name);
+			if (valid)
+				return (BaseMaterialProperties::Property<T>*)GetProperty(name);
+			else
+			{
+				Logger::AddLog(LogType::Warning, __FUNCTION__, "Using an invalid material");
+				return nullptr;
+			}
 		}
 
 		virtual void UpdateShaderProgramUniforms() = 0;
 		virtual void BindTextures() = 0;
+
+		bool IsValid() const { return valid; }
 
 		template<typename>
 		friend class Material;
@@ -98,14 +109,40 @@ namespace Blaze
 	class Material : public BaseMaterial
 	{				
 		void* ptrs[S::TypesTuple::TupleSize];
+		bool valid = false;
 
 		template<size_t index, typename T>
 		constexpr bool IsCompatible(T& tuple)
 		{
 			if constexpr (index < S::TypesTuple::TupleSize - 1)
-				return IsCompatible<index + 1>(tuple.nextTuple) && tuple.value.name == sp.GetUniforms()[index].GetName();
+			{				
+				auto& uniforms = sp.GetUniforms();
+				bool found = false;
+				for (int i = 0; i < uniforms.size(); ++i)
+					if (tuple.value.name == uniforms[i].GetName())
+					{
+						found = true;
+						//tuple.value.uniform.
+						break;
+					}
+
+				if (found)
+					return IsCompatible<index + 1>(tuple.nextTuple);
+				else
+					return  false;
+			}
 			else
-				return tuple.value.name == sp.GetUniforms()[index].GetName();
+			{
+				bool found = false;
+				for (auto& u : sp.GetUniforms())
+					if (tuple.value.name == u.GetName())
+					{
+						found = true;
+						break;
+					}
+
+				return found;
+			}				
 		}
 
 		template<size_t index, typename T>
@@ -153,9 +190,15 @@ namespace Blaze
 		inline void UpdateShaderProgramCompability()
 		{
 			if (sp.GetUniforms().size() != S::TypesTuple::TupleSize)
+			{
 				Logger::AddLog(LogType::Warning, __FUNCTION__, "The material property structure isnt compatible with the given shaders. There is either too many or too few properties in the structure");
+				valid = false;
+			}
 			else if (!IsCompatible<0>(properties.AsTuple()))
+			{
 				Logger::AddLog(LogType::Warning, __FUNCTION__, "The material property structure isnt compatible with the given shaders. The property and uniforms names arent the same");
+				valid = false;
+			}
 			else
 			{
 				auto& uniforms = sp.GetUniforms();
@@ -173,6 +216,8 @@ namespace Blaze
 					else if (uniforms[i].GetName() == "u_texture")
 						standardProperties.mainTexture = (BaseMaterialProperties::Property<Texture2D>*)ptrs[i];
 				}
+
+				valid = true;
 			}
 		}
 	public:
@@ -218,19 +263,32 @@ namespace Blaze
 		}
 
 		void UpdateShaderProgramUniforms() override
-		{						
-			uint textureIndex = 0;
-			UpdateShaderProgramUniforms<0>(properties.AsTuple(), textureIndex);			
+		{		
+			if (valid)
+			{
+				uint textureIndex = 0;
+				UpdateShaderProgramUniforms<0>(properties.AsTuple(), textureIndex);
+			}
+			else			
+				Logger::AddLog(LogType::Warning, __FUNCTION__, "Using an invalid material");							
 		}
 		void BindTextures() override
 		{
-			uint textureIndex = 0;
-			BindTextures<0>(properties.AsTuple(), textureIndex);
+			if (valid)
+			{
+				uint textureIndex = 0;
+				BindTextures<0>(properties.AsTuple(), textureIndex);
+			}
+			else
+				Logger::AddLog(LogType::Warning, __FUNCTION__, "Using an invalid material");			
 		}
 
 		void Serialize(ByteStream& bs)
 		{
-			sp.Serialize(bs);
+			if (valid)
+				sp.Serialize(bs);
+			else			
+				Logger::AddLog(LogType::Warning, __FUNCTION__, "Using an invalid material");				
 		}
 		void Deserialize(ByteStream& bs)
 		{
@@ -240,13 +298,21 @@ namespace Blaze
 
 		bool Load(StringView path, bool emitWarningOnFail = true)
 		{
-			ByteStream bs;
-			if (File::Read(path, &bs, emitWarningOnFail))
+			if (valid)
 			{
-				Deserialize(bs);
-				return true;
+				ByteStream bs;
+				if (File::Read(path, &bs, emitWarningOnFail))
+				{
+					Deserialize(bs);
+					return true;
+				}
+				return false;
 			}
-			return false;
+			else
+			{
+				Logger::AddLog(LogType::Warning, __FUNCTION__, "Using an invalid material");
+				return false;
+			}
 		}
 		bool Save(StringView path, bool emitWarningOnFail = true)
 		{
