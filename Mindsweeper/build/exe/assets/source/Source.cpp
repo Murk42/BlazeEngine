@@ -9,9 +9,10 @@ struct MatProps : MaterialProperties<Mat4f, TextureArray2D>
 	Property<Mat4f> mvp = "u_MVP";
 	Property<TextureArray2D> texture = "u_texture";
 };
-struct TextMatProps : MaterialProperties<Mat4f, Texture2D>
+struct TextMatProps : MaterialProperties<Mat4f, Vec4f, Texture2D>
 {
 	Property<Mat4f> mvp = "u_MVP";
+	Property<Vec4f> color = "u_color";
 	Property<Texture2D> texture = "u_texture";
 };
 
@@ -52,12 +53,12 @@ public:
 	Mat4f tilesTrans;
 	 
 	struct {  
-		TextRenderer menuTitle;
+		NormalText menuTitle;
 		Mat4f menuTitleTrans;
 
-		TextRenderer title;
+		NormalText title;
 		Mat4f titleTrans;
-		TextRenderer details;
+		NormalText details;
 		Mat4f detailsTrans;
 
 	} text;
@@ -73,8 +74,10 @@ public:
 			{
 				vertices[x + y * maxSizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
 				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);				
-				vertices[x + y * maxSizeX].GetValue<2>() = 13;
+				vertices[x + y * maxSizeX].GetValue<2>() = 1;
 				vertices[x + y * maxSizeX].GetValue<3>() = 0;
+
+				textureMatrix[x + y * maxSizeX] = 13;
 
 				offsetX += tileSizeX;
 			}
@@ -109,47 +112,21 @@ public:
 			} 
 
 			{   
-				Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/text/vertex.glsl");
-				Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/shaders/text/fragment.glsl");
-				Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/text/geometry.glsl");
+				Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/normalText/vertex.glsl");
+				Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/normalText/fragment.glsl");
+				Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/normalText/geometry.glsl");
 				textMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
 			}			
 			mesh.SetVertices(vertices, maxSizeX * maxSizeY);
 
 			text.title.SetFont(&font, 50);
-			text.title.SetString("Minesweeper");
-			text.title.SetColors({
-					Color(148, 0, 211),
-					Color(75, 0, 130),
-					Color(0, 0, 255),
-					Color(0, 255, 0),
-					Color(255, 255, 0),
-					Color(255, 127, 0),
-					Color(255, 0, 0),
-					Color(148, 0, 211),
-					Color(75, 0, 130),
-					Color(0, 0, 255),
-					Color(0, 255, 0),
-				});
+			text.title.SetString("Minesweeper");			
 
 			text.details.SetFont(&font, 20);
 			text.details.SetString(String(format_string, "Size is %dx%d", maxSizeX, maxSizeY));
 
 			text.menuTitle.SetFont(&font, 100);
 			text.menuTitle.SetString("Minesweeper");
-			text.menuTitle.SetColors({
-					Color(148, 0, 211),
-					Color(75, 0, 130),
-					Color(0, 0, 255),
-					Color(0, 255, 0),
-					Color(255, 255, 0),
-					Color(255, 127, 0),
-					Color(255, 0, 0),
-					Color(148, 0, 211),
-					Color(75, 0, 130),
-					Color(0, 0, 255),
-					Color(0, 255, 0),
-				});
 		}				
 	}
 
@@ -164,6 +141,7 @@ public:
 		case Scene::Menu: {
 			textMaterial.properties.mvp = canvasProjection * text.menuTitleTrans;
 			textMaterial.properties.texture = text.menuTitle.GetTexture();
+
 			Renderer::RenderPointArray(textMaterial, text.menuTitle.GetMesh());
 
 			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Down)
@@ -195,10 +173,12 @@ public:
 
 			textMaterial.properties.mvp = canvasProjection * text.titleTrans;
 			textMaterial.properties.texture = text.title.GetTexture();
+			textMaterial.properties.color = Color(1, 1, 1, 1).ToVector();
 			Renderer::RenderPointArray(textMaterial, text.title.GetMesh());
 
 			textMaterial.properties.mvp = canvasProjection * text.detailsTrans;
 			textMaterial.properties.texture = text.details.GetTexture();
+			textMaterial.properties.color = Color(1, 1, 1, 1).ToVector();
 			Renderer::RenderPointArray(textMaterial, text.details.GetMesh());
 			break;
 		}
@@ -335,7 +315,7 @@ public:
 			Logger::AddLog(LogType::Message, __FUNCTION__, "Ops, you hit bomb!");
 			return 1;
 		}
-		if (checkedMatrix) 
+		if (checkedMatrix[k]) 
 		{
 			return 0;
 		}
@@ -389,36 +369,28 @@ public:
 			}
 			break;
 		case 1:
-			textureMatrix[k] = 10;
-			UpdateTiles();
+			textureMatrix[k] = 10;			
 			break;
 		case 2:
-			textureMatrix[k] = 9;
-			UpdateTiles();
+			textureMatrix[k] = 9;			
 			break;
 		case 3:
-			textureMatrix[k] = 8;
-			UpdateTiles();
+			textureMatrix[k] = 8;			
 			break;
 		case 4:
-			textureMatrix[k] = 7;
-			UpdateTiles();
+			textureMatrix[k] = 7;			
 			break;
 		case 5:
-			textureMatrix[k] = 6;
-			UpdateTiles();
+			textureMatrix[k] = 6;			
 			break;
 		case 6:
-			textureMatrix[k] = 5;
-			UpdateTiles();
+			textureMatrix[k] = 5;			
 			break;
 		case 7:
-			textureMatrix[k] = 4;
-			UpdateTiles();
+			textureMatrix[k] = 4;			
 			break;
 		case 8:
-			textureMatrix[k] = 3;
-			UpdateTiles();
+			textureMatrix[k] = 3;			
 			break;
 		}
 		
