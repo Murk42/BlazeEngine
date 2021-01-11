@@ -24,7 +24,8 @@ enum class Scene
 class App : public Application<App>
 {   
 public: 
-	Console::LogList logList = Console::LogList(Vec2i(0, 0), Vec2i(200, 20)); 
+	Console::LogList logList = Console::LogList(Vec2i(0, 0), Vec2i(100, 10)); 
+	Console::Frame frame = Console::Frame(Vec2i(0, 11), Vec2i(100, 10));
 	Window window;	
 
 	Scene scene = Scene::Menu;
@@ -37,14 +38,15 @@ public:
 	TextureArray2D texture; 
 	   
 	static constexpr int posX = 10, posY = 10;
-	static constexpr int maxSizeX = 16, maxSizeY = 8;
-	static constexpr int tileSizeX = 64, tileSizeY = 64;
+	static constexpr int maxSizeX = 32, maxSizeY = 16;
+	static constexpr int tileSizeX = 32, tileSizeY = 32;
 
 	Vertex<Vec2f, Vec2f, float, float> vertices[maxSizeX * maxSizeY];	
-	int valuesMatrix[maxSizeX * maxSizeY];
+	int valueMatrix[maxSizeX * maxSizeY];
 	int textureMatrix[maxSizeX * maxSizeY];
+	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX = 5, sizeY = 5;
+	int sizeX =25 , sizeY = 10, mineCount=70;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
@@ -71,7 +73,7 @@ public:
 			{
 				vertices[x + y * maxSizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
 				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);				
-				vertices[x + y * maxSizeX].GetValue<2>() = 0;
+				vertices[x + y * maxSizeX].GetValue<2>() = 13;
 				vertices[x + y * maxSizeX].GetValue<3>() = 0;
 
 				offsetX += tileSizeX;
@@ -92,6 +94,7 @@ public:
 		Renderer::SetTarget(window);
 		Renderer::UseBlending(true);
 
+		GenerateTiles();
 		//Loading filesx
 		{
 			font.Load("assets/fonts/Roboto-Regular.ttf");
@@ -181,6 +184,8 @@ public:
 					mp.y < sizeY)
 				{
 					ClickOnTile(mp.x, mp.y);
+					memset(checkedMatrix, 0, sizeof(checkedMatrix));
+					UpdateTiles();
 				}
 			}
 
@@ -227,6 +232,86 @@ public:
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
 	}	
 
+	void GenerateTiles( )
+	{
+		if (mineCount > sizeX * sizeY)
+		{
+			Logger::AddLog(LogType::Message, __FUNCTION__, "The number of mines is bigger than number of tiles!");
+		}
+
+		for (int i = 0; i < mineCount; ++i) 
+		{
+			int x1 = Random::Float(0, sizeX);
+			int y1 = Random::Float(0, sizeY);
+			int k = x1 + maxSizeX * y1;
+			bool twoSquare = 1;
+			bool threeSquare = 1;
+			if (valueMatrix[k] == 1)
+			{
+				i--;
+				continue;
+			}
+			valueMatrix[k] = 1;
+			if (valueMatrix[k - 1] == 0) 
+			{
+				threeSquare = 0;
+				continue;
+			}
+			if (valueMatrix[k + 1] == 0) 
+			{
+				threeSquare = 0;
+				twoSquare = 0;
+				continue;
+			}
+			if (valueMatrix[k - maxSizeX] == 0)
+			{
+				threeSquare = 0;
+				continue;
+			}
+			if (valueMatrix[k - maxSizeX + 1] == 0) 
+			{
+				threeSquare = 0;
+				continue;
+			}
+			if (valueMatrix[k - maxSizeX - 1] == 0) 
+			{
+				threeSquare = 0;
+				continue;
+			}
+			if (valueMatrix[k + maxSizeX] == 0)
+			{
+				threeSquare = 0;
+				twoSquare = 0;
+				continue;
+			}
+			if (valueMatrix[k + maxSizeX + 1] == 0)
+			{
+				threeSquare = 0;
+				twoSquare = 0;
+				continue;
+			}
+			if (valueMatrix[k + maxSizeX - 1] == 0)
+			{
+				threeSquare = 0;
+				continue;
+			}
+			if (twoSquare)
+			{
+				i--;
+				valueMatrix[k + maxSizeX] = 0;
+			}
+			if (threeSquare)
+			{
+				i -= 2;
+				valueMatrix[k - maxSizeX] = 0;
+				valueMatrix[k + maxSizeX + 1] = 0;
+			}
+		}
+
+
+		UpdateTiles();
+	}
+
 	void UpdateTiles()
 	{
 		for (int y = 0; y < sizeY; ++y)
@@ -236,16 +321,108 @@ public:
 		mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
 	}
 
-	void GenetateTiles()
+	bool inRange(int x, int y) 
 	{
-
+		if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) return 1;
+		else return 0;
 	}
 
-	void ClickOnTile(int x, int y)
+	int ClickOnTile(int x, int y)
 	{
-		textureMatrix[x + y * maxSizeX] = (textureMatrix[x + y * maxSizeX] + 1) % 14;
+		int k = x + y * maxSizeX;
+		if (valueMatrix[k] == 1)
+		{
+			Logger::AddLog(LogType::Message, __FUNCTION__, "Ops, you hit bomb!");
+			return 1;
+		}
+		if (checkedMatrix) 
+		{
+			return 0;
+		}
+		checkedMatrix[k] = 1;
+		
+		int NumberOfMines = 0;
+		if (inRange(x - 1, y) && valueMatrix[k - 1] == 1) NumberOfMines++;
+		if (inRange(x + 1, y) && valueMatrix[k + 1] == 1) NumberOfMines++;
+		if (inRange(x, y - 1) && valueMatrix[k - maxSizeX] == 1) NumberOfMines++;
+		if (inRange(x - 1, y - 1) && valueMatrix[k - maxSizeX - 1] == 1) NumberOfMines++;
+		if (inRange(x + 1, y - 1) && valueMatrix[k - maxSizeX + 1] == 1) NumberOfMines++;
+		if (inRange(x, y + 1) && valueMatrix[k + maxSizeX] == 1) NumberOfMines++;
+		if (inRange(x - 1, y + 1) && valueMatrix[k + maxSizeX - 1] == 1) NumberOfMines++;
+		if (inRange(x + 1, y + 1) && valueMatrix[k + maxSizeX + 1] == 1) NumberOfMines++;
 
-		UpdateTiles();
+		switch (NumberOfMines)
+		{
+		case 0:
+			textureMatrix[k] = 12;
+			if (inRange(x - 1, y))
+			{
+				ClickOnTile(x - 1, y);
+			}
+			if (inRange(x + 1, y))
+			{
+				ClickOnTile(x + 1, y);
+			}
+			if (inRange(x, y - 1))
+			{
+				ClickOnTile(x, y - 1);
+			}
+			if (inRange(x - 1, y - 1))
+			{
+				ClickOnTile(x - 1, y - 1);
+			}
+			if (inRange(x + 1, y - 1))
+			{
+				ClickOnTile(x + 1, y - 1);
+			}
+			if (inRange(x, y + 1))
+			{
+				ClickOnTile(x, y + 1);
+			}
+			if (inRange(x - 1, y + 1))
+			{
+				ClickOnTile(x - 1, y + 1);
+			}
+			if (inRange(x + 1, y + 1))
+			{
+				ClickOnTile(x + 1, y + 1);
+			}
+			break;
+		case 1:
+			textureMatrix[k] = 10;
+			UpdateTiles();
+			break;
+		case 2:
+			textureMatrix[k] = 9;
+			UpdateTiles();
+			break;
+		case 3:
+			textureMatrix[k] = 8;
+			UpdateTiles();
+			break;
+		case 4:
+			textureMatrix[k] = 7;
+			UpdateTiles();
+			break;
+		case 5:
+			textureMatrix[k] = 6;
+			UpdateTiles();
+			break;
+		case 6:
+			textureMatrix[k] = 5;
+			UpdateTiles();
+			break;
+		case 7:
+			textureMatrix[k] = 4;
+			UpdateTiles();
+			break;
+		case 8:
+			textureMatrix[k] = 3;
+			UpdateTiles();
+			break;
+		}
+		
+		return 0;
 	}
 };
 
