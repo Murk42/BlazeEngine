@@ -15,13 +15,6 @@ struct TextMatProps : MaterialProperties<Mat4f, Texture2D>
 	Property<Texture2D> texture = "u_texture";
 };
 
-
-class Button
-{
-public:
-	Vertex<Vec2f, Vec2f, float>
-};
-
 enum class Scene
 {
 	Menu,

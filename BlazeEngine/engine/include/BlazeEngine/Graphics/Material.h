@@ -13,7 +13,7 @@ namespace Blaze
 	class BaseMaterialProperties
 	{
 		template<typename T>
-		using processed_type = std::conditional_t<std::is_base_of_v<Texture, T>, T*, T>;
+		using processed_type = std::conditional_t<std::is_base_of_v<Texture, T>,const T*, T>;
 	public:
 		template<typename T>
 		class Property

@@ -12,30 +12,12 @@
 namespace Blaze
 {	
 	class BLAZE_API Font
-	{
-		struct Size {
-			Size() = default;
-			Size(const Size&);
-			struct Character
-			{
-				Vec2i size;
-				Vec2i offset;
-				uint advance = 0;
-				uint uv_offset = 0;
-			} characters[128];
-
-			Texture2D texture;
-			uint height = 0;
-			uint useCount = 0;
-
-			Size& operator=(const Size&) noexcept;
-		};
+	{		
 		void* ptr;
-		std::vector<Size*> sizes;
+		std::vector<void*> sizes;
 
-
-		Size* AddSize(uint height);
-		void RemoveSize(Size* size);
+		void* AddSize(uint height);
+		void RemoveSize(void* size);
 	public:
 		Font();
 		~Font();
@@ -43,14 +25,15 @@ namespace Blaze
 		bool Load(const StringView& path);
 
 		friend class TextRenderer;
-	};
+	};	
 
 	class BLAZE_API TextRenderer
-	{		
-		Font* font;				
-		Font::Size* size;	
-		int width;
-		
+	{			
+		Font* font;
+		void* fontSizePtr;		
+		Vec2i size;
+
+		String string;
 		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f, Vec4f>> vertices;
 		Mesh mesh;
 	public:		
@@ -61,13 +44,9 @@ namespace Blaze
 		void SetString(StringView text);
 		void SetColors(const std::vector<Color>& colors);
 		
-		Mesh& GetMesh() { return mesh; }
-		Vec2i GetSize() { return Vec2i(width, size->height); }
-		Texture2D* GetTexture() 
-		{
-			if (size != nullptr)				
-				return &size->texture; 
-			return nullptr;
-		}
+		const Mesh& GetMesh() const { return mesh; }
+		String GetString() const { return string; }
+		Vec2i GetSize() const { return size; }
+		const Texture2D* GetTexture() const;
 	};
 }

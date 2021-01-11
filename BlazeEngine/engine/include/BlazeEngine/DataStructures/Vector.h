@@ -174,6 +174,7 @@ namespace Blaze
 	template<typename T>
 	using Vec2 = Vector<T, 2>;
 	using Vec2i = Vec2<int>;
+	using Vec2u = Vec2<unsigned>;
 	using Vec2f = Vec2<float>;
 	using Vec2d = Vec2<double>;
 
@@ -250,6 +251,7 @@ namespace Blaze
 	template<typename T>
 	using Vec3 = Vector<T, 3>;
 	using Vec3i = Vec3<int>;
+	using Vec3u = Vec3<unsigned>;
 	using Vec3f = Vec3<float>;
 	using Vec3d = Vec3<double>;
 
@@ -327,6 +329,7 @@ namespace Blaze
 	template<typename T>
 	using Vec4 = Vector<T, 4>;
 	using Vec4i = Vec4<int>;
+	using Vec4u = Vec4<unsigned>;
 	using Vec4f = Vec4<float>;
 	using Vec4d = Vec4<double>;
 }

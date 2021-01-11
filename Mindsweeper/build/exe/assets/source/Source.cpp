@@ -15,14 +15,6 @@ struct TextMatProps : MaterialProperties<Mat4f, Texture2D>
 	Property<Texture2D> texture = "u_texture";
 };
 
-
-class UIElement
-{
-public:
-	inline static UIElement* focused = nullptr;
-	Recti rect;
-};
-
 enum class Scene
 {
 	Menu,

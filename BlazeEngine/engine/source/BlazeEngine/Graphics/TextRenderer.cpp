@@ -5,16 +5,41 @@
 
 namespace Blaze
 {	
-	Font::Size* Font::AddSize(uint height)
+	struct FontSize 
 	{
-		Size& size = *new Size;
+		FontSize() = default;
+
+		struct Character
+		{
+			Vec2u size;
+			Vec2u offset;
+			uint advance = 0;
+			uint uv_offset = 0;
+		} characters[128];
+
+		Texture2D texture;
+		uint height = 0;		
+		uint useCount = 0;
+
+		FontSize& operator=(FontSize&& s) noexcept
+		{
+			memcpy(characters, s.characters, sizeof(characters));
+			texture.operator=(std::move(*(Texture2D*)&s.texture));
+			height = s.height;
+			useCount = s.useCount;
+
+			return *this;
+		}
+	};	
+
+	void* Font::AddSize(uint height)
+	{
+		FontSize& size = *new FontSize;
 		sizes.emplace_back() = &size;
 		size.height = height;
 		size.useCount = 0;
 
 		FT_Face face = (FT_Face)ptr;
-
-		
 
 		Bitmap bitmaps[128];
 		Vec2<uint> resultSize;
@@ -53,7 +78,7 @@ namespace Blaze
 
 		return &size;
 	}
-	void Font::RemoveSize(Size* size)
+	void Font::RemoveSize(void* size)
 	{
 		sizes.erase(std::find(sizes.begin(), sizes.end(), size));
 	}
@@ -85,42 +110,44 @@ namespace Blaze
 
 	
 	TextRenderer::TextRenderer()
-		: font(nullptr), size(nullptr), width(0)
+		: font(nullptr), fontSizePtr(nullptr), size(0, 0)
 	{
 	}
 	TextRenderer::~TextRenderer()
 	{
-		if (size != nullptr)
+		FontSize* fontSize = (FontSize*)fontSizePtr;
+		if (fontSize != nullptr)
 		{
-			--size->useCount;
-			if (size->useCount == 0)
-				font->RemoveSize(size);
+			--fontSize->useCount;
+			if (fontSize->useCount == 0)
+				font->RemoveSize(fontSize);
 		}
 	}	
 	void TextRenderer::SetFont(Font* font, uint height)
-	{
-		this->font = font;		
+	{		
+		this->font = font;
 
-		size = font->AddSize(height);
-		++size->useCount;
+		fontSizePtr = font->AddSize(height);
+		++((FontSize*)fontSizePtr)->useCount;
 	}
 	void TextRenderer::SetString(StringView text)
 	{						
 		vertices.resize(text.Size());
-		
+		FontSize* fontSize = (FontSize*)fontSizePtr;
+
 		int offset = 0;
 		for (int i = 0; i < text.Size(); ++i)
 		{
-			auto& c = size->characters[text[i]];
+			auto& c = fontSize->characters[text[i]];
 			vertices[i].GetValue<0>() = Vec2f(Vec2i(offset, 0) + c.offset);
 			vertices[i].GetValue<1>() = Vec2f(Vec2i(offset, 0) + c.offset + c.size);
-			vertices[i].GetValue<2>() = Vec2f(c.uv_offset, 0) / size->texture.GetSize().x;
-			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / size->texture.GetSize();			
+			vertices[i].GetValue<2>() = Vec2f(c.uv_offset, 0) / fontSize->texture.GetSize().x;
+			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / fontSize->texture.GetSize();			
 			vertices[i].GetValue<4>() = Vec4f(1, 1, 1, 1);
 			offset += c.advance;
 		}		
 
-		width = offset;
+		size.x = offset;
 
 		mesh.SetVertices(vertices.data(), vertices.size());
 	}
@@ -130,19 +157,13 @@ namespace Blaze
 			vertices[i].GetValue<4>() = colors[i].ToVector();
 
 		mesh.SetVertices(vertices.data(), vertices.size());
-	}
-	
-	Font::Size::Size(const Size& s)
-	{
-		*this = std::move(*(Size*)&s);
-	}
-	Font::Size& Font::Size::operator=(const Size& s) noexcept
-	{
-		memcpy(characters, s.characters, sizeof(characters));
-		texture.operator=(std::move(*(Texture2D*)&s.texture));
-		height = s.height;
-		useCount = s.useCount;
+	}	
 
-		return *this;
+	const Texture2D* TextRenderer::GetTexture() const
+	{
+		if (fontSizePtr != nullptr)
+			return &((FontSize*)fontSizePtr)->texture;
+		return nullptr;
 	}
+
 }
