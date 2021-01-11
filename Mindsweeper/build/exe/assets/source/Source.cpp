@@ -37,9 +37,14 @@ public:
 	TextureArray2D texture; 
 	   
 	static constexpr int posX = 10, posY = 10;
-	static constexpr int sizeX = 16, sizeY = 8;
+	static constexpr int maxSizeX = 16, maxSizeY = 8;
 	static constexpr int tileSizeX = 64, tileSizeY = 64;
-	Vertex<Vec2f, Vec2f, float, float> vertices[sizeX * sizeY];	
+
+	Vertex<Vec2f, Vec2f, float, float> vertices[maxSizeX * maxSizeY];	
+	int valuesMatrix[maxSizeX * maxSizeY];
+	int textureMatrix[maxSizeX * maxSizeY];
+
+	int sizeX = 5, sizeY = 5;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
@@ -57,15 +62,17 @@ public:
 
 	void Startup() override
 	{				
+		memset(vertices, 0, sizeof(vertices));
+
 		int offsetX = 0, offsetY = 0;
 		for (int y = 0; y < sizeY; ++y)
 		{
 			for (int x = 0; x < sizeX; ++x)
 			{
-				vertices[x + y * sizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
-				vertices[x + y * sizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);
-				vertices[x + y * sizeX].GetValue<2>() = 13;
-				vertices[x + y * sizeX].GetValue<3>() = 0;
+				vertices[x + y * maxSizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
+				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);				
+				vertices[x + y * maxSizeX].GetValue<2>() = 0;
+				vertices[x + y * maxSizeX].GetValue<3>() = 0;
 
 				offsetX += tileSizeX;
 			}
@@ -76,7 +83,7 @@ public:
 		Input::SetEventFunction(InputEvent::WindowClosed, CloseWindowEvent);
 		Input::SetEventFunction(InputEvent::WindowSizeChanged, ResizeWindowEvent);
 
-		window.SetSize(Vec2i(10 + tileSizeX * sizeX + 10, 10 + tileSizeY * sizeY + 10 + 50 + 10));
+		window.SetSize(Vec2i(10 + tileSizeX * maxSizeX + 10, 10 + tileSizeY * maxSizeY + 10 + 50 + 10));
 		window.SetWindowed(true, false);
 		window.ShowWindow(true);
 		
@@ -104,7 +111,7 @@ public:
 				Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/text/geometry.glsl");
 				textMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
 			}			
-			mesh.SetVertices(vertices, sizeX * sizeY);
+			mesh.SetVertices(vertices, maxSizeX * maxSizeY);
 
 			text.title.SetFont(&font, 50);
 			text.title.SetString("Minesweeper");
@@ -123,7 +130,7 @@ public:
 				});
 
 			text.details.SetFont(&font, 20);
-			text.details.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
+			text.details.SetString(String(format_string, "Size is %dx%d", maxSizeX, maxSizeY));
 
 			text.menuTitle.SetFont(&font, 100);
 			text.menuTitle.SetString("Minesweeper");
@@ -173,9 +180,7 @@ public:
 					mp.y >= 0 &&
 					mp.y < sizeY)
 				{
-					vertices[mp.x + sizeX * mp.y].GetValue<2>() = ((uint)vertices[mp.x + sizeX * mp.y].GetValue<2>() + 1) % 14;
-
-					mesh.ChangeVertices(vertices, sizeX * sizeY, 0);
+					ClickOnTile(mp.x, mp.y);
 				}
 			}
 
@@ -220,6 +225,27 @@ public:
 	{
 		scene = Scene::Game;
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
+	}	
+
+	void UpdateTiles()
+	{
+		for (int y = 0; y < sizeY; ++y)
+			for (int x = 0; x < sizeX; ++x)			
+				vertices[x + maxSizeX * y].GetValue<2>() = textureMatrix[x + maxSizeX * y];
+
+		mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
+	}
+
+	void GenetateTiles()
+	{
+
+	}
+
+	void ClickOnTile(int x, int y)
+	{
+		textureMatrix[x + y * sizeX] = (textureMatrix[x + y * sizeX] + 1) % 14;
+
+		UpdateTiles();
 	}
 };
 

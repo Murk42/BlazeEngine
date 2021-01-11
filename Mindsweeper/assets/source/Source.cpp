@@ -36,14 +36,15 @@ public:
 	Font font;
 	TextureArray2D texture; 
 	   
-	static constexpr int maxPosX = 10, maxPosY = 10;
+	static constexpr int posX = 10, posY = 10;
 	static constexpr int maxSizeX = 16, maxSizeY = 8;
 	static constexpr int tileSizeX = 64, tileSizeY = 64;
 
 	Vertex<Vec2f, Vec2f, float, float> vertices[maxSizeX * maxSizeY];	
-	int matrix[maxSizeX * maxSizeY];
+	int valuesMatrix[maxSizeX * maxSizeY];
+	int textureMatrix[maxSizeX * maxSizeY];
 
-	int sizeX, sizeY;
+	int sizeX = 5, sizeY = 5;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
@@ -61,14 +62,16 @@ public:
 
 	void Startup() override
 	{				
+		memset(vertices, 0, sizeof(vertices));
+
 		int offsetX = 0, offsetY = 0;
-		for (int y = 0; y < maxSizeY; ++y)
+		for (int y = 0; y < sizeY; ++y)
 		{
-			for (int x = 0; x < maxSizeX; ++x)
+			for (int x = 0; x < sizeX; ++x)
 			{
 				vertices[x + y * maxSizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
-				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);
-				vertices[x + y * maxSizeX].GetValue<2>() = 13;
+				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);				
+				vertices[x + y * maxSizeX].GetValue<2>() = 0;
 				vertices[x + y * maxSizeX].GetValue<3>() = 0;
 
 				offsetX += tileSizeX;
@@ -169,17 +172,15 @@ public:
 			{
 				Vec2i mp = Input::GetMousePos();
 				mp.y = window.GetSize().y - mp.y;
-				mp -= Vec2i(maxPosX, maxPosY);
+				mp -= Vec2i(posX, posY);
 				mp /= Vec2i(tileSizeX, tileSizeY);
 
 				if (mp.x >= 0 &&
-					mp.x < maxSizeX &&
+					mp.x < sizeX &&
 					mp.y >= 0 &&
-					mp.y < maxSizeY)
+					mp.y < sizeY)
 				{
-					vertices[mp.x + maxSizeX * mp.y].GetValue<2>() = ((uint)vertices[mp.x + maxSizeX * mp.y].GetValue<2>() + 1) % 14;
-
-					mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
+					ClickOnTile(mp.x, mp.y);
 				}
 			}
 
@@ -230,7 +231,7 @@ public:
 	{
 		for (int y = 0; y < sizeY; ++y)
 			for (int x = 0; x < sizeX; ++x)			
-				vertices[x + maxSizeX * y].GetValue<2>() = matrix[x + maxSizeX * y];
+				vertices[x + maxSizeX * y].GetValue<2>() = textureMatrix[x + maxSizeX * y];
 
 		mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
 	}
@@ -242,7 +243,9 @@ public:
 
 	void ClickOnTile(int x, int y)
 	{
+		textureMatrix[x + y * maxSizeX] = (textureMatrix[x + y * maxSizeX] + 1) % 14;
 
+		UpdateTiles();
 	}
 };
 
@@ -261,7 +264,7 @@ void ResizeWindowEvent(int w, int h, Window* win)
 		break;
 		}
 	case Scene::Game: {
-		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::maxPosX, App::maxPosY));
+		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
 		app.text.titleTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.text.title.GetSize().y));
 		app.text.detailsTrans = app.text.titleTrans * Math::TranslationMatrix<float>(Vec2i(app.text.title.GetSize().x + 30, 0));
 		break;
