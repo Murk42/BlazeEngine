@@ -128,29 +128,29 @@ public:
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/normalText/geometry.glsl");
 			textMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
 		}
-		 
+
 		//Load ButtonMaterial 
 		{
 			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/button/vertex.glsl");
 			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/button/fragment.glsl");
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/button/geometry.glsl");
-			buttonMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);			
+			buttonMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
 		}
 
 		//Seting up menu scene 
 		{
-			buttonTexture.Load("assets/sprites/buttonTexture.png", Vec2i(48, 48)); 			
-			 
-			menu.titleText.SetFont(&font, 100); 
-			menu.titleText.SetString("Minesweeper");   
-			 
+			buttonTexture.Load("assets/sprites/buttonTexture.png", Vec2i(48, 48));
+
+			menu.titleText.SetFont(&font, 100);
+			menu.titleText.SetString("Minesweeper");
+
 			menu.playButton.cornerSize = Vec2u(20);
 		}
-		 
+
 		//Seting up game scene
 		{
-			tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));			
-			tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);			
+			tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
+			tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
 			tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
 
 			game.titleText.SetFont(&font, 50);
@@ -160,7 +160,8 @@ public:
 
 			game.detailsText.SetFont(&font, 20);
 			game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
-		}  
+		}
+
 	}
 
 	void Frame() override 
@@ -201,7 +202,6 @@ public:
 			
 			if (game.restartButton.GetState() == ButtonState::Down)
 				ChangeToGameScene();
-			break;
 
 			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed && !gameEnded)
 			{
@@ -318,8 +318,8 @@ public:
 		scene = Scene::Game;
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
 
-		//GenerateTiles();
-		//UpdateTiles();
+		GenerateTiles();
+		UpdateTiles();
 	}	
 
 	void GenerateTiles( )
@@ -398,7 +398,6 @@ public:
 				valueMatrix[k + maxSizeX + 1] = 0;
 			}
 		}
-
 
 		UpdateTiles();
 	}
