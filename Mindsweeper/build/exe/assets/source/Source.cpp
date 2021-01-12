@@ -56,6 +56,7 @@ public:
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
 	int sizeX =32 , sizeY = 16, mineCount=100;
+	bool gameEnded = 0;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
@@ -69,6 +70,7 @@ public:
 	} menu;
 	 
 	struct {		
+		Button restartButton;
 		NormalText titleText;
 		Mat4f titleTextTrans;
 		NormalText detailsText;
@@ -154,11 +156,11 @@ public:
 			game.titleText.SetFont(&font, 50);
 			game.titleText.SetString("Minesweeper");
 
-			game.detailsText.SetFont(&font, 20);
-			game.detailsText.SetString(String(format_string, "Size is %dx%d", maxSizeX, maxSizeY));
-		}   
+			game.restartButton.cornerSize = Vec2u(20, 20);
 
-		GenerateTiles();
+			game.detailsText.SetFont(&font, 20);
+			game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
+		}  
 	}
 
 	void Frame() override 
@@ -187,11 +189,21 @@ public:
 			}			
 
 			if (menu.playButton.GetState() == ButtonState::Down)
+			{
+				//Logger::AddLog(LogType::Message, __FUNCTION__, "pusikaronja");
 				ChangeToGameScene();
+			}
 			break;
 		}
 		case Scene::Game: {
-			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed)
+			game.restartButton.Update();
+			game.restartButton.UpdateMesh();
+			
+			if (game.restartButton.GetState() == ButtonState::Down)
+				ChangeToGameScene();
+			break;
+
+			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed && !gameEnded)
 			{
 				Vec2i mp = Input::GetMousePos();
 				mp.y = window.GetSize().y - mp.y;
@@ -203,8 +215,10 @@ public:
 					int Checker = ClickOnTile(mp.x, mp.y);
 					switch (Checker)
 					{
+					case 0:
+						break;
 					case 1:
-						game.detailsText.SetString(String("Booom!"));
+						game.detailsText.SetString(String("Booooom!"));
 						textureMatrix[mp.x + mp.y * maxSizeX] = 1;
 						for (int y = 0; y < sizeX; ++y)
 						{
@@ -221,6 +235,7 @@ public:
 								}
 							}
 						}
+						gameEnded = 1;
 						break;
 					}
 					memset(checkedMatrix, 0, sizeof(checkedMatrix));
@@ -228,7 +243,7 @@ public:
 				}
 			}
 			
-			if (Input::GetKeyState(Key::MouseRight) == KeyState::Pressed)
+			if (Input::GetKeyState(Key::MouseRight) == KeyState::Pressed && !gameEnded)
 			{
 				Vec2i mp = Input::GetMousePos();
 				mp.y = window.GetSize().y - mp.y;
@@ -254,6 +269,10 @@ public:
 					UpdateTiles();
 				}
 			}
+
+			buttonMaterial.properties.mvp = canvasProjection;
+			buttonMaterial.properties.texture = &buttonTexture;
+			Renderer::RenderPointArray(buttonMaterial, game.restartButton.GetMesh());
 
 			tilesMaterial.properties.mvp = canvasProjection * tilesTrans;
 			tilesMaterial.properties.texture = &tilesSpriteSheet;
@@ -298,6 +317,9 @@ public:
 	{
 		scene = Scene::Game;
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
+
+		//GenerateTiles();
+		//UpdateTiles();
 	}	
 
 	void GenerateTiles( )
@@ -422,6 +444,10 @@ public:
 	int ClickOnTile(int x, int y)
 	{
 		int k = x + y * maxSizeX;
+		if (textureMatrix[k] == 11)
+		{
+			return 0;
+		}
 		if (valueMatrix[k] == 1)
 		{
 			Logger::AddLog(LogType::Message, __FUNCTION__, "Ops, you hit bomb!");
@@ -529,6 +555,7 @@ void ResizeWindowEvent(int w, int h, Window* win)
 		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
 		app.game.titleTextTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.game.titleText.GetSize().y));
 		app.game.detailsTextTrans = app.game.titleTextTrans * Math::TranslationMatrix<float>(Vec2i(app.game.titleText.GetSize().x + 30, 0));
+		app.game.restartButton.rect = Rectu(Vec2u(500, h - 65), Vec2u(120, 50));
 		break;
 	}
 	}
