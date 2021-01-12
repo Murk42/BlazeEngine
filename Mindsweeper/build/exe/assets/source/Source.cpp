@@ -47,7 +47,7 @@ public:
 	int textureMatrix[maxSizeX * maxSizeY];
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX =25 , sizeY = 10, mineCount=70;
+	int sizeX =16 , sizeY = 8, mineCount=4;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
@@ -166,6 +166,33 @@ public:
 					UpdateTiles();
 				}
 			}
+			
+			if (Input::GetKeyState(Key::MouseRight) == KeyState::Pressed)
+			{
+				Vec2i mp = Input::GetMousePos();
+				mp.y = window.GetSize().y - mp.y;
+				mp -= Vec2i(posX, posY);
+				mp /= Vec2i(tileSizeX, tileSizeY);
+
+				if (mp.x >= 0 && mp.x < sizeX && mp.y >= 0 && mp.y < sizeY)
+				{
+					
+					switch (textureMatrix[mp.x + mp.y * maxSizeX])
+					{
+					case 13:
+						textureMatrix[mp.x + mp.y * maxSizeX] = 11;
+						mineCount--;
+						break;
+					case 11:
+						textureMatrix[mp.x + mp.y * maxSizeX] = 13;
+						mineCount++;
+						break;
+					default:
+						break;
+					}
+					UpdateTiles();
+				}
+			}
 
 			material.properties.mvp = canvasProjection * tilesTrans;
 			material.properties.texture = &texture;
@@ -181,7 +208,7 @@ public:
 			textMaterial.properties.color = Color(1, 1, 1, 1).ToVector();
 			Renderer::RenderPointArray(textMaterial, text.details.GetMesh());
 			break;
-		}
+			}
 		}
 
 		Renderer::UpdateTarget();				
@@ -219,6 +246,7 @@ public:
 			Logger::AddLog(LogType::Message, __FUNCTION__, "The number of mines is bigger than number of tiles!");
 		}
 
+		srand(time(0));
 		for (int i = 0; i < mineCount; ++i) 
 		{
 			int x1 = Random::Float(0, sizeX);
@@ -294,6 +322,11 @@ public:
 
 	void UpdateTiles()
 	{
+		Logger::AddLog(LogType::Message, __FUNCTION__, String(format_string, "Number of mines: %d", mineCount));
+		if (mineCount == 0) 
+		{
+			text.details.SetString(String("You won!"));
+		}
 		for (int y = 0; y < sizeY; ++y)
 			for (int x = 0; x < sizeX; ++x)			
 				vertices[x + maxSizeX * y].GetValue<2>() = textureMatrix[x + maxSizeX * y];
