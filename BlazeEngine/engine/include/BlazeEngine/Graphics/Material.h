@@ -35,12 +35,14 @@ namespace Blaze
 
 			}
 
-			constexpr StorageType& operator= (const StorageType& v)
+			constexpr Property<T>& operator= (const StorageType& v)
 			{
 				if (value != v)
+				{
 					changed = true;
-				value = v;
-				return value;
+					value = v;
+				}
+				return *this;
 			}
 			
 			constexpr const StorageType& GetValue() const { return value; }

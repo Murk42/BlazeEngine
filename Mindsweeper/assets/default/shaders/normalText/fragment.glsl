@@ -11,7 +11,7 @@ void main()
 	
 	color.a = color.r;
 	color.rgb = vec3(1, 1, 1);
-	color *= u_color;
+	color *= u_color;	
 		
 	gl_FragColor = color;	
 }

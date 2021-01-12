@@ -169,7 +169,7 @@ namespace Blaze
 			size.y = std::max<int>(size.y, c.size.y);
 		}
 
-		size.x = offset;
+		string = text;
 
 		mesh.SetVertices(vertices.data(), vertices.size());
 	}

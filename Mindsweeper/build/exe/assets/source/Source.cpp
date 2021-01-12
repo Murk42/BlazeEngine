@@ -122,26 +122,26 @@ public:
 			text.title.SetFont(&font, 50);
 			text.title.SetString("Minesweeper");			
 
-			text.details.SetFont(&font, 20);
+			text.details.SetFont(&font, 20); 
 			text.details.SetString(String(format_string, "Size is %dx%d", maxSizeX, maxSizeY));
-
+			 
 			text.menuTitle.SetFont(&font, 100);
 			text.menuTitle.SetString("Minesweeper");
-		}				
+		}				  
 	}
 
 	void Frame() override 
 	{
 		Input::Update();				
-
+		 
 		Renderer::ClearTarget();
-
+		 
 		switch (scene)
 		{
 		case Scene::Menu: {
 			textMaterial.properties.mvp = canvasProjection * text.menuTitleTrans;
 			textMaterial.properties.texture = text.menuTitle.GetTexture();
-
+			textMaterial.properties.color = Color(255, 128, 0).ToVector();
 			Renderer::RenderPointArray(textMaterial, text.menuTitle.GetMesh());
 
 			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Down)
@@ -200,15 +200,15 @@ public:
 
 			textMaterial.properties.mvp = canvasProjection * text.titleTrans;
 			textMaterial.properties.texture = text.title.GetTexture();
-			textMaterial.properties.color = Color(1, 1, 1, 1).ToVector();
+			textMaterial.properties.color = Color(255, 128, 0).ToVector();
 			Renderer::RenderPointArray(textMaterial, text.title.GetMesh());
 
 			textMaterial.properties.mvp = canvasProjection * text.detailsTrans;
 			textMaterial.properties.texture = text.details.GetTexture();
-			textMaterial.properties.color = Color(1, 1, 1, 1).ToVector();
+			textMaterial.properties.color = Color(255).ToVector();
 			Renderer::RenderPointArray(textMaterial, text.details.GetMesh());
 			break;
-			}
+			} 
 		}
 
 		Renderer::UpdateTarget();				
