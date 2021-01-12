@@ -55,7 +55,7 @@ public:
 	int textureMatrix[maxSizeX * maxSizeY];
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX =32 , sizeY = 16, mineCount=100;
+	int sizeX =32 , sizeY = 16, mineCount=70;
 	bool gameEnded = 0;
 	 
 	Mat4f canvasProjection;
@@ -318,6 +318,8 @@ public:
 		scene = Scene::Game;
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
 
+		mineCount = 70;
+		gameEnded = 0;
 		GenerateTiles();
 		UpdateTiles();
 	}	
@@ -327,6 +329,14 @@ public:
 		if (mineCount > sizeX * sizeY)
 		{
 			Logger::AddLog(LogType::Message, __FUNCTION__, "The number of mines is bigger than number of tiles!");
+		}
+		for (int y = 0; y < sizeY; ++y)
+		{
+			for (int x = 0; x < sizeX; ++x)
+			{
+				int k = x + y * maxSizeX;
+				textureMatrix[k] = 13;
+			}
 		}
 
 		srand(time(0));
