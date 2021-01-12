@@ -14,7 +14,13 @@
 namespace Blaze
 {	
 	namespace Renderer
-	{		
+	{
+		uint MaxBoundTextures()
+		{
+			int num;
+			glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &num);
+			return uint(num);
+		}
 		void SetViewport(const Vec2i& pos, const Vec2i& size)
 		{
 			engine->Renderer.viewportPos = pos;

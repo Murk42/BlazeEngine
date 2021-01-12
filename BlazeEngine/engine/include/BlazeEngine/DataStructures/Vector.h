@@ -23,7 +23,7 @@ namespace Blaze
 				arr[i] = T(0);
 		}
 		template<typename ... Ts>
-		constexpr Vector(Ts ... values)
+		explicit constexpr Vector(Ts ... values)
 			: arr{ T(values)... }
 		{
 		}
@@ -125,7 +125,7 @@ namespace Blaze
 		template<typename T2>
 		constexpr explicit Vector(const T2& v) : x(v), y(v) { }
 		template<typename ... Ts>
-		constexpr Vector(Ts ... values)
+		explicit constexpr Vector(Ts ... values)
 			: arr{ T(values)... }
 		{
 		}
@@ -199,7 +199,7 @@ namespace Blaze
 					arr[i] = 0;
 		}
 		template<typename ... Ts>
-		constexpr Vector(Ts ... values)
+		explicit constexpr Vector(Ts ... values)
 			: arr{ T(values)... }
 		{
 		}
@@ -276,7 +276,7 @@ namespace Blaze
 					arr[i] = 0;
 		}
 		template<typename ... Ts>
-		constexpr Vector(Ts ... values)
+		explicit constexpr Vector(Ts ... values)
 			: arr{ T(values)... }
 		{
 		}

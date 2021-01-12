@@ -135,9 +135,6 @@
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\TextRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\include\BlazeEngine\Console\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -148,6 +145,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="engine\source\BlazeEngine\Internal\Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Panel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -183,9 +189,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Graphics\ShaderProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\TextRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Texture.cpp">
@@ -239,6 +242,12 @@
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="engine\assets\default\vertexDiffuse.glsl" />
@@ -249,6 +258,9 @@
     <None Include="engine\assets\default\shaders\normalText\fragment.glsl" />
     <None Include="engine\assets\default\shaders\normalText\geometry.glsl" />
     <None Include="engine\assets\default\shaders\normalText\vertex.glsl" />
+    <None Include="engine\assets\default\shaders\button\fragment.glsl" />
+    <None Include="engine\assets\default\shaders\button\geometry.glsl" />
+    <None Include="engine\assets\default\shaders\button\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="engine\assets\default\default.png">

@@ -1,4 +1,4 @@
-#include "BlazeEngine/Graphics/TextRenderer.h"
+#include "BlazeEngine/Graphics/UI/Text.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "freetype/freetype.h"
 #include "Engine.h"
@@ -74,7 +74,7 @@ namespace Blaze
 
 		resultBitmap.FlipVerticaly();		
 
-		size.texture.Create(resultBitmap);
+		size.texture.Create(resultBitmap);		
 
 		return &size;
 	}

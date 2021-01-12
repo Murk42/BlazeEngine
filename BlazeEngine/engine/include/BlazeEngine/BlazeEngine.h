@@ -17,7 +17,8 @@
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/Graphics/Mesh.h"
-#include "BlazeEngine/Graphics/TextRenderer.h"
+#include "BlazeEngine/Graphics/UI/Text.h"
+#include "BlazeEngine/Graphics/UI/Button.h"
 
 #include "BlazeEngine/Graphics/Bitmap.h"
 #include "BlazeEngine/Graphics/Texture.h"

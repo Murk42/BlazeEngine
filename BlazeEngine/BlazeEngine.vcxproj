@@ -210,7 +210,9 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\TypeTraits.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Vector.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Bitmap.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\TextRenderer.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Button.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Panel.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Text.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Texture.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Buffer.h" />
     <ClInclude Include="engine\include\BlazeEngine\Console\Console.h" />
@@ -237,6 +239,7 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Button.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Console\LogList.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Console\Frame.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\Application.cpp" />
@@ -248,7 +251,7 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     <ClCompile Include="engine\source\BlazeEngine\DataStructures\StringStream.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Bitmap.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Material.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\TextRenderer.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Text.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Texture.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Buffer.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Console\Console.cpp" />
@@ -269,6 +272,9 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="engine\assets\default\fragmentDiffuse.glsl" />
+    <None Include="engine\assets\default\shaders\button\fragment.glsl" />
+    <None Include="engine\assets\default\shaders\button\geometry.glsl" />
+    <None Include="engine\assets\default\shaders\button\vertex.glsl" />
     <None Include="engine\assets\default\shaders\coloredText\fragment.glsl" />
     <None Include="engine\assets\default\shaders\coloredText\geometry.glsl" />
     <None Include="engine\assets\default\shaders\coloredText\vertex.glsl" />

@@ -26,6 +26,7 @@ namespace Blaze
 	};
 
 	typedef Rect<int> Recti;
+	typedef Rect<unsigned> Rectu;
 	typedef Rect<float> Rectf;
 	typedef Rect<double> Rectd;
 }

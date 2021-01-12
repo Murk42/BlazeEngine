@@ -12,8 +12,22 @@ namespace Blaze
 {
 	class Window;
 
+	enum class RenderMode
+	{
+		PointIndexed,
+		PointArray,
+		LineIndexed,
+		LineArray,
+		TriangleIndexed,
+		TriangleArray,
+	};
+
 	namespace Renderer
 	{
+
+
+		uint BLAZE_API MaxBoundTextures();
+
 		void BLAZE_API SetViewport(const Vec2i& pos, const Vec2i& size);
 		void BLAZE_API SetClearColor(Color);
 		void BLAZE_API ClearTarget();

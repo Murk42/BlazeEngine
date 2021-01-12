@@ -4,7 +4,7 @@ using namespace Blaze;
 void CloseWindowEvent(Window* win);
 void ResizeWindowEvent(int w, int h, Window* win);
  
-struct MatProps : MaterialProperties<Mat4f, TextureArray2D>
+struct TilesMatProps : MaterialProperties<Mat4f, TextureArray2D>
 {	
 	Property<Mat4f> mvp = "u_MVP";
 	Property<TextureArray2D> texture = "u_texture";
@@ -14,6 +14,11 @@ struct TextMatProps : MaterialProperties<Mat4f, Vec4f, Texture2D>
 	Property<Mat4f> mvp = "u_MVP";
 	Property<Vec4f> color = "u_color";
 	Property<Texture2D> texture = "u_texture";
+};
+struct ButtonMatProps : MaterialProperties<Mat4f, TextureArray2D>
+{
+	Property<Mat4f> mvp = "u_MVP";
+	Property<TextureArray2D> texture = "u_texture";
 };
 
 enum class Scene
@@ -31,13 +36,16 @@ public:
 
 	Scene scene = Scene::Menu;
 
+	Material<TilesMatProps> tilesMaterial;
 	Material<TextMatProps> textMaterial;
-	Material<MatProps> material;
-	Mesh mesh;			
+	Material<ButtonMatProps> buttonMaterial;
 
 	Font font;
-	TextureArray2D texture; 
-	   
+	TextureArray2D tilesSpriteSheet;
+	TextureArray2D buttonTexture;
+
+	Mesh tilesMesh;			
+	    
 	static constexpr int posX = 10, posY = 10;
 	static constexpr int maxSizeX = 32, maxSizeY = 16;
 	static constexpr int tileSizeX = 32, tileSizeY = 32;
@@ -47,24 +55,28 @@ public:
 	int textureMatrix[maxSizeX * maxSizeY];
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX =16 , sizeY = 8, mineCount=10;
+	int sizeX =32 , sizeY = 16, mineCount=100;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
+
+	struct {		
+		NormalText titleText;
+		Mat4f titleTextTrans;
+
+		Button playButton;
+		Mat4f playButtonTrans;
+	} menu;
 	 
-	struct {  
-		NormalText menuTitle;
-		Mat4f menuTitleTrans;
-
-		NormalText title;
-		Mat4f titleTrans;
-		NormalText details;
-		Mat4f detailsTrans;
-
-	} text;
+	struct {		
+		NormalText titleText;
+		Mat4f titleTextTrans;
+		NormalText detailsText;
+		Mat4f detailsTextTrans;
+	} game;	
 
 	void Startup() override
-	{				
+	{
 		memset(vertices, 0, sizeof(vertices));
 
 		int offsetX = 0, offsetY = 0;
@@ -73,7 +85,7 @@ public:
 			for (int x = 0; x < sizeX; ++x)
 			{
 				vertices[x + y * maxSizeX].GetValue<0>() = Vec2i(offsetX, offsetY);
-				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);				
+				vertices[x + y * maxSizeX].GetValue<1>() = Vec2i(offsetX + tileSizeX, offsetY + tileSizeY);
 				vertices[x + y * maxSizeX].GetValue<2>() = 1;
 				vertices[x + y * maxSizeX].GetValue<3>() = 0;
 
@@ -91,60 +103,90 @@ public:
 		window.SetSize(Vec2i(10 + tileSizeX * maxSizeX + 10, 10 + tileSizeY * maxSizeY + 10 + 50 + 10));
 		window.SetWindowed(true, false);
 		window.ShowWindow(true);
-		
+
 		Renderer::SetClearColor(Color(160));
 		Renderer::SetViewport(Vec2i(), window.GetSize());
 		Renderer::SetTarget(window);
 		Renderer::UseBlending(true);
 
-		GenerateTiles();
-		//Loading filesx
+		font.Load("assets/fonts/Roboto-Regular.ttf");
+
+		//Load tilesMaterial 
 		{
-			font.Load("assets/fonts/Roboto-Regular.ttf");
+			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
+			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/shaders/sprite/fragment.glsl");
+			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
+			tilesMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
+		}
 
-			texture.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
+		//Load textMaterial
+		{
+			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/normalText/vertex.glsl");
+			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/normalText/fragment.glsl");
+			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/normalText/geometry.glsl");
+			textMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
+		}
+		 
+		//Load ButtonMaterial 
+		{
+			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/button/vertex.glsl");
+			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/button/fragment.glsl");
+			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/button/geometry.glsl");
+			buttonMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);			
+		}
 
-			{
-				Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
-				Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/shaders/sprite/fragment.glsl");
-				Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
-				material.SetShaders(vertexShader, fragmentShader, geometryShader);
-			} 
-
-			{   
-				Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/normalText/vertex.glsl");
-				Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/normalText/fragment.glsl");
-				Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/normalText/geometry.glsl");
-				textMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
-			}			
-			mesh.SetVertices(vertices, maxSizeX * maxSizeY);
-
-			text.title.SetFont(&font, 50);
-			text.title.SetString("Minesweeper");			
-
-			text.details.SetFont(&font, 20); 
-			text.details.SetString(String(format_string, "Size is %dx%d", maxSizeX, maxSizeY));
+		//Seting up menu scene 
+		{
+			buttonTexture.Load("assets/sprites/buttonTexture.png", Vec2i(48, 48)); 			
 			 
-			text.menuTitle.SetFont(&font, 100);
-			text.menuTitle.SetString("Minesweeper");
-		}				  
+			menu.titleText.SetFont(&font, 100); 
+			menu.titleText.SetString("Minesweeper");   
+			 
+			menu.playButton.cornerSize = Vec2u(20);
+		}
+		 
+		//Seting up game scene
+		{
+			tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));			
+			tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);			
+			tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
+
+			game.titleText.SetFont(&font, 50);
+			game.titleText.SetString("Minesweeper");
+
+			game.detailsText.SetFont(&font, 20);
+			game.detailsText.SetString(String(format_string, "Size is %dx%d", maxSizeX, maxSizeY));
+		}   
+
+		GenerateTiles();
 	}
 
 	void Frame() override 
 	{
 		Input::Update();				
 		 
-		Renderer::ClearTarget();
+		Renderer::ClearTarget(); 
 		 
 		switch (scene)
 		{
-		case Scene::Menu: {
-			textMaterial.properties.mvp = canvasProjection * text.menuTitleTrans;
-			textMaterial.properties.texture = text.menuTitle.GetTexture();
-			textMaterial.properties.color = Color(255, 128, 0).ToVector();
-			Renderer::RenderPointArray(textMaterial, text.menuTitle.GetMesh());
+		case Scene::Menu: { 
 
-			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Down)
+			menu.playButton.Update();
+			menu.playButton.UpdateMesh();
+
+			//Render menuTitle
+			{ 
+				buttonMaterial.properties.mvp = canvasProjection;
+				buttonMaterial.properties.texture = &buttonTexture;
+				Renderer::RenderPointArray(buttonMaterial, menu.playButton.GetMesh());  
+
+				textMaterial.properties.mvp = canvasProjection * menu.titleTextTrans;
+				textMaterial.properties.texture = menu.titleText.GetTexture();
+				textMaterial.properties.color = Color(255, 128, 0).ToVector(); 
+				Renderer::RenderPointArray(textMaterial, menu.titleText.GetMesh());
+			}			
+
+			if (menu.playButton.GetState() == ButtonState::Down)
 				ChangeToGameScene();
 			break;
 		}
@@ -162,7 +204,7 @@ public:
 					switch (Checker)
 					{
 					case 1:
-						text.details.SetString(String("Booom!"));
+						game.detailsText.SetString(String("Booom!"));
 						textureMatrix[mp.x + mp.y * maxSizeX] = 1;
 						for (int y = 0; y < sizeX; ++y)
 						{
@@ -213,19 +255,19 @@ public:
 				}
 			}
 
-			material.properties.mvp = canvasProjection * tilesTrans;
-			material.properties.texture = &texture;
-			Renderer::RenderPointArray(material, mesh.vl);
+			tilesMaterial.properties.mvp = canvasProjection * tilesTrans;
+			tilesMaterial.properties.texture = &tilesSpriteSheet;
+			Renderer::RenderPointArray(tilesMaterial, tilesMesh.vl);
 
-			textMaterial.properties.mvp = canvasProjection * text.titleTrans;
-			textMaterial.properties.texture = text.title.GetTexture();
+			textMaterial.properties.mvp = canvasProjection * game.titleTextTrans;
+			textMaterial.properties.texture = game.titleText.GetTexture();
 			textMaterial.properties.color = Color(255, 128, 0).ToVector();
-			Renderer::RenderPointArray(textMaterial, text.title.GetMesh());
+			Renderer::RenderPointArray(textMaterial, game.titleText.GetMesh());
 
-			textMaterial.properties.mvp = canvasProjection * text.detailsTrans;
-			textMaterial.properties.texture = text.details.GetTexture();
+			textMaterial.properties.mvp = canvasProjection * game.detailsTextTrans;
+			textMaterial.properties.texture = game.detailsText.GetTexture();
 			textMaterial.properties.color = Color(255).ToVector();
-			Renderer::RenderPointArray(textMaterial, text.details.GetMesh());
+			Renderer::RenderPointArray(textMaterial, game.detailsText.GetMesh());	
 			break;
 			} 
 		}
@@ -356,7 +398,7 @@ public:
 					}
 				}
 			}
-			if (isMineOpened) text.details.SetString(String("You won!"));
+			if (isMineOpened) game.detailsText.SetString(String("You won!"));
 		}
 		for (int y = 0; y < sizeY; ++y)
 		{
@@ -366,7 +408,7 @@ public:
 			}
 		}
 
-		mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
+		tilesMesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
 	}
 
 	bool inRange(int x, int y) 
@@ -479,13 +521,14 @@ void ResizeWindowEvent(int w, int h, Window* win)
 	switch (app.scene)
 	{
 	case Scene::Menu : {
-		app.text.menuTitleTrans = Math::TranslationMatrix<float>(Vec2i((w - app.text.menuTitle.GetSize().x) / 2, h - app.text.menuTitle.GetSize().y - 50));
+		app.menu.titleTextTrans = Math::TranslationMatrix<float>(Vec2i((w - app.menu.titleText.GetSize().x) / 2, h - app.menu.titleText.GetSize().y - 50));
+		app.menu.playButton.rect = Rectu(Vec2u(w / 2 - 100, h - 270), Vec2u(200, 70));
 		break;
 		}
 	case Scene::Game: {
 		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
-		app.text.titleTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.text.title.GetSize().y));
-		app.text.detailsTrans = app.text.titleTrans * Math::TranslationMatrix<float>(Vec2i(app.text.title.GetSize().x + 30, 0));
+		app.game.titleTextTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.game.titleText.GetSize().y));
+		app.game.detailsTextTrans = app.game.titleTextTrans * Math::TranslationMatrix<float>(Vec2i(app.game.titleText.GetSize().x + 30, 0));
 		break;
 	}
 	}

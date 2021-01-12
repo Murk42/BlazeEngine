@@ -155,6 +155,7 @@
     <ClCompile Include="assets\source\Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\sprites\buttonTexture.png" />
     <Image Include="assets\sprites\sprites.png" />
     <Image Include="assets\sprites\SpriteSheet.png" />
   </ItemGroup>

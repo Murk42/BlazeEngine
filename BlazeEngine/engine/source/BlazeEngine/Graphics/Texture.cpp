@@ -396,7 +396,7 @@ namespace Blaze
 	void TextureCubemap::GetPixels(Bitmap& bm, CubemapFace face)
 	{
 		if (bm.GetSize() != Vec2i(size, size) || bm.GetFormat() != format)
-			bm.Create(size, format);
+			bm.Create(Vec2i(size), format);
 
 		glGetTexImage((GLenum)face, 0, (uint)format, GL_UNSIGNED_BYTE, bm.GetPixels());
 	}
