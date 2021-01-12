@@ -1,7 +1,14 @@
-﻿  BlazeEngine.vcxproj -> D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll
-  D:\Minesweaper\BlazeEngine\Libraries\SDL\SDL2-2.0.10\lib\x64\SDL2.dll
+﻿  Logger.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49,30): warning C4251: 'Blaze::UniformBlock::members': class 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>' needs to have dll-interface to be used by clients of struct 'Blaze::UniformBlock'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49): message : see declaration of 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66,32): warning C4251: 'Blaze::ShaderProgram::uniforms': class 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>' needs to have dll-interface to be used by clients of class 'Blaze::ShaderProgram'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66): message : see declaration of 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11,27): warning C4251: 'Blaze::VertexLayout::layout': class 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>' needs to have dll-interface to be used by clients of class 'Blaze::VertexLayout'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11): message : see declaration of 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>'
+  BlazeEngine.vcxproj -> C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll
+  C:\Programming\Projects\BlazeEngine\Libraries\SDL\SDL2-2.0.10\lib\x64\SDL2.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\Libraries\DevIL\lib\x64\DevIL.dll
+  C:\Programming\Projects\BlazeEngine\Libraries\DevIL\lib\x64\DevIL.dll
   1 File(s) copied
-  D:\Minesweaper\BlazeEngine\Libraries\DevIL\lib\x64\ILU.dll
+  C:\Programming\Projects\BlazeEngine\Libraries\DevIL\lib\x64\ILU.dll
   1 File(s) copied

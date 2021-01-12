@@ -28,6 +28,7 @@ namespace Blaze
 	{		
 		void OpenGLCallbackFunc(unsigned source, unsigned type, int id, unsigned severity, unsigned lenght, const char* message)
 		{
+			LogType logType;
 			String _source;
 			switch (source)
 			{
@@ -39,8 +40,19 @@ namespace Blaze
 			default:
 			case GL_DEBUG_SOURCE_OTHER: _source = "Other"; break;
 			}			
+			switch (type) {
+			case GL_DEBUG_TYPE_ERROR:		
+				logType = LogType::Error;
+				break;				
+			case GL_DEBUG_TYPE_MARKER:
+				logType = LogType::Message;
+				break;
+			default:
+				logType = LogType::Warning;
+				break;
+			}
 
-			AddLog(LogType::Error, std::move(_source), message);
+			AddLog(logType, std::move(_source), message);
 		}
 
 		void AddLog(LogType type, String&& source, String&& message)
