@@ -47,7 +47,7 @@ public:
 	int textureMatrix[maxSizeX * maxSizeY];
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX =16 , sizeY = 8, mineCount=4;
+	int sizeX =16 , sizeY = 8, mineCount=10;
 	 
 	Mat4f canvasProjection;
 	Mat4f tilesTrans;
@@ -156,12 +156,31 @@ public:
 				mp -= Vec2i(posX, posY);
 				mp /= Vec2i(tileSizeX, tileSizeY);
 
-				if (mp.x >= 0 &&
-					mp.x < sizeX &&
-					mp.y >= 0 &&
-					mp.y < sizeY)
+				if (mp.x >= 0 && mp.x < sizeX && mp.y >= 0 && mp.y < sizeY)
 				{
-					ClickOnTile(mp.x, mp.y);
+					int Checker = ClickOnTile(mp.x, mp.y);
+					switch (Checker)
+					{
+					case 1:
+						text.details.SetString(String("Booom!"));
+						textureMatrix[mp.x + mp.y * maxSizeX] = 1;
+						for (int y = 0; y < sizeX; ++y)
+						{
+							for (int x = 0; x < sizeX; ++x)
+							{
+								int k = x + y * maxSizeX;
+								if (textureMatrix[k] == 13 && valueMatrix[k] == 1)
+								{
+									textureMatrix[k] = 2;
+								}
+								if (textureMatrix[k] == 11 && valueMatrix[k] == 0)
+								{
+									textureMatrix[k] = 0;
+								}
+							}
+						}
+						break;
+					}
 					memset(checkedMatrix, 0, sizeof(checkedMatrix));
 					UpdateTiles();
 				}
@@ -325,19 +344,37 @@ public:
 		Logger::AddLog(LogType::Message, __FUNCTION__, String(format_string, "Number of mines: %d", mineCount));
 		if (mineCount == 0) 
 		{
-			text.details.SetString(String("You won!"));
+			bool isMineOpened = 1;
+			for (int y = 0; y < sizeY; ++y)
+			{					
+				for (int x = 0; x < sizeX; ++x)
+				{
+					if (textureMatrix[x + y * maxSizeX] == 13)
+					{							
+						isMineOpened = 0;
+						break;
+					}
+				}
+			}
+			if (isMineOpened) text.details.SetString(String("You won!"));
 		}
 		for (int y = 0; y < sizeY; ++y)
-			for (int x = 0; x < sizeX; ++x)			
+		{
+			for (int x = 0; x < sizeX; ++x)
+			{
 				vertices[x + maxSizeX * y].GetValue<2>() = textureMatrix[x + maxSizeX * y];
+			}
+		}
 
 		mesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
 	}
 
 	bool inRange(int x, int y) 
 	{
-		if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) return 1;
-		else return 0;
+		if (x >= 0 && x < sizeX && y >= 0 && y < sizeY)
+			return 1;
+		else 
+			return 0;
 	}
 
 	int ClickOnTile(int x, int y)
