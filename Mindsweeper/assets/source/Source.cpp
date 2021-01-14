@@ -3,6 +3,7 @@ using namespace Blaze;
 
 void CloseWindowEvent(Window* win);
 void ResizeWindowEvent(int w, int h, Window* win);
+void SetUp();
  
 struct TilesMatProps : MaterialProperties<Mat4f, TextureArray2D>
 {	
@@ -47,7 +48,7 @@ public:
 	Mesh tilesMesh;			
 	    
 	static constexpr int posX = 10, posY = 10;
-	static constexpr int maxSizeX = 32, maxSizeY = 16;
+	static constexpr int maxSizeX = 100, maxSizeY = 50;
 	static constexpr int tileSizeX = 32, tileSizeY = 32;
 
 	Vertex<Vec2f, Vec2f, float, float> vertices[maxSizeX * maxSizeY];	
@@ -55,7 +56,7 @@ public:
 	int textureMatrix[maxSizeX * maxSizeY];
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX =32 , sizeY = 16, mineCount=70;
+	int sizeX =20 , sizeY = 8, mineCount=10;
 	bool gameEnded = 0;
 	 
 	Mat4f canvasProjection;
@@ -76,6 +77,8 @@ public:
 		NormalText detailsText;
 		Mat4f detailsTextTrans;
 	} game;	
+
+	
 
 	void Startup() override
 	{
@@ -148,20 +151,8 @@ public:
 		}
 
 		//Seting up game scene
-		{
-			tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
-			tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
-			tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
 
-			game.titleText.SetFont(&font, 50);
-			game.titleText.SetString("Minesweeper");
-
-			game.restartButton.cornerSize = Vec2u(20, 20);
-
-			game.detailsText.SetFont(&font, 20);
-			game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
-		}
-
+		SetUp();
 	}
 
 	void Frame() override 
@@ -296,6 +287,21 @@ public:
 		ProcessLogs();
 	}
 
+	void SetUp()
+	{
+		tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
+		tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
+		tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
+
+		game.titleText.SetFont(&font, 50);
+		game.titleText.SetString("Minesweeper");
+
+		game.restartButton.cornerSize = Vec2u(20, 20);
+
+		game.detailsText.SetFont(&font, 20);
+		game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
+	}
+
 	void ProcessLogs()
 	{
 		Log log;
@@ -316,10 +322,12 @@ public:
 	void ChangeToGameScene() 
 	{
 		scene = Scene::Game;
+		SetUp();
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
 
+		memset(valueMatrix, 0, sizeof(valueMatrix));
 		memset(checkedMatrix, 0, sizeof(checkedMatrix));
-		mineCount = 70;
+		mineCount = 10;
 		gameEnded = 0;
 		GenerateTiles();
 		UpdateTiles();
@@ -423,14 +431,20 @@ public:
 			{					
 				for (int x = 0; x < sizeX; ++x)
 				{
+					Logger::AddLog(LogType::Message, __FUNCTION__, String(format_string, "uso: %d", mineCount));
 					if (textureMatrix[x + y * maxSizeX] == 13)
 					{							
 						isMineOpened = 0;
 						break;
 					}
+					
 				}
 			}
-			if (isMineOpened) game.detailsText.SetString(String("You won!"));
+			if (isMineOpened)
+			{
+				game.detailsText.SetString(String("You won!"));
+				gameEnded = 1;
+			}
 		}
 		for (int y = 0; y < sizeY; ++y)
 		{
