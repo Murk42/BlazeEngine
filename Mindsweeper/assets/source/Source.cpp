@@ -47,7 +47,7 @@ public:
 
 	Mesh tilesMesh;			
 	    
-	static constexpr int posX = 10, posY = 10;
+	static constexpr int posX = 200, posY = 120;
 	static constexpr int maxSizeX = 100, maxSizeY = 50;
 	static constexpr int tileSizeX = 32, tileSizeY = 32;
 
@@ -56,7 +56,9 @@ public:
 	int textureMatrix[maxSizeX * maxSizeY];
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX =20 , sizeY = 8, mineCount=10;
+	int sizeX = 20, sizeY = 8, startMineCount = 10;
+	int mineCount = startMineCount;
+
 	bool gameEnded = 0;
 	 
 	Mat4f canvasProjection;
@@ -327,7 +329,7 @@ public:
 
 		memset(valueMatrix, 0, sizeof(valueMatrix));
 		memset(checkedMatrix, 0, sizeof(checkedMatrix));
-		mineCount = 10;
+		mineCount = startMineCount;
 		gameEnded = 0;
 		GenerateTiles();
 		UpdateTiles();
