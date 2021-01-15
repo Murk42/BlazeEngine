@@ -116,7 +116,7 @@ public:
 		Renderer::SetTarget(window);
 		Renderer::UseBlending(true);
 
-		font.Load("assets/fonts/Roboto-Regular.ttf");
+		font.Load("assets/fonts/Pixellari.ttf");
 		buttonTexture.Load("assets/sprites/ButtonSpriteSheet.png", Vec2i(96, 96));
 		buttonTexture.SetSettings(TextureSampling::Linear, TextureSampling::Nearest);
 

@@ -147,7 +147,9 @@ C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(587): m
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\shaders\normalText\fragment.glsl
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\shaders\normalText\geometry.glsl
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\default\shaders\normalText\vertex.glsl
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\fonts\8-BIT WONDER.TTF
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\fonts\KarmaFuture.ttf
+  C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\fonts\Pixellari.ttf
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\fonts\Roboto-Black.ttf
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\fonts\Roboto-BlackItalic.ttf
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\fonts\Roboto-Bold.ttf
@@ -173,6 +175,6 @@ C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(587): m
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\sprites\buttonTexture.png
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\sprites\sprites.png
   C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\sprites\SpriteSheet.png
-  43 File(s) copied
+  45 File(s) copied
   C:\Programming\Projects\BlazeEngine\Mindsweeper\build\Debug\x64\Mindsweeper.exe
   1 File(s) copied
