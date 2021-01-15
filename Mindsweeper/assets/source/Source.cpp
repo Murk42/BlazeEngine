@@ -3,7 +3,6 @@ using namespace Blaze;
 
 void CloseWindowEvent(Window* win);
 void ResizeWindowEvent(int w, int h, Window* win);
-void SetUp();
  
 struct TilesMatProps : MaterialProperties<Mat4f, TextureArray2D>
 {	

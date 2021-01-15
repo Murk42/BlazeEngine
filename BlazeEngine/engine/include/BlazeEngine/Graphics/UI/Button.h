@@ -27,15 +27,13 @@ namespace Blaze
 
 	class BLAZE_API Button
 	{
-		Vertex<Vec2f, Vec2f, Vec2f, float, float> vertex;
+		Vertex<Vec2f, Vec4f, float, float> vertex;
 		void* eventFunctions[(uint)ButtonEvent::ButtonEvent_Count];
 
 		Mesh mesh;
 		ButtonState state;
 	public:
-		float depth;
-		Rectu rect;		
-		Vec2f cornerSize;			
+		float depth;				
 		Vec2i size;
 		Recti colliderRect;
 		Recti textureCenterRect;
@@ -47,7 +45,6 @@ namespace Blaze
 		ButtonState GetState() const { return state; }
 		const Mesh& GetMesh() const { return mesh; }		
 
-		void Update();
-		void UpdateMesh();
+		void Update();		
 	};	
 }

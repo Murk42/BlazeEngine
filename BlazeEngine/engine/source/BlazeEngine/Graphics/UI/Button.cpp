@@ -30,9 +30,9 @@ namespace Blaze
 		{
 			mousePos.y = focusedWindow->GetSize().y - mousePos.y;
 
-			mousePos -= rect.pos;
+			mousePos -= colliderRect.pos;
 
-			if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x < rect.size.x && mousePos.y < rect.size.y)
+			if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x < colliderRect.size.x && mousePos.y < colliderRect.size.y)
 			{
 				KeyState keyState = Input::GetKeyState(Key::MouseLeft);
 				
@@ -73,30 +73,25 @@ namespace Blaze
 			CallEventFunction(eventFunctions[(uint)ButtonEvent::Released], this);
 			break;
 		}
-	}
 
-	void Button::UpdateMesh()
-	{
-		vertex.GetValue<0>() = rect.pos;
-		vertex.GetValue<1>() = rect.pos + rect.size;
-		vertex.GetValue<2>() = cornerSize;
-		vertex.GetValue<4>() = depth;
+		vertex.GetValue<0>() = size;
+		vertex.GetValue<1>() = Vec4f(textureCenterRect.x, textureCenterRect.y, textureCenterRect.w, textureCenterRect.h);
+		vertex.GetValue<3>() = depth;
 		switch (state)
 		{
 		case ButtonState::Released:
 		case ButtonState::Up:
-			vertex.GetValue<3>() = 2.0f;
+			vertex.GetValue<2>() = 2.0f;
 			break;
 		case ButtonState::Hovered:
-			vertex.GetValue<3>() = 1.0f;
+			vertex.GetValue<2>() = 1.0f;
 			break;
 		case ButtonState::Pressed:
 		case ButtonState::Down:
-			vertex.GetValue<3>() = 0.0f;
+			vertex.GetValue<2>() = 0.0f;
 			break;
-
 		}
 
 		mesh.ChangeVertices(&vertex, 1, 0);
-	}
+	}	
 }
