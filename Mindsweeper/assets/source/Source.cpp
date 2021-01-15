@@ -15,10 +15,11 @@ struct TextMatProps : MaterialProperties<Mat4f, Texture2D, Vec4f>
 	Property<Texture2D> texture = "u_texture";
 	Property<Vec4f> color = "u_color";
 };
-struct ButtonMatProps : MaterialProperties<Mat4f, TextureArray2D>
+struct ButtonMatProps : MaterialProperties<Mat4f, TextureArray2D, float>
 {
 	Property<Mat4f> mvp = "u_MVP";
 	Property<TextureArray2D> texture = "u_texture";
+	Property<float> texScale = "u_texScale";
 };
 
 enum class Scene
@@ -73,6 +74,7 @@ public:
 	 
 	struct {		
 		Button restartButton;
+		Mat4f restartButtonTrans;
 
 		NormalText titleText;
 		Mat4f titleTextTrans;
@@ -105,7 +107,7 @@ public:
 		Input::SetEventFunction(InputEvent::WindowClosed, CloseWindowEvent);
 		Input::SetEventFunction(InputEvent::WindowSizeChanged, ResizeWindowEvent);
 
-		window.SetSize(Vec2i(10 + tileSizeX * sizeX + 10, 10 + tileSizeY * sizeY + 10 + 50 + 10));
+		window.SetSize(Vec2i(800, 400));
 		window.SetWindowed(true, false);
 		window.ShowWindow(true);
 
@@ -115,40 +117,55 @@ public:
 		Renderer::UseBlending(true);
 
 		font.Load("assets/fonts/Roboto-Regular.ttf");
+		buttonTexture.Load("assets/sprites/ButtonSpriteSheet.png", Vec2i(96, 96));
+		buttonTexture.SetSettings(TextureSampling::Linear, TextureSampling::Nearest);
 
-		//Load tilesMaterial 
+		//Load tilesMaterial  
 		{
 			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
 			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/shaders/sprite/fragment.glsl");
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
 			tilesMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
-		}
-
-		//Load textMaterial
+		}  
+		  
+		//Load textMaterial 
 		{
 			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/normalText/vertex.glsl");
 			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/normalText/fragment.glsl");
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/normalText/geometry.glsl");
 			textMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
-		}
-
-		//Load ButtonMaterial 
-		{
+		} 
+		 
+		//Load ButtonMaterial    
+		{   
 			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/button/vertex.glsl");
 			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/button/fragment.glsl");
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/button/geometry.glsl");
 			buttonMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
-		}
 
-		//Seting up menu scene 
-		{
-			buttonTexture.Load("assets/sprites/buttonTexture.png", Vec2i(48, 48));
-
+			buttonMaterial.properties.texScale = 0.5f;
+		}     
+		      
+		//Seting up menu scene   
+		{   
 			menu.titleText.SetFont(&font, 100);
 			menu.titleText.SetString("Minesweeper");
 
-			menu.playButton.textureCenterRect
-			menu.playButton.cornerSize = Vec2u(20);			
+			menu.playButton.textureCenterRect = Recti(26, 37, 44, 14);			
+
+
+			/* 
+			* 
+				26 + 44 + 26 = 96
+			37
+			+
+			14
+			+
+			45
+			=
+			96
+
+			*/
 		}
 
 		//Seting up game scene
@@ -160,7 +177,7 @@ public:
 			game.titleText.SetFont(&font, 50);
 			game.titleText.SetString("Minesweeper");
 
-			game.restartButton.cornerSize = Vec2u(20, 20);
+			game.restartButton.textureCenterRect = Recti(26, 37, 44, 14);			
 
 			game.detailsText.SetFont(&font, 20);
 			game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
@@ -181,7 +198,7 @@ public:
 
 			//Render menuTitle
 			{ 
-				buttonMaterial.properties.mvp = canvasProjection;
+				buttonMaterial.properties.mvp = canvasProjection * menu.playButtonTrans;
 				buttonMaterial.properties.texture = &buttonTexture;
 				Renderer::RenderPointArray(buttonMaterial, menu.playButton.GetMesh());  
 
@@ -271,7 +288,7 @@ public:
 				}
 			}
 
-			buttonMaterial.properties.mvp = canvasProjection;
+			buttonMaterial.properties.mvp = canvasProjection * game.restartButtonTrans;
 			buttonMaterial.properties.texture = &buttonTexture;
 			Renderer::RenderPointArray(buttonMaterial, game.restartButton.GetMesh());
 
@@ -567,15 +584,21 @@ void ResizeWindowEvent(int w, int h, Window* win)
 	switch (app.scene)
 	{
 	case Scene::Menu : {
-		app.menu.titleTextTrans = Math::TranslationMatrix<float>(Vec2i((w - app.menu.titleText.GetSize().x) / 2, h - app.menu.titleText.GetSize().y - 50));
-		app.menu.playButton.rect = Rectu(Vec2u(w / 2 - 100, h - 270), Vec2u(200, 70));
+		app.menu.titleTextTrans = Math::TranslationMatrix<float>(Vec2i((w - app.menu.titleText.GetSize().x) / 2, h - app.menu.titleText.GetSize().y - 10));
+		
+		app.menu.playButton.colliderRect = Recti(w / 2 - 100, h - 200, 200, 50);
+		app.menu.playButton.size = app.menu.playButton.colliderRect.size;
+		app.menu.playButtonTrans = Math::TranslationMatrix<float>(app.menu.playButton.colliderRect.pos);
 		break;
 		}
 	case Scene::Game: {
 		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
 		app.game.titleTextTrans = Math::TranslationMatrix<float>(Vec2i(10, h - 5 - app.game.titleText.GetSize().y));
 		app.game.detailsTextTrans = app.game.titleTextTrans * Math::TranslationMatrix<float>(Vec2i(app.game.titleText.GetSize().x + 30, 0));
-		app.game.restartButton.rect = Rectu(Vec2u(500, h - 65), Vec2u(120, 50));
+
+		app.game.restartButton.colliderRect = Recti(500, h - 80, 200, 50);
+		app.game.restartButton.size = app.game.restartButton.colliderRect.size;
+		app.game.restartButtonTrans = Math::TranslationMatrix<float>(app.game.restartButton.colliderRect.pos);
 		break;
 	}
 	}

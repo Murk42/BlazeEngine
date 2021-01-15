@@ -38,5 +38,8 @@
     <Image Include="assets\sprites\buttonTexture.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="assets\sprites\ButtonSpriteSheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

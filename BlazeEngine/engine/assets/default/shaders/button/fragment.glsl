@@ -5,38 +5,55 @@ in vec4 p_textureCenterRect;
 in vec3 p_uv;
 
 uniform sampler2DArray u_texture;
+uniform float u_texScale;
 
 void main()
 {			
 	vec2 texSize = textureSize(u_texture, 0).xy;
-	vec2 uv;
+	vec2 uv;	
 	
 	vec2 pos = p_rect.xy;
-
+	 
+	float tx1 = p_textureCenterRect.x;
+	float ty1 = p_textureCenterRect.y;
 	float tx2 = p_textureCenterRect.z;
-	float ty2 = p_textureCenterRect.w;		
+	float ty2 = p_textureCenterRect.w;
+	float tx3 = texSize.x - tx1 - tx2;
+	float ty3 = texSize.y - ty1 - ty2;
 
-	float x1 = p_textureCenterRect.x;
-	float x3 = texSize.x - tx2 - x1;
-	float y1 = p_textureCenterRect.y;
-	float y3 = texSize.y - ty2 - y1;
+	float sx1 = tx1 * u_texScale;
+	float sy1 = ty1 * u_texScale;
+	float sx2 = texSize.x - (tx1 + tx3) * u_texScale;
+	float sy2 = texSize.y - (ty1 + ty3) * u_texScale;
+	float sx3 = tx3 * u_texScale;
+	float sy3 = ty3 * u_texScale;
 
-	float rx2 = p_rect.z - x1 - x3;
-	float ry2 = p_rect.w - y1 - y3;
+	float rx1 = sx1;
+	float ry1 = sy1;
+	float rx2 = p_rect.z - sx1 - sx3;
+	float ry2 = p_rect.w - sy1 - sy3;
+	float rx3 = sx3;
+	float ry3 = sy3;
 
-	if (pos.x < x1)
-		uv.x = pos.x / texSize.x;
-	else if (pos.x - x1 < rx2)
-		uv.x = ((pos.x - x1) / rx2 * tx2 + x1) / texSize.x;
+	//if (sx1 == 13 && sx2 == 70 && sx3 == 13)
+	//{
+	//	gl_FragColor = vec4(0, 1, 0, 1);
+	//	return;
+	//}
+
+	if (pos.x < rx1)	
+		uv.x = pos.x / rx1 * tx1 / texSize.x;
+	else if (pos.x < rx1 + rx2)
+		uv.x = ((pos.x - rx1) / rx2 * tx2 + tx1) / texSize.x;
 	else
-		uv.x = (pos.x - x1 - rx2) / texSize.x;
+		uv.x = ((pos.x - rx1 - rx2) / rx3 * tx3 + tx1 + tx2)/ texSize.x;
 
-	if (pos.y < y1)
-		uv.y = pos.y / texSize.y;
-	else if (pos.y - y1 < ry2)
-		uv.y = ((pos.y - y1) / ry2 * ty2 + y1) / texSize.y;
+	if (pos.y < ry1)	
+		uv.y = pos.y / ry1 * ty1 / texSize.y;
+	else if (pos.y < ry1 + ry2)
+		uv.y = ((pos.y - ry1) / ry2 * ty2 + ty1) / texSize.y;
 	else
-		uv.y = (pos.y - y1 - ry2) / texSize.y;
+		uv.y = ((pos.y - ry1 - ry2) / ry3 * ty3 + ty1 + ty2)/ texSize.y;
 
 	vec4 color = texture(u_texture, vec3(uv, p_uv.z));		
 	gl_FragColor = color;	

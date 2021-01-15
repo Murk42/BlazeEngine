@@ -15,7 +15,7 @@ out VS_OUT {
 void main()
 {
 	vs_out.size = i_size;
-	vs_out.cornerSize = i_textureCenterRect;
+	vs_out.textureCenterRect = i_textureCenterRect;
 	vs_out.uv = i_uv;
 	vs_out.depth = i_depth;	
 }
