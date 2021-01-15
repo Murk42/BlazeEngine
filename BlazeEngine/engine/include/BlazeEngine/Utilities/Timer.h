@@ -9,7 +9,7 @@ namespace Blaze
 		std::chrono::steady_clock::time_point timerStart;		
 	public:
 		Timer();
-		Timer(const Timer&);
+		Timer(const Timer&);		
 
 		double Reset();
 		double GetTime();		
