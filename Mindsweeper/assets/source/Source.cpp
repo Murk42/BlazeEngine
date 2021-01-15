@@ -47,7 +47,7 @@ public:
 
 	Mesh tilesMesh;			
 	    
-	static constexpr int posX = 200, posY = 120;
+	static constexpr int posX = 10, posY = 10;
 	static constexpr int maxSizeX = 100, maxSizeY = 50;
 	static constexpr int tileSizeX = 32, tileSizeY = 32;
 
@@ -107,7 +107,7 @@ public:
 		Input::SetEventFunction(InputEvent::WindowClosed, CloseWindowEvent);
 		Input::SetEventFunction(InputEvent::WindowSizeChanged, ResizeWindowEvent);
 
-		window.SetSize(Vec2i(10 + tileSizeX * maxSizeX + 10, 10 + tileSizeY * maxSizeY + 10 + 50 + 10));
+		window.SetSize(Vec2i(10 + tileSizeX * sizeX + 10, 10 + tileSizeY * sizeY + 10 + 50 + 10));
 		window.SetWindowed(true, false);
 		window.ShowWindow(true);
 
@@ -153,8 +153,19 @@ public:
 		}
 
 		//Seting up game scene
+		{
+			tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
+			tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
+			tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
 
-		SetUp();
+			game.titleText.SetFont(&font, 50);
+			game.titleText.SetString("Minesweeper");
+
+			game.restartButton.cornerSize = Vec2u(20, 20);
+
+			game.detailsText.SetFont(&font, 20);
+			game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
+		}
 	}
 
 	void Frame() override 
@@ -287,22 +298,7 @@ public:
 		Renderer::UpdateTarget();				
 
 		ProcessLogs();
-	}
-
-	void SetUp()
-	{
-		tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
-		tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
-		tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
-
-		game.titleText.SetFont(&font, 50);
-		game.titleText.SetString("Minesweeper");
-
-		game.restartButton.cornerSize = Vec2u(20, 20);
-
-		game.detailsText.SetFont(&font, 20);
-		game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
-	}
+	}	
 
 	void ProcessLogs()
 	{
@@ -323,8 +319,7 @@ public:
 
 	void ChangeToGameScene() 
 	{
-		scene = Scene::Game;
-		SetUp();
+		scene = Scene::Game;		
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
 
 		memset(valueMatrix, 0, sizeof(valueMatrix));
