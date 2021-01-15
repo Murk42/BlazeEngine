@@ -46,6 +46,8 @@ namespace Blaze
 		String GetString() const { return string; }
 		Vec2i GetSize() const { return size; }
 		const Texture2D* GetTexture() const;		
+
+		void Render(BaseMaterial& material);
 	};	
 
 	class BLAZE_API NormalText : public Text

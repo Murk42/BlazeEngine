@@ -77,11 +77,9 @@ namespace Blaze
 		ShaderProgram sp;
 	public:
 		struct {
-			BaseMaterialProperties::Property<Mat4f>* MVP;
-			BaseMaterialProperties::Property<Mat4f>* model;
-			BaseMaterialProperties::Property<Mat4f>* view;
-			BaseMaterialProperties::Property<Mat4f>* projection;
-			BaseMaterialProperties::Property<Texture2D>* mainTexture;
+			BaseMaterialProperties::Property<Mat4f>* MVP;			
+			BaseMaterialProperties::Property<Texture2D>* texture;
+			BaseMaterialProperties::Property<Vec4f>* color;
 		} standardProperties;
 
 		const ShaderProgram& GetShaderProgram() { return sp; }	
@@ -116,35 +114,24 @@ namespace Blaze
 		template<size_t index, typename T>
 		constexpr bool IsCompatible(T& tuple)
 		{
-			if constexpr (index < S::TypesTuple::TupleSize - 1)
-			{				
-				auto& uniforms = sp.GetUniforms();
-				bool found = false;
-				for (int i = 0; i < uniforms.size(); ++i)
-					if (tuple.value.name == uniforms[i].GetName())
-					{
-						found = true;
-						//tuple.value.uniform.
-						break;
-					}
+			auto& uniforms = sp.GetUniforms();
+			bool found = false;
 
+			for (int i = 0; i < uniforms.size(); ++i)
+				if (tuple.value.name == uniforms[i].GetName())
+				{
+					found = true;
+					tuple.value.uniformIndex = i;						
+					break;
+				}
+
+			if constexpr (index < S::TypesTuple::TupleSize - 1)			
 				if (found)
 					return IsCompatible<index + 1>(tuple.nextTuple);
 				else
-					return  false;
-			}
-			else
-			{
-				bool found = false;
-				for (auto& u : sp.GetUniforms())
-					if (tuple.value.name == u.GetName())
-					{
-						found = true;
-						break;
-					}
-
-				return found;
-			}				
+					return  false;			
+			else			
+				return found;						
 		}
 
 		template<size_t index, typename T>
@@ -162,12 +149,12 @@ namespace Blaze
 			{
 				if constexpr (std::is_base_of_v<Texture, T::Type::Type>)
 				{
-					sp.SetUniform(&sp.GetUniforms()[index], &textureIndex);
+					sp.SetUniform(&sp.GetUniforms()[tuple.value.uniformIndex], &textureIndex);
 					++textureIndex;
 				}
 				else
 				{					
-					sp.SetUniform(&sp.GetUniforms()[index], &tuple.value.value);
+					sp.SetUniform(&sp.GetUniforms()[tuple.value.uniformIndex], &tuple.value.value);
 				}
 
 				tuple.value.changed = false;
@@ -208,15 +195,11 @@ namespace Blaze
 				for (int i = 0; i < uniforms.size(); ++i)
 				{
 					if (uniforms[i].GetName() == "u_MVP")
-						standardProperties.MVP = (BaseMaterialProperties::Property<Mat4f>*)ptrs[i];
-					else if (uniforms[i].GetName() == "u_model")
-						standardProperties.model = (BaseMaterialProperties::Property<Mat4f>*)ptrs[i];
-					else if (uniforms[i].GetName() == "u_view")
-						standardProperties.view = (BaseMaterialProperties::Property<Mat4f>*)ptrs[i];
-					else if (uniforms[i].GetName() == "u_projection")
-						standardProperties.projection = (BaseMaterialProperties::Property<Mat4f>*)ptrs[i];
+						standardProperties.MVP = (BaseMaterialProperties::Property<Mat4f>*)ptrs[i];				
 					else if (uniforms[i].GetName() == "u_texture")
-						standardProperties.mainTexture = (BaseMaterialProperties::Property<Texture2D>*)ptrs[i];
+						standardProperties.texture = (BaseMaterialProperties::Property<Texture2D>*)ptrs[i];
+					else if (uniforms[i].GetName() == "u_color")
+						standardProperties.color = (BaseMaterialProperties::Property<Vec4f>*)ptrs[i];
 				}
 
 				valid = true;

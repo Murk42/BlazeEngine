@@ -11,7 +11,7 @@ namespace Blaze
 	}
 
 	Button::Button()
-		: texture(nullptr), state(ButtonState::Up)
+		: state(ButtonState::Up)
 	{
 		mesh.SetVertices(&vertex, 1);
 	}

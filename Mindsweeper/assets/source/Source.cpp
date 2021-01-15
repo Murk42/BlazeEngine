@@ -10,11 +10,11 @@ struct TilesMatProps : MaterialProperties<Mat4f, TextureArray2D>
 	Property<Mat4f> mvp = "u_MVP";
 	Property<TextureArray2D> texture = "u_texture";
 };
-struct TextMatProps : MaterialProperties<Mat4f, Vec4f, Texture2D>
+struct TextMatProps : MaterialProperties<Mat4f, Texture2D, Vec4f>
 {
-	Property<Mat4f> mvp = "u_MVP";
-	Property<Vec4f> color = "u_color";
+	Property<Mat4f> mvp = "u_MVP"; 
 	Property<Texture2D> texture = "u_texture";
+	Property<Vec4f> color = "u_color";
 };
 struct ButtonMatProps : MaterialProperties<Mat4f, TextureArray2D>
 {
@@ -74,13 +74,12 @@ public:
 	 
 	struct {		
 		Button restartButton;
+
 		NormalText titleText;
 		Mat4f titleTextTrans;
 		NormalText detailsText;
 		Mat4f detailsTextTrans;
 	} game;	
-
-	
 
 	void Startup() override
 	{
@@ -149,7 +148,7 @@ public:
 			menu.titleText.SetFont(&font, 100);
 			menu.titleText.SetString("Minesweeper");
 
-			menu.playButton.cornerSize = Vec2u(20);
+			menu.playButton.cornerSize = Vec2u(20);			
 		}
 
 		//Seting up game scene
@@ -204,7 +203,7 @@ public:
 			game.restartButton.Update();
 			game.restartButton.UpdateMesh();
 			
-			if (game.restartButton.GetState() == ButtonState::Down)
+			if (game.restartButton.GetState() == ButtonState::Pressed)
 				ChangeToGameScene();
 
 			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed && !gameEnded)
@@ -326,8 +325,7 @@ public:
 		memset(checkedMatrix, 0, sizeof(checkedMatrix));
 		mineCount = startMineCount;
 		gameEnded = 0;
-		GenerateTiles();
-		UpdateTiles();
+		GenerateTiles();		
 	}	
 
 	void GenerateTiles( )

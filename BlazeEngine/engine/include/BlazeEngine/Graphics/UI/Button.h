@@ -35,8 +35,10 @@ namespace Blaze
 	public:
 		float depth;
 		Rectu rect;		
-		Vec2f cornerSize;
-		TextureArray2D* texture;		
+		Vec2f cornerSize;			
+		Vec2i size;
+		Recti colliderRect;
+		Recti textureCenterRect;
 
 		Button();
 

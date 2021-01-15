@@ -26,32 +26,38 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graph
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(17): message : see declaration of 'std::vector<void *,std::allocator<void *>>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(35,13): warning C4251: 'Blaze::Text::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Text'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<int,2>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(53,59): warning C4251: 'Blaze::NormalText::vertices': class 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>>>' needs to have dll-interface to be used by clients of class 'Blaze::NormalText'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(53): message : see declaration of 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>>>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(60,66): warning C4251: 'Blaze::ColoredText::vertices': class 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>>>' needs to have dll-interface to be used by clients of class 'Blaze::ColoredText'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(60): message : see declaration of 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(55,59): warning C4251: 'Blaze::NormalText::vertices': class 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>>>' needs to have dll-interface to be used by clients of class 'Blaze::NormalText'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(55): message : see declaration of 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f>>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(62,66): warning C4251: 'Blaze::ColoredText::vertices': class 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>>>' needs to have dll-interface to be used by clients of class 'Blaze::ColoredText'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Text.h(62): message : see declaration of 'std::vector<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>,std::allocator<Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec4f>>>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(30,51): warning C4251: 'Blaze::Button::vertex': struct 'Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,float,float>' needs to have dll-interface to be used by clients of class 'Blaze::Button'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(30): message : see declaration of 'Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,Blaze::Vec2f,float,float>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(37,13): warning C4251: 'Blaze::Button::rect': struct 'Blaze::Rect<unsigned int>' needs to have dll-interface to be used by clients of class 'Blaze::Button'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Rect.h(29): message : see declaration of 'Blaze::Rect<unsigned int>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(38,19): warning C4251: 'Blaze::Button::cornerSize': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Button'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<float,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(39,13): warning C4251: 'Blaze::Button::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Button'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(40,21): warning C4251: 'Blaze::Button::colliderRect': struct 'Blaze::Rect<int>' needs to have dll-interface to be used by clients of class 'Blaze::Button'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Rect.h(28): message : see declaration of 'Blaze::Rect<int>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(41,26): warning C4251: 'Blaze::Button::textureCenterRect': struct 'Blaze::Rect<int>' needs to have dll-interface to be used by clients of class 'Blaze::Button'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Rect.h(28): message : see declaration of 'Blaze::Rect<int>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Utilities\Timer.h(9,51): warning C4251: 'Blaze::Timer::timerStart': class 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' needs to have dll-interface to be used by clients of class 'Blaze::Timer'
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\chrono(603): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>'
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(348,13): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(351,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(351,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(352,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(352,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(450,78): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(584,66): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(346,13): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(349,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(349,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(350,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(350,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(448,78): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(582,66): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
           with
           [
               T=float
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(584,60): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(582,60): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
           with
           [
               T=float
@@ -65,8 +71,8 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
           [
               T=float
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(94): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(94): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(93): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(93): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(157,5): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
           with
           [
@@ -85,8 +91,8 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
           [
               T=float
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(152): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<unsigned int>(const Blaze::Vector<unsigned int,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(152): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<unsigned int>(const Blaze::Vector<unsigned int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(151): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<unsigned int>(const Blaze::Vector<unsigned int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(151): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<unsigned int>(const Blaze::Vector<unsigned int,2> &)' being compiled
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(157,5): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
           with
           [
@@ -97,7 +103,7 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
               T=float
           ]
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Mesh.h(48,1): warning C4267: 'argument': conversion from 'size_t' to 'Blaze::uint', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(159): message : see reference to function template instantiation 'void Blaze::Mesh::SetVertices<Blaze::Vec2f,Blaze::Vec2f,float,float>(const Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,float,float> *,size_t)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(158): message : see reference to function template instantiation 'void Blaze::Mesh::SetVertices<Blaze::Vec2f,Blaze::Vec2f,float,float>(const Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,float,float> *,size_t)' being compiled
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(196,21): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
           with
           [
@@ -107,8 +113,8 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
           [
               T=float
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(571): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(571): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(569): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(569): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
   C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.lib
   1 File(s) copied
   C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll
