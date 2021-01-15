@@ -147,6 +147,7 @@ public:
 			menu.titleText.SetFont(&font, 100);
 			menu.titleText.SetString("Minesweeper");
 
+			menu.playButton.textureCenterRect
 			menu.playButton.cornerSize = Vec2u(20);			
 		}
 
@@ -176,8 +177,7 @@ public:
 		{
 		case Scene::Menu: { 
 
-			menu.playButton.Update();
-			menu.playButton.UpdateMesh();
+			menu.playButton.Update();			
 
 			//Render menuTitle
 			{ 
@@ -199,8 +199,7 @@ public:
 			break;
 		}
 		case Scene::Game: {
-			game.restartButton.Update();
-			game.restartButton.UpdateMesh();
+			game.restartButton.Update();			
 			
 			if (game.restartButton.GetState() == ButtonState::Pressed)
 				ChangeToGameScene();
