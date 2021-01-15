@@ -314,17 +314,20 @@ public:
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
 	}
 
-	void ChangeToGameScene() 
+	void ChangeToGameScene()
 	{
-		scene = Scene::Game;		
+		scene = Scene::Game;
 		ResizeWindowEvent(window.GetSize().x, window.GetSize().y, &window);
+
+		game.titleText.SetString("Minesweeper");
+		game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
 
 		memset(valueMatrix, 0, sizeof(valueMatrix));
 		memset(checkedMatrix, 0, sizeof(checkedMatrix));
 		mineCount = startMineCount;
 		gameEnded = 0;
-		GenerateTiles();		
-	}	
+		GenerateTiles();
+	}
 
 	void GenerateTiles( )
 	{
