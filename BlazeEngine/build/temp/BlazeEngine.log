@@ -1,10 +1,7 @@
-﻿  Timer.cpp
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Utilities\Timer.h(9,51): warning C4251: 'Blaze::Timer::timerStart': class 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' needs to have dll-interface to be used by clients of class 'Blaze::Timer'
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\chrono(603): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>'
-  BlazeEngine.vcxproj -> C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll
-  C:\Programming\Projects\BlazeEngine\Libraries\SDL\SDL2-2.0.10\lib\x64\SDL2.dll
+﻿  BlazeEngine.vcxproj -> D:\Minesweaper\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll
+  D:\Minesweaper\BlazeEngine\Libraries\SDL\SDL2-2.0.10\lib\x64\SDL2.dll
   1 File(s) copied
-  C:\Programming\Projects\BlazeEngine\Libraries\DevIL\lib\x64\DevIL.dll
+  D:\Minesweaper\BlazeEngine\Libraries\DevIL\lib\x64\DevIL.dll
   1 File(s) copied
-  C:\Programming\Projects\BlazeEngine\Libraries\DevIL\lib\x64\ILU.dll
+  D:\Minesweaper\BlazeEngine\Libraries\DevIL\lib\x64\ILU.dll
   1 File(s) copied

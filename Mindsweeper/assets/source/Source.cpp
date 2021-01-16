@@ -90,6 +90,7 @@ public:
 		NormalText timerText;
 		Mat4f timerTextTrans;
 		Timer timer;
+		NormalText bombCounter;
 	} game;	
 
 	void Startup() override
@@ -195,8 +196,11 @@ public:
 
 			game.timerText.SetFont(&font, 20);			
 
+			game.bombCounter.SetFont(&font, 20);
+			game.bombCounter.SetString(String(format_string, "Mines: %d", mineCount));
+
 			game.restartButtonText.SetFont(&font, 30);
-			game.restartButtonText.SetString("Resetart");
+			game.restartButtonText.SetString("Restart");
 			game.restartButtonTextColor = Color(255);
 
 			game.restartButton.textureCenterRect = Recti(26, 37, 44, 14);			
@@ -270,7 +274,7 @@ public:
 				game.restartButtonTextColor = Color(255);
 
 			if (!gameEnded && startedGame)				
-				game.timerText.SetString(String(format_string, "Time: %f", game.timer.GetTime()));									
+				game.timerText.SetString(String(format_string, "Time: %0.2fs.", game.timer.GetTime()));
 
 			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed && !gameEnded)
 			{
