@@ -56,7 +56,7 @@ public:
 	int textureMatrix[maxSizeX * maxSizeY];
 	bool checkedMatrix[maxSizeX * maxSizeY];
 
-	int sizeX = 20, sizeY = 8, startMineCount = 10;
+	int sizeX = 20, sizeY = 8, startMineCount = 20;
 	int mineCount = startMineCount;
 
 	bool gameEnded = 0;
