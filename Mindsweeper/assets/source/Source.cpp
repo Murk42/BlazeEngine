@@ -270,7 +270,7 @@ public:
 				game.restartButtonTextColor = Color(255);
 
 			if (!gameEnded && startedGame)				
-				game.timerText.SetString(String(format_string, "Time: %f.2", game.timer.GetTime()));									
+				game.timerText.SetString(String(format_string, "Time: %f", game.timer.GetTime()));									
 
 			if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed && !gameEnded)
 			{
