@@ -15,6 +15,11 @@ namespace Blaze
 	{
 		mesh.SetVertices(&vertex, 1);
 	}
+	Button::Button(Recti textureCenterRect)
+		: textureCenterRect(textureCenterRect)
+	{
+
+	}
 
 	void Button::SetEventFunction(ButtonEvent event, void* function)
 	{
@@ -27,12 +32,12 @@ namespace Blaze
 		Vec2i mousePos = Input::GetMousePos();
 
 		if (focusedWindow != nullptr)
-		{
+		{			
 			mousePos.y = focusedWindow->GetSize().y - mousePos.y;
 
-			mousePos -= colliderRect.pos;
+			mousePos -= transform.absolutePos;
 
-			if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x < colliderRect.size.x && mousePos.y < colliderRect.size.y)
+			if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x < transform.size.x && mousePos.y < transform.size.y)
 			{
 				KeyState keyState = Input::GetKeyState(Key::MouseLeft);
 				
@@ -74,9 +79,9 @@ namespace Blaze
 			break;
 		}
 
-		vertex.GetValue<0>() = size;
+		vertex.GetValue<0>() = transform.size;
 		vertex.GetValue<1>() = Vec4f(textureCenterRect.x, textureCenterRect.y, textureCenterRect.w, textureCenterRect.h);
-		vertex.GetValue<3>() = depth;
+		vertex.GetValue<3>() = transform.depth;
 		switch (state)
 		{
 		case ButtonState::Released:

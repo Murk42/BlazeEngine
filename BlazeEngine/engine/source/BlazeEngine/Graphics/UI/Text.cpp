@@ -87,6 +87,11 @@ namespace Blaze
 		: ptr(nullptr)
 	{
 	}
+	Font::Font(StringView path)
+		: ptr(nullptr)
+	{
+		Load(path);
+	}
 	Font::~Font()
 	{
 		if (ptr != nullptr)
@@ -109,7 +114,7 @@ namespace Blaze
 	}	
 
 	Text::Text()
-		: font(nullptr), fontSizePtr(nullptr), size(0, 0)
+		: font(nullptr), fontSizePtr(nullptr)
 	{
 	}
 	Text::~Text()
@@ -145,6 +150,16 @@ namespace Blaze
 		++((FontSize*)fontSizePtr)->useCount;
 	}
 
+	NormalText::NormalText()
+	{
+
+	}
+	NormalText::NormalText(Font* font, uint height, StringView text)
+	{
+		SetFont(font, height);
+		SetString(text);
+	}
+
 	void NormalText::SetString(StringView text)
 	{
 		if (font == nullptr)
@@ -155,7 +170,7 @@ namespace Blaze
 		vertices.resize(text.Size());
 		FontSize* fontSize = (FontSize*)fontSizePtr;
 
-		size = Vec2i(0);
+		transform.size = Vec2i(0);
 		int offset = 0;
 		for (int i = 0; i < text.Size(); ++i)
 		{
@@ -165,8 +180,8 @@ namespace Blaze
 			vertices[i].GetValue<2>() = Vec2f(c.uv_offset, 0) / fontSize->texture.GetSize().x;
 			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / fontSize->texture.GetSize();			
 			offset += c.advance;
-			size.x += c.advance;
-			size.y = std::max<int>(size.y, c.size.y);
+			transform.size.x += c.advance;
+			transform.size.y = std::max<int>(transform.size.y, c.size.y);
 		}
 
 		string = text;
@@ -181,10 +196,11 @@ namespace Blaze
 			Logger::AddLog(LogType::Warning, __FUNCTION__, "No font has been set");
 			return;
 		}
+
 		vertices.resize(text.Size());
 		FontSize* fontSize = (FontSize*)fontSizePtr;		
 
-		size = Vec2i(0);
+		transform.size = Vec2i(0);
 		int offset = 0;
 		for (int i = 0; i < text.Size(); ++i)
 		{
@@ -195,11 +211,11 @@ namespace Blaze
 			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / fontSize->texture.GetSize();			
 			vertices[i].GetValue<4>() = colors[i].ToVector();
 			offset += c.advance;
-			size.x += c.advance;
-			size.y = std::max<int>(size.y, c.size.y);
+			transform.size.x += c.advance;
+			transform.size.y = std::max<int>(transform.size.y, c.size.y);
 		}		
 
-		size.x = offset;
+		transform.size.x = offset;
 
 		mesh.SetVertices(vertices.data(), vertices.size());
 	}

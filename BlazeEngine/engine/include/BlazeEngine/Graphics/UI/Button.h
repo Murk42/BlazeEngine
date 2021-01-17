@@ -3,6 +3,7 @@
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/Graphics/Mesh.h"
 #include "BlazeEngine/Graphics/Texture.h"
+#include "BlazeEngine/DataStructures/Transform2D.h"
 
 namespace Blaze
 {
@@ -33,12 +34,11 @@ namespace Blaze
 		Mesh mesh;
 		ButtonState state;
 	public:
-		float depth;				
-		Vec2i size;
-		Recti colliderRect;
+		Transform2D transform;				
 		Recti textureCenterRect;
 
 		Button();
+		Button(Recti textureCenterRect);
 
 		void SetEventFunction(ButtonEvent event, void* function);
 				

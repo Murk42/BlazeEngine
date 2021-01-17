@@ -207,6 +207,7 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Serializer.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Stream.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\StringStream.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Transform2D.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\TypeTraits.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Vector.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Bitmap.h" />

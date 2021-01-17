@@ -4,6 +4,7 @@
 #include "BlazeEngine/DataStructures/StringView.h"
 #include "BlazeEngine/DataStructures/Color.h"
 #include "BlazeEngine/DataStructures/Vector.h"
+#include "BlazeEngine/DataStructures/Transform2D.h"
 #include "BlazeEngine/Graphics/Texture.h"
 #include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/Graphics/Mesh.h"
@@ -20,6 +21,7 @@ namespace Blaze
 		void RemoveSize(void* size);
 	public:
 		Font();
+		Font(StringView path);
 		~Font();
 
 		bool Load(const StringView& path);
@@ -31,20 +33,20 @@ namespace Blaze
 	{
 	protected:
 		Font* font;
-		void* fontSizePtr;
-		Vec2i size;
+		void* fontSizePtr;		
 
 		String string;
 		Mesh mesh;
 	public:
+		Transform2D transform;
+
 		Text();
 		~Text();
 
 		void SetFont(Font* font, uint height);
 
 		const Mesh& GetMesh() const { return mesh; }
-		String GetString() const { return string; }
-		Vec2i GetSize() const { return size; }
+		String GetString() const { return string; }		
 		const Texture2D* GetTexture() const;		
 
 		void Render(BaseMaterial& material);
@@ -54,6 +56,9 @@ namespace Blaze
 	{
 		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f>> vertices;
 	public:
+		NormalText();
+		NormalText(Font* font, uint height, StringView text);
+
 		void SetString(StringView text);		
 	};
 

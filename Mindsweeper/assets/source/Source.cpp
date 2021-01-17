@@ -34,6 +34,7 @@ public:
 	Console::LogList logList = Console::LogList(Vec2i(0, 0), Vec2i(100, 10)); 
 	Console::Frame frame = Console::Frame(Vec2i(0, 11), Vec2i(100, 10));
 	Window window;	
+	Transform2D baseTransform;
 
 	Scene scene = Scene::Menu;
 
@@ -44,6 +45,7 @@ public:
 	Font font;
 	TextureArray2D tilesSpriteSheet;
 	TextureArray2D buttonTexture;
+	Recti buttonCenterRect = Recti(26, 37, 44, 14);
 
 	Mesh tilesMesh;			
 	    
@@ -66,15 +68,13 @@ public:
 	Mat4f tilesTrans;
 
 	struct {		
-		Button playButton;
-		Mat4f playButtonTrans;
-		NormalText playButtonText;
-		Mat4f playButtonTextTrans;
-		Color playButtonTextColor;
-
-		NormalText titleText;
-		Mat4f titleTextTrans;
 	} menu;
+
+
+	NormalText titleText;
+	NormalText playButtonText;
+	Button playButton;
+	Color playButtonTextColor;		
 	 
 	struct {		
 		Button restartButton;
@@ -89,8 +89,7 @@ public:
 		Mat4f detailsTextTrans;
 		NormalText timerText;
 		Mat4f timerTextTrans;
-		Timer timer;
-		NormalText bombCounter;
+		Timer timer;		
 	} game;	
 
 	void Startup() override
@@ -119,14 +118,14 @@ public:
 		Input::SetEventFunction(InputEvent::WindowSizeChanged, ResizeWindowEvent);
 
 		window.SetSize(Vec2i(800, 400));
-		window.SetWindowed(false, false);
+		window.SetWindowed(true, false);
 		window.ShowWindow(true);
 
 		Renderer::SetClearColor(Color(100, 100, 120));
 		Renderer::SetViewport(Vec2i(), window.GetSize());
 		Renderer::SetTarget(window);
 		Renderer::UseBlending(true);
-
+		
 		font.Load("assets/fonts/Pixellari.ttf");
 		buttonTexture.Load("assets/sprites/ButtonSpriteSheet.png", Vec2i(96, 96));
 		buttonTexture.SetSettings(TextureSampling::Linear, TextureSampling::Nearest);
@@ -158,28 +157,23 @@ public:
 		}     
 		      
 		//Seting up menu scene   
-		{   
-			menu.titleText.SetFont(&font, 70);
-			menu.titleText.SetString("Minesweeper");
-
-			menu.playButton.textureCenterRect = Recti(26, 37, 44, 14);			
-			menu.playButtonText.SetFont(&font, 30);
-			menu.playButtonText.SetString("Play");
-			menu.playButtonTextColor = Color(255);
-
-
-			/* 
-			* 
-				26 + 44 + 26 = 96
-			37
-			+
-			14
-			+
-			45
-			=
-			96
-
-			*/
+		{   	 
+			titleText.SetFont(&font, 70);
+			titleText.SetString("Minesweeper");
+			titleText.transform.parent = &baseTransform;
+			titleText.transform.parentAlign = Align::TopLeft;
+			titleText.transform.pos = Vec2f(5, -5);
+			
+			playButton.transform.parent = &baseTransform;
+			playButton.transform.parentAlign = Align::TopLeft;
+			playButton.transform.pos = Vec2f(5, -60);
+			playButton.transform.size = Vec2f(200, 50);
+			playButton.textureCenterRect = buttonCenterRect;
+			playButtonText.SetFont(&font, 30);
+			playButtonText.SetString("Play");
+			playButtonText.transform.parent = &playButton.transform;
+			playButtonText.transform.parentAlign = Align::Center;
+			playButtonTextColor = Color(255);
 		}
 
 		//Seting up game scene
@@ -194,10 +188,7 @@ public:
 			game.detailsText.SetFont(&font, 20);
 			game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
 
-			game.timerText.SetFont(&font, 20);			
-
-			game.bombCounter.SetFont(&font, 20);
-			game.bombCounter.SetString(String(format_string, "Mines: %d", mineCount));
+			game.timerText.SetFont(&font, 20);						
 
 			game.restartButtonText.SetFont(&font, 30);
 			game.restartButtonText.SetString("Restart");
@@ -217,38 +208,40 @@ public:
 		{
 		case Scene::Menu: { 
 
-			menu.playButton.Update();			
-
-			if (menu.playButton.GetState() == ButtonState::Down)
-				menu.playButtonTextTrans = Math::TranslationMatrix<float>(Vec2i(menu.playButton.colliderRect.pos +
-					Vec2i(100 - menu.playButtonText.GetSize().x / 2, (menu.playButtonText.GetSize().y + 10) / 2 - 2)));
+			playButton.Update();				
+			 
+			if (playButton.GetState() == ButtonState::Down) 
+				playButtonText.transform.pos = Vec2f(0, 0);				
 			else
-				menu.playButtonTextTrans = Math::TranslationMatrix<float>(Vec2i(menu.playButton.colliderRect.pos +
-					Vec2i(100 - menu.playButtonText.GetSize().x / 2, (menu.playButtonText.GetSize().y + 10) / 2 + 5)));
+				playButtonText.transform.pos = Vec3f(0, 7); 
 
-			if (menu.playButton.GetState() != ButtonState::Up)
-				menu.playButtonTextColor = Color(220);
+			if (playButton.GetState() != ButtonState::Up)
+				playButtonTextColor = Color(220);
 			else
-				menu.playButtonTextColor = Color(255);
+				playButtonTextColor = Color(255);
+
+			playButton.transform.Update();
+			playButtonText.transform.Update();
+			titleText.transform.Update();			
 
 			//Render menuTitle
 			{ 
-				buttonMaterial.properties.mvp = canvasProjection * menu.playButtonTrans;
+				buttonMaterial.properties.mvp = canvasProjection * playButton.transform.mat;
 				buttonMaterial.properties.texture = &buttonTexture;
-				Renderer::RenderPointArray(buttonMaterial, menu.playButton.GetMesh());  
+				Renderer::RenderPointArray(buttonMaterial, playButton.GetMesh());  
 
-				textMaterial.properties.mvp = canvasProjection * menu.playButtonTextTrans;
-				textMaterial.properties.texture = menu.playButtonText.GetTexture();
-				textMaterial.properties.color = menu.playButtonTextColor.ToVector();
-				Renderer::RenderPointArray(textMaterial, menu.playButtonText.GetMesh());
+				textMaterial.properties.mvp = canvasProjection * playButtonText.transform.mat;
+				textMaterial.properties.texture = playButtonText.GetTexture();
+				textMaterial.properties.color = playButtonTextColor.ToVector();
+				Renderer::RenderPointArray(textMaterial, playButtonText.GetMesh());
 
-				textMaterial.properties.mvp = canvasProjection * menu.titleTextTrans;
-				textMaterial.properties.texture = menu.titleText.GetTexture();
+				textMaterial.properties.mvp = canvasProjection * titleText.transform.mat;
+				textMaterial.properties.texture = titleText.GetTexture();
 				textMaterial.properties.color = Color(255, 128, 0).ToVector(); 
-				Renderer::RenderPointArray(textMaterial, menu.titleText.GetMesh());
+				Renderer::RenderPointArray(textMaterial, titleText.GetMesh());
 			}			
 
-			if (menu.playButton.GetState() == ButtonState::Down)
+			if (playButton.GetState() == ButtonState::Down)
 			{
 				//Logger::AddLog(LogType::Message, __FUNCTION__, "pusikaronja");
 				ChangeToGameScene();
@@ -262,11 +255,11 @@ public:
 				ChangeToGameScene();
 
 			if (game.restartButton.GetState() == ButtonState::Down)			
-				game.restartButtonTextTrans = Math::TranslationMatrix<float>(Vec2i(game.restartButton.colliderRect.pos +
-					Vec2i(100 - game.restartButtonText.GetSize().x / 2, (game.restartButtonText.GetSize().y + 10) / 2 - 2)));			
+				game.restartButtonTextTrans = Math::TranslationMatrix<float>(Vec2i(game.restartButton.transform.pos +
+					Vec2i(100 - game.restartButtonText.transform.size.x / 2, (game.restartButtonText.transform.size.y + 10) / 2 - 2)));
 			else			
-				game.restartButtonTextTrans = Math::TranslationMatrix<float>(Vec2i(game.restartButton.colliderRect.pos +
-					Vec2i(100 - game.restartButtonText.GetSize().x / 2, (game.restartButtonText.GetSize().y + 10) / 2 + 5)));			
+				game.restartButtonTextTrans = Math::TranslationMatrix<float>(Vec2i(game.restartButton.transform.pos +
+					Vec2i(100 - game.restartButtonText.transform.size.x / 2, (game.restartButtonText.transform.size.y + 10) / 2 + 5)));
 
 			if (game.restartButton.GetState() != ButtonState::Up)
 				game.restartButtonTextColor = Color(220);
@@ -368,7 +361,8 @@ public:
 
 			textMaterial.properties.mvp = canvasProjection * game.detailsTextTrans;
 			textMaterial.properties.texture = game.detailsText.GetTexture();
-			textMaterial.properties.color = Color(255).ToVector();
+			textMaterial.properties.color = Color(255).ToVector();			
+
 			Renderer::RenderPointArray(textMaterial, game.detailsText.GetMesh());	
 			break;
 			} 
@@ -428,7 +422,7 @@ public:
 			}
 		}
 
-		srand(time(0));
+		srand(Time::GetWorldTime() * 1000);
 		for (int i = 0; i < mineCount; ++i) 
 		{
 			int x1 = Random::Float(0, sizeX);
@@ -649,28 +643,26 @@ void CloseWindowEvent(Window* win)
 }
 void ResizeWindowEvent(int w, int h, Window* win)
 {	
-	App& app = App::Instance();	
+	App& app = App::Instance();
+
+	app.baseTransform.size = Vec2f(w, h);
+	app.baseTransform.Update();
 
 	switch (app.scene)
 	{
-	case Scene::Menu : {
-		app.menu.titleTextTrans = Math::TranslationMatrix<float>(Vec2i(5, h - 5 - app.game.titleText.GetSize().y));
-		
-		app.menu.playButton.colliderRect = Recti(5, h - 115, 200, 50);
-		app.menu.playButton.size = app.menu.playButton.colliderRect.size;
-		app.menu.playButtonTrans = Math::TranslationMatrix<float>(app.menu.playButton.colliderRect.pos);
+	case Scene::Menu : {						
 		break;
 		}
 	case Scene::Game: {
 		app.tilesTrans = Math::TranslationMatrix<float>(Vec2i(App::posX, App::posY));
-		app.game.titleTextTrans = Math::TranslationMatrix<float>(Vec2i(5, h - 5 - app.game.titleText.GetSize().y));
+		app.game.titleTextTrans = Math::TranslationMatrix<float>(Vec2i(5, h - 5 - app.game.titleText.transform.size.y));
 		
-		app.game.restartButton.colliderRect = Recti(5, h - 115, 200, 50);
-		app.game.restartButton.size = app.game.restartButton.colliderRect.size;
-		app.game.restartButtonTrans = Math::TranslationMatrix<float>(app.game.restartButton.colliderRect.pos);		
+		app.game.restartButton.transform.pos = Vec2i(5, h - 115);
+		app.game.restartButton.transform.size = Vec2i(200, 50);
+		app.game.restartButtonTrans = Math::TranslationMatrix<float>(app.game.restartButton.transform.pos);		
 		
-		app.game.detailsTextTrans = app.game.restartButtonTrans * Math::TranslationMatrix<float>(Vec2i(210, 45 - app.game.timerText.GetSize().y));
-		app.game.timerTextTrans = app.game.restartButtonTrans * Math::TranslationMatrix<float>(Vec2i(210, 25 - app.game.timerText.GetSize().y));
+		app.game.detailsTextTrans = app.game.restartButtonTrans * Math::TranslationMatrix<float>(Vec2i(210, 45 - app.game.timerText.transform.size.y));
+		app.game.timerTextTrans = app.game.restartButtonTrans * Math::TranslationMatrix<float>(Vec2i(210, 25 - app.game.timerText.transform.size.y));		
 		break;
 	}
 	}

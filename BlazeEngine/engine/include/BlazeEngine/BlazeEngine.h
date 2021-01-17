@@ -47,3 +47,4 @@
 #include "BlazeEngine/DataStructures/StringStream.h"
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/DataStructures/OrderedTuple.h"
+#include "BlazeEngine/DataStructures/Transform2D.h"
