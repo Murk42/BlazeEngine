@@ -91,7 +91,6 @@ public:
 		Mat4f timerTextTrans;
 		Timer timer;
 		NormalText bombCounter;
-		Mat4f bombCounterTrans;
 	} game;	
 
 	void Startup() override
@@ -197,7 +196,7 @@ public:
 
 			game.timerText.SetFont(&font, 20);			
 
-			game.bombCounter.SetFont(&font, 30);
+			game.bombCounter.SetFont(&font, 20);
 			game.bombCounter.SetString(String(format_string, "Mines: %d", mineCount));
 
 			game.restartButtonText.SetFont(&font, 30);
@@ -258,7 +257,6 @@ public:
 		}
 		case Scene::Game: {
 			game.restartButton.Update();			
-			game.bombCounter.SetString(String(format_string, "Mines: %d", mineCount));
 			
 			if (game.restartButton.GetState() == ButtonState::Pressed)
 				ChangeToGameScene();
@@ -368,11 +366,6 @@ public:
 			textMaterial.properties.color = Color(255, 128, 0).ToVector();
 			Renderer::RenderPointArray(textMaterial, game.titleText.GetMesh());
 
-			textMaterial.properties.mvp = canvasProjection * game.bombCounterTrans;
-			textMaterial.properties.texture = game.bombCounter.GetTexture();
-			textMaterial.properties.color = Color(255, 255, 255).ToVector();
-			Renderer::RenderPointArray(textMaterial, game.bombCounter.GetMesh());
-
 			textMaterial.properties.mvp = canvasProjection * game.detailsTextTrans;
 			textMaterial.properties.texture = game.detailsText.GetTexture();
 			textMaterial.properties.color = Color(255).ToVector();
@@ -409,7 +402,6 @@ public:
 		
 		game.detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
 		game.timerText.SetString("Time: 0.0");
-		game.bombCounter.SetString(String(format_string, "Mines: %d", mineCount));
 
 		memset(valueMatrix, 0, sizeof(valueMatrix));
 		memset(checkedMatrix, 0, sizeof(checkedMatrix));
@@ -677,7 +669,6 @@ void ResizeWindowEvent(int w, int h, Window* win)
 		app.game.restartButton.size = app.game.restartButton.colliderRect.size;
 		app.game.restartButtonTrans = Math::TranslationMatrix<float>(app.game.restartButton.colliderRect.pos);		
 		
-		app.game.bombCounterTrans = app.game.restartButtonTrans * Math::TranslationMatrix<float>(Vec2i(518, 25 - app.game.timerText.GetSize().y));
 		app.game.detailsTextTrans = app.game.restartButtonTrans * Math::TranslationMatrix<float>(Vec2i(210, 45 - app.game.timerText.GetSize().y));
 		app.game.timerTextTrans = app.game.restartButtonTrans * Math::TranslationMatrix<float>(Vec2i(210, 25 - app.game.timerText.GetSize().y));
 		break;
