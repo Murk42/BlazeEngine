@@ -40,18 +40,18 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Utili
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\chrono(603): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>'
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(425,30): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(428,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(428,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(429,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(429,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(527,78): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(670,66): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(451,30): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(454,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(454,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(455,30): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(455,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(553,78): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(677,66): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
           with
           [
               T=float
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(670,60): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(677,60): warning C4244: 'argument': conversion from 'int' to 'const T', possible loss of data
           with
           [
               T=float
@@ -84,6 +84,17 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
           [
               T=float
           ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(196,21): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(62): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,4>(const Blaze::Vector<int,4> &)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(62): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,4>(const Blaze::Vector<int,4> &)' being compiled
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(157,81): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
           with
           [
@@ -93,8 +104,8 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
           [
               T=float
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(104): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(104): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(98): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(98): message : see reference to function template instantiation 'void Blaze::Vector<float,2>::operator =<int>(const Blaze::Vector<int,2> &)' being compiled
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(157,5): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
           with
           [
@@ -105,8 +116,8 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
               T=float
           ]
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Mesh.h(48,1): warning C4267: 'argument': conversion from 'size_t' to 'Blaze::uint', possible loss of data
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(183): message : see reference to function template instantiation 'void Blaze::Mesh::SetVertices<Blaze::Vec2f,Blaze::Vec2f,float,float>(const Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,float,float> *,size_t)' being compiled
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(120,21): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(177): message : see reference to function template instantiation 'void Blaze::Mesh::SetVertices<Blaze::Vec2f,Blaze::Vec2f,float,float>(const Blaze::Vertex<Blaze::Vec2f,Blaze::Vec2f,float,float> *,size_t)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(148,1): warning C4244: '-=': conversion from 'const T' to 'T', possible loss of data
           with
           [
               T=float
@@ -115,19 +126,17 @@ C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataS
           [
               T=int
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(259): message : see reference to function template instantiation 'Blaze::Vector<int,2>::Vector<float,2>(const Blaze::Vector<float,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(258): message : see reference to function template instantiation 'Blaze::Vector<int,2>::Vector<float,2>(const Blaze::Vector<float,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(196,21): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(295): message : see reference to function template instantiation 'void Blaze::Vector<int,2>::operator -=<float>(const Blaze::Vector<float,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(295): message : see reference to function template instantiation 'void Blaze::Vector<int,2>::operator -=<float>(const Blaze::Vector<float,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(148,1): warning C4244: '-=': conversion from 'const T' to 'T', possible loss of data
           with
-          [
-              T=int
-          ]
-          and
           [
               T=float
           ]
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(259): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\Mindsweeper\assets\source\Source.cpp(258): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
+          and
+          [
+              T=int
+          ]
   C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.lib
   1 File(s) copied
   C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll

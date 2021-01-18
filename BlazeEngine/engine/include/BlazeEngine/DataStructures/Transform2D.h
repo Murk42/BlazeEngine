@@ -59,12 +59,12 @@ namespace Blaze
 				}
 
 				absolutePos = parent->absolutePos + offset + pos;
-				mat = Math::TranslationMatrix<float>(absolutePos);
+				mat = Math::TranslationMatrix<float>(Vec4i(absolutePos.x, absolutePos.y, 0.0f, 1.0f));
 			}
 			else
 			{
 				absolutePos = pos;
-				mat = Math::TranslationMatrix<float>(absolutePos);
+				mat = Math::TranslationMatrix<float>(Vec4i(absolutePos.x, absolutePos.y, 0.0f, 1.0f));
 			}
 		}
 	};

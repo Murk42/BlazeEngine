@@ -30,7 +30,7 @@ namespace Blaze
 			const char* const name;
 
 			Property(const char* name)
-				: name(name), value()
+				: name(name), value(), changed(true)
 			{
 
 			}

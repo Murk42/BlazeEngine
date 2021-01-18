@@ -41,16 +41,15 @@ namespace Blaze
 			{
 				KeyState keyState = Input::GetKeyState(Key::MouseLeft);
 				
+				if (state == ButtonState::Pressed)
+					state = ButtonState::Down;
+
 				if (keyState == KeyState::Pressed)
 				{
 					if (state == ButtonState::Up || state == ButtonState::Released || state == ButtonState::Hovered)
 						state = ButtonState::Pressed;
-				}
-				else if (keyState == KeyState::Down)
-				{
-					state = ButtonState::Down;
-				}
-				else
+				}				
+				else if (keyState != KeyState::Down)
 					state = ButtonState::Hovered;
 			}
 			else
