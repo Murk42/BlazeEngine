@@ -176,6 +176,20 @@ namespace Blaze
 				BindTextures<index + 1, T::NextTuple>(tuple.nextTuple, textureIndex);
 		}		
 
+		template<typename T>
+		constexpr void SetStandardProperty(T& tuple, const std::vector<Uniform>& uniforms)
+		{
+			if (uniforms[tuple.value.uniformIndex].GetName() == "u_MVP")
+				standardProperties.MVP = (BaseMaterialProperties::Property<Mat4f>*) & tuple.value;
+			else if (uniforms[tuple.value.uniformIndex].GetName() == "u_texture")
+				standardProperties.texture = (BaseMaterialProperties::Property<Texture2D>*) & tuple.value;
+			else if (uniforms[tuple.value.uniformIndex].GetName() == "u_color")
+				standardProperties.color = (BaseMaterialProperties::Property<Vec4f>*) & tuple.value;
+
+			if constexpr (T::TupleSize > 1)
+				SetStandardProperty(tuple.nextTuple, uniforms);
+		}
+
 		inline void UpdateShaderProgramCompability()
 		{
 			if (sp.GetUniforms().size() != S::TypesTuple::TupleSize)
@@ -190,18 +204,7 @@ namespace Blaze
 			}
 			else
 			{
-				auto& uniforms = sp.GetUniforms();
-
-				for (int i = 0; i < uniforms.size(); ++i)
-				{
-					if (uniforms[i].GetName() == "u_MVP")
-						standardProperties.MVP = (BaseMaterialProperties::Property<Mat4f>*)ptrs[i];				
-					else if (uniforms[i].GetName() == "u_texture")
-						standardProperties.texture = (BaseMaterialProperties::Property<Texture2D>*)ptrs[i];
-					else if (uniforms[i].GetName() == "u_color")
-						standardProperties.color = (BaseMaterialProperties::Property<Vec4f>*)ptrs[i];
-				}
-
+				SetStandardProperty(properties.AsTuple(), sp.GetUniforms());				
 				valid = true;
 			}
 		}
