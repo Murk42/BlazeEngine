@@ -152,7 +152,9 @@
     <None Include="assets\shaders\text\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="assets\source\Source.cpp" />
+    <ClCompile Include="assets\source\App.cpp" />
+    <ClCompile Include="assets\source\GameScene.cpp" />
+    <ClCompile Include="assets\source\MenuScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sprites\ButtonSpriteSheet.png" />
@@ -164,6 +166,12 @@
     <ProjectReference Include="..\BlazeEngine\BlazeEngine.vcxproj">
       <Project>{5c88a884-6f27-4382-83a4-5a3ef438d83b}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="assets\source\App.h" />
+    <ClInclude Include="assets\source\GameScene.h" />
+    <ClInclude Include="assets\source\MenuScene.h" />
+    <ClInclude Include="assets\source\Scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
