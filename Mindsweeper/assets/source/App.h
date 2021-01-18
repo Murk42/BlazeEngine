@@ -1,13 +1,8 @@
 #include "BlazeEngine/BlazeEngine.h"
 using namespace Blaze;
 
-class Scene;
+#include "Scene.h"
 
-struct TilesMatProps : MaterialProperties<Mat4f, TextureArray2D>
-{
-	Property<Mat4f> mvp = "u_MVP";
-	Property<TextureArray2D> texture = "u_texture";
-};
 struct TextMatProps : MaterialProperties<Mat4f, Texture2D, Vec4f>
 {
 	Property<Mat4f> mvp = "u_MVP";
@@ -33,12 +28,10 @@ public:
 
 	Scene* activeScene;
 
-	Material<TilesMatProps> tilesMaterial;
 	Material<TextMatProps> textMaterial;
 	Material<ButtonMatProps> buttonMaterial;
 
-	Font font = Font("assets/fonts/Pixellari.ttf");
-	TextureArray2D tilesSpriteSheet;
+	Font font = Font("assets/fonts/Pixellari.ttf");	
 	TextureArray2D buttonTexture;
 	Recti buttonCenterRect = Recti(26, 37, 44, 14);
 

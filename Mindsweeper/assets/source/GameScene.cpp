@@ -25,9 +25,16 @@ void GameScene::Startup()
 		offsetY += tileSizeY;
 	}
 
-	app.tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
-	app.tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
+	tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
+	tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
 	tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
+
+	{
+		Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
+		Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/shaders/sprite/fragment.glsl");
+		Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
+		tilesMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
+	}
 
 	tilesTransform.parent = &app.baseTransform;
 	tilesTransform.parentAlign = Align::BottomLeft;
@@ -189,9 +196,9 @@ void GameScene::Frame()
 	app.textMaterial.properties.color = Color(255).ToVector();
 	Renderer::RenderPointArray(app.textMaterial, timerText.GetMesh());
 
-	app.tilesMaterial.properties.mvp = app.canvasProjection * tilesTransform.mat;
-	app.tilesMaterial.properties.texture = &app.tilesSpriteSheet;
-	Renderer::RenderPointArray(app.tilesMaterial, tilesMesh.vl);
+	tilesMaterial.properties.mvp = app.canvasProjection * tilesTransform.mat;
+	tilesMaterial.properties.texture = &tilesSpriteSheet;
+	Renderer::RenderPointArray(tilesMaterial, tilesMesh.vl);
 
 	app.textMaterial.properties.mvp = app.canvasProjection * titleText.transform.mat;
 	app.textMaterial.properties.texture = titleText.GetTexture();

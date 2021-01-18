@@ -49,7 +49,7 @@ namespace Blaze
 		String GetString() const { return string; }		
 		const Texture2D* GetTexture() const;		
 
-		void Render(BaseMaterial& material);
+		void Render(BaseMaterial& material, const Color& color, const Mat4f& mvp);
 	};	
 
 	class BLAZE_API NormalText : public Text

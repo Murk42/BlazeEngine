@@ -35,11 +35,7 @@ void App::Startup()
 	buttonTexture.SetSettings(TextureSampling::Linear, TextureSampling::Nearest);
 
 	//Load tilesMaterial  
-	{
-		Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
-		Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/shaders/sprite/fragment.glsl");
-		Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
-		tilesMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
+	{		
 	}
 
 	//Load textMaterial 

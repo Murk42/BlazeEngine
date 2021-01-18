@@ -150,6 +150,21 @@ namespace Blaze
 		++((FontSize*)fontSizePtr)->useCount;
 	}
 
+	void Text::Render(BaseMaterial& material, const Color& color, const Mat4f& mvp)
+	{
+		if (material.standardProperties.MVP == nullptr || material.standardProperties.color == nullptr || material.standardProperties.texture == nullptr)
+		{
+			Logger::AddLog(LogType::Error, __FUNCTION__, "Text::Render requires material with MVP, color and texture property.");
+			return;
+		}
+
+		*material.standardProperties.MVP = mvp;
+		*material.standardProperties.color = color.ToVector();
+		*material.standardProperties.texture = GetTexture();
+
+		Renderer::RenderPointArray(material, mesh);
+	}
+
 	NormalText::NormalText()
 	{
 

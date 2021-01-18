@@ -48,16 +48,10 @@ void MenuScene::Frame()
 		app.buttonMaterial.properties.mvp = app.canvasProjection * playButton.transform.mat;
 		app.buttonMaterial.properties.texture = &app.buttonTexture;
 		Renderer::RenderPointArray(app.buttonMaterial, playButton.GetMesh());
+		
+		playButtonText.Render(app.textMaterial, playButtonTextColor, app.canvasProjection * playButtonText.transform.mat);
 
-		app.textMaterial.properties.mvp = app.canvasProjection * playButtonText.transform.mat;
-		app.textMaterial.properties.texture = playButtonText.GetTexture();
-		app.textMaterial.properties.color = playButtonTextColor.ToVector();
-		Renderer::RenderPointArray(app.textMaterial, playButtonText.GetMesh());
-
-		app.textMaterial.properties.mvp = app.canvasProjection * titleText.transform.mat;
-		app.textMaterial.properties.texture = titleText.GetTexture();
-		app.textMaterial.properties.color = Color(255, 128, 0).ToVector();
-		Renderer::RenderPointArray(app.textMaterial, titleText.GetMesh());
+		titleText.Render(app.textMaterial, Color(1.0f, 0.5f, 0.0f), app.canvasProjection * titleText.transform.mat);		
 	}
 
 	if (startingGame && startTimer.GetTime() > 0.2)

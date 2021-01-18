@@ -3,14 +3,22 @@
 #include "BlazeEngine/BlazeEngine.h"
 using namespace Blaze;
 
+struct TilesMatProps : MaterialProperties<Mat4f, TextureArray2D>
+{
+	Property<Mat4f> mvp = "u_MVP";
+	Property<TextureArray2D> texture = "u_texture";
+};
+
 class GameScene : public Scene
 {
 public:	
+	Material<TilesMatProps> tilesMaterial;
+	TextureArray2D tilesSpriteSheet;
 	Mesh tilesMesh;
 	Transform2D tilesTransform;
 
 	static constexpr int maxSizeX = 100, maxSizeY = 50;
-	static constexpr int tileSizeX = 32, tileSizeY = 32;
+	static constexpr int tileSizeX = 32, tileSizeY = 32; 
 
 	Vertex<Vec2f, Vec2f, float, float> vertices[maxSizeX * maxSizeY];
 	int valueMatrix[maxSizeX * maxSizeY];

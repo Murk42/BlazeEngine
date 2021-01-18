@@ -138,7 +138,7 @@ namespace Blaze
 		constexpr void SetPtrs(T& tuple)
 		{
 			ptrs[index] = &tuple.value;
-			if constexpr (index < S::Tuple::TupleSize - 1)
+			if constexpr (T::TupleSize > 1)
 				SetPtrs<index + 1>(tuple.nextTuple);
 		}		
 

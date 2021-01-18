@@ -3,11 +3,6 @@ using namespace Blaze;
 
 #include "Scene.h"
 
-struct TilesMatProps : MaterialProperties<Mat4f, TextureArray2D>
-{
-	Property<Mat4f> mvp = "u_MVP";
-	Property<TextureArray2D> texture = "u_texture";
-};
 struct TextMatProps : MaterialProperties<Mat4f, Texture2D, Vec4f>
 {
 	Property<Mat4f> mvp = "u_MVP";
@@ -21,34 +16,25 @@ struct ButtonMatProps : MaterialProperties<Mat4f, TextureArray2D, float>
 	Property<float> texScale = "u_texScale";
 };
 
-enum class SceneType
-{
-	Menu,
-	Game
-};
-
 class App : public Application<App>
 {
 public:
 	Console::LogList logList = Console::LogList(Vec2i(0, 0), Vec2i(100, 10));
 	Console::Frame frame = Console::Frame(Vec2i(0, 11), Vec2i(100, 10));
 	Window window;
-	Transform2D baseTransform;
 
-	SceneType scene = SceneType::Menu;
+	Transform2D baseTransform;
+	Mat4f canvasProjection;		
 
 	Scene* activeScene;
 
-	Material<TilesMatProps> tilesMaterial;
 	Material<TextMatProps> textMaterial;
 	Material<ButtonMatProps> buttonMaterial;
 
-	Font font = Font("assets/fonts/Pixellari.ttf");
-	TextureArray2D tilesSpriteSheet;
+	Font font = Font("assets/fonts/Pixellari.ttf");	
 	TextureArray2D buttonTexture;
 	Recti buttonCenterRect = Recti(26, 37, 44, 14);
 
-	Mat4f canvasProjection;	
 
 	void Startup() override;
 	void Frame() override;
