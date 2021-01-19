@@ -7,16 +7,14 @@ void MenuScene::Startup()
 	App& app = App::Instance();
 
 	titleText.SetFont(&app.font, 70);
-	titleText.SetString("Minesweeper");
-	titleText.transform.parent = &app.baseTransform;
+	titleText.SetString("Minesweeper");	
 	titleText.transform.parentAlign = Align::TopLeft;
 	titleText.transform.pos = Vec2f(5, -5);
-
-	playButton.transform.parent = &app.baseTransform;
+	
 	playButton.transform.parentAlign = Align::TopLeft;
 	playButton.transform.pos = Vec2f(5, -65);
-	playButton.transform.size = Vec2f(200, 50);
-	playButton.textureCenterRect = app.buttonCenterRect;
+	playButton.transform.size = Vec2f(200, 50);	
+	playButton.buttonData = &app.buttonData;
 	playButtonText.SetFont(&app.font, 30);
 	playButtonText.SetString("Play");
 	playButtonText.transform.parent = &playButton.transform;
@@ -45,12 +43,8 @@ void MenuScene::Frame()
 
 	//Render menuTitle
 	{
-		app.buttonMaterial.properties.mvp = app.canvasProjection * playButton.transform.mat;
-		app.buttonMaterial.properties.texture = &app.buttonTexture;
-		Renderer::RenderPointArray(app.buttonMaterial, playButton.GetMesh());
-		
+		playButton.Render(app.buttonMaterial, app.canvasProjection * playButton.transform.mat);				
 		playButtonText.Render(app.textMaterial, playButtonTextColor, app.canvasProjection * playButtonText.transform.mat);
-
 		titleText.Render(app.textMaterial, Color(1.0f, 0.5f, 0.0f), app.canvasProjection * titleText.transform.mat);		
 	}
 

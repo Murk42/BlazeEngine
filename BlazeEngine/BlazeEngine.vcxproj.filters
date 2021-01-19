@@ -251,6 +251,9 @@
     <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\Transform2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="engine\assets\default\vertexDiffuse.glsl" />

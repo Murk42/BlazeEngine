@@ -35,29 +35,24 @@ void GameScene::Startup()
 		Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
 		tilesMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
 	}
-
-	tilesTransform.parent = &app.baseTransform;
+	
 	tilesTransform.parentAlign = Align::BottomLeft;
 	tilesTransform.pos = Vec2f(10, 10);
 	tilesTransform.size = Vec2f(sizeX * tileSizeX, sizeY * tileSizeY);
 
 	titleText.SetFont(&app.font, 70);
-	titleText.SetString("Minesweeper");
-	titleText.transform.parent = &app.baseTransform;
+	titleText.SetString("Minesweeper");	
 	titleText.transform.parentAlign = Align::TopLeft;
 	titleText.transform.pos = Vec2f(5, -5);
 
 	detailsText.SetFont(&app.font, 20);
-	detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));
-	detailsText.transform.parent = &app.baseTransform;
+	detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));	
 	detailsText.transform.parentAlign = Align::TopLeft;
 	detailsText.transform.pos = Vec2f(215, -75);
-
-	restartButton.transform.parent = &app.baseTransform;
+	
 	restartButton.transform.parentAlign = Align::TopLeft;
 	restartButton.transform.pos = Vec2f(5, -65);
-	restartButton.transform.size = Vec2f(200, 50);
-	restartButton.textureCenterRect = app.buttonCenterRect;
+	restartButton.transform.size = Vec2f(200, 50);	
 	restartButtonText.SetFont(&app.font, 30);
 	restartButtonText.SetString("Restart");
 	restartButtonText.transform.parent = &restartButton.transform;
@@ -65,8 +60,7 @@ void GameScene::Startup()
 	restartButtonTextColor = Color(255);
 
 	timerText.SetFont(&app.font, 20);
-	timerText.SetString("Time: 0.0");
-	timerText.transform.parent = &app.baseTransform;
+	timerText.SetString("Time: 0.0");	
 	timerText.transform.parentAlign = Align::TopLeft;
 	timerText.transform.pos = Vec2i(215, -90);
 		

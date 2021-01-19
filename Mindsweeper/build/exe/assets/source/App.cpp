@@ -9,9 +9,6 @@ void ResizeWindowEvent(int w, int h, Window* win)
 {
 	App& app = App::Instance();
 
-	app.baseTransform.size = Vec2f(w, h);
-	app.baseTransform.Update();
-
 	app.canvasProjection = Math::OrthographicMatrix<float>(0, w, 0, h, -1, 1);
 	Renderer::SetViewport(Vec2i(), Vec2i(w, h));
 }
@@ -29,10 +26,12 @@ void App::Startup()
 	Renderer::SetViewport(Vec2i(), window.GetSize());
 	Renderer::SetTarget(window);
 	Renderer::UseBlending(true);
-
-	font.Load("assets/fonts/Pixellari.ttf");
-	buttonTexture.Load("assets/sprites/ButtonSpriteSheet.png", Vec2i(96, 96));
+		
 	buttonTexture.SetSettings(TextureSampling::Linear, TextureSampling::Nearest);
+
+	buttonData.texture = &buttonTexture;
+	buttonData.textureCenterRect = Recti(26, 37, 44, 14);
+	buttonData.texScale = 0.5f;
 
 	//Load tilesMaterial  
 	{		
@@ -51,9 +50,7 @@ void App::Startup()
 		Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/button/vertex.glsl");
 		Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/button/fragment.glsl");
 		Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/button/geometry.glsl");
-		buttonMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
-
-		buttonMaterial.properties.texScale = 0.5f;
+		buttonMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);		
 	}
 
 	ChangeScene<MenuScene>();

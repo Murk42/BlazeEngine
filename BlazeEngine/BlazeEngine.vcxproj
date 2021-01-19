@@ -240,6 +240,7 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\Transform2D.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Button.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Console\LogList.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Console\Frame.cpp" />

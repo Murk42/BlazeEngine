@@ -3,10 +3,18 @@
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/Graphics/Mesh.h"
 #include "BlazeEngine/Graphics/Texture.h"
+#include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/DataStructures/Transform2D.h"
 
 namespace Blaze
 {
+	struct ButtonData
+	{
+		TextureArray2D* texture;
+		Recti textureCenterRect;
+		float texScale;
+	};
+
 	enum class ButtonState
 	{
 		Down,
@@ -28,17 +36,17 @@ namespace Blaze
 
 	class BLAZE_API Button
 	{
-		Vertex<Vec2f, Vec4f, float, float> vertex;
+		Vertex<Vec2f, float, float> vertex;
 		void* eventFunctions[(uint)ButtonEvent::ButtonEvent_Count];
 
 		Mesh mesh;
 		ButtonState state;
 	public:
-		Transform2D transform;				
-		Recti textureCenterRect;
+		ButtonData* buttonData;
+		Transform2D transform;						
 
-		Button();
-		Button(Recti textureCenterRect);
+		Button();		
+		Button(ButtonData* buttonData);
 
 		void SetEventFunction(ButtonEvent event, void* function);
 				
@@ -46,5 +54,7 @@ namespace Blaze
 		const Mesh& GetMesh() const { return mesh; }		
 
 		void Update();		
+
+		void Render(BaseMaterial& material, const Mat4f& mat);
 	};	
 }

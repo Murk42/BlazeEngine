@@ -1,11 +1,11 @@
 #version 330 core
 
 in vec4 p_rect;
-in vec4 p_textureCenterRect;
 in vec3 p_uv;
 
 uniform sampler2DArray u_texture;
 uniform float u_texScale;
+uniform vec4 u_textureCenterRect;
 
 void main()
 {			
@@ -14,10 +14,10 @@ void main()
 	
 	vec2 pos = p_rect.xy;
 	 
-	float tx1 = p_textureCenterRect.x;
-	float ty1 = p_textureCenterRect.y;
-	float tx2 = p_textureCenterRect.z;
-	float ty2 = p_textureCenterRect.w;
+	float tx1 = u_textureCenterRect.x;
+	float ty1 = u_textureCenterRect.y;
+	float tx2 = u_textureCenterRect.z;
+	float ty2 = u_textureCenterRect.w;
 	float tx3 = texSize.x - tx1 - tx2;
 	float ty3 = texSize.y - ty1 - ty2;
 

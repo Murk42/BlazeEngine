@@ -5,7 +5,7 @@ using namespace Blaze;
 
 class MenuScene : public Scene
 {
-public:
+public: 
 	NormalText titleText;
 	Button playButton;
 	NormalText playButtonText;

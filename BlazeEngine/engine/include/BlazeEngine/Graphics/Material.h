@@ -22,9 +22,9 @@ namespace Blaze
 			using Type = T;
 			using StorageType = processed_type<T>;
 		private:
-			StorageType value;
-			bool changed;
 			uint uniformIndex;
+			bool changed;
+			StorageType value;
 		public:
 
 			const char* const name;
@@ -66,19 +66,20 @@ namespace Blaze
 
 	class BLAZE_API BaseMaterial
 	{		
-		bool valid = false;
 
 		BaseMaterial();
 		BaseMaterial(const BaseMaterial&);
 		BaseMaterial(BaseMaterial&&);
 
 		void* GetProperty(StringView);
+		const void* GetProperty(StringView) const;
 	protected:
+		bool valid = false;
 		ShaderProgram sp;
 	public:
 		struct {
 			BaseMaterialProperties::Property<Mat4f>* MVP;			
-			BaseMaterialProperties::Property<Texture2D>* texture;
+			BaseMaterialProperties::Property<Texture>* texture;
 			BaseMaterialProperties::Property<Vec4f>* color;
 		} standardProperties;
 
@@ -86,6 +87,17 @@ namespace Blaze
 
 		template<typename T>
 		BaseMaterialProperties::Property<T>* GetProperty(StringView name)
+		{
+			if (valid)
+				return (BaseMaterialProperties::Property<T>*)GetProperty(name);
+			else
+			{
+				Logger::AddLog(LogType::Warning, __FUNCTION__, "Using an invalid material");
+				return nullptr;
+			}
+		}
+		template<typename T>
+		const BaseMaterialProperties::Property<T>* GetProperty(StringView name) const
 		{
 			if (valid)
 				return (BaseMaterialProperties::Property<T>*)GetProperty(name);
@@ -109,7 +121,6 @@ namespace Blaze
 	class Material : public BaseMaterial
 	{				
 		void* ptrs[S::TypesTuple::TupleSize];
-		bool valid = false;
 
 		template<size_t index, typename T>
 		constexpr bool IsCompatible(T& tuple)
@@ -179,11 +190,12 @@ namespace Blaze
 		template<typename T>
 		constexpr void SetStandardProperty(T& tuple, const std::vector<Uniform>& uniforms)
 		{
-			if (uniforms[tuple.value.uniformIndex].GetName() == "u_MVP")
+			const Uniform& uniform = uniforms[tuple.value.uniformIndex];
+			if (uniform.GetName() == "u_MVP" && std::is_same_v<T::Type::Type, Mat4f>)
 				standardProperties.MVP = (BaseMaterialProperties::Property<Mat4f>*) & tuple.value;
-			else if (uniforms[tuple.value.uniformIndex].GetName() == "u_texture")
-				standardProperties.texture = (BaseMaterialProperties::Property<Texture2D>*) & tuple.value;
-			else if (uniforms[tuple.value.uniformIndex].GetName() == "u_color")
+			else if (uniform.GetName() == "u_texture" && uniform.IsSampler() && std::is_base_of_v<Texture, T::Type::Type>)
+				standardProperties.texture = (BaseMaterialProperties::Property<Texture>*) & tuple.value;
+			else if (uniform.GetName() == "u_color" && std::is_same_v<T::Type::Type, Vec4f>)
 				standardProperties.color = (BaseMaterialProperties::Property<Vec4f>*) & tuple.value;
 
 			if constexpr (T::TupleSize > 1)
