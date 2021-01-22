@@ -13,8 +13,8 @@ class GameScene : public Scene
 {
 public:	
 	Material<TilesMatProps> tilesMaterial;
-	TextureArray2D tilesSpriteSheet;
-	Mesh tilesMesh;
+	TextureArray2D tilesSpriteSheet = TextureArray2D("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
+	Mesh tilesMesh; 
 	Transform2D tilesTransform;
 
 	static constexpr int maxSizeX = 100, maxSizeY = 50;
@@ -37,7 +37,9 @@ public:
 	NormalText titleText;
 	NormalText detailsText;
 	NormalText timerText;
-	Timer timer;
+	Timer timer;	
+
+	void Test(Button*) { }
 
 	void Startup() override;
 	void Frame() override;
@@ -47,4 +49,5 @@ public:
 	void UpdateTiles();
 	bool inRange(int x, int y);
 	int ClickOnTile(int x, int y);	
+	void RestartTiles();
 };

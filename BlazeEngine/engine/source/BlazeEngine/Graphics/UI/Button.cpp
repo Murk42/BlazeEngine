@@ -5,10 +5,10 @@
 
 namespace Blaze
 {
-	inline void CallEventFunction(void* function, Button* button)
-	{
-		if (function != nullptr)
-			((void(*)(Button*))function)(button);
+	inline void CallEventFunction(std::function<void(Button*)>& func, Button* button)
+	{		
+		if (func)
+			func(button);
 	}
 
 	Button::Button()
@@ -21,10 +21,19 @@ namespace Blaze
 	{
 	}
 
-
 	void Button::SetEventFunction(ButtonEvent event, void* function)
-	{
-		eventFunctions[(uint)event] = function;
+	{		
+		switch (event)
+		{
+		case Blaze::ButtonEvent::Down:			
+		case Blaze::ButtonEvent::Up:			
+		case Blaze::ButtonEvent::Pressed:			
+		case Blaze::ButtonEvent::Released:			
+		eventFunctions[(uint)event].func = *(std::function<void(Button*)>*)function;
+		break;
+		default:
+			break;
+		}
 	}
 
 	void Button::Update()
@@ -40,7 +49,7 @@ namespace Blaze
 
 			if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x < transform.size.x && mousePos.y < transform.size.y)
 			{
-				KeyState keyState = Input::GetKeyState(Key::MouseLeft);
+				KeyState keyState = Input::GetKeyState(Key::MouseLeft).state;
 				
 				if (state == ButtonState::Pressed)
 					state = ButtonState::Down;
@@ -65,17 +74,17 @@ namespace Blaze
 		switch (state)
 		{
 		case ButtonState::Down:
-			CallEventFunction(eventFunctions[(uint)ButtonEvent::Down], this);
+			CallEventFunction(eventFunctions[(uint)ButtonEvent::Down].func, this);
 			break;
 		case ButtonState::Hovered:
 		case ButtonState::Up:
-			CallEventFunction(eventFunctions[(uint)ButtonEvent::Up], this);
+			CallEventFunction(eventFunctions[(uint)ButtonEvent::Up].func, this);
 			break;
 		case ButtonState::Pressed:
-			CallEventFunction(eventFunctions[(uint)ButtonEvent::Pressed], this);
+			CallEventFunction(eventFunctions[(uint)ButtonEvent::Pressed].func, this);
 			break;
 		case ButtonState::Released:
-			CallEventFunction(eventFunctions[(uint)ButtonEvent::Released], this);
+			CallEventFunction(eventFunctions[(uint)ButtonEvent::Released].func, this);
 			break;
 		}
 

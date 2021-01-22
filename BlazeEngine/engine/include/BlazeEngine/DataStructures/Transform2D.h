@@ -33,7 +33,7 @@ namespace Blaze
 		Transform2D* parent;
 
 		Transform2D();
-		Transform2D(Vec2f pos, Vec2f size, Align parentAlign = Align::Center, Transform2D* parent = nullptr);
+		Transform2D(Vec2f pos, Vec2f size, Align parentAlign = Align::Center, Transform2D* parent = nullptr, float depth = 0);
 
 		void Update();
 	};

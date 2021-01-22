@@ -12,10 +12,10 @@ namespace Blaze
 	enum class InputEvent
 	{
 		//DONT CHANGE PLACES AND ORDER OF FRIST FOUR
-		KeyUp,				/* void Function(Key) */
-		KeyDown,			/* void Function(Key) */
-		KeyPressed,			/* void Function(Key) */
-		KeyReleased,		/* void Function(Key) */
+		KeyUp,				/* void Function(Key, double) */
+		KeyDown,			/* void Function(Key, double) */
+		KeyPressed,			/* void Function(Key, double, uint) */
+		KeyReleased,		/* void Function(Key, double) */		
 		MouseMotion,		/* void Function(int dx, int dy) */
 		MouseWheel,			/* void Function(int v) */
 		MouseEnter,			/* void Function(Window*) */
@@ -30,19 +30,27 @@ namespace Blaze
 		WindowClosed,		/* void Function(Window*) */
 		InputEvent_Count
 	};			
+
 	enum class KeyState
 	{
-		Up = (int)InputEvent::KeyUp, 
+		Up = (int)InputEvent::KeyUp,
 		Down = (int)InputEvent::KeyDown,
 		Pressed = (int)InputEvent::KeyPressed,
-		Released = (int)InputEvent::KeyReleased
+		Released = (int)InputEvent::KeyReleased,		
+	};
+
+	struct KeyStateData
+	{	
+		double lastPress;
+		uint pressCount;
+		KeyState state;
 	};
 
 	namespace Input
 	{							
 		void BLAZE_API Update();
 
-		const BLAZE_API KeyState GetKeyState(Key code);
+		const BLAZE_API KeyStateData GetKeyState(Key code);		
 
 		void BLAZE_API SetEventFunction(InputEvent event, void* function);			
 		
@@ -50,7 +58,9 @@ namespace Blaze
 		Vec2i BLAZE_API GetMousePos();
 		Vec2i BLAZE_API GetMouseMovement();
 		BLAZE_API Window* GetFocusedWindow();
+		double BLAZE_API GetDoubleClickInterval();
 
+		void BLAZE_API SetDoubleClickInterval(double interval);
 		void BLAZE_API SetMousePos(const Vec2i&);
 	}
 }

@@ -49,7 +49,6 @@ namespace Blaze
 		String GetString() const { return string; }		
 		const Texture2D* GetTexture() const;		
 
-		void Render(BaseMaterial& material, const Color& color, const Mat4f& mvp);
 	};	
 
 	class BLAZE_API NormalText : public Text
@@ -60,12 +59,19 @@ namespace Blaze
 		NormalText(Font* font, uint height, StringView text);
 
 		void SetString(StringView text);		
+
+		void Render(BaseMaterial& material, const Color& color, const Mat4f& mvp);
 	};
 
 	class BLAZE_API ColoredText : public Text
 	{					
 		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f, Vec4f>> vertices;		
 	public:						
+		ColoredText();
+		ColoredText(Font* font, uint height, StringView text, const std::vector<Color>& colors);
+
 		void SetString(StringView text, const std::vector<Color>& colors);
+
+		void Render(BaseMaterial& material, const Mat4f& mvp);
 	};
 }

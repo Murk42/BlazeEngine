@@ -24,45 +24,52 @@ void GameScene::Startup()
 		offsetX = 0;
 		offsetY += tileSizeY;
 	}
-
-	tilesSpriteSheet.Load("assets/sprites/SpriteSheet.png", Vec2i(64, 64));
-	tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
+	
 	tilesMesh.SetVertices(vertices, maxSizeX * maxSizeY);
+	tilesSpriteSheet.SetSettings(TextureSampling::Linear, TextureSampling::Linear);
+	tilesTransform = Transform2D(Vec2f(10, 10), Vec2f(sizeX * tileSizeX, sizeY * tileSizeY), Align::BottomLeft, nullptr);
 
 	{
 		Shader vertexShader = Shader(ShaderType::VertexShader, "assets/shaders/sprite/vertex.glsl");
 		Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/shaders/sprite/fragment.glsl");
 		Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/shaders/sprite/geometry.glsl");
 		tilesMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);
-	}
+	}	
 	
-	tilesTransform.parentAlign = Align::BottomLeft;
-	tilesTransform.pos = Vec2f(10, 10);
-	tilesTransform.size = Vec2f(sizeX * tileSizeX, sizeY * tileSizeY);
-
+	titleText.transform = Transform2D(Vec2f(5, -5), Vec2f(), Align::TopLeft, nullptr);	
 	titleText.SetFont(&app.font, 70);
-	titleText.SetString("Minesweeper");	
-	titleText.transform.parentAlign = Align::TopLeft;
-	titleText.transform.pos = Vec2f(5, -5);
-
+	titleText.SetString("Minesweeper");
+	 
+	detailsText.transform = Transform2D(Vec2f(215, -75), Vec2f(), Align::TopLeft, nullptr);
 	detailsText.SetFont(&app.font, 20);
-	detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));	
-	detailsText.transform.parentAlign = Align::TopLeft;
-	detailsText.transform.pos = Vec2f(215, -75);
-	
-	restartButton.transform.parentAlign = Align::TopLeft;
-	restartButton.transform.pos = Vec2f(5, -65);
-	restartButton.transform.size = Vec2f(200, 50);	
+	detailsText.SetString(String(format_string, "Size is %dx%d", sizeX, sizeY));		
+
+	restartButton.transform = Transform2D(Vec2f(5, -65), Vec2f(200, 50), Align::TopLeft, nullptr);	
+	restartButton.buttonData = &app.buttonData;
+
+	auto RestartButtonDownFunc = [&](Button * button)
+	{		
+		restartButtonText.transform.pos = Vec2f(0, 0);
+		restartButtonTextColor = Color(220);
+	};
+	auto RestartButtonUpFunc = [&](Button * button)
+	{		
+		restartButtonText.transform.pos = Vec2f(0, 7);
+		restartButtonTextColor = Color(255);
+	};
+
+				
+	restartButton.SetEventFunction<ButtonEvent::Down>(RestartButtonDownFunc);
+	restartButton.SetEventFunction<ButtonEvent::Up>(RestartButtonUpFunc);
+
+	restartButtonText.transform = Transform2D(Vec2f(), Vec2f(), Align::Center, &restartButton.transform);
 	restartButtonText.SetFont(&app.font, 30);
-	restartButtonText.SetString("Restart");
-	restartButtonText.transform.parent = &restartButton.transform;
-	restartButtonText.transform.parentAlign = Align::Center;
+	restartButtonText.SetString("Restart");	
 	restartButtonTextColor = Color(255);
 
+	timerText.transform = Transform2D(Vec2f(215, -90), Vec2f(), Align::TopLeft, nullptr);
 	timerText.SetFont(&app.font, 20);
-	timerText.SetString("Time: 0.0");	
-	timerText.transform.parentAlign = Align::TopLeft;
-	timerText.transform.pos = Vec2i(215, -90);
+	timerText.SetString("Time: 0.0");		
 		
 	memset(valueMatrix, 0, sizeof(valueMatrix));
 	memset(checkedMatrix, 0, sizeof(checkedMatrix));
@@ -71,7 +78,9 @@ void GameScene::Startup()
 	startedGame = false;
 
 	GenerateTiles();
+	UpdateTiles();
 }
+
 void GameScene::Frame()
 {
 	App& app = App::Instance();
@@ -79,30 +88,15 @@ void GameScene::Frame()
 	restartButton.Update();
 
 	if (restartButton.GetState() == ButtonState::Pressed)
-	{
-		memset(valueMatrix, 0, sizeof(valueMatrix));
-		memset(checkedMatrix, 0, sizeof(checkedMatrix));
-		mineCount = startMineCount;
-		gameEnded = false;
-		startedGame = false;
-
-		GenerateTiles();
-	}
-
-	if (restartButton.GetState() == ButtonState::Down)
-		restartButtonText.transform.pos = Vec2f(0, 0);
-	else
-		restartButtonText.transform.pos = Vec2f(0, 7);
-
-	if (restartButton.GetState() != ButtonState::Up)
-		restartButtonTextColor = Color(220);
-	else
-		restartButtonTextColor = Color(255);
-
+	{		
+		RestartTiles();
+		UpdateTiles();
+	}	
+	 
 	if (!gameEnded && startedGame)
 		timerText.SetString(String(format_string, "Time: %0.2fs.", timer.GetTime()));
 
-	if (Input::GetKeyState(Key::MouseLeft) == KeyState::Pressed && !gameEnded)
+	if (Input::GetKeyState(Key::MouseLeft).state == KeyState::Pressed && !gameEnded)
 	{
 		Vec2i mp = Input::GetMousePos();
 		mp.y = app.window.GetSize().y - mp.y;
@@ -142,7 +136,7 @@ void GameScene::Frame()
 		}
 	}
 
-	if (Input::GetKeyState(Key::MouseRight) == KeyState::Pressed && !gameEnded)
+	if (Input::GetKeyState(Key::MouseRight).state == KeyState::Pressed && !gameEnded)
 	{
 		Vec2i mp = Input::GetMousePos();
 		mp.y = app.window.GetSize().y - mp.y;
@@ -167,7 +161,7 @@ void GameScene::Frame()
 			}
 			UpdateTiles();
 		}
-	}
+	}	
 
 	tilesTransform.Update();
 	titleText.transform.Update();
@@ -176,35 +170,18 @@ void GameScene::Frame()
 	restartButtonText.transform.Update();
 	timerText.transform.Update();
 
-	app.buttonMaterial.properties.mvp = app.canvasProjection * restartButton.transform.mat;
-	app.buttonMaterial.properties.texture = &app.buttonTexture;
-	Renderer::RenderPointArray(app.buttonMaterial, restartButton.GetMesh());
-
-	app.textMaterial.properties.mvp = app.canvasProjection * restartButtonText.transform.mat;
-	app.textMaterial.properties.texture = restartButtonText.GetTexture();
-	app.textMaterial.properties.color = restartButtonTextColor.ToVector();
-	Renderer::RenderPointArray(app.textMaterial, restartButtonText.GetMesh());
-
-	app.textMaterial.properties.mvp = app.canvasProjection * timerText.transform.mat;
-	app.textMaterial.properties.texture = timerText.GetTexture();
-	app.textMaterial.properties.color = Color(255).ToVector();
-	Renderer::RenderPointArray(app.textMaterial, timerText.GetMesh());
+	restartButton.Render(app.buttonMaterial, app.canvasProjection * restartButton.transform.mat);	
+	restartButtonText.Render(app.textMaterial, restartButtonTextColor, app.canvasProjection * restartButtonText.transform.mat);
+	timerText.Render(app.textMaterial, Color(255), app.canvasProjection* timerText.transform.mat);	
+	titleText.Render(app.textMaterial, Color(255, 128, 0), app.canvasProjection* titleText.transform.mat);
+	detailsText.Render(app.textMaterial, Color(255), app.canvasProjection* detailsText.transform.mat);
 
 	tilesMaterial.properties.mvp = app.canvasProjection * tilesTransform.mat;
 	tilesMaterial.properties.texture = &tilesSpriteSheet;
-	Renderer::RenderPointArray(tilesMaterial, tilesMesh.vl);
+	Renderer::RenderPointArray(tilesMaterial, tilesMesh.vl);	
 
-	app.textMaterial.properties.mvp = app.canvasProjection * titleText.transform.mat;
-	app.textMaterial.properties.texture = titleText.GetTexture();
-	app.textMaterial.properties.color = Color(255, 128, 0).ToVector();
-	Renderer::RenderPointArray(app.textMaterial, titleText.GetMesh());
-
-	app.textMaterial.properties.mvp = app.canvasProjection * detailsText.transform.mat;
-	app.textMaterial.properties.texture = detailsText.GetTexture();
-	app.textMaterial.properties.color = Color(255).ToVector();
-
-	Renderer::RenderPointArray(app.textMaterial, detailsText.GetMesh());
 }
+
 void GameScene::Cleanup()
 {
 
@@ -293,9 +270,7 @@ void GameScene::GenerateTiles()
 			valueMatrix[k - maxSizeX] = 0;
 			valueMatrix[k + maxSizeX + 1] = 0;
 		}
-	}
-
-	UpdateTiles();
+	}	
 }
 
 void GameScene::UpdateTiles()
@@ -305,31 +280,24 @@ void GameScene::UpdateTiles()
 	{
 		bool isMineOpened = 1;
 		for (int y = 0; y < sizeY; ++y)
-		{
 			for (int x = 0; x < sizeX; ++x)
-			{
-				Logger::AddLog(LogType::Message, __FUNCTION__, String(format_string, "uso: %d", mineCount));
 				if (textureMatrix[x + y * maxSizeX] == 13)
 				{
 					isMineOpened = 0;
-					break;
+					goto forExit;
 				}
+	forExit:
 
-			}
-		}
 		if (isMineOpened)
 		{
 			detailsText.SetString(String("You won!"));
 			gameEnded = 1;
 		}
 	}
-	for (int y = 0; y < sizeY; ++y)
-	{
-		for (int x = 0; x < sizeX; ++x)
-		{
-			vertices[x + maxSizeX * y].GetValue<2>() = textureMatrix[x + maxSizeX * y];
-		}
-	}
+
+	for (int y = 0; y < sizeY; ++y)	
+		for (int x = 0; x < sizeX; ++x)		
+			vertices[x + maxSizeX * y].GetValue<2>() = textureMatrix[x + maxSizeX * y];		
 
 	tilesMesh.ChangeVertices(vertices, maxSizeX * maxSizeY, 0);
 }
@@ -437,4 +405,15 @@ int GameScene::ClickOnTile(int x, int y)
 	}
 
 	return 0;
+}
+
+void GameScene::RestartTiles()
+{
+	memset(valueMatrix, 0, sizeof(valueMatrix));
+	memset(checkedMatrix, 0, sizeof(checkedMatrix));
+	mineCount = startMineCount;
+	gameEnded = false;
+	startedGame = false;
+
+	GenerateTiles();	
 }

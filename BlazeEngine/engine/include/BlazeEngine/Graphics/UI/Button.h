@@ -6,6 +6,8 @@
 #include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/DataStructures/Transform2D.h"
 
+#include <functional>
+
 namespace Blaze
 {
 	struct ButtonData
@@ -36,19 +38,33 @@ namespace Blaze
 
 	class BLAZE_API Button
 	{
-		Vertex<Vec2f, float, float> vertex;
-		void* eventFunctions[(uint)ButtonEvent::ButtonEvent_Count];
+		union EventFunction
+		{
+			std::function<void(Button*)> func;
+
+			EventFunction() { }
+			~EventFunction() { }
+		};
+
+		Vertex<Vec2f, float, float> vertex;		
+		EventFunction eventFunctions[(uint)ButtonEvent::ButtonEvent_Count];
 
 		Mesh mesh;
 		ButtonState state;
+
+		void SetEventFunction(ButtonEvent, void*);
 	public:
 		ButtonData* buttonData;
 		Transform2D transform;						
 
 		Button();		
 		Button(ButtonData* buttonData);
-
-		void SetEventFunction(ButtonEvent event, void* function);
+		
+		template<ButtonEvent E>
+		void SetEventFunction(std::function<void(Button*)> function)
+		{
+			SetEventFunction(E, (void*)&function);
+		}						
 				
 		ButtonState GetState() const { return state; }
 		const Mesh& GetMesh() const { return mesh; }		

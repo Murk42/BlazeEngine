@@ -1,50 +1,12 @@
-﻿  Button.cpp
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11,27): warning C4251: 'Blaze::VertexLayout::layout': class 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>' needs to have dll-interface to be used by clients of class 'Blaze::VertexLayout'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11): message : see declaration of 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Bitmap.h(23,13): warning C4251: 'Blaze::Bitmap::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Bitmap'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<int,2>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(85,13): warning C4251: 'Blaze::Texture2D::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Texture2D'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<int,2>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(146,13): warning C4251: 'Blaze::TextureArray2D::size': struct 'Blaze::Vector<int,3>' needs to have dll-interface to be used by clients of class 'Blaze::TextureArray2D'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(252): message : see declaration of 'Blaze::Vector<int,3>'
+﻿  Application.cpp
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49,30): warning C4251: 'Blaze::UniformBlock::members': class 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>' needs to have dll-interface to be used by clients of struct 'Blaze::UniformBlock'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49): message : see declaration of 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66,32): warning C4251: 'Blaze::ShaderProgram::uniforms': class 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>' needs to have dll-interface to be used by clients of class 'Blaze::ShaderProgram'
 C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66): message : see declaration of 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(25,12): warning C4251: 'Blaze::Transform2D::pos': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<float,2>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(27,13): warning C4251: 'Blaze::Transform2D::size': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<float,2>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(28,12): warning C4251: 'Blaze::Transform2D::mat': struct 'Blaze::Matrix<float,4,4>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Matrix.h(211): message : see declaration of 'Blaze::Matrix<float,4,4>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(30,20): warning C4251: 'Blaze::Transform2D::absolutePos': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<float,2>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(39,37): warning C4251: 'Blaze::Button::vertex': struct 'Blaze::Vertex<Blaze::Vec2f,float,float>' needs to have dll-interface to be used by clients of class 'Blaze::Button'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\UI\Button.h(39): message : see declaration of 'Blaze::Vertex<Blaze::Vec2f,float,float>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(25,23): warning C4251: 'Blaze::Window::lockedMousePos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Window'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(175): message : see declaration of 'Blaze::Vector<int,2>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Mesh.h(48,1): warning C4267: 'argument': conversion from 'size_t' to 'Blaze::uint', possible loss of data
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Graphics\UI\Button.cpp(17): message : see reference to function template instantiation 'void Blaze::Mesh::SetVertices<Blaze::Vec2f,float,float>(const Blaze::Vertex<Blaze::Vec2f,float,float> *,size_t)' being compiled
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(148,1): warning C4244: '-=': conversion from 'const T' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-          and
-          [
-              T=int
-          ]
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Graphics\UI\Button.cpp(39): message : see reference to function template instantiation 'void Blaze::Vector<int,2>::operator -=<float>(const Blaze::Vector<float,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Graphics\UI\Button.cpp(39): message : see reference to function template instantiation 'void Blaze::Vector<int,2>::operator -=<float>(const Blaze::Vector<float,2> &)' being compiled
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(148,1): warning C4244: '-=': conversion from 'const T' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-          and
-          [
-              T=int
-          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11,27): warning C4251: 'Blaze::VertexLayout::layout': class 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>' needs to have dll-interface to be used by clients of class 'Blaze::VertexLayout'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11): message : see declaration of 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>'
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\wincontypes.h(103,1): warning C4005: 'MOUSE_MOVED': macro redefinition
+C:\Programming\Projects\BlazeEngine\Libraries\PDCurses\include\PDC\curses.h(183): message : see previous definition of 'MOUSE_MOVED'
   BlazeEngine.vcxproj -> C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll
   C:\Programming\Projects\BlazeEngine\Libraries\SDL\SDL2-2.0.10\lib\x64\SDL2.dll
   1 File(s) copied

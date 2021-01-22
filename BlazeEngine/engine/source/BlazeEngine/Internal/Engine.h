@@ -319,13 +319,14 @@ namespace Blaze
 				{ Key::RAlt,SDL_Scancode::SDL_SCANCODE_RALT				}
 			};
 
-			KeyState keyStates[(int)Key::Key_Count];
+			KeyStateData keyStates[(int)Key::Key_Count];
 			void* eventFunctions[(int)InputEvent::InputEvent_Count];
 
 			Vec2i mousePos;
 			Vec2i lastMouseRealPos;
 			Vec2i mouseMovement;
 			int mouseScroll = 0;
+			double doubleClickInterval = 0.3;
 
 			Window* focusedWindow = nullptr;
 		} Input;

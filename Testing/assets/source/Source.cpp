@@ -23,26 +23,25 @@ class App : public Application<App>
 public:
 	Console::LogList logList = Console::LogList(Vec2i(0, 0), Vec2i(160, 20));
 	Window window;
-	   
-	Font font;  
-	Material<NormalTextMatProp> normalTextMaterial;
-	Material<ColoredTextMatProp> coloredTextMaterial;
-	ColoredText text;	
-	NormalText dataText;
 
 	std::vector<Color> colors {
-		Color(1, 0, 0),
-		Color(1, 1, 0),
-		Color(0, 1, 0),
-		Color(0, 1, 1),
-		Color(0, 0, 1),
-		Color(0, 0, 0),
-		Color(1, 0, 1),
-		Color(1, 0, 0),
+		Color(1.0f, 0.0f, 0.0f),
+		Color(1.0f, 1.0f, 0.0f),
+		Color(0.0f, 1.0f, 0.0f),
+		Color(0.0f, 1.0f, 1.0f),
+		Color(0.0f, 0.0f, 1.0f),
+		Color(0.0f, 0.0f, 0.0f),
+		Color(1.0f, 0.0f, 1.0f),
+		Color(1.0f, 0.0f, 0.0f),
 	};
+	    
+	Font font = Font("assets/fonts/VertigoFLF.ttf");
+	Material<NormalTextMatProp> normalTextMaterial;
+	Material<ColoredTextMatProp> coloredTextMaterial;
+	ColoredText text = ColoredText(&font, 50, "Marko :)", colors);
+	NormalText dataText;
 
-	Mat4f canvasProjMatrix;
-	Mat4f textTransform;	
+	Mat4f canvasProjMatrix;	 
 
 	String inputString;
 	 
@@ -52,13 +51,14 @@ public:
 		Input::SetEventFunction(InputEvent::WindowClosed, WindowCloseEvent);
 		Input::SetEventFunction(InputEvent::KeyPressed, KeyPressedEvent);
 
-		window.SetSize(Vec2i(800, 600)); 
-		window.SetWindowed(true, false);  
-		window.ShowWindow(true); 
-		
+		window.SetSize(Vec2i(800, 400));
+		window.SetWindowed(true, false); 
+		window.ShowWindow(true);
+
+		Renderer::SetClearColor(Color(100, 100, 120));
+		Renderer::SetViewport(Vec2i(), window.GetSize());
 		Renderer::SetTarget(window);		
-		 
-		font.Load("assets/fonts/VertigoFLF.ttf");
+		 		
 		{
 			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/normalText/vertex.glsl");
 			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/normalText/fragment.glsl");
@@ -74,9 +74,7 @@ public:
 				
 		dataText.SetFont(&font, 40);
 
-		text.SetFont(&font, 50); 
-		text.SetString("Marko :)", colors);
-
+		text.transform.parentAlign = Align::TopRight;		
 	} 
 	
 	int FPS = 0;
@@ -112,14 +110,10 @@ public:
 		  
 		Renderer::ClearTarget();
 
-		normalTextMaterial.properties.mvp = canvasProjMatrix;
-		normalTextMaterial.properties.texture = dataText.GetTexture();
-		normalTextMaterial.properties.color = Color(1, 1, 0, 1).ToVector();
-		Renderer::RenderPointArray(normalTextMaterial, dataText.GetMesh());
+		text.transform.Update();
 
-		coloredTextMaterial.properties.mvp = canvasProjMatrix * textTransform;
-		coloredTextMaterial.properties.texture = text.GetTexture();
-		Renderer::RenderPointArray(coloredTextMaterial, text.GetMesh());		
+		dataText.Render(normalTextMaterial, Color(1.0f, 1.0f, 0.0f, 1.0f), canvasProjMatrix);
+		text.Render(coloredTextMaterial, canvasProjMatrix * text.transform.mat);		
 
 
 		Renderer::UpdateTarget();
@@ -153,8 +147,7 @@ static void WindowSizeChangedEvent(int w, int h, Window* win)
 	App& app = App::Instance();	
 
 	Renderer::SetViewport(Vec2i(), Vec2i(w, h));
-	app.canvasProjMatrix = Math::OrthographicMatrix<float>(0, w, 0, h, -1, 1);	
-	app.textTransform = Math::TranslationMatrix<float>(Renderer::GetViewportSize() - app.text.GetSize());
+	app.canvasProjMatrix = Math::OrthographicMatrix<float>(0, w, 0, h, -1, 1);		
 }
 
 static void KeyPressedEvent(Key key, Window* win)
@@ -168,7 +161,6 @@ static void KeyPressedEvent(Key key, Window* win)
 		{
 			app.inputString.Resize(app.inputString.Size() - 1);
 			app.text.SetString(app.inputString, app.colors);
-			app.textTransform = Math::TranslationMatrix<float>(Renderer::GetViewportSize() - app.text.GetSize());
 		}
 		break;
 	}
@@ -177,8 +169,7 @@ static void KeyPressedEvent(Key key, Window* win)
 		if (c != '\0')
 		{
 			app.inputString += c;
-			app.text.SetString(app.inputString, app.colors);
-			app.textTransform = Math::TranslationMatrix<float>(Renderer::GetViewportSize() - app.text.GetSize());
+			app.text.SetString(app.inputString, app.colors);			
 		}
 		break;
 	}

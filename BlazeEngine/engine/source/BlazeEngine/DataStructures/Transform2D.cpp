@@ -8,8 +8,8 @@ namespace Blaze
 	{
 
 	}
-	Transform2D::Transform2D(Vec2f pos, Vec2f size, Align parentAlign, Transform2D* parent)
-		: pos(pos), size(size), parentAlign(parentAlign), parent(parent)
+	Transform2D::Transform2D(Vec2f pos, Vec2f size, Align parentAlign, Transform2D* parent, float depth)
+		: pos(pos), size(size), parentAlign(parentAlign), parent(parent), depth(depth)
 	{
 	}
 

@@ -148,22 +148,7 @@ namespace Blaze
 
 		fontSizePtr = font->AddSize(height);
 		++((FontSize*)fontSizePtr)->useCount;
-	}
-
-	void Text::Render(BaseMaterial& material, const Color& color, const Mat4f& mvp)
-	{
-		if (material.standardProperties.MVP == nullptr || material.standardProperties.color == nullptr || material.standardProperties.texture == nullptr)
-		{
-			Logger::AddLog(LogType::Error, __FUNCTION__, "Text::Render requires material with MVP, color and texture property.");
-			return;
-		}
-
-		*material.standardProperties.MVP = mvp;
-		*material.standardProperties.color = color.ToVector();
-		*material.standardProperties.texture = GetTexture();
-
-		Renderer::RenderPointArray(material, mesh);
-	}
+	}	
 
 	NormalText::NormalText()
 	{
@@ -204,6 +189,32 @@ namespace Blaze
 		mesh.SetVertices(vertices.data(), vertices.size());
 	}
 
+	void NormalText::Render(BaseMaterial& material, const Color& color, const Mat4f& mvp)
+	{
+		if (material.standardProperties.MVP == nullptr || material.standardProperties.color == nullptr || material.standardProperties.texture == nullptr)
+		{
+			Logger::AddLog(LogType::Error, __FUNCTION__, "Text::Render requires material with MVP, color and texture property.");
+			return;
+		}
+
+		*material.standardProperties.MVP = mvp;
+		*material.standardProperties.color = color.ToVector();
+		*material.standardProperties.texture = GetTexture();
+
+		Renderer::RenderPointArray(material, mesh);
+	}
+
+	ColoredText::ColoredText()
+	{
+
+	}
+	ColoredText::ColoredText(Font* font, uint height, StringView text, const std::vector<Color>& colors)
+	{
+		SetFont(font, height);
+		SetString(text, colors);
+	}
+
+
 	void ColoredText::SetString(StringView text, const std::vector<Color>& colors)
 	{				
 		if (font == nullptr)
@@ -223,8 +234,8 @@ namespace Blaze
 			vertices[i].GetValue<0>() = Vec2f(Vec2i(offset, 0) + c.offset);
 			vertices[i].GetValue<1>() = Vec2f(Vec2i(offset, 0) + c.offset + c.size);
 			vertices[i].GetValue<2>() = Vec2f(c.uv_offset, 0) / fontSize->texture.GetSize().x;
-			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / fontSize->texture.GetSize();			
-			vertices[i].GetValue<4>() = colors[i].ToVector();
+			vertices[i].GetValue<3>() = Vec2f(Vec2i(c.uv_offset, 0) + c.size) / fontSize->texture.GetSize();						
+			vertices[i].GetValue<4>() = i < colors.size() ? colors[i].ToVector() : Vec4f(1, 1, 1, 1);
 			offset += c.advance;
 			transform.size.x += c.advance;
 			transform.size.y = std::max<int>(transform.size.y, c.size.y);
@@ -233,5 +244,19 @@ namespace Blaze
 		transform.size.x = offset;
 
 		mesh.SetVertices(vertices.data(), vertices.size());
+	}
+
+	void ColoredText::Render(BaseMaterial& material, const Mat4f& mvp)
+	{
+		if (material.standardProperties.MVP == nullptr || material.standardProperties.texture == nullptr)
+		{
+			Logger::AddLog(LogType::Error, __FUNCTION__, "Text::Render requires material with MVP, color and texture property.");
+			return;
+		}
+
+		*material.standardProperties.MVP = mvp;		
+		*material.standardProperties.texture = GetTexture();
+
+		Renderer::RenderPointArray(material, mesh);
 	}
 }
