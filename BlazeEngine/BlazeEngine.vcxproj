@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -99,7 +99,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -121,7 +121,7 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -145,7 +145,7 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -171,7 +171,7 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SDL_MAIN_HANDLED;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;BLAZE_EXPORTS;BLAZE_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\source\BlazeEngine\Internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LibrariesDir)DevIL\include;$(LibrariesDir)SDL\SDL2-2.0.10\include;$(LibrariesDir)PDCurses\include;$(LibrariesDir)FreeType\include;$(LibrariesDir)glew-2.1.0\glew-2.1.0\include;$(ProjectDir)engine\include;$(ProjectDir)engine\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -191,48 +191,47 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="engine\include\BlazeEngine\BlazeEngine.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Console\Frame.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Console\LogList.h" />
     <ClInclude Include="engine\include\BlazeEngine\Core\Application.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Core\Debug.h" />
     <ClInclude Include="engine\include\BlazeEngine\Core\Logger.h" />
-    <ClInclude Include="engine\include\BlazeEngine\DataStructures\ArrayView.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Array.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\AxisAngle.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\ByteStream.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Common.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Guard.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Matrix.h" />
-    <ClInclude Include="engine\include\BlazeEngine\DataStructures\OrderedTuple.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Transform3D.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Tuple.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Quaternion.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Rect.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Serializer.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Stream.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\StringStream.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Template.h" />
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\TemplateGroup.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Transform2D.h" />
-    <ClInclude Include="engine\include\BlazeEngine\DataStructures\TypeTraits.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Vector.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Bitmap.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Button.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Panel.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Text.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\GraphicsLibrary.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Mesh.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\Buffer.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\Program.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\Shader.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\VertexArray.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Texture.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Buffer.h" />
     <ClInclude Include="engine\include\BlazeEngine\Console\Console.h" />
     <ClInclude Include="engine\include\BlazeEngine\Core\EngineCore.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Material.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Mesh.h" />
     <ClInclude Include="engine\include\BlazeEngine\Input\Key.h" />
+    <ClInclude Include="engine\include\BlazeEngine\Utilities\Threading.h" />
     <ClInclude Include="engine\source\BlazeEngine\Internal\Engine.h" />
     <ClInclude Include="engine\include\BlazeEngine\Utilities\File.h" />
     <ClInclude Include="engine\include\BlazeEngine\Input\Input.h" />
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Renderer.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Shader.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\ShaderProgram.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Color.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\StringView.h" />
     <ClInclude Include="engine\include\BlazeEngine\Math\Random.h" />
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\String.h" />
     <ClInclude Include="engine\include\BlazeEngine\Utilities\ThreadWorker.h" />
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\VertexLayout.h" />
     <ClInclude Include="engine\include\BlazeEngine\Core\Window.h" />
     <ClInclude Include="engine\include\BlazeEngine\Math\Math.h" />
     <ClInclude Include="engine\include\BlazeEngine\Utilities\Time.h" />
@@ -241,9 +240,12 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="engine\source\BlazeEngine\DataStructures\Transform2D.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Button.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Console\LogList.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Console\Frame.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\Transform3D.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Mesh.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\Buffer.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\Program.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\Shader.cpp" />
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\VertexArray.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\Application.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\EngineCore.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp" />
@@ -252,19 +254,12 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     <ClCompile Include="engine\source\BlazeEngine\Core\ByteStream.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\DataStructures\StringStream.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Bitmap.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Material.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Text.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Texture.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Buffer.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Console\Console.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\DataStructures\StringView.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Mesh.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Input\Key.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Utilities\File.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Input\Input.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Shader.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\ShaderProgram.cpp" />
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\VertexLayout.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Core\Window.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\Math\Random.cpp" />
     <ClCompile Include="engine\source\BlazeEngine\DataStructures\String.cpp" />
@@ -283,6 +278,8 @@ xcopy /y $(LibrariesDir)DevIL\lib\$(PlatformTarget)\ILU.dll $(OutDir)</Command>
     <None Include="engine\assets\default\shaders\normalText\fragment.glsl" />
     <None Include="engine\assets\default\shaders\normalText\geometry.glsl" />
     <None Include="engine\assets\default\shaders\normalText\vertex.glsl" />
+    <None Include="engine\assets\default\shaders\textured\fragment.glsl" />
+    <None Include="engine\assets\default\shaders\textured\vertex.glsl" />
     <None Include="engine\assets\default\vertexDiffuse.glsl" />
   </ItemGroup>
   <ItemGroup>

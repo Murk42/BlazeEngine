@@ -46,6 +46,46 @@ namespace Blaze
 				waiting = false;
 			}
 		}
+	};	
+
+	template<typename T>
+	class SharedVariable
+	{
+		std::mutex m;
+		T value;
+	public:
+		inline bool TryRead(T& out)
+		{
+			if (m.try_lock())
+			{
+				out = value;
+				m.unlock();
+				return true;
+			}
+			return false;
+		}
+		inline void Read(T& out)
+		{
+			m.lock();
+			out = value;
+			m.unlock();
+		}
+		inline void TryWrite(const T& in)
+		{
+			if (m.try_lock())
+			{
+				value = in;
+				m.unlock();
+				return true;
+			}
+			return false;
+		}
+		inline void Write(const T& in)
+		{
+			m.lock();
+			value = in;
+			m.unlock();
+		}
 	};
 
 	template<typename R, typename ... A>

@@ -1,5 +1,5 @@
 #include "BlazeEngine/Core/Window.h"
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 
 #include <SDL/SDL.h>
 

@@ -22,11 +22,6 @@ namespace Blaze
 			for (size_t i = (S2 < S ? S2 : S); i < S; ++i)
 				arr[i] = T(0);
 		}
-		template<typename ... Ts>
-		explicit constexpr Vector(Ts ... values)
-			: arr{ T(values)... }
-		{
-		}
 		template<typename T2>
 		constexpr explicit Vector(const T2& v)
 		{
@@ -37,6 +32,11 @@ namespace Blaze
 		{
 			for (size_t i = 0; i != S; ++i)
 				arr = ptr[i];
+		}
+		template<typename ... Ts>
+		explicit constexpr Vector(Ts ... values)
+			: arr{ T(values)... }
+		{
 		}
 
 		constexpr Vector operator-() const
@@ -113,6 +113,10 @@ namespace Blaze
 		};
 
 		constexpr Vector() = default;
+		constexpr Vector(const T& x, const T& y)
+			: x(x), y(y)
+		{
+		}
 		template<typename T2, size_t S>
 		constexpr Vector(const Vector<T2, S>& v)
 		{
@@ -124,15 +128,15 @@ namespace Blaze
 		}
 		template<typename T2>
 		constexpr explicit Vector(const T2& v) : x(v), y(v) { }
-		template<typename ... Ts>
-		explicit constexpr Vector(Ts ... values)
-			: arr{ T(values)... }
-		{
-		}
 		constexpr Vector(T* ptr)
 		{
 			for (size_t i = 0; i != 2; ++i)
 				arr[i] = ptr[i];
+		}
+		template<typename ... Ts>
+		explicit constexpr Vector(Ts ... values)
+			: arr{ T(values)... }
+		{
 		}
 
 		constexpr Vector operator-() const { return Vector(-x, -y); }
@@ -189,6 +193,10 @@ namespace Blaze
 		};
 
 		constexpr Vector() = default;
+		constexpr Vector(const T& x, const T& y, const T& z)
+			: x(x), y(y), z(z)
+		{
+		}
 		template<typename T2, size_t S>
 		constexpr Vector(const Vector<T2, S>& v)
 		{
@@ -198,17 +206,17 @@ namespace Blaze
 				for (size_t i = S; i < 3; ++i)
 					arr[i] = 0;
 		}
-		template<typename ... Ts>
-		explicit constexpr Vector(Ts ... values)
-			: arr{ T(values)... }
-		{
-		}
 		template<typename T2>
 		constexpr explicit Vector(const T2& v) : x(v), y(v), z(v) { }
 		constexpr Vector(T* ptr)
 		{
 			for (size_t i = 0; i != 3; ++i)
 				arr[i] = ptr[i];
+		}
+		template<typename ... Ts>
+		explicit constexpr Vector(Ts ... values)
+			: arr{ T(values)... }
+		{
 		}
 
 		constexpr Vector operator-() const { return Vector(-x, -y, -z); }
@@ -266,6 +274,10 @@ namespace Blaze
 		};
 
 		constexpr Vector() = default;
+		constexpr Vector(const T& x, const T& y, const T& z, const T& w)
+			: x(x), y(y), z(z), w(w)
+		{
+		}
 		template<typename T2, size_t S>
 		constexpr Vector(const Vector<T2, S>& v)
 		{
@@ -275,17 +287,17 @@ namespace Blaze
 				for (size_t i = S; i < 4; ++i)
 					arr[i] = 0;
 		}
-		template<typename ... Ts>
-		explicit constexpr Vector(Ts ... values)
-			: arr{ T(values)... }
-		{
-		}
 		template<typename T2>
 		constexpr explicit Vector(const T2& v) : x(v), y(v), z(v), w(v) { }
 		constexpr Vector(T* ptr)
 		{
 			for (size_t i = 0; i != 4; ++i)
 				arr[i] = ptr[i];
+		}
+		template<typename ... Ts>
+		explicit constexpr Vector(Ts ... values)
+			: arr{ T(values)... }
+		{
 		}
 
 		constexpr Vector operator-() const { return Vector(-x, -y, -z, -w); }

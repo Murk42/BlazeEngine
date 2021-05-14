@@ -21,7 +21,8 @@ namespace Blaze
 
 			size_t Apply(const char*);
 			void WriteRaw(const char*, size_t);
-		public:
+		public:			
+			Frame();
 			Frame(const Vec2i& pos, const Vec2i& size);
 			Frame(Frame&&) noexcept;
 			~Frame();
@@ -33,6 +34,9 @@ namespace Blaze
 
 			void Clear();
 			void Refresh();
+
+			void SetSize(Vec2i size);
+			void SetPos(Vec2i pos);
 
 			inline Vec2i GetSize() const { return size; }
 			inline Vec2i GetPos() const { return pos; }

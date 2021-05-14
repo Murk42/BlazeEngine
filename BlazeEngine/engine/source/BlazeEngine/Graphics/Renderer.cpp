@@ -1,11 +1,7 @@
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "BlazeEngine/Core/Logger.h"
 #include "BlazeEngine/Core/Window.h"
-#include "BlazeEngine/Graphics/Buffer.h"
-#include "BlazeEngine/Graphics/VertexLayout.h"
-#include "BlazeEngine/Graphics/ShaderProgram.h"
-#include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/Core/Application.h"
 
 #include "SDL/SDL.h"
@@ -55,7 +51,6 @@ namespace Blaze
 		void SwapInterval(bool vsync)
 		{
 			SDL_GL_SetSwapInterval(vsync);
-
 		}
 		void SetTarget(Window& win)
 		{
@@ -101,6 +96,15 @@ namespace Blaze
 				glDisable(GL_BLEND);
 		}
 
+		void RenderTriangles(IndexType indexType, uint triangleCount)
+		{					
+			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)0);			
+		}
+		void RenderPointArray(uint count, size_t offset)
+		{
+			glDrawArrays(GL_POINTS, int(offset), count);
+		}
+		 /*
 		void RenderPointArray(const ShaderProgram& sp, const VertexLayout& vl, uint count, size_t offset)
 		{
 			if (vl.GetLayout().size() != 0)
@@ -208,5 +212,6 @@ namespace Blaze
 			glDrawElements(GL_TRIANGLES, triangleCount * 3, (unsigned)indexType, (void*)(offset * SizeOf(indexType)));
 			mesh.vl.Unbind();
 		}		
+		*/
 	}
 }

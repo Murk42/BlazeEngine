@@ -5,6 +5,8 @@ int BLAZE_API main();
 
 namespace Blaze
 {				
+	struct Log;
+
 	class BLAZE_API BaseApplication
 	{			
 		using Constructor = void(*)(BaseApplication*);
@@ -14,6 +16,8 @@ namespace Blaze
 		virtual void Startup() { }
 		virtual void Cleanup() { }
 		virtual void Frame() { }
+
+		virtual void NewLog(const Log& log) { }
 
 		static void Stop();			
 		static BaseApplication& Instance();				

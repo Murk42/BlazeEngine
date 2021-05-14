@@ -1,7 +1,7 @@
 #include "BlazeEngine/Input/Key.h"
 #include "BlazeEngine/DataStructures/Common.h"
 
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 
 #include "SDL/SDL.h"
 

@@ -1,14 +1,14 @@
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze
 {	
-	Engine* engine = nullptr;
+	Engine* engine = nullptr; 
 
 	void Terminate();
 
 	Engine::Engine()
 	{
-		Renderer.boundVertexLayout = &Renderer.defaultVAO;
+		Renderer.boundVertexArray = &Renderer.defaultVertexArray;
 	}
 	Engine::~Engine()
 	{

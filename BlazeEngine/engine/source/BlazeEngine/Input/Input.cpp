@@ -1,7 +1,7 @@
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Core/Window.h"
 #include "BlazeEngine/Core/Logger.h"
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 #include <map>
 
 #include "SDL/SDL.h"
@@ -11,48 +11,13 @@
 namespace Blaze
 {
 	extern void* initWindow;
+
+#define CALL_EVENT_FUNC(name, args) \
+	if (engine->Input.eventFunctions. name)	\
+		engine->Input.eventFunctions. name args
 	
 	namespace Input
-	{
-
-		inline void CallEventFunction(InputEvent event)
-		{
-			if (engine->Input.eventFunctions[(int)event] != nullptr)
-				((void(*)())engine->Input.eventFunctions[(int)event])();
-		}
-		inline void CallEventFunction(InputEvent event, Key key, double lastPress)
-		{
-			if (engine->Input.eventFunctions[(int)event] != nullptr)
-				((void(*)(Key, double))engine->Input.eventFunctions[(int)event])(key, lastPress);
-		}
-		inline void CallEventFunction(InputEvent event, Key key, double lastPress, uint count)
-		{
-			if (engine->Input.eventFunctions[(int)event] != nullptr)
-				((void(*)(Key, double, uint))engine->Input.eventFunctions[(int)event])(key, lastPress, count);
-		}
-		inline void CallEventFunction(InputEvent event, int x)
-		{
-			if (engine->Input.eventFunctions[(int)event] != nullptr)
-				((void(*)(int))engine->Input.eventFunctions[(int)event])(x);
-		}
-		inline void CallEventFunction(InputEvent event, int x, int y)
-		{
-			if (engine->Input.eventFunctions[(int)event] != nullptr)
-				((void(*)(int, int))engine->Input.eventFunctions[(int)event])(x, y);
-		}
-		inline void CallEventFunction(InputEvent event, Window* win)
-		{
-			if (engine->Input.eventFunctions[(int)event] != nullptr)
-				((void(*)(Window*))engine->Input.eventFunctions[(int)event])(win);
-		}
-		inline void CallEventFunction(InputEvent event, int x, int y, Window* win)
-		{
-			if (engine->Input.eventFunctions[(int)event] != nullptr)
-				((void(*)(int, int, Window*))engine->Input.eventFunctions[(int)event])(x, y, win);
-		}
-
-
-
+	{		
 		void Update()
 		{
 			double currentTime = Time::GetRunTime();
@@ -74,12 +39,16 @@ namespace Blaze
 				switch (data.state)
 				{
 				case KeyState::Down:
+					CALL_EVENT_FUNC(keyDownFunc, ((Key)i, data.lastPress));					
+					break;
 				case KeyState::Released:
+					CALL_EVENT_FUNC(keyReleasedFunc, ((Key)i, data.lastPress));
+					break;
 				case KeyState::Up:
-					CallEventFunction((InputEvent)data.state, (Key)i, data.lastPress);
+					CALL_EVENT_FUNC(keyUpFunc, ((Key)i, data.lastPress));
 					break;
 				case KeyState::Pressed:
-					CallEventFunction((InputEvent)data.state, (Key)i, data.lastPress, data.pressCount);
+					CALL_EVENT_FUNC(keyPressedFunc, ((Key)i, data.lastPress, data.pressCount));
 					break;
 				}
 
@@ -97,7 +66,7 @@ namespace Blaze
 				switch (event.type)
 				{
 				case SDL_MOUSEWHEEL: {
-					CallEventFunction(InputEvent::MouseWheel, event.wheel.y);
+					CALL_EVENT_FUNC(mouseWheelFunc, (event.wheel.y));
 					engine->Input.mouseScroll += event.wheel.y;
 					break;
 				}
@@ -168,59 +137,54 @@ namespace Blaze
 						switch (event.window.event) {
 						case SDL_WINDOWEVENT_MOVED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::WindowMoved, event.window.data1, event.window.data2, win);
+							CALL_EVENT_FUNC(windowMovedFunc, (event.window.data1, event.window.data2, *win));
 							break;
-						}
-						case SDL_WINDOWEVENT_RESTORED: {
-							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::WindowSizeChanged, win->GetSize().x, win->GetSize().y, win);
-							break;
-						}
+						}						
 						case SDL_WINDOWEVENT_MINIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::WindowMinimized, win);
+							CALL_EVENT_FUNC(windowMinimizedFunc, (*win));
 							break;
 						}
 						case SDL_WINDOWEVENT_MAXIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::WindowMaximized, win);
+							CALL_EVENT_FUNC(windowMaximizedFunc, (*win));
 							break;
 						}
 						case SDL_WINDOWEVENT_SIZE_CHANGED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::WindowSizeChanged, event.window.data1, event.window.data2, win);
+							CALL_EVENT_FUNC(windowSizeChangedFunc, (event.window.data1, event.window.data2, *win));
 							break;
 						}
 						case SDL_WINDOWEVENT_RESIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::WindowResized, event.window.data1, event.window.data2, win);
+							CALL_EVENT_FUNC(windowResizedFunc, (event.window.data1, event.window.data2, *win));
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_GAINED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
 							engine->Input.focusedWindow = win;
-							CallEventFunction(InputEvent::WindowFocusGained, win);
+							CALL_EVENT_FUNC(windowFocusGainedFunc, (*win));
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_LOST: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
 							engine->Input.focusedWindow = nullptr;
-							CallEventFunction(InputEvent::WindowFocusLost, win);
+							CALL_EVENT_FUNC(windowFocusLostFunc, (*win));
 							break;
 						}
 						case SDL_WINDOWEVENT_CLOSE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::WindowClosed, win);
+							CALL_EVENT_FUNC(windowClosedFunc, (*win));
 							break;
 						}
 						case SDL_WINDOWEVENT_ENTER: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::MouseEnter, win);
+							CALL_EVENT_FUNC(mouseEnterFunc, (*win));
 							break;
 						}
 						case SDL_WINDOWEVENT_LEAVE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							CallEventFunction(InputEvent::MouseLeave, win);
+							CALL_EVENT_FUNC(mouseLeaveFunc, (*win));
 							break;
 						}
 						}
@@ -258,18 +222,36 @@ namespace Blaze
 					first = false;
 
 					if (engine->Input.mouseMovement != Vec2i(0))
-						CallEventFunction(InputEvent::MouseMotion, engine->Input.mouseMovement.x, engine->Input.mouseMovement.y);
+						CALL_EVENT_FUNC(mouseMotionFunc, (engine->Input.mouseMovement.x, engine->Input.mouseMovement.y));
 				}
 		}
 
 		const KeyStateData GetKeyState(Key code)
 		{
 			return engine->Input.keyStates[(int)code];
-		}
+		}		
 
-		void SetEventFunction(InputEvent event, void* function)
+		void SetEventFunction(void* func, InputEvent event)
 		{
-			engine->Input.eventFunctions[(int)event] = function;
+			switch (event)
+			{
+			case Blaze::InputEvent::KeyUp:				engine->Input.eventFunctions.keyUpFunc				= *(std::function<void(Key, double)>*)			func; break;
+			case Blaze::InputEvent::KeyDown:			engine->Input.eventFunctions.keyDownFunc			= *(std::function<void(Key, double)>*)			func; break;
+			case Blaze::InputEvent::KeyPressed:			engine->Input.eventFunctions.keyPressedFunc			= *(std::function<void(Key, double, uint)>*)	func; break;
+			case Blaze::InputEvent::KeyReleased:		engine->Input.eventFunctions.keyReleasedFunc		= *(std::function<void(Key, double)>*)			func; break;
+			case Blaze::InputEvent::MouseMotion:		engine->Input.eventFunctions.mouseMotionFunc		= *(std::function<void(int, int)>*)				func; break;
+			case Blaze::InputEvent::MouseWheel:			engine->Input.eventFunctions.mouseWheelFunc			= *(std::function<void(int)>*)					func; break;
+			case Blaze::InputEvent::MouseEnter:			engine->Input.eventFunctions.mouseEnterFunc			= *(std::function<void(Window&)>*)				func; break;
+			case Blaze::InputEvent::MouseLeave:			engine->Input.eventFunctions.mouseLeaveFunc			= *(std::function<void(Window&)>*)				func; break;
+			case Blaze::InputEvent::WindowSizeChanged:	engine->Input.eventFunctions.windowSizeChangedFunc	= *(std::function<void(int, int, Window&)>*)	func; break;
+			case Blaze::InputEvent::WindowResized:		engine->Input.eventFunctions.windowResizedFunc		= *(std::function<void(int, int, Window&)>*)	func; break;
+			case Blaze::InputEvent::WindowMoved:		engine->Input.eventFunctions.windowMovedFunc		= *(std::function<void(int, int, Window&)>*)	func; break;
+			case Blaze::InputEvent::WindowMinimized:	engine->Input.eventFunctions.windowMinimizedFunc	= *(std::function<void(Window&)>*)				func; break;
+			case Blaze::InputEvent::WindowMaximized:	engine->Input.eventFunctions.windowMaximizedFunc	= *(std::function<void(Window&)>*)				func; break;
+			case Blaze::InputEvent::WindowFocusGained:	engine->Input.eventFunctions.windowFocusGainedFunc	= *(std::function<void(Window&)>*)				func; break;
+			case Blaze::InputEvent::WindowFocusLost:	engine->Input.eventFunctions.windowFocusLostFunc	= *(std::function<void(Window&)>*)				func; break;
+			case Blaze::InputEvent::WindowClosed:		engine->Input.eventFunctions.windowClosedFunc		= *(std::function<void(Window&)>*)				func; break;			
+			}
 		}
 
 		int GetMouseScroll()

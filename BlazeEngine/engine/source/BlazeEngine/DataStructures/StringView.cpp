@@ -50,21 +50,24 @@ namespace Blaze
 
 		return std::count(ptr, ptr + size, val);
 	}
-	constexpr void StringView::operator=(const StringView& s)
+	constexpr StringView& StringView::operator=(const StringView& s)
 	{
 		ptr = s.ptr;
 		size = s.size;
+		return *this;
 	}	
-	void StringView::operator=(const String& s)
+	StringView& StringView::operator=(const String& s)
 	{
 		ptr = s.Ptr();
 		size = s.Size();
+		return *this;
 	}
 
-	constexpr void StringView::operator=(const char* _ptr)
+	constexpr StringView& StringView::operator=(const char* _ptr)
 	{
 		ptr = _ptr;
 		for (; ptr[size] != '\0'; size++);
+		return *this;
 	}
 
 	constexpr bool StringView::operator==(const StringView& s) const

@@ -1,5 +1,6 @@
-    #include "BlazeEngine/Console/Frame.h"
+#include "BlazeEngine/Console/Frame.h"
 #include "BlazeEngine/Console/Console.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 #include <PDC/curses.h>
 
 namespace Blaze
@@ -71,12 +72,17 @@ namespace Blaze
             wmove((WINDOW*)this->ptr, cursor.y + 1, cursor.x + 1);
         }
 
+        Frame::Frame()
+            : ptr(newwin(0, 0, 0, 0)), pos(0), size(0), color(0)
+        {            
+        }
+
         Frame::Frame(const Vec2i& pos, const Vec2i& size)
-            : ptr(newwin(size.y + 2, size.x + 2, pos.y, pos.x)), pos(pos), size(size), color(0)
-        {
+            : ptr(newwin(size.y, size.x, pos.y, pos.x)), pos(pos), size(size), color(0)
+        {            
             //if (ptr == nullptr)
             //    throw "newwin returned nullptr. Maybe the requested size of the frame is too big";
-            Refresh();
+            Refresh();            
         }
         Frame::Frame(Frame&& f) noexcept
             : ptr(std::exchange(f.ptr, nullptr)), pos(f.pos), size(f.size), color(f.color)
@@ -131,12 +137,27 @@ namespace Blaze
         }
         void Frame::Refresh()
         {
+            if (is_termresized())
+                resize_window((WINDOW*)ptr, size.y, size.x);
+
             Apply("f7");
             Apply("b0");
             Apply("ad");
             box((WINDOW*)ptr, 0, 0);
             wrefresh((WINDOW*)ptr);
-        }   
+        }
+
+        void Frame::SetSize(Vec2i size)
+        {
+            wresize((WINDOW*)ptr, size.y, size.x);
+            this->size = size;
+        }
+
+        void Frame::SetPos(Vec2i pos)
+        {
+            mvwin((WINDOW*)ptr, pos.y, pos.x);
+            this->pos = pos;
+        }
 
         void Frame::operator=(Frame&& f) noexcept
         {

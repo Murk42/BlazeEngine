@@ -26,14 +26,41 @@ namespace Blaze
 
 		bool Load(const StringView& path);
 
-		friend class Text;
+		friend class FontSize;
 	};	
+
+	class BLAZE_API FontSize
+	{
+	public:
+		struct CharData {
+			Vec2u textureSize;
+			int textureOffset;
+			Vec2i positionOffset;
+			uint advance;
+		};
+	private:		
+		Font* font;
+		uint height;
+		Texture2D texture;
+
+		CharData characters[128];
+
+	public:
+		FontSize();
+		FontSize(Font* font, uint height);
+
+		void SetFontAndSize(Font* font, uint height);
+
+		Font* GetFont() const { return font; }
+		uint GetHeight() const { return height; }
+		CharData GetCharData(char c) const { return characters[c]; }
+		const Texture2D& GetTexture() const { return texture; }
+	};
 
 	class BLAZE_API Text
 	{
 	protected:
-		Font* font;
-		void* fontSizePtr;		
+		FontSize* fontSize;		
 
 		String string;
 		Mesh mesh;
@@ -43,11 +70,11 @@ namespace Blaze
 		Text();
 		~Text();
 
-		void SetFont(Font* font, uint height);
+		void SetFontSize(FontSize* fontSize);
 
 		const Mesh& GetMesh() const { return mesh; }
-		String GetString() const { return string; }		
-		const Texture2D* GetTexture() const;		
+		String GetString() const { return string; }				
+		FontSize* GetFontSize() const { return fontSize; }
 
 	};	
 
@@ -56,7 +83,7 @@ namespace Blaze
 		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f>> vertices;
 	public:
 		NormalText();
-		NormalText(Font* font, uint height, StringView text);
+		NormalText(FontSize* fontSize, StringView text);
 
 		void SetString(StringView text);		
 
@@ -68,7 +95,7 @@ namespace Blaze
 		std::vector<Vertex<Vec2f, Vec2f, Vec2f, Vec2f, Vec4f>> vertices;		
 	public:						
 		ColoredText();
-		ColoredText(Font* font, uint height, StringView text, const std::vector<Color>& colors);
+		ColoredText(FontSize* font, StringView text, const std::vector<Color>& colors);
 
 		void SetString(StringView text, const std::vector<Color>& colors);
 

@@ -7,7 +7,7 @@ namespace Blaze
 {
     namespace File
     {
-        bool Read(StringView path, ByteStream* ptr, bool emitWarning)
+        bool Read(StringView path, ByteStream* ptr, bool emitLogOnError)
         {
             if (path.Size() == 0) return false;
 
@@ -28,11 +28,11 @@ namespace Blaze
                 fclose(file);
                 return true;
             }
-            else if (emitWarning)
+            else if (emitLogOnError)
                 Logger::AddLog(LogType::Warning, __FUNCTION__, "Failed to read file with path \"" + String(path) + "\"");
             return false;
         }
-        bool Write(StringView path, bool clear, ByteStream* ptr, bool emitWarning)
+        bool Write(StringView path, bool clear, ByteStream* ptr, bool emitLogOnError)
         {
             if (path.Size() == 0) return false;
 
@@ -49,7 +49,7 @@ namespace Blaze
                     return true;
                 }
             }
-            else if (emitWarning)
+            else if (emitLogOnError)
                 Logger::AddLog(LogType::Warning, __FUNCTION__, "Failed to write to file with path \"" + String(path) + "\". The file doesnt exist");
             return false;
         }

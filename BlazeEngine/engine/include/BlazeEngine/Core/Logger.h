@@ -23,13 +23,14 @@ namespace Blaze
 		Log();
 		Log(LogType, String&&, String&&);
 
+		inline bool Empty();
+
 		bool operator==(const Log&);
 		bool operator!=(const Log&);
 	};
 
 	namespace Logger
 	{				
-		void BLAZE_API AddLog(LogType type, String&& source, String&& message);		
-		bool BLAZE_API GetNextLog(Log& log);
+		void BLAZE_API AddLog(LogType type, String&& source, String&& message);				
 	};
 }

@@ -1,0 +1,68 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(476,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
+  Source.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(25,23): warning C4251: 'Blaze::Window::lockedMousePos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Window'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\Frame.h(14,16): warning C4251: 'Blaze::Console::Frame::cursor': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Console::Frame'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\Frame.h(15,14): warning C4251: 'Blaze::Console::Frame::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Console::Frame'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\Frame.h(16,13): warning C4251: 'Blaze::Console::Frame::pos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Console::Frame'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\LogList.h(18,30): warning C4251: 'Blaze::Console::LogList::logs': class 'std::vector<Blaze::Console::LogList::LogCache,std::allocator<Blaze::Console::LogList::LogCache>>' needs to have dll-interface to be used by clients of class 'Blaze::Console::LogList'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Console\LogList.h(18): message : see declaration of 'std::vector<Blaze::Console::LogList::LogCache,std::allocator<Blaze::Console::LogList::LogCache>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Bitmap.h(23,13): warning C4251: 'Blaze::Bitmap::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Bitmap'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(85,13): warning C4251: 'Blaze::Texture2D::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Texture2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(146,13): warning C4251: 'Blaze::TextureArray2D::size': struct 'Blaze::Vector<int,3>' needs to have dll-interface to be used by clients of class 'Blaze::TextureArray2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<int,3>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Utilities\Timer.h(9,51): warning C4251: 'Blaze::Timer::timerStart': class 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' needs to have dll-interface to be used by clients of class 'Blaze::Timer'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\chrono(603): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(25,12): warning C4251: 'Blaze::Transform2D::pos': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<float,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(27,13): warning C4251: 'Blaze::Transform2D::size': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<float,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(28,12): warning C4251: 'Blaze::Transform2D::mat': struct 'Blaze::Matrix<float,4,4>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Matrix.h(211): message : see declaration of 'Blaze::Matrix<float,4,4>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(30,20): warning C4251: 'Blaze::Transform2D::absolutePos': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<float,2>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(12,12): warning C4251: 'Blaze::Transform3D::pos': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(13,12): warning C4251: 'Blaze::Transform3D::rot': struct 'Blaze::Quat<float>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Quaternion.h(84): message : see declaration of 'Blaze::Quat<float>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(14,14): warning C4251: 'Blaze::Transform3D::scale': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(15,12): warning C4251: 'Blaze::Transform3D::mat': struct 'Blaze::Matrix<float,4,4>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Matrix.h(211): message : see declaration of 'Blaze::Matrix<float,4,4>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(17,20): warning C4251: 'Blaze::Transform3D::absolutePos': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(18,20): warning C4251: 'Blaze::Transform3D::absoluteRot': struct 'Blaze::Quat<float>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Quaternion.h(84): message : see declaration of 'Blaze::Quat<float>'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(19,22): warning C4251: 'Blaze::Transform3D::absoluteScale': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D'
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>'
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(424,77): warning C4293: '>>': shift count negative or too big, undefined behavior
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(424,77): warning C4554: '>>': check operator precedence for possible error; use parentheses to clarify precedence
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(118,16): warning C4305: 'argument': truncation from 'double' to 'const T'
+          with
+          [
+              T=float
+          ]
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(133,53): warning C4101: 'a': unreferenced local variable
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(372,22): warning C4018: '<': signed/unsigned mismatch
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(387,1): warning C4267: 'initializing': conversion from 'size_t' to 'Blaze::uint', possible loss of data
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(390,22): warning C4018: '<': signed/unsigned mismatch
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(401,22): warning C4018: '<': signed/unsigned mismatch
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(429,1): error C4146: unary minus operator applied to unsigned type, result still unsigned
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(191): message : see reference to function template instantiation 'void App::CreateIcosphere<UnpackedMeshData<VertexLayout<Blaze::Vec3f,Blaze::Vec2f,Blaze::Vec3f>,unsigned int>>(_MeshType &,Blaze::uint)' being compiled
+          with
+          [
+              _MeshType=UnpackedMeshData<VertexLayout<Blaze::Vec3f,Blaze::Vec2f,Blaze::Vec3f>,unsigned int>
+          ]
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(430,20): warning C4244: 'initializing': conversion from 'Blaze::uint64' to 'Blaze::uint', possible loss of data
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(437,1): warning C4305: 'initializing': truncation from 'double' to 'const float'
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(438,1): warning C4305: 'initializing': truncation from 'double' to 'const float'
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(481,1): warning C4506: no definition for inline function 'void Blaze::OpenGL::Program::Unuse(void)'
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(481,1): warning C4506: no definition for inline function 'void Blaze::OpenGL::VertexArray::Bind(const Blaze::OpenGL::VertexArray &)'
+C:\Programming\Projects\BlazeEngine\Testing2\Source.cpp(481,1): warning C4506: no definition for inline function 'void Blaze::OpenGL::VertexArray::Unbind(void)'

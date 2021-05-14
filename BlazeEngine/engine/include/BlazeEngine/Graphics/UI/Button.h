@@ -3,7 +3,6 @@
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/Graphics/Mesh.h"
 #include "BlazeEngine/Graphics/Texture.h"
-#include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/DataStructures/Transform2D.h"
 
 #include <functional>

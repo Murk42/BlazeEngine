@@ -24,7 +24,7 @@ namespace Blaze
 	{
 		T x, y, z, w;
 
-		constexpr Quat() = default;
+		constexpr Quat() : x(T(0)), y(T(0)), z(T(0)), w(T(1)) { }
 		constexpr Quat(const Quat<T>& q) : x(q.x), y(q.y), z(q.z), w(q.w) { }
 		constexpr Quat(const T& x, const T& y, const T& z, const T& w) : x(x), y(y), z(z), w(w) { }
 		template<typename T2>

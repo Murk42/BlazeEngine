@@ -1,7 +1,7 @@
 #include "BlazeEngine/Core/Logger.h"
 #include "GL/glew.h"
 
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze
 {
@@ -10,8 +10,13 @@ namespace Blaze
 	{
 	}
 	Log::Log(LogType type, String&& source, String&& message)
-		: type(type), source(source), message(message)
+		: type(type), source(std::move(source)), message(std::move(message))
 	{
+	}
+
+	inline bool Log::Empty()
+	{
+		return source.Size() == 0 && message.Size() == 0;
 	}
 
 	bool Log::operator==(const Log& log)
@@ -56,19 +61,9 @@ namespace Blaze
 		}
 
 		void AddLog(LogType type, String&& source, String&& message)
-		{
-			std::lock_guard<std::mutex> lk(engine->Logger.queueMutex);
-			engine->Logger.logs.emplace(type, std::move(source), std::move(message));
-		}
-
-		bool GetNextLog(Log& log)
-		{
-			std::lock_guard<std::mutex> lk(engine->Logger.queueMutex);
-			if (engine->Logger.logs.size() == 0)
-				return false;
-			log = engine->Logger.logs.front();
-			engine->Logger.logs.pop();
-			return true;
-		}
+		{			
+			Log log = Log(type, std::move(source), std::move(message));
+			engine->AppInstance.ptr->NewLog(log);
+		}		
 	}
 }

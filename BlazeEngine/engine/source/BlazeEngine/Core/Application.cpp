@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 #include "BlazeEngine/Core/Application.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/Vector.h"
@@ -23,7 +23,7 @@ namespace Blaze
 		void(*construct)(BaseApplication*) = nullptr;
 		void(*destruct)(BaseApplication*) = nullptr;
 		size_t size = 0;
-	}
+	}	
 
 	void BaseApplication::Initialize(Constructor c, Destructor d, size_t size)
 	{		
@@ -52,6 +52,11 @@ namespace Blaze
 	{
 		void OpenGLCallbackFunc(unsigned, unsigned, int, unsigned, unsigned, const char*);
 	}	
+
+	namespace Console
+	{
+		void ConsoleInputThreadFunction();
+	}
 
 	void BaseApplication::Stop()
 	{
@@ -133,6 +138,9 @@ namespace Blaze
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback((GLDEBUGPROC)Logger::OpenGLCallbackFunc, nullptr);
 
+		glFrontFace(GL_CW);
+		glDepthMask(GL_TRUE);
+		glEnable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
@@ -144,11 +152,11 @@ namespace Blaze
 	}
 	void InitializePDC()
 	{
-		initscr();
+		//initscr();
 	}
 	void TerminatePDC()
 	{
-		endwin();
+		//endwin();		
 	}
 	void InitializeFreeType()
 	{
@@ -163,16 +171,19 @@ namespace Blaze
 	{
 		SDL_GetGlobalMouseState(&engine->Input.mousePos.x, &engine->Input.mousePos.y);
 
-		start_color();
-		noecho();
-		cbreak();
-		nodelay(stdscr, true);
-		keypad(stdscr, true);
-		curs_set(0);
+		//start_color();
+		//noecho();
+		//cbreak();
+		//nodelay(stdscr, true);
+		//keypad(stdscr, true);
+		//curs_set(0);
+		//scrollok(stdscr, TRUE);
 
-		for (short f = 0; f < 8; f++)
-			for (short b = 0; b < 8; b++)
-				init_pair(f + b * 8, f, b);
+		//for (short f = 0; f < 8; f++)
+		//	for (short b = 0; b < 8; b++)
+		//		init_pair(f + b * 8, f, b);
+		engine->Console.Input.thread = std::move(std::thread(Console::ConsoleInputThreadFunction));
+		engine->Console.Input.thread.detach();
 
 		engine->AppInstance.constructor = EngineInitialization::construct;		
 		engine->AppInstance.destructor = EngineInitialization::destruct;

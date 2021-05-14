@@ -19,6 +19,10 @@ namespace Blaze
 
 	template<typename R, typename ... T>
 	using Function = R(*)(T...);
+
+	struct InvalidType
+	{
+	};
 }
 
 #define baseoffset(derived, base) (size_t)(base*)(derived*)(uint8_t*)1 - 1

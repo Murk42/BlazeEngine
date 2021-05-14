@@ -33,9 +33,6 @@
     <ClInclude Include="engine\include\BlazeEngine\Core\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -78,16 +75,7 @@
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\include\BlazeEngine\Core\Logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\VertexLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\ShaderProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Guard.h">
@@ -111,22 +99,7 @@
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Rect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\DataStructures\TypeTraits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\DataStructures\ArrayView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\include\BlazeEngine\Utilities\Time.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\DataStructures\OrderedTuple.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="engine\include\BlazeEngine\Graphics\Bitmap.h">
@@ -138,25 +111,49 @@
     <ClInclude Include="engine\include\BlazeEngine\Console\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Console\Frame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Console\LogList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\source\BlazeEngine\Internal\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Text.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Button.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\include\BlazeEngine\Graphics\UI\Panel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\include\BlazeEngine\DataStructures\Transform2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\TemplateGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Tuple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\Program.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\VertexArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\GraphicsLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Graphics\OpenGL\Buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Transform3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Utilities\Threading.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\Core\Debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\include\BlazeEngine\DataStructures\Array.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -182,22 +179,7 @@
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\ShaderProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\VertexLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\DataStructures\Types.cpp">
@@ -230,28 +212,31 @@
     <ClCompile Include="engine\source\BlazeEngine\Console\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Console\Frame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Console\LogList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\Material.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Internal\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\Graphics\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Text.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\source\BlazeEngine\Graphics\UI\Button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\source\BlazeEngine\DataStructures\Transform2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\Program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\Graphics\OpenGL\Buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\source\BlazeEngine\DataStructures\Transform3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -267,6 +252,8 @@
     <None Include="engine\assets\default\shaders\button\fragment.glsl" />
     <None Include="engine\assets\default\shaders\button\geometry.glsl" />
     <None Include="engine\assets\default\shaders\button\vertex.glsl" />
+    <None Include="engine\assets\default\shaders\textured\fragment.glsl" />
+    <None Include="engine\assets\default\shaders\textured\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="engine\assets\default\default.png">

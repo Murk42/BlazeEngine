@@ -1,12 +1,195 @@
-﻿  Application.cpp
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49,30): warning C4251: 'Blaze::UniformBlock::members': class 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>' needs to have dll-interface to be used by clients of struct 'Blaze::UniformBlock'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(49): message : see declaration of 'std::vector<Blaze::UniformBlock::Member,std::allocator<Blaze::UniformBlock::Member>>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66,32): warning C4251: 'Blaze::ShaderProgram::uniforms': class 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>' needs to have dll-interface to be used by clients of class 'Blaze::ShaderProgram'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\ShaderProgram.h(66): message : see declaration of 'std::vector<Blaze::Uniform,std::allocator<Blaze::Uniform>>'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11,27): warning C4251: 'Blaze::VertexLayout::layout': class 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>' needs to have dll-interface to be used by clients of class 'Blaze::VertexLayout'
-C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\VertexLayout.h(11): message : see declaration of 'std::vector<Blaze::Type,std::allocator<Blaze::Type>>'
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\wincontypes.h(103,1): warning C4005: 'MOUSE_MOVED': macro redefinition
-C:\Programming\Projects\BlazeEngine\Libraries\PDCurses\include\PDC\curses.h(183): message : see previous definition of 'MOUSE_MOVED'
+﻿  Transform2D.cpp
+  Transform3D.cpp
+  Mesh.cpp
+  Buffer.cpp
+  Program.cpp
+  Shader.cpp
+  VertexArray.cpp
+  Application.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(12,12): warning C4251: 'Blaze::Transform3D::pos': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(13,12): warning C4251: 'Blaze::Transform3D::rot': struct 'Blaze::Quat<float>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Quaternion.h(84): message : see declaration of 'Blaze::Quat<float>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(14,14): warning C4251: 'Blaze::Transform3D::scale': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(15,12): warning C4251: 'Blaze::Transform3D::mat': struct 'Blaze::Matrix<float,4,4>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Matrix.h(211): message : see declaration of 'Blaze::Matrix<float,4,4>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(17,20): warning C4251: 'Blaze::Transform3D::absolutePos': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(18,20): warning C4251: 'Blaze::Transform3D::absoluteRot': struct 'Blaze::Quat<float>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Quaternion.h(84): message : see declaration of 'Blaze::Quat<float>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform3D.h(19,22): warning C4251: 'Blaze::Transform3D::absoluteScale': struct 'Blaze::Vector<float,3>' needs to have dll-interface to be used by clients of class 'Blaze::Transform3D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<float,3>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(25,12): warning C4251: 'Blaze::Transform2D::pos': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<float,2>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(27,13): warning C4251: 'Blaze::Transform2D::size': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<float,2>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(28,12): warning C4251: 'Blaze::Transform2D::mat': struct 'Blaze::Matrix<float,4,4>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Matrix.h(211): message : see declaration of 'Blaze::Matrix<float,4,4>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Transform2D.h(30,20): warning C4251: 'Blaze::Transform2D::absolutePos': struct 'Blaze::Vector<float,2>' needs to have dll-interface to be used by clients of class 'Blaze::Transform2D' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<float,2>' (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream' (compiling source file engine\source\BlazeEngine\Graphics\OpenGL\Shader.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' (compiling source file engine\source\BlazeEngine\Graphics\OpenGL\Shader.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Graphics\OpenGL\Shader.cpp(40,57): warning C4267: 'argument': conversion from 'size_t' to 'Blaze::uint', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(210,45): warning C4244: 'initializing': conversion from 'const T2' to 'T', possible loss of data
+          with
+          [
+              T2=int
+          ]
+          and
+          [
+              T=float
+          ] (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform3D.cpp(8): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int>(const T2 &)' being compiled
+          with
+          [
+              T2=int
+          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform3D.cpp(7): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int>(const T2 &)' being compiled
+          with
+          [
+              T2=int
+          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(210,51): warning C4244: 'initializing': conversion from 'const T2' to 'T', possible loss of data
+          with
+          [
+              T2=int
+          ]
+          and
+          [
+              T=float
+          ] (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(210,57): warning C4244: 'initializing': conversion from 'const T2' to 'T', possible loss of data
+          with
+          [
+              T2=int
+          ]
+          and
+          [
+              T=float
+          ] (compiling source file engine\source\BlazeEngine\DataStructures\Transform3D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(130,45): warning C4244: 'initializing': conversion from 'const T2' to 'T', possible loss of data
+          with
+          [
+              T2=int
+          ]
+          and
+          [
+              T=float
+          ] (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform2D.cpp(8): message : see reference to function template instantiation 'Blaze::Vector<float,2>::Vector<int>(const T2 &)' being compiled
+          with
+          [
+              T2=int
+          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform2D.cpp(7): message : see reference to function template instantiation 'Blaze::Vector<float,2>::Vector<int>(const T2 &)' being compiled
+          with
+          [
+              T2=int
+          ]
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(130,51): warning C4244: 'initializing': conversion from 'const T2' to 'T', possible loss of data
+          with
+          [
+              T2=int
+          ]
+          and
+          [
+              T=float
+          ] (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(204,21): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ] (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform2D.cpp(35): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,4>(const Blaze::Vector<int,4> &)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform2D.cpp(35): message : see reference to function template instantiation 'Blaze::Vector<float,3>::Vector<int,4>(const Blaze::Vector<int,4> &)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(124,21): warning C4244: '=': conversion from 'const T' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ] (compiling source file engine\source\BlazeEngine\DataStructures\Transform2D.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform2D.cpp(39): message : see reference to function template instantiation 'Blaze::Vector<float,2>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\DataStructures\Transform2D.cpp(39): message : see reference to function template instantiation 'Blaze::Vector<float,2>::Vector<int,2>(const Blaze::Vector<int,2> &)' being compiled
+  EngineCore.cpp
+  Renderer.cpp
+  Engine.cpp
+  Logger.cpp
+  ByteStream.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Graphics\OpenGL\VertexArray.cpp(48,75): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Graphics\OpenGL\VertexArray.cpp(63,83): warning C4267: 'argument': conversion from 'size_t' to 'GLuint', possible loss of data
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream' (compiling source file engine\source\BlazeEngine\Core\ByteStream.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' (compiling source file engine\source\BlazeEngine\Core\ByteStream.cpp)
+  StringStream.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\source\BlazeEngine\Graphics\OpenGL\Buffer.cpp(59): warning C4715: 'Blaze::OpenGL::BaseBuffer::GetBound': not all control paths return a value
+  Bitmap.cpp
+  Texture.cpp
+  Console.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\wincontypes.h(103,1): warning C4005: 'MOUSE_MOVED': macro redefinition (compiling source file engine\source\BlazeEngine\Core\Application.cpp)
+C:\Programming\Projects\BlazeEngine\Libraries\PDCurses\include\PDC\curses.h(183): message : see previous definition of 'MOUSE_MOVED' (compiling source file engine\source\BlazeEngine\Core\Application.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream' (compiling source file engine\source\BlazeEngine\DataStructures\StringStream.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' (compiling source file engine\source\BlazeEngine\DataStructures\StringStream.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Bitmap.h(23,13): warning C4251: 'Blaze::Bitmap::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Bitmap' (compiling source file engine\source\BlazeEngine\Graphics\Bitmap.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>' (compiling source file engine\source\BlazeEngine\Graphics\Bitmap.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Bitmap.h(23,13): warning C4251: 'Blaze::Bitmap::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Bitmap' (compiling source file engine\source\BlazeEngine\Graphics\Texture.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>' (compiling source file engine\source\BlazeEngine\Graphics\Texture.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(85,13): warning C4251: 'Blaze::Texture2D::size': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Texture2D' (compiling source file engine\source\BlazeEngine\Graphics\Texture.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>' (compiling source file engine\source\BlazeEngine\Graphics\Texture.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Graphics\Texture.h(146,13): warning C4251: 'Blaze::TextureArray2D::size': struct 'Blaze::Vector<int,3>' needs to have dll-interface to be used by clients of class 'Blaze::TextureArray2D' (compiling source file engine\source\BlazeEngine\Graphics\Texture.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(260): message : see declaration of 'Blaze::Vector<int,3>' (compiling source file engine\source\BlazeEngine\Graphics\Texture.cpp)
+  StringView.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(25,23): warning C4251: 'Blaze::Window::lockedMousePos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Window' (compiling source file engine\source\BlazeEngine\Graphics\Renderer.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>' (compiling source file engine\source\BlazeEngine\Graphics\Renderer.cpp)
+  Key.cpp
+  File.cpp
+  Input.cpp
+  Window.cpp
+  Random.cpp
+  String.cpp
+  Time.cpp
+  Timer.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(25,23): warning C4251: 'Blaze::Window::lockedMousePos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Window' (compiling source file engine\source\BlazeEngine\Core\Window.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>' (compiling source file engine\source\BlazeEngine\Core\Window.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Core\Window.h(25,23): warning C4251: 'Blaze::Window::lockedMousePos': struct 'Blaze::Vector<int,2>' needs to have dll-interface to be used by clients of class 'Blaze::Window' (compiling source file engine\source\BlazeEngine\Input\Input.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\Vector.h(179): message : see declaration of 'Blaze::Vector<int,2>' (compiling source file engine\source\BlazeEngine\Input\Input.cpp)
+  Types.cpp
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12,26): warning C4251: 'Blaze::ByteStream::data': class 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' needs to have dll-interface to be used by clients of class 'Blaze::ByteStream' (compiling source file engine\source\BlazeEngine\Utilities\File.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\DataStructures\ByteStream.h(12): message : see declaration of 'std::vector<Blaze::uint8,std::allocator<Blaze::uint8>>' (compiling source file engine\source\BlazeEngine\Utilities\File.cpp)
+C:\Programming\Projects\BlazeEngine\BlazeEngine\engine\include\BlazeEngine\Utilities\Timer.h(9,51): warning C4251: 'Blaze::Timer::timerStart': class 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' needs to have dll-interface to be used by clients of class 'Blaze::Timer' (compiling source file engine\source\BlazeEngine\Utilities\Timer.cpp)
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\include\chrono(602): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' (compiling source file engine\source\BlazeEngine\Utilities\Timer.cpp)
+     Creating library C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.lib and object C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.exp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\vc120.pdb'; linking object as if no debug info
+freetype.lib(autofit.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(autofit.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(ftbase.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(ftbase.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(ftbitmap.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(ftbitmap.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(ftinit.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(ftinit.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(ftsystem.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(ftsystem.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(bdf.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(bdf.obj)' or at ''; linking object as if no debug info
+freetype.lib(cff.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(cff.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(type1cid.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(type1cid.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(ftgzip.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(ftgzip.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(ftlzw.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(ftlzw.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(pcf.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(pcf.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(pfr.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(pfr.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(psaux.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(psaux.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(pshinter.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(pshinter.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(psmodule.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(psmodule.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(raster.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(raster.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(sfnt.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(sfnt.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(smooth.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(smooth.obj)' or at ''; linking object as if no debug info
+freetype.lib(truetype.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(truetype.obj)' or at ''; linking object as if no debug info
+freetype.lib(type1.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(type1.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(type42.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(type42.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
+freetype.lib(winfnt.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(winfnt.obj)' or at ''; linking object as if no debug info
+freetype.lib(ftdebug.obj) : warning LNK4099: PDB 'freetype.pdb' was not found with 'freetype.lib(ftdebug.obj)' or at 'C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\freetype.pdb'; linking object as if no debug info
   BlazeEngine.vcxproj -> C:\Programming\Projects\BlazeEngine\BlazeEngine\build\bin\Debug\x64\BlazeEngine.dll
   C:\Programming\Projects\BlazeEngine\Libraries\SDL\SDL2-2.0.10\lib\x64\SDL2.dll
   1 File(s) copied

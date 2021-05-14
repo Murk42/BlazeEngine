@@ -1,7 +1,7 @@
 #include "BlazeEngine/Utilities/Time.h"
 #include <chrono>
 
-#include "Engine.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze
 { 
@@ -22,6 +22,16 @@ namespace Blaze
 		{
 			std::chrono::duration<double> diff = std::chrono::steady_clock::now() - engine->Time.engineStartTime;
 			return diff.count();
+		}
+		double GetDeltaTime()
+		{
+			return engine->Time.dt;
+		}
+		void Update()
+		{
+			double currentTime = GetRunTime();
+			engine->Time.dt = currentTime - engine->Time.lastFrameTime;
+			engine->Time.lastFrameTime = currentTime;
 		}
 	}
 }

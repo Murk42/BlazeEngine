@@ -20,8 +20,8 @@ namespace Blaze
 		constexpr inline bool operator!=(const Color& c) const { return r != c.r || g != c.g || b != c.b || a != c.a; }
 		constexpr inline void operator=(const Colorb& c);
 
-		Vec4f& ToVector() { return *(Vec4f*)this; }
-		Vec4f& ToVector() const { return *(Vec4f*)this; }
+		constexpr Vec4f& ToVector() { return *(Vec4f*)this; }
+		constexpr Vec4f& ToVector() const { return *(Vec4f*)this; }
 	};
 
 	struct BLAZE_API Colorb

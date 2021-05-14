@@ -1,1 +1,3 @@
-﻿
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(476,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
+  Source.cpp
+C:\Programming\Projects\BlazeEngine\Editor\assets\source\Source.cpp(1,10): fatal error C1083: Cannot open include file: 'BlazeEngine/BlazeEngineMain.h': No such file or directory

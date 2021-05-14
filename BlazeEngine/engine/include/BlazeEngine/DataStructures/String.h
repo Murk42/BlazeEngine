@@ -55,9 +55,9 @@ namespace Blaze
 		void operator+= (const char* _ptr);
 		void operator+= (const char& c);
 
-		String operator+ (const String& s);
-		String operator+ (const char* _ptr);
-		String operator+ (const char& c);
+		String operator+ (const String& s) const;
+		String operator+ (const char* _ptr) const;
+		String operator+ (const char& c) const;
 
 		String& operator= (const String& s);
 		String& operator= (String&& s) noexcept;

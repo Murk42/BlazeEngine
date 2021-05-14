@@ -3,12 +3,12 @@ using namespace Blaze;
 
 static void WindowCloseEvent(Window* win);
 static void WindowSizeChangedEvent(int w, int h, Window* win);
-static void KeyPressedEvent(Key key, Window* win);
-
+static void KeyPressedEvent(Key key, double lastPress, uint count);
+  
 struct ColoredTextMatProp : MaterialProperties<Mat4f, Texture2D>
 {
 	Property<Mat4f> mvp = "u_MVP";
-	Property<Texture2D> texture = "u_texture";
+	Property<Texture2D> texture = "u_texture"; 
 };
 struct NormalTextMatProp : MaterialProperties<Mat4f, Texture2D, Vec4f>
 {
@@ -16,7 +16,11 @@ struct NormalTextMatProp : MaterialProperties<Mat4f, Texture2D, Vec4f>
 	Property<Texture2D> texture = "u_texture";
 	Property<Vec4f> color = "u_color";
 };
-
+struct TexturedMatProp : MaterialProperties<Mat4f, Texture2D>
+{
+	Property<Mat4f> mvp = "u_MVP";
+	Property<Texture2D> texture = "u_texture";
+};
 
 class App : public Application<App>
 {
@@ -30,34 +34,43 @@ public:
 		Color(0.0f, 1.0f, 0.0f),
 		Color(0.0f, 1.0f, 1.0f),
 		Color(0.0f, 0.0f, 1.0f),
-		Color(0.0f, 0.0f, 0.0f),
-		Color(1.0f, 0.0f, 1.0f),
+		Color(0.0f, 0.0f, 0.0f), 
+		Color(1.0f, 0.0f, 1.0f), 
 		Color(1.0f, 0.0f, 0.0f),
 	};
 	    
-	Font font = Font("assets/fonts/VertigoFLF.ttf");
-	Material<NormalTextMatProp> normalTextMaterial;
+	Material<NormalTextMatProp> normalTextMaterial; 
 	Material<ColoredTextMatProp> coloredTextMaterial;
-	ColoredText text = ColoredText(&font, 50, "Marko :)", colors);
-	NormalText dataText;
+	Material<TexturedMatProp> texturedMaterial;
 
-	Mat4f canvasProjMatrix;	 
+	Font font = Font("assets/fonts/VertigoFLF.ttf");
+	FontSize smallFontSize = FontSize(&font, 30);
+	FontSize mediumFontSize = FontSize(&font, 50);
+	FontSize bigFontSize = FontSize(&font, 100);	
 
-	String inputString;
-	 
-	void Startup() override
+	ColoredText text = ColoredText(&mediumFontSize, "Marko :)", colors);
+	NormalText dataText = NormalText(&bigFontSize, ""); 
+
+	Mat4f canvasProjMatrix;	  
+
+	String inputString;	
+
+	Texture2D texture;
+	Mesh mesh;	
+
+	void Startup() override 
 	{
-		Input::SetEventFunction(InputEvent::WindowSizeChanged, WindowSizeChangedEvent);
-		Input::SetEventFunction(InputEvent::WindowClosed, WindowCloseEvent);
-		Input::SetEventFunction(InputEvent::KeyPressed, KeyPressedEvent);
+		Input::SetEventFunction<InputEvent::WindowSizeChanged>(WindowSizeChangedEvent);
+		Input::SetEventFunction<InputEvent::WindowClosed>(WindowCloseEvent);
+		Input::SetEventFunction<InputEvent::KeyPressed>(KeyPressedEvent);
 
-		window.SetSize(Vec2i(800, 400));
-		window.SetWindowed(true, false); 
+		window.SetSize({ 800, 400 });
+		window.SetWindowed(true, false);
 		window.ShowWindow(true);
-
+		
 		Renderer::SetClearColor(Color(100, 100, 120));
 		Renderer::SetViewport(Vec2i(), window.GetSize());
-		Renderer::SetTarget(window);		
+		Renderer::SetTarget(window);				
 		 		
 		{
 			Shader vertexShader = Shader(ShaderType::VertexShader, "assets/default/shaders/normalText/vertex.glsl");
@@ -70,24 +83,46 @@ public:
 			Shader fragmentShader = Shader(ShaderType::FragmentShader, "assets/default/shaders/coloredText/fragment.glsl");
 			Shader geometryShader = Shader(ShaderType::GeometryShader, "assets/default/shaders/coloredText/geometry.glsl");						
 			coloredTextMaterial.SetShaders(vertexShader, fragmentShader, geometryShader);			
+		}		
+		{
+			Shader vertexShader = { ShaderType::VertexShader, "assets/default/shaders/textured/vertex.glsl" };
+			Shader fragmentShader = { ShaderType::FragmentShader, "assets/default/shaders/textured/fragment.glsl" };
+			texturedMaterial.SetShaders(vertexShader, fragmentShader);
 		}
-				
-		dataText.SetFont(&font, 40);
 
-		text.transform.parentAlign = Align::TopRight;		
+
+		{
+			Vertex<Vec3f, Vec2f> vertices[4]
+			{
+				{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+				{ { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f } },
+				{ { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
+				{ { 1.0f, 1.0f, 0.0f }, { 1.0f, 1.0f } }
+			};
+			unsigned indices[6]
+			{
+				0, 1, 2, 1, 2, 3
+			};
+
+			mesh.SetVertices(vertices, 4);
+			mesh.SetIndicies(indices, 6);
+		}
+
+		texture.Load("assets/default/logo.png");
+		texturedMaterial.properties.texture = &texture;
+
+		text.transform.parentAlign = Align::TopRight;					
 	} 
 	
 	int FPS = 0;
 	int FPScount; 
 	Timer FPStimer;
-
-	float dt;
-	Timer dtTimer;
-	float dtSum;
-	float dtAverege;
+	
+	double dtSum;  
+	double dtAverege; 
 	void Frame() override
 	{		
-		dt = dtTimer.Reset();
+		double dt = Time::GetDeltaTime();
 		dtSum += dt;
 
 		if (FPStimer.GetTime() > 1)
@@ -98,12 +133,12 @@ public:
 			FPScount = 0;
 			dtSum = 0;
 
-			FPStimer.Reset();
+			FPStimer.Reset(); 
 		}
 		++FPScount;
-
+		 
 		String formatedString = String(format_string, "FPS: %d  dt: %fms dta: %fms rdta: %f", FPS, dt * 1000, dtAverege * 1000, 1.0f / dtAverege);
-		dataText.SetString(formatedString);
+		dataText.SetString(formatedString); 
 
 		Input::Update();					
 
@@ -115,10 +150,14 @@ public:
 		dataText.Render(normalTextMaterial, Color(1.0f, 1.0f, 0.0f, 1.0f), canvasProjMatrix);
 		text.Render(coloredTextMaterial, canvasProjMatrix * text.transform.mat);		
 
-
-		Renderer::UpdateTarget();
+		texturedMaterial.properties.mvp = Mat4f::Identity();
+		Renderer::RenderTriangles(texturedMaterial, mesh);
 		 
+		Renderer::UpdateTarget();
+		  
 		ProcessLogs();
+
+		Time::Update();		
 	}
 
 	void ProcessLogs()
@@ -150,7 +189,7 @@ static void WindowSizeChangedEvent(int w, int h, Window* win)
 	app.canvasProjMatrix = Math::OrthographicMatrix<float>(0, w, 0, h, -1, 1);		
 }
 
-static void KeyPressedEvent(Key key, Window* win)
+static void KeyPressedEvent(Key key, double lastPress, uint count)
 {
 	App& app = App::Instance();
 

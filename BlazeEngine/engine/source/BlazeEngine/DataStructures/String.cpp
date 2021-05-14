@@ -227,7 +227,7 @@ namespace Blaze
 	void String::operator+= (const char* _ptr) { Append(_ptr); }
 	void String::operator+= (const char& c) { Append(c); }
 
-	String String::operator+ (const String& s)
+	String String::operator+ (const String& s) const
 	{		
 		if (s.ptr == nullptr) return *this;
 		if (ptr == nullptr) return s;
@@ -241,7 +241,7 @@ namespace Blaze
 		out.size = size + s.size;		
 		return out;
 	}
-	String String::operator+ (const char* _ptr)
+	String String::operator+ (const char* _ptr) const
 	{
 		if (ptr == nullptr) return String(_ptr);
 
@@ -260,7 +260,7 @@ namespace Blaze
 		out.size = size + _size;		
 		return out;
 	}
-	String String::operator+ (const char& c)
+	String String::operator+ (const char& c) const
 	{
 		if (ptr == nullptr)
 			return String((char*)&c, 1);

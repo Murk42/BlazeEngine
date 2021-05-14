@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>C:\Programming\Projects\BlazeEngine\SnakeGame\source\</FILEPATH>
+      <FILENAME>Source.cpp</FILENAME>
+      <LINE>23</LINE>
+      <COLUMN>1</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Variable 'App::&lt;unnamed-type-grid&gt;::MVPuniform' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <FUNCTION>App::&lt;unnamed-type-grid&gt;::{ctor}</FUNCTION>
+    <DECORATED>??0&lt;unnamed-type-grid&gt;@App@@QEAA@XZ</DECORATED>
+    <FUNCLINE>23</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>App::&lt;unnamed-type-grid&gt;::MVPuniform</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT>
+</DEFECTS>

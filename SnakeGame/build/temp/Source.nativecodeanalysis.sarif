@@ -1,0 +1,405 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "ruleId": "C26495",
+          "message": {
+            "text": "Variable 'App::<unnamed-type-grid>::MVPuniform' is uninitialized. Always initialize a member variable (type.6)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Programming/Projects/BlazeEngine/SnakeGame/source/Source.cpp"
+                },
+                "region": {
+                  "startLine": 23,
+                  "startColumn": 2,
+                  "endLine": 23,
+                  "endColumn": 2
+                }
+              },
+              "logicalLocations": [
+                {
+                  "decoratedName": "??0<unnamed-type-grid>@App@@QEAA@XZ",
+                  "kind": "function"
+                }
+              ]
+            }
+          ],
+          "suppressions": [],
+          "properties": {
+            "targetSymbol": "App::<unnamed-type-grid>::MVPuniform"
+          }
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.28.29914.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "commandLine": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.28.29910\\bin\\HostX86\\x64\\c1xx.dll\" -ACf{1F7B090C-16DB-4822-966A-A93D26ED4681} -ACpmspft140.dll -Alint -D_PREFAST_ -D_AST_FE_ -Analyze -zm0x00C8B1C0 -il C:\\Users\\Marko\\AppData\\Local\\Temp\\_CL_330a3b81ast -typedil -f source\\Source.cpp -Ze -D_MSC_EXTENSIONS -Zp16 -pc \\:/ -D_MSC_VER=1928 -D_MSC_FULL_VER=192829914 -D_MSC_BUILD=0 -D_M_AMD64=100 -ZILP448 -D_M_X64=100 -D_WIN64 -D_WIN32 -GR -D_CPPRTTI -I C:\\Programming\\Projects\\BlazeEngine\\BlazeEngine\\engine\\include -nologo -W 3 -diagnostics:column -D_GUARDOVERFLOW_CRT_ALLOCATORS=1 -Ot -DCODE_ANALYSIS -D_DEBUG -D_CONSOLE -D_UNICODE -DUNICODE -EHs -D_CPPUNWIND -EHc -D__MSVC_RUNTIME_CHECKS -RTCs -RTCu -MDd -D_DEBUG -D_MT -D_DLL -GS -D_M_FP_PRECISE -permissive- -Zc:wchar_t -Zc:forScope -std:c++17 -FoC:\\Programming\\Projects\\BlazeEngine\\SnakeGame\\build\\temp\\Source.obj -FdC:\\Programming\\Projects\\BlazeEngine\\SnakeGame\\build\\temp\\vc142.pdb -Gd -analyze:projectdirectory C:\\Programming\\Projects\\BlazeEngine\\SnakeGame -analyze:rulesetdirectory ;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Team Tools\\Static Analysis Tools\\\\Rule Sets; -analyze:ruleset C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Team Tools\\Static Analysis Tools\\Rule Sets\\NativeRecommendedRules.ruleset -analyze:quiet -analyze:plugin C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.28.29910\\bin\\HostX86\\x86\\EspXEngine.dll -FC -errorreport:prompt -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.28.29910\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.28.29910\\atlmfc\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\VS\\include -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.18362.0\\ucrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.18362.0\\um -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.18362.0\\shared -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.18362.0\\winrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.18362.0\\cppwinrt -I C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\Include\\um",
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///C:/Programming/Projects/BlazeEngine/SnakeGame/source/Source.cpp"
+          },
+          "roles": [
+            "analysisTarget",
+            "resultFile"
+          ],
+          "hashes": {
+            "md5": "efbf7e18dfb53bc36554792156e268b8"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/blazeengine.h"
+          },
+          "hashes": {
+            "md5": "c14ee21a07f0ee35043e14fe4e246703"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/core/logger.h"
+          },
+          "hashes": {
+            "md5": "a81df8e99720c422c4799187b3a5a86c"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/core/enginecore.h"
+          },
+          "hashes": {
+            "md5": "64d1eff57de8d685c2abe007ddc97f03"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/stringview.h"
+          },
+          "hashes": {
+            "md5": "fb4450c6032480bebc1c89da8c8b9b59"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/string.h"
+          },
+          "hashes": {
+            "md5": "f563c96dd60f25fb12a23d74fe53df47"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/core/application.h"
+          },
+          "hashes": {
+            "md5": "9878213b6b122e471110830fbe501186"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/core/window.h"
+          },
+          "hashes": {
+            "md5": "1554050cf47a0c1db5210c38980f3642"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/vector.h"
+          },
+          "hashes": {
+            "md5": "a4d5a5df2e0f7eeab23a4743b46103fc"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/console/console.h"
+          },
+          "hashes": {
+            "md5": "b0bfa94102df3ebd3f1490df4abd869f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/renderer.h"
+          },
+          "hashes": {
+            "md5": "a65893ce817e4652f2547c28cde09377"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/color.h"
+          },
+          "hashes": {
+            "md5": "3ba15abb452be30a366006661e189416"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/common.h"
+          },
+          "hashes": {
+            "md5": "9fbd190bd27903e734dfe2b3dbe265ee"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/mesh.h"
+          },
+          "hashes": {
+            "md5": "42cb85a20c998e3fadc1f27a555cbb61"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/tuple.h"
+          },
+          "hashes": {
+            "md5": "6b729da97ff6e56aa554751232341832"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/templategroup.h"
+          },
+          "hashes": {
+            "md5": "f002661f81e6a5320d680f36623e5081"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/template.h"
+          },
+          "hashes": {
+            "md5": "f45ec599b96ac012f279464d1e271ead"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/graphicslibrary.h"
+          },
+          "hashes": {
+            "md5": "adb8159c07efa885e04838ec5b89bf42"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/opengl/buffer.h"
+          },
+          "hashes": {
+            "md5": "5e22fce470249b9a78630292a9020786"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/opengl/program.h"
+          },
+          "hashes": {
+            "md5": "174e5054401eeda68c847053d7c6094e"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/opengl/shader.h"
+          },
+          "hashes": {
+            "md5": "3ed04f299e728b15dc4a3f7d945d9b43"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/matrix.h"
+          },
+          "hashes": {
+            "md5": "081d5fcf5d453d1b82bb6b795d35566f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/opengl/vertexarray.h"
+          },
+          "hashes": {
+            "md5": "c2946352bc4c3b2354bc8fd10775fc04"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/bitmap.h"
+          },
+          "hashes": {
+            "md5": "cc7631a910cad5d12b0a8e68eadb1aec"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/graphics/texture.h"
+          },
+          "hashes": {
+            "md5": "2618142714b5a09f88249b3aab088842"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/input/key.h"
+          },
+          "hashes": {
+            "md5": "939b11a28b2f96ed1d26d6f113330d51"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/input/input.h"
+          },
+          "hashes": {
+            "md5": "efe29261206f23160b5cefb4d6d1703a"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/math/math.h"
+          },
+          "hashes": {
+            "md5": "4ce27ad57f23b26bcb037484b60f3b4f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/quaternion.h"
+          },
+          "hashes": {
+            "md5": "caf2ed6a2706f87cd4e6c146fa1a8fc9"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/axisangle.h"
+          },
+          "hashes": {
+            "md5": "935a669ed210acbcbeb9164429adc82b"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/rect.h"
+          },
+          "hashes": {
+            "md5": "eed5a4150b867e9f0ebc026e5ba40413"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/math/random.h"
+          },
+          "hashes": {
+            "md5": "d8167ec753d931e25f7e9dfdbe5958b2"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/utilities/file.h"
+          },
+          "hashes": {
+            "md5": "3d4af76371d30089eca78a6f9327e5c7"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/utilities/threadworker.h"
+          },
+          "hashes": {
+            "md5": "04a2f22e03c60a6f1e51c988779d2ea9"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/utilities/timer.h"
+          },
+          "hashes": {
+            "md5": "ea05d8f8f4c0048c06db9988deabecca"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/utilities/time.h"
+          },
+          "hashes": {
+            "md5": "045b8ad378dfb518cf5e878412375657"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/array.h"
+          },
+          "hashes": {
+            "md5": "a1b93daedf0d8f123cb73a8b3a15591d"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/types.h"
+          },
+          "hashes": {
+            "md5": "3c3f4a2cae88bcf838c2138e0e1264ea"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/guard.h"
+          },
+          "hashes": {
+            "md5": "2df4a8ed1f366866ffb8b251bbfa4ed0"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/bytestream.h"
+          },
+          "hashes": {
+            "md5": "40de72fd9116f704e9823fac20373e26"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/stringstream.h"
+          },
+          "hashes": {
+            "md5": "253a89355e43b7489507423f109caa0a"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/transform2d.h"
+          },
+          "hashes": {
+            "md5": "d2e396252a87547d1ebeadd08ab86194"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/programming/projects/blazeengine/blazeengine/engine/include/blazeengine/datastructures/transform3d.h"
+          },
+          "hashes": {
+            "md5": "ad238319adb3d47f124ad77e2ee5afd0"
+          }
+        }
+      ]
+    }
+  ]
+}

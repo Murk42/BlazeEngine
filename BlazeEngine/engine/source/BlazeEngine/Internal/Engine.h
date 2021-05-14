@@ -3,21 +3,24 @@
 #include "BlazeEngine/Core/Application.h"
 #include "BlazeEngine/Core/Logger.h"
 #include "BlazeEngine/Input/Input.h"
-#include "BlazeEngine/Graphics/ShaderProgram.h"
-#include "BlazeEngine/Graphics/VertexLayout.h"
+#include "BlazeEngine/Graphics/OpenGL/VertexArray.h"
+#include "BlazeEngine/Graphics/OpenGL/Program.h"
+#include "BlazeEngine/Utilities/Threading.h"
+#include "BlazeEngine/Utilities/ThreadWorker.h"
 
 #include "freetype/freetype.h"
 #include "SDL/SDL.h"
 
 #include <map>
 #include <mutex>
-#include <queue>
+#include <thread>
+#include <condition_variable>
 #include <vector>
 
 namespace Blaze
 {	
 	class Window;	
-	class Buffer;
+	class Buffer;	
 
 	class Engine
 	{
@@ -39,7 +42,17 @@ namespace Blaze
 			void* openGLContext = nullptr;
 
 			std::vector<Window*> allWindows;
-		} App;
+		} App;	
+
+		struct {
+			struct {
+				std::thread thread;				
+				std::mutex m;
+
+				bool empty = true;
+				String data;
+			} Input;
+		} Console;
 
 		struct
 		{
@@ -320,7 +333,25 @@ namespace Blaze
 			};
 
 			KeyStateData keyStates[(int)Key::Key_Count];
-			void* eventFunctions[(int)InputEvent::InputEvent_Count];
+
+			struct {
+				std::function<void(Key, double)>			keyUpFunc;
+				std::function<void(Key, double)>			keyDownFunc;
+				std::function<void(Key, double, uint)>		keyPressedFunc;
+				std::function<void(Key, double)>			keyReleasedFunc;
+				std::function<void(int dx, int dy)>			mouseMotionFunc;
+				std::function<void(int v)>					mouseWheelFunc;
+				std::function<void(Window&)>				mouseEnterFunc;
+				std::function<void(Window&)>				mouseLeaveFunc;
+				std::function<void(int w, int h, Window&)>	windowSizeChangedFunc;
+				std::function<void(int w, int h, Window&)>	windowResizedFunc;
+				std::function<void(int x, int y, Window&)>	windowMovedFunc;
+				std::function<void(Window&)>				windowMinimizedFunc;
+				std::function<void(Window&)>				windowMaximizedFunc;
+				std::function<void(Window&)>				windowFocusGainedFunc;
+				std::function<void(Window&)>				windowFocusLostFunc;
+				std::function<void(Window&)>				windowClosedFunc;
+			} eventFunctions;
 
 			Vec2i mousePos;
 			Vec2i lastMouseRealPos;
@@ -332,19 +363,15 @@ namespace Blaze
 		} Input;
 
 		struct
-		{
-			std::mutex queueMutex;
-			std::queue<Log> logs;
+		{			
 		} Logger;
 
 		struct
 		{
-			VertexLayout defaultVAO;
-			VertexLayout* boundVertexLayout = nullptr;
-			ShaderProgram* boundShaderProgram = nullptr;
-			Buffer* boundUniformBuffer;
-
-			std::vector<UniformBlock> uniformBlocks;
+			OpenGL::VertexArray defaultVertexArray;
+			OpenGL::VertexArray* boundVertexArray = nullptr;	
+			OpenGL::BaseBuffer* boundUniformBuffer = nullptr;
+			OpenGL::Program* usedProgram;			
 
 			void* target = nullptr;
 
@@ -355,6 +382,8 @@ namespace Blaze
 		struct
 		{
 			std::chrono::steady_clock::time_point engineStartTime = std::chrono::steady_clock::now();
+			double lastFrameTime;
+			double dt;
 		} Time;		
 
 		Engine();

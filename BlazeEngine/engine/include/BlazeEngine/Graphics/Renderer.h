@@ -2,11 +2,8 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Color.h"
 #include "BlazeEngine/DataStructures/Vector.h"
-#include "BlazeEngine/Graphics/Material.h"
 #include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/Graphics/ShaderProgram.h"
 #include "BlazeEngine/Graphics/Mesh.h"
-#include "BlazeEngine/Graphics/VertexLayout.h"
 
 namespace Blaze
 {
@@ -24,8 +21,6 @@ namespace Blaze
 
 	namespace Renderer
 	{
-
-
 		uint BLAZE_API MaxBoundTextures();
 
 		void BLAZE_API SetViewport(const Vec2i& pos, const Vec2i& size);
@@ -43,20 +38,9 @@ namespace Blaze
 
 		void BLAZE_API UseDepthBuffer(bool use);
 		void BLAZE_API UseFaceCulling(bool use);		
-		void BLAZE_API UseBlending(bool use);
-		
-		void BLAZE_API RenderPointArray(const ShaderProgram& material, const VertexLayout& vl, uint count = 0, size_t offset = 0);
-		void BLAZE_API RenderPointArray(const ShaderProgram& material, const Mesh& mesh, uint count = 0, size_t offset = 0);
-		void BLAZE_API RenderPointArray(BaseMaterial& material, const VertexLayout& vl, uint count = 0, size_t offset = 0);
-		void BLAZE_API RenderPointArray(BaseMaterial& material, const Mesh& mesh, uint count = 0, size_t offset = 0);
-		
-		void BLAZE_API RenderPoints(const ShaderProgram& sp, const VertexLayout& vl, uint pointCount = 0, size_t offset = 0);		
-		void BLAZE_API RenderPoints(const ShaderProgram& sp, const Mesh& mesh, uint pointCount = 0, size_t offset = 0);		
-		void BLAZE_API RenderPoints(BaseMaterial& material, const VertexLayout& vl, uint pointCount = 0, size_t offset = 0);		
-		void BLAZE_API RenderPoints(BaseMaterial& material, const Mesh& mesh, uint pointCount = 0, size_t offset = 0);
-		
-		void BLAZE_API RenderTriangles(ShaderProgram& sp, VertexLayout& vl, uint triangleCount = 0, size_t offset = 0);		
-		void BLAZE_API RenderTriangles(ShaderProgram& sp, Mesh& mesh, uint triangleCount = 0, size_t offset = 0);		
-		void BLAZE_API RenderTriangles(BaseMaterial& material, Mesh& mesh, uint triangleCount = 0, size_t offset = 0);		
+		void BLAZE_API UseBlending(bool use);		
+
+		void BLAZE_API RenderTriangles(IndexType indexType, uint triangleCount);
+		void BLAZE_API RenderPointArray(uint count, size_t offset);
 	}
 }

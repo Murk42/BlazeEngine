@@ -24,9 +24,9 @@ namespace Blaze
 		size_t Find(const std::vector<char>& val);
 		size_t Count(char val) const;
 
-		constexpr void operator= (const StringView&);				
-		void operator= (const String&);
-		constexpr void operator= (const char*);
+		constexpr StringView& operator= (const StringView&);				
+		StringView& operator= (const String&);
+		constexpr StringView& operator= (const char*);
 
 		constexpr bool operator==(const StringView& s) const;				
 		constexpr bool operator!=(const StringView& s) const;		
