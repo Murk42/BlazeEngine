@@ -1,0 +1,15 @@
+#Build files
+build/
+.vs/
+*.lib
+*.dll
+
+#Project files
+*.sln
+*.user
+*.vcxproj
+*.filters
+
+*.hint
+*.props
+
