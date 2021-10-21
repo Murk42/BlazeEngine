@@ -22,7 +22,7 @@ namespace Blaze
 	class BLAZE_API BlazeEngineBase
 	{			
 		using Constructor = void(*)(BlazeEngineBase*);
-		using Destructor = void(*)(BlazeEngineBase*);	
+		using Destructor = void(*)(BlazeEngineBase*);		
 	public:
 		static void Initialize(Constructor, Destructor, size_t);
 
@@ -30,7 +30,7 @@ namespace Blaze
 		virtual void Cleanup() { }
 		virtual void Frame() { }
 		
-		virtual void NewLog(const Log& log);								
+		virtual void NewLog(const Log& log);			
 		
 		template<typename>
 		friend class BlazeEngine;

@@ -49,7 +49,7 @@
 #include "BlazeEngine/DataStructures/Buffer.h"
 
 #include "BlazeEngine/Graphics/UI/Layer.h"
-#include "BlazeEngine/Graphics/UI/LayerManager.h"
+#include "BlazeEngine/Graphics/UI/UI.h"
 
 #include "BlazeEngine/Graphics/UI/Elements/ElementTransform.h"
 #include "BlazeEngine/Graphics/UI/Elements/Element.h"

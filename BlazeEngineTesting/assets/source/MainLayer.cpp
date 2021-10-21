@@ -2,9 +2,7 @@
 #include "App.h" 
 
 void MainLayer::Setup()
-{	
-
-	Add(fpsText.text);
+{		
 	fpsText.text.transform.parentAlign = UI::Align::BottomRight;
 	fpsText.text.transform.align = UI::Align::BottomRight;
 	fpsText.text.transform.pos = Vec2i(-5, 5);
@@ -13,7 +11,6 @@ void MainLayer::Setup()
 	fpsText.text.SetColor(Colors::Green);
 	fpsText.text.SetScale(16);	
 
-	Add(exitButton.button);
 	exitButton.button.parent = &exitButton.panel;	
 	exitButton.button.StateChangedEvent = [&]()
 	{
@@ -25,8 +22,7 @@ void MainLayer::Setup()
 
 		SetInteractable(false);
 	};
-		
-	Add(exitButton.panel);
+			
 	exitButton.panel.transform.parentAlign = UI::Align::TopLeft;
 	exitButton.panel.transform.align = UI::Align::TopLeft;
 	exitButton.panel.transform.pos = { 5, -5 };
@@ -34,8 +30,7 @@ void MainLayer::Setup()
 	exitButton.panel.UpdateTransform();
 	exitButton.panel.color = buttonUpColor;
 	exitButton.panel.outlineColor = panelOutlineColor;
-	 
-	Add(exitButton.text);
+	 	
 	exitButton.text.transform.parentAlign = UI::Align::Center;
 	exitButton.text.transform.align = UI::Align::Center;
 	exitButton.text.UpdateTransform();
@@ -46,7 +41,6 @@ void MainLayer::Setup()
 	exitButton.text.SetFont(&app->font);	
 
 
-	Add(textField.textField);
 	textField.textField.parent = &textField.panel;	
 	textField.textField.StateChangedEvent = [&]()
 	{
@@ -80,8 +74,7 @@ void MainLayer::Setup()
 		if (textField.textField.string.Size() == 0)
 			textField.text.SetString("Enter text");
 	};
-	
-	Add(textField.panel);
+		
 	textField.panel.SetParent(exitButton.panel); 
 	textField.panel.transform.parentAlign = UI::Align::BottomLeft;
 	textField.panel.transform.align = UI::Align::TopLeft;
@@ -105,7 +98,14 @@ void MainLayer::Setup()
 	textField.text.SetScale(16);
 	textField.text.SetString("Enter text");
 	textField.text.SetFont(&app->font);
-	textField.text.clip = true;			
+	textField.text.clip = true;		
+
+	Add(fpsText.text);
+	Add(exitButton.button);
+	Add(exitButton.panel);
+	Add(exitButton.text);
+	Add(textField.textField);
+	Add(textField.panel);
 	Add(textField.text);
 }
 

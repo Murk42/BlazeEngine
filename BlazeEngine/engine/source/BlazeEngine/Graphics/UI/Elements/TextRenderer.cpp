@@ -47,6 +47,27 @@ namespace Blaze::UI
 	{
 		for (auto& text : this->texts)
 		{
+			if (text->dirty)
+			{
+				Font::CharacterVertex* buffer = text->font->GenerateVertices(text->string, text->vertexCount, text->size);
+
+				delete[] text->vertices;
+				text->vertices = new TextVertex[text->vertexCount];
+
+				for (size_t i = 0; i < text->vertexCount; ++i)
+				{
+					text->vertices[i].p1 = buffer[i].p1;
+					text->vertices[i].p2 = buffer[i].p2;
+					text->vertices[i].uv1 = buffer[i].uv1;
+					text->vertices[i].uv2 = buffer[i].uv2;
+					text->vertices[i].color = text->color;
+				}
+
+				text->transform.size = text->size * text->scale;
+				text->UpdateTransform();
+				text->dirty = false;
+			}
+
 			vb.AllocateDynamicStorage(BufferView(text->vertices, text->vertexCount * sizeof(TextVertex)), Graphics::Core::GraphicsBufferDynamicStorageHint::StaticDraw);
 
 			Renderer::SelectProgram(&program);

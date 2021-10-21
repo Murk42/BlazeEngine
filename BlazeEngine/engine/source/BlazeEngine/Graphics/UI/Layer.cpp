@@ -3,8 +3,7 @@
 #include "BlazeEngine/Graphics/UI/Elements/Panel.h"
 #include "BlazeEngine/Graphics/UI/States/ButtonState.h"
 #include "BlazeEngine/Graphics/UI/States/TextFieldState.h"
-
-#include "BlazeEngine/Graphics/UI/LayerManager.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze::UI
 {	
@@ -32,13 +31,14 @@ namespace Blaze::UI
 		stateManager.AddState(textField);
 	}
 
-	Layer::Layer()
-		: manager(nullptr)
+	Layer::Layer()		
 	{		
 		elementManager.layer = this;
 		stateManager.layer = this;
 
 		textFieldManager.stateManager = &stateManager;
+
+		engine->UI.layers.emplace_back(this);
 	}
 
 	void Layer::SetActive(bool active)

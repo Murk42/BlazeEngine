@@ -17,6 +17,7 @@ namespace Blaze::UI
 
 	class BLAZE_API Text : public Element
 	{
+		bool dirty;
 		TextRenderer* renderer;
 
 		TextVertex* vertices;

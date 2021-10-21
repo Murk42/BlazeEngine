@@ -23,6 +23,11 @@ namespace Blaze
 {	
 	class Window;		
 
+	namespace UI
+	{
+		class Layer;
+	}
+
 	class Engine
 	{
 	public:
@@ -78,7 +83,7 @@ namespace Blaze
 			} Input;
 			std::mutex coutMutex;
 		} Console;
-
+#pragma region
 		struct
 		{
 			std::map<uint, Key> keymap = {
@@ -218,7 +223,6 @@ namespace Blaze
 				{ SDL_Scancode::SDL_SCANCODE_RSHIFT,			Key::RShift			},
 				{ SDL_Scancode::SDL_SCANCODE_RALT,				Key::RAlt			}
 			};
-
 			std::map<Key, SDL_Scancode> scancodemap = {
 				{ Key::Unknown, SDL_Scancode::SDL_SCANCODE_UNKNOWN				},
 				{ Key::A,	SDL_Scancode::SDL_SCANCODE_A					},
@@ -365,13 +369,11 @@ namespace Blaze
 			Key keyReleasedArray[16];
 			size_t keyReleasedArraySize = 0;
 
-			struct {				
-				//InputEventFunction::KeyDown				keyDown			= [](InputEvent::KeyDown			){};
+			struct {								
 				InputEventFunction::KeyPressed			keyPressed			= [](InputEvent::KeyPressed			){};
 				InputEventFunction::KeyReleased			keyReleased			= [](InputEvent::KeyReleased		){};
 				InputEventFunction::MousePressed		mousePressed		= [](InputEvent::MousePressed		){};
-				InputEventFunction::MouseReleased		mouseReleased		= [](InputEvent::MouseReleased		){};
-				//InputEventFunction::MouseDown			mouseDown			= [](InputEvent::MouseDown			){};
+				InputEventFunction::MouseReleased		mouseReleased		= [](InputEvent::MouseReleased		){};				
 				InputEventFunction::MouseMotion			mouseMotion			= [](InputEvent::MouseMotion		){};
 				InputEventFunction::MouseScroll			mouseScroll			= [](InputEvent::MouseScroll		){};
 				InputEventFunction::MouseEnter			mouseEnter			= [](InputEvent::MouseEnter			){};
@@ -394,6 +396,26 @@ namespace Blaze
 
 			Window* focusedWindow = nullptr;
 		} Input;
+
+		void Input_KeyPressed		(InputEvent::KeyPressed			);
+		void Input_KeyReleased		(InputEvent::KeyReleased		);
+		void Input_MousePressed		(InputEvent::MousePressed		);
+		void Input_MouseReleased	(InputEvent::MouseReleased		);
+		void Input_MouseMotion		(InputEvent::MouseMotion		);
+		void Input_MouseScroll		(InputEvent::MouseScroll		);
+		void Input_MouseEnter		(InputEvent::MouseEnter			);
+		void Input_MouseLeave		(InputEvent::MouseLeave			);
+		void Input_WindowSizeChanged(InputEvent::WindowSizeChanged	);
+		void Input_WindowResized	(InputEvent::WindowResized		);
+		void Input_WindowMoved		(InputEvent::WindowMoved		);
+		void Input_WindowMinimized	(InputEvent::WindowMinimized	);
+		void Input_WindowMaximized	(InputEvent::WindowMaximized	);
+		void Input_WindowFocusGained(InputEvent::WindowFocusGained	);
+		void Input_WindowFocusLost	(InputEvent::WindowFocusLost	);
+		void Input_WindowClosed		(InputEvent::WindowClosed		);
+		void Input_TextInput		(InputEvent::TextInput			);
+
+#pragma endregion Input
 
 		struct
 		{	
@@ -439,6 +461,22 @@ namespace Blaze
 			int FPS = 0, FPScounter = 0;
 		} Time;		
 		
+#pragma region
+		struct {
+			std::vector<UI::Layer*> layers;
+			Vec2i viewportSize;
+			Mat4f proj;
+		} UI;
+
+		void UI_Render();
+		void UI_Setup();
+		void UI_MouseMotionEvent(InputEvent::MouseMotion);
+		void UI_MousePressedEvent(InputEvent::MousePressed);
+		void UI_MouseReleasedEvent(InputEvent::MouseReleased);
+		void UI_KeyPressedEvent(InputEvent::KeyPressed);
+		void UI_TextInputEvent(InputEvent::TextInput);
+		void UI_SetViewportSize(Vec2i size);
+#pragma endregion UI
 
 		struct Cache {
 			struct RenderSDFCache

@@ -16,62 +16,25 @@ namespace Blaze::UI
 
 	void Text::SetColor(ColorRGBA color)
 	{
-		this->color = color;
-
-		for (size_t i = 0; i < vertexCount; ++i)
-			vertices[i].color = color;
+		this->color = color;		
+		dirty = true;
 	}
 	void Text::SetScale(float scale)
 	{
 		this->scale = scale;
 		transform.size = size * scale;
+		UpdateTransform();
 	}
 
 	void Text::SetString(StringView string)
-	{
-		if (font != nullptr)
-		{
-			Font::CharacterVertex* buffer = font->GenerateVertices(string, vertexCount, size);
-
-			delete[] vertices;
-			vertices = new TextVertex[vertexCount];
-
-			for (size_t i = 0; i < vertexCount; ++i)
-			{
-				vertices[i].p1 = buffer[i].p1;
-				vertices[i].p2 = buffer[i].p2;
-				vertices[i].uv1 = buffer[i].uv1;
-				vertices[i].uv2 = buffer[i].uv2;
-				vertices[i].color = color;
-			}
-
-			transform.size = size * scale;
-			UpdateTransform();
-		}
+	{		
 		this->string = string;
+		dirty = true;
 	}
 
 	void Text::SetFont(Font* font)
 	{
 		this->font = font;
-		if (string.Size() != 0)
-		{
-			Font::CharacterVertex* buffer = font->GenerateVertices(string, vertexCount, size);
-
-			delete[] vertices;
-			vertices = new TextVertex[vertexCount];
-
-			for (size_t i = 0; i < vertexCount; ++i)
-			{
-				vertices[i].p1 = buffer[i].p1;
-				vertices[i].p2 = buffer[i].p2;
-				vertices[i].uv1 = buffer[i].uv1;
-				vertices[i].uv2 = buffer[i].uv2;
-				vertices[i].color = color;
-			}
-
-			transform.size = size * scale;
-			UpdateTransform();
-		}
+		dirty = true;
 	}
 }

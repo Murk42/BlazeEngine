@@ -28,15 +28,22 @@ float map(float value, float min1, float max1, float min2, float max2) {
 
 void main()
 {			
-	vec4 color;
-	float v2 = getOutterDistance(frag_radius, frag_thickness);	
-	v2 = distanceToAlpha(frag_radius - v2);
-	float v1 = getInnerDistance((frag_radius - frag_thickness), frag_thickness);
-	v1 = distanceToAlpha((frag_radius - frag_thickness) - v1);
-	v1 = clamp(v1, 0, 1);
-	v2 = clamp(v2, 0, 1);
-	color = frag_outlineColor;
-	color.a *= v2;
-	color = color * (1.0f - v1) + frag_color * v1;		
-	gl_FragColor = color;	
+	if (frag_radius == 0)
+	{
+		gl_FragColor = frag_color;
+	}
+	else
+	{
+		vec4 color;
+		float v2 = getOutterDistance(frag_radius, frag_thickness);	
+		v2 = distanceToAlpha(frag_radius - v2);
+		float v1 = getInnerDistance((frag_radius - frag_thickness), frag_thickness);
+		v1 = distanceToAlpha((frag_radius - frag_thickness) - v1);
+		v1 = clamp(v1, 0, 1);
+		v2 = clamp(v2, 0, 1);
+		color = frag_outlineColor;
+		color.a *= v2;
+		color = color * (1.0f - v1) + frag_color * v1;		
+		gl_FragColor = color;	
+	}
 }

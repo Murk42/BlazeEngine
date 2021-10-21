@@ -1,9 +1,10 @@
 #include "App.h"
 
+
 ColorRGBA GetButtonColor(UI::ButtonState& button)
 {
 	if (button.down)
-		return buttonDownColor;
+		return buttonDownColor; 
 	if (button.hovered)
 		return buttonHoveredColor;
 	return buttonUpColor;
@@ -26,8 +27,7 @@ App::App()
 
 void App::SetViewport(Vec2i size) 
 {
-	Renderer::SetViewport(Vec2i(), size); 
-	layerManager.SetViewportSize(size);
+	Renderer::SetViewport(Vec2i(), size); 	
 }
 
 void App::SetupEvents()
@@ -39,28 +39,11 @@ void App::SetupEvents()
 	Input::SetEventFunction([&](InputEvent::WindowSizeChanged event)
 		{
 			SetViewport(event.size);
-		});
-	Input::SetEventFunction([&](InputEvent::MouseMotion event)
-		{
-			layerManager.MouseMotionEvent(event);	 			
-		});
-	Input::SetEventFunction([&](InputEvent::MousePressed event)
-		{
-			layerManager.MousePressedEvent(event);
-		});
-	Input::SetEventFunction([&](InputEvent::MouseReleased event)
-		{
-			layerManager.MouseReleasedEvent(event);
-		});
+		});			
 	Input::SetEventFunction([&](InputEvent::KeyPressed event)
 		{
-			layerManager.KeyPressedEvent(event);
-
 			if (event.key == Key::F11)
 				window.SetFullscreen(!window.IsFullscreen());
-		});
-	Input::SetEventFunction([&](InputEvent::TextInput event) {
-		layerManager.TextInputEvent(event);
 		});
 }
 void App::SetupWindow()
@@ -74,35 +57,33 @@ void App::SetupRenderer()
 {
 	Renderer::SetTarget(window);
 	Renderer::EnableFaceCulling(false);
-	Renderer::EnableDepthBuffer(false);
+	Renderer::EnableDepthBuffer(false); 
 	Renderer::EnableDepthTest(false);
-	Renderer::SetClearColor(ColorRGBA(86, 86, 86, 255));
+	Renderer::SetClearColor(ColorRGBA(86, 86, 86, 255));	
 	SetViewport(window.GetSize());
+}
+void App::SetupAssets()
+{
+	font.Load("assets/Roboto.ttf", FontType::Antialiased, 30);
 }
 
 void App::Startup()
 {	
-	SetupEvents();
+	SetupEvents(); 
 	SetupWindow();
-	SetupRenderer();
-
-	font.Load("assets/Roboto.ttf", FontType::Antialiased, 30);
-	 
-	layerManager.AddLayer(mainLayer);
-	layerManager.AddLayer(exitConfirmationMenuLayer);
-	layerManager.SetupLayers();
+	SetupRenderer();		
+	SetupAssets();
+	
 }
 
 void App::Frame()
-{
-	layerManager.UpdateLayers();
-
+{	
 	Renderer::ClearTarget();
 	
-	layerManager.RenderLayers();	
+	UI::RenderUI();
 
 	Renderer::UpdateTarget();
-}
+} 
 
 void App::Cleanup()
 {

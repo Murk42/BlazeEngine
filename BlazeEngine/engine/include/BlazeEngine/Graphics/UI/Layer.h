@@ -10,24 +10,26 @@
 #include "BlazeEngine/Graphics/UI/States/TextFieldStateManager.h"
 #include "BlazeEngine/Graphics/UI/States/ButtonStateManager.h"
 
+namespace Blaze
+{
+	class Engine;
+}
 namespace Blaze::UI
 {
 	class LayerManager;
 
 	class BLAZE_API Layer
-	{		
+	{				
 	protected:
 		virtual void Setup() { }
 		virtual void Update() { }
 		virtual void NewViewport(Vec2i size) { }
-		virtual void Activated() { }
+		virtual void Activated() { }		
 
 		void Add(Text&);
 		void Add(Panel&);
 		void Add(ButtonState&);
-		void Add(TextFieldState&);
-
-		LayerManager* manager;
+		void Add(TextFieldState&);		
 
 		ElementManager elementManager;
 		StateManager stateManager;
@@ -44,12 +46,10 @@ namespace Blaze::UI
 		Layer();
 
 		void SetActive(bool active);
-		void SetInteractable(bool interactable);
-
-		inline LayerManager* GetManager() const { return manager; }
-
-		friend class LayerManager;
+		void SetInteractable(bool interactable);		
+		
 		friend class Element;
 		friend class State;
+		friend class Blaze::Engine;
 	};
 }

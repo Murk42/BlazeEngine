@@ -19,8 +19,7 @@ public:
 	Window window;	
 
 	Font font; 
-
-	UI::LayerManager layerManager;
+	 
 	MainLayer mainLayer;
 	ExitConfirmationMenuLayer exitConfirmationMenuLayer;
 
@@ -30,7 +29,8 @@ public:
 
 	void SetupEvents();
 	void SetupWindow();
-	void SetupRenderer();
+	void SetupRenderer(); 
+	void SetupAssets();	
 
 	void Startup() override;
 

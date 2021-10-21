@@ -1,11 +1,14 @@
 #include "BlazeEngine/Graphics/UI/Elements/Element.h"
 #include "BlazeEngine/Graphics/UI/Elements/ElementManager.h"
 #include "BlazeEngine/Graphics/UI/Layer.h"
-#include "BlazeEngine/Graphics/UI/LayerManager.h"
 #include "BlazeEngine/Math/Math.h"
+
+#include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze::UI
 {
+	extern LayerManager* mainLayerManager;
+
 	Element::Element()
 		: parent(nullptr), manager(nullptr)
 	{		
@@ -30,7 +33,7 @@ namespace Blaze::UI
 		}
 		else
 		{
-			parentAbsoluteSize = manager->layer->GetManager()->GetViewportSize();
+			parentAbsoluteSize = engine->UI.viewportSize;
 			parentAbsolutePos = Vec2i();
 		}
 

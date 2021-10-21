@@ -116,6 +116,7 @@ namespace Blaze
 			engine->Renderer.viewportPos = pos;
 			engine->Renderer.viewportSize = size;
 			glViewport(pos.x, pos.y, size.x, size.y);
+			engine->UI_SetViewportSize(size);
 		}
 		void SetPatchSize(uint size)
 		{

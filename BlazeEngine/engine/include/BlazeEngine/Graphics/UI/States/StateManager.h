@@ -3,6 +3,11 @@
 #include "BlazeEngine/Input/Event.h"
 #include <vector>
 
+namespace Blaze
+{
+	class Engine;
+}
+
 namespace Blaze::UI
 {
 	class State;
@@ -23,8 +28,8 @@ namespace Blaze::UI
 		State* GetSelected() const { return selected; }
 
 		void AddState(State& state);
-
-		friend class LayerManager;
+		
 		friend class Layer;
+		friend class Engine;
 	};
 }

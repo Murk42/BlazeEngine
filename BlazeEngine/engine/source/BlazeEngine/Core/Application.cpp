@@ -326,6 +326,7 @@ namespace Blaze
 	void Run()
 	{
 		engine->AppInstance.ptr->Startup();
+		engine->UI_Setup();
 
 		while (engine->App.state & (uint32)StateFlags::Running)
 		{

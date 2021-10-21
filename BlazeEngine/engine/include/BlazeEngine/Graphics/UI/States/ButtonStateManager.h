@@ -3,6 +3,11 @@
 #include "BlazeEngine/Input/Event.h"
 #include <vector>
 
+namespace Blaze
+{
+	class Engine;
+}
+
 namespace Blaze::UI
 {
 	class ButtonState;
@@ -18,5 +23,6 @@ namespace Blaze::UI
 		void AddButton(ButtonState& button);
 
 		friend class LayerManager;
+		friend class ::Blaze::Engine;
 	};
 }
