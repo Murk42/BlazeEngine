@@ -14,8 +14,7 @@ namespace Blaze::UI
 		ColorRGBA pressedColor;
 		ColorRGBA outlineColor;
 	};
-
-	class ButtonStateManager;
+	
 	class TextRenderer;
 	class PanelRenderer;
 

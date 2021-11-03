@@ -45,6 +45,7 @@ namespace Blaze
 				gl_FragColor = color;											
 			}																				
 		*/
+		/*
 		const char* vertexSource = " \
 			#version 330 core							\n\
 														\n\
@@ -94,7 +95,7 @@ namespace Blaze
 		cache.va.SetVertexAttributeData(0, Graphics::Core::VertexAttribute(&cache.vb, sizeof(Vertex), 0, Graphics::Core::VertexAttributeType::Float, 2, false, 0));
 
 		cache.texUniform = cache.program.GetUniformLocation("u_texture");
-		cache.limitUniform = cache.program.GetUniformLocation("limit");
+		cache.limitUniform = cache.program.GetUniformLocation("limit");*/
 	}
 	void Engine::Cache::DeinitializeRenderSDFCache()
 	{  
@@ -102,7 +103,8 @@ namespace Blaze
 	}
 
 	void Engine::Cache::InitializeRenderTextureCache()
-	{/*
+	{
+		/*
 		const char* vertexSource = " \
 			#version 330 core							\n\
 														\n\

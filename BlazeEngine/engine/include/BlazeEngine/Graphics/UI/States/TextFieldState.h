@@ -17,8 +17,6 @@ namespace Blaze::UI
 		std::function<void()> StringChangedEvent;
 		std::function<void()> StringFinishedEvent;		
 
-		TextFieldState();
-
-		friend class TextFieldStateManager;
+		TextFieldState();		
 	};
 }

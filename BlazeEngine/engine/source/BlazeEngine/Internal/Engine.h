@@ -5,6 +5,7 @@
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
 #include "BlazeEngine/Graphics/Material/Material.h"
+#include "BlazeEngine/Graphics/Renderer.h"
 #include "BlazeEngine/Utilities/Threading.h"
 #include "BlazeEngine/Utilities/ThreadWorker.h"
 #include "BlazeEngine/Utilities/Stopwatch.h"
@@ -378,14 +379,14 @@ namespace Blaze
 				InputEventFunction::MouseScroll			mouseScroll			= [](InputEvent::MouseScroll		){};
 				InputEventFunction::MouseEnter			mouseEnter			= [](InputEvent::MouseEnter			){};
 				InputEventFunction::MouseLeave			mouseLeave			= [](InputEvent::MouseLeave			){};
-				InputEventFunction::WindowSizeChanged	windowSizeChanged	= [](InputEvent::WindowSizeChanged	){};
+				InputEventFunction::WindowSizeChanged	windowSizeChanged	= [](InputEvent::WindowSizeChanged event) { Renderer::SetViewport({ 0, 0 }, event.size); };
 				InputEventFunction::WindowResized		windowResized		= [](InputEvent::WindowResized		){};
 				InputEventFunction::WindowMoved			windowMoved			= [](InputEvent::WindowMoved		){};
 				InputEventFunction::WindowMinimized		windowMinimized		= [](InputEvent::WindowMinimized	){};
 				InputEventFunction::WindowMaximized		windowMaximized		= [](InputEvent::WindowMaximized	){};
 				InputEventFunction::WindowFocusGained	windowFocusGained	= [](InputEvent::WindowFocusGained	){};
 				InputEventFunction::WindowFocusLost		windowFocusLost		= [](InputEvent::WindowFocusLost	){};
-				InputEventFunction::WindowClosed		windowClosed		= [](InputEvent::WindowClosed		){};
+				InputEventFunction::WindowClosed		windowClosed		= [](InputEvent::WindowClosed		) { Application::Stop(); };
 				InputEventFunction::TextInput			textInput			= [](InputEvent::TextInput			){};
 			} eventFunctions;
 
@@ -415,8 +416,7 @@ namespace Blaze
 		void Input_WindowClosed		(InputEvent::WindowClosed		);
 		void Input_TextInput		(InputEvent::TextInput			);
 
-#pragma endregion Input
-
+#pragma endregion Input		
 		struct
 		{	
 			std::mutex mutex;
@@ -463,10 +463,16 @@ namespace Blaze
 		
 #pragma region
 		struct {
+			UI::Layer* currentLayer;
 			std::vector<UI::Layer*> layers;
 			Vec2i viewportSize;
 			Mat4f proj;
 		} UI;
+
+		void UI_SetupPanels(UI::Layer*);
+		void UI_SetupTexts(UI::Layer*);
+		void UI_RenderPanels(UI::Layer*);
+		void UI_RenderTexts(UI::Layer*);
 
 		void UI_Render();
 		void UI_Setup();

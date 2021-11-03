@@ -48,23 +48,18 @@
 #include "BlazeEngine/DataStructures/TemplateGroup.h"
 #include "BlazeEngine/DataStructures/Buffer.h"
 
+/*
 #include "BlazeEngine/Graphics/UI/Layer.h"
 #include "BlazeEngine/Graphics/UI/UI.h"
 
 #include "BlazeEngine/Graphics/UI/Elements/ElementTransform.h"
 #include "BlazeEngine/Graphics/UI/Elements/Element.h"
-#include "BlazeEngine/Graphics/UI/Elements/ElementManager.h"
 #include "BlazeEngine/Graphics/UI/Elements/Panel.h"
-#include "BlazeEngine/Graphics/UI/Elements/PanelRenderer.h"
 #include "BlazeEngine/Graphics/UI/Elements/Text.h"
-#include "BlazeEngine/Graphics/UI/Elements/TextRenderer.h"
 
 #include "BlazeEngine/Graphics/UI/States/ButtonState.h"
-#include "BlazeEngine/Graphics/UI/States/ButtonStateManager.h"
 #include "BlazeEngine/Graphics/UI/States/TextFieldState.h"
-#include "BlazeEngine/Graphics/UI/States/TextFieldStateManager.h"
 #include "BlazeEngine/Graphics/UI/States/State.h"
-#include "BlazeEngine/Graphics/UI/States/StateManager.h"
-
+*/
 
 #include "BlazeEngine/Debug/Graphics.h"

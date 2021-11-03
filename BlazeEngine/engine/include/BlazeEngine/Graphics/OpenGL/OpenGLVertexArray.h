@@ -56,8 +56,7 @@ namespace Blaze
 			void DisableVertexAttribute(uint index);			
 
 			void SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, size_t stride, size_t offset);
-			void SetVertexAttributeFormat(uint index, VertexAttributeType type, size_t count, bool normalised, size_t offset);
-			void SetVertexAttributeData(uint index, const VertexAttribute& data);
+			void SetVertexAttributeFormat(uint index, VertexAttributeType type, size_t count, bool normalised, size_t offset);			
 
 			inline uint GetHandle() const { return id; }
 

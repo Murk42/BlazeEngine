@@ -5,14 +5,11 @@
 #include <functional>
 
 namespace Blaze::UI
-{
-	class ElementManager;
-
+{	
 	class BLAZE_API Element
 	{
 		std::vector<Element*> children;
-		Element* parent;
-		ElementManager* manager;
+		Element* parent;		
 	public:
 		ElementTransform transform;
 		std::function<void()> TransformUpdate;
@@ -21,7 +18,6 @@ namespace Blaze::UI
 
 		void SetParent(Element& parent);
 		void UpdateTransform();		
-
-		friend class ElementManager;
+		
 	};
 }

@@ -6,9 +6,10 @@ int BLAZE_API main();
 namespace Blaze
 {				
 	class Log;
+	class Window;
 
 	namespace Application
-	{
+	{		
 		BLAZE_API void SetTargetFramerate(uint fps);
 		BLAZE_API void SetTargetDeltaTime(double deltaTime);
 
@@ -23,8 +24,8 @@ namespace Blaze
 	{			
 		using Constructor = void(*)(BlazeEngineBase*);
 		using Destructor = void(*)(BlazeEngineBase*);		
-	public:
 		static void Initialize(Constructor, Destructor, size_t);
+	public:
 
 		virtual void Startup() { }
 		virtual void Cleanup() { }

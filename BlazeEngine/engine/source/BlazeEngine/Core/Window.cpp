@@ -1,20 +1,39 @@
 #include "BlazeEngine/Core/Window.h"
 #include "source/BlazeEngine/Internal/Engine.h"
+#include "source/BlazeEngine/Internal/Conversions.h"
 
 #include <SDL/SDL.h>
 
 namespace Blaze
 {				
-	Window::Window()
+	void* CreateWindow(StringView title, Vec2i size)
 	{
-		engine->App.allWindows.push_back(this);
 		if (engine->App.initWindow != nullptr)
 		{
-			ptr = engine->App.initWindow;
+			SDL_SetWindowTitle((SDL_Window*)engine->App.initWindow, title.Ptr());
+			SDL_SetWindowSize((SDL_Window*)engine->App.initWindow, size.x, size.y);			
+			void* copy = engine->App.initWindow;
 			engine->App.initWindow = nullptr;
+			return copy;
 		}
 		else
-			ptr = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+			return SDL_CreateWindow(title.Ptr(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size.x, size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+	}
+
+	Window::Window()
+	{
+		engine->App.allWindows.push_back(this);				
+		ptr = CreateWindow("Blaze Engine Application", { 640, 360 });
+	}
+	Window::Window(StringView title)
+	{
+		engine->App.allWindows.push_back(this);
+		ptr = CreateWindow(title, { 640, 360 });
+	}
+	Window::Window(StringView title, Vec2i size)
+	{
+		engine->App.allWindows.push_back(this);
+		ptr = CreateWindow(title, size);
 	}
 
 	Window::~Window()
@@ -44,6 +63,36 @@ namespace Blaze
 		return SDL_GetWindowTitle((SDL_Window*)ptr);
 	}
 
+	void Window::SetIcon(BitmapView bitmap)
+	{
+		if (bitmap.GetPixelType() != BitmapPixelType::Uint8 || bitmap.GetPixelFormat() != BitmapPixelFormat::RGBA)
+		{
+			BLAZE_INFO_LOG("Blaze Engine", "Unsuported bitmap type");
+			return;
+		}
+
+		SDL_Surface* surface;
+		surface = SDL_CreateRGBSurfaceWithFormat(0, bitmap.GetSize().x, bitmap.GetSize().y, 32, SDL_PIXELFORMAT_RGBA32);
+
+		SDL_LockSurface(surface);
+		size_t stride = bitmap.GetSize().x * GetFormatDepth(bitmap.GetPixelFormat());
+		uint8* dst = (uint8*)surface->pixels;
+		uint8* src = (uint8*)bitmap.GetPixels() + stride * (bitmap.GetSize().y - 1);		
+		for (size_t y = 0; y < surface->h; ++y)
+		{
+			memcpy(dst, src, stride);
+			dst += surface->pitch;
+			src -= stride;
+		}		
+		SDL_UnlockSurface(surface);
+
+		SDL_SetWindowIcon((SDL_Window*)ptr, surface);		
+		SDL_FreeSurface(surface);
+	}
+	void Window::SetOpacity(float opacity)
+	{		
+		SDL_SetWindowOpacity((SDL_Window*)engine->App.initWindow, opacity);
+	}
 	void Window::SetPos(Vec2i s)
 	{
 		SDL_SetWindowPosition((SDL_Window*)ptr, s.x, s.y);
@@ -64,6 +113,7 @@ namespace Blaze
 	{
 		SDL_SetWindowMaximumSize((SDL_Window*)ptr, size.x, size.y);
 	}
+
 	void Window::Minimize()
 	{
 		SDL_MinimizeWindow((SDL_Window*)ptr);
@@ -72,10 +122,12 @@ namespace Blaze
 	{
 		SDL_MaximizeWindow((SDL_Window*)ptr);
 	}
+
 	void Window::Raise()
 	{
 		SDL_RaiseWindow((SDL_Window*)ptr);
 	}
+
 	void Window::ShowWindow(bool show)
 	{
 		if (show)

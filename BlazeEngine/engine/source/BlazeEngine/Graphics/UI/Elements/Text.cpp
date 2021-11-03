@@ -1,12 +1,12 @@
 #include "BlazeEngine/Graphics/UI/Elements/Text.h"
-#include "BlazeEngine/Graphics/UI/Elements/TextRenderer.h"
 #include "BlazeEngine/Resources/Font/Font.h"
+#include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze::UI
 {
 	Text::Text()
 		: scale(1), vertices(nullptr), font(nullptr), vertexCount(0), clip(false), clipRect(0, 0, 0, 0)
-	{
+	{		
 	}
 
 	Text::~Text()

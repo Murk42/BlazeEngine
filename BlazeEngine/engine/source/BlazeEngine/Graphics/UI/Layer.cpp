@@ -6,7 +6,7 @@
 #include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze::UI
-{	
+{	/*
 	void Layer::Add(Text& text)
 	{
 		textRenderer.AddText(text);
@@ -39,7 +39,7 @@ namespace Blaze::UI
 		textFieldManager.stateManager = &stateManager;
 
 		engine->UI.layers.emplace_back(this);
-	}
+	}*/
 
 	void Layer::SetActive(bool active)
 	{

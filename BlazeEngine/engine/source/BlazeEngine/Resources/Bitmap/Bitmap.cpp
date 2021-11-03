@@ -41,7 +41,7 @@ namespace Blaze
 			type = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE));
 			size = Vec2i(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 			
-			size_t stride = size.x * PixelTypeSize(type);
+			size_t stride = size.x * GetFormatDepth(format);
 			size_t dataSize = stride * size.y;
 			void* input = ilGetData();
 			void* output = malloc(dataSize);
@@ -53,7 +53,9 @@ namespace Blaze
 				memcpy((uint8*)output + outputOffset, (uint8*)input + inputOffset, stride);
 				inputOffset -= stride;
 				outputOffset += stride;
-			}			
+			}		
+
+			this->pixels = output;
 
 			return true;
 		}

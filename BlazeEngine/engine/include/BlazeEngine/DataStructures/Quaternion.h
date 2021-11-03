@@ -37,6 +37,59 @@ namespace Blaze
 			y = a.y * temp;
 			z = a.z * temp;
 		}
+		constexpr Quat(Vec3<T> forward, Vec3<T> up)
+		{			
+			Vec3<T> vector = forward;
+			Vec3<T> vector2 = Math::CrossProduct<T>(up, vector);
+			Vec3<T> vector3 = Math::CrossProduct<T>(vector, vector2);
+			T m00 = vector2.x;
+			T m01 = vector2.y;
+			T m02 = vector2.z;
+			T m10 = vector3.x;
+			T m11 = vector3.y;
+			T m12 = vector3.z;
+			T m20 = vector.x;
+			T m21 = vector.y;
+			T m22 = vector.z;
+
+			T num8 = (m00 + m11) + m22;			
+			if (num8 > 0.0)
+			{
+				T num = Math::Sqrt<T>(num8 + 1.0);
+				w = num * 0.5;
+				num = 0.5 / num;
+				x = (m12 - m21) * num;
+				y = (m20 - m02) * num;
+				z = (m01 - m10) * num;				
+			}
+			else if ((m00 >= m11) && (m00 >= m22))
+			{
+				T num7 = Math::Sqrt<T>(((1.0 + m00) - m11) - m22);
+				T num4 = 0.5 / num7;
+				x = 0.5 * num7;
+				y = (m01 + m10) * num4;
+				z = (m02 + m20) * num4;
+				w = (m12 - m21) * num4;				
+			}
+			else if (m11 > m22)
+			{
+				T num6 = Math::Sqrt<T>(((1.0 + m11) - m00) - m22);
+				T num3 = 0.5 / num6;
+				x = (m10 + m01) * num3;
+				y = 0.5 * num6;
+				z = (m21 + m12) * num3;
+				w = (m20 - m02) * num3;				
+			}
+			else
+			{
+				T num5 = Math::Sqrt<T>(((1.0 + m22) - m00) - m11);
+				T num2 = 0.5 / num5;
+				x = (m20 + m02) * num2;
+				y = (m21 + m12) * num2;
+				z = 0.5 * num5;
+				w = (m01 - m10) * num2;
+			}
+		}
 
 		constexpr Quat<T> operator*(const Quat<T>& b) const
 		{

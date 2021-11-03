@@ -1,14 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
-
-#include "BlazeEngine/Graphics/UI/Elements/ElementManager.h"
-#include "BlazeEngine/Graphics/UI/States/StateManager.h"
-
-#include "BlazeEngine/Graphics/UI/Elements/TextRenderer.h"
-#include "BlazeEngine/Graphics/UI/Elements/PanelRenderer.h"
-
-#include "BlazeEngine/Graphics/UI/States/TextFieldStateManager.h"
-#include "BlazeEngine/Graphics/UI/States/ButtonStateManager.h"
+#include "BlazeEngine/Graphics/GraphicsLibrary.h"
+#include <vector>
 
 namespace Blaze
 {
@@ -16,8 +9,12 @@ namespace Blaze
 }
 namespace Blaze::UI
 {
-	class LayerManager;
-
+	class State;
+	class Element;
+	class Text;
+	class Panel;
+	class ButtonState;
+	class TextFieldState;
 	class BLAZE_API Layer
 	{				
 	protected:
@@ -30,15 +27,34 @@ namespace Blaze::UI
 		void Add(Panel&);
 		void Add(ButtonState&);
 		void Add(TextFieldState&);		
+		
+		State* selected;
+		std::vector<State*> states;
+		std::vector<Element*> elements;
 
-		ElementManager elementManager;
-		StateManager stateManager;
+		struct TextData {
+			Graphics::Core::Program program;
+			Graphics::Core::GraphicsBuffer vb;
+			Graphics::Core::VertexArray va;
+			int uniformTex;
+			int uniformVP;
 
-		TextRenderer textRenderer;
-		PanelRenderer panelRenderer;
+			std::vector<Text*> texts;
+		} text;		
+		struct PanelData {
+			Graphics::Core::VertexArray va;
+			Graphics::Core::GraphicsBuffer vb;
+			Graphics::Core::Program program;
+			int uniformVP;
 
-		ButtonStateManager buttonManager;
-		TextFieldStateManager textFieldManager;
+			std::vector<Panel*> panels;			
+		} panel;
+		struct ButtonStateData {
+			std::vector<ButtonState*> buttons;
+		} buttonStateData;
+		struct TextFieldStateData{
+			std::vector<TextFieldState*> textFields;
+		} textFieldState;
 
 		bool active = true;
 		bool interactable = true;

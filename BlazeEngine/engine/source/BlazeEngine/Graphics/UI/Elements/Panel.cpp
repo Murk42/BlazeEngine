@@ -1,5 +1,4 @@
 #include "BlazeEngine/Graphics/UI/Elements/Panel.h"
-#include "BlazeEngine/Graphics/UI/Elements/PanelRenderer.h"
 
 namespace Blaze::UI
 {

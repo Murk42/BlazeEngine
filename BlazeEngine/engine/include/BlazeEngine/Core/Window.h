@@ -3,6 +3,7 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/Vector.h"
+#include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 
 namespace Blaze
 {	
@@ -19,18 +20,22 @@ namespace Blaze
 
 	class BLAZE_API Window
 	{		
-		void* ptr = nullptr;				
+		void* ptr = nullptr;					
 
 		Window(const Window&) = delete;
 		Window& operator=(const Window&) = delete;		
 	public:		
 		Window();
+		Window(StringView title);
+		Window(StringView title, Vec2i size);
 		~Window();
 
 		Vec2i GetPos() const;
 		Vec2i GetSize() const;
 		String GetTitle() const;
 
+		void SetIcon(BitmapView bitmap);
+		void SetOpacity(float opacity);
 		void SetPos(Vec2i pos);
 		void SetSize(Vec2i size);
 		void SetTitle(StringView title);

@@ -17,7 +17,5 @@ namespace Blaze::UI
 		std::function<void()> ReleasedEvent;		
 
 		ButtonState();
-
-		friend class ButtonStateManager;
 	};
 }

@@ -19,6 +19,8 @@ namespace Blaze
 	{				 
 		void RenderTexture(Graphics::Core::Texture2D& texture, const Mat4f& mvp)
 		{					
+			if (engine->cache.renderTextureCache == nullptr)
+				engine->cache.InitializeRenderTextureCache();
 			Engine::Cache::RenderTextureCache& cache = *engine->cache.renderTextureCache;
 
 			cache.program.SetUniform(cache.texUniform, 0);			

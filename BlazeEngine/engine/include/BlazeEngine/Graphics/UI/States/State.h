@@ -5,12 +5,9 @@
 #include <functional>
 
 namespace Blaze::UI
-{
-	class StateManager;
-
+{	
 	class BLAZE_API State
-	{		
-		StateManager* manager;
+	{				
 		bool selected;	
 	public:					
 		std::function<void()> StateChangedEvent;
@@ -18,9 +15,6 @@ namespace Blaze::UI
 		std::function<void()> DeselectedEvent;
 
 		void Select();
-		inline bool IsSelected() const { return selected; }
-		inline StateManager* GetStateManager() const { return manager; }
-
-		friend class StateManager;
+		inline bool IsSelected() const { return selected; }		
 	};
 }

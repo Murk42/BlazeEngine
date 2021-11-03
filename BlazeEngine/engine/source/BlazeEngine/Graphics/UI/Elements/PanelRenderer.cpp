@@ -1,6 +1,4 @@
-#include "BlazeEngine/Graphics/UI/Elements/PanelRenderer.h"
 #include "BlazeEngine/Graphics/UI/Elements/Panel.h"
-#include "BlazeEngine/Graphics/UI/Elements/ElementManager.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 
 namespace Blaze::UI

@@ -58,6 +58,19 @@ namespace Blaze
 		default: return 0;
 		}
 	}
+	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format)
+	{
+		switch (format)
+		{
+		case BitmapPixelFormat::Red: throw;
+		case BitmapPixelFormat::RG:	throw;
+		case BitmapPixelFormat::RGB: return SDL_PIXELFORMAT_RGB24;
+		case BitmapPixelFormat::RGBA: return SDL_PIXELFORMAT_RGBA32;
+		case BitmapPixelFormat::BGR: return SDL_PIXELFORMAT_BGR24;
+		case BitmapPixelFormat::BGRA: return SDL_PIXELFORMAT_BGRA32;
+		default: return (SDL_PixelFormatEnum)0;
+		}
+	}
 	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format)
 	{
 		switch (format)

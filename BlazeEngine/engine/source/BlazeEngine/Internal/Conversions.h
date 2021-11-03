@@ -5,6 +5,8 @@
 #include <IL/il.h>
 #include <GL/glew.h>
 
+#include <SDL/SDL.h>
+
 namespace Blaze
 {
 	unsigned GetFormatDepth(BitmapPixelFormat format);
@@ -12,6 +14,7 @@ namespace Blaze
 
 	ILenum DevILPixelFormat(BitmapPixelFormat format);
 	GLenum OpenGLPixelFormat(BitmapPixelFormat format);
+	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format);
 	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format);
 	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format);
 	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format);

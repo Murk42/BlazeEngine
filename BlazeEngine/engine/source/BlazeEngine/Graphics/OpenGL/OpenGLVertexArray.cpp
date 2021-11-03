@@ -55,17 +55,7 @@ namespace Blaze
         void VertexArray::SetVertexAttributeFormat(uint index, VertexAttributeType type, size_t count, bool normalised, size_t offset)
         {
             glVertexArrayAttribFormat(id, index, count, (size_t)type, normalised, offset);
-        }
-        
-        void VertexArray::SetVertexAttributeData(uint index, const VertexAttribute& data)
-        {                        
-            glVertexArrayAttribFormat(id, index, data.count, (size_t)data.type, data.normalised, data.attributeOffset);
-
-            if (data.buffer != nullptr)
-                glVertexArrayVertexBuffer(id, index, data.buffer->id, data.bufferOffset, data.bufferStride);
-            else
-                glVertexArrayVertexBuffer(id, index, 0, data.bufferOffset, data.bufferStride);
-        }
+        }              
 
 
         void VertexArray::SetIndexBuffer(GraphicsBuffer& buffer)

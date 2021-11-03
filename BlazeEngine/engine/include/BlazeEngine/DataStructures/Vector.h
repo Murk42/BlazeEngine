@@ -100,7 +100,10 @@ namespace Blaze
 			T arr[3]{ };
 		};
 
-		constexpr Vector() = default;
+		constexpr Vector()
+			: x(0), y(0), z(0)
+		{
+		}
 		constexpr Vector(const T& x, const T& y, const T& z)
 			: x(x), y(y), z(z)
 		{

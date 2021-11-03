@@ -28,7 +28,7 @@ namespace Blaze
 
 	Time Time::GetWorldTime()
 	{
-		auto now = std::chrono::system_clock::now();
+		auto now = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = now.time_since_epoch();
 		return Time(diff.count());
 	}

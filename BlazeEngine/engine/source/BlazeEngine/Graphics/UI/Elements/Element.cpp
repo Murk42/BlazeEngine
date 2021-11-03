@@ -1,5 +1,4 @@
 #include "BlazeEngine/Graphics/UI/Elements/Element.h"
-#include "BlazeEngine/Graphics/UI/Elements/ElementManager.h"
 #include "BlazeEngine/Graphics/UI/Layer.h"
 #include "BlazeEngine/Math/Math.h"
 
@@ -7,10 +6,8 @@
 
 namespace Blaze::UI
 {
-	extern LayerManager* mainLayerManager;
-
 	Element::Element()
-		: parent(nullptr), manager(nullptr)
+		: parent(nullptr)
 	{		
 	}	
 	void Element::SetParent(Element& parent)
