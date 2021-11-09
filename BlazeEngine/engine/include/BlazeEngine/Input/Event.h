@@ -19,7 +19,7 @@ namespace Blaze
 		MouseEnter,			
 		MouseLeave,			
 
-		WindowSizeChanged,	
+		ViewportChanged,	
 		WindowResized,		
 		WindowMoved,		
 		WindowMinimized,	
@@ -43,7 +43,7 @@ namespace Blaze
 		struct MouseEnter			{ };			
 		struct MouseLeave			{ };			
 	
-		struct WindowSizeChanged	{ Vec2i size; Window* window; };	
+		struct ViewportChanged		{ Vec2i pos; Vec2i size; };
 		struct WindowResized		{ Vec2i size; Window* window; };		
 		struct WindowMoved			{ Vec2i size; Window* window; };
 		struct WindowMinimized		{ Window* window; };	
@@ -65,7 +65,7 @@ namespace Blaze
 		using MouseScroll       = std::function<void(InputEvent::MouseScroll		)>;
 		using MouseEnter        = std::function<void(InputEvent::MouseEnter			)>;
 		using MouseLeave        = std::function<void(InputEvent::MouseLeave			)>;		
-		using WindowSizeChanged = std::function<void(InputEvent::WindowSizeChanged	)>;
+		using ViewportChanged	= std::function<void(InputEvent::ViewportChanged	)>;
 		using WindowResized     = std::function<void(InputEvent::WindowResized		)>;
 		using WindowMoved       = std::function<void(InputEvent::WindowMoved		)>;
 		using WindowMinimized   = std::function<void(InputEvent::WindowMinimized	)>;
@@ -89,7 +89,7 @@ namespace Blaze
 	//template<> class InputEventFunction<InputEventType::MouseWheel			> : public std::function<void(int v)				> { public: InputEventFunction(const std::function<void(int v)					>& func) : function(func) { } };
 	//template<> class InputEventFunction<InputEventType::MouseEnter			> : public std::function<void(Window&)				> { public: InputEventFunction(const std::function<void(Window&)				>& func) : function(func) { } };
 	//template<> class InputEventFunction<InputEventType::MouseLeave			> : public std::function<void(Window&)				> { public: InputEventFunction(const std::function<void(Window&)				>& func) : function(func) { } };
-	//template<> class InputEventFunction<InputEventType::WindowSizeChanged	> : public std::function<void(int w, int h, Window&)> { public: InputEventFunction(const std::function<void(int w, int h, Window&)	>& func) : function(func) { } };
+	//template<> class InputEventFunction<InputEventType::ViewportChanged	> : public std::function<void(int w, int h, Window&)> { public: InputEventFunction(const std::function<void(int w, int h, Window&)	>& func) : function(func) { } };
 	//template<> class InputEventFunction<InputEventType::WindowResized		> : public std::function<void(int w, int h, Window&)> { public: InputEventFunction(const std::function<void(int w, int h, Window&)	>& func) : function(func) { } };
 	//template<> class InputEventFunction<InputEventType::WindowMoved			> : public std::function<void(int x, int y, Window&)> { public: InputEventFunction(const std::function<void(int x, int y, Window&)	>& func) : function(func) { } };
 	//template<> class InputEventFunction<InputEventType::WindowMinimized		> : public std::function<void(Window&)				> { public: InputEventFunction(const std::function<void(Window&)				>& func) : function(func) { } };
@@ -121,7 +121,7 @@ namespace Blaze
 		BLAZE_API void SetEventFunction(const InputEventFunction::MouseScroll		&);
 		BLAZE_API void SetEventFunction(const InputEventFunction::MouseEnter		&);
 		BLAZE_API void SetEventFunction(const InputEventFunction::MouseLeave		&);
-		BLAZE_API void SetEventFunction(const InputEventFunction::WindowSizeChanged	&);
+		BLAZE_API void SetEventFunction(const InputEventFunction::ViewportChanged	&);
 		BLAZE_API void SetEventFunction(const InputEventFunction::WindowResized		&);
 		BLAZE_API void SetEventFunction(const InputEventFunction::WindowMoved		&);
 		BLAZE_API void SetEventFunction(const InputEventFunction::WindowMinimized	&);

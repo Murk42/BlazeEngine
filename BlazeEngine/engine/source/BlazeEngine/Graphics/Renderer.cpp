@@ -116,7 +116,8 @@ namespace Blaze
 			engine->Renderer.viewportPos = pos;
 			engine->Renderer.viewportSize = size;
 			glViewport(pos.x, pos.y, size.x, size.y);
-			engine->UI_SetViewportSize(size);
+			Input_ViewportChanged({ pos, size });
+			UI_SetViewportSize(size);
 		}
 		void SetPatchSize(uint size)
 		{
@@ -177,10 +178,10 @@ namespace Blaze
 
 		void SetTarget(Window& win)
 		{
-			if (engine->Renderer.target != win.ptr)
+			if (engine->Renderer.target != win.GetHandle())
 			{
-				engine->Renderer.target = win.ptr;
-				SDL_GL_MakeCurrent((SDL_Window*)win.ptr, (SDL_GLContext)engine->App.openGLContext);
+				engine->Renderer.target = win.GetHandle();
+				SDL_GL_MakeCurrent((SDL_Window*)win.GetHandle(), (SDL_GLContext)engine->GLEW.openGLContext);
 			}
 		}
 		void SetPolygonMode(PolygonMode mode)

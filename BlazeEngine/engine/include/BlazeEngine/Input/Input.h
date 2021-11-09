@@ -27,6 +27,6 @@ namespace Blaze
 		void BLAZE_API LockCursor(bool lock);
 
 		void BLAZE_API SetDoubleClickInterval(double interval);
-		void BLAZE_API SetMousePos(const Vec2i&);		
+		void BLAZE_API SetMousePos(Vec2i);		
 	}
 }

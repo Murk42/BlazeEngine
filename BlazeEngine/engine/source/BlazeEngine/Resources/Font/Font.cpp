@@ -192,7 +192,7 @@ namespace Blaze
 				FT_CHECK(ftError);
 			}
 
-			ftError = FT_New_Face(engine->ft_library, path.Ptr(), 0, &face);
+			ftError = FT_New_Face(engine->FreeType.freeTypeLibrary, path.Ptr(), 0, &face);
 			FT_CHECK(ftError);
 			ptr = face;
 		}

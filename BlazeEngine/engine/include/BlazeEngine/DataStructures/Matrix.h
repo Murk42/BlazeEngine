@@ -1,5 +1,4 @@
 #pragma once
-#include <utility>
 #include "Vector.h"
 
 namespace Blaze
@@ -40,10 +39,14 @@ namespace Blaze
 
 			size_t i = 0, j = 0, k = 0;
 			for (i = 0; i < Sy; ++i)
-				for (j = 0; j < Sx2; ++j)
-					for (k = 0; k < Sx; ++k) {
-						out.arr[j + i * Sx2] += arr[k + i * Sx] * m.arr[j + k * Sx2];
+				for (k = 0; k < Sx; ++k)
+				{
+					T mul = arr[k + i * Sx];
+					for (j = 0; j < Sx2; ++j)
+					{
+						out.arr[j + i * Sx2] += mul * m.arr[j + k * Sx2];
 					}
+				}
 			return out;
 		}
 		constexpr Matrix operator* (const T& v) const
@@ -70,14 +73,19 @@ namespace Blaze
 		constexpr void operator*= (const Matrix<T, Sx, Sy>& m)
 		{
 			Matrix<T, Sx, Sy> res;
-			memset(res.arr, 0, sizeof(T) * Sx * Sy);
-			size_t i, j, k;
-			for (i = 0; i < Sy; ++i)
-				for (j = 0; j < Sx; ++j)
-					for (k = 0; k < Sx; ++k) {
-						res.arr[j + i * Sx] += arr[k + i * Sx] * m.arr[j + k * Sx];
-					}
-			memcpy(arr, res.arr, sizeof(T) * Sx * Sy);
+
+			for (size_t i = 0; i < Sx; ++i)
+				for (size_t j = 0; j < Sy; ++j)
+					res.arr[i + j * Sx] = 0;
+			
+			for (size_t i = 0; i < Sy; ++i)
+				for (size_t k = 0; k < Sx; ++k)
+					for (size_t j = 0; j < Sx; ++j)
+						res.arr[j + i * Sx] += arr[k + i * Sx] * m.arr[j + k * Sx];				
+
+			for (size_t i = 0; i < Sx; ++i)
+				for (size_t j = 0; j < Sy; ++j)
+					arr[i + j * Sx] = res.arr[i + j * Sx];			
 		}
 
 		constexpr bool operator== (const Matrix<T, Sx, Sy>& m) const { return memcmp(arr, m.arr, sizeof(T) * Sx * Sy) == 0; }
@@ -160,14 +168,21 @@ namespace Blaze
 		constexpr void operator*= (const Matrix<T, S, S>& m)
 		{
 			Matrix<T, S, S> res;
-			memset(res.arr, 0, sizeof(T) * S * S);
+			
+			for (size_t i = 0; i < S; ++i)
+				for (size_t j = 0; j < S; ++j)
+					res.arr[i + j * S] = 0;
+
 			size_t i, j, k;
 			for (i = 0; i < S; ++i)
 				for (j = 0; j < S; ++j)
 					for (k = 0; k < S; ++k) {
 						res.arr[j + i * S] += arr[k + i * S] * m.arr[j + k * S];
 					}
-			memcpy(arr, res.arr, sizeof(T) * S * S);
+
+			for (size_t i = 0; i < S; ++i)
+				for (size_t j = 0; j < S; ++j)
+					arr[i + j * S] = res.arr[i + j * S];
 		}
 
 		constexpr bool operator== (const Matrix<T, S, S>& m) const { return memcmp(arr, m.arr, sizeof(T) * S * S) == 0; }
@@ -188,7 +203,11 @@ namespace Blaze
 		{
 			for (size_t i = 1; i < S; ++i)
 				for (size_t j = 0; j < i; ++j)
-					std::swap(this->arr[i + j * S], this->arr[j + i * S]);
+				{
+					T temp = this->arr[i + j * S];
+					this->arr[i + j * S] = this->arr[j + i * S];
+					this->arr[j + i * S] = temp;
+				}					
 		}
 		constexpr Matrix<T, S, S> Transposed() const
 		{

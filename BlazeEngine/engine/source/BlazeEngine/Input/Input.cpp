@@ -14,8 +14,8 @@ namespace Blaze
 	extern void* initWindow;
 
 #define CALL_EVENT_FUNC(name, args) \
-	if (engine->Input_ name)	\
-		engine->Input_ name args
+	if (Input_ name)	\
+		Input_ name args
 	
 	namespace Input
 	{				
@@ -37,7 +37,7 @@ namespace Blaze
 				data.pressed = true;
 				data.down = true;			
 
-				engine->Input_KeyPressed({ key, time, data.combo });
+				Input_KeyPressed({ key, time, data.combo });
 				data.timePressed = time;
 			}
 			else			
@@ -56,7 +56,7 @@ namespace Blaze
 				data.down = false;
 				data.released = true;
 
-				engine->Input_KeyReleased({ key, time - data.timePressed });
+				Input_KeyReleased({ key, time - data.timePressed });
 			}
 			else			
 				BLAZE_WARNING_LOG("Blaze Engine", "engine->Input.keyReleasedArray got full, aborted keyReleased event.");			
@@ -77,7 +77,7 @@ namespace Blaze
 			auto GetWindowFromSDLid = [](uint32 id) -> Window*
 			{
 				void* win = SDL_GetWindowFromID(id);
-				for (auto& w : engine->App.allWindows)
+				for (auto& w : engine->ProcessInfo.allWindows)
 					if (w->GetHandle() == win)
 						return w;
 				return nullptr;
@@ -100,7 +100,7 @@ namespace Blaze
 				{
 				case SDL_MOUSEWHEEL: {
 					engine->Input.mouseScroll = event.wheel.y;
-					engine->Input_MouseScroll({ event.wheel.y });
+					Input_MouseScroll({ event.wheel.y });
 					break;
 				}
 				case SDL_MOUSEBUTTONDOWN: {
@@ -116,7 +116,7 @@ namespace Blaze
 					engine->Input.mouseKeyStates[(int)key].timePressed = frameTime;
 
 					if (engine->Input.focusedWindow != nullptr)
-						engine->Input_MousePressed({ key, Vec2i(event.button.x, engine->Input.focusedWindow->GetSize().y - event.button.y) });
+						Input_MousePressed({ key, Vec2i(event.button.x, engine->Input.focusedWindow->GetSize().y - event.button.y) });
 					break;
 				}
 				case SDL_MOUSEBUTTONUP: {
@@ -126,7 +126,7 @@ namespace Blaze
 					engine->Input.mouseKeyStates[(int)key].released = true;
 
 					if (engine->Input.focusedWindow != nullptr)
-						engine->Input_MouseReleased({ key, Vec2i(event.button.x, engine->Input.focusedWindow->GetSize().y - event.button.y) });
+						Input_MouseReleased({ key, Vec2i(event.button.x, engine->Input.focusedWindow->GetSize().y - event.button.y) });
 					break;
 				}
 				case SDL_KEYDOWN: {
@@ -153,62 +153,65 @@ namespace Blaze
 					break;
 				}
 				case SDL_TEXTINPUT: {										
-					engine->Input_TextInput({ String((const char*)event.text.text, UTF8Size(event.text.text)) });					
+					Input_TextInput({ String((const char*)event.text.text, UTF8Size(event.text.text)) });					
 					break;								
 				}
 				case SDL_WINDOWEVENT: {
-					if (engine->App.initWindow == nullptr)
+					if (engine->GLEW.openGLInitWindow == nullptr)
 						switch (event.window.event) {
 						case SDL_WINDOWEVENT_MOVED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_WindowMoved({ Vec2i(event.window.data1, event.window.data2), win });
+							Input_WindowMoved({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_MINIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_WindowMinimized({ win });
+							Input_WindowMinimized({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_MAXIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_WindowMaximized({ win });
+							Input_WindowMaximized({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_SIZE_CHANGED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_WindowSizeChanged({ Vec2i(event.window.data1, event.window.data2), win });
+							Input_WindowResized({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_RESIZED: {
-							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_WindowResized({ Vec2i(event.window.data1, event.window.data2), win });
+							/*
+							Covered by SDL_WINDOWEVENT_SIZE_CHANGED
+							*/
+							//Window* win = GetWindowFromSDLid(event.window.windowID);
+							//Input_WindowResized({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_GAINED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
 							engine->Input.focusedWindow = win;
-							engine->Input_WindowFocusGained({ win });
+							Input_WindowFocusGained({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_LOST: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
 							engine->Input.focusedWindow = nullptr;
-							engine->Input_WindowFocusLost({ win });
+							Input_WindowFocusLost({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_CLOSE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_WindowClosed({ win });
+							Input_WindowClosed({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_ENTER: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_MouseEnter({ });
+							Input_MouseEnter({ });
 							break;
 						}
 						case SDL_WINDOWEVENT_LEAVE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input_MouseLeave({ });
+							Input_MouseLeave({ });
 							break;
 						}
 						}
@@ -230,7 +233,7 @@ namespace Blaze
 				engine->Input.mousePos = mouseRealPos;
 
 			if (engine->Input.mouseMovement != Vec2i(0))
-				engine->Input_MouseMotion({ Vec2i(engine->Input.mousePos.x, engine->Input.mousePos.y), Vec2i(engine->Input.mouseMovement.x, engine->Input.mouseMovement.y) });
+				Input_MouseMotion({ Vec2i(engine->Input.mousePos.x, engine->Input.mousePos.y), Vec2i(engine->Input.mouseMovement.x, engine->Input.mouseMovement.y) });
 		}
 
 		KeyState GetKeyState(Key code)
@@ -278,10 +281,10 @@ namespace Blaze
 		{
 			engine->Input.doubleClickInterval = interval;
 		}
-		void SetMousePos(const Vec2i& p)
+		void SetMousePos(Vec2i p)
 		{
 			if (engine->Input.focusedWindow != nullptr)
-				SDL_WarpMouseInWindow((SDL_Window*)engine->Input.focusedWindow->ptr, p.x, p.y);
+				SDL_WarpMouseInWindow((SDL_Window*)engine->Input.focusedWindow->GetHandle(), p.x, p.y);
 			else
 				SDL_WarpMouseGlobal(p.x, p.y);
 			engine->Input.mousePos = p;

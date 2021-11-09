@@ -14,8 +14,7 @@ namespace Blaze
 	namespace UI
 	{
 		void RenderUI()
-		{
-			engine->UI_Render();
+		{			
 		}
 	}
 
@@ -31,7 +30,7 @@ namespace Blaze
 	constexpr size_t vertexCount = 128;
 	PanelVertex panelVertices[vertexCount];	
 	
-	void Engine::UI_SetupPanels(UI::Layer* layer)
+	void UI_SetupPanels(UI::Layer* layer)
 	{
 		/*
 		UI::Layer::PanelData& data = *layer->panelData;
@@ -61,31 +60,32 @@ namespace Blaze
 		}*/
 	}
 
-	void Engine::UI_SetupTexts(UI::Layer*)
+	void UI_SetupTexts(UI::Layer*)
 	{
 	}
 
-	void Engine::UI_RenderPanels(UI::Layer*)
+	void UI_RenderPanels(UI::Layer*)
 	{
 	}
 
-	void Engine::UI_RenderTexts(UI::Layer*)
+	void UI_RenderTexts(UI::Layer*)
 	{
 	}
 
-	void Engine::UI_Render()
+	void UI_Render()
 	{
+		/*
 		for (auto& layer : engine->UI.layers)
 			if (layer->active)
 			{
 				
-				/*
+				
 				layer->textRenderer.Render(UI.proj);
-				Renderer::ClearTargetDepth();*/
-			}
+				Renderer::ClearTargetDepth();
+			}*/
 	}
 
-	void Engine::UI_Setup()
+	void UI_Setup()
 	{		/*
 		for (auto& layer : UI.layers)
 		{			
@@ -98,7 +98,7 @@ namespace Blaze
 				layer->NewViewport(UI.viewportSize);
 		}*/
 	}
-	void Engine::UI_MouseMotionEvent(InputEvent::MouseMotion event)
+	void UI_MouseMotionEvent(InputEvent::MouseMotion event)
 	{/*
 		for (auto& layer : UI.layers)
 			if (layer->active && layer->interactable)
@@ -107,7 +107,7 @@ namespace Blaze
 				layer->textFieldManager.MouseMotionEvent(event);
 			}*/
 	}
-	void Engine::UI_MousePressedEvent(InputEvent::MousePressed event)
+	void UI_MousePressedEvent(InputEvent::MousePressed event)
 	{/*
 		for (auto& layer : UI.layers)
 			if (layer->active && layer->interactable)
@@ -117,7 +117,7 @@ namespace Blaze
 				layer->textFieldManager.MousePressedEvent(event);
 			}*/
 	}
-	void Engine::UI_MouseReleasedEvent(InputEvent::MouseReleased event)
+	void UI_MouseReleasedEvent(InputEvent::MouseReleased event)
 	{/*
 		for (auto& layer : UI.layers)
 			if (layer->active && layer->interactable)
@@ -126,7 +126,7 @@ namespace Blaze
 				layer->textFieldManager.MouseReleasedEvent(event);
 			}*/
 	}
-	void Engine::UI_KeyPressedEvent(InputEvent::KeyPressed event)
+	void UI_KeyPressedEvent(InputEvent::KeyPressed event)
 	{/*
 		for (auto& layer : UI.layers)
 			if (layer->active && layer->interactable)
@@ -134,7 +134,7 @@ namespace Blaze
 				layer->textFieldManager.KeyPressedEvent(event);
 			}*/
 	}
-	void Engine::UI_TextInputEvent(InputEvent::TextInput event)
+	void UI_TextInputEvent(InputEvent::TextInput event)
 	{/*
 		for (auto& layer : UI.layers)
 			if (layer->active && layer->interactable)
@@ -142,7 +142,7 @@ namespace Blaze
 				layer->textFieldManager.TextInputEvent(event);
 			}*/
 	}
-	void Engine::UI_SetViewportSize(Vec2i size)
+	void UI_SetViewportSize(Vec2i size)
 	{/*
 		UI.proj = Math::OrthographicMatrix<float>(0, size.x, 0, size.y, -1, 1);
 		UI.viewportSize = size;

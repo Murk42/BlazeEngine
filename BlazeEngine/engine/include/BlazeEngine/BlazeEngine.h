@@ -1,9 +1,9 @@
 #define BLAZE_ENGINE
 
+#include "BlazeEngine/Core/Scene.h"
 #include "BlazeEngine/Core/Logger.h"
 #include "BlazeEngine/Core/Application.h"
 #include "BlazeEngine/Core/Window.h"
-#include "BlazeEngine/Core/Hardware.h"
 
 #include "BlazeEngine/Console/Console.h"
 
@@ -30,7 +30,6 @@
 
 #include "BlazeEngine/DataStructures/Array.h"
 #include "BlazeEngine/DataStructures/Color.h"
-#include "BlazeEngine/DataStructures/Types.h"
 #include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/StringView.h"
 #include "BlazeEngine/DataStructures/Vector.h"

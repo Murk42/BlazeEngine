@@ -10,7 +10,7 @@
 namespace Blaze
 {		
 	Log::Log(LogType type, String&& filePath, String&& functionName, uint line, String&& source, String&& message)
-		: threadID(std::this_thread::get_id()), time(Time::GetWorldTime()), type(type), 
+		: threadID(ProcessInfo_GetThreadID(std::this_thread::get_id())), time(Time::GetWorldTime()), type(type), 
 		filePath(std::move(filePath)), functionName(std::move(functionName)), line(line),
 		source(std::move(source)), message(std::move(message))
 	{
@@ -27,12 +27,7 @@ namespace Blaze
 		case Blaze::LogType::Warning: typeStr = "WARNING"; break;
 		}
 		return "[" + timeStr + "] [" + typeStr + "] " + filePath + ": " + message + "\n";
-	}
-
-	inline uint Log::GetThreadID() const
-	{
-		return engine->Core.GetThreadID(threadID);
-	}
+	}	
 
 	bool Log::operator==(const Log& log)
 	{
@@ -79,7 +74,9 @@ namespace Blaze
 		{
 			std::lock_guard<std::mutex> lk(engine->Logger.mutex);
 			for (auto& log : engine->Logger.logs)
-				engine->AppInstance.ptr->NewLog(log);
+				;
+				//TODO: SEND LOGS				
+				//engine->AppInstance.ptr->NewLog(log);
 
 			engine->Logger.logs.clear();
 			engine->Logger.threadLogs.clear();
@@ -91,7 +88,7 @@ namespace Blaze
 			Log& log = engine->Logger.logs.emplace_back(Log(type, std::move(fileName), std::move(functionName), line, std::move(source), std::move(message)));
 			if (engine->Logger.policy == LoggingPolicy::WaitForFlush)
 			{				
-				std::thread::id id = std::this_thread::get_id();
+				std::thread::id id = std::this_thread::get_id();				
 				engine->Logger.threadLogs[id].emplace_back(&log);
 			}
 			else if (engine->Logger.policy == LoggingPolicy::PrintInstantly)

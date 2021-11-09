@@ -3,9 +3,6 @@
 #include "BlazeEngine/DataStructures/StringView.h"
 #include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/Utilities/Time.h"
-#include <thread> 
-
-#include <string.h>
 
 BLAZE_API const char* FILE_NAME(const char* macro);
 #define BLAZE_FILE_NAME (::FILE_NAME(__FILE__))
@@ -23,7 +20,7 @@ namespace Blaze
 
 	class BLAZE_API Log
 	{
-		const std::thread::id threadID;
+		uint threadID;
 		Time time;
 
 		LogType type;
@@ -33,13 +30,13 @@ namespace Blaze
 		uint line;
 
 		String source;
-		String message;		
-	public:					
+		String message;
+	public:
 		Log(LogType type, String&& filePath, String&& functionName, uint line, String&& source, String&& message);
 
 		String FormatString();
 
-		inline uint GetThreadID() const;
+		inline uint GetThreadID() const { return threadID; }
 		inline const LogType GetType() const { return type; }
 
 		inline const String& GetFilePath() const { return filePath; }

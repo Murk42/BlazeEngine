@@ -8,12 +8,12 @@ namespace Blaze
 {				
 	void* CreateWindow(StringView title, Vec2i size)
 	{
-		if (engine->App.initWindow != nullptr)
+		if (engine->GLEW.openGLInitWindow != nullptr)
 		{
-			SDL_SetWindowTitle((SDL_Window*)engine->App.initWindow, title.Ptr());
-			SDL_SetWindowSize((SDL_Window*)engine->App.initWindow, size.x, size.y);			
-			void* copy = engine->App.initWindow;
-			engine->App.initWindow = nullptr;
+			SDL_SetWindowTitle((SDL_Window*)engine->GLEW.openGLInitWindow, title.Ptr());
+			SDL_SetWindowSize((SDL_Window*)engine->GLEW.openGLInitWindow, size.x, size.y);			
+			void* copy = engine->GLEW.openGLInitWindow;
+			engine->GLEW.openGLInitWindow = nullptr;
 			return copy;
 		}
 		else
@@ -22,26 +22,26 @@ namespace Blaze
 
 	Window::Window()
 	{
-		engine->App.allWindows.push_back(this);				
+		engine->ProcessInfo.allWindows.push_back(this);				
 		ptr = CreateWindow("Blaze Engine Application", { 640, 360 });
 	}
 	Window::Window(StringView title)
 	{
-		engine->App.allWindows.push_back(this);
+		engine->ProcessInfo.allWindows.push_back(this);
 		ptr = CreateWindow(title, { 640, 360 });
 	}
 	Window::Window(StringView title, Vec2i size)
 	{
-		engine->App.allWindows.push_back(this);
+		engine->ProcessInfo.allWindows.push_back(this);
 		ptr = CreateWindow(title, size);
 	}
 
 	Window::~Window()
 	{
-		auto i = std::find(engine->App.allWindows.begin(), engine->App.allWindows.end(), this);
+		auto i = std::find(engine->ProcessInfo.allWindows.begin(), engine->ProcessInfo.allWindows.end(), this);
 
-		if (i != engine->App.allWindows.end())
-			engine->App.allWindows.erase(i);
+		if (i != engine->ProcessInfo.allWindows.end())
+			engine->ProcessInfo.allWindows.erase(i);
 
 		SDL_DestroyWindow((SDL_Window*)ptr);
 	}
@@ -91,7 +91,7 @@ namespace Blaze
 	}
 	void Window::SetOpacity(float opacity)
 	{		
-		SDL_SetWindowOpacity((SDL_Window*)engine->App.initWindow, opacity);
+		SDL_SetWindowOpacity((SDL_Window*)engine->GLEW.openGLInitWindow, opacity);
 	}
 	void Window::SetPos(Vec2i s)
 	{

@@ -1,8 +1,6 @@
 #pragma once
-#include <vector>
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/StringView.h"
-#include <functional>
 
 namespace Blaze
 {

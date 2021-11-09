@@ -20,9 +20,3 @@
 #define BLAZE_YES 1
 #define BLAZE_NO 0
 #define BLAZE_ERROR -1
-
-namespace Blaze
-{
-	unsigned BLAZE_API GetMajorVersion();
-	unsigned BLAZE_API GetMinorVersion();
-}

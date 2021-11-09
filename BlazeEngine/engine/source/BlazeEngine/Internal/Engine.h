@@ -2,6 +2,7 @@
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Core/Application.h"
 #include "BlazeEngine/Core/Logger.h"
+#include "BlazeEngine/Core/Scene.h"
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
 #include "BlazeEngine/Graphics/Material/Material.h"
@@ -10,6 +11,7 @@
 #include "BlazeEngine/Utilities/ThreadWorker.h"
 #include "BlazeEngine/Utilities/Stopwatch.h"
 #include "source/BlazeEngine/Internal/InternalKeyStateData.h"
+
 
 #include "freetype/freetype.h"
 #include "SDL/SDL.h"
@@ -22,57 +24,50 @@
 
 namespace Blaze
 {	
-	class Window;		
+	class Window;			
 
 	namespace UI
 	{
 		class Layer;
 	}
 
-	class Engine
-	{
-	public:
-		FT_Library ft_library;
-
+	struct Engine
+	{	
 		struct {
-			std::mutex threadIDsMutex;
-			std::unordered_map<std::thread::id, uint> threadIDs;
-
-			//thread-safe
-			uint GetThreadID(std::thread::id id)
-			{
-				std::lock_guard<std::mutex> lk(threadIDsMutex);
-				auto it = threadIDs.find(id);
-				if (it == threadIDs.end())				
-					return (threadIDs[id] = threadIDs.size());
-				return threadIDs[id];
-			}
-		} Core;
-
-		struct {
-			BlazeEngineBase* ptr = nullptr;
-			void (*constructor)(BlazeEngineBase*) = nullptr;
-			void (*destructor)(BlazeEngineBase*) = nullptr;
-			size_t size;
-		} AppInstance;
-
-		struct {
-			uint32 initState = 0;			
-			uint32 state = 0;
-
-			double targetDeltaTime = 0;			
-			double deltaTime = 0;
-			std::chrono::high_resolution_clock::time_point lastFrame;
-			uint FPS = 0;
-			uint FPScounter = 0;
-			Stopwatch FPSstopwatch;
-
-			void* initWindow = nullptr;
+			void* openGLInitWindow = nullptr;
 			void* openGLContext = nullptr;
+		} GLEW;
+
+		struct {
+			FT_Library freeTypeLibrary;
+		} FreeType;
+
+		struct {
+			SceneInfo startupSceneInfo;
+			SceneInfo currentSceneInfo;
+			void* currentScene = nullptr;
+		} Scene;
+
+		struct {
+			bool running;
+			std::mutex threadIDsMutex;
+			std::unordered_map<std::thread::id, uint> threadIDMap;
 
 			std::vector<Window*> allWindows;
-		} App;	
+		} ProcessInfo;
+			
+			/**/		
 
+		struct {
+			double targetDeltaTime = 0;
+			double deltaTime = 0;
+			std::chrono::high_resolution_clock::time_point lastFrame;
+
+			uint FPS = 0;
+			uint FPScounter = 0;
+			std::chrono::high_resolution_clock::time_point FPStime_point;
+		} FrameInfo;
+		
 		struct {
 			struct {
 				std::thread thread;				
@@ -84,7 +79,7 @@ namespace Blaze
 			} Input;
 			std::mutex coutMutex;
 		} Console;
-#pragma region
+
 		struct
 		{
 			std::map<uint, Key> keymap = {
@@ -379,7 +374,7 @@ namespace Blaze
 				InputEventFunction::MouseScroll			mouseScroll			= [](InputEvent::MouseScroll		){};
 				InputEventFunction::MouseEnter			mouseEnter			= [](InputEvent::MouseEnter			){};
 				InputEventFunction::MouseLeave			mouseLeave			= [](InputEvent::MouseLeave			){};
-				InputEventFunction::WindowSizeChanged	windowSizeChanged	= [](InputEvent::WindowSizeChanged event) { Renderer::SetViewport({ 0, 0 }, event.size); };
+				InputEventFunction::ViewportChanged	windowSizeChanged	= [](InputEvent::ViewportChanged event) { Renderer::SetViewport({ 0, 0 }, event.size); };
 				InputEventFunction::WindowResized		windowResized		= [](InputEvent::WindowResized		){};
 				InputEventFunction::WindowMoved			windowMoved			= [](InputEvent::WindowMoved		){};
 				InputEventFunction::WindowMinimized		windowMinimized		= [](InputEvent::WindowMinimized	){};
@@ -397,26 +392,7 @@ namespace Blaze
 
 			Window* focusedWindow = nullptr;
 		} Input;
-
-		void Input_KeyPressed		(InputEvent::KeyPressed			);
-		void Input_KeyReleased		(InputEvent::KeyReleased		);
-		void Input_MousePressed		(InputEvent::MousePressed		);
-		void Input_MouseReleased	(InputEvent::MouseReleased		);
-		void Input_MouseMotion		(InputEvent::MouseMotion		);
-		void Input_MouseScroll		(InputEvent::MouseScroll		);
-		void Input_MouseEnter		(InputEvent::MouseEnter			);
-		void Input_MouseLeave		(InputEvent::MouseLeave			);
-		void Input_WindowSizeChanged(InputEvent::WindowSizeChanged	);
-		void Input_WindowResized	(InputEvent::WindowResized		);
-		void Input_WindowMoved		(InputEvent::WindowMoved		);
-		void Input_WindowMinimized	(InputEvent::WindowMinimized	);
-		void Input_WindowMaximized	(InputEvent::WindowMaximized	);
-		void Input_WindowFocusGained(InputEvent::WindowFocusGained	);
-		void Input_WindowFocusLost	(InputEvent::WindowFocusLost	);
-		void Input_WindowClosed		(InputEvent::WindowClosed		);
-		void Input_TextInput		(InputEvent::TextInput			);
-
-#pragma endregion Input		
+		
 		struct
 		{	
 			std::mutex mutex;
@@ -459,9 +435,8 @@ namespace Blaze
 
 			std::chrono::steady_clock::time_point fpsTimer = std::chrono::steady_clock::now();
 			int FPS = 0, FPScounter = 0;
-		} Time;		
+		} Time;	
 		
-#pragma region
 		struct {
 			UI::Layer* currentLayer;
 			std::vector<UI::Layer*> layers;
@@ -469,21 +444,7 @@ namespace Blaze
 			Mat4f proj;
 		} UI;
 
-		void UI_SetupPanels(UI::Layer*);
-		void UI_SetupTexts(UI::Layer*);
-		void UI_RenderPanels(UI::Layer*);
-		void UI_RenderTexts(UI::Layer*);
-
-		void UI_Render();
-		void UI_Setup();
-		void UI_MouseMotionEvent(InputEvent::MouseMotion);
-		void UI_MousePressedEvent(InputEvent::MousePressed);
-		void UI_MouseReleasedEvent(InputEvent::MouseReleased);
-		void UI_KeyPressedEvent(InputEvent::KeyPressed);
-		void UI_TextInputEvent(InputEvent::TextInput);
-		void UI_SetViewportSize(Vec2i size);
-#pragma endregion UI
-
+		/*
 		struct Cache {
 			struct RenderSDFCache
 			{
@@ -525,10 +486,45 @@ namespace Blaze
 			static void InitializeRenderTextCache();
 			static void DeinitializeRenderTextCache();			
 		} cache;
+		*/
 
 		Engine();
 		~Engine();
 	};
 
 	extern Engine* engine;
+
+	void UI_SetupPanels(UI::Layer*);
+	void UI_SetupTexts(UI::Layer*);
+	void UI_RenderPanels(UI::Layer*);
+	void UI_RenderTexts(UI::Layer*);
+
+	void UI_Render();
+	void UI_Setup();
+	void UI_MouseMotionEvent(InputEvent::MouseMotion);
+	void UI_MousePressedEvent(InputEvent::MousePressed);
+	void UI_MouseReleasedEvent(InputEvent::MouseReleased);
+	void UI_KeyPressedEvent(InputEvent::KeyPressed);
+	void UI_TextInputEvent(InputEvent::TextInput);
+	void UI_SetViewportSize(Vec2i size);
+
+	uint ProcessInfo_GetThreadID(std::thread::id id);
+
+	void Input_KeyPressed(InputEvent::KeyPressed);
+	void Input_KeyReleased(InputEvent::KeyReleased);
+	void Input_MousePressed(InputEvent::MousePressed);
+	void Input_MouseReleased(InputEvent::MouseReleased);
+	void Input_MouseMotion(InputEvent::MouseMotion);
+	void Input_MouseScroll(InputEvent::MouseScroll);
+	void Input_MouseEnter(InputEvent::MouseEnter);
+	void Input_MouseLeave(InputEvent::MouseLeave);
+	void Input_ViewportChanged(InputEvent::ViewportChanged);
+	void Input_WindowResized(InputEvent::WindowResized);
+	void Input_WindowMoved(InputEvent::WindowMoved);
+	void Input_WindowMinimized(InputEvent::WindowMinimized);
+	void Input_WindowMaximized(InputEvent::WindowMaximized);
+	void Input_WindowFocusGained(InputEvent::WindowFocusGained);
+	void Input_WindowFocusLost(InputEvent::WindowFocusLost);
+	void Input_WindowClosed(InputEvent::WindowClosed);
+	void Input_TextInput(InputEvent::TextInput);
 }
