@@ -13,6 +13,7 @@
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture2D.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture2DArray.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureCubemap.h"
+#include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureBuffer.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureEnums.h"
 #endif
 

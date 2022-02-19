@@ -1,20 +1,33 @@
 #include "BlazeEngine/Core/Window.h"
-#include "source/BlazeEngine/Internal/Engine.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
 
 #include <SDL/SDL.h>
 
 namespace Blaze
 {				
+	void* GetOpenGLInitWindow();
+	static std::vector<Window*> allWindows;
+	static bool firstWindowCreated = false;
+
+	const std::vector<Window*>& GetAllWindows()
+	{
+		return allWindows;
+	}
+
+	bool WasFirstWindowCreated()
+	{
+		return firstWindowCreated;
+	}
+
 	void* CreateWindow(StringView title, Vec2i size)
 	{
-		if (engine->GLEW.openGLInitWindow != nullptr)
+		if (!firstWindowCreated)
 		{
-			SDL_SetWindowTitle((SDL_Window*)engine->GLEW.openGLInitWindow, title.Ptr());
-			SDL_SetWindowSize((SDL_Window*)engine->GLEW.openGLInitWindow, size.x, size.y);			
-			void* copy = engine->GLEW.openGLInitWindow;
-			engine->GLEW.openGLInitWindow = nullptr;
-			return copy;
+			void* ptr = GetOpenGLInitWindow();
+			SDL_SetWindowTitle((SDL_Window*)ptr, title.Ptr());
+			SDL_SetWindowSize((SDL_Window*)ptr, size.x, size.y);									
+			firstWindowCreated = true;
+			return ptr;
 		}
 		else
 			return SDL_CreateWindow(title.Ptr(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size.x, size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
@@ -22,26 +35,26 @@ namespace Blaze
 
 	Window::Window()
 	{
-		engine->ProcessInfo.allWindows.push_back(this);				
+		allWindows.emplace_back(this);				
 		ptr = CreateWindow("Blaze Engine Application", { 640, 360 });
 	}
 	Window::Window(StringView title)
 	{
-		engine->ProcessInfo.allWindows.push_back(this);
+		allWindows.emplace_back(this);
 		ptr = CreateWindow(title, { 640, 360 });
 	}
 	Window::Window(StringView title, Vec2i size)
 	{
-		engine->ProcessInfo.allWindows.push_back(this);
+		allWindows.emplace_back(this);
 		ptr = CreateWindow(title, size);
 	}
 
 	Window::~Window()
 	{
-		auto i = std::find(engine->ProcessInfo.allWindows.begin(), engine->ProcessInfo.allWindows.end(), this);
+		auto i = std::find(allWindows.begin(), allWindows.end(), this);
 
-		if (i != engine->ProcessInfo.allWindows.end())
-			engine->ProcessInfo.allWindows.erase(i);
+		if (i != allWindows.end())
+			allWindows.erase(i);
 
 		SDL_DestroyWindow((SDL_Window*)ptr);
 	}
@@ -91,7 +104,7 @@ namespace Blaze
 	}
 	void Window::SetOpacity(float opacity)
 	{		
-		SDL_SetWindowOpacity((SDL_Window*)engine->GLEW.openGLInitWindow, opacity);
+		SDL_SetWindowOpacity((SDL_Window*)ptr, opacity);
 	}
 	void Window::SetPos(Vec2i s)
 	{

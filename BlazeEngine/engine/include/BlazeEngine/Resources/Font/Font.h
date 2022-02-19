@@ -2,9 +2,9 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/String.h"
+#include "BlazeEngine/DataStructures/StringViewUTF8.h"
 #include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/Buffer.h"
-#include "BlazeEngine/DataStructures/Array.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
 #include <vector>
 #include <unordered_map>
@@ -48,8 +48,8 @@ namespace Blaze
 		Font();		
 		~Font();		
 
-		bool GetCharacterData(int character, CharacterData& data) const;
-		CharacterVertex* GenerateVertices(StringView text, uint& vertexCount, Vec2f& size) const;
+		bool GetCharacterData(UnicodeChar character, CharacterData& data) const;
+		CharacterVertex* GenerateVertices(StringViewUTF8 text, uint& vertexCount, Vec2f& size) const;
 		
 		int Load(StringView path, FontType type, uint resolution, bool emitLogOnFail = true);
 

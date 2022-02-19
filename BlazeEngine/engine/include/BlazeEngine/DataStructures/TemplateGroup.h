@@ -6,13 +6,14 @@ namespace Blaze
 {
 	template<typename ... T>
 	class TemplateGroup
-	{
+	{		
 	public:
+		using First = InvalidType;
 		static constexpr size_t Size = 0;
 
 		static constexpr bool AllTypesDifferent = true;
 		template<template<typename> class C>
-		static constexpr bool AppliesToAll = true;
+		static constexpr bool AppliesToAll = true;		
 	};
 
 	template<typename T1, typename ... T>
@@ -80,23 +81,6 @@ namespace Blaze
 		{
 			static constexpr bool value = C<T1>::value && _AppliesToAll<C, T...>::template value;
 		};
-
-		template<typename ... T>
-		struct _AllTypesDifferent
-		{
-			static constexpr bool value = true;
-		};
-		template<typename T1, typename T2>
-		struct _AllTypesDifferent<T1, T2>
-		{
-			static constexpr bool value = !Template<T1>::template Same<T2>;
-		};
-		template<typename T1, typename T2, typename ... T>
-		struct _AllTypesDifferent<T1, T2, T...>
-		{
-			static constexpr bool value = !Template<T1>::template Same<T2> && _AllTypesDifferent<T1, T...>::value;
-		};
-
 	public:
 		using First = T1;
 		using Next = TemplateGroup<T...>;
@@ -113,9 +97,7 @@ namespace Blaze
 		template<typename ... S>
 		static constexpr bool HasTypes = (_HasType<S, T1, T...>::value && ...);
 		template<template<typename> class C>
-		static constexpr bool AppliesToAll = _AppliesToAll<C, T1, T...>::value;
-
-		static constexpr bool AllTypesDifferent = _AllTypesDifferent<T1, T...>::value && TemplateGroup<T...>::AllTypesDifferent;
+		static constexpr bool AppliesToAll = _AppliesToAll<C, T1, T...>::value;				
 	};
 
 	template<typename T>
@@ -128,7 +110,7 @@ namespace Blaze
 	{
 		static constexpr bool value = true;
 	};
-
+	
 	template<typename T>
 	constexpr bool IsTemplateGroup = _IsTemplateGroup<T>::value;
 }

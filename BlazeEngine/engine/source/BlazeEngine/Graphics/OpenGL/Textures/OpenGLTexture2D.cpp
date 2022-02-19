@@ -1,10 +1,12 @@
 #pragma once
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture2D.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
-#include "BlazeEngine/Core/Logger.h"
+#include "BlazeEngine/Logger/Logger.h"
 
 #include "GL/glew.h"
 #include "IL/il.h"
+
+#include "BlazeEngine/Graphics/Renderer.h"
 
 namespace Blaze::OpenGL
 {
@@ -35,12 +37,16 @@ namespace Blaze::OpenGL
 		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
 		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);
+
+		Renderer::SelectTexture(this);
+		if (settings.mipmaps)
+			glGenerateMipmap(GL_TEXTURE_2D);
 	}		
 	void Texture2D::Create(Vec2i size, TextureInternalPixelFormat internalFormat)
 	{
 		this->size = size;		
-		glBindTexture(GL_TEXTURE_2D, id);
-		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+		Renderer::SelectTexture(this);				
+		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}
 	void Texture2D::Create(BitmapView bm)
 	{
@@ -50,7 +56,7 @@ namespace Blaze::OpenGL
 	{
 		size = bm.GetSize();
 
-		glBindTexture(GL_TEXTURE_2D, id);
+		Renderer::SelectTexture(this);
 
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
@@ -112,7 +118,7 @@ namespace Blaze::OpenGL
 
 	void Texture2D::SetPixels(Vec2i offset, BitmapView bm)
 	{
-		glBindTexture(GL_TEXTURE_2D, id);
+		Renderer::SelectTexture(this);
 
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
@@ -130,6 +136,12 @@ namespace Blaze::OpenGL
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
 		glTextureSubImage2D(id, 0, offset.x, offset.y, size.x, size.y, _format, _type, pixels);
+	}
+
+	void Texture2D::GenerateMipmaps()
+	{
+		Renderer::SelectTexture(this);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	Texture2D& Texture2D::operator=(Texture2D&& tex) noexcept

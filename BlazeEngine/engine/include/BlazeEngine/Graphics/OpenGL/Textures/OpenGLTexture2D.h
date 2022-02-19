@@ -6,12 +6,12 @@ namespace Blaze::OpenGL
 {	
 	struct Texture2DSettings
 	{
-		TextureWrapping xWrap;
-		TextureWrapping yWrap;
-		TextureSampling min;
-		TextureSampling mag;
-		TextureSampling mip;
-		bool mipmaps;
+		TextureWrapping xWrap = TextureWrapping::ClampToEdge;
+		TextureWrapping yWrap = TextureWrapping::ClampToBorder;
+		TextureSampling min = TextureSampling::Nearest;
+		TextureSampling mag = TextureSampling::Nearest;
+		TextureSampling mip = TextureSampling::Nearest;
+		bool mipmaps = false;
 	};
 
 	class BLAZE_API Texture2D
@@ -34,6 +34,8 @@ namespace Blaze::OpenGL
 		void Create(BitmapView bm, TextureInternalPixelFormat internalFormat);
 		void SetPixels(Vec2i offset, BitmapView bm);
 		void SetPixels(Vec2i offset, Vec2i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels);				
+
+		void GenerateMipmaps();
 
 		Vec2i GetSize() const { return size; }		
 

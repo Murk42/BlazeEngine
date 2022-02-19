@@ -1,18 +1,17 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/StringView.h"
+#include "BlazeEngine/DataStructures/StringViewUTF8.h"
 
 namespace Blaze
 {
 	//thread-safe
 	namespace Console
 	{								
-		void BLAZE_API Write(StringView text);
 		void BLAZE_API Write(char text);
-		void BLAZE_API WriteLine(StringView text);
+		void BLAZE_API Write(StringView text);
+		void BLAZE_API WriteLine(StringView text);		
 
-		bool BLAZE_API ReadWord(String& value);	
-		void BLAZE_API ClearInput();
-		void BLAZE_API WaitForInput();
+		String BLAZE_API Read();
 	}
 }

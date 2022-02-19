@@ -4,6 +4,7 @@
 namespace Blaze
 {
 	class String;
+	class StringViewUTF8;
 	class BLAZE_API StringView
 	{
 		const char* ptr;
@@ -15,7 +16,7 @@ namespace Blaze
 		StringView(const char*);
 		StringView(const char*, size_t count);
 		StringView(const char* begin, const char* end);
-		StringView(const String&);
+		StringView(const String&);		
 
 		inline const char* Ptr() const { return ptr; }
 		inline size_t Size() const { return size; }	

@@ -1,10 +1,10 @@
 #include "BlazeEngine/Utilities/Time.h"
 #include <chrono>
 
-#include "source/BlazeEngine/Internal/Engine.h"
-
 namespace Blaze
 {
+	static std::chrono::steady_clock::time_point engineStartTime = std::chrono::steady_clock::now();
+
 	double GetCurrentTimeValue()
 	{
 		return double(std::chrono::high_resolution_clock::now().time_since_epoch().count()) / 1000000000.0;
@@ -34,7 +34,7 @@ namespace Blaze
 	}
 	Time Time::GetRunTime()
 	{
-		std::chrono::duration<double> diff = std::chrono::steady_clock::now() - engine->Time.engineStartTime;
+		std::chrono::duration<double> diff = std::chrono::steady_clock::now() - engineStartTime;
 		return Time(diff.count());
 	}
 }

@@ -1,5 +1,7 @@
 #pragma once
-#include "BlazeEngine/Core/Logger.h"
+#include "BlazeEngine/Core/EngineCore.h"
+#include "BlazeEngine/Core/Result.h"
+#include "BlazeEngine/Logger/Logger.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Graphics/OpenGL/OpenGLShader.h"
 #include "BlazeEngine/DataStructures/Vector.h"
@@ -28,63 +30,60 @@ namespace Blaze
 			uint maxUniformBlockNameLenght;
 
 		public:
-			inline Program();
-			inline Program(const Program&) = delete;
-			inline Program(Program&&) noexcept;
-			inline ~Program();
+			Program();
+			Program(const Program&) = delete;
+			Program(Program&&) noexcept;
+			~Program();
 
-			inline void AttachShader(const Shader& shader);
-			inline void DetachShader(const Shader& shader);
-			inline bool LinkProgram();
-			inline String GetLinkingLog();
+			void AttachShader(const Shader& shader);
+			void DetachShader(const Shader& shader);
+			Result LinkProgram();
+			String GetLinkingLog();
 					
-			inline bool LinkShaders(const std::initializer_list<Shader*>& shaders, bool emitLogOnError =  true)
+			Result LinkShaders(const std::initializer_list<Shader*>& shaders)
 			{
 				for (auto& s : shaders)
 					AttachShader(*s);
 
-				if (LinkProgram() == BLAZE_ERROR)
+				if (Result result = LinkProgram())
 				{
-					if (emitLogOnError)
-					{
-						String message = GetLinkingLog();
-						BLAZE_ERROR_LOG("Blaze Engine", std::move(message));
-					}
-
-					return BLAZE_ERROR;
+					return Result(result, Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
+						"Blaze Engine", GetLinkingLog()), true);
 				}
 
 				for (auto& s : shaders)
 					DetachShader(*s);
 
-				return BLAZE_OK;
+				return Result();
 			}
 
-			inline uint GetUniformCount() const;	
-			inline int GetUniformLocation(const StringView& name);
-			inline void GetUniformData(uint index, String& name, uint& size, UniformType& type) const;
+			uint GetUniformCount() const;	
+			int GetUniformLocation(const StringView& name);
+			void GetUniformData(uint index, String& name, uint& size, UniformType& type) const;
 
-			inline uint GetUniformBlockCount() const;
-			inline void GetUniformBlockData(uint index, int& location, String& name, uint& size, std::vector<int>& memberLocations) const;
-			inline void GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset);
+			uint GetUniformBlockCount() const;
+			void GetUniformBlockData(uint index, int& location, String& name, uint& size, std::vector<int>& memberLocations) const;
+			void GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset);
 
 			template<typename T>
 			void SetUniform(int, const T&);
+			template<> void SetUniform(int location, const bool& value);
 			template<> void SetUniform(int location, const int& value);
+			template<> void SetUniform(int location, const uint& value);
 			template<> void SetUniform(int location, const float& value);			
+			template<> void SetUniform(int location, const Vec2i& value);
+			template<> void SetUniform(int location, const Vec2f& value);
+			template<> void SetUniform(int location, const Vec3i& value);
 			template<> void SetUniform(int location, const Vec3f& value);
 			template<> void SetUniform(int location, const Vec4f& value);
+			template<> void SetUniform(int location, const Mat2f& value);
+			template<> void SetUniform(int location, const Mat3f& value);
 			template<> void SetUniform(int location, const Mat4f& value);
 
-			inline uint GetHandle() const { return id; }
+			uint GetHandle() const { return id; }
 
-			inline Program& operator=(const Program&) = delete;
-			inline Program& operator=(Program&&) noexcept;			
-		};
-
-		class ProgramUniforms
-		{
-
+			Program& operator=(const Program&) = delete;
+			Program& operator=(Program&&) noexcept;			
 		};
 	}
 }

@@ -19,38 +19,38 @@ namespace Blaze
 		this->rot *= rot;
 	}
 
-	void Transform3D::Update()
+	Mat4f Transform3D::CalculateTransformMatrix(Transform3D& t)
 	{
-		if (parent != nullptr)
+		if (t.parent != nullptr)
 		{			
-			absolutePos = parent->absolutePos + pos;
-			absoluteRot = parent->absoluteRot * rot;
-			absoluteScale = parent->absoluteScale * scale;
-			mat = Math::TranslationMatrix<float>(absolutePos) * Math::RotationMatrix(absoluteRot) * Math::ScalingMatrix(absoluteScale);
+			t.absolutePos = t.parent->absolutePos + t.pos;
+			t.absoluteRot = t.parent->absoluteRot * t.rot;
+			t.absoluteScale = t.parent->absoluteScale * t.scale;
+			return Math::TranslationMatrix<float>(t.absolutePos) * Math::RotationMatrix(t.absoluteRot) * Math::ScalingMatrix(t.absoluteScale);
 		}
 		else
 		{			
-			absolutePos = pos;
-			absoluteRot = rot;
-			absoluteScale = scale;
-			mat = Math::TranslationMatrix<float>(absolutePos) * Math::RotationMatrix(absoluteRot) * Math::ScalingMatrix(absoluteScale);
+			t.absolutePos = t.pos;
+			t.absoluteRot = t.rot;
+			t.absoluteScale = t.scale;
+			return Math::TranslationMatrix<float>(t.absolutePos) * Math::RotationMatrix(t.absoluteRot) * Math::ScalingMatrix(t.absoluteScale);
 		}
-	}
-	void Transform3D::UpdateAsViewTransform()
+	}	
+	Mat4f Transform3D::CalculateViewMatrix(Transform3D& t)	
 	{
-		if (parent != nullptr)
+		if (t.parent != nullptr)
 		{
-			absolutePos = parent->absolutePos + pos;
-			absoluteRot = parent->absoluteRot * rot;
-			absoluteScale = parent->absoluteScale * scale;
-			mat = Math::RotationMatrix(absoluteRot.Conjugated()) * Math::TranslationMatrix<float>(-absolutePos) * Math::ScalingMatrix(absoluteScale);
+			t.absolutePos = t.parent->absolutePos + t.pos;
+			t.absoluteRot = t.parent->absoluteRot * t.rot;
+			t.absoluteScale = t.parent->absoluteScale * t.scale;
+			return Math::RotationMatrix(t.absoluteRot.Conjugated()) * Math::TranslationMatrix<float>(-t.absolutePos) * Math::ScalingMatrix(t.absoluteScale);
 		}
 		else
 		{
-			absolutePos = pos;
-			absoluteRot = rot;
-			absoluteScale = scale;
-			mat = Math::RotationMatrix(absoluteRot.Conjugated()) * Math::TranslationMatrix<float>(-absolutePos) * Math::ScalingMatrix(absoluteScale);
+			t.absolutePos = t.pos;
+			t.absoluteRot = t.rot;
+			t.absoluteScale = t.scale;
+			return Math::RotationMatrix(t.absoluteRot.Conjugated()) * Math::TranslationMatrix<float>(-t.absolutePos) * Math::ScalingMatrix(t.absoluteScale);
 		}
 	}
 }

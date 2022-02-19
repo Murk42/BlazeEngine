@@ -1,8 +1,10 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
+#include "BlazeEngine/Core/Result.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/Buffer.h"
+#include "BlazeEngine/File/Path.h"
 
 namespace Blaze
 {
@@ -15,27 +17,28 @@ namespace Blaze
 			GeometryShader = 36313,
 			TessellationControlShader = 36488,
 			TessellationEvaluationShader = 36487,
+			ComputeShader = 37305,
 		};
 
 		class BLAZE_API Shader
 		{
 			uint id;
 		public:
-			inline Shader(ShaderType type);
-			inline Shader(const Shader&) = delete;
-			inline Shader(Shader&&) noexcept;
-			inline Shader(ShaderType type, const StringView& path, bool emitLogOnError = true);
-			inline ~Shader();
+			Shader(ShaderType type);
+			Shader(const Shader&) = delete;
+			Shader(Shader&&) noexcept;
+			Shader(ShaderType type, const Path& path);
+			~Shader();
+			
+			Result Load(const Path& path);
 
-			inline bool Load(const StringView& path, bool emitLogOnError = true);
+			void ShaderSource(BufferView source);
+			void ShaderSource(StringView source);
+			Result CompileShader();
+			String GetCompilationLog();			
 
-			inline void ShaderSource(BufferView source);
-			inline void ShaderSource(StringView source);
-			inline int CompileShader();
-			inline String GetCompilationLog();			
-
-			inline Shader& operator=(const Shader&) = delete;
-			inline Shader& operator=(Shader&&) noexcept;
+			Shader& operator=(const Shader&) = delete;
+			Shader& operator=(Shader&&) noexcept;
 
 			friend class Program;
 		};
@@ -43,36 +46,43 @@ namespace Blaze
 		class VertexShader : public Shader
 		{ 
 		public:
-			inline VertexShader() : Shader(ShaderType::VertexShader) { }
-			inline VertexShader(const StringView& path, bool emitLogOnError = true) : Shader(ShaderType::VertexShader, path, emitLogOnError) { }
+			VertexShader() : Shader(ShaderType::VertexShader) { }
+			VertexShader(const StringView& path) : Shader(ShaderType::VertexShader, path) { }
 		};
 
 		class FragmentShader : public Shader
 		{
 		public:
-			inline FragmentShader() : Shader(ShaderType::FragmentShader) { }
-			inline FragmentShader(const StringView& path, bool emitLogOnError = true) : Shader(ShaderType::FragmentShader, path, emitLogOnError) { }
+			FragmentShader() : Shader(ShaderType::FragmentShader) { }
+			FragmentShader(const StringView& path) : Shader(ShaderType::FragmentShader, path) { }
 		};
 
 		class GeometryShader : public Shader
 		{
 		public:
-			inline GeometryShader() : Shader(ShaderType::GeometryShader) { }
-			inline GeometryShader(const StringView& path, bool emitLogOnError = true) : Shader(ShaderType::GeometryShader, path, emitLogOnError) { }
+			GeometryShader() : Shader(ShaderType::GeometryShader) { }
+			GeometryShader(const StringView& path) : Shader(ShaderType::GeometryShader, path) { }
 		};
 
 		class TessellationControlShader : public Shader
 		{
 		public:
-			inline TessellationControlShader() : Shader(ShaderType::TessellationControlShader) { }
-			inline TessellationControlShader(const StringView& path, bool emitLogOnError = true) : Shader(ShaderType::TessellationControlShader, path, emitLogOnError) { }
+			TessellationControlShader() : Shader(ShaderType::TessellationControlShader) { }
+			TessellationControlShader(const StringView& path) : Shader(ShaderType::TessellationControlShader, path) { }
 		};
 
 		class TessellationEvaluationShader : public Shader
 		{
 		public:
-			inline TessellationEvaluationShader() : Shader(ShaderType::TessellationEvaluationShader) { }
-			inline TessellationEvaluationShader(const StringView& path, bool emitLogOnError = true) : Shader(ShaderType::TessellationEvaluationShader, path, emitLogOnError) { }
+			TessellationEvaluationShader() : Shader(ShaderType::TessellationEvaluationShader) { }
+			TessellationEvaluationShader(const StringView& path) : Shader(ShaderType::TessellationEvaluationShader, path) { }
+		};
+
+		class ComputeShader : public Shader
+		{
+		public:
+			ComputeShader() : Shader(ShaderType::ComputeShader) { }
+			ComputeShader(const StringView& path) : Shader(ShaderType::ComputeShader, path) { }
 		};
 	}
 }

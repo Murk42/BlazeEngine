@@ -1,7 +1,6 @@
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Graphics/Renderer.h"
-#include "source/BlazeEngine/Internal/Engine.h"
 
 #include "ft2build.h"
 #include "freetype/freetype.h"
@@ -17,8 +16,11 @@
 
 #include "C:/Programming/Libraries/rectpack2D/include/rectpack2D/finders_interface.h"
 
+
 namespace Blaze
-{
+{	
+	FT_Library GetFreeTypeLibrary();
+
 #define FT_CHECK(x) \
 	if (x != 0)\
 	{	\
@@ -75,9 +77,9 @@ namespace Blaze
 		}
 	}
 
-	bool Font::GetCharacterData(int character, CharacterData& data) const
+	bool Font::GetCharacterData(UnicodeChar character, CharacterData& data) const
 	{
-		auto it = characterMap.find(character);
+		auto it = characterMap.find(character.Value());
 		if (it != characterMap.end())
 		{
 			data = it->second;
@@ -90,7 +92,7 @@ namespace Blaze
 	}		
 
 	Font::CharacterVertex vertices[256];
-	Font::CharacterVertex* Font::GenerateVertices(StringView text, uint& vertexCount, Vec2f& size) const
+	Font::CharacterVertex* Font::GenerateVertices(StringViewUTF8 text, uint& vertexCount, Vec2f& size) const
 	{	
 		if (text.Size() == 0)
 		{
@@ -98,16 +100,15 @@ namespace Blaze
 			size = Vec2f();
 			return nullptr;
 		}
-		Vec2f texturePixel = Vec2f(1, 1) / texture.GetSize();
+		Vec2f texturePixel = Vec2f(1, 1) / Vec2f(texture.GetSize());
 		Font::CharacterData data;
 
 		size = Vec2f();		
 
 		uint characterCount = 0;
-		for (size_t i = 0; i < text.Size();)
+		for (auto it = text.begin(); it != text.end(); ++it)		
 		{
-			uint32 character = 0;			
-			i += UTF8ToUnicode(text.Ptr() + i, character);
+			UnicodeChar character = it.ToUnicode();			
 
 			GetCharacterData(character, data);
 
@@ -192,7 +193,7 @@ namespace Blaze
 				FT_CHECK(ftError);
 			}
 
-			ftError = FT_New_Face(engine->FreeType.freeTypeLibrary, path.Ptr(), 0, &face);
+			ftError = FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
 			FT_CHECK(ftError);
 			ptr = face;
 		}
@@ -330,9 +331,9 @@ namespace Blaze
 
 				texture.SetPixels(offset, bitmap.size, bitmap.stride, BitmapPixelFormat::Red, BitmapPixelType::Uint8, bitmap.data);
 
-				data.uv1 = Vec2f(offset.x, offset.y) / textureSize;
-				data.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / textureSize;
-				data.size = Vec2f(bitmap.size);
+				data.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
+				data.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);
+				data.size = bitmap.size;
 			}
 			else
 			{
@@ -342,7 +343,7 @@ namespace Blaze
 
 			data.character = bitmap.character;
 			data.advance = bitmap.advance;
-			data.offset = bitmap.renderOffset;
+			data.offset = Vec2i(bitmap.renderOffset);
 
 			std::swap(data.uv1.y, data.uv2.y);
 
@@ -432,9 +433,9 @@ namespace Blaze
 				Vec2i offset = Vec2i(rectangles[i].x + 1, rectangles[i].y + 1);				
 
 				texture.SetPixels(offset, bitmap.size, bitmap.stride, BitmapPixelFormat::Red, BitmapPixelType::Uint8, bitmap.data);
-				data.uv1 = Vec2f(offset.x, offset.y) / textureSize;
-				data.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / textureSize;
-				data.size = Vec2f(bitmap.size);
+				data.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
+				data.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);
+				data.size = bitmap.size;
 			}
 			else
 			{
@@ -444,7 +445,7 @@ namespace Blaze
 
 			data.character = bitmap.character;
 			data.advance = bitmap.advance;
-			data.offset = bitmap.renderOffset;
+			data.offset = Vec2i(bitmap.renderOffset);
 
 			std::swap(data.uv1.y, data.uv2.y);
 

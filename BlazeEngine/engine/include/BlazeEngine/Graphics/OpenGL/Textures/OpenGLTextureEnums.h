@@ -18,6 +18,11 @@ namespace Blaze::OpenGL
 
 	enum class TextureInternalPixelFormat
 	{
+		RGBA,
+		RGB,
+		RG,
+		R,
+
 		RGBA8,
 		RGB8,
 		RG8,
@@ -75,5 +80,44 @@ namespace Blaze::OpenGL
 		Depth24Stencil8,
 		Depth32FStencil8,							
 		Stencil8,
+
+		R11F_G11F_B10F,
+	};
+
+	enum class TextureBufferInternalPixelFormat
+	{
+		R8,	
+		R16,		
+		R16F,
+		R32F,		
+		R8I,		
+		R16I,		
+		R32I,		
+		R8UI,		
+		R16UI,	
+		R32UI,	
+		RG8,		
+		RG16,		
+		RG16F,	
+		RG32F,	
+		RG8I,		
+		RG16I,	
+		RG32I,	
+		RG8UI,	
+		RG16UI,	
+		RG32UI,	
+		RGB32F,	
+		RGB32I,	
+		RGB32UI,
+		RGBA8,	
+		RGBA16,	
+		RGBA16F,
+		RGBA32F,
+		RGBA8I,	
+		RGBA16I,
+		RGBA32I,
+		RGBA8UI,
+		RGBA16UI,
+		RGBA32UI
 	};
 }

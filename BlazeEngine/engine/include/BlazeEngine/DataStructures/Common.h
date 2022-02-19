@@ -18,14 +18,14 @@ namespace Blaze
 	using uint32 = unsigned int;
 	using uint64 = unsigned long long;	
 
-	using byte = char;
-	using ubyte = unsigned char;				
+	enum byte : char { };
+	enum ubyte : unsigned char { };				
 
 	template<typename R, typename ... T>
 	using Function = R(*)(T...);	
 }
 
-#define baseoffset(derived, base) (size_t)(base*)(derived*)(uint8_t*)1 - 1
+#define baseoffset(derived, base) (int)(base*)(derived*)(uint8_t*)1 - 1
 #define ENUM_CLASS_BITWISE_OPERATIONS(name) \
 	constexpr name operator|(name left, name right) { return (name)((int)left | (int)right); } \
 	constexpr name operator&(name left, name right) { return (name)((int)left & (int)right); } \

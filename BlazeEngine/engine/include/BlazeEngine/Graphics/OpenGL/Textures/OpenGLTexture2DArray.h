@@ -6,12 +6,12 @@ namespace Blaze::OpenGL
 {
 	struct Texture2DArraySettings
 	{
-		TextureWrapping xWrap;
-		TextureWrapping yWrap;
-		TextureSampling min;
-		TextureSampling mag;
-		TextureSampling mip;
-		bool mipmaps;
+		TextureWrapping xWrap = TextureWrapping::ClampToEdge;
+		TextureWrapping yWrap = TextureWrapping::ClampToBorder;
+		TextureSampling min = TextureSampling::Nearest;
+		TextureSampling mag = TextureSampling::Nearest;
+		TextureSampling mip = TextureSampling::Nearest;
+		bool mipmaps = false;
 	};
 
 	class BLAZE_API Texture2DArray

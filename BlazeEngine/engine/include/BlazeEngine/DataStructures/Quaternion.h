@@ -1,6 +1,4 @@
 #pragma once
-#include "AxisAngle.h"
-#include "Matrix.h"
 
 namespace Blaze
 {
@@ -26,16 +24,15 @@ namespace Blaze
 
 		constexpr Quat() : x(T(0)), y(T(0)), z(T(0)), w(T(1)) { }
 		constexpr Quat(const Quat<T>& q) : x(q.x), y(q.y), z(q.z), w(q.w) { }
-		constexpr Quat(const T& x, const T& y, const T& z, const T& w) : x(x), y(y), z(z), w(w) { }
-		template<typename T2>
-		constexpr Quat(const Quat<T2>& q) : x(T(q.x)), y(T(q.y)), z(T(q.z)), w(T(q.w)) { }
-		constexpr Quat(const AxisAngle<T>& a)
+		constexpr Quat(const T& x, const T& y, const T& z, const T& w) : x(x), y(y), z(z), w(w) { }		
+		constexpr Quat(Vec3<T> axis, T angle)
 		{
-			T temp = Math::Sin<T>(a.a / T(2));
-			w = Math::Cos<T>(a.a / T(2));
-			x = a.x * temp;
-			y = a.y * temp;
-			z = a.z * temp;
+			angle = angle * T(0.5);
+			T temp = Math::Sin<T>(angle);
+			w = Math::Cos<T>(angle);
+			x = axis.x * temp;
+			y = axis.y * temp;
+			z = axis.z * temp;
 		}
 		constexpr Quat(Vec3<T> forward, Vec3<T> up)
 		{			
@@ -132,6 +129,8 @@ namespace Blaze
 		constexpr inline bool IsNormalised() const { return (x * x + y * y + z * z + w * w) == T(1); }
 		constexpr inline void Conjugate() { x = -x; y = -y; z = -z; }
 		constexpr inline Quat<T> Conjugated() const { return Quat<T>(-x, -y, -z, w); }
+
+		constexpr inline Vec4<T> Vector() { return { x, y, z, w }; }
 	};
 
 	typedef Quat<float> Quatf;

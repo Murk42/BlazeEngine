@@ -3,12 +3,17 @@
 
 #include "GL/glew.h"
 
+#include "BlazeEngine/Graphics/Renderer.h"
+
 namespace Blaze::OpenGL
 {
 	Renderbuffer::Renderbuffer()		
 		: id(-1)
 	{
-		glGenRenderbuffers(1, &id);
+		glGenRenderbuffers(1, &id);		
+		Renderer::SelectRenderbuffer(this);		
+
+		glBindRenderbuffer(GL_RENDERBUFFER, id);		
 	}
 	Renderbuffer::Renderbuffer(Renderbuffer&& rb) noexcept
 		: id(rb.id)
@@ -24,7 +29,9 @@ namespace Blaze::OpenGL
 	{
 		this->size = size;
 		GLenum _format = OpenGLInternalPixelFormat(format);
-		glNamedRenderbufferStorage(id, _format, size.x, size.y);
+
+		Renderer::SelectRenderbuffer(this);
+		glRenderbufferStorage(GL_RENDERBUFFER, _format, size.x, size.y);		
 	}
 	Renderbuffer& Renderbuffer::operator=(Renderbuffer&& rb) noexcept
 	{

@@ -41,7 +41,6 @@ namespace Blaze
 		KeyCount
 	};
 
-	char BLAZE_API KeyToChar(Key key);
 	String BLAZE_API GetKeyName(Key key);
 	String BLAZE_API GetKeyName(MouseKey key);
 }

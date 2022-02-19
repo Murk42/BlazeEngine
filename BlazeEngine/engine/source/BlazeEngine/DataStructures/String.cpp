@@ -34,21 +34,7 @@ namespace Blaze
 	{
 		ptr = new char[size + 1];
 		ptr[size] = '\0';
-	}
-	String::String(const char* ptr)		
-	{
-		if (ptr == nullptr)
-		{
-			this->ptr = nullptr;
-			size = 0;
-		}
-		else
-		{
-			size = strlen(ptr);
-			this->ptr = new char[size + 1];
-			memcpy(this->ptr, ptr, size + 1);
-		}
-	}
+	}	
 	String::String(const char* ptr, size_t size)
 		: size(size)
 	{		
@@ -61,19 +47,18 @@ namespace Blaze
 	{
 		ptr = new char[size + 1];
 		memcpy(ptr, sv.Ptr(), size + 1);
+	}	
+	String::String(const char* ptr)
+		: String(ptr, strlen(ptr))
+	{
 	}
 	String::~String()
 	{
 		delete[] ptr;
-	}
-	void String::Resize(size_t newSize)
+	}	
+	String String::SubString(size_t start, size_t size) const
 	{
-		char* old = ptr;
-		ptr = new char[newSize + 1];		
-		memcpy(ptr, old, (size < newSize ? size : newSize));
-		delete[] old;
-		ptr[newSize] = '\0';
-		size = newSize;
+		return String(ptr + start, size);
 	}
 	void String::Clear()
 	{
@@ -120,6 +105,15 @@ namespace Blaze
 	bool String::operator!=(const StringView& s) const
 	{
 		return strcmp(ptr, s.Ptr()) != 0;
+	}
+
+	String& String::operator+=(const StringView& string)
+	{
+		return *this = *this + string;		
+	}
+	String& String::operator+=(const char& ch)
+	{
+		return *this = *this + ch;
 	}
 
 	char buffer[128];
@@ -230,75 +224,6 @@ namespace Blaze
 		return false;
 	}	
 
-	size_t UTF8Size(const char* ptr)
-	{		
-		while ((*ptr & 0b11000000) == 0b10000000)
-			--ptr;
-
-		if ((*ptr & 0b10000000) == 0)		
-			return 1;		
-		else if ((*ptr & 0b11100000) == 0b11000000)		
-			return 2;		
-		else if ((*ptr & 0b11110000) == 0b11100000)		
-			return 3;		
-		else if ((*ptr & 0b11111000) == 0b11110000)		
-			return 4;		
-		else if ((*ptr & 0b11111100) == 0b11111000)
-			return 5;
-		else if ((*ptr & 0b11111110) == 0b11111100)
-			return 6;
-	}
-
-	size_t UTF8ToUnicode(const char* ptr, uint32& character)
-	{
-		character = 0;
-		if ((ptr[0] & 0b10000000) == 0)
-		{
-			character = uint32(ptr[0]);
-			return 1;
-		}
-		else if ((ptr[0] & 0b11100000) == 0b11000000)
-		{
-			character = uint32(ptr[0] & 0b00011111) << 6;
-			character |= uint32(ptr[1] & 0b00111111);
-			return 2;
-		}
-		else if ((ptr[0] & 0b11110000) == 0b11100000)
-		{
-			character = uint32(ptr[0] & 0b00001111) << 12;
-			character |= uint32(ptr[1] & 0b00111111) << 6;
-			character |= uint32(ptr[2] & 0b00111111);
-			return 3;
-		}
-		else if ((ptr[0] & 0b11111000) == 0b11110000)
-		{
-			character = uint32(ptr[0] & 0b00000111) << 18;
-			character |= uint32(ptr[1] & 0b00111111) << 12;
-			character |= uint32(ptr[2] & 0b00111111) << 6;
-			character |= uint32(ptr[3] & 0b00111111);
-			return 4;
-		}
-		else if ((ptr[0] & 0b11111100) == 0b11111000)
-		{
-			character = uint32(ptr[0] & 0b00000111) << 24;
-			character |= uint32(ptr[1] & 0b00111111) << 18;
-			character |= uint32(ptr[2] & 0b00111111) << 12;
-			character |= uint32(ptr[3] & 0b00111111) << 6;
-			character |= uint32(ptr[4] & 0b00111111);
-			return 5;
-		}
-		else if ((ptr[0] & 0b11111110) == 0b11111100)
-		{
-			character = uint32(ptr[0] & 0b00000111) << 30;
-			character |= uint32(ptr[1] & 0b00111111) << 24;
-			character |= uint32(ptr[2] & 0b00111111) << 18;
-			character |= uint32(ptr[3] & 0b00111111) << 12;
-			character |= uint32(ptr[4] & 0b00111111) << 6;
-			character |= uint32(ptr[5] & 0b00111111);
-			return 6;
-		}
-	}
-
 	String operator+(const StringView& left, const StringView& right)
 	{
 		if (left.Ptr() == nullptr)
@@ -314,4 +239,39 @@ namespace Blaze
 		out.size = size;
 		return out;
 	}
+	String operator+(const StringView& left, const char& right)
+	{
+		if (left.Ptr() == nullptr)
+			return String(&right, 1);
+
+		size_t size = left.Size() + 1;
+		char* ptr = new char[size + 1];
+
+		memcpy(ptr, left.Ptr(), left.Size());
+		ptr[size - 1] = right;
+		ptr[size] = '\0';
+
+		String out;
+		out.ptr = ptr;
+		out.size = size;
+		return out;
+	}
+	String operator+(const char& left, const StringView& right)
+	{
+		if (right.Ptr() == nullptr)
+			return String(&left , 1);
+
+		size_t size = 1 + right.Size();
+		char* ptr = new char[size + 1];
+
+		ptr[0] = left;
+		memcpy(ptr + 1, right.Ptr(), right.Size());
+		ptr[size] = '\0';
+
+		String out;
+		out.ptr = ptr;
+		out.size = size;
+		return out;
+	}
+
 }

@@ -6,12 +6,8 @@
 
 namespace Blaze
 {	
-	struct StringView;
-
-	BLAZE_API size_t UTF8Size(const char* ptr);
-	BLAZE_API size_t UTF8ToUnicode(const char* ptr, uint32& character);
-
-	//thread-safe
+	class StringView;	
+	
 	class BLAZE_API String
 	{
 		char* ptr;
@@ -21,18 +17,18 @@ namespace Blaze
 		String(const String& s);
 		String(String&& s) noexcept;		
 
-		String(size_t size);		
-		String(const char* ptr);
+		String(size_t size);	
 		String(const char* ptr, size_t size);	
 		String(const StringView&);
+		String(const char* ptr);		
 
 		~String();
 
 		inline char* Ptr() { return ptr; }
 		inline const char* Ptr() const { return ptr; }
 		inline size_t Size() const { return size; }		
-
-		void Resize(size_t newSize);		
+		
+		String SubString(size_t start, size_t size) const;
 		void Clear();						
 
 		String& operator= (const StringView& s);
@@ -44,6 +40,9 @@ namespace Blaze
 
 		char& operator[](size_t index) { return ptr[index]; }
 		const char& operator[](size_t index) const { return ptr[index]; }		
+
+		String& operator+= (const StringView&);
+		String& operator+= (const char&);
 
 		static String Convert(uint32 value);
 		static String Convert(int32 value);
@@ -77,7 +76,11 @@ namespace Blaze
 		template<> static bool ConvertTo<double>(const StringView&, double&);
 
 		friend BLAZE_API String operator+(const StringView& left, const StringView& right);
+		friend BLAZE_API String operator+(const StringView& left, const char& right);
+		friend BLAZE_API String operator+(const char& left, const StringView& right);
 	}; 
 
 	BLAZE_API String operator+(const StringView& left, const StringView& right);
+	BLAZE_API String operator+(const StringView& left, const char& right);
+	BLAZE_API String operator+(const char& left, const StringView& right);
 }

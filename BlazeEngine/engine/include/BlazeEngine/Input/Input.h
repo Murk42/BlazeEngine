@@ -2,9 +2,7 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/Common.h"
-
-#include "Key.h"
-#include "Event.h"
+#include "BlazeEngine/Input/Key.h"
 
 #include <functional>
 
@@ -13,20 +11,33 @@ namespace Blaze
 	class Window; 	
 
 	namespace Input
-	{							
-		BLAZE_API KeyState GetKeyState(Key key);		
+	{
+		struct KeyState
+		{
+			bool down;
+			bool pressed;
+			bool released;
+			uint combo;
+			double time;
+
+			constexpr operator bool() const { return pressed; }
+		};
+
+		BLAZE_API void Update();
+
+		BLAZE_API KeyState GetKeyState(Key key);
 		BLAZE_API KeyState GetKeyState(MouseKey key);
-						
-		int BLAZE_API GetMouseScroll();
-		Vec2i BLAZE_API GetMousePos();
-		Vec2i BLAZE_API GetMouseMovement();
+
+		BLAZE_API int GetMouseScroll();
+		BLAZE_API Vec2i GetMousePos();
+		BLAZE_API Vec2i GetMouseMovement();
 		BLAZE_API Window* GetFocusedWindow();
-		double BLAZE_API GetDoubleClickInterval();
+		BLAZE_API double GetDoubleClickInterval();
 
-		void BLAZE_API ShowCursor(bool show);
-		void BLAZE_API LockCursor(bool lock);
+		BLAZE_API void ShowCursor(bool show);
+		BLAZE_API void LockCursor(bool lock);
 
-		void BLAZE_API SetDoubleClickInterval(double interval);
-		void BLAZE_API SetMousePos(Vec2i);		
+		BLAZE_API void SetDoubleClickInterval(double interval);
+		BLAZE_API void SetMousePos(Vec2i);
 	}
 }

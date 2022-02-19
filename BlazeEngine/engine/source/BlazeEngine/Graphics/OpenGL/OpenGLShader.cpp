@@ -1,44 +1,45 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLShader.h"
-#include "BlazeEngine/DataStructures/ByteStream.h"
-#include "BlazeEngine/Utilities/File.h"
-#include "BlazeEngine/Core/Logger.h"
+#include "BlazeEngine/File/File.h"
+#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logger/LogListener.h"
 
 #include "GL/glew.h"
+
+#include <utility>
 
 namespace Blaze
 {
 	namespace OpenGL
 	{
-		inline Shader::Shader(ShaderType type)
+		Shader::Shader(ShaderType type)
 			: id(-1)
-		{			
-			GL_TESS_EVALUATION_SHADER;
-			GL_TESS_CONTROL_SHADER;
+		{						
 			id = glCreateShader((uint)type);
 		}		
-		inline Shader::Shader(Shader&& s) noexcept
+		Shader::Shader(Shader&& s) noexcept
 			: id(-1)
 		{
 			id = s.id;
 			s.id = -1;
 		}
-		inline Shader::Shader(ShaderType type, const StringView& path, bool emitLogOnError)
+		Shader::Shader(ShaderType type, const Path& path)
 			: Shader(type)
 		{
-			Load(path, emitLogOnError);
+			Load(path);
 		}
-		inline Shader::~Shader()
+		Shader::~Shader()
 		{
 			if (id != -1)
 				glDeleteShader(id);
 		}
 
-		inline bool Shader::Load(const StringView& path, bool emitLogOnError)
+		Result Shader::Load(const Path& path)
 		{
 			File file;
-			if (file.Open(path, FileOpenMode::Read) == BLAZE_ERROR)
-			{
-				return false;
+			if (Result result = file.Open(path, FileOpenMode::Read))
+			{				
+				return Result(result, Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
+					"Blaze Engine", "Failed to open shader file with path \"" + path.GetString() + "\""), true);
 			}
 
 			Buffer buffer;
@@ -47,43 +48,52 @@ namespace Blaze
 
 			ShaderSource(buffer);
 
-			if (CompileShader() == BLAZE_ERROR)
-			{
-				if (emitLogOnError)
-				{
-					String log = GetCompilationLog();
-					BLAZE_ERROR_LOG("Blaze Engine", std::move(log));
-				}
-
-				return BLAZE_ERROR;
+			if (Result result = CompileShader())
+			{				
+				return Result(result, Log(LogType::Info, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
+					"Blaze Engine", GetCompilationLog()));
 			}
 
-			return BLAZE_OK;
+			return Result();
 		}
 
-		inline void Shader::ShaderSource(BufferView source)
+		void Shader::ShaderSource(BufferView source)
 		{
 			const int lenght = source.Size();
 			const char* ptr = (const char*)source.Ptr();
 			glShaderSource(id, 1, &ptr, &lenght);
 		}
 		 
-		inline void Shader::ShaderSource(StringView source)
+		void Shader::ShaderSource(StringView source)
 		{
 			const int lenght = source.Size();
 			const char* ptr = source.Ptr();
 			glShaderSource(id, 1, &ptr, &lenght);
 		}
 
-		inline int Shader::CompileShader()
+		Result Shader::CompileShader()
 		{			
+			LogListener listener;
+			listener.StartListening();
+			listener.SupressLogs(true);
+
 			glCompileShader(id);
-			int result;
-			glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-			return (result == GL_TRUE ? BLAZE_OK : BLAZE_ERROR);
+			int compileStatus;
+			glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);
+			
+			listener.StopListening();
+
+			Result result;
+
+			result.AddLogs(listener.GetLogs());						
+
+			if (compileStatus == GL_FALSE)
+				result.SetFailed(true);
+
+			return result;
 		}
 
-		inline String Shader::GetCompilationLog()
+		String Shader::GetCompilationLog()
 		{
 			int lenght;
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
@@ -92,7 +102,7 @@ namespace Blaze
 			return message;
 		}
 
-		inline Shader& Shader::operator=(Shader&& s) noexcept
+		Shader& Shader::operator=(Shader&& s) noexcept
 		{
 			if (id != -1)
 				glDeleteShader(id);

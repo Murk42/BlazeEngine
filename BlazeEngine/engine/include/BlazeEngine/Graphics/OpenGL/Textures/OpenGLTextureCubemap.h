@@ -23,11 +23,11 @@ namespace Blaze::OpenGL
 
 	struct TextureCubemapSettings
 	{
-		TextureWrapping xWrap;
-		TextureWrapping yWrap;		
-		TextureSampling min;
-		TextureSampling mag;
-		TextureSampling mip;
+		TextureWrapping xWrap = TextureWrapping::ClampToEdge;
+		TextureWrapping yWrap = TextureWrapping::ClampToBorder;
+		TextureSampling min = TextureSampling::Nearest;
+		TextureSampling mag = TextureSampling::Nearest;
+		TextureSampling mip = TextureSampling::Nearest;		
 	};
 
 	class BLAZE_API TextureCubemap

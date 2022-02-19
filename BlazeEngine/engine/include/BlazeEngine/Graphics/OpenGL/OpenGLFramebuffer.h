@@ -2,6 +2,8 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture2D.h"
 #include "BlazeEngine/Graphics/OpenGL/OpenGLRenderbuffer.h"
+#include "BlazeEngine/DataStructures/Common.h"
+#include <initializer_list>
 
 namespace Blaze::OpenGL
 {
@@ -26,6 +28,8 @@ namespace Blaze::OpenGL
 		void SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer);
 		void SetAttachment(FramebufferAttachment attachment, Texture2D& texture);
 		bool IsComplete() const;
+
+		void SetBufferOutputs(const std::initializer_list<int>& outputs);
 
 		inline unsigned GetHandle() const { return id; }
 

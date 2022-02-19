@@ -5,14 +5,13 @@
 #include "BlazeEngine/Math/Math.h"
 
 namespace Blaze
-{	
+{	 
 	class BLAZE_API Transform3D
 	{
 	public:
 		Vec3f pos;
 		Quatf rot;
-		Vec3f scale;
-		Mat4f mat;
+		Vec3f scale;		
 
 		Vec3f absolutePos;
 		Quatf absoluteRot;
@@ -23,9 +22,9 @@ namespace Blaze
 		Transform3D();
 		Transform3D(Vec3f pos, Quatf rot, Vec3f scale, Transform3D* parent = nullptr);
 		
-		void RotateAround(Vec3f center, Quatf rot);
+		void RotateAround(Vec3f center, Quatf rot);		
 
-		void Update();
-		void UpdateAsViewTransform();
+		static Mat4f CalculateTransformMatrix(Transform3D&);
+		static Mat4f CalculateViewMatrix(Transform3D&);
 	};
 }

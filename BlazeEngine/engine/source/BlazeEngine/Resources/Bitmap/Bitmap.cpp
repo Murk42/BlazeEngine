@@ -1,5 +1,5 @@
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
-#include "BlazeEngine/Core/Logger.h"
+#include "BlazeEngine/Logger/Logger.h"
 #include "IL/il.h"
 #include "IL/ilu.h"
 

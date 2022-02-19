@@ -96,10 +96,72 @@ namespace Blaze
 		}
 	}
 
+	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format)
+	{
+		switch (format)
+		{
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG:				     return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R:				     return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG8:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R8:					 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16F:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16F:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16F:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16F:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32F:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32F:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG32F:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R32F:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG8I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R8I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16I:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32I:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG32I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R32I:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8UI:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8UI:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG8UI:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R8UI:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16UI:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16UI:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16UI:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16UI:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32UI:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32UI:			 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG32UI:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R32UI:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT;
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT;
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT;
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH_STENCIL;
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH_STENCIL;
+		case Blaze::OpenGL::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_RGB;
+		default: return -1;
+		}
+	}
 	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format)
 	{
 		switch (format)
 		{
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA:				 return GL_RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB:				 return GL_RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG:					 return GL_RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R:					 return GL_R;
 		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8:				 return GL_RGBA8;
 		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8:				 return GL_RGB8;
 		case Blaze::OpenGL::TextureInternalPixelFormat::RG8:				 return GL_RG8;
@@ -146,7 +208,47 @@ namespace Blaze
 		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH24_STENCIL8;
 		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH32F_STENCIL8;
 		case Blaze::OpenGL::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_R11F_G11F_B10F;
 		default: return -1;
+		}
+	}
+	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format)
+	{
+		switch (format)
+		{			
+			case Graphics::Core::TextureBufferInternalPixelFormat::R8		: return GL_R8		;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R16		: return GL_R16		;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R16F		: return GL_R16F	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R32F		: return GL_R32F	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R8I		: return GL_R8I		;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R16I		: return GL_R16I	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R32I		: return GL_R32I	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R8UI		: return GL_R8UI	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R16UI	: return GL_R16UI	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::R32UI	: return GL_R32UI	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG8		: return GL_RG8		;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG16		: return GL_RG16	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG16F	: return GL_RG16F	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG32F	: return GL_RG32F	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG8I		: return GL_RG8I	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG16I	: return GL_RG16I	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG32I	: return GL_RG32I	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG8UI	: return GL_RG8UI	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG16UI	: return GL_RG16UI	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RG32UI	: return GL_RG32UI	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGB32F	: return GL_RGB32F	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGB32I	: return GL_RGB32I	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGB32UI	: return GL_RGB32UI ;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA8	: return GL_RGBA8	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16	: return GL_RGBA16	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16F	: return GL_RGBA16F ;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32F	: return GL_RGBA32F ;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA8I	: return GL_RGBA8I	;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16I	: return GL_RGBA16I ;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32I	: return GL_RGBA32I ;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA8UI	: return GL_RGBA8UI ;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16UI	: return GL_RGBA16UI;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32UI	: return GL_RGBA32UI;
 		}
 	}
 

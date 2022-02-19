@@ -4,25 +4,13 @@
 #include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/Common.h"
 
-#include "BlazeEngine/Graphics/Mesh/Mesh.h"
-#include "BlazeEngine/Graphics/Material/Material.h"
-
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
+
+#include "RendererEnums.h"
 
 namespace Blaze
 {
 	class Window;		
-
-	enum class IndexType
-	{
-		UnsignedInt = 5125,
-	};
-	enum class PolygonMode
-	{
-		Point = 6912,
-		Line = 6913,
-		Fill = 6914
-	};
 
 	namespace Renderer
 	{
@@ -36,6 +24,9 @@ namespace Blaze
 
 		BLAZE_API void SelectTexture(Graphics::Core::TextureCubemap*);		
 		BLAZE_API Graphics::Core::TextureCubemap* GetSelectedTextureCubemap();
+
+		BLAZE_API void SelectTexture(Graphics::Core::TextureBuffer*);
+		BLAZE_API Graphics::Core::TextureBuffer* GetTextureBuffer();
 
 		BLAZE_API void SelectVertexBuffer(Graphics::Core::GraphicsBuffer* buffer);		
 		BLAZE_API Graphics::Core::GraphicsBuffer* GetSelectedVertexBuffer();
@@ -55,6 +46,13 @@ namespace Blaze
 		BLAZE_API void SelectFramebuffer(Graphics::Core::Framebuffer* framebuffer);
 		BLAZE_API Graphics::Core::Framebuffer* GetSelectedFramebuffer();
 
+		BLAZE_API void SelectDrawFramebuffer(Graphics::Core::Framebuffer* framebuffer);
+		BLAZE_API Graphics::Core::Framebuffer* GetDrawSelectedFramebuffer();
+		BLAZE_API void SelectReadFramebuffer(Graphics::Core::Framebuffer* framebuffer);
+		BLAZE_API Graphics::Core::Framebuffer* GetReadSelectedFramebuffer();
+
+		BLAZE_API void SelectRenderbuffer(Graphics::Core::Renderbuffer* renderbuffer);
+		BLAZE_API Graphics::Core::Renderbuffer* GetSelectedRenderbuffer();
 
 		BLAZE_API void SetClearColor(ColorRGBAf);
 		BLAZE_API void SetViewport(Vec2i pos, Vec2i size);
@@ -71,23 +69,26 @@ namespace Blaze
 		BLAZE_API void ClearTarget();
 		BLAZE_API void ClearTargetColor();
 		BLAZE_API void ClearTargetDepth();
-		BLAZE_API void UpdateTarget();
+		BLAZE_API void SwapWindowBuffers();
 
 		BLAZE_API void SetTarget(Window& win);
 		BLAZE_API void SetPolygonMode(PolygonMode mode);
 
 		BLAZE_API void EnableVSync(bool enable);
-		BLAZE_API void EnableDepthBuffer(bool enable);
+		BLAZE_API void EnableWritingToDepthBuffer(bool enable);		
 		BLAZE_API void EnableBlending(bool enable);		
 		BLAZE_API void EnableProgramPointSize(bool enable);
 		BLAZE_API void EnableFaceCulling(bool enable);		
 		BLAZE_API void EnableDepthTest(bool enable);
 		BLAZE_API void EnableScissorTest(bool enable);
+		
+		BLAZE_API void RenderIndexedPrimitives(PrimitiveType type, IndexType indexType, uint indexCount, uint indexBufferOffset);
+		BLAZE_API void RenderPrimitiveArray(PrimitiveType type, uint statIndex, uint primitiveCount);		
 
-		BLAZE_API void RenderTriangles(IndexType indexType, uint indexCount);
-		BLAZE_API void RenderPatches(IndexType indexType, uint count);
-		BLAZE_API void RenderTriangleArray(uint vertexCount, size_t vertexOffset);
-		BLAZE_API void RenderPointArray(uint vertexCount, size_t vertexOffset);		
-		BLAZE_API void RenderPatchArray(uint vertexCount, size_t vertexOffset);
+		BLAZE_API void DispatchCompute(uint x, uint y, uint z);
+
+		BLAZE_API void MemoryBarrier();
+
+		BLAZE_API void SelectImage(uint slot, const Graphics::Core::Texture2D& texture, uint level, ImageAccess access, ImageFormat format);		
 	}
 }

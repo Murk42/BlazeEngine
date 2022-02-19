@@ -3,6 +3,8 @@
 
 #include <GL/glew.h>
 
+#include "BlazeEngine/Graphics/Renderer.h"
+
 namespace Blaze::OpenGL
 {
 	Framebuffer::Framebuffer()
@@ -22,27 +24,42 @@ namespace Blaze::OpenGL
 	}	
 	void Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer)
 	{
-		glNamedFramebufferRenderbuffer(id, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());
+		Renderer::SelectFramebuffer(this);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());
 	}
 	void Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture)
-	{		
-		glBindTexture(GL_TEXTURE_2D, texture.GetHandle());
-		glBindFramebuffer(GL_FRAMEBUFFER, id);
+	{	
+		Renderer::SelectFramebuffer(this);
+		Renderer::SelectTexture(&texture);		
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_TEXTURE_2D, texture.GetHandle(), 0);
 	}
 	void Framebuffer::SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer)
 	{
+		Renderer::SelectFramebuffer(this);
 		GLenum _attachment = OpenGLFramebufferAttachment(attachment);		
-		glNamedFramebufferRenderbuffer(id, _attachment, renderbuffer.GetHandle(), 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, _attachment, GL_RENDERBUFFER, renderbuffer.GetHandle());
 	}
 	void Framebuffer::SetAttachment(FramebufferAttachment attachment, Texture2D& texture)
 	{
-		GLenum _attachment = OpenGLFramebufferAttachment(attachment);		
-		glNamedFramebufferTexture(id, _attachment, texture.GetHandle(), 0);
+		Renderer::SelectFramebuffer(this);
+		GLenum _attachment = OpenGLFramebufferAttachment(attachment);				
+		glFramebufferTexture(GL_FRAMEBUFFER, _attachment, texture.GetHandle(), 0);
 	}
 	bool Framebuffer::IsComplete() const
 	{
 		return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+	}
+	void Framebuffer::SetBufferOutputs(const std::initializer_list<int>& outputs)
+	{
+		std::vector<GLenum> values;
+		values.resize(outputs.size());
+		for (int i = 0; i < outputs.size(); ++i)
+			if (outputs.begin()[i] == -1)
+				values[i] = GL_NONE;
+			else
+				values[i] = GL_COLOR_ATTACHMENT0 + outputs.begin()[i];
+		Renderer::SelectFramebuffer(this);
+		glDrawBuffers(outputs.size(), values.data());
 	}
 	Framebuffer& Framebuffer::operator=(Framebuffer&& fb) noexcept
 	{

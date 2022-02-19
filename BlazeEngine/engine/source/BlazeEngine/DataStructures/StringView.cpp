@@ -1,5 +1,6 @@
 #include "BlazeEngine/DataStructures/StringView.h"
 #include "BlazeEngine/DataStructures/String.h"
+#include "BlazeEngine/DataStructures/StringViewUTF8.h"
 #include <cstring>
 
 namespace Blaze

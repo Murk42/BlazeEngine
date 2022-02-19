@@ -1,9 +1,7 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLProgram.h"
 #include "BlazeEngine/DataStructures/String.h"
-
-#include "source/BlazeEngine/Internal/Engine.h"
-
 #include "GL/glew.h"
+#include "BlazeEngine/Logger/LogListener.h"
 
 namespace Blaze
 {
@@ -36,15 +34,26 @@ namespace Blaze
 			glDetachShader(id, shader.id);
 		}
 
-		bool Program::LinkProgram()
+		Result Program::LinkProgram()
 		{
+			LogListener listener;
+			listener.SupressLogs(true);
+			listener.StartListening();
 			glLinkProgram(id);
 
 			int linkStatus = 0;
 			glGetProgramiv(id, GL_LINK_STATUS, &linkStatus);
+			listener.StopListening();
+
+			Result result;
+
+			result.AddLogs(listener.GetLogs());
 
 			if (linkStatus == GL_FALSE)
-				return BLAZE_ERROR;
+			{
+				result.SetFailed(true);
+				return result;
+			}
 
 			int lenght;
 			glGetProgramiv(id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &lenght);
@@ -52,7 +61,7 @@ namespace Blaze
 			glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_MAX_NAME_LENGTH, &lenght);
 			maxUniformBlockNameLenght = lenght;
 
-			return BLAZE_OK;
+			return result;
 		}
 
 		String Program::GetLinkingLog()
@@ -144,14 +153,39 @@ namespace Blaze
 		}
 
 		template<>
+		void Program::SetUniform(int location, const bool& value)
+		{ 
+		}
+
+		template<>
 		void Program::SetUniform(int location, const int& value)
 		{
 			glProgramUniform1i(id, location, value);
 		}
 		template<>
+		void Program::SetUniform(int location, const uint& value)
+		{
+			glProgramUniform1ui(id, location, value);
+		}
+		template<>
 		void Program::SetUniform(int location, const float& value)
 		{
 			glProgramUniform1f(id, location, value);
+		}
+		template<>
+		void Program::SetUniform(int location, const Vec2i& value)
+		{
+			glProgramUniform2i(id, location, value.x, value.y);
+		}
+		template<>
+		void Program::SetUniform(int location, const Vec2f& value)
+		{
+			glProgramUniform2f(id, location, value.x, value.y);
+		}
+		template<>
+		void Program::SetUniform(int location, const Vec3i& value)
+		{
+			glProgramUniform3i(id, location, value.x, value.y, value.z);
 		}
 		template<>
 		void Program::SetUniform(int location, const Vec3f& value)
@@ -162,6 +196,16 @@ namespace Blaze
 		void Program::SetUniform(int location, const Vec4f& value)
 		{
 			glProgramUniform4f(id, location, value.x, value.y, value.z, value.w);
+		}
+		template<>
+		void Program::SetUniform(int location, const Mat2f& value)
+		{
+			glProgramUniformMatrix2fv(id, location, 1, true, value.arr);
+		}
+		template<>
+		void Program::SetUniform(int location, const Mat3f& value)
+		{
+			glProgramUniformMatrix3fv(id, location, 1, true, value.arr);
 		}
 		template<>
 		void Program::SetUniform(int location, const Mat4f& value)

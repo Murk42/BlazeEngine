@@ -1,35 +1,96 @@
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Core/Window.h"
-#include "BlazeEngine/Core/Logger.h"
-#include "source/BlazeEngine/Internal/Engine.h"
+#include "BlazeEngine/Console/Console.h"
+#include "BlazeEngine/Logger/Logger.h"
 #include "source/BlazeEngine/Internal/InternalKeyStateData.h"
+#include "BlazeEngine/Event/EventDispatcher.h"
+#include "BlazeEngine/Event/EventHandler.h"
+#include "BlazeEngine/Event/Events.h"
 #include <map>
 
 #include "SDL/SDL.h"
 
 #include "BlazeEngine/Utilities/Time.h"
 
-namespace Blaze
-{
-	extern void* initWindow;
+namespace Blaze	
+{			
+	void* GetOpenGLInitWindow();
+	const std::vector<Window*>& GetAllWindows();
+	Key GetKeyFromScancode(SDL_Scancode);
+	bool WasFirstWindowCreated();
 
-#define CALL_EVENT_FUNC(name, args) \
-	if (Input_ name)	\
-		Input_ name args
-	
+	extern EventDispatcher<Event::KeyPressed		 >        keyPressedDispatcher;
+	extern EventDispatcher<Event::KeyReleased		 >       keyReleasedDispatcher;
+	extern EventDispatcher<Event::MousePressed	     >      mousePressedDispatcher;
+	extern EventDispatcher<Event::MouseReleased	     >     mouseReleasedDispatcher;
+	extern EventDispatcher<Event::MouseMotion	     >       mouseMotionDispatcher;
+	extern EventDispatcher<Event::MouseScroll	     >       mouseScrollDispatcher;
+	extern EventDispatcher<Event::MouseEnter	     >        mouseEnterDispatcher;
+	extern EventDispatcher<Event::MouseLeave	     >        mouseLeaveDispatcher;
+	extern EventDispatcher<Event::WindowResized	     >     windowResizedDispatcher;
+	extern EventDispatcher<Event::WindowMoved		 >       windowMovedDispatcher;
+	extern EventDispatcher<Event::WindowMinimized	 >   windowMinimizedDispatcher;
+	extern EventDispatcher<Event::WindowMaximized	 >   windowMaximizedDispatcher;
+	extern EventDispatcher<Event::WindowFocusGained  > windowFocusGainedDispatcher;
+	extern EventDispatcher<Event::WindowFocusLost	 >   windowFocusLostDispatcher;
+	extern EventDispatcher<Event::WindowClosed	     >      windowClosedDispatcher;
+	extern EventDispatcher<Event::TextInput		     >         textInputDispatcher;
+	extern EventDispatcher<Event::ViewportChanged    >   viewportChangedDispatcher;
+
+	static Input::KeyState keyStates[(int)Key::KeyCount];
+	static Input::KeyState mouseKeyStates[(int)MouseKey::KeyCount];
+
+	static Key keyPressedArray[16];
+	static size_t keyPressedArraySize = 0;
+	static Key keyReleasedArray[16];
+	static size_t keyReleasedArraySize = 0;
+
+	static Vec2i mousePos;
+	static Vec2i mouseMovement;
+	static int mouseScroll = 0;
+	static double doubleClickInterval = 0.2;
+
+	static Window* focusedWindow = nullptr;
+
+	void InitializeInput()
+	{		
+		SDL_GetGlobalMouseState(&mousePos.x, &mousePos.y);
+
+		for (auto& keyState : keyStates)
+		{
+			keyState.time = 0;
+			keyState.combo = 0;
+			keyState.down = false;
+			keyState.pressed = false;
+			keyState.released = false;
+		}
+		for (auto& keyState : mouseKeyStates)
+		{
+			keyState.time = 0;
+			keyState.combo = 0;
+			keyState.down = false;
+			keyState.pressed = false;
+			keyState.released = false;
+		}
+	}
+	void TerminateInput()
+	{
+
+	}
+
 	namespace Input
 	{				
 		void KeyPressed(Key key, float time)
 		{
-			KeyState& data = engine->Input.keyStates[(int)key];
+			KeyState& data = keyStates[(int)key];
 
 
-			if (engine->Input.keyPressedArraySize < _countof(engine->Input.keyPressedArray))
+			if (keyPressedArraySize < _countof(keyPressedArray))
 			{
-				engine->Input.keyPressedArray[engine->Input.keyPressedArraySize] = key;
-				engine->Input.keyPressedArraySize++;				
+				keyPressedArray[keyPressedArraySize] = key;
+				keyPressedArraySize++;				
 
-				if (time - data.timePressed < engine->Input.doubleClickInterval)
+				if (time - data.time < doubleClickInterval)
 					++data.combo;
 				else
 					data.combo = 1;
@@ -37,29 +98,29 @@ namespace Blaze
 				data.pressed = true;
 				data.down = true;			
 
-				Input_KeyPressed({ key, time, data.combo });
-				data.timePressed = time;
+				keyPressedDispatcher.Call({ key, time, data.combo });
+				data.time = time;
 			}
 			else			
-				BLAZE_WARNING_LOG("Blaze Engine", "engine->Input.keyPressedArray got full, aborted keyPressed event.");
+				BLAZE_WARNING_LOG("Blaze Engine", "keyPressedArray got full, aborted keyPressed event.");
 		}
 		void KeyReleased(Key key, float time)
 		{
-			KeyState& data = engine->Input.keyStates[(int)key];			
+			KeyState& data = keyStates[(int)key];			
 
 
-			if (engine->Input.keyReleasedArraySize < _countof(engine->Input.keyReleasedArray))
+			if (keyReleasedArraySize < _countof(keyReleasedArray))
 			{
-				engine->Input.keyReleasedArray[engine->Input.keyReleasedArraySize] = key;
-				engine->Input.keyReleasedArraySize++;
+				keyReleasedArray[keyReleasedArraySize] = key;
+				keyReleasedArraySize++;
 
 				data.down = false;
 				data.released = true;
 
-				Input_KeyReleased({ key, time - data.timePressed });
+				keyReleasedDispatcher.Call({ key, time - data.time });
 			}
 			else			
-				BLAZE_WARNING_LOG("Blaze Engine", "engine->Input.keyReleasedArray got full, aborted keyReleased event.");			
+				BLAZE_WARNING_LOG("Blaze Engine", "keyReleasedArray got full, aborted keyReleased event.");			
 		} 
 
 		//Event detection
@@ -77,106 +138,101 @@ namespace Blaze
 			auto GetWindowFromSDLid = [](uint32 id) -> Window*
 			{
 				void* win = SDL_GetWindowFromID(id);
-				for (auto& w : engine->ProcessInfo.allWindows)
+				const auto& windows = GetAllWindows();
+				for (auto& w : windows)
 					if (w->GetHandle() == win)
 						return w;
 				return nullptr;
 			};
 
-			for (size_t i = 0; i < engine->Input.keyPressedArraySize; ++i)			
-				engine->Input.keyStates[(int)engine->Input.keyPressedArray[i]].pressed = false;						
-			engine->Input.keyPressedArraySize = 0;
+			for (size_t i = 0; i < keyPressedArraySize; ++i)			
+				keyStates[(int)keyPressedArray[i]].pressed = false;						
+			keyPressedArraySize = 0;
 
-			for (size_t i = 0; i < engine->Input.keyReleasedArraySize; ++i)
-				engine->Input.keyStates[(int)engine->Input.keyReleasedArray[i]].released = false;
-			engine->Input.keyReleasedArraySize = 0;
+			for (size_t i = 0; i < keyReleasedArraySize; ++i)
+				keyStates[(int)keyReleasedArray[i]].released = false;
+			keyReleasedArraySize = 0;
 
-			for (auto& state : engine->Input.mouseKeyStates)
+			for (auto& state : mouseKeyStates)
 				state.pressed = state.released = false;
 
+			mouseScroll = 0;
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
 				switch (event.type)
 				{
 				case SDL_MOUSEWHEEL: {
-					engine->Input.mouseScroll = event.wheel.y;
-					Input_MouseScroll({ event.wheel.y });
+					mouseScroll = event.wheel.y;
+					mouseScrollDispatcher.Call({ event.wheel.y });
 					break;
 				}
 				case SDL_MOUSEBUTTONDOWN: {
 					MouseKey key = (MouseKey)(event.button.button - 1);
 
-					if (frameTime - engine->Input.mouseKeyStates[(int)key].timePressed < engine->Input.doubleClickInterval)
-						++engine->Input.mouseKeyStates[(int)key].combo;
+					if (frameTime - mouseKeyStates[(int)key].time < doubleClickInterval)
+						++mouseKeyStates[(int)key].combo;
 					else
-						engine->Input.mouseKeyStates[(int)key].combo = 1;
+						mouseKeyStates[(int)key].combo = 1;
 
-					engine->Input.mouseKeyStates[(int)key].down = true;
-					engine->Input.mouseKeyStates[(int)key].pressed = true;
-					engine->Input.mouseKeyStates[(int)key].timePressed = frameTime;
+					mouseKeyStates[(int)key].down = true;
+					mouseKeyStates[(int)key].pressed = true;
+					mouseKeyStates[(int)key].time = frameTime;
 
-					if (engine->Input.focusedWindow != nullptr)
-						Input_MousePressed({ key, Vec2i(event.button.x, engine->Input.focusedWindow->GetSize().y - event.button.y) });
+					if (focusedWindow != nullptr)
+						mousePressedDispatcher.Call({ key, Vec2i(event.button.x, focusedWindow->GetSize().y - event.button.y) });
 					break;
 				}
 				case SDL_MOUSEBUTTONUP: {
 					MouseKey key = (MouseKey)(event.button.button - 1);
 
-					engine->Input.mouseKeyStates[(int)key].down = false;
-					engine->Input.mouseKeyStates[(int)key].released = true;
+					mouseKeyStates[(int)key].down = false;
+					mouseKeyStates[(int)key].released = true;
 
-					if (engine->Input.focusedWindow != nullptr)
-						Input_MouseReleased({ key, Vec2i(event.button.x, engine->Input.focusedWindow->GetSize().y - event.button.y) });
+					if (focusedWindow != nullptr)
+						mouseReleasedDispatcher.Call({ key, Vec2i(event.button.x, focusedWindow->GetSize().y - event.button.y) });
 					break;
 				}
 				case SDL_KEYDOWN: {
 					SDL_Scancode scancode = event.key.keysym.scancode;
-					
-					auto it = engine->Input.keymap.find(scancode);
-					if (it != engine->Input.keymap.end())
-					{
-						Key key = it->second;
-						if (event.key.repeat == 0)
-							KeyPressed(key, frameTime);						
-					}
+										
+					Key key = GetKeyFromScancode(scancode);
+					if (event.key.repeat == 0)
+						KeyPressed(key, frameTime);											
+
 					break;
 				}
 				case SDL_KEYUP: {
 					SDL_Scancode scancode = event.key.keysym.scancode;
 
-					auto it = engine->Input.keymap.find(scancode);
-					if (it != engine->Input.keymap.end())
-					{
-						Key key = it->second;
-						KeyReleased(key, frameTime);
-					}
+					Key key = GetKeyFromScancode(scancode);
+					KeyReleased(key, frameTime);
 					break;
 				}
-				case SDL_TEXTINPUT: {										
-					Input_TextInput({ String((const char*)event.text.text, UTF8Size(event.text.text)) });					
+				case SDL_TEXTINPUT: {					
+					textInputDispatcher.Call({ StringViewUTF8(event.text.text) });
 					break;								
 				}
 				case SDL_WINDOWEVENT: {
-					if (engine->GLEW.openGLInitWindow == nullptr)
+					if (WasFirstWindowCreated())
 						switch (event.window.event) {
 						case SDL_WINDOWEVENT_MOVED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							Input_WindowMoved({ Vec2i(event.window.data1, event.window.data2), win });
+							windowMovedDispatcher.Call({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_MINIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							Input_WindowMinimized({ win });
+							windowMinimizedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_MAXIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							Input_WindowMaximized({ win });
+							windowMaximizedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_SIZE_CHANGED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							Input_WindowResized({ Vec2i(event.window.data1, event.window.data2), win });
+							windowResizedDispatcher.Call({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_RESIZED: {
@@ -184,34 +240,34 @@ namespace Blaze
 							Covered by SDL_WINDOWEVENT_SIZE_CHANGED
 							*/
 							//Window* win = GetWindowFromSDLid(event.window.windowID);
-							//Input_WindowResized({ Vec2i(event.window.data1, event.window.data2), win });
+							//Event_WindowResized({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_GAINED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input.focusedWindow = win;
-							Input_WindowFocusGained({ win });
+							focusedWindow = win;
+							windowFocusGainedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_LOST: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							engine->Input.focusedWindow = nullptr;
-							Input_WindowFocusLost({ win });
+							focusedWindow = nullptr;
+							windowFocusLostDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_CLOSE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							Input_WindowClosed({ win });
+							windowClosedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_ENTER: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							Input_MouseEnter({ });
+							mouseEnterDispatcher.Call({ });
 							break;
 						}
 						case SDL_WINDOWEVENT_LEAVE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							Input_MouseLeave({ });
+							mouseLeaveDispatcher.Call({ });
 							break;
 						}
 						}
@@ -221,50 +277,52 @@ namespace Blaze
 			Vec2i mouseRealPos;
 			SDL_GetGlobalMouseState(&mouseRealPos.x, &mouseRealPos.y);			
 
-			SDL_GetRelativeMouseState(&engine->Input.mouseMovement.x, &engine->Input.mouseMovement.y);
-			engine->Input.mouseMovement.y = -engine->Input.mouseMovement.y;
+			SDL_GetRelativeMouseState(&mouseMovement.x, &mouseMovement.y);
+			mouseMovement.y = -mouseMovement.y;
 
-			if (engine->Input.focusedWindow != nullptr)
+			if (focusedWindow != nullptr)
 			{
-				engine->Input.mousePos = mouseRealPos - engine->Input.focusedWindow->GetPos();
-				engine->Input.mousePos.y = engine->Input.focusedWindow->GetSize().y - engine->Input.mousePos.y;
+				mousePos = mouseRealPos - focusedWindow->GetPos();
+				mousePos.y = focusedWindow->GetSize().y - mousePos.y;
 			}
 			else
-				engine->Input.mousePos = mouseRealPos;
+				mousePos = mouseRealPos;
 
-			if (engine->Input.mouseMovement != Vec2i(0))
-				Input_MouseMotion({ Vec2i(engine->Input.mousePos.x, engine->Input.mousePos.y), Vec2i(engine->Input.mouseMovement.x, engine->Input.mouseMovement.y) });
+			if (mouseMovement != Vec2i(0))
+			{				
+				mouseMotionDispatcher.Call({ Vec2i(mousePos.x, mousePos.y), Vec2i(mouseMovement.x, mouseMovement.y) });
+			}
 		}
 
 		KeyState GetKeyState(Key code)
 		{			
-			return engine->Input.keyStates[(int)code];
+			return keyStates[(int)code];
 		}
 
 		KeyState GetKeyState(MouseKey code)
 		{
-			return engine->Input.mouseKeyStates[(int)code];
+			return mouseKeyStates[(int)code];
 		}
 
 		int GetMouseScroll()
 		{
-			return engine->Input.mouseScroll;
+			return mouseScroll;
 		}
 		Vec2i GetMousePos()
 		{
-			return engine->Input.mousePos;
+			return mousePos;
 		}
 		Vec2i GetMouseMovement()
 		{
-			return engine->Input.mouseMovement;
+			return mouseMovement;
 		}
 		Window* GetFocusedWindow()
 		{
-			return engine->Input.focusedWindow;
+			return focusedWindow;
 		}
 		double GetDoubleClickInterval()
 		{
-			return engine->Input.doubleClickInterval;
+			return doubleClickInterval;
 		}
 
 		void ShowCursor(bool show)
@@ -279,15 +337,15 @@ namespace Blaze
 
 		void SetDoubleClickInterval(double interval)
 		{
-			engine->Input.doubleClickInterval = interval;
+			doubleClickInterval = interval;
 		}
 		void SetMousePos(Vec2i p)
 		{
-			if (engine->Input.focusedWindow != nullptr)
-				SDL_WarpMouseInWindow((SDL_Window*)engine->Input.focusedWindow->GetHandle(), p.x, p.y);
+			if (focusedWindow != nullptr)
+				SDL_WarpMouseInWindow((SDL_Window*)focusedWindow->GetHandle(), p.x, p.y);
 			else
 				SDL_WarpMouseGlobal(p.x, p.y);
-			engine->Input.mousePos = p;
+			mousePos = p;
 		}
 		void StartTextInput()
 		{

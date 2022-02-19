@@ -22,14 +22,21 @@ namespace Blaze
 	struct Vector<T, 2>
 	{
 		union {
+			T arr[2];
 			struct {
 				T x, y;
 			};
-
-			T arr[2]{ };
 		};
 
-		constexpr Vector() = default;
+		constexpr Vector()
+			: x(), y()
+		{
+
+		}		
+		constexpr Vector(const Vector<T, 2>& v)
+			: x(v.x), y(v.y)
+		{
+		}
 		constexpr Vector(const T& x, const T& y)
 			: x(x), y(y)
 		{
@@ -39,41 +46,41 @@ namespace Blaze
 		{ 
 		}		
 		template<typename T2>
-		constexpr Vector(const Vector<T2, 2>& v)
+		constexpr explicit Vector(const Vector<T2, 2>& v)
 			: x(v.x), y(v.y)
 		{			
 		}
 
 		constexpr Vector operator-() const { return Vector(-x, -y); }
 
-		template<typename T2> constexpr Vector operator+(const Vector<T2, 2>& b) const { return Vector(x + b.x, y + b.y); }
-		template<typename T2> constexpr Vector operator-(const Vector<T2, 2>& b) const { return Vector(x - b.x, y - b.y); }
-		template<typename T2> constexpr Vector operator*(const Vector<T2, 2>& v) const { return Vector(x * v.x, y * v.y); }
-		template<typename T2> constexpr Vector operator/(const Vector<T2, 2>& v) const { return Vector(x / v.x, y / v.y); }
-		template<typename T2> constexpr Vector operator*(const T2& v) const { return Vector(x * v, y * v); }
-		template<typename T2> constexpr Vector operator/(const T2& v) const { return Vector(x / v, y / v); }
+		constexpr Vector operator+(const Vector<T, 2>& b) const { return Vector(x + b.x, y + b.y); }
+		constexpr Vector operator-(const Vector<T, 2>& b) const { return Vector(x - b.x, y - b.y); }
+		constexpr Vector operator*(const Vector<T, 2>& v) const { return Vector(x * v.x, y * v.y); }
+		constexpr Vector operator/(const Vector<T, 2>& v) const { return Vector(x / v.x, y / v.y); }
+		constexpr Vector operator*(const T& v) const { return Vector(x * v, y * v); }
+		constexpr Vector operator/(const T& v) const { return Vector(x / v, y / v); }
 
-		template<typename T2> constexpr void operator+= (const Vector<T2, 2>& v) { x += v.x; y += v.y; }
-		template<typename T2> constexpr void operator-= (const Vector<T2, 2>& v) { x -= v.x; y -= v.y; }
-		template<typename T2> constexpr void operator*= (const Vector<T2, 2>& v) { x *= v.x; y *= v.y; }
-		template<typename T2> constexpr void operator/= (const Vector<T2, 2>& v) { x /= v.x; y /= v.y; }
-		template<typename T2> constexpr void operator*= (const T2& v) { x *= v; y *= v; }
-		template<typename T2> constexpr void operator/= (const T2& v) { x /= v; y /= v; }
+		constexpr void operator+= (const Vector<T, 2>& v) { x += v.x; y += v.y; }
+		constexpr void operator-= (const Vector<T, 2>& v) { x -= v.x; y -= v.y; }
+		constexpr void operator*= (const Vector<T, 2>& v) { x *= v.x; y *= v.y; }
+		constexpr void operator/= (const Vector<T, 2>& v) { x /= v.x; y /= v.y; }
+		constexpr void operator*= (const T& v) { x *= v; y *= v; }
+		constexpr void operator/= (const T& v) { x /= v; y /= v; }
 
-		template<typename T2> constexpr bool operator== (const Vector<T2, 2>& v) const { return x == v.x && y == v.y; }
-		template<typename T2> constexpr bool operator!= (const Vector<T2, 2>& v) const { return x != v.x || y != v.y; }
+		constexpr bool operator== (const Vector<T, 2>& v) const { return x == v.x && y == v.y; }
+		constexpr bool operator!= (const Vector<T, 2>& v) const { return x != v.x || y != v.y; }
 		
-		template<typename T2> constexpr void operator=(const Vector<T2, 2>& v) { x = v.x; y = v.y; }
+		constexpr Vector<T, 2>& operator=(const Vector<T, 2>& v) { x = v.x; y = v.y; return* this; }
 
-		constexpr inline T Lenght() const { return Math::Sqrt<T>(x * x + y * y); }
-		constexpr inline T SqrLenght() const { return x * x + y * y; }
-		constexpr inline void Normalise()
+		constexpr T Lenght() const { return Math::Sqrt<T>(x * x + y * y); }
+		constexpr T SqrLenght() const { return x * x + y * y; }
+		constexpr void Normalise()
 		{
 			const T lenght = Lenght();
 			x /= lenght;
 			y /= lenght;
 		}
-		constexpr inline Vector Normalised()
+		constexpr Vector Normalised()
 		{
 			const T lenght = Lenght();
 			return Vector(x / lenght, y / lenght);
@@ -91,17 +98,21 @@ namespace Blaze
 	struct Vector<T, 3>
 	{
 		union {
-			struct {
-				T x, y, z;
-			};
+			T arr[3];
 			struct {
 				Vec2<T> xy;
 			};
-			T arr[3]{ };
+			struct {
+				T x, y, z;
+			};
 		};
 
 		constexpr Vector()
-			: x(0), y(0), z(0)
+			: x(), y(), z()
+		{
+		}
+		constexpr Vector(const Vector<T, 3>& v)
+			: x(v.x), y(v.y), z(v.z)
 		{
 		}
 		constexpr Vector(const T& x, const T& y, const T& z)
@@ -113,42 +124,42 @@ namespace Blaze
 		{ 
 		}
 		template<typename T2>
-		constexpr Vector(const Vector<T2, 3>& v)
+		constexpr explicit Vector(const Vector<T2, 3>& v)
 			: x(v.x), y(v.y), z(v.z)
-		{			
-		}		
+		{
+		}
 
 		constexpr Vector operator-() const { return Vector(-x, -y, -z); }
 
-		template<typename T2> constexpr Vector operator+(const Vector<T2, 3>& b) const { return Vector(x + b.x, y + b.y, z + b.z); }
-		template<typename T2> constexpr Vector operator-(const Vector<T2, 3>& b) const { return Vector(x - b.x, y - b.y, z - b.z); }
-		template<typename T2> constexpr Vector operator*(const Vector<T2, 3>& v) const { return Vector(x * v.x, y * v.y, z * v.z); }
-		template<typename T2> constexpr Vector operator/(const Vector<T2, 3>& v) const { return Vector(x / v.x, y / v.y, z / v.z); }
-		template<typename T2> constexpr Vector operator*(const T2& v) const { return Vector(x * v, y * v, z * v); }
-		template<typename T2> constexpr Vector operator/(const T2& v) const { return Vector(x / v, y / v, z / v); }
+		constexpr Vector operator+(const Vector<T, 3>& b) const { return Vector(x + b.x, y + b.y, z + b.z); }
+		constexpr Vector operator-(const Vector<T, 3>& b) const { return Vector(x - b.x, y - b.y, z - b.z); }
+		constexpr Vector operator*(const Vector<T, 3>& v) const { return Vector(x * v.x, y * v.y, z * v.z); }
+		constexpr Vector operator/(const Vector<T, 3>& v) const { return Vector(x / v.x, y / v.y, z / v.z); }
+		constexpr Vector operator*(const T& v) const { return Vector(x * v, y * v, z * v); }
+		constexpr Vector operator/(const T& v) const { return Vector(x / v, y / v, z / v); }
 
-		template<typename T2> constexpr void operator+= (const Vector<T2, 3>& v) { x += v.x; y += v.y; z += v.z; }
-		template<typename T2> constexpr void operator-= (const Vector<T2, 3>& v) { x -= v.x; y -= v.y; z -= v.z; }
-		template<typename T2> constexpr void operator*= (const Vector<T2, 3>& v) { x *= v.x; y *= v.y; z *= v.z; }
-		template<typename T2> constexpr void operator/= (const Vector<T2, 3>& v) { x /= v.x; y /= v.y; z /= v.z; }
-		template<typename T2> constexpr void operator*= (const T2& v) { x *= v; y *= v; z *= v; }
-		template<typename T2> constexpr void operator/= (const T2& v) { x /= v; y /= v; z /= v; }
+		constexpr void operator+= (const Vector<T, 3>& v) { x += v.x; y += v.y; z += v.z; }
+		constexpr void operator-= (const Vector<T, 3>& v) { x -= v.x; y -= v.y; z -= v.z; }
+		constexpr void operator*= (const Vector<T, 3>& v) { x *= v.x; y *= v.y; z *= v.z; }
+		constexpr void operator/= (const Vector<T, 3>& v) { x /= v.x; y /= v.y; z /= v.z; }
+		constexpr void operator*= (const T& v) { x *= v; y *= v; z *= v; }
+		constexpr void operator/= (const T& v) { x /= v; y /= v; z /= v; }
 
-		template<typename T2> constexpr bool operator== (const Vector<T2, 3>& v) const { return x == v.x && y == v.y && z == v.z; }
-		template<typename T2> constexpr bool operator!= (const Vector<T2, 3>& v) const { return x != v.x || y != v.y || z != v.z; }
-		
-		template<typename T2> constexpr void operator=(const Vector<T2, 3>& v) { x = T(v.x); y = T(v.y); z = T(v.z); }
+		constexpr bool operator== (const Vector<T, 3>& v) const { return x == v.x && y == v.y && z == v.z; }
+		constexpr bool operator!= (const Vector<T, 3>& v) const { return x != v.x || y != v.y || z != v.z; }
+				
+		constexpr Vector<T, 3>& operator=(const Vector<T, 3>& v) { x = v.x; y = v.y; z = v.z; return *this; }
 
-		constexpr inline T Lenght() const { return Math::Sqrt<T>(x * x + y * y + z * z); }
-		constexpr inline T SqrLenght() const { return x * x + y * y + z * z; }
-		constexpr inline void Normalise()
+		constexpr T Lenght() const { return Math::Sqrt<T>(x * x + y * y + z * z); }
+		constexpr T SqrLenght() const { return x * x + y * y + z * z; }
+		constexpr void Normalise()
 		{
 			const T lenght = Lenght();
 			x /= lenght;
 			y /= lenght;
 			z /= lenght;
 		}
-		constexpr inline Vector Normalised()
+		constexpr Vector Normalised()
 		{
 			const T lenght = Lenght();
 			return Vector(x / lenght, y / lenght, z / lenght);
@@ -166,6 +177,7 @@ namespace Blaze
 	struct Vector<T, 4>
 	{
 		union {
+			T arr[4];
 			struct {
 				T x, y, z, w;
 			};
@@ -175,10 +187,14 @@ namespace Blaze
 			struct {
 				Vec3<T> xyz;
 			};
-			T arr[4]{ };
 		};
 
 		constexpr Vector()
+			: x(), y(), z(), w()
+		{
+		}		
+		constexpr Vector(const Vector<T, 4>& v)
+			: x(v.x), y(v.y), z(v.y), w(v.w)
 		{
 		}
 		constexpr Vector(const T& x, const T& y, const T& z, const T& w)
@@ -190,35 +206,35 @@ namespace Blaze
 		{ 
 		}		
 		template<typename T2>
-		constexpr Vector(const Vector<T2, 4>& v)
+		constexpr explicit Vector(const Vector<T2, 4>& v)
 			: x(v.x), y(v.y), z(v.y), w(v.w)
 		{			
 		}	
 
 		constexpr Vector operator-() const { return Vector(-x, -y, -z, -w); }
 
-		template<typename T2> constexpr Vector operator+(const Vector<T2, 4>& b) const { return Vector(x + b.x, y + b.y, z + b.z, w + b.w); }
-		template<typename T2> constexpr Vector operator-(const Vector<T2, 4>& b) const { return Vector(x - b.x, y - b.y, z - b.z, w - b.w); }
-		template<typename T2> constexpr Vector operator*(const Vector<T2, 4>& v) const { return Vector(x * v.x, y * v.y, z * v.z, w * v.w); }
-		template<typename T2> constexpr Vector operator/(const Vector<T2, 4>& v) const { return Vector(x / v.x, y / v.y, z / v.z, w / v.w); }
-		template<typename T2> constexpr Vector operator*(const T2& v) const { return Vector(x * v, y * v, z * v, w * v); }
-		template<typename T2> constexpr Vector operator/(const T2& v) const { return Vector(x / v, y / v, z / v, w / v); }
+		constexpr Vector operator+(const Vector<T, 4>& b) const { return Vector(x + b.x, y + b.y, z + b.z, w + b.w); }
+		constexpr Vector operator-(const Vector<T, 4>& b) const { return Vector(x - b.x, y - b.y, z - b.z, w - b.w); }
+		constexpr Vector operator*(const Vector<T, 4>& v) const { return Vector(x * v.x, y * v.y, z * v.z, w * v.w); }
+		constexpr Vector operator/(const Vector<T, 4>& v) const { return Vector(x / v.x, y / v.y, z / v.z, w / v.w); }
+		constexpr Vector operator*(const T& v) const { return Vector(x * v, y * v, z * v, w * v); }
+		constexpr Vector operator/(const T& v) const { return Vector(x / v, y / v, z / v, w / v); }
 
-		template<typename T2> constexpr void operator+= (const Vector<T2, 4>& v) { x += v.x; y += v.y; z += v.z; w += v.w; }
-		template<typename T2> constexpr void operator-= (const Vector<T2, 4>& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; }
-		template<typename T2> constexpr void operator*= (const Vector<T2, 4>& v) { x *= v.x; y *= v.y; z *= v.z; w *= v.w; }
-		template<typename T2> constexpr void operator/= (const Vector<T2, 4>& v) { x /= v.x; y /= v.y; z /= v.z; w /= v.w; }
-		template<typename T2> constexpr void operator*= (const T2& v) { x *= v; y *= v; z *= v; w *= v; }
-		template<typename T2> constexpr void operator/= (const T2& v) { x /= v; y /= v; z /= v; w /= v; }
+		constexpr void operator+= (const Vector<T, 4>& v) { x += v.x; y += v.y; z += v.z; w += v.w; }
+		constexpr void operator-= (const Vector<T, 4>& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; }
+		constexpr void operator*= (const Vector<T, 4>& v) { x *= v.x; y *= v.y; z *= v.z; w *= v.w; }
+		constexpr void operator/= (const Vector<T, 4>& v) { x /= v.x; y /= v.y; z /= v.z; w /= v.w; }
+		constexpr void operator*= (const T& v) { x *= v; y *= v; z *= v; w *= v; }
+		constexpr void operator/= (const T& v) { x /= v; y /= v; z /= v; w /= v; }
 
-		template<typename T2> constexpr bool operator== (const Vector<T2, 4>& v) const { return x == v.x && y == v.y && z == v.z && w == v.w; }
-		template<typename T2> constexpr bool operator!= (const Vector<T2, 4>& v) const { return x != v.x || y != v.y || z != v.z || w != v.w; }
+		constexpr bool operator== (const Vector<T, 4>& v) const { return x == v.x && y == v.y && z == v.z && w == v.w; }
+		constexpr bool operator!= (const Vector<T, 4>& v) const { return x != v.x || y != v.y || z != v.z || w != v.w; }
 		
-		template<typename T2> constexpr void operator=(const Vector<T2, 4>& v) { x = v.x; y = v.y; z = v.z; w = v.w; }
+		constexpr Vector<T, 4>& operator=(const Vector<T, 4>& v) { x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
 
-		constexpr inline T Lenght() const { return Math::Sqrt<T>(x * x + y * y + z * z + w * w); }
-		constexpr inline T SqrLenght() const { return x * x + y * y + z * z + w * w; }
-		constexpr inline void Normalise()
+		constexpr T Lenght() const { return Math::Sqrt<T>(x * x + y * y + z * z + w * w); }
+		constexpr T SqrLenght() const { return x * x + y * y + z * z + w * w; }
+		constexpr void Normalise()
 		{
 			const T lenght = Lenght();
 			x /= lenght;
@@ -226,7 +242,7 @@ namespace Blaze
 			z /= lenght;
 			w /= lenght;
 		}
-		constexpr inline Vector Normalised()
+		constexpr Vector Normalised()
 		{
 			const T lenght = Lenght();
 			return Vector(x / lenght, y / lenght, z / lenght, w / lenght);

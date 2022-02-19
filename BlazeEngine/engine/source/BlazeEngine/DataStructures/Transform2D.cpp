@@ -24,8 +24,8 @@ namespace Blaze
 		}
 		else
 		{
-			parentAbsoluteSize = Renderer::GetViewportSize();
-			parentAbsolutePos = Vec2i();
+			parentAbsoluteSize = Vec2f(Renderer::GetViewportSize());
+			parentAbsolutePos = Vec2f();
 		}
 		
 		offset += parentAbsolutePos;					

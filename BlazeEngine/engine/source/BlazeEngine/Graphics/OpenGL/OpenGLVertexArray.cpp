@@ -1,17 +1,21 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLVertexArray.h"
 #include "GL/glew.h"
 
-#include "source/BlazeEngine/Internal/Engine.h"
 
 namespace Blaze
 {    
     namespace OpenGL
     {
+        static bool firstVertexArray = true;
+
         VertexArray::VertexArray()
             : id(-1), indexBuffer(nullptr)
         {
-            if (engine == nullptr)
-                id = -1;
+            if (firstVertexArray)
+            {
+                id = 0;
+                firstVertexArray = false;
+            }
             else
                 glCreateVertexArrays(1, &id);
         }        
@@ -25,7 +29,7 @@ namespace Blaze
         }
         VertexArray::~VertexArray()
         {
-            if (id != -1)
+            if (id != -1 && id != 0)
                 glDeleteVertexArrays(1, &id);
         }
 

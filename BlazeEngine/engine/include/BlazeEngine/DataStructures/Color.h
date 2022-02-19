@@ -30,6 +30,7 @@ namespace Blaze
 
 		constexpr inline ColorRGBA() : r(255), g(255), b(255), a(255) { }
 		constexpr inline ColorRGBA(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) { }
+		constexpr inline ColorRGBA(ColorRGB c, uint8 a) : r(c.r), g(c.g), b(c.b), a(a) { }
 		constexpr inline ColorRGBA(const ColorRGBAf&);
 
 		constexpr inline Vec4<uint8> ToVector() const { return Vec4<uint8>(r, g, b, a); }
@@ -62,6 +63,7 @@ namespace Blaze
 
 		constexpr inline ColorRGBAf() : r(1.0f), g(1.0f), b(1.0f), a(1.0f) { }
 		constexpr inline ColorRGBAf(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) { }
+		constexpr inline ColorRGBAf(ColorRGBf c, float a) : r(c.r), g(c.g), b(c.b), a(a) { }
 		constexpr inline ColorRGBAf(const ColorRGBA& other) : r(float(other.r) / 255.0f), g(float(other.g) / 255.0f), b(float(other.b) / 255.0f), a(float(other.a) / 255.0f) { }
 
 		constexpr inline Vec4f ToVector() const { return Vec4f(r, g, b, a); }
@@ -73,8 +75,8 @@ namespace Blaze
 		constexpr inline bool operator!=(const ColorRGBAf& other) const { return other.r != r || other.g != g || other.b != b || other.a != a; }
 	};
 
-	constexpr inline Blaze::ColorRGB::ColorRGB(const ColorRGBf& other) : r(other.r * 255.0f), g(other.g * 255.0f), b(other.b * 255.0f) { }	
-	constexpr inline Blaze::ColorRGBA::ColorRGBA(const ColorRGBAf& other) : r(other.r * 255.0f), g(other.g * 255.0f), b(other.b * 255.0f), a(other.a * 255.0f) { }	
+	constexpr inline Blaze::ColorRGB::ColorRGB(const ColorRGBf& other) : r(float(other.r) * 255.0f), g(float(other.g) * 255.0f), b(float(other.b) * 255.0f) { }
+	constexpr inline Blaze::ColorRGBA::ColorRGBA(const ColorRGBAf& other) : r(float(other.r) * 255.0f), g(float(other.g) * 255.0f), b(float(other.b) * 255.0f), a(float(other.a) * 255.0f) { }
 
 	constexpr inline ColorRGB::operator Vec3f() const { return ColorRGBf(*this); }
 	constexpr inline ColorRGBA::operator Vec4f() const { return ColorRGBAf(*this); }

@@ -1,17 +1,148 @@
-#include "source/BlazeEngine/Internal/Engine.h"
 #include "BlazeEngine/Graphics/Renderer.h"
-#include "BlazeEngine/Core/Logger.h"
+#include "BlazeEngine/Logger/Logger.h"
 #include "BlazeEngine/Core/Window.h"
-#include "BlazeEngine/Core/Application.h"
+#include "BlazeEngine/Application/Application.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
+#include "BlazeEngine/Event/Events.h"
+#include "BlazeEngine/Event/EventDispatcher.h"
+#include "BlazeEngine/Event/EventHandler.h"
+#include "source/BlazeEngine/Internal/Conversions.h"
 
 #include "SDL/SDL.h"
 #include "GL/glew.h"
 
 namespace Blaze
 {	
+	void* GetOpenGLInitWindow();
+	void* GetOpenGLContext();	
+
+	extern EventDispatcher<Event::ViewportChanged   >   viewportChangedDispatcher;
+
+	void Graphics_ViewportChanged(Event::ViewportChanged);
+	
+	static Graphics::Core::VertexArray defaultVertexArray;
+	static Graphics::Core::VertexArray* selectedVertexArray = nullptr;
+	static Graphics::Core::GraphicsBuffer* selectedArrayBuffer = nullptr;
+	static Graphics::Core::GraphicsBuffer* selectedUniformBuffer = nullptr;
+	static Graphics::Core::Program* selectedProgram = nullptr;
+	static Graphics::Core::Renderbuffer* selectedRenderbuffer = nullptr;
+	static Graphics::Core::Framebuffer* selectedFramebuffer = nullptr;
+	static Graphics::Core::Framebuffer* selectedDrawFramebuffer = nullptr;
+	static Graphics::Core::Framebuffer* selectedReadFramebuffer = nullptr;
+
+	static Graphics::Core::Texture2D* selectedTexture2D = nullptr;
+	static Graphics::Core::Texture2DArray* selectedTexture2DArray = nullptr;
+	static Graphics::Core::TextureCubemap* selectedTextureCubemap = nullptr;
+	static Graphics::Core::TextureBuffer* selectedTextureBuffer = nullptr;
+
+	static void* target = nullptr;
+
+	static Vec2i viewportPos;
+	static Vec2i viewportSize;
+
+	static ColorRGBAf clearColor;
+
+
+	void InitializeRenderer()
+	{
+		target = GetOpenGLInitWindow();
+		selectedVertexArray = &defaultVertexArray;
+	}
+	void TerminateRenderer()
+	{
+
+	}
+
 	namespace Renderer
 	{
+
+		GLenum OpenGLRenderPrimitive(PrimitiveType type)
+		{
+			switch (type)
+			{
+			case PrimitiveType::Points: return GL_POINTS;
+			case PrimitiveType::Lines: return GL_LINES;
+			case PrimitiveType::LineStrip: return GL_LINE_STRIP;			
+			case PrimitiveType::LineLoop: return GL_LINE_LOOP;
+			case PrimitiveType::Triangles: return GL_TRIANGLES;			
+			case PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;
+			case PrimitiveType::TriangleFan: return GL_TRIANGLE_FAN;
+			case PrimitiveType::Pathes: return GL_PATCHES;
+			}
+		}
+		GLenum OpenGLIndexType(IndexType type)
+		{
+			switch (type)
+			{
+			case IndexType::Uint32: return GL_UNSIGNED_INT;
+			case IndexType::Uint16: return GL_UNSIGNED_SHORT;
+			case IndexType::Uint8: return GL_UNSIGNED_BYTE;		
+			}
+		}
+		GLenum OpenGLPolygonMode(PolygonMode mode)
+		{
+			switch (mode)
+			{
+			case PolygonMode::Point: return GL_POINT;
+			case PolygonMode::Line: return GL_LINE;
+			case PolygonMode::Fill: return GL_FILL;		
+			}
+		}
+		GLenum OpenGLImageAccess(ImageAccess access)
+		{
+			switch (access)
+			{
+			case ImageAccess::Read: return GL_READ_ONLY;
+			case ImageAccess::Write: return GL_WRITE_ONLY;
+			case ImageAccess::ReadWrite: return GL_READ_WRITE;		
+			}
+		}
+		GLenum OpenGLImageFormat(ImageFormat format)
+		{
+			switch (format)
+			{
+			case ImageFormat::RGBA32F:			return GL_RGBA32F;
+			case ImageFormat::RGBA16F:			return GL_RGBA16F;
+			case ImageFormat::RG32F:			return GL_RG32F;
+			case ImageFormat::RG16F:			return GL_RG16F;
+			case ImageFormat::R11F_G11F_B10F:	return GL_R11F_G11F_B10F;
+			case ImageFormat::R32F:			return GL_R32F;
+			case ImageFormat::R16F:			return GL_R16F;
+			case ImageFormat::RGBA32UI:		return GL_RGBA32UI;
+			case ImageFormat::RGBA16UI:		return GL_RGBA16UI;
+			case ImageFormat::RGB10_A2UI:		return GL_RGB10_A2UI;
+			case ImageFormat::RGBA8UI:			return GL_RGBA8UI;
+			case ImageFormat::RG32UI:			return GL_RG32UI;
+			case ImageFormat::RG16UI:			return GL_RG16UI;
+			case ImageFormat::RG8UI:			return GL_RG8UI;
+			case ImageFormat::R32UI:			return GL_R32UI;
+			case ImageFormat::R16UI:			return GL_R16UI;
+			case ImageFormat::R8UI:			return GL_R8UI;
+			case ImageFormat::RGBA32I:			return GL_RGBA32I;
+			case ImageFormat::RGBA16I:			return GL_RGBA16I;
+			case ImageFormat::RGBA8I:			return GL_RGBA8I;
+			case ImageFormat::RG32I:			return GL_RG32I;
+			case ImageFormat::RG16I:			return GL_RG16I;
+			case ImageFormat::RG8I:			return GL_RG8I;
+			case ImageFormat::R32I:			return GL_R32I;
+			case ImageFormat::R16I:			return GL_R16I;
+			case ImageFormat::R8I:				return GL_R8I;
+			case ImageFormat::RGBA16:			return GL_RGBA16;
+			case ImageFormat::RGB10_A2:		return GL_RGB10_A2;
+			case ImageFormat::RGBA8:			return GL_RGBA8;
+			case ImageFormat::RG16:			return GL_RG16;
+			case ImageFormat::RG8:				return GL_RG8;
+			case ImageFormat::R16:				return GL_R16;
+			case ImageFormat::R8:				return GL_R8;
+			case ImageFormat::RGBA16_SNORM:	return GL_RGBA16_SNORM;
+			case ImageFormat::RGBA8_SNORM:		return GL_RGBA8_SNORM;
+			case ImageFormat::RG16_SNORM:		return GL_RG16_SNORM;
+			case ImageFormat::RG8_SNORM:		return GL_RG8_SNORM;
+			case ImageFormat::R16_SNORM:		return GL_R16_SNORM;
+			case ImageFormat::R8_SNORM:		return GL_R8_SNORM;			
+			}
+		}
+
 		void BLAZE_API SetActiveTextureSlot(uint slot)
 		{
 			glActiveTexture(GL_TEXTURE0 + slot);
@@ -19,105 +150,147 @@ namespace Blaze
 		void SelectTexture(Graphics::Core::Texture2D* obj)
 		{			
 			glBindTexture(GL_TEXTURE_2D, obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedTexture2D = obj;
+			selectedTexture2D = obj;
 		}		
 		Graphics::Core::Texture2D* GetSelectedTexture2D()
 		{
-			return engine->Renderer.selectedTexture2D;
+			return selectedTexture2D;
 		}
 
 		void SelectTexture(Graphics::Core::Texture2DArray* obj)
 		{
 			glBindTexture(GL_TEXTURE_2D_ARRAY, obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedTexture2DArray = obj;
+			selectedTexture2DArray = obj;
 		}		
 		Graphics::Core::Texture2DArray* GetSelectedTexture2DArray()
 		{			
-			return engine->Renderer.selectedTexture2DArray;
+			return selectedTexture2DArray;
 		}
 
 		void SelectTexture(Graphics::Core::TextureCubemap* obj)
 		{
 			glBindTexture(GL_TEXTURE_CUBE_MAP, obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedTextureCubemap = obj;
+			selectedTextureCubemap = obj;
 		}
 		Graphics::Core::TextureCubemap* GetSelectedTextureCubemap()
 		{
-			return engine->Renderer.selectedTextureCubemap;
+			return selectedTextureCubemap;
+		}
+
+		void SelectTexture(Graphics::Core::TextureBuffer* obj)
+		{
+			glBindTexture(GL_TEXTURE_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
+			selectedTextureBuffer = obj;
+		}
+		Graphics::Core::TextureBuffer* GetTextureBuffer()
+		{
+			return selectedTextureBuffer;
 		}
 
 		void SelectVertexBuffer(Graphics::Core::GraphicsBuffer* obj)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedArrayBuffer = obj;
+			selectedArrayBuffer = obj;
 		}		
 		Graphics::Core::GraphicsBuffer* GetSelectedVertexBuffer()
 		{
-			return engine->Renderer.selectedArrayBuffer;
+			return selectedArrayBuffer;
 		}
 
 		void SelectIndexBuffer(Graphics::Core::GraphicsBuffer* obj)
 		{			
-			engine->Renderer.selectedVertexArray->SetIndexBuffer(*obj);
+			selectedVertexArray->SetIndexBuffer(*obj);
 		}		
 		Graphics::Core::GraphicsBuffer* GetSelectedIndexBuffer()
 		{
-			return engine->Renderer.selectedVertexArray->GetIndexBuffer();
+			return selectedVertexArray->GetIndexBuffer();
 		}
 
 		void SelectUniformBuffer(Graphics::Core::GraphicsBuffer* obj)
 		{
 			glBindBuffer(GL_UNIFORM_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedUniformBuffer = obj;
+			selectedUniformBuffer = obj;
 		}
 		Graphics::Core::GraphicsBuffer* GetSelectedUniformBuffer()
 		{
-			return engine->Renderer.selectedUniformBuffer;
+			return selectedUniformBuffer;
 		}
 
 		void SelectVertexArray(Graphics::Core::VertexArray* obj)
 		{
 			glBindVertexArray(obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedVertexArray = obj;
+			selectedVertexArray = obj;
 		}		
 		Graphics::Core::VertexArray* GetSelectedVertexArray()
 		{
-			return engine->Renderer.selectedVertexArray;
+			return selectedVertexArray;
 		}
 
 		void SelectProgram(Graphics::Core::Program* obj)
 		{
 			glUseProgram(obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedProgram = obj;
+			selectedProgram = obj;
 		}
 		Graphics::Core::Program* GetSelectedProgram()
 		{
-			return engine->Renderer.selectedProgram;
+			return selectedProgram;
 		}
 
 		void SelectFramebuffer(Graphics::Core::Framebuffer* obj)
 		{ 
 			glBindFramebuffer(GL_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
-			engine->Renderer.selectedFramebuffer = obj;
+			selectedFramebuffer = obj;
 		}
 		Graphics::Core::Framebuffer* GetSelectedFramebuffer()
 		{
-			return engine->Renderer.selectedFramebuffer;;
+			return selectedFramebuffer;;
+		}
+
+		void SelectDrawFramebuffer(Graphics::Core::Framebuffer* obj)
+		{
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
+			selectedDrawFramebuffer = obj;
+		}
+
+		BLAZE_API Graphics::Core::Framebuffer* GetDrawSelectedFramebuffer()
+		{
+			return selectedDrawFramebuffer;
+		}
+
+		BLAZE_API void SelectReadFramebuffer(Graphics::Core::Framebuffer* obj)
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
+			selectedReadFramebuffer = obj;
+		}
+
+		BLAZE_API Graphics::Core::Framebuffer* GetReadSelectedFramebuffer()
+		{
+			return selectedReadFramebuffer;
+		}
+
+		void SelectRenderbuffer(Graphics::Core::Renderbuffer* obj)
+		{
+			glBindRenderbuffer(GL_RENDERBUFFER, obj == nullptr ? 0 : obj->GetHandle());
+			selectedRenderbuffer = obj;
+		}
+		Graphics::Core::Renderbuffer* GetSelectedRenderbuffer()
+		{
+			return selectedRenderbuffer;
 		}
 
 
 		void SetClearColor(ColorRGBAf color)
 		{
-			engine->Renderer.clearColor = color;
+			clearColor = color;
 			glClearColor(color.r, color.g, color.b, color.a);
 		}
 		void SetViewport(Vec2i pos, Vec2i size)
 		{
-			engine->Renderer.viewportPos = pos;
-			engine->Renderer.viewportSize = size;
+			viewportPos = pos;
+			viewportSize = size;
 			glViewport(pos.x, pos.y, size.x, size.y);
-			Input_ViewportChanged({ pos, size });
-			UI_SetViewportSize(size);
+			viewportChangedDispatcher.Call({ pos, size });
+			Graphics_ViewportChanged({ pos, size });
 		}
 		void SetPatchSize(uint size)
 		{
@@ -141,19 +314,19 @@ namespace Blaze
 		}
 		ColorRGBAf GetClearColor()
 		{
-			return engine->Renderer.clearColor;
+			return clearColor;
 		}
 		Vec2i GetViewportPos()
 		{
-			return engine->Renderer.viewportPos;
+			return viewportPos;
 		}
 		Vec2i GetViewportSize()
 		{
-			return engine->Renderer.viewportSize;
+			return viewportSize;
 		}
 		float GetViewportRatio()
 		{
-			return (float)engine->Renderer.viewportSize.x / engine->Renderer.viewportSize.y;
+			return (float)viewportSize.x / viewportSize.y;
 		}
 
 		void ClearTarget()
@@ -168,32 +341,32 @@ namespace Blaze
 		{
 			glClear(GL_DEPTH_BUFFER_BIT);
 		}
-		void UpdateTarget()
+		void SwapWindowBuffers()
 		{
-			if (engine->Renderer.target == nullptr)
+			if (target == nullptr)
 				BLAZE_WARNING_LOG("Blaze Engine", "No target was selected!");
 			else
-				SDL_GL_SwapWindow((SDL_Window*)engine->Renderer.target);
+				SDL_GL_SwapWindow((SDL_Window*)target);
 		}
 
 		void SetTarget(Window& win)
 		{
-			if (engine->Renderer.target != win.GetHandle())
+			if (target != win.GetHandle())
 			{
-				engine->Renderer.target = win.GetHandle();
-				SDL_GL_MakeCurrent((SDL_Window*)win.GetHandle(), (SDL_GLContext)engine->GLEW.openGLContext);
+				target = win.GetHandle();
+				SDL_GL_MakeCurrent((SDL_Window*)win.GetHandle(), (SDL_GLContext)GetOpenGLContext());
 			}
 		}
 		void SetPolygonMode(PolygonMode mode)
 		{			
-			glPolygonMode(GL_FRONT_AND_BACK, (GLenum)mode);			
+			glPolygonMode(GL_FRONT_AND_BACK, OpenGLPolygonMode(mode));			
 		}
 
 		void EnableVSync(bool vsync)
 		{
 			SDL_GL_SetSwapInterval(vsync);
 		}		
-		void EnableDepthBuffer(bool enable)
+		void EnableWritingToDepthBuffer(bool enable)
 		{
 			glDepthMask(enable);
 		}		
@@ -231,7 +404,7 @@ namespace Blaze
 				glEnable(GL_SCISSOR_TEST);
 			else
 				glDisable(GL_SCISSOR_TEST);
-		}
+		}		
 		void EnableStencilTest(bool enable)
 		{
 			if (enable)
@@ -240,25 +413,28 @@ namespace Blaze
 				glDisable(GL_STENCIL_TEST);
 		}
 		
-		void RenderTriangles(IndexType indexType, uint count)
-		{								
-			glDrawElements(GL_TRIANGLES, count, (unsigned)indexType, (void*)0);			
-		}
-		void RenderPatches(IndexType indexType, uint count)
+		void RenderIndexedPrimitives(PrimitiveType type, IndexType indexType, uint indexCount, uint indexBufferOffset)
 		{
-			glDrawElements(GL_PATCHES, count, (unsigned)indexType, (void*)0);
+			glDrawElements(OpenGLRenderPrimitive(type), indexCount, OpenGLIndexType(indexType), (void*)indexBufferOffset);
 		}
-		void RenderTriangleArray(uint count, size_t offset)
+		void RenderPrimitiveArray(PrimitiveType type, uint startIndex, uint primitiveCount)
 		{
-			glDrawArrays(GL_TRIANGLES, int(offset), count);
-		}
-		void RenderPointArray(uint count, size_t offset)
+			glDrawArrays(OpenGLRenderPrimitive(type), startIndex, primitiveCount);
+		}										
+
+		void DispatchCompute(uint x, uint y, uint z)
 		{
-			glDrawArrays(GL_POINTS, int(offset), count);
+			glDispatchCompute(x, y, z);
 		}
-		void RenderPatchArray(uint count, size_t offset)
+
+		void MemoryBarrier()
 		{
-			glDrawArrays(GL_PATCHES, int(offset), count);
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		}
+
+		void SelectImage(uint slot, const Graphics::Core::Texture2D& texture, uint level, ImageAccess access, ImageFormat format)
+		{
+			glBindImageTexture(slot, texture.GetHandle(), level, GL_FALSE, 0, OpenGLImageAccess(access), OpenGLImageFormat(format));
+		}		
 	}
 }

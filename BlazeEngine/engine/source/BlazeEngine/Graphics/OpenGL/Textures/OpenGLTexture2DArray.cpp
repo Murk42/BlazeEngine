@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 
+#include "BlazeEngine/Graphics/Renderer.h"
+
 namespace Blaze::OpenGL
 {
 	Texture2DArray::Texture2DArray()
@@ -57,8 +59,8 @@ namespace Blaze::OpenGL
 		this->size = size;
 		this->layers = layers;
 
-		glBindTexture(GL_TEXTURE_2D_ARRAY, id);		
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, layers, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+		Renderer::SelectTexture(this);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, layers, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}
 
 	void Texture2DArray::SetPixels(Vec2i offset, size_t layer, BitmapView bm)
@@ -66,7 +68,7 @@ namespace Blaze::OpenGL
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+		Renderer::SelectTexture(this);
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, bm.GetSize().x, bm.GetSize().y, 1, format, type, bm.GetPixels());
 	}
 

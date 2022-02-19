@@ -17,7 +17,9 @@ namespace Blaze
 	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format);
 	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format);
 	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format);
+	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format);
 	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format);
+	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format);
 
 	ILenum DevILPixelType(BitmapPixelType type);
 	GLenum OpenGLPixelType(BitmapPixelType type);
