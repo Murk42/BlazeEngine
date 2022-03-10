@@ -8,11 +8,18 @@
 
 void PrintHelp()
 {
-	cout << "build <project path> <output dir> <output name> [-p:(property name)=(value)]\n";
+	cout << "\n ---- build help ----\n";
+	cout << "build <project path> <output dir> <output name> [-p:(property name)=(value)]\n\n";
+	cout << "Properties can be \"Configuration\", \"Platform\".\n";
+	cout << "Other switches are \"guiOpenFile\"\n";
+	cout << "\n";
 }
 
 static bool GetProjectPathFromArgs(const std::vector<string>& args, string& path)
 {
+	if (args[1] == "\"\"")
+		return false;
+
 	if (!StripQuotes(args[1], path))
 	{
 		cout << "Invalid project path syntax \"" << args[1] << "\"\n";
@@ -182,6 +189,10 @@ static bool ParseSwitch(const vector<string>& symbols, BuildCommandOptions& opti
 	{
 		CHECK(ParsePropertySwitch(symbols, options));
 	}
+	else if (symbols.size() >= 2 && symbols[1] == "guiOpenFile")
+	{
+		options.guiOpenFile = true;
+	}
 	else
 	{
 		cout << "Invalid property switch syntax\n";
@@ -227,6 +238,7 @@ bool ParseBuildCommand(const vector<string>& args, BuildCommandOptions& options)
 
 	options.configuration = Configuration::FinalBuild_Debug;
 	options.platform = Platform::x64;	
+	options.guiOpenFile = false;
 	
 	CHECK(ParseSwitches(args, options));
 

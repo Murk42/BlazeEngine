@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace Blaze
-{
+{/*
 	struct BlazeApplicationClassInfo
 	{
 		void(*Constructor)(void*);
@@ -13,11 +13,9 @@ namespace Blaze
 		void(*Setup)(void*);
 		size_t size = 0;		
 	};			
-
-	BLAZE_API void SetBlazeApplicationClassInfo(BlazeApplicationClassInfo sceneInfo);		
-
-	BLAZE_API void Stop();
-
+	
+	BLAZE_API void SetBlazeApplicationClassInfo(BlazeApplicationClassInfo sceneInfo);			
+	
 	template<typename T>
 	class BlazeApplication
 	{
@@ -47,7 +45,8 @@ namespace Blaze
 		int Setup;		
 	public:			
 	};	
-
+	
 	template<typename T>
 	typename BlazeApplication<T>::Init init;
-}
+	*/
+}	

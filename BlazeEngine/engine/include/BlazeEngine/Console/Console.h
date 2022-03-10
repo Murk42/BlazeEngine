@@ -4,8 +4,7 @@
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
 
 namespace Blaze
-{
-	//thread-safe
+{	
 	namespace Console
 	{								
 		void BLAZE_API Write(char text);

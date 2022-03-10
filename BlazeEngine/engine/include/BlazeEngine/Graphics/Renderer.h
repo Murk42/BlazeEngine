@@ -40,8 +40,8 @@ namespace Blaze
 		BLAZE_API void SelectVertexArray(Graphics::Core::VertexArray* vertexArray);		
 		BLAZE_API Graphics::Core::VertexArray* GetSelectedVertexArray();
 
-		BLAZE_API void SelectProgram(Graphics::Core::Program* program);		
-		BLAZE_API Graphics::Core::Program* GetSelectedProgram();
+		BLAZE_API void SelectProgram(Graphics::Core::ShaderProgram* program);		
+		BLAZE_API Graphics::Core::ShaderProgram* GetSelectedProgram();
 
 		BLAZE_API void SelectFramebuffer(Graphics::Core::Framebuffer* framebuffer);
 		BLAZE_API Graphics::Core::Framebuffer* GetSelectedFramebuffer();

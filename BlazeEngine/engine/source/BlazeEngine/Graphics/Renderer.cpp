@@ -18,13 +18,16 @@ namespace Blaze
 
 	extern EventDispatcher<Event::ViewportChanged   >   viewportChangedDispatcher;
 
-	void Graphics_ViewportChanged(Event::ViewportChanged);
+	namespace Graphics
+	{
+		void Graphics_ViewportChanged(Event::ViewportChanged);
+	}
 	
 	static Graphics::Core::VertexArray defaultVertexArray;
 	static Graphics::Core::VertexArray* selectedVertexArray = nullptr;
 	static Graphics::Core::GraphicsBuffer* selectedArrayBuffer = nullptr;
 	static Graphics::Core::GraphicsBuffer* selectedUniformBuffer = nullptr;
-	static Graphics::Core::Program* selectedProgram = nullptr;
+	static Graphics::Core::ShaderProgram* selectedProgram = nullptr;
 	static Graphics::Core::Renderbuffer* selectedRenderbuffer = nullptr;
 	static Graphics::Core::Framebuffer* selectedFramebuffer = nullptr;
 	static Graphics::Core::Framebuffer* selectedDrawFramebuffer = nullptr;
@@ -226,12 +229,12 @@ namespace Blaze
 			return selectedVertexArray;
 		}
 
-		void SelectProgram(Graphics::Core::Program* obj)
+		void SelectProgram(Graphics::Core::ShaderProgram* obj)
 		{
 			glUseProgram(obj == nullptr ? 0 : obj->GetHandle());
 			selectedProgram = obj;
 		}
-		Graphics::Core::Program* GetSelectedProgram()
+		Graphics::Core::ShaderProgram* GetSelectedProgram()
 		{
 			return selectedProgram;
 		}
@@ -290,7 +293,7 @@ namespace Blaze
 			viewportSize = size;
 			glViewport(pos.x, pos.y, size.x, size.y);
 			viewportChangedDispatcher.Call({ pos, size });
-			Graphics_ViewportChanged({ pos, size });
+			Graphics::Graphics_ViewportChanged({ pos, size });
 		}
 		void SetPatchSize(uint size)
 		{

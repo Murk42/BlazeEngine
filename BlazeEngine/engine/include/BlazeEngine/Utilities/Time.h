@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/String.h"
+#include <chrono>
 
 /*
 %a	Abbreviated weekday name *																Thu
@@ -32,7 +33,7 @@
 %w	Weekday as a decimal number with Sunday as 0 (0-6)										4
 %W	Week number with the first Monday as the first day of week one (00-53)					34
 %x	Date representation *																	08/23/01
-%X	Time representation *																	14:55:02
+%X	TimePoint representation *																	14:55:02
 %y	Year, last two digits (00-99)															01
 %Y	Year																					2001
 %z	ISO 8601 offset from UTC in timezone (1 minute=1, 1 hour=100)							+100
@@ -40,17 +41,21 @@
 %%	A % sign																				%
 */
 namespace Blaze
-{	
-	class BLAZE_API Time
-	{
-		double value;
+{		
+	class BLAZE_API TimePoint
+	{		
+		std::chrono::system_clock::time_point value;
 	public:
-		Time(double seconds);
+		TimePoint();
+		TimePoint(const TimePoint&);
 
-		String FormatString(const char* format);
-		double GetValue() const { return value; }
+		String FormatString(const char* format);		
 
-		static Time GetWorldTime();
-		static Time GetRunTime();		
+		double operator-(const TimePoint&) const;
+
+		TimePoint& operator=(const TimePoint&);
+
+		static TimePoint GetWorldTime();
+		static double GetRunTime();			
 	};
 }

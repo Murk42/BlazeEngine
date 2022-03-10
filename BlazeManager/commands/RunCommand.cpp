@@ -1,3 +1,8 @@
+#ifdef _WIN32
+#include <Windows.h>
+#undef LoadLibrary
+#endif
+
 #include "RunCommand.h"
 #include <filesystem>
 #include <iostream>
@@ -17,6 +22,30 @@
 extern VisualStudioInfo vsInfo;
 extern string blazeDir;
 extern string runtimeDir;
+
+#ifdef _WIN32
+static string GuiOpenFile()
+{
+	OPENFILENAMEA ofn = { 0 };
+	char Buffer[300];
+	fill(Buffer, Buffer + 300, '\0');
+
+	ofn.lStructSize = sizeof(OPENFILENAMEA);
+	ofn.hwndOwner = NULL;
+	ofn.lpstrFile = Buffer;
+	ofn.nMaxFile = 300;
+	ofn.Flags = OFN_EXPLORER;
+	ofn.lpstrFilter = NULL;
+	ofn.lpstrCustomFilter = NULL;
+	ofn.nFilterIndex = 0;
+	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrTitle = NULL;
+	GetOpenFileNameA(&ofn);
+
+	return string(Buffer, 300);
+}
+#endif
 
 Result LoadClientLibraries(std::vector<Library>& libraries, const string& path, const string& outputPath)
 {
@@ -60,7 +89,7 @@ Result LoadClientLibraries(std::vector<Library>& libraries, const string& path, 
 		//string newPath = outputPath + filesystem::path(paths[i]).filename().string();
 		//filesystem::copy_file(paths[i], newPath, filesystem::copy_options::overwrite_existing);
 		//
-		//Result r = libraries[i].LoadLibrary(newPath);
+		//Result r = libraries[i].LoadLibrary(newPath
 		Result r = libraries[i].LoadLibrary(paths[i]);
 		if (!r.sucessfull)
 			return r;
@@ -71,6 +100,13 @@ Result LoadClientLibraries(std::vector<Library>& libraries, const string& path, 
 
 bool RunCommand(RunCommandOptions options)
 {
+	if (options.guiOpenFile)
+	{
+#ifdef _WIN32
+		options.projectPath = GuiOpenFile();
+#endif
+	}
+
 	Configuration configuration = options.release ? Configuration::Release : Configuration::Debug;
 	
 	string projectDir = filesystem::path(options.projectPath).parent_path().string() + "\\";
@@ -86,12 +122,13 @@ bool RunCommand(RunCommandOptions options)
 
 	if (!options.dontBuildBlaze)
 	{
-		cout << "Building blaze...\n";
+		if (options.log)
+			cout << "Building blaze...\n";
 		CHECK(BuildBlaze(configuration, ::platform));
 	}
 	
 	if (!options.dontBuildClient)
-	{
+	{		
 		BuildSettings clientBuildSettings;
 		clientBuildSettings.projectPath = options.projectPath;
 		clientBuildSettings.platform = ::platform;
@@ -102,7 +139,8 @@ bool RunCommand(RunCommandOptions options)
 		clientBuildSettings.intermediateDir = projectDir + intermediateSubDir;
 		clientBuildSettings.outputType = BuildOutputType::DynamicLibrary;
 
-		cout << "Building client project...\n";
+		if (options.log)
+			cout << "Building client project...\n";
 		Result clientBuildResult = BuildProject(vsInfo, clientBuildSettings, "-p:WarningLevel=0");
 
 		if (!clientBuildResult.sucessfull)
@@ -124,7 +162,8 @@ bool RunCommand(RunCommandOptions options)
 		runtimeBuildSettings.intermediateDir = runtimeDir + intermediateSubDir;
 		runtimeBuildSettings.outputType = BuildOutputType::DynamicLibrary;
 
-		cout << "Building runtime...\n";
+		if (options.log)
+			cout << "Building runtime...\n";
 		Result runtimeBuildResult = BuildProject(vsInfo, runtimeBuildSettings, "-p:WarningLevel=0");
 
 		if (!runtimeBuildResult.sucessfull)
@@ -153,7 +192,9 @@ bool RunCommand(RunCommandOptions options)
 		Library libraryRuntime;
 		vector<Library> clientLibraries;
 
-		cout << "Loading libraries...\n";
+		if (options.log)
+			cout << "Loading libraries...\n";
+
 		Result r;
 		string path;
 
@@ -192,7 +233,8 @@ bool RunCommand(RunCommandOptions options)
 		void(*RUNTIME_START)() = (void(*)())libraryRuntime.GetFunction("RUNTIME_START", r);
 		if (!r.sucessfull) { cout << r.log; return true; }
 
-		cout << "Statring:\n";
+		if (options.log)
+			cout << "Statring:\n";
 
 		string oldPath = std::filesystem::current_path().string();
 		

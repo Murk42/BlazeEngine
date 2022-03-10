@@ -18,7 +18,7 @@ namespace Blaze
 	class BLAZE_API Log
 	{
 		uint threadID;
-		Time time;
+		TimePoint time;
 
 		LogType type;
 

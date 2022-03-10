@@ -40,7 +40,7 @@ namespace Blaze
 			Shader& operator=(const Shader&) = delete;
 			Shader& operator=(Shader&&) noexcept;
 
-			friend class Program;
+			friend class ShaderProgram;
 		};
 
 		class VertexShader : public Shader

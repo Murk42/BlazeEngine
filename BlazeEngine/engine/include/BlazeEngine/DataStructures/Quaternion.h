@@ -3,17 +3,17 @@
 namespace Blaze
 {
 	namespace Math
-	{
+	{		
+		inline float Sqrt(float);		
+		inline double Sqrt(double);
 		template<typename T>
-		constexpr inline T Sqrt(const T&);
+		constexpr T DotProduct(Vec3<T>, Vec3<T>);
 		template<typename T>
-		constexpr inline T DotProduct(const Vec3<T>& a, const Vec3<T>& b);
-		template<typename T>
-		constexpr inline Vec3<T> CrossProduct(const Vec3<T>&, const Vec3<T>&);
-		template<typename T>
-		constexpr inline T Sin(const T& v);
-		template<typename T>
-		constexpr inline T Cos(const T& v);
+		constexpr Vec3<T> CrossProduct(Vec3<T>, Vec3<T>);		
+		inline float Sin(float v);		
+		inline double Sin(double v);
+		inline float Cos(float v);
+		inline double Cos(double v);
 
 	}
 
@@ -28,8 +28,8 @@ namespace Blaze
 		constexpr Quat(Vec3<T> axis, T angle)
 		{
 			angle = angle * T(0.5);
-			T temp = Math::Sin<T>(angle);
-			w = Math::Cos<T>(angle);
+			T temp = Math::Sin(angle);
+			w = Math::Cos(angle);
 			x = axis.x * temp;
 			y = axis.y * temp;
 			z = axis.z * temp;
@@ -52,7 +52,7 @@ namespace Blaze
 			T num8 = (m00 + m11) + m22;			
 			if (num8 > 0.0)
 			{
-				T num = Math::Sqrt<T>(num8 + 1.0);
+				T num = Math::Sqrt(num8 + 1.0);
 				w = num * 0.5;
 				num = 0.5 / num;
 				x = (m12 - m21) * num;
@@ -61,7 +61,7 @@ namespace Blaze
 			}
 			else if ((m00 >= m11) && (m00 >= m22))
 			{
-				T num7 = Math::Sqrt<T>(((1.0 + m00) - m11) - m22);
+				T num7 = Math::Sqrt(((1.0 + m00) - m11) - m22);
 				T num4 = 0.5 / num7;
 				x = 0.5 * num7;
 				y = (m01 + m10) * num4;
@@ -70,7 +70,7 @@ namespace Blaze
 			}
 			else if (m11 > m22)
 			{
-				T num6 = Math::Sqrt<T>(((1.0 + m11) - m00) - m22);
+				T num6 = Math::Sqrt(((1.0 + m11) - m00) - m22);
 				T num3 = 0.5 / num6;
 				x = (m10 + m01) * num3;
 				y = 0.5 * num6;
@@ -79,7 +79,7 @@ namespace Blaze
 			}
 			else
 			{
-				T num5 = Math::Sqrt<T>(((1.0 + m22) - m00) - m11);
+				T num5 = Math::Sqrt(((1.0 + m22) - m00) - m11);
 				T num2 = 0.5 / num5;
 				x = (m20 + m02) * num2;
 				y = (m21 + m12) * num2;
@@ -111,7 +111,7 @@ namespace Blaze
 		constexpr void operator= (const Quat<T>& v) { x = v.x; y = v.y; z = v.z; w = v.w; }
 		template<typename T2> constexpr void operator=(const Quat<T2>& v) { x = T(v.x); y = T(v.y); z = T(v.z); w = T(v.w); }
 
-		constexpr inline T Magnitude() const { return Math::Sqrt<T>(x * x + y * y + z * z + w * w); }
+		constexpr inline T Magnitude() const { return Math::Sqrt(x * x + y * y + z * z + w * w); }
 		constexpr inline T SqrMagnitude() const { return x * x + y * y + z * z + w * w; }
 		constexpr inline void Normalise()
 		{

@@ -7,34 +7,34 @@ namespace Blaze
 {
 	namespace OpenGL
 	{
-		Program::Program()
+		ShaderProgram::ShaderProgram()
 			: id(-1)
 		{
 			id = glCreateProgram();
 		}
-		Program::Program(Program&& p) noexcept
+		ShaderProgram::ShaderProgram(ShaderProgram&& p) noexcept
 			: id(-1)
 		{
 			id = p.id;
 			p.id = -1;
 		}
-		Program::~Program()
+		ShaderProgram::~ShaderProgram()
 		{
 			if (id != -1)
 				glDeleteProgram(id);
 		}
 
-		void Program::AttachShader(const Shader& shader)
+		void ShaderProgram::AttachShader(const Shader& shader)
 		{
 			glAttachShader(id, shader.id);
 		}
 
-		void Program::DetachShader(const Shader& shader)
+		void ShaderProgram::DetachShader(const Shader& shader)
 		{
 			glDetachShader(id, shader.id);
 		}
 
-		Result Program::LinkProgram()
+		Result ShaderProgram::LinkProgram()
 		{
 			LogListener listener;
 			listener.SupressLogs(true);
@@ -64,7 +64,7 @@ namespace Blaze
 			return result;
 		}
 
-		String Program::GetLinkingLog()
+		String ShaderProgram::GetLinkingLog()
 		{
 			int lenght = 0;
 			glGetProgramiv(id, GL_INFO_LOG_LENGTH, &lenght);
@@ -73,19 +73,19 @@ namespace Blaze
 			return log;
 		}
 
-		uint Program::GetUniformCount() const
+		uint ShaderProgram::GetUniformCount() const
 		{
 			int count;
 			glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);
 			return count;
 		}		
 
-		int Program::GetUniformLocation(const StringView& name)
+		int ShaderProgram::GetUniformLocation(const StringView& name)
 		{
 			return glGetUniformLocation(id, name.Ptr());
 		}
 
-		void Program::GetUniformData(uint index, String& name, uint& uniformSize, UniformType& uniformType) const
+		void ShaderProgram::GetUniformData(uint index, String& name, uint& uniformSize, UniformType& uniformType) const
 		{
 			char* ptr = new char[maxUniformNameLenght];
 			int lenght;
@@ -98,14 +98,14 @@ namespace Blaze
 			uniformType = (UniformType)type;				
 		}
 
-		uint Program::GetUniformBlockCount() const
+		uint ShaderProgram::GetUniformBlockCount() const
 		{		
 			int uniformBlockCount;
 			glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformBlockCount);
 			return uniformBlockCount;
 		}
 
-		void Program::GetUniformBlockData(uint index, int& location, String& name, uint& uniformBlockSize, std::vector<int>& memberIndicies) const
+		void ShaderProgram::GetUniformBlockData(uint index, int& location, String& name, uint& uniformBlockSize, std::vector<int>& memberIndicies) const
 		{
 			char* ptr = new char[maxUniformBlockNameLenght];
 			int lenght;
@@ -129,7 +129,7 @@ namespace Blaze
 			uniformBlockSize = v1.uniformBlockSize;
 		}
 
-		void Program::GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset)
+		void ShaderProgram::GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset)
 		{
 			constexpr const unsigned props1[]{ GL_NAME_LENGTH, GL_OFFSET, GL_TYPE, GL_ARRAY_SIZE };
 
@@ -151,69 +151,57 @@ namespace Blaze
 			type = (UniformType)v2.uniformBlockVariableType;
 			offset = v2.uniformBlockVariableOffset;
 		}
-
-		template<>
-		void Program::SetUniform(int location, const bool& value)
-		{ 
+		
+		void ShaderProgram::SetUniform(int location, const bool& value)
+		{ 						
 		}
-
-		template<>
-		void Program::SetUniform(int location, const int& value)
+		
+		void ShaderProgram::SetUniform(int location, const int& value)
 		{
 			glProgramUniform1i(id, location, value);
-		}
-		template<>
-		void Program::SetUniform(int location, const uint& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const uint& value)
 		{
 			glProgramUniform1ui(id, location, value);
-		}
-		template<>
-		void Program::SetUniform(int location, const float& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const float& value)
 		{
 			glProgramUniform1f(id, location, value);
-		}
-		template<>
-		void Program::SetUniform(int location, const Vec2i& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const Vec2i& value)
 		{
 			glProgramUniform2i(id, location, value.x, value.y);
-		}
-		template<>
-		void Program::SetUniform(int location, const Vec2f& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const Vec2f& value)
 		{
 			glProgramUniform2f(id, location, value.x, value.y);
-		}
-		template<>
-		void Program::SetUniform(int location, const Vec3i& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const Vec3i& value)
 		{
 			glProgramUniform3i(id, location, value.x, value.y, value.z);
-		}
-		template<>
-		void Program::SetUniform(int location, const Vec3f& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const Vec3f& value)
 		{
 			glProgramUniform3f(id, location, value.x, value.y, value.z);
 		}
-		template<>
-		void Program::SetUniform(int location, const Vec4f& value)
+		void ShaderProgram::SetUniform(int location, const Vec4f& value)
 		{
 			glProgramUniform4f(id, location, value.x, value.y, value.z, value.w);
-		}
-		template<>
-		void Program::SetUniform(int location, const Mat2f& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const Mat2f& value)
 		{
 			glProgramUniformMatrix2fv(id, location, 1, true, value.arr);
-		}
-		template<>
-		void Program::SetUniform(int location, const Mat3f& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const Mat3f& value)
 		{
 			glProgramUniformMatrix3fv(id, location, 1, true, value.arr);
-		}
-		template<>
-		void Program::SetUniform(int location, const Mat4f& value)
+		}		
+		void ShaderProgram::SetUniform(int location, const Mat4f& value)
 		{
 			glProgramUniformMatrix4fv(id, location, 1, true, value.arr);
 		}
 				
-		Program& Program::operator=(Program&& p) noexcept
+		ShaderProgram& ShaderProgram::operator=(ShaderProgram&& p) noexcept
 		{
 			if (id != -1)
 				glDeleteProgram(id);

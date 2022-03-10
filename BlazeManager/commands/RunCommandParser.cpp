@@ -7,11 +7,17 @@
 
 static void PrintHelp()
 {
-	cout << "run <project path> [-p:(property name)=(value)]\n";
+	cout << "\n ---- run help ----\n";
+	cout << "run <project path> [switches]\n\n";
+	cout << "A switch can be one of \"Release\", \"exit\", \"dontBuildBlaze\", \"dontBuildClient\", \"dontBuildRuntime\", \"dontBuildAny\", \"noLog\".\n";
+	cout << "\n";
 }
 
 static bool GetProjectPathFromArgs(const std::vector<string>& args, string& path)
 {
+	if (args[1] == "\"\"")
+		return false;
+
 	if (!StripQuotes(args[1], path))
 	{
 		cout << "Invalid project path syntax \"" << args[1] << "\"\n";
@@ -68,6 +74,14 @@ static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& option
 		{
 			options.dontBuildBlaze = options.dontBuildClient = options.dontBuildRuntime = true;
 		}
+		else if (symbols[1] == "noLog")
+		{
+			options.log = false;
+		}
+		else if (symbols[1] == "guiOpenFile")
+		{
+			options.guiOpenFile = true;
+		}
 	}
 	else
 	{
@@ -108,11 +122,13 @@ bool ParseRunCommand(const vector<string>& args, RunCommandOptions& options)
 		return true;
 	}
 
+	options.log = true;
 	options.release = false;
 	options.stopAfter = false;
 	options.dontBuildBlaze = false;
 	options.dontBuildClient = false;
 	options.dontBuildRuntime = false;
+	options.guiOpenFile = false;
 
 	CHECK(ParseSwitches(args, options));
 

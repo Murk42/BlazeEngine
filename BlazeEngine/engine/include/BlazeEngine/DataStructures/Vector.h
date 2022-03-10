@@ -4,8 +4,8 @@ namespace Blaze
 {
 	namespace Math
 	{
-		template<typename T>
-		constexpr T Sqrt(const T&);
+		inline float Sqrt(float value);
+		inline double Sqrt(double value);
 	}
 
 	template<typename T, size_t S>
@@ -37,16 +37,16 @@ namespace Blaze
 			: x(v.x), y(v.y)
 		{
 		}
-		constexpr Vector(const T& x, const T& y)
+		constexpr Vector(T x, T y)
 			: x(x), y(y)
 		{
 		}
-		constexpr explicit Vector(const T& v) 
+		constexpr explicit Vector(T v) 
 			: x(v), y(v) 
 		{ 
 		}		
 		template<typename T2>
-		constexpr explicit Vector(const Vector<T2, 2>& v)
+		constexpr explicit Vector(Vector<T2, 2> v)
 			: x(v.x), y(v.y)
 		{			
 		}
@@ -115,17 +115,21 @@ namespace Blaze
 			: x(v.x), y(v.y), z(v.z)
 		{
 		}
-		constexpr Vector(const T& x, const T& y, const T& z)
+		constexpr Vector(T x, T y, T z)
 			: x(x), y(y), z(z)
 		{
 		}
-		constexpr explicit Vector(const T& v) 
+		constexpr explicit Vector(T v) 
 			: x(v), y(v), z(v) 
 		{ 
 		}
 		template<typename T2>
-		constexpr explicit Vector(const Vector<T2, 3>& v)
+		constexpr explicit Vector(Vector<T2, 3> v)
 			: x(v.x), y(v.y), z(v.z)
+		{
+		}
+		constexpr Vector(Vector<T, 2> v, T z)
+			: x(v.x), y(v.y), z(z)
 		{
 		}
 
@@ -150,7 +154,7 @@ namespace Blaze
 				
 		constexpr Vector<T, 3>& operator=(const Vector<T, 3>& v) { x = v.x; y = v.y; z = v.z; return *this; }
 
-		constexpr T Lenght() const { return Math::Sqrt<T>(x * x + y * y + z * z); }
+		constexpr T Lenght() const { return Math::Sqrt(x * x + y * y + z * z); }
 		constexpr T SqrLenght() const { return x * x + y * y + z * z; }
 		constexpr void Normalise()
 		{
@@ -197,19 +201,27 @@ namespace Blaze
 			: x(v.x), y(v.y), z(v.y), w(v.w)
 		{
 		}
-		constexpr Vector(const T& x, const T& y, const T& z, const T& w)
+		constexpr Vector(T x, T y, T z, T w)
 			: x(x), y(y), z(z), w(w)
 		{
 		}
-		constexpr explicit Vector(const T& v) 
+		constexpr explicit Vector(T v) 
 			: x(v), y(v), z(v), w(v) 
 		{ 
 		}		
 		template<typename T2>
-		constexpr explicit Vector(const Vector<T2, 4>& v)
+		constexpr explicit Vector(Vector<T2, 4> v)
 			: x(v.x), y(v.y), z(v.y), w(v.w)
 		{			
 		}	
+		constexpr Vector(Vector<T, 3> v, T w)
+			: x(v.x), y(v.y), z(v.z), w(w)
+		{
+		}
+		constexpr Vector(Vector<T, 2> v, T z, T w)
+			: x(v.x), y(v.y), z(z), w(w)
+		{
+		}		
 
 		constexpr Vector operator-() const { return Vector(-x, -y, -z, -w); }
 

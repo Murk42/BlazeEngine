@@ -4,6 +4,10 @@
 #include "BlazeEngine/DataStructures/Color.h" 
 #include "BlazeEngine/DataStructures/Matrix.h"
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
+#include "BlazeEngine/Graphics/Renderers/Line2DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/Line3DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/Point2DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/TextRenderer.h"
    
 namespace Blaze 
 {   
@@ -24,10 +28,17 @@ namespace Blaze
 
 		BLAZE_API void Write(const StringViewUTF8& text, Vec2i pos, float height, ColorRGBA color);
 
+		BLAZE_API Point2DRenderer& GetPoint2DRenderer();
+		BLAZE_API Line2DRenderer& GetLine2DRenderer();
+		BLAZE_API Line3DRenderer& GetLine3DRenderer();
+		BLAZE_API TextRenderer& GetTextRenderer();
+
 		BLAZE_API void Set3DViewMatrix(const Mat4f&);		
 		BLAZE_API void Set3DProjectionMatrix(const Mat4f&);		
 		BLAZE_API Mat4f Get3DViewMatrix();
 		BLAZE_API Mat4f Get3DProjectionMatrix();
 		BLAZE_API void Flush();
+
+		BLAZE_API Vec3f WorldToScreenSpace(Vec3f position);
 	}
 }

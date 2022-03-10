@@ -23,17 +23,17 @@ namespace Blaze
 			Sampler2D = 35678,			
 		};
 
-		class BLAZE_API Program
+		class BLAZE_API ShaderProgram
 		{
 			uint id;
 			uint maxUniformNameLenght;
 			uint maxUniformBlockNameLenght;
 
 		public:
-			Program();
-			Program(const Program&) = delete;
-			Program(Program&&) noexcept;
-			~Program();
+			ShaderProgram();
+			ShaderProgram(const ShaderProgram&) = delete;
+			ShaderProgram(ShaderProgram&&) noexcept;
+			~ShaderProgram();
 
 			void AttachShader(const Shader& shader);
 			void DetachShader(const Shader& shader);
@@ -64,26 +64,24 @@ namespace Blaze
 			uint GetUniformBlockCount() const;
 			void GetUniformBlockData(uint index, int& location, String& name, uint& size, std::vector<int>& memberLocations) const;
 			void GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset);
-
-			template<typename T>
-			void SetUniform(int, const T&);
-			template<> void SetUniform(int location, const bool& value);
-			template<> void SetUniform(int location, const int& value);
-			template<> void SetUniform(int location, const uint& value);
-			template<> void SetUniform(int location, const float& value);			
-			template<> void SetUniform(int location, const Vec2i& value);
-			template<> void SetUniform(int location, const Vec2f& value);
-			template<> void SetUniform(int location, const Vec3i& value);
-			template<> void SetUniform(int location, const Vec3f& value);
-			template<> void SetUniform(int location, const Vec4f& value);
-			template<> void SetUniform(int location, const Mat2f& value);
-			template<> void SetUniform(int location, const Mat3f& value);
-			template<> void SetUniform(int location, const Mat4f& value);
+				
+			void SetUniform(int location, const bool& value);
+			void SetUniform(int location, const int& value);
+			void SetUniform(int location, const uint& value);
+			void SetUniform(int location, const float& value);			
+			void SetUniform(int location, const Vec2i& value);
+			void SetUniform(int location, const Vec2f& value);
+			void SetUniform(int location, const Vec3i& value);
+			void SetUniform(int location, const Vec3f& value);
+			void SetUniform(int location, const Vec4f& value);
+			void SetUniform(int location, const Mat2f& value);
+			void SetUniform(int location, const Mat3f& value);
+			void SetUniform(int location, const Mat4f& value);
 
 			uint GetHandle() const { return id; }
 
-			Program& operator=(const Program&) = delete;
-			Program& operator=(Program&&) noexcept;			
+			ShaderProgram& operator=(const ShaderProgram&) = delete;
+			ShaderProgram& operator=(ShaderProgram&&) noexcept;			
 		};
 	}
 }

@@ -4,11 +4,13 @@ using namespace std;
 
 struct RunCommandOptions
 {
+	bool log;
 	bool release;
 	bool stopAfter;
 	bool dontBuildClient;
 	bool dontBuildBlaze;
 	bool dontBuildRuntime;		
+	bool guiOpenFile;
 	string projectPath;
 };
 

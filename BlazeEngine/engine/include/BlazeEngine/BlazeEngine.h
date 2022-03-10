@@ -1,6 +1,5 @@
 #define BLAZE_ENGINE
 
-#include "BlazeEngine/Core/Scene.h"
 #include "BlazeEngine/Logger/Log.h"
 #include "BlazeEngine/Logger/Logger.h"
 #include "BlazeEngine/Logger/LogListener.h"
@@ -12,6 +11,10 @@
 #include "BlazeEngine/Console/Console.h"
 
 #include "BlazeEngine/Graphics/Graphics.h"
+#include "BlazeEngine/Graphics/Renderers/Line2DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/Line3DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/Point2DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/TextRenderer.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
@@ -53,17 +56,3 @@
 #include "BlazeEngine/DataStructures/TemplateGroup.h"
 #include "BlazeEngine/DataStructures/Buffer.h"
 #include "BlazeEngine/DataStructures/StringHash.h"
-
-/*
-#include "BlazeEngine/Graphics/UI/Layer.h"
-#include "BlazeEngine/Graphics/UI/UI.h"
-
-#include "BlazeEngine/Graphics/UI/Elements/ElementTransform.h"
-#include "BlazeEngine/Graphics/UI/Elements/Element.h"
-#include "BlazeEngine/Graphics/UI/Elements/Panel.h"
-#include "BlazeEngine/Graphics/UI/Elements/Text.h"
-
-#include "BlazeEngine/Graphics/UI/States/ButtonState.h"
-#include "BlazeEngine/Graphics/UI/States/TextFieldState.h"
-#include "BlazeEngine/Graphics/UI/States/State.h"
-*/

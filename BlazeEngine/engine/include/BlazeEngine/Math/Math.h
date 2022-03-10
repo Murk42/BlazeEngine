@@ -11,67 +11,37 @@ namespace Blaze
 	{
 		constexpr long double PI = 3.14159265358979323846264338327950288419716939937510;
 
-		template<typename T>
-		constexpr inline T Radians(const T& v)
-		{
-			return v * T(PI) / T(180);
-		}		
-		template<typename T>
-		constexpr inline T Degrees(const T& v)
-		{
-			return v * T(180) / T(PI);
-		}
+		constexpr float Radians(float degrees) { return degrees * PI / 180.0f; }
+		constexpr double Radians(double degrees) { return degrees * PI / 180.0f; }				
 
-		template<typename T1, typename T2>
-		constexpr inline T1 Mod(const T1& v, const T2& m)
-		{
-			return fmod(v, m);
-		}
+		inline float Sin(float radians) { return sin(radians); }
+		inline double Sin(double radians) { return sin(radians); }
+		inline float Arcsin(float radians) { return asin(radians); }
+		inline double Arcsin(double radians) { return asin(radians); }
+		inline float Cos(float radians) { return cos(radians); }
+		inline double Cos(double radians) { return cos(radians); }
+		inline float Arccos(float radians) { return acos(radians); }
+		inline double Arccos(double radians) { return acos(radians); }
+		inline float Tan(float radians) { return tan(radians); }
+		inline double Tan(double radians) { return tan(radians); }
+		inline float Arctan(float radians) { return atan(radians); }
+		inline double Arctan(double radians) { return atan(radians); }
 
-		template<typename T>
-		constexpr inline T Tan(const T& v)
-		{
-			return tan(v);
-		}
-		template<typename T>
-		constexpr inline T Atan(const T& v)
-		{
-			return atan(v);
-		}
-		template<typename T>
-		constexpr inline T Sin(const T& v)
-		{
-			return sin(v);
-		}
-		template<typename T>
-		constexpr inline T Asin(const T& v)
-		{
-			return asin(v);
-		}
-		template<typename T>
-		constexpr inline T Cos(const T& v)
-		{
-			return cos(v);
-		}
-		template<typename T>
-		constexpr inline T Acos(const T& v)
-		{
-			return acos(v);
-		}
+		inline float Sqrt(float value) { return sqrt(value); }
+		inline double Sqrt(double value) { return sqrt(value); }
 
 		template<typename T>
-		constexpr inline T Sqrt(const T& v)
-		{						
-			return sqrt(v);
-		}		
-
+		constexpr T DotProduct(Vec2<T> a, Vec2<T> b)
+		{
+			return a.x * b.x + a.y * b.y;
+		}
 		template<typename T>
-		constexpr inline T DotProduct(const Vec3<T>& a, const Vec3<T>& b)
+		constexpr T DotProduct(Vec3<T> a, Vec3<T> b)
 		{
 			return a.x * b.x + a.y * b.y + a.z * b.z;
-		}
+		}		
 		template<typename T>
-		constexpr inline Vec3<T> CrossProduct(const Vec3<T>& a, const Vec3<T>& b)
+		constexpr Vec3<T> CrossProduct(Vec3<T> a, Vec3<T> b)
 		{
 			Vec3<T> out;
 			out.x = a.y * b.z - a.z * b.y;
@@ -81,7 +51,7 @@ namespace Blaze
 		}
 
 		template<typename T>
-		constexpr inline Matrix<T, 4, 4> TranslationMatrix(const Vec3<T>& v)
+		constexpr inline Matrix<T, 4, 4> TranslationMatrix(Vec3<T> v)
 		{
 			return Matrix<T, 4, 4>({
 				1, 0, 0, v.x,
@@ -91,7 +61,7 @@ namespace Blaze
 				});
 		}
 		template<typename T>
-		constexpr inline Matrix<T, 4, 4> ScalingMatrix(const Vec3<T>& v)
+		constexpr inline Matrix<T, 4, 4> ScalingMatrix(Vec3<T> v)
 		{
 			return Matrix<T, 4, 4>({
 				v.x, 0, 0, 0,
@@ -101,7 +71,7 @@ namespace Blaze
 				});
 		}
 		template<typename T>
-		constexpr inline Matrix<T, 4, 4> RotationMatrix(const Quat<T>& q)
+		constexpr inline Matrix<T, 4, 4> RotationMatrix(Quat<T> q)
 		{			
 			const T xx = q.x * q.x;
 			const T yy = q.y * q.y;
@@ -121,7 +91,7 @@ namespace Blaze
 		}
 
 		template<typename T>
-		constexpr inline Matrix<T, 4, 4> OrthographicMatrix(const T& left, const T& right, const T& bottom, const T& top, const T& near, const T& far)
+		constexpr inline Matrix<T, 4, 4> OrthographicMatrix(T left, T right, T bottom, T top, T near, T far)
 		{
 			T rml = right - left;
 			T tmb = top - bottom;
@@ -136,9 +106,9 @@ namespace Blaze
 			return m;
 		}
 		template<typename T>
-		constexpr inline Matrix<T, 4, 4> PerspectiveMatrix(const T& fov, const T& aspectRatio, const T& near, const T& far)
+		constexpr inline Matrix<T, 4, 4> PerspectiveMatrix(T fov, T aspectRatio, T near, T far)
 		{
-			T S = T(1) / Tan<T>(fov / T(2));
+			T S = T(1) / Tan(fov / T(2));
 
 			return Matrix<T, 4, 4>({
 				S, T(0), T(0), T(0),

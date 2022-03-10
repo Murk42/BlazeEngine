@@ -21,24 +21,62 @@ string GetLine()
 	return o;
 }
 
+bool superDebug = false;
+
 int main(int argc, char* argv[])
 {			
+	if (argc > 1 && strcmp(argv[1], "superDebug") == 0)
+		superDebug = true;
+
+	if (superDebug)
+	{
+		cout << "superDebug flag set\n";
+		cout << "BlazeManager: starting program\n";
+		cout << "BlazeManager: argc = " << argc << " argv = { ";
+
+		for (int i = 0; i < argc; ++i)
+			cout << argv[i] << (i == argc - 1 ? " }\n" : ", ");
+	}
+
 	vsInfo = GetVisualStudioInfo();
+
+	if (superDebug)
+	{
+		cout << "\n";
+		cout << "BlazeManager: vsInfo: \n";
+		cout << "BlazeManager: devenvPath = " << vsInfo.devenvPath << "\n";
+		cout << "BlazeManager: MSBuildPath = " << vsInfo.MSBuildPath << "\n";
+		cout << "BlazeManager: instalationPath = " << vsInfo.instalationPath << "\n";
+		cout << "\n";
+	}
+
+	int startArgLowest = 1;
+	if (superDebug)
+		startArgLowest = 2;
 
 	while (true)
 	{						
 		vector<string> args;
 
-		if (argc > 1)
+		if (argc > startArgLowest)
 		{
-			for (int i = 1; i < argc; ++i)
+			if (superDebug)
+				cout << "BlazeManager: Parsing command line arguments\n";
+			for (int i = startArgLowest; i < argc; ++i)
 				args.emplace_back(argv[i]);
 			argc = 1;
 		}
 		else
 		{
+			if (superDebug)
+				cout << "BlazeManager: Waiting for input\n";
+
 			cout << "->";
 			string input = GetLine();
+
+			if (superDebug)
+				cout << "BlazeManager: Parsing input...";
+
 			args = Split(input);
 		}
 
@@ -47,12 +85,18 @@ int main(int argc, char* argv[])
 
 		if (args[0] == "build")
 		{
+			if (superDebug)
+				cout << "BlazeManager: Starting build command";
+
 			BuildCommandOptions options;
 			if (ParseBuildCommand(args, options)) continue;
 			if (BuildCommand(options)) continue;
 		}		
 		else if (args[0] == "run")
 		{
+			if (superDebug)
+				cout << "BlazeManager: Starting run command";
+
 			RunCommandOptions options;
 			if (ParseRunCommand(args, options)) continue;
 			if (RunCommand(options)) continue;
@@ -62,4 +106,5 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+//build "C:\Programming\Projects\TemplateProjectlol1\TemplateProjectlol1\TemplateProjectlol1.vcxproj" "C:\Users\Marko\Desktop\temp" "program"
 //final "C:\Programming\Projects\BlazeEngineTest\Client\Client.vcxproj" "C:\Users\Marko\Desktop\temp\" App.exe -p:Configuration=Release -p:Platform=x86

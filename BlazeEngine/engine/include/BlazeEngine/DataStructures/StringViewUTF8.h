@@ -44,7 +44,7 @@ namespace Blaze
 
 		StringViewUTF8(const char* ptr);
 		StringViewUTF8(const char* ptr, size_t size);		
-		StringViewUTF8(const StringUTF8&);		
+		StringViewUTF8(const StringUTF8&);
 		StringViewUTF8(const StringView&);		
 
 		const void* Buffer() const { return buffer; }

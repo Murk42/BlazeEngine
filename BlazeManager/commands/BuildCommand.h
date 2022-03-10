@@ -11,6 +11,8 @@ struct BuildCommandOptions
 
 	string outputDir;
 	string outputName;
+
+	bool guiOpenFile;
 };
 
 bool BuildCommand(BuildCommandOptions options);

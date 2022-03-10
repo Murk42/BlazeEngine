@@ -126,7 +126,7 @@ namespace Blaze
 		//Event detection
 		void Update()
 		{
-			double frameTime = Time::GetRunTime().GetValue();			
+			double frameTime = TimePoint::GetRunTime();			
 
 			SDL_Rect rect;
 			rect.x = 50;

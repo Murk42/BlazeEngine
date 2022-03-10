@@ -11,7 +11,14 @@ extern "C" void TerminateBlaze();
 extern "C" bool GetApplicationClassInfo(Blaze::BlazeApplicationClassInfo*&);
 extern "C" void InvalidateApplicationClassInfo();
 
+#if !defined(FINAL_BUILD_EMPTY)
 extern "C" void Setup();
+#else
+void Setup()
+{
+
+}
+#endif
 
 #else
 #include "VisualStudioInfo.h"
@@ -29,8 +36,8 @@ LibraryView clientLibrary;
 
 void(*InitializeBlaze)();
 void(*TerminateBlaze)();
-bool(*GetApplicationClassInfo)(Blaze::BlazeApplicationClassInfo*&);
-void(*InvalidateApplicationClassInfo)();
+//bool(*GetApplicationClassInfo)(Blaze::BlazeApplicationClassInfo*&);
+//void(*InvalidateApplicationClassInfo)();
 void(*Setup)();
 
 #define LOAD_FUNC(x, y, z) x = (decltype(x))y.GetFunction(#x, z); if (!z.sucessfull) { result.log += "Failed to load function \"" #x "\"\n"; return result; }
@@ -41,8 +48,8 @@ Result LoadBlazeFunctions()
 
 	LOAD_FUNC(InitializeBlaze, blazeLibrary, result);	
 	LOAD_FUNC(TerminateBlaze, blazeLibrary, result);	
-	LOAD_FUNC(GetApplicationClassInfo, blazeLibrary, result);	
-	LOAD_FUNC(InvalidateApplicationClassInfo, blazeLibrary, result);	
+	//LOAD_FUNC(GetApplicationClassInfo, blazeLibrary, result);	
+	//LOAD_FUNC(InvalidateApplicationClassInfo, blazeLibrary, result);	
 	return Result();
 }
 Result LoadClientFunctions()
@@ -79,33 +86,22 @@ extern "C" __declspec(dllexport) int RUNTIME_START()
 	RESOLVE(LoadClientFunctions());	
 #else
 int main()
-{
+{	
 #endif
-	//Blaze::BlazeApplicationClassInfo* appClassInfo;
-	//if (!GetApplicationClassInfo(appClassInfo))
-	//{
-	//	cout << "Application entry point class not defined!\n";
-	//	cout << "Press enter to continue...\n";
-	//	cin.get();
-	//	exit(1);
-	//}
+//#if defined(FINAL_BUILD_DEBUG)
+	cout << "BlazeEngineRuntime: Started\n";	
+//#endif
 
+	cout << "BlazeEngineRuntime: Initializing Blaze\n";
 	InitializeBlaze();
+	cout << "BlazeEngineRuntime: Blaze initialized\n";
 
+	cout << "BlazeEngineRuntime: Starting client\n";
 	Setup();
 
-	//void* app = malloc(appClassInfo->size);
-	//appClassInfo->Constructor(app);
-	//
-	//while (true)
-	//{
-	//	appClassInfo->Setup(app);
-	//}
-	//
-	//appClassInfo->Destructor(app);
-	//free(app);
-
+	cout << "BlazeEngineRuntime: Terminating Blaze\n";
 	TerminateBlaze();
+	cout << "BlazeEngineRuntime: Blaze terminated\n";
 
 	return 0;
 }

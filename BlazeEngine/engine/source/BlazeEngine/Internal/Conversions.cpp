@@ -12,7 +12,7 @@ namespace Blaze
 		case Blaze::BitmapPixelFormat::RGBA: return 4;
 		case Blaze::BitmapPixelFormat::BGR:	return 3;
 		case Blaze::BitmapPixelFormat::BGRA: return 4;
-		default: return 0;
+		default: return -1;
 		}
 	}
 
@@ -28,8 +28,8 @@ namespace Blaze
 		case Blaze::BitmapPixelType::Uint32: return sizeof(uint32);
 		case Blaze::BitmapPixelType::Float:	return sizeof(float);
 		case Blaze::BitmapPixelType::Double: return sizeof(double);
-		default: return 0;
-		}
+		default: return -1;
+		}		
 	}
 
 	ILenum DevILPixelFormat(BitmapPixelFormat format)
@@ -42,8 +42,8 @@ namespace Blaze
 		case BitmapPixelFormat::RGBA: return IL_RGBA;
 		case BitmapPixelFormat::BGR: return IL_BGR;
 		case BitmapPixelFormat::BGRA: return IL_BGRA;
-		default: return 0;
-		}
+		default: return -1;
+		}		
 	}
 	GLenum OpenGLPixelFormat(BitmapPixelFormat format)
 	{
@@ -55,8 +55,8 @@ namespace Blaze
 		case BitmapPixelFormat::RGBA: return GL_RGBA;
 		case BitmapPixelFormat::BGR: return GL_BGR;
 		case BitmapPixelFormat::BGRA: return GL_BGRA;
-		default: return 0;
-		}
+		default: return -1;
+		}		
 	}
 	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format)
 	{
@@ -68,7 +68,7 @@ namespace Blaze
 		case BitmapPixelFormat::RGBA: return SDL_PIXELFORMAT_RGBA32;
 		case BitmapPixelFormat::BGR: return SDL_PIXELFORMAT_BGR24;
 		case BitmapPixelFormat::BGRA: return SDL_PIXELFORMAT_BGRA32;
-		default: return (SDL_PixelFormatEnum)0;
+		default: return (SDL_PixelFormatEnum)-1;		
 		}
 	}
 	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format)
@@ -81,6 +81,7 @@ namespace Blaze
 		case IL_RGBA: return BitmapPixelFormat::RGBA;
 		case IL_BGR: return BitmapPixelFormat::BGR;
 		case IL_BGRA: return BitmapPixelFormat::BGRA;
+		default: return (BitmapPixelFormat)-1;
 		}
 	}
 	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format)
@@ -93,6 +94,7 @@ namespace Blaze
 		case GL_RGBA: return BitmapPixelFormat::RGBA;
 		case GL_BGR: return BitmapPixelFormat::BGR;
 		case GL_BGRA: return BitmapPixelFormat::BGRA;
+		default: return (BitmapPixelFormat)-1;
 		}
 	}
 
@@ -248,7 +250,8 @@ namespace Blaze
 			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32I	: return GL_RGBA32I ;
 			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA8UI	: return GL_RGBA8UI ;
 			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16UI	: return GL_RGBA16UI;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32UI	: return GL_RGBA32UI;
+			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32UI: return GL_RGBA32UI; 
+			default: return -1;
 		}
 	}
 
@@ -264,7 +267,7 @@ namespace Blaze
 		case Blaze::BitmapPixelType::Uint32: return IL_UNSIGNED_INT;
 		case Blaze::BitmapPixelType::Float:	return IL_FLOAT;
 		case Blaze::BitmapPixelType::Double: return IL_DOUBLE;
-		default: return 0;
+		default: return -1;
 		}
 	}
 	GLenum OpenGLPixelType(BitmapPixelType type)
@@ -279,7 +282,7 @@ namespace Blaze
 		case Blaze::BitmapPixelType::Uint32: return GL_UNSIGNED_INT;
 		case Blaze::BitmapPixelType::Float:	return GL_FLOAT;
 		case Blaze::BitmapPixelType::Double: return GL_DOUBLE;
-		default: return 0;
+		default: return -1;
 		}
 	}
 	BitmapPixelType DevILToBlazePixelType(ILenum type)
@@ -294,6 +297,7 @@ namespace Blaze
 		case IL_UNSIGNED_INT: return Blaze::BitmapPixelType::Uint32;
 		case IL_FLOAT: return Blaze::BitmapPixelType::Float;
 		case IL_DOUBLE: return Blaze::BitmapPixelType::Double;
+		default: return (BitmapPixelType)-1;
 		}
 	}
 	BitmapPixelType OpenGLToBlazePixelType(GLenum type)
@@ -308,6 +312,7 @@ namespace Blaze
 		case GL_UNSIGNED_INT: return Blaze::BitmapPixelType::Uint32;
 		case GL_FLOAT: return Blaze::BitmapPixelType::Float;
 		case GL_DOUBLE: return Blaze::BitmapPixelType::Double;
+		default: return (BitmapPixelType)-1;
 		}
 	}
 	GLenum OpenGLTextureMinSampling(Graphics::Core::TextureSampling min, Graphics::Core::TextureSampling mip, bool mipmaps)
@@ -337,6 +342,7 @@ namespace Blaze
 		{
 		case Blaze::OpenGL::TextureSampling::Nearest: return GL_NEAREST;
 		case Blaze::OpenGL::TextureSampling::Linear: return GL_LINEAR;
+		default: return -1;
 		}
 	}	
 	GLenum OpenGLTextureWrapping(Graphics::Core::TextureWrapping wrapping)
@@ -347,6 +353,7 @@ namespace Blaze
 		case Blaze::OpenGL::TextureWrapping::ClampToEdge: return GL_CLAMP_TO_EDGE;			
 		case Blaze::OpenGL::TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;			
 		case Blaze::OpenGL::TextureWrapping::Repeat: return GL_REPEAT;			
+		default: return -1;
 		}
 	}
 	Graphics::Core::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapPixelFormat format)
@@ -359,6 +366,7 @@ namespace Blaze
 		case BitmapPixelFormat::RGBA: return Graphics::Core::TextureInternalPixelFormat::RGBA32F;
 		case BitmapPixelFormat::BGR: return Graphics::Core::TextureInternalPixelFormat::RGB32F;
 		case BitmapPixelFormat::BGRA: return Graphics::Core::TextureInternalPixelFormat::RGBA32F;
+		default: return (Graphics::Core::TextureInternalPixelFormat) - 1;
 		}
 	}
 	GLenum OpenGLFramebufferAttachment(Graphics::Core::FramebufferAttachment attachment)
@@ -368,6 +376,7 @@ namespace Blaze
 		case Blaze::OpenGL::FramebufferAttachment::DepthStencil: return GL_DEPTH_STENCIL_ATTACHMENT;
 		case Blaze::OpenGL::FramebufferAttachment::Stencil:	return GL_STENCIL_ATTACHMENT;
 		case Blaze::OpenGL::FramebufferAttachment::Depth: return GL_DEPTH_ATTACHMENT;
+		default: return -1;
 		}
 	}
 	GLenum OpenGLBufferDynamicStorageHint(Graphics::Core::GraphicsBufferDynamicStorageHint hint)
@@ -383,6 +392,7 @@ namespace Blaze
 		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::DynamicDraw: return GL_DYNAMIC_DRAW;
 		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::DynamicRead: return GL_DYNAMIC_READ;
 		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::DynamicCopy: return GL_DYNAMIC_COPY;		
+		default: return -1;
 		}
 	}
 	GLenum OpenGLBufferStaticStorageHint(Graphics::Core::GraphicsBufferStaticStorageHint hint)
@@ -396,6 +406,7 @@ namespace Blaze
 		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::MapPersistant: return GL_MAP_PERSISTENT_BIT;
 		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::MapCoherent: return GL_MAP_COHERENT_BIT;
 		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::ClientStorage: return GL_CLIENT_STORAGE_BIT;		
+		default: return -1;
 		}
 	}
 }

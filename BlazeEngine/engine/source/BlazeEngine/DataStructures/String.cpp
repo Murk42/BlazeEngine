@@ -32,15 +32,30 @@ namespace Blaze
 	String::String(size_t size)
 		: size(size)
 	{
-		ptr = new char[size + 1];
-		ptr[size] = '\0';
+		if (size == 0)
+		{
+			ptr = nullptr;
+		}
+		else
+		{
+			ptr = new char[size + 1];
+			ptr[size] = '\0';
+		}
 	}	
 	String::String(const char* ptr, size_t size)
 		: size(size)
 	{		
-		this->ptr = new char[size + 1];
-		memcpy(this->ptr, ptr, size);
-		this->ptr[size] = '\0';
+		if (size == 0 || ptr == nullptr)
+		{
+			this->ptr = nullptr;
+			this->size = 0;
+		}
+		else
+		{
+			this->ptr = new char[size + 1];
+			memcpy(this->ptr, ptr, size);
+			this->ptr[size] = '\0';
+		}
 	}
 	String::String(const StringView& sv)
 		: size(sv.Size())
@@ -49,7 +64,7 @@ namespace Blaze
 		memcpy(ptr, sv.Ptr(), size + 1);
 	}	
 	String::String(const char* ptr)
-		: String(ptr, strlen(ptr))
+		: String(ptr, (ptr == nullptr ? 0 : strlen(ptr)))
 	{
 	}
 	String::~String()

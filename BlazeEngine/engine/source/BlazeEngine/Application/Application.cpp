@@ -2,15 +2,8 @@
 
 #include "source/BlazeEngine/Internal/Libraries.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Core/Scene.h"
 #include "BlazeEngine/Core/MemoryManager.h"
 #include "BlazeEngine/Graphics/Graphics.h"
-
-#ifdef __WINDOWS__
-#include <Windows.h>
-#endif
-
-#undef GetMessage
 
 namespace Blaze 
 {			
@@ -25,45 +18,55 @@ namespace Blaze
 	//void InitializeLayerManager();
 	//void TerminateLayerManager();
 
-	static bool appClassInfoSet = false;
-	static BlazeApplicationClassInfo appClassInfo;
-
-	void SetBlazeApplicationClassInfo(BlazeApplicationClassInfo appClassInfo)
-	{
-		Blaze::appClassInfo = appClassInfo;
-		appClassInfoSet = true;
-	}				
+	//static bool appClassInfoSet = false;
+	//static BlazeApplicationClassInfo appClassInfo;
+	//
+	//void SetBlazeApplicationClassInfo(BlazeApplicationClassInfo appClassInfo)
+	//{
+	//	Blaze::appClassInfo = appClassInfo;
+	//	appClassInfoSet = true;
+	//}				
 }
 
-extern "C" BLAZE_API void InvalidateApplicationClassInfo()
-{
-	Blaze::appClassInfoSet = false;
-}
-
-extern "C" BLAZE_API bool GetApplicationClassInfo(Blaze::BlazeApplicationClassInfo*& info)
-{
-	if (Blaze::appClassInfoSet)
-	{
-		info = &Blaze::appClassInfo;
-		return true;
-	}
-	return false;
-}
+//extern "C" BLAZE_API void InvalidateApplicationClassInfo()
+//{
+//	Blaze::appClassInfoSet = false;
+//}
+//
+//extern "C" BLAZE_API bool GetApplicationClassInfo(Blaze::BlazeApplicationClassInfo*& info)
+//{
+//	if (Blaze::appClassInfoSet)
+//	{
+//		info = &Blaze::appClassInfo;
+//		return true;
+//	}
+//	return false;
+//}
 
 extern "C" BLAZE_API void InitializeBlaze()
 {
+	std::cout << "BlazeEngine: Initializing libraries\n";
 	Blaze::InitializeLibraries();
+	std::cout << "BlazeEngine: Initializing console\n";
 	Blaze::InitializeConsole();
+	std::cout << "BlazeEngine: Initializing input\n";
 	Blaze::InitializeInput();
+	std::cout << "BlazeEngine: Initializing renderer\n";
 	Blaze::InitializeRenderer();
+	std::cout << "BlazeEngine: Initializing graphics\n";
 	Blaze::InitializeGraphics();
 }
 extern "C" BLAZE_API void TerminateBlaze()
 {
+	std::cout << "BlazeEngine: Terminating graphics\n";
 	Blaze::TerminateGraphics();
+	std::cout << "BlazeEngine: Terminating renderer\n";
 	Blaze::TerminateRenderer();
+	std::cout << "BlazeEngine: Terminating input\n";
 	Blaze::TerminateInput();
+	std::cout << "BlazeEngine: Terminating console\n";
 	Blaze::TerminateConsole();
+	std::cout << "BlazeEngine: Terminating libraries\n";
 	Blaze::TerminateLibraries();
 }
 
