@@ -116,7 +116,7 @@ namespace Blaze::Graphics
 		"	float d = dist(frag_pos1, frag_pos2, frag_pos);						   \n"
 		"	d = smoothstep(frag_width - 1, frag_width + 1, d);					   \n"
 		"																		   \n"
-		"	gl_FragColor = vec4(frag_color.rgb, mix(frag_color.a, 0, d));		   \n"
+		"	gl_FragColor = vec4(vec3(frag_color.rgb), mix(frag_color.a, 0, d));     \n"
 		"}																		   \n";
 
 	struct Vertex

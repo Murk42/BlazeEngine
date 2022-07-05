@@ -28,7 +28,7 @@ namespace Blaze
 		inline double Arctan(double radians) { return atan(radians); }
 
 		inline float Sqrt(float value) { return sqrt(value); }
-		inline double Sqrt(double value) { return sqrt(value); }
+		inline double Sqrt(double value) { return sqrt(value); }	
 
 		template<typename T>
 		constexpr T DotProduct(Vec2<T> a, Vec2<T> b)

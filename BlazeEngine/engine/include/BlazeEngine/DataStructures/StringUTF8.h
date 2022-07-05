@@ -72,7 +72,7 @@ namespace Blaze
 		static StringUTF8 Convert(uint64 value);
 		static StringUTF8 Convert(int64 value);
 		static StringUTF8 Convert(float value);
-		static StringUTF8 Convert(double value);
+		static StringUTF8 Convert(double value);		
 		template<typename T>
 		static StringUTF8 Convert(Vec2<T> vec)
 		{ 

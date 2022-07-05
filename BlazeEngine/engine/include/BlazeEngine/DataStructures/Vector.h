@@ -1,4 +1,5 @@
 #pragma once 
+#include <array>
 
 namespace Blaze
 {
@@ -222,6 +223,10 @@ namespace Blaze
 			: x(v.x), y(v.y), z(z), w(w)
 		{
 		}		
+		constexpr Vector(Vector<T, 2> v, Vector<T, 2> v2)
+			: x(v.x), y(v.y), z(v2.x), w(v2.y)
+		{
+		}
 
 		constexpr Vector operator-() const { return Vector(-x, -y, -z, -w); }
 

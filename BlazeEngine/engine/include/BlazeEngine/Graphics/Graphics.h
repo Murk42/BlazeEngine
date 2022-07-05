@@ -11,6 +11,8 @@
    
 namespace Blaze 
 {   
+	class Font;
+
 	namespace Graphics
 	{
 
@@ -26,12 +28,17 @@ namespace Blaze
 		BLAZE_API void DrawBoxOutline3D(Vec3f pos1, Vec3f pos2, ColorRGBA color, float width);
 		//BLAZE_API void DrawBox3D(Vec3f pos1, Vec3f pos2, ColorRGBA color, float width);
 
-		BLAZE_API void Write(const StringViewUTF8& text, Vec2i pos, float height, ColorRGBA color);
+		BLAZE_API void Write(const StringViewUTF8& text, float height, Vec2i pos, ColorRGBA color);
+		BLAZE_API void Write(TextRenderData& data, Vec2i pos, ColorRGBA color);
+
+		BLAZE_API TextRenderData GetTextRenderData(const StringViewUTF8& text, float height);
 
 		BLAZE_API Point2DRenderer& GetPoint2DRenderer();
 		BLAZE_API Line2DRenderer& GetLine2DRenderer();
 		BLAZE_API Line3DRenderer& GetLine3DRenderer();
 		BLAZE_API TextRenderer& GetTextRenderer();
+
+		BLAZE_API Font& GetDefaultFont();
 
 		BLAZE_API void Set3DViewMatrix(const Mat4f&);		
 		BLAZE_API void Set3DProjectionMatrix(const Mat4f&);		

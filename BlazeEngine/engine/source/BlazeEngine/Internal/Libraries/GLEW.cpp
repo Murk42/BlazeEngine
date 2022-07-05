@@ -62,7 +62,9 @@ namespace Blaze
 		glDepthMask(GL_TRUE);
 		glEnable(GL_DEPTH_TEST);
 		
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+		
+		glDepthFunc(GL_LEQUAL);
+		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		
 	}
 	void TerminateGLEW()

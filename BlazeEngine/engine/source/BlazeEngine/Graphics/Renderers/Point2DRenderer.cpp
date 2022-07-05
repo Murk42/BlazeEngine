@@ -90,7 +90,7 @@ namespace Blaze::Graphics
 		"	gl_FragColor = vec4(frag_color.rgb, mix(frag_color.a, 0, d)); \n"
 		"}																  \n";
 
-	struct Vertex
+	struct PointVertex
 	{
 		Vec2f pos;
 		Vec4f color;
@@ -112,9 +112,9 @@ namespace Blaze::Graphics
 		va.SetVertexAttributeFormat(0, Core::VertexAttributeType::Float, 2, false, 0);
 		va.SetVertexAttributeFormat(1, Core::VertexAttributeType::Float, 4, false, sizeof(float) * 2);
 		va.SetVertexAttributeFormat(2, Core::VertexAttributeType::Float, 1, false, sizeof(float) * 6);
-		va.SetVertexAttributeBuffer(0, &vb, sizeof(Vertex), 0);
-		va.SetVertexAttributeBuffer(1, &vb, sizeof(Vertex), 0);
-		va.SetVertexAttributeBuffer(2, &vb, sizeof(Vertex), 0);
+		va.SetVertexAttributeBuffer(0, &vb, sizeof(PointVertex), 0);
+		va.SetVertexAttributeBuffer(1, &vb, sizeof(PointVertex), 0);
+		va.SetVertexAttributeBuffer(2, &vb, sizeof(PointVertex), 0);
 	}
 	Point2DRenderer::~Point2DRenderer()
 	{
@@ -128,10 +128,10 @@ namespace Blaze::Graphics
 
 	void Point2DRenderer::SetBatchMode(uint batchSize)
 	{
-		cache = new Vertex[batchSize];
+		cache = new PointVertex[batchSize];
 		this->batchSize = batchSize;
 
-		vb.AllocateDynamicStorage(BufferView(nullptr, batchSize * sizeof(Vertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+		vb.AllocateDynamicStorage(BufferView(nullptr, batchSize * sizeof(PointVertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
 	}
 	void Point2DRenderer::SetImmediateMode()
 	{
@@ -139,27 +139,27 @@ namespace Blaze::Graphics
 		cache = nullptr;
 		this->batchSize = 0;
 
-		vb.AllocateDynamicStorage(BufferView(nullptr, sizeof(Vertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+		vb.AllocateDynamicStorage(BufferView(nullptr, sizeof(PointVertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
 	}
 	void Point2DRenderer::Draw(Vec2f pos, ColorRGBA color, float radius)
 	{
-		Vertex vertex;
+		PointVertex vertex;
 		vertex.pos = pos;
 		vertex.color = color;
 		vertex.radius = radius;
 
-		if (cache == nullptr)
+		if (cache != nullptr)
 		{
-			((Vertex*)cache)[batchOffset] = vertex;
-
-			batchOffset++;
-
-			if (batchOffset == batchSize)
-				Flush();
+			//((Vertex*)cache)[batchOffset] = vertex;
+			//
+			//batchOffset++;
+			//
+			//if (batchOffset == batchSize)
+			//	Flush();
 		}
 		else
 		{
-			vb.ChangeData(BufferView(&vertex, sizeof(Vertex)), 0);
+			vb.ChangeData(BufferView(&vertex, sizeof(PointVertex)), 0);
 			Renderer::SelectVertexArray(&va);
 			Renderer::SelectProgram(&program);
 			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, 1);
@@ -167,7 +167,7 @@ namespace Blaze::Graphics
 	}
 	void Point2DRenderer::Flush()
 	{
-		vb.ChangeData(BufferView(cache, sizeof(Vertex) * batchSize), 0);
+		vb.ChangeData(BufferView(cache, sizeof(PointVertex) * batchSize), 0);
 		Renderer::SelectVertexArray(&va);
 		Renderer::SelectProgram(&program);
 		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, 1);

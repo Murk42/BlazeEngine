@@ -51,16 +51,22 @@ namespace Blaze
 	
 	void InitializeGraphics()
 	{
-		Console::WriteLine("Creating graphics data");
 		Graphics::graphicsData = new Graphics::GraphicsData;		
 
-		Console::WriteLine("Setting default values");
+		Graphics::graphicsData->line2DRenderer.SetImmediateMode();
+		Graphics::graphicsData->line3DRenderer.SetImmediateMode();
+		Graphics::graphicsData->point2DRenderer.SetImmediateMode();		
+
 		Graphics::graphicsData->userProj3D = false;
 		Graphics::graphicsData->view3D = Mat4f::Identity();
 		Graphics::graphicsData->line3DRenderer.SetProjectionMatrix(Graphics::graphicsData->proj3D);
 
-		Console::WriteLine("BlazeEngine: loading assets\n");
-		Graphics::graphicsData->defaultFont.Load("assets/Blaze/Consola.ttf", FontType::Antialiased, 64);
+		Graphics::graphicsData->defaultFont.Load("assets/Blaze/Consola.ttf", FontType::Antialiased, 128);
+		Graphics::Core::Texture2DSettings settings;
+		settings.mip = Graphics::Core::TextureSampling::Linear;
+		settings.mag = Graphics::Core::TextureSampling::Linear;		
+		settings.mipmaps = false;		
+		Graphics::graphicsData->defaultFont.GetTexture().SetSettings(settings);
 		Graphics::graphicsData->textRenderer.SetFont(&Graphics::graphicsData->defaultFont);
 	}
 	void TerminateGraphics()
@@ -104,9 +110,18 @@ namespace Blaze
 			Graphics::DrawLine3D(Vec3f(pos1.x, pos2.y, pos1.z), Vec3f(pos1.x, pos2.y, pos2.z), color, width);
 			Graphics::DrawLine3D(Vec3f(pos2.x, pos2.y, pos1.z), Vec3f(pos2.x, pos2.y, pos2.z), color, width);
 		}
-		void Write(const StringViewUTF8& text, Vec2i pos, float height, ColorRGBA color)
+		void Write(const StringViewUTF8& text, float height, Vec2i pos, ColorRGBA color)
 		{ 
-			graphicsData->textRenderer.Write(text, pos, height, color);
+			graphicsData->textRenderer.Write(text, height, pos, color);
+		}
+		void Write(TextRenderData& data, Vec2i pos, ColorRGBA color)
+		{
+			graphicsData->textRenderer.Write(data, pos, color);
+		}
+
+		TextRenderData GetTextRenderData(const StringViewUTF8& text, float height)
+		{
+			return TextRenderData(graphicsData->textRenderer, text, height);
 		}
 
 		Point2DRenderer& GetPoint2DRenderer()
@@ -124,6 +139,11 @@ namespace Blaze
 		TextRenderer& GetTextRenderer()
 		{
 			return graphicsData->textRenderer;
+		}
+
+		Font& GetDefaultFont()
+		{
+			return graphicsData->defaultFont;
 		}
 
 		void Set3DViewMatrix(const Mat4f& mat)

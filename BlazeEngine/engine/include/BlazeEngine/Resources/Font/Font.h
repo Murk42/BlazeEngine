@@ -43,18 +43,18 @@ namespace Blaze
 		Graphics::Core::Texture2D texture;
 		FontType type;
 		uint resolution;
-		uint height;
+		float baselineDistance;
 	public:
 		Font();		
 		~Font();		
 
 		bool GetCharacterData(UnicodeChar character, CharacterData& data) const;
-		CharacterVertex* GenerateVertices(StringViewUTF8 text, uint& vertexCount, Vec2f& size) const;
+		CharacterVertex* GenerateVertices(StringViewUTF8 text, uint& vertexCount, Vec2f& size, Vec2f& bottomLeft, Vec2f& topRight) const;
 		
 		int Load(StringView path, FontType type, uint resolution, bool emitLogOnFail = true);
 
 		inline Graphics::Core::Texture2D& GetTexture() { return texture; }
 		inline FontType GetType() const { return type; }
-		inline uint GetHeight() const { return height; }
+		inline uint GetBaselineDistance() const { return baselineDistance; }
 	};	
 }

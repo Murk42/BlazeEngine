@@ -14,8 +14,11 @@ namespace Blaze
 	{
 		struct KeyState
 		{
+			//"down" is true the same frame "pressed" is true, but is false as soon "released" is true
 			bool down;
+			//True only one frame when the button was pressed
 			bool pressed;
+			//True only one frame when the button was released
 			bool released;
 			uint combo;
 			double time;

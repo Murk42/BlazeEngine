@@ -44,29 +44,19 @@ namespace Blaze
 //}
 
 extern "C" BLAZE_API void InitializeBlaze()
-{
-	std::cout << "BlazeEngine: Initializing libraries\n";
-	Blaze::InitializeLibraries();
-	std::cout << "BlazeEngine: Initializing console\n";
-	Blaze::InitializeConsole();
-	std::cout << "BlazeEngine: Initializing input\n";
-	Blaze::InitializeInput();
-	std::cout << "BlazeEngine: Initializing renderer\n";
-	Blaze::InitializeRenderer();
-	std::cout << "BlazeEngine: Initializing graphics\n";
+{	
+	Blaze::InitializeLibraries();	
+	Blaze::InitializeConsole();	
+	Blaze::InitializeInput();	
+	Blaze::InitializeRenderer();	
 	Blaze::InitializeGraphics();
 }
 extern "C" BLAZE_API void TerminateBlaze()
-{
-	std::cout << "BlazeEngine: Terminating graphics\n";
-	Blaze::TerminateGraphics();
-	std::cout << "BlazeEngine: Terminating renderer\n";
-	Blaze::TerminateRenderer();
-	std::cout << "BlazeEngine: Terminating input\n";
-	Blaze::TerminateInput();
-	std::cout << "BlazeEngine: Terminating console\n";
-	Blaze::TerminateConsole();
-	std::cout << "BlazeEngine: Terminating libraries\n";
+{	
+	Blaze::TerminateGraphics();	
+	Blaze::TerminateRenderer();	
+	Blaze::TerminateInput();	
+	Blaze::TerminateConsole();	
 	Blaze::TerminateLibraries();
 }
 

@@ -360,7 +360,7 @@ namespace Blaze
 		out.size = left.Size() + right.Size();
 		out.buffer = Memory::Allocate(out.size + 1);
 		memcpy(out.buffer, left.Buffer(), left.Size());
-		memcpy((byte*)out.buffer + left.Size(), right.Buffer(), right.Size());
+		memcpy((byte*)out.buffer + left.Size(), right.Buffer(), right.Size() + 1);
 		return out;
 	}	
 }

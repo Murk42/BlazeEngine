@@ -60,7 +60,7 @@ namespace Blaze
 	}	
 
 	Font::Font()
-		: ptr(nullptr), height(0), resolution(0), type(FontType::Monochrome)
+		: ptr(nullptr), resolution(0), type(FontType::Monochrome)
 	{
 	}
 	Font::~Font()
@@ -91,8 +91,8 @@ namespace Blaze
 		}
 	}		
 
-	Font::CharacterVertex vertices[256];
-	Font::CharacterVertex* Font::GenerateVertices(StringViewUTF8 text, uint& vertexCount, Vec2f& size) const
+	Font::CharacterVertex vertices[1024];
+	Font::CharacterVertex* Font::GenerateVertices(StringViewUTF8 text, uint& vertexCount, Vec2f& size, Vec2f& bottomLeft, Vec2f& topRight) const
 	{	
 		if (text.Size() == 0)
 		{
@@ -118,7 +118,12 @@ namespace Blaze
 				vertices[characterCount].p1.y = data.offset.y;
 				vertices[characterCount].p2 = vertices[characterCount].p1 + Vec2f(data.size);
 				vertices[characterCount].uv1 = data.uv1;
-				vertices[characterCount].uv2 = data.uv2;				
+				vertices[characterCount].uv2 = data.uv2;
+
+				topRight.x = std::max(topRight.x, vertices[characterCount].p2.x);
+				topRight.y = std::max(topRight.y, vertices[characterCount].p2.y);
+				bottomLeft.x = std::min(bottomLeft.x, vertices[characterCount].p1.x);
+				bottomLeft.y = std::min(bottomLeft.y, vertices[characterCount].p1.y);
 
 				switch (type)
 				{
@@ -129,7 +134,7 @@ namespace Blaze
 					vertices[characterCount].p2 += Vec2f(1, 1);
 					vertices[characterCount].uv1 -= Vec2f(texturePixel.x, -texturePixel.x);
 					vertices[characterCount].uv2 += Vec2f(texturePixel.x, -texturePixel.x);
-					break;				
+					break;
 				}
 
 				vertices[characterCount].p1 += Vec2f(0.0001f);
@@ -137,6 +142,18 @@ namespace Blaze
 				vertices[characterCount].uv1 += Vec2f(texturePixel.x, -texturePixel.y) * 0.005f;
 				vertices[characterCount].uv2 -= Vec2f(texturePixel.x, -texturePixel.y) * 0.005f;
 			}
+			else
+			{
+				vertices[characterCount].p1.x = data.offset.x + size.x;
+				vertices[characterCount].p1.y = data.offset.y;
+				vertices[characterCount].p2 = vertices[characterCount].p1 + Vec2f(data.size);
+				vertices[characterCount].uv1 = data.uv1;
+				vertices[characterCount].uv2 = data.uv2;
+			}
+
+			vertices[characterCount].p1 /= resolution;
+			vertices[characterCount].p2 /= resolution;
+
 
 			size.x += data.advance;
 
@@ -145,17 +162,24 @@ namespace Blaze
 			//	size.y = data.size.y;
 		}
 
-		size.x += -(int)data.advance + data.size.x;		
-		size.y = height;
+		topRight /= resolution;
+		bottomLeft /= resolution;
+		size = topRight;
+		//size = topRight - bottomLeft;
+		//size.x += -(int)data.advance + data.size.x;		
+		//size.y = topRi;
 
-		for (size_t i = 0; i < text.Size(); ++i)
-		{
-			vertices[i].p1 /= size;
-			vertices[i].p2 /= size;
-		}
+		//for (size_t i = 0; i < text.Size(); ++i)
+		//{
+		//	vertices[i].p1 /= size;
+		//	vertices[i].p2 /= size;
+		//}
 
-		size /= resolution;	
-
+		//size *= (float)height / resolution;			
+		//bottomLeft *= (float)height / resolution;
+		//topRight *= (float)height / resolution;
+		//
+		//size.y = height;
 		vertexCount = characterCount;
 
 		return vertices;
@@ -218,9 +242,9 @@ namespace Blaze
 		case Blaze::FontType::Antialiased:			returned = LoadFontAntialiased	(resolution, face, texture, characterMap, emitLogOnFail); break;		
 		}		
 		if (returned != BLAZE_OK)
-			return returned;
+			return returned;		
 
-		height = characterMap['I'].size.y;
+		baselineDistance = (float)face->size->metrics.height / (1 << 6) / resolution;
 
 		return BLAZE_OK;
 	}
@@ -266,8 +290,7 @@ namespace Blaze
 		uint glyphIndex;
 
 		ftError = FT_Set_Pixel_Sizes(face, 0, resolution);
-		FT_CHECK(ftError);
-
+		FT_CHECK(ftError);		
 
 		characterCount = CountCharacters(face);
 		characterBitmaps = new CharacterBitmap[characterCount];		
@@ -333,7 +356,7 @@ namespace Blaze
 
 				data.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
 				data.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);
-				data.size = bitmap.size;
+				data.size = bitmap.size;				
 			}
 			else
 			{

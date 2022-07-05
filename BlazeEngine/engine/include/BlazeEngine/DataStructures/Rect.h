@@ -23,6 +23,12 @@ namespace Blaze
 		Rect(const Rect<T2>& r) : pos(r.pos), size(r.size) { }
 		Rect(const T& x, const T& y, const T& w, const T& h) : x(x), y(y), w(w), h(h) { }
 		Rect(const Vec2<T>& pos, const Vec2<T>& size) : pos(pos), size(size) { }		
+
+		Rect& operator=(const Rect& other)
+		{
+			x = other.x; y = other.y; w = other.w; h = other.h;
+			return *this;
+		}
 	};
 
 	typedef Rect<int> Recti;
