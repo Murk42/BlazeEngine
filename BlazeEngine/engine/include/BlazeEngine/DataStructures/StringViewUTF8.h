@@ -11,7 +11,8 @@ namespace Blaze
 	class BLAZE_API StringViewUTF8
 	{
 		const void* buffer;		
-		size_t size;
+		size_t bufferSize;
+		size_t characterCount;
 	public:
 		class BLAZE_API Iterator
 		{
@@ -48,7 +49,8 @@ namespace Blaze
 		StringViewUTF8(const StringView&);		
 
 		const void* Buffer() const { return buffer; }
-		size_t Size() const { return size; }
+		size_t BufferSize() const { return bufferSize; }
+		size_t CharacterCount() const { return characterCount; }
 
 		Iterator begin() const;
 		Iterator end() const;

@@ -9,11 +9,34 @@
 #include "RendererEnums.h"
 
 namespace Blaze
-{
-	class Window;		
+{		
+	class Window;
+
+	struct DisplayMode
+	{
+		DisplayPixelFormat format;
+		Vec2i size;
+		uint refreshRate;
+	};
 
 	namespace Renderer
-	{
+	{		
+		BLAZE_API uint GetVideoDisplayCount();
+
+		BLAZE_API uint GetDisplayModeCount(uint videoDisplayIndex);
+		BLAZE_API DisplayMode GetDisplayMode(uint videoDisplayIndex, uint index);
+
+		//See GetDesktopDisplayMode for further information
+		BLAZE_API DisplayMode GetCurrentDisplayMode(uint videoDisplayIndex);
+
+		//There's a difference between this function and GetCurrentDisplayMode() when the program 
+		//runs fullscreen and has changed the resolution. In that case this function will return 
+		//the previous native display mode, and not the current display mode.
+		BLAZE_API DisplayMode GetDesktopDisplayMode(uint videoDisplayIndex);
+
+		//Returns false if no matching display mode was available;		
+		BLAZE_API bool GetClosestDisplayMode(uint displayIndex, DisplayMode target, DisplayMode& closest);
+
 		BLAZE_API void SetActiveTextureSlot(uint slot);
 
 		BLAZE_API void SelectTexture(Graphics::Core::Texture2D*);

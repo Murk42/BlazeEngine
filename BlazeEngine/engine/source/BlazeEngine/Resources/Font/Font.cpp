@@ -151,33 +151,43 @@ namespace Blaze
 	{
 		CharacterData out;
 		uint32 chValue = ch.Value();
-		auto data = characterMap[chValue];		
 
-		out.advance = data.metrics->advance * resolution;
-		out.renderOffset = data.metrics->renderOffset * resolution;
-		out.size = data.metrics->size * resolution;
-		out.uv1 = data.uv1;
-		out.uv2 = data.uv2;
+		auto it = characterMap.find(chValue);
+		if (it == characterMap.end())
+		{
+			out.advance = 0;
+			out.renderOffset = { };
+			out.size = { };
+			out.uv1 = { };
+			out.uv2 = { };
+		}
+		else
+		{
+			auto data = it->second;
 
-		return CharacterData();
+			out.advance = data.metrics->advance * resolution;
+			out.renderOffset = data.metrics->renderOffset * resolution;
+			out.size = data.metrics->size * resolution;
+			out.uv1 = data.uv1;
+			out.uv2 = data.uv2;
+		}
+		return out;
 	}
 
 	Font::Font()
-		: ptr(nullptr), baselineDistance(0), characterCount(0), pixelsPerUnit(0)
+		: ptr(nullptr), characterCount(0), pixelsPerUnit(0)
 	{
 	}
 	Font::~Font()
 	{
+		for (auto& res : resolutions)
+			delete res;
 		if (ptr != nullptr)
-		{
-			FT_Error ftError;
+		{			
 			FT_Face face = (FT_Face)ptr;
 			FT_Done_Face(face);
 			ptr = nullptr;
-
-			if (ftError != 0)
-				BLAZE_ERROR_LOG("FreeType", FT_Error_String(ftError));
-		}
+		}		
 	}
 
 	void Font::LoadFontMetrics()
@@ -200,9 +210,9 @@ namespace Blaze
 			data.advance = float(face->glyph->metrics.horiAdvance);
 			data.renderOffset = Vec2f(face->glyph->metrics.horiBearingX, face->glyph->metrics.horiBearingY - face->glyph->metrics.height);
 
-			data.size /= pixelsPerUnit * 64.0f;
-			data.advance /= pixelsPerUnit * 64.0f;
-			data.renderOffset /= pixelsPerUnit * 64.0f;
+			data.size /= pixelsPerUnit ;
+			data.advance /= pixelsPerUnit;
+			data.renderOffset /= pixelsPerUnit;
 
 			characterMap.insert({ character, data });
 
@@ -244,17 +254,19 @@ namespace Blaze
 	FontResolution* Font::CreateFontResolution(uint resolution)
 	{
 		FT_Error ftError;
-		FT_Face face = (FT_Face)ptr;
-
-		FontResolution& res = resolutions.emplace_back();
+		FT_Face face = (FT_Face)ptr;		
+		
+		FontResolution& res = *resolutions.emplace_back(new FontResolution);
 		res.resolution = resolution;
+		res.baselineDistance = (float)face->height / pixelsPerUnit * resolution;
 		res.font = this;
 
 		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
 
 		res.LoadAtlas();
 
-		baselineDistance = (float)face->size->metrics.height / (1 << 6) / resolution;
+
+		return &res;
 	}
 
 	/*

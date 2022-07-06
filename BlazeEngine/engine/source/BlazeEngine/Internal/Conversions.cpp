@@ -409,6 +409,69 @@ namespace Blaze
 		default: return -1;
 		}
 	}
+
+	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format)
+	{
+		switch (format)
+		{
+		case SDL_PIXELFORMAT_RGB332:		return Blaze::DisplayPixelFormat::RGB332;
+		case SDL_PIXELFORMAT_RGB444:		return Blaze::DisplayPixelFormat::RGB444;
+		case SDL_PIXELFORMAT_RGB555:		return Blaze::DisplayPixelFormat::RGB555;
+		case SDL_PIXELFORMAT_BGR555:		return Blaze::DisplayPixelFormat::BGR555;
+		case SDL_PIXELFORMAT_ARGB4444:		return Blaze::DisplayPixelFormat::ARGB4444;
+		case SDL_PIXELFORMAT_RGBA4444:		return Blaze::DisplayPixelFormat::RGBA4444;
+		case SDL_PIXELFORMAT_ABGR4444:		return Blaze::DisplayPixelFormat::ABGR4444;
+		case SDL_PIXELFORMAT_BGRA4444:		return Blaze::DisplayPixelFormat::BGRA4444;
+		case SDL_PIXELFORMAT_ARGB1555:		return Blaze::DisplayPixelFormat::ARGB1555;
+		case SDL_PIXELFORMAT_RGBA5551:		return Blaze::DisplayPixelFormat::RGBA5551;
+		case SDL_PIXELFORMAT_ABGR1555:		return Blaze::DisplayPixelFormat::ABGR1555;
+		case SDL_PIXELFORMAT_BGRA5551:		return Blaze::DisplayPixelFormat::BGRA5551;
+		case SDL_PIXELFORMAT_RGB565:		return Blaze::DisplayPixelFormat::RGB565;
+		case SDL_PIXELFORMAT_BGR565:		return Blaze::DisplayPixelFormat::BGR565;
+		case SDL_PIXELFORMAT_RGB24:			return Blaze::DisplayPixelFormat::RGB24;
+		case SDL_PIXELFORMAT_BGR24:			return Blaze::DisplayPixelFormat::BGR24;
+		case SDL_PIXELFORMAT_RGB888:		return Blaze::DisplayPixelFormat::RGB888;
+		case SDL_PIXELFORMAT_RGBX8888:		return Blaze::DisplayPixelFormat::RGBX8888;
+		case SDL_PIXELFORMAT_BGR888:		return Blaze::DisplayPixelFormat::BGR888;
+		case SDL_PIXELFORMAT_BGRX8888:		return Blaze::DisplayPixelFormat::BGRX8888;
+		case SDL_PIXELFORMAT_ARGB8888:		return Blaze::DisplayPixelFormat::ARGB8888;
+		case SDL_PIXELFORMAT_RGBA8888:		return Blaze::DisplayPixelFormat::RGBA8888;
+		case SDL_PIXELFORMAT_ABGR8888:		return Blaze::DisplayPixelFormat::ABGR8888;
+		case SDL_PIXELFORMAT_BGRA8888:		return Blaze::DisplayPixelFormat::BGRA8888;
+		case SDL_PIXELFORMAT_ARGB2101010:	return Blaze::DisplayPixelFormat::ARGB2101010;
+		}
+	}
+	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format)
+	{
+		switch (format)
+		{
+		case Blaze::DisplayPixelFormat::RGB332:		return SDL_PIXELFORMAT_RGB332;
+		case Blaze::DisplayPixelFormat::RGB444:		return SDL_PIXELFORMAT_RGB444;
+		case Blaze::DisplayPixelFormat::RGB555:		return SDL_PIXELFORMAT_RGB555;
+		case Blaze::DisplayPixelFormat::BGR555:		return SDL_PIXELFORMAT_BGR555;
+		case Blaze::DisplayPixelFormat::ARGB4444:		return SDL_PIXELFORMAT_ARGB4444;
+		case Blaze::DisplayPixelFormat::RGBA4444:		return SDL_PIXELFORMAT_RGBA4444;
+		case Blaze::DisplayPixelFormat::ABGR4444:		return SDL_PIXELFORMAT_ABGR4444;
+		case Blaze::DisplayPixelFormat::BGRA4444:		return SDL_PIXELFORMAT_BGRA4444;
+		case Blaze::DisplayPixelFormat::ARGB1555:		return SDL_PIXELFORMAT_ARGB1555;
+		case Blaze::DisplayPixelFormat::RGBA5551:		return SDL_PIXELFORMAT_RGBA5551;
+		case Blaze::DisplayPixelFormat::ABGR1555:		return SDL_PIXELFORMAT_ABGR1555;
+		case Blaze::DisplayPixelFormat::BGRA5551:		return SDL_PIXELFORMAT_BGRA5551;
+		case Blaze::DisplayPixelFormat::RGB565:		return SDL_PIXELFORMAT_RGB565;
+		case Blaze::DisplayPixelFormat::BGR565:		return SDL_PIXELFORMAT_BGR565;
+		case Blaze::DisplayPixelFormat::RGB24:		return SDL_PIXELFORMAT_RGB24;
+		case Blaze::DisplayPixelFormat::BGR24:		return SDL_PIXELFORMAT_BGR24;
+		case Blaze::DisplayPixelFormat::RGB888:		return SDL_PIXELFORMAT_RGB888;
+		case Blaze::DisplayPixelFormat::RGBX8888:		return SDL_PIXELFORMAT_RGBX8888;
+		case Blaze::DisplayPixelFormat::BGR888:		return SDL_PIXELFORMAT_BGR888;
+		case Blaze::DisplayPixelFormat::BGRX8888:		return SDL_PIXELFORMAT_BGRX8888;
+		case Blaze::DisplayPixelFormat::ARGB8888:		return SDL_PIXELFORMAT_ARGB8888;
+		case Blaze::DisplayPixelFormat::RGBA8888:		return SDL_PIXELFORMAT_RGBA8888;
+		case Blaze::DisplayPixelFormat::ABGR8888:		return SDL_PIXELFORMAT_ABGR8888;
+		case Blaze::DisplayPixelFormat::BGRA8888:		return SDL_PIXELFORMAT_BGRA8888;
+		case Blaze::DisplayPixelFormat::ARGB2101010:	return SDL_PIXELFORMAT_ARGB2101010;
+		}
+	}
 }
 
 /*

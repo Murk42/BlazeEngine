@@ -45,12 +45,17 @@ namespace Blaze
 		uint resolution;
 		Graphics::Core::Texture2D atlas;
 		std::unordered_map<uint, CharacterUV> characterMap;
+		float baselineDistance;
 		
 		void LoadAtlas();
 	public:
 
 		CharacterData GetCharacterData(UnicodeChar ch);
 		uint GetResolution() const { return resolution; }		
+		Graphics::Core::Texture2D& GetAtlas() { return atlas; }
+		Font* GetFont() { return font; }
+		const Font* GetFont() const { return font; }
+		inline float GetBaselineDistance() const { return baselineDistance; }
 
 		friend class Font;
 	};
@@ -59,9 +64,8 @@ namespace Blaze
 	{		
 		void* ptr;					
 
-		std::list<FontResolution> resolutions;				
-		std::unordered_map<uint, CharacterMetrics> characterMap;		
-		float baselineDistance;
+		std::vector<FontResolution*> resolutions;				
+		std::unordered_map<uint, CharacterMetrics> characterMap;				
 		uint characterCount;
 		uint pixelsPerUnit; //How many pixels fit in one font unit
 
@@ -72,9 +76,11 @@ namespace Blaze
 					
 		int Load(StringView path, bool emitLogOnFail = true);
 		FontResolution* CreateFontResolution(uint resolution);				
-				
-		inline uint GetBaselineDistance() const { return baselineDistance; }
+						
+		inline std::vector<FontResolution*> GetResolutions() const { return resolutions; }
 
 		friend class FontResolution;
+		inline FontType GetType() const { return type; }
+		inline uint GetBaselineDistance() const { return baselineDistance; }
 	};	
 }

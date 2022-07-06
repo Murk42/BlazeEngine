@@ -144,9 +144,74 @@ namespace Blaze
 			case ImageFormat::R16_SNORM:		return GL_R16_SNORM;
 			case ImageFormat::R8_SNORM:		return GL_R8_SNORM;			
 			}
+		}		
+
+		uint GetVideoDisplayCount()
+		{
+			return SDL_GetNumVideoDisplays();
+		}
+		uint GetDisplayModeCount(uint videoDisplayIndex)
+		{
+			return SDL_GetNumDisplayModes(videoDisplayIndex);
 		}
 
-		void BLAZE_API SetActiveTextureSlot(uint slot)
+		DisplayMode GetDisplayMode(uint videoDisplayIndex, uint displayModeIndex)
+		{
+			SDL_DisplayMode mode;
+			SDL_GetDisplayMode(videoDisplayIndex, displayModeIndex, &mode);
+			DisplayMode out;
+
+			out.format = BlazeDisplayPixelFormat(mode.format);
+			out.refreshRate = mode.refresh_rate;
+			out.size = Vec2i(mode.w, mode.h);
+			return out;
+		}
+
+		DisplayMode GetCurrentDisplayMode(uint videoDisplayIndex)
+		{
+			SDL_DisplayMode mode;
+			SDL_GetCurrentDisplayMode(videoDisplayIndex, &mode);
+			DisplayMode out;
+
+			out.format = BlazeDisplayPixelFormat(mode.format);
+			out.refreshRate = mode.refresh_rate;
+			out.size = Vec2i(mode.w, mode.h);
+			return out;
+		}
+
+		DisplayMode GetDesktopDisplayMode(uint videoDisplayIndex)
+		{
+			SDL_DisplayMode mode;
+			SDL_GetDesktopDisplayMode(videoDisplayIndex, &mode);
+			DisplayMode out;
+
+			out.format = BlazeDisplayPixelFormat(mode.format);
+			out.refreshRate = mode.refresh_rate;
+			out.size = Vec2i(mode.w, mode.h);
+			return out;
+		}
+
+		bool GetClosestDisplayMode(uint displayIndex, DisplayMode mode, DisplayMode& out)
+		{
+			SDL_DisplayMode x;
+			x.format = SDLDisplayPixelFormat(mode.format);
+			x.w = mode.size.x;
+			x.h = mode.size.y;
+			x.refresh_rate = mode.refreshRate;
+			x.driverdata = nullptr;
+
+			SDL_DisplayMode closest;
+
+			if (SDL_GetClosestDisplayMode(displayIndex, &x, &closest) == NULL)
+				return false;
+
+			out.format = BlazeDisplayPixelFormat(closest.format);
+			out.refreshRate = closest.refresh_rate;
+			out.size = Vec2i(closest.w, closest.h);
+			return true;			
+		}
+
+		void SetActiveTextureSlot(uint slot)
 		{
 			glActiveTexture(GL_TEXTURE0 + slot);
 		}

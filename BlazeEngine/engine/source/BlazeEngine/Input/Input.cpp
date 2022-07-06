@@ -209,7 +209,7 @@ namespace Blaze
 					break;
 				}
 				case SDL_TEXTINPUT: {					
-					textInputDispatcher.Call({ StringViewUTF8(event.text.text) });
+					textInputDispatcher.Call({ StringUTF8((void*)event.text.text, strlen(event.text.text)) } );
 					break;								
 				}
 				case SDL_WINDOWEVENT: {

@@ -153,7 +153,7 @@ namespace Blaze
 	void Window::SetFullscreen(bool fullscreen)
 	{
 		if (fullscreen)
-			SDL_SetWindowFullscreen((SDL_Window*)ptr, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			SDL_SetWindowFullscreen((SDL_Window*)ptr, SDL_WINDOW_FULLSCREEN);
 		else
 			SDL_SetWindowFullscreen((SDL_Window*)ptr, 0);
 	}
@@ -179,4 +179,31 @@ namespace Blaze
 	bool Window::IsMinmized() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_MINIMIZED; }
 	bool Window::IsMaximized() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_MAXIMIZED; }
 	bool Window::IsShown() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_SHOWN; }
+
+	uint Window::GetWindowVideoDisplayIndex()
+	{
+		return SDL_GetWindowDisplayIndex((SDL_Window*)ptr);
+	}
+
+	DisplayMode Window::GetWindowDisplayMode()
+	{
+		SDL_DisplayMode mode;
+		SDL_GetWindowDisplayMode((SDL_Window*)ptr, &mode);
+		DisplayMode out;
+
+		out.format = BlazeDisplayPixelFormat(mode.format);
+		out.refreshRate = mode.refresh_rate;
+		out.size = Vec2i(mode.w, mode.h);
+		return out;
+	}
+	void Window::SetWindowDisplayMode(DisplayMode mode)
+	{
+		SDL_DisplayMode out;
+		out.format = SDLDisplayPixelFormat(mode.format);
+		out.w = mode.size.x;
+		out.h = mode.size.y;
+		out.refresh_rate = mode.refreshRate;
+		out.driverdata = nullptr;
+		SDL_SetWindowDisplayMode((SDL_Window*)ptr, &out);
+	}
 }

@@ -5,14 +5,15 @@
 #include "BlazeEngine/DataStructures/UnicodeChar.h"
 
 namespace Blaze
-{
+{	
 	class StringViewUTF8;		
-	class StringView;
+	class StringView;	
 	
 	class BLAZE_API StringUTF8
 	{
-		void* buffer;		
-		size_t size;
+		void* buffer;	
+		size_t bufferSize;
+		size_t characterCount;		
 	public:
 		class BLAZE_API Iterator
 		{
@@ -45,6 +46,7 @@ namespace Blaze
 		StringUTF8(const StringUTF8& s);
 		StringUTF8(StringUTF8&& s) noexcept;
 				
+		StringUTF8(void* buffer, size_t bufferSize);
 		StringUTF8(const char* ptr);
 		StringUTF8(const char* ptr, size_t size);
 		StringUTF8(const StringViewUTF8&);
@@ -53,13 +55,15 @@ namespace Blaze
 		~StringUTF8();			
 		
 		void Clear();
-
-		void* Buffer() { return buffer; }
+		
 		const void* Buffer() const { return buffer; }
-		size_t Size() const { return size; }
+		size_t BufferSize() const { return bufferSize; }
+		size_t CharacterCount() const { return characterCount; }
 		
 		Iterator begin() const;		
 		Iterator end() const;
+
+		StringUTF8& Resize(size_t newCharacterCount, UnicodeChar fill);
 
 		StringUTF8& operator= (const StringViewUTF8& s);		
 		StringUTF8& operator= (StringUTF8&& s) noexcept;
@@ -98,7 +102,7 @@ namespace Blaze
 		template<> static bool ConvertTo<float >(const StringViewUTF8&, float&);
 		template<> static bool ConvertTo<double>(const StringViewUTF8&, double&);
 
-		friend BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);		
+		friend BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);				
 	};
 	
 

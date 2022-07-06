@@ -28,7 +28,7 @@ namespace std
     {
         std::size_t operator()(const Blaze::StringUTF8& k) const
         {
-            return hash<string_view>()(std::string_view((const char*)k.Buffer(), k.Size()));
+            return hash<string_view>()(std::string_view((const char*)k.Buffer(), k.BufferSize()));
         }
     };
     template <>
@@ -36,7 +36,7 @@ namespace std
     {
         std::size_t operator()(const Blaze::StringViewUTF8& k) const
         {
-            return hash<string_view>()(std::string_view((const char*)k.Buffer(), k.Size()));
+            return hash<string_view>()(std::string_view((const char*)k.Buffer(), k.BufferSize()));
         }
     };
 }

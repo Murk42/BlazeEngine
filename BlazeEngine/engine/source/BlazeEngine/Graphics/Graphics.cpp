@@ -31,6 +31,9 @@ namespace Blaze
 			Point2DRenderer point2DRenderer;
 			TextRenderer textRenderer;
 			Font defaultFont;
+			FontResolution* fontResolution20;
+			FontResolution* fontResolution64;
+			FontResolution* fontResolution128;
 		};
 		static GraphicsData* graphicsData;		
 
@@ -61,13 +64,16 @@ namespace Blaze
 		Graphics::graphicsData->view3D = Mat4f::Identity();
 		Graphics::graphicsData->line3DRenderer.SetProjectionMatrix(Graphics::graphicsData->proj3D);
 
-		Graphics::graphicsData->defaultFont.Load("assets/Blaze/Consola.ttf", FontType::Antialiased, 128);
-		Graphics::Core::Texture2DSettings settings;
-		settings.mip = Graphics::Core::TextureSampling::Linear;
-		settings.mag = Graphics::Core::TextureSampling::Linear;		
-		settings.mipmaps = false;		
-		Graphics::graphicsData->defaultFont.GetTexture().SetSettings(settings);
-		Graphics::graphicsData->textRenderer.SetFont(&Graphics::graphicsData->defaultFont);
+		Graphics::graphicsData->defaultFont.Load("assets/Blaze/Consola.ttf");
+		Graphics::graphicsData->fontResolution20 = Graphics::graphicsData->defaultFont.CreateFontResolution(20);
+		Graphics::graphicsData->fontResolution64 = Graphics::graphicsData->defaultFont.CreateFontResolution(64);
+		Graphics::graphicsData->fontResolution128 = Graphics::graphicsData->defaultFont.CreateFontResolution(128);		
+
+		Graphics::graphicsData->textRenderer.SetResolutions({
+			Graphics::graphicsData->fontResolution20,
+			Graphics::graphicsData->fontResolution64,
+			Graphics::graphicsData->fontResolution128
+			});
 	}
 	void TerminateGraphics()
 	{
@@ -110,11 +116,11 @@ namespace Blaze
 			Graphics::DrawLine3D(Vec3f(pos1.x, pos2.y, pos1.z), Vec3f(pos1.x, pos2.y, pos2.z), color, width);
 			Graphics::DrawLine3D(Vec3f(pos2.x, pos2.y, pos1.z), Vec3f(pos2.x, pos2.y, pos2.z), color, width);
 		}
-		void Write(const StringViewUTF8& text, float height, Vec2i pos, ColorRGBA color)
+		void Write(const StringViewUTF8& text, float resolution, Vec2f pos, ColorRGBA color)
 		{ 
-			graphicsData->textRenderer.Write(text, height, pos, color);
+			graphicsData->textRenderer.Write(text, resolution, pos, color);
 		}
-		void Write(TextRenderData& data, Vec2i pos, ColorRGBA color)
+		void Write(TextRenderData& data, Vec2f pos, ColorRGBA color)
 		{
 			graphicsData->textRenderer.Write(data, pos, color);
 		}

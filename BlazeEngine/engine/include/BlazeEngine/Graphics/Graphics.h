@@ -28,8 +28,8 @@ namespace Blaze
 		BLAZE_API void DrawBoxOutline3D(Vec3f pos1, Vec3f pos2, ColorRGBA color, float width);
 		//BLAZE_API void DrawBox3D(Vec3f pos1, Vec3f pos2, ColorRGBA color, float width);
 
-		BLAZE_API void Write(const StringViewUTF8& text, float height, Vec2i pos, ColorRGBA color);
-		BLAZE_API void Write(TextRenderData& data, Vec2i pos, ColorRGBA color);
+		BLAZE_API void Write(const StringViewUTF8& text, float resolution, Vec2f pos, ColorRGBA color);
+		BLAZE_API void Write(TextRenderData& data, Vec2f pos, ColorRGBA color);
 
 		BLAZE_API TextRenderData GetTextRenderData(const StringViewUTF8& text, float height);
 
@@ -38,7 +38,7 @@ namespace Blaze
 		BLAZE_API Line3DRenderer& GetLine3DRenderer();
 		BLAZE_API TextRenderer& GetTextRenderer();
 
-		BLAZE_API Font& GetDefaultFont();
+		BLAZE_API Font& GetDefaultFont();		
 
 		BLAZE_API void Set3DViewMatrix(const Mat4f&);		
 		BLAZE_API void Set3DProjectionMatrix(const Mat4f&);		

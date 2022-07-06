@@ -1,6 +1,7 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLVertexArray.h"
 #include "GL/glew.h"
 
+#include "BlazeEngine/Graphics/Renderer.h"
 
 namespace Blaze
 {    
@@ -49,11 +50,12 @@ namespace Blaze
         }
 
         void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, size_t stride, size_t offset)
-        {
+        {   
+            Renderer::SelectVertexArray(this);
             if (buffer != nullptr)
-                glVertexArrayVertexBuffer(id, index, buffer->GetHandle(), offset, stride);
-            else
-                glVertexArrayVertexBuffer(id, index, 0, offset, stride);
+                glBindVertexBuffer(index, buffer->GetHandle(), offset, stride);
+            else  
+                glBindVertexBuffer(index, 0, offset, stride);
         }
 
         void VertexArray::SetVertexAttributeFormat(uint index, VertexAttributeType type, size_t count, bool normalised, size_t offset)

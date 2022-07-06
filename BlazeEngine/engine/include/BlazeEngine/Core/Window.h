@@ -3,6 +3,7 @@
 #include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
+#include "BlazeEngine/Graphics/Renderer.h"
 
 namespace Blaze
 {
@@ -48,7 +49,11 @@ namespace Blaze
 		bool IsMouseLockedInside();
 		bool IsMinmized();
 		bool IsMaximized();
-		bool IsShown();		
+		bool IsShown();
+
+		uint GetWindowVideoDisplayIndex();
+		DisplayMode GetWindowDisplayMode();
+		void SetWindowDisplayMode(DisplayMode mode);
 
 		inline void* GetHandle() const { return ptr; }				
 	};
