@@ -80,5 +80,7 @@ namespace Blaze
 		inline std::vector<FontResolution*> GetResolutions() const { return resolutions; }
 
 		friend class FontResolution;
+		inline FontType GetType() const { return type; }
+		inline uint GetBaselineDistance() const { return baselineDistance; }
 	};	
 }
