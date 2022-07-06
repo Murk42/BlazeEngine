@@ -26,7 +26,7 @@ CLIENT_API void Setup()
 		float b = Math::Sin(time + (float)Math::PI / 3 * 2) / 2 + 0.5f;
 		
 		Graphics::DrawBoxOutline2D(Vec2f(20, 125), Vec2f(20 + textRenderData.GetSize().x, 125 + Graphics::GetDefaultFont().GetBaselineDistance() * 140), Colors::Green, 1);
-		Graphics::Write(textRenderData, Vec2i(20, 125), ColorRGBAf(r, g, b, 1));				
+		Graphics::Write(textRenderData, Vec2f(20, 125), ColorRGBAf(r, g, b, 1));				
 
 		Renderer::SwapWindowBuffers();
 	}

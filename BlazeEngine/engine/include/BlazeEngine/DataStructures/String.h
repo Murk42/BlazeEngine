@@ -29,7 +29,8 @@ namespace Blaze
 		inline size_t Size() const { return size; }		
 		
 		String SubString(size_t start, size_t size) const;
-		void Clear();						
+		void Clear();	
+		String& Resize(size_t newSize, char fill = ' ');
 
 		String& operator= (const StringView& s);
 		String& operator= (const String& s);

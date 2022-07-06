@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Input/Key.h"
-#include "BlazeEngine/DataStructures/StringViewUTF8.h"
+#include "BlazeEngine/DataStructures/StringUTF8.h"
 #include <functional>
 
 namespace Blaze
@@ -25,7 +25,7 @@ namespace Blaze
 		struct WindowFocusGained	{ Window* window; };	
 		struct WindowFocusLost		{ Window* window; };	
 		struct WindowClosed			{ Window* window; };		
-		struct TextInput			{ StringViewUTF8 input; };
+		struct TextInput			{ StringUTF8 input; };
 		struct ViewportChanged		{ Vec2i pos; Vec2i size; };
 	}	
 }

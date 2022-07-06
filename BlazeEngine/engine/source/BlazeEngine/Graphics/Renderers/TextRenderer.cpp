@@ -80,6 +80,40 @@ namespace Blaze::Graphics
 		"	gl_FragColor = color;							  \n"
 		"}													  \n";
 
+	struct CharacterVertex
+	{
+		Vec2f p1;
+		Vec2f p2;
+		Vec2f uv1;
+		Vec2f uv2;
+	};
+
+	FontResolution* TextRenderer::SelectResolution(int res) const
+	{
+		if (fontResolutions.size() == 0)
+			return 0;
+
+		FontResolution* upper = nullptr;
+		FontResolution* lower = nullptr; 
+
+		for (auto& fontRes : fontResolutions)
+		{
+			int currRes = fontRes->GetResolution();
+
+			if (currRes == res)
+				return fontRes;
+			else if (currRes < res && currRes > lower->GetResolution())
+				lower = fontRes;
+			else if (currRes > res && currRes < upper->GetResolution())
+				upper = fontRes;			
+		}		
+
+		if (upper == nullptr)
+			return lower;
+
+		return upper;
+	}
+
 	TextRenderer::TextRenderer()
 	{
 		Core::VertexShader vert; vert.ShaderSource(vertSource); vert.CompileShader();
@@ -96,10 +130,10 @@ namespace Blaze::Graphics
 		va.SetVertexAttributeFormat(1, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 2);
 		va.SetVertexAttributeFormat(2, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 4);
 		va.SetVertexAttributeFormat(3, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 6);
-		va.SetVertexAttributeBuffer(0, &vb, sizeof(Font::CharacterVertex), 0);
-		va.SetVertexAttributeBuffer(1, &vb, sizeof(Font::CharacterVertex), 0);
-		va.SetVertexAttributeBuffer(2, &vb, sizeof(Font::CharacterVertex), 0);
-		va.SetVertexAttributeBuffer(3, &vb, sizeof(Font::CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(0, &vb, sizeof(CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(1, &vb, sizeof(CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(2, &vb, sizeof(CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(3, &vb, sizeof(CharacterVertex), 0);
 	}
 	TextRenderer::~TextRenderer()
 	{
@@ -110,63 +144,110 @@ namespace Blaze::Graphics
 		program.SetUniform(0, mat);
 	}
 
-	void TextRenderer::SetFont(Font* font)
+	void TextRenderer::SetResolutions(std::initializer_list<FontResolution*> resolutions)
 	{
-		this->font = font;
-	}
+		fontResolutions = resolutions;
+	}	
 
-	void TextRenderer::Write(const StringViewUTF8& text, float height, Vec2i pos, ColorRGBA color)
+	void TextRenderer::Write(const StringViewUTF8& text, int resolution, Vec2f pos, ColorRGBA color)
 	{
-		uint vertexCount;
-		Vec2f size;
-		Vec2f bottomLeft;
-		Vec2f topRight;
-		Font::CharacterVertex* vertices = font->GenerateVertices(text, vertexCount, size, bottomLeft, topRight);
+		FontResolution* res = SelectResolution(resolution);
+		
+		uint vertexCount = text.CharacterCount();
+		CharacterVertex* vertices = new CharacterVertex[vertexCount];
+
+		unsigned i = 0;
+		for (auto it = text.begin(); it != text.end(); ++it, ++i)
+		{
+			UnicodeChar ch = it.ToUnicode();
+			CharacterData data = res->GetCharacterData(ch);
+	
+			vertices[i].p1 = pos + data.renderOffset;
+			vertices[i].p2 = vertices[i].p1 + data.size;
+			vertices[i].uv1 = data.uv1;
+			vertices[i].uv2 = data.uv2;			
+		}
+
 		vb.AllocateDynamicStorage(
-			BufferView(vertices, vertexCount * sizeof(Font::CharacterVertex)),
+			BufferView(vertices, vertexCount * sizeof(CharacterVertex)),
 			Core::GraphicsBufferDynamicStorageHint::DynamicDraw
 		);				
+
+		delete[] vertices;
 
 		Renderer::SelectProgram(&program);
 		Renderer::SelectVertexArray(&va);
 		Renderer::SetActiveTextureSlot(0);
-		Renderer::SelectTexture(&font->GetTexture());
+		Renderer::SelectTexture(&res->GetAtlas());
 		program.SetUniform(1,
 			Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0)) *
-			Math::ScalingMatrix<float>(Vec3f(height, height, 0))
+			Math::ScalingMatrix<float>(Vec3f(resolution, resolution, 0))
 		);
 		program.SetUniform(2, 0);
 		program.SetUniform(3, ColorRGBAf(color).ToVector());
 		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, vertexCount);
 	}
 
-	void TextRenderer::Write(TextRenderData& data, Vec2i pos, ColorRGBA color)
+	void TextRenderer::Write(TextRenderData& data, Vec2f pos, ColorRGBA color)
 	{		
 		Renderer::SelectProgram(&program);
 		Renderer::SelectVertexArray(&data.va);
-		Renderer::SetActiveTextureSlot(0);
-		Renderer::SelectTexture(&font->GetTexture());
+		Renderer::SetActiveTextureSlot(0
+		);
+		Renderer::SelectTexture(&data.fontResolution->GetAtlas());
 		program.SetUniform(1,
-			Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0)) *
-			Math::ScalingMatrix<float>(Vec3f(data.height, data.height, 0))
+			Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0))
 		);
 		program.SetUniform(2, 0);
 		program.SetUniform(3, ColorRGBAf(color).ToVector());
 		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, data.vertexCount);
 	}
 
-	TextRenderData::TextRenderData(const TextRenderer& renderer, StringViewUTF8 text, float height)
+	TextRenderData::TextRenderData(const TextRenderer& renderer, StringViewUTF8 text, float resolution)
 	{				
 		this->renderer = &renderer;
-		this->height = height;
-		Font::CharacterVertex* vertices = renderer.font->GenerateVertices(text, vertexCount, size, bottomLeft, topRight);
-		bottomLeft *= height;
-		topRight *= height;
-		size *= height;
+
+		bottomLeft = { FLT_MAX, FLT_MAX };
+		topRight = { FLT_MIN, FLT_MIN };
+
+		fontResolution = renderer.SelectResolution(resolution);
+		float res = fontResolution->GetResolution();
+
+		uint vertexCount = text.CharacterCount();
+		CharacterVertex* vertices = new CharacterVertex[vertexCount];
+
+		unsigned i = 0;
+		for (auto it = text.begin(); it != text.end(); ++it, ++i)
+		{
+			UnicodeChar ch = it.ToUnicode();
+			CharacterData data = fontResolution->GetCharacterData(ch);
+
+			vertices[i].p1 = data.renderOffset;
+			vertices[i].p2 = vertices[i].p1 + data.renderOffset + data.size;
+			vertices[i].uv1 = data.uv1;
+			vertices[i].uv2 = data.uv2;
+
+			bottomLeft.x = std::min(bottomLeft.x, vertices[i].p1.x);
+			bottomLeft.y = std::min(bottomLeft.y, vertices[i].p1.y);
+			topRight.x = std::max(topRight.x, vertices[i].p2.x);
+			topRight.y = std::max(topRight.y, vertices[i].p2.y);
+		}
+
 		vb.AllocateDynamicStorage(
-			BufferView(vertices, vertexCount * sizeof(Font::CharacterVertex)),
+			BufferView(vertices, vertexCount * sizeof(CharacterVertex)),
 			Core::GraphicsBufferDynamicStorageHint::DynamicDraw
 		);
+
+		bottomLeft *= fontResolution->GetResolution();
+		topRight *= fontResolution->GetResolution();
+		size *= fontResolution->GetResolution();
+		delete[] vertices;
+
+		//CharacterVertex* vertices = renderer.font->GenerateVertices(text, vertexCount, size, bottomLeft, topRight);
+		//vb.AllocateDynamicStorage(
+		//	BufferView(vertices, vertexCount * sizeof(Font::CharacterVertex)),
+		//	Core::GraphicsBufferDynamicStorageHint::DynamicDraw
+		//);
 
 		va.EnableVertexAttribute(0);
 		va.EnableVertexAttribute(1);
@@ -176,15 +257,15 @@ namespace Blaze::Graphics
 		va.SetVertexAttributeFormat(1, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 2);
 		va.SetVertexAttributeFormat(2, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 4);
 		va.SetVertexAttributeFormat(3, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 6);
-		va.SetVertexAttributeBuffer(0, &vb, sizeof(Font::CharacterVertex), 0);
-		va.SetVertexAttributeBuffer(1, &vb, sizeof(Font::CharacterVertex), 0);
-		va.SetVertexAttributeBuffer(2, &vb, sizeof(Font::CharacterVertex), 0);
-		va.SetVertexAttributeBuffer(3, &vb, sizeof(Font::CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(0, &vb, sizeof(CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(1, &vb, sizeof(CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(2, &vb, sizeof(CharacterVertex), 0);
+		va.SetVertexAttributeBuffer(3, &vb, sizeof(CharacterVertex), 0);
 	}
 
 
 	TextRenderData::TextRenderData(TextRenderData&& data)
-		: vb(std::move(data.vb)), va(std::move(data.va)), vertexCount(data.vertexCount), size(data.size), renderer(data.renderer), height(data.height)
+		: vb(std::move(data.vb)), va(std::move(data.va)), vertexCount(data.vertexCount), size(data.size), renderer(data.renderer), fontResolution(data.fontResolution)
 	{
 	}
 

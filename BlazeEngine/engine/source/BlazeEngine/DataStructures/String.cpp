@@ -80,6 +80,18 @@ namespace Blaze
 		delete[] ptr;
 		size = 0;
 	}
+	String& String::Resize(size_t newSize, char fill)
+	{
+		char* old = ptr;
+		ptr = new char[newSize + 1];
+		memcpy(ptr, old, size);
+		if (newSize > size)
+			std::fill_n(ptr + size, newSize - size, fill);
+		size = newSize;
+		delete[] old;
+		ptr[size] = '\0';
+		return *this;		
+	}
 	String& String::operator=(const StringView& s)
 	{
 		delete[] ptr;

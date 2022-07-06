@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
+#include "BlazeEngine/Graphics/RendererEnums.h"
 
 #include <IL/il.h>
 #include <GL/glew.h>
@@ -36,4 +37,7 @@ namespace Blaze
 
 	GLenum OpenGLBufferDynamicStorageHint(Graphics::Core::GraphicsBufferDynamicStorageHint hint);
 	GLenum OpenGLBufferStaticStorageHint(Graphics::Core::GraphicsBufferStaticStorageHint hint);
+
+	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format);
+	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format);
 }

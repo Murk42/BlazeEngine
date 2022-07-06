@@ -105,55 +105,58 @@ namespace Blaze
 	}
 
 	StringViewUTF8::StringViewUTF8()
-		: buffer(nullptr), size(0)
+		: buffer(nullptr), bufferSize(0), characterCount(0)
 	{
 	}
 	StringViewUTF8::StringViewUTF8(const StringViewUTF8& s)
-		: buffer(s.buffer), size(s.size)
+		: buffer(s.buffer), bufferSize(s.bufferSize), characterCount(s.characterCount)
 	{
 	}	
 	StringViewUTF8::StringViewUTF8(const char* ptr)
-		: buffer(ptr), size(strlen(ptr))
+		: buffer(ptr), bufferSize(0), characterCount(0)
 	{
+		characterCount = strlen(ptr);
+		bufferSize = characterCount + 1;
 	}
 	StringViewUTF8::StringViewUTF8(const char* ptr, size_t size)
-		: buffer(ptr), size(size)
+		: buffer(ptr), bufferSize(size + 1), characterCount(size)
 	{
 	}
 	StringViewUTF8::StringViewUTF8(const StringUTF8& s)
-		: buffer(s.Buffer()), size(s.Size())
+		: buffer(s.Buffer()), bufferSize(s.BufferSize()), characterCount(s.CharacterCount())
 	{
 	}
 	StringViewUTF8::StringViewUTF8(const StringView& s)
-		: buffer(s.Ptr()), size(s.Size())
+		: buffer(s.Ptr()), bufferSize(s.Size() + 1), characterCount(s.Size())
 	{
-	}
+	}	
 	StringViewUTF8::Iterator StringViewUTF8::begin() const
 	{
 		return Iterator(buffer);
 	}
 	StringViewUTF8::Iterator StringViewUTF8::end() const
 	{
-		return Iterator((byte*)buffer + size);
+		return Iterator((byte*)buffer + bufferSize);
 	}
 	StringViewUTF8& StringViewUTF8::operator=(const StringViewUTF8& s)
 	{
 		buffer = s.buffer;
-		size = s.size;
+		bufferSize = s.bufferSize;
+		characterCount = s.characterCount;
 		return *this;
 	}
 	bool StringViewUTF8::operator==(const StringViewUTF8& s) const
 	{
-		if (size != s.size)
+		if (bufferSize != s.bufferSize)
 			return false;
 		
-		return memcmp(buffer, s.buffer, size) == 0;
+		return memcmp(buffer, s.buffer, bufferSize) == 0;
 	}
 	bool StringViewUTF8::operator!=(const StringViewUTF8& s) const
 	{
-		if (size != s.size)
+		if (bufferSize != s.bufferSize)
 			return true;
 
-		return memcmp(buffer, s.buffer, size) != 0;
+		return memcmp(buffer, s.buffer, bufferSize) != 0;
 	}	
 }

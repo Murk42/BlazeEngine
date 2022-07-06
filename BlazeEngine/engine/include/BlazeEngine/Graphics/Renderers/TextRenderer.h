@@ -16,8 +16,8 @@ namespace Blaze
 			unsigned vertexCount;
 			Vec2f size;
 			Vec2f bottomLeft;
-			Vec2f topRight;
-			float height;
+			Vec2f topRight;			
+			FontResolution* fontResolution;
 			const TextRenderer* renderer;
 		public:
 			TextRenderData(TextRenderData&&);
@@ -26,7 +26,7 @@ namespace Blaze
 			Vec2f GetSize() const { return size; }
 			Vec2f GetBottomLeft() const { return bottomLeft; }
 			Vec2f GetTopRight() const { return topRight; }
-			float GetHeight() const { return height; }
+			FontResolution* GetFontResolution() const { return fontResolution; }
 
 			friend class TextRenderer;
 		};
@@ -36,16 +36,18 @@ namespace Blaze
 			Core::ShaderProgram program;
 			Core::VertexArray va;
 			Core::GraphicsBuffer vb;
-			Font* font;
+			std::vector<FontResolution*> fontResolutions;			
+
+			FontResolution* SelectResolution(int resolution) const;
 		public:
 			TextRenderer();
 			~TextRenderer();
 
 			void SetProjectionMatrix(Mat4f mat);
-			void SetFont(Font* font);
+			void SetResolutions(std::initializer_list<FontResolution*> resolutions);
 
-			void Write(const StringViewUTF8& text, float height, Vec2i pos, ColorRGBA color);
-			void Write(TextRenderData&, Vec2i pos, ColorRGBA color);
+			void Write(const StringViewUTF8& text, int resolution, Vec2f pos, ColorRGBA color);
+			void Write(TextRenderData&, Vec2f pos, ColorRGBA color);
 
 			friend class TextRenderData;
 		};
