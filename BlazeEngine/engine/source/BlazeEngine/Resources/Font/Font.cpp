@@ -16,32 +16,257 @@
 
 #include "C:/Programming/Libraries/rectpack2D/include/rectpack2D/finders_interface.h"
 
+constexpr bool allow_flip = false;
+using spaces_type = rectpack2D::empty_spaces<allow_flip, rectpack2D::default_empty_spaces>;
+using rect_type = rectpack2D::output_rect_t<spaces_type>;
+
+rectpack2D::rect_wh PackRects(std::vector<rect_type>& rectangles)
+{
+	const auto runtime_flipping_mode = rectpack2D::flipping_option::DISABLED;
+	const auto max_side = 4096;
+	const auto discard_step = 1;
+
+	auto report_successful = [](rect_type&) {
+		return rectpack2D::callback_result::CONTINUE_PACKING;
+	};
+
+	auto report_unsuccessful = [](rect_type&) {
+		return rectpack2D::callback_result::ABORT_PACKING;
+	};
+
+	const auto result_size = rectpack2D::find_best_packing<spaces_type>(
+		rectangles,
+		make_finder_input(
+			max_side,
+			discard_step,
+			report_successful,
+			report_unsuccessful,
+			runtime_flipping_mode
+		));
+
+	return result_size;
+}
 
 namespace Blaze
-{	
+{
 	FT_Library GetFreeTypeLibrary();
 
-#define FT_CHECK(x) \
-	if (x != 0)\
-	{	\
-		if (emitLogOnFail)	\
-			BLAZE_ERROR_LOG("FreeType", FT_Error_String(ftError));	\
-		return BLAZE_ERROR;	\
-	}	
-		
 	struct CharacterBitmap
 	{
-		uint character;
-		
-
-		Vec2f renderOffset;
-		float advance;
+		uint character;		
 
 		Vec2i size;
 		size_t stride;
 		uint8* data;
-	};
+	};	
 
+	void FontResolution::LoadAtlas()
+	{		
+		FT_Face face = (FT_Face)font->ptr;
+
+		CharacterBitmap* characterBitmaps;
+
+		uint character;
+		uint glyphIndex;
+
+		FT_Set_Pixel_Sizes(face, 0, resolution);
+
+		std::vector<rect_type> rectangles;
+		rectangles.resize(font->characterCount);
+		characterBitmaps = new CharacterBitmap[font->characterCount];
+
+		character = FT_Get_First_Char(face, &glyphIndex);
+		for (uint i = 0; glyphIndex != 0; ++i)
+		{
+			CharacterBitmap& bitmap = characterBitmaps[i];
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
+			
+			FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
+
+			bitmap.data = new uint8[face->glyph->bitmap.pitch * face->glyph->bitmap.rows];
+			bitmap.size = Vec2i(face->glyph->bitmap.width, face->glyph->bitmap.rows);
+			bitmap.stride = face->glyph->bitmap.pitch;
+
+			memcpy(bitmap.data, face->glyph->bitmap.buffer, bitmap.stride * bitmap.size.y);
+
+			bitmap.character = character;			
+
+			character = FT_Get_Next_Char(face, character, &glyphIndex);
+
+			rectangles[i].x = 0;
+			rectangles[i].y = 0;
+			rectangles[i].w = characterBitmaps[i].size.x + 2;
+			rectangles[i].h = characterBitmaps[i].size.y + 2;
+		}		
+
+		const auto result_size = PackRects(rectangles);
+
+		Vec2i textureSize = Vec2i(result_size.w, result_size.h);
+
+		atlas.Create(textureSize, Graphics::Core::TextureInternalPixelFormat::R8);
+
+		Graphics::Core::Texture2DSettings settings;
+		settings.mag = Graphics::Core::TextureSampling::Linear;
+		settings.min = Graphics::Core::TextureSampling::Linear;
+		settings.mip = Graphics::Core::TextureSampling::Nearest;
+		settings.xWrap = Graphics::Core::TextureWrapping::ClampToEdge;
+		settings.yWrap = Graphics::Core::TextureWrapping::ClampToEdge;
+		settings.mipmaps = false;
+
+		atlas.SetSettings(settings);
+
+		for (uint i = 0; i < font->characterCount; ++i)
+		{
+			CharacterBitmap& bitmap = characterBitmaps[i];
+			CharacterUV uv;
+
+			if (bitmap.size.x != 0)
+			{
+				Vec2i offset = Vec2i(rectangles[i].x + 1, rectangles[i].y + 1);
+
+				atlas.SetPixels(offset, bitmap.size, bitmap.stride, BitmapPixelFormat::Red, BitmapPixelType::Uint8, bitmap.data);
+
+				uv.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
+				uv.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);
+
+				std::swap(uv.uv1.y, uv.uv2.y);				
+			}
+			else
+			{
+				uv.uv1 = { };
+				uv.uv2 = { };
+			}
+
+			uv.metrics = &font->characterMap[bitmap.character];
+
+			characterMap.insert({ bitmap.character, uv });
+		}
+
+		for (uint i = 0; i < font->characterCount; ++i)
+			delete[] characterBitmaps[i].data;
+		delete[] characterBitmaps;
+	}
+
+	CharacterData FontResolution::GetCharacterData(UnicodeChar ch)
+	{
+		CharacterData out;
+		uint32 chValue = ch.Value();
+		auto data = characterMap[chValue];		
+
+		out.advance = data.metrics->advance * resolution;
+		out.renderOffset = data.metrics->renderOffset * resolution;
+		out.size = data.metrics->size * resolution;
+		out.uv1 = data.uv1;
+		out.uv2 = data.uv2;
+
+		return CharacterData();
+	}
+
+	Font::Font()
+		: ptr(nullptr), baselineDistance(0), characterCount(0), pixelsPerUnit(0)
+	{
+	}
+	Font::~Font()
+	{
+		if (ptr != nullptr)
+		{
+			FT_Error ftError;
+			FT_Face face = (FT_Face)ptr;
+			FT_Done_Face(face);
+			ptr = nullptr;
+
+			if (ftError != 0)
+				BLAZE_ERROR_LOG("FreeType", FT_Error_String(ftError));
+		}
+	}
+
+	void Font::LoadFontMetrics()
+	{
+		FT_Face face = (FT_Face)ptr;
+
+		pixelsPerUnit = face->units_per_EM;
+
+		uint glyphIndex;
+		uint character = FT_Get_First_Char(face, &glyphIndex);
+
+		characterCount = 0;
+		while (glyphIndex != 0)
+		{
+			CharacterMetrics data;
+
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_SCALE);			
+
+			data.size = Vec2f(face->glyph->metrics.width, face->glyph->metrics.height);
+			data.advance = float(face->glyph->metrics.horiAdvance);
+			data.renderOffset = Vec2f(face->glyph->metrics.horiBearingX, face->glyph->metrics.horiBearingY - face->glyph->metrics.height);
+
+			data.size /= pixelsPerUnit * 64.0f;
+			data.advance /= pixelsPerUnit * 64.0f;
+			data.renderOffset /= pixelsPerUnit * 64.0f;
+
+			characterMap.insert({ character, data });
+
+			character = FT_Get_Next_Char(face, character, &glyphIndex);
+			++characterCount;
+		}
+	}
+
+	int Font::Load(StringView path, bool emitLogOnFail)
+	{
+		FT_Error ftError;
+		FT_Face face;
+
+		//Load face
+		{
+			if (ptr != nullptr)
+			{
+				FT_Done_Face((FT_Face)ptr);
+				ptr = nullptr;
+			}
+
+			FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
+
+			ptr = face;
+		}
+
+		if (!(face->face_flags & FT_FACE_FLAG_SCALABLE))
+		{
+			if (emitLogOnFail)
+				BLAZE_ERROR_LOG("Blaze Engine", "The font isnt a vector font");
+			return BLAZE_ERROR;
+		}
+
+		LoadFontMetrics();
+
+		return BLAZE_OK;
+	}
+
+	FontResolution* Font::CreateFontResolution(uint resolution)
+	{
+		FT_Error ftError;
+		FT_Face face = (FT_Face)ptr;
+
+		FontResolution& res = resolutions.emplace_back();
+		res.resolution = resolution;
+		res.font = this;
+
+		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+
+		res.LoadAtlas();
+
+		baselineDistance = (float)face->size->metrics.height / (1 << 6) / resolution;
+	}
+
+	/*
+	uint CountCharacters(FT_Face face)
+	{
+		uint characterCount = 0;
+		uint glyphIndex;
+		uint character;
+		for (character = FT_Get_First_Char(face, &glyphIndex); glyphIndex != 0; character = FT_Get_Next_Char(face, character, &glyphIndex))
+			++characterCount;
+		return characterCount;
+	}
 
 	//TODO remove ' ' from font
 	void ConvertMonochrome(uint8* output, size_t outputStride, uint8* input, size_t inputStride, size_t width, size_t height)
@@ -69,7 +294,7 @@ namespace Blaze
 		{
 			FT_Error ftError;
 			FT_Face face = (FT_Face)ptr;
-			ftError = FT_Done_Face(face);
+			FT_Done_Face(face);
 			ptr = nullptr;
 
 			if (ftError != 0)
@@ -185,20 +410,6 @@ namespace Blaze
 		return vertices;
 	}
 
-	uint CountCharacters(FT_Face face)
-	{
-		uint characterCount = 0;
-		uint glyphIndex;
-		uint character;
-		for (character = FT_Get_First_Char(face, &glyphIndex); glyphIndex != 0; character = FT_Get_Next_Char(face, character, &glyphIndex))
-			++characterCount;
-		return characterCount;
-	}
-
-	bool IsFaceSupported(FT_Face face)
-	{
-		return face->face_flags & FT_FACE_FLAG_SCALABLE;
-	}
 
 	int LoadFontMonochrome(uint resolution, FT_Face face, Graphics::Core::Texture2D& atlas, std::unordered_map<uint, Font::CharacterData>& characterMap, bool emitLogOnFail);
 	int LoadFontAntialiased(uint resolution, FT_Face face, Graphics::Core::Texture2D& atlas, std::unordered_map<uint, Font::CharacterData>& characterMap, bool emitLogOnFail);
@@ -212,12 +423,12 @@ namespace Blaze
 		{
 			if (ptr != nullptr)
 			{
-				ftError = FT_Done_Face((FT_Face)ptr);
+				FT_Done_Face((FT_Face)ptr);
 				ptr = nullptr;
 				FT_CHECK(ftError);
 			}
 
-			ftError = FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
+			FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
 			FT_CHECK(ftError);
 			ptr = face;
 		}
@@ -232,7 +443,7 @@ namespace Blaze
 		this->type = type;
 		this->resolution = resolution;
 
-		ftError = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
 		FT_CHECK(ftError);
 		 
 		int returned;
@@ -289,7 +500,7 @@ namespace Blaze
 		uint character;
 		uint glyphIndex;
 
-		ftError = FT_Set_Pixel_Sizes(face, 0, resolution);
+		FT_Set_Pixel_Sizes(face, 0, resolution);
 		FT_CHECK(ftError);		
 
 		characterCount = CountCharacters(face);
@@ -299,10 +510,10 @@ namespace Blaze
 		for (uint i = 0; i < characterCount; ++i)
 		{
 			CharacterBitmap& bitmap = characterBitmaps[i];
-			ftError = FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			FT_CHECK(ftError);
 			
-			ftError = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO);
+			FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO);
 			FT_CHECK(ftError);			
 
 			bitmap.size = Vec2i(face->glyph->bitmap.width, face->glyph->bitmap.rows);
@@ -388,7 +599,7 @@ namespace Blaze
 		uint character;
 		uint glyphIndex;
 
-		ftError = FT_Set_Pixel_Sizes(face, 0, resolution);
+		FT_Set_Pixel_Sizes(face, 0, resolution);
 		FT_CHECK(ftError);
 
 
@@ -399,10 +610,10 @@ namespace Blaze
 		for (uint i = 0; i < characterCount; ++i)
 		{
 			CharacterBitmap& bitmap = characterBitmaps[i];
-			ftError = FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			FT_CHECK(ftError);
 			
-			ftError = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
+			FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 			FT_CHECK(ftError);
 
 			bitmap.data = new uint8[face->glyph->bitmap.pitch * face->glyph->bitmap.rows];			
@@ -481,7 +692,8 @@ namespace Blaze
 
 		return BLAZE_OK;
 	}	
-		
+		*/
+
 	/* SDF generation shader
 #version 330 core
 
