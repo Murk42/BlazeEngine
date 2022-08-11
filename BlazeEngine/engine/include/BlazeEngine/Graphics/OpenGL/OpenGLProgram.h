@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Graphics/OpenGL/OpenGLShader.h"
 #include "BlazeEngine/DataStructures/Vector.h"

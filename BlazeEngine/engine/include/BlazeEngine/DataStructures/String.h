@@ -82,6 +82,8 @@ namespace Blaze
 	}; 
 
 	BLAZE_API String operator+(const StringView& left, const StringView& right);
+	BLAZE_API String operator+(const StringView& left, const char* right);
+	BLAZE_API String operator+(const char* left, const StringView& right);
 	BLAZE_API String operator+(const StringView& left, const char& right);
 	BLAZE_API String operator+(const char& left, const StringView& right);
 }

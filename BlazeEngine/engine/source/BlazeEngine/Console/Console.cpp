@@ -2,11 +2,15 @@
 #include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/Utilities/Thread.h"
 #include <iostream>
+#include "BlazeEngine/Core/Startup.h"
 
 namespace Blaze
 {    
-    void InitializeConsole()
+    Startup::ConsoleInitInfo InitializeConsole()
     {        
+        Startup::ConsoleInitInfo initInfo;
+        initInfo.initTime = 0;
+        return initInfo;
     }
     void TerminateConsole()
     {                

@@ -1,7 +1,8 @@
 #pragma once
+#include "BlazeEngine/Core/Startup.h"
 
 namespace Blaze
 {
-	void InitializeDevIL();
+	Startup::BlazeLibrariesInitInfo::DevILInitInfo InitializeDevIL();
 	void TerminateDevIL();
 }

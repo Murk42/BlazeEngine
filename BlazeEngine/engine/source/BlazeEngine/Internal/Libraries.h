@@ -1,7 +1,8 @@
 #pragma once
+#include "BlazeEngine/Core/Startup.h"
 
 namespace Blaze
-{
-	void InitializeLibraries();
+{	
+	Startup::BlazeLibrariesInitInfo InitializeLibraries();
 	void TerminateLibraries();
 }

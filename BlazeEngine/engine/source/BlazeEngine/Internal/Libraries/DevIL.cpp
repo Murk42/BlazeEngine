@@ -1,13 +1,16 @@
 #include "source/BlazeEngine/Internal/Libraries/DevIL.h"
-#include "BlazeEngine/DataStructures/String.h"
+#include "BlazeEngine/Utilities/Time.h"
 
 #include "IL/il.h"
 #include "IL/ilu.h"
 
 namespace Blaze
 {
-	void InitializeDevIL()
+	Startup::BlazeLibrariesInitInfo::DevILInitInfo InitializeDevIL()
 	{
+		Startup::BlazeLibrariesInitInfo::DevILInitInfo initInfo;
+		TimePoint startTimePoint = TimePoint::GetWorldTime();
+
 		ILenum error;
 
 		ilInit();
@@ -25,6 +28,9 @@ namespace Blaze
 			throw
 			"Failed to initialize the DevIL library!\n"
 			"DevIL error code: " + String::Convert(error);
+
+		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
+		return initInfo;
 	}
 	void TerminateDevIL()
 	{

@@ -174,12 +174,12 @@ namespace Blaze::Graphics
 
 		vb.AllocateDynamicStorage(BufferView(nullptr, sizeof(Vertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
 	}
-	void Line2DRenderer::Draw(Vec2f pos1, Vec2f pos2, ColorRGBA color, float width)
+	void Line2DRenderer::Draw(Vec2f pos1, Vec2f pos2, ColorRGBAf color, float width)
 	{
 		Vertex vertex;
 		vertex.pos1 = pos1;
 		vertex.pos2 = pos2;
-		vertex.color = color;
+		vertex.color = (Vec4f)color;
 		vertex.width = width;
 
 		if (cache != nullptr)

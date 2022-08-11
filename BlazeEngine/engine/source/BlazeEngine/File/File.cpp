@@ -1,5 +1,5 @@
 #include "BlazeEngine/File/File.h"
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 #include <io.h>
 #include <fcntl.h>
 

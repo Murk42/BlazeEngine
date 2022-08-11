@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 using namespace std;
 #include "VisualStudioInfo.h"
 #include "Command.h"
@@ -73,15 +74,20 @@ constexpr const char* GetBuildOutputTypeString(BuildOutputType outputType)
 
 struct BuildSettings
 {
+	struct Property
+	{
+		std::string name;
+		std::vector<std::string> values;		
+	};
+
 	std::string projectPath;
 	std::string outputDir;
 	std::string outputName;
 	std::string intermediateDir;
-	std::string additionalLibraryDirectories;
-	std::string additionalDependencies;
 	Configuration configuration = (Configuration)-1;
 	Platform platform = (Platform)-1;
 	BuildOutputType outputType = (BuildOutputType)-1;
+	std::vector<Property> properties;	
 };
 
 Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string additional = "");

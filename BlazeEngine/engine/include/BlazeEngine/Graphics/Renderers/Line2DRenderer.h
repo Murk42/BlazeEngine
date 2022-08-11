@@ -24,7 +24,7 @@ namespace Blaze
 			void SetBatchMode(uint batchSize);
 			void SetImmediateMode();
 
-			void Draw(Vec2f pos1, Vec2f pos2, ColorRGBA color, float width);
+			void Draw(Vec2f pos1, Vec2f pos2, ColorRGBAf color, float width);
 			void Flush();
 		};
 	}

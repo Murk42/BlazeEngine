@@ -188,11 +188,31 @@ namespace Blaze
 	StringUTF8::StringUTF8(const StringView& s)
 		: buffer(nullptr), bufferSize(s.Size() + 1), characterCount(s.Size())
 	{
-		if (s.Ptr() == nullptr)
+		if (s.Ptr() != nullptr)
 		{
 			buffer = Memory::Allocate(bufferSize);
 			memcpy(buffer, s.Ptr(), bufferSize);
 		}		
+		else
+		{
+			bufferSize = 0;
+			characterCount = 0;
+		}
+	}
+
+	StringUTF8::StringUTF8(const String& s)
+		: buffer(nullptr), bufferSize(s.Size() + 1), characterCount(s.Size())
+	{
+		if (s.Ptr() != nullptr)
+		{
+			buffer = Memory::Allocate(bufferSize);
+			memcpy(buffer, s.Ptr(), bufferSize);
+		}
+		else
+		{
+			bufferSize = 0;
+			characterCount = 0;
+		}
 	}
 
 	StringUTF8::~StringUTF8()
@@ -214,7 +234,7 @@ namespace Blaze
 	}
 	StringUTF8::Iterator StringUTF8::end() const
 	{
-		return Iterator((byte*)buffer + bufferSize);
+		return Iterator((byte*)buffer + bufferSize - 1);
 	}
 
 	StringUTF8& StringUTF8::Resize(size_t newCharacterCount, UnicodeChar fill)
@@ -417,8 +437,29 @@ namespace Blaze
 		StringUTF8 out;
 		out.bufferSize = (lSize == 0 ? 1 : lSize) + (rSize == 0 ? 1 : rSize) - 1;
 		out.buffer = Memory::Allocate(out.bufferSize);
+		out.characterCount = left.CharacterCount() + right.CharacterCount();
 		memcpy(out.buffer, left.Buffer(), lSize - 1);
 		memcpy((byte*)out.buffer + lSize - 1, right.Buffer(), rSize);
 		return out;
-	}	
+	}
+	StringUTF8 operator+(const StringViewUTF8& left, const StringView& right)
+	{
+		return left + StringViewUTF8(right);
+	}
+
+	StringUTF8 operator+(const StringView& left, const StringViewUTF8& right)
+	{
+		return StringViewUTF8(left) + right;
+	}
+
+	StringUTF8 operator+(const StringViewUTF8& left, const char* right)
+	{
+		return left + StringViewUTF8(right);
+	}
+
+	StringUTF8 operator+(const char* left, const StringViewUTF8& right)
+	{
+		return StringViewUTF8(left) + right;
+	}
+
 }

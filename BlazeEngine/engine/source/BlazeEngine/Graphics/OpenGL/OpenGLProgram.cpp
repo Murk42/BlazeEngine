@@ -1,7 +1,7 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLProgram.h"
 #include "BlazeEngine/DataStructures/String.h"
 #include "GL/glew.h"
-#include "BlazeEngine/Logger/LogListener.h"
+#include "BlazeEngine/Logging/LogListener.h"
 
 namespace Blaze
 {

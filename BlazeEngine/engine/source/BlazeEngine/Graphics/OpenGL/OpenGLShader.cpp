@@ -1,7 +1,7 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLShader.h"
 #include "BlazeEngine/File/File.h"
-#include "BlazeEngine/Logger/Logger.h"
-#include "BlazeEngine/Logger/LogListener.h"
+#include "BlazeEngine/Logging/Logger.h"
+#include "BlazeEngine/Logging/LogListener.h"
 
 #include "GL/glew.h"
 

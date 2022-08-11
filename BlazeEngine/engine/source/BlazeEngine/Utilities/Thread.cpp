@@ -1,5 +1,5 @@
 #include "BlazeEngine/Utilities/Thread.h"
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include <Windows.h>

@@ -1,6 +1,6 @@
 #include "BlazeEngine/File/FileSystem.h"
 
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 
 #include <filesystem>
 #include <fstream>

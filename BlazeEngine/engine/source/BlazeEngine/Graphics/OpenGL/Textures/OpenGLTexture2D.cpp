@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture2D.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 
 #include "GL/glew.h"
 #include "IL/il.h"
@@ -10,6 +10,35 @@
 
 namespace Blaze::OpenGL
 {
+	void CalculateAlignmentAndStride(uint width, uint byteStride, uint pixelSize, uint& align, uint& pixelStride)
+	{
+		uint byteWidth = width * pixelSize;
+
+		if (byteWidth == byteStride)
+		{
+			align = 1;
+		}
+		else
+		{
+			if (byteStride % 8 == 0)
+			{
+				align = 8;
+			}
+			if (byteStride % 4 == 0)
+			{
+				align = 4;
+			}
+			else if (byteStride % 2 == 0)
+			{
+				align = 2;
+			}
+			else
+				align = 1;
+		}
+		
+		pixelStride = byteStride / pixelSize;		
+	}
+
 	Texture2D::Texture2D()
 		: id(-1), size(0)
 	{
@@ -133,8 +162,11 @@ namespace Blaze::OpenGL
 		GLenum _format = OpenGLPixelFormat(format);
 		GLenum _type = OpenGLPixelType(type);
 		
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
+		uint align;
+		uint str;
+		CalculateAlignmentAndStride(size.x, stride, PixelTypeSize(type) * GetFormatDepth(format), align, str);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, align);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, str);		
 		glTextureSubImage2D(id, 0, offset.x, offset.y, size.x, size.y, _format, _type, pixels);
 	}
 

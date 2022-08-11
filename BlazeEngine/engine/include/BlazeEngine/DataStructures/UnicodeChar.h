@@ -12,7 +12,7 @@ namespace Blaze
 		UnicodeChar() = default;
 		UnicodeChar(const UnicodeChar&);
 		UnicodeChar(char ch);
-		UnicodeChar(const StringViewUTF8&);
+		UnicodeChar(const char*);		
 
 		inline uint32 Value() const { return value; }
 		size_t UTF8Size();

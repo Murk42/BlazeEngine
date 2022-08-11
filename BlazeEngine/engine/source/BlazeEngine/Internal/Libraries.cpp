@@ -5,14 +5,23 @@
 #include "source/BlazeEngine/Internal/Libraries/GLEW.h"
 #include "source/BlazeEngine/Internal/Libraries/FreeType.h"
 
+#include "BlazeEngine/Utilities/Time.h"
+
+
 namespace Blaze
-{
-	void InitializeLibraries()
+{	
+	Startup::BlazeLibrariesInitInfo InitializeLibraries()
 	{
-		InitializeSDL();
-		InitializeGLEW();
-		InitializeDevIL();
-		InitializeFreeType();
+		Startup::BlazeLibrariesInitInfo initInfo;
+		TimePoint startTimePoint = TimePoint::GetWorldTime();
+
+		initInfo.sdlInitInfo = InitializeSDL();
+		initInfo.glewInitInfo = InitializeGLEW();
+		initInfo.devILInitInfo = InitializeDevIL();
+		initInfo.freeTypeInitInfo = InitializeFreeType();
+		
+		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
+		return initInfo;
 	}
 	void TerminateLibraries()
 	{

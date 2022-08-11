@@ -266,6 +266,14 @@ namespace Blaze
 		out.size = size;
 		return out;
 	}
+	String operator+(const StringView& left, const char* right)
+	{
+		return left + StringView(right);
+	}
+	String operator+(const char* left, const StringView& right)
+	{
+		return StringView(left) + right;
+	}
 	String operator+(const StringView& left, const char& right)
 	{
 		if (left.Ptr() == nullptr)

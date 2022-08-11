@@ -6,18 +6,6 @@
 
 namespace Blaze
 {
-	enum class Align
-	{
-		Top,
-		TopRight,
-		Right,
-		BottomRight,
-		Bottom,
-		BottomLeft,
-		Left,
-		TopLeft,
-		Center
-	};
 
 	class BLAZE_API Transform2D
 	{

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Command.h"
+#include "Result.h"
 
 class Library
 {

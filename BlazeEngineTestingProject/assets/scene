@@ -1,0 +1,57 @@
+layer "mainLayer"
+
+Font "font" name = "Default font" {
+	"font32" Antialiased 32
+	"font14" Antialiased 14
+}
+
+element Panel "propertiesPanel" ("mainLayer") 
+{			
+	rect			= (50,-50) 200x400	
+	anchor			= ""
+	localAlignment	= TopLeft
+	anchorAlignment = TopLeft			
+
+	borderWidth		= 1
+	cornerRadius	= 1
+	fillColor		= 0x44444488
+	borderColor		= 0x333333FF		
+}
+
+element Text "propertiesText" ("mainLayer") 
+{
+	pos				= (10,-10)
+	anchor			= "propertiesPanel"
+	localAlignment	= TopLeft
+	anchorAlignment = TopLeft				
+
+	font			= "font32"
+	text			= "Properties"
+	fontSize		= 32
+	color			= 0xFFFFFFFF
+
+	sizeChanged		= "PropertiesTextSizeChanged"
+}
+
+element Text "smallText" ("mainLayer") 
+{
+	pos				= (0,-10)
+	anchor			= "propertiesText"
+	localAlignment	= TopLeft
+	anchorAlignment = BottomLeft			
+
+	font			= "font14"
+	text			= "Panel"
+	fontSize		= 14
+	color			= 0xFF0000FF
+}
+
+element Button "button" ("mainLayer")
+{
+	anchor			= "propertiesText"
+	anchorAlignment = Center
+	localAlignment	= Center
+	rect			= (0, 0) 200x30
+
+	pressed			= "PropertiesButtonPressed"
+}

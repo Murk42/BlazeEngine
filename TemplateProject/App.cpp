@@ -1,6 +1,42 @@
 #include "BlazeEngine/BlazeEngine.h"
 using namespace Blaze;
 
+int CalculateFPS()
+{
+	static int fps_count;
+	static int fps;
+	static TimePoint last_time_point = TimePoint::GetWorldTime();
+
+	TimePoint now = TimePoint::GetWorldTime();
+	if (now - last_time_point > 1.0f)
+	{
+		fps = fps_count;
+		last_time_point = now;
+		fps_count = 0;
+	}
+	fps_count++;
+
+	return fps;
+}
+
+void RenderFrames(int fps)
+{
+	Vec2i viewportSize = Renderer::GetViewportSize();
+
+	Graphics::Write("FPS: " + StringUTF8::Convert(fps), 20.0f, Vec2f(), ColorRGBAf(0.0f, 0.9f, 0.0f, 1.0f));
+}
+
+void RenderCube()
+{
+	static Quatf cameraRot;
+	Vec3f cameraPos = cameraRot * Vec3f(0, 0, -3);
+
+	cameraRot *= Quatf(Vec3f(0, 1, 0), 0.001f);
+
+	Graphics::Set3DViewMatrix(Math::RotationMatrix(cameraRot.Conjugated()) * Math::TranslationMatrix(-cameraPos));
+	Graphics::DrawBoxOutline3D(Vec3f(-1, -1, -1), Vec3f(1, 1, 1), Colors::White, 3.0f);
+}
+
 CLIENT_API void Setup()
 {
 	Window window{ "Blaze engine application", Vec2i(640, 360) };
@@ -12,16 +48,14 @@ CLIENT_API void Setup()
 
 	while (!Input::GetKeyState(Key::Escape).pressed)
 	{
+		int FPS = CalculateFPS();
+
 		Input::Update();
 
 		Renderer::ClearTarget();
 
-		float time = TimePoint::GetRunTime().GetValue();
-		float r = Math::Sin(time + Math::PI / 3 * 0) / 2 + 0.5f;
-		float g = Math::Sin(time + Math::PI / 3 * 1) / 2 + 0.5f;
-		float b = Math::Sin(time + Math::PI / 3 * 2) / 2 + 0.5f;
-
-		Graphics::Write("Hello :)", Vec2i(20, 125), 140, ColorRGBAf(r, g, b, 1));
+		RenderFrames(FPS);
+		RenderCube();
 
 		Renderer::SwapWindowBuffers();
 	}

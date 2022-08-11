@@ -8,6 +8,7 @@ namespace Blaze
 {	
 	class StringViewUTF8;		
 	class StringView;	
+	class String;
 	
 	class BLAZE_API StringUTF8
 	{
@@ -50,7 +51,8 @@ namespace Blaze
 		StringUTF8(const char* ptr);
 		StringUTF8(const char* ptr, size_t size);
 		StringUTF8(const StringViewUTF8&);
-		StringUTF8(const StringView&);		
+		explicit StringUTF8(const StringView&);		
+		explicit StringUTF8(const String&);
 
 		~StringUTF8();			
 		
@@ -105,6 +107,9 @@ namespace Blaze
 		friend BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);				
 	};
 	
-
 	BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);
+	BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringView& right);
+	BLAZE_API StringUTF8 operator+(const StringView& left, const StringViewUTF8& right);
+	BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const char* right);
+	BLAZE_API StringUTF8 operator+(const char* left, const StringViewUTF8& right);
 }

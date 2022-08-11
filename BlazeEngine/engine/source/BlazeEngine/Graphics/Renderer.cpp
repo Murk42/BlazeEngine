@@ -1,12 +1,12 @@
 #include "BlazeEngine/Graphics/Renderer.h"
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/Core/Window.h"
-#include "BlazeEngine/Application/Application.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
 #include "BlazeEngine/Event/Events.h"
 #include "BlazeEngine/Event/EventDispatcher.h"
 #include "BlazeEngine/Event/EventHandler.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
+#include "BlazeEngine/Core/Startup.h"
 
 #include "SDL/SDL.h"
 #include "GL/glew.h"
@@ -46,10 +46,16 @@ namespace Blaze
 	static ColorRGBAf clearColor;
 
 
-	void InitializeRenderer()
+	Startup::RendererInitInfo InitializeRenderer()
 	{
+		Startup::RendererInitInfo initInfo;
+		TimePoint startTimePoint = TimePoint::GetWorldTime();
+
 		target = GetOpenGLInitWindow();
 		selectedVertexArray = &defaultVertexArray;
+
+		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
+		return initInfo;
 	}
 	void TerminateRenderer()
 	{

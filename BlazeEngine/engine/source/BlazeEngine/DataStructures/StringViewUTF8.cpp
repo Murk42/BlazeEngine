@@ -115,7 +115,7 @@ namespace Blaze
 	StringViewUTF8::StringViewUTF8(const char* ptr)
 		: buffer(ptr), bufferSize(0), characterCount(0)
 	{
-		characterCount = strlen(ptr);
+		characterCount = ptr == nullptr ? 0 : strlen(ptr);
 		bufferSize = characterCount + 1;
 	}
 	StringViewUTF8::StringViewUTF8(const char* ptr, size_t size)
@@ -129,14 +129,19 @@ namespace Blaze
 	StringViewUTF8::StringViewUTF8(const StringView& s)
 		: buffer(s.Ptr()), bufferSize(s.Size() + 1), characterCount(s.Size())
 	{
-	}	
+	}
+	StringViewUTF8::StringViewUTF8(const String& s)
+		: buffer(s.Ptr()), bufferSize(s.Size() + 1), characterCount(s.Size())
+	{
+	}
+
 	StringViewUTF8::Iterator StringViewUTF8::begin() const
 	{
 		return Iterator(buffer);
 	}
 	StringViewUTF8::Iterator StringViewUTF8::end() const
 	{
-		return Iterator((byte*)buffer + bufferSize);
+		return Iterator((byte*)buffer + bufferSize - 1);
 	}
 	StringViewUTF8& StringViewUTF8::operator=(const StringViewUTF8& s)
 	{

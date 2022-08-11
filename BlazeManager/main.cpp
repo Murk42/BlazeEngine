@@ -1,9 +1,9 @@
 #include <iostream>
-
 #include "VisualStudioInfo.h"
 #include "Parsing.h"
-#include "commands/BuildCommandParser.h"
-#include "commands/RunCommandParser.h"
+#include "commands/Build/BuildCommandParser.h"
+#include "commands/Run/RunCommandParser.h"
+#include "commands/Help/PrintHelp.h"
 
 VisualStudioInfo vsInfo;
 string blazeDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngine\\";
@@ -99,10 +99,22 @@ int main(int argc, char* argv[])
 
 			RunCommandOptions options;
 			if (ParseRunCommand(args, options)) continue;
-			if (RunCommand(options)) continue;
+			bool ret = RunCommand(options);
+			if (options.stopAfter)
+				return 0;
+			if (ret)
+				continue;
+		}
+		else if (args[0] == "help")
+		{
+			PrintHelp();
+		}
+		else if (args[0] == "vsInfo")
+		{
+			PrintVisualStudioInfo(vsInfo);
 		}
 	}
-
+	
 	return 0;
 }
 

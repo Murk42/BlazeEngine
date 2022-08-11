@@ -1,55 +1,50 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
-#include "BlazeEngine/Resources/Font/Font.h"
 
 namespace Blaze
 {
-	namespace Graphics
+	class FontResolution;
+}
+
+namespace Blaze::Graphics
+{	
+	class TextRenderCache;
+	class BaseTextVertexGenerator;
+
+	struct TextShaderProgramSource
 	{
-		class TextRenderer;
+		String vert;
+		String geom;
+		String frag;
+	};	
 
-		class BLAZE_API TextRenderData
-		{
-			Core::GraphicsBuffer vb;
-			Core::VertexArray va;
-			unsigned vertexCount;
-			Vec2f size;
-			Vec2f bottomLeft;
-			Vec2f topRight;			
-			FontResolution* fontResolution;
-			const TextRenderer* renderer;
-		public:
-			TextRenderData(TextRenderData&&);
-			TextRenderData(const TextRenderer& renderer, StringViewUTF8 text, float height);
+	BLAZE_API TextShaderProgramSource GetDefaultTextShaderProgramSource_Normal();
+	BLAZE_API TextShaderProgramSource GetDefaultTextShaderProgramSource_LCD();
+	BLAZE_API TextShaderProgramSource GetDefaultTextShaderProgramSource_SDF();	
 
-			Vec2f GetSize() const { return size; }
-			Vec2f GetBottomLeft() const { return bottomLeft; }
-			Vec2f GetTopRight() const { return topRight; }
-			FontResolution* GetFontResolution() const { return fontResolution; }
+	class BLAZE_API TextRenderer
+	{
+		Core::ShaderProgram program;
+		Core::VertexArray va;
+		Core::GraphicsBuffer vb;
 
-			friend class TextRenderer;
-		};
+		FontResolution* fontResolution;
+		Mat4f proj;
+		
+	public:
+		TextRenderer();
+		~TextRenderer();
 
-		class BLAZE_API TextRenderer
-		{
-			Core::ShaderProgram program;
-			Core::VertexArray va;
-			Core::GraphicsBuffer vb;
-			std::vector<FontResolution*> fontResolutions;			
+		void SetProjectionMatrix(Mat4f mat);
+		void SetFontResolution(FontResolution* fontResolution);
+		
+		Result Write(const StringViewUTF8& text, Vec2f pos, ColorRGBAf color, float size);
+		Result Write(const StringViewUTF8& text, Vec2f pos, ColorRGBAf color, float size, BaseTextVertexGenerator& generator);
+		Result Write(TextRenderCache&, Vec2f pos, float size, ColorRGBAf color);
 
-			FontResolution* SelectResolution(int resolution) const;
-		public:
-			TextRenderer();
-			~TextRenderer();
-
-			void SetProjectionMatrix(Mat4f mat);
-			void SetResolutions(std::initializer_list<FontResolution*> resolutions);
-
-			void Write(const StringViewUTF8& text, int resolution, Vec2f pos, ColorRGBA color);
-			void Write(TextRenderData&, Vec2f pos, ColorRGBA color);
-
-			friend class TextRenderData;
-		};
-	}
+		inline Core::ShaderProgram& GetShaderProgram() { return program; };
+		inline const Core::ShaderProgram& GetShaderProgram() const { return program; }
+		inline FontResolution* GetFontResolution() const { return fontResolution; }
+	};
 }

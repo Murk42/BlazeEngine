@@ -1,7 +1,8 @@
 #pragma once
+#include "BlazeEngine/Core/Startup.h"
 
 namespace Blaze
 {
-	void InitializeFreeType();
+	Startup::BlazeLibrariesInitInfo::FreeTypeInitInfo InitializeFreeType();
 	void TerminateFreeType();
 }

@@ -12,50 +12,60 @@
 
 namespace Blaze
 {		
-	class Font;
+	class Font;	
 
-	struct CharacterData
+	enum class FontResolutionRenderType
 	{
-		float advance;
-		Vec2f renderOffset;
-		Vec2f size;
-
-		Vec2f uv1;
-		Vec2f uv2;
-	};
-
-	struct CharacterMetrics
-	{		
-		float advance;
-		Vec2f renderOffset;
-		Vec2f size;
+		Monochrome,
+		Antialiased,		
+		HorizontalLCD,
+		VerticalLCD,
+		SDF,
 	};
 		               
-	class BLAZE_API FontResolution
+	struct CharacterMetrics
 	{		
-		struct CharacterUV
-		{
-			Vec2f uv1;
-			Vec2f uv2;
+		Vec2f uv1;
+		Vec2f uv2;
 
-			CharacterMetrics* metrics;
-		};
+		float advance;
+		Vec2f renderOffset;
+		Vec2f size;		
 
+		Vec2i bitmapSize;
+	};
+
+	class BLAZE_API FontResolution
+	{				
 		Font* font;
-		uint resolution;
 		Graphics::Core::Texture2D atlas;
-		std::unordered_map<uint, CharacterUV> characterMap;
-		float baselineDistance;
-		
-		void LoadAtlas();
-	public:
+		FontResolutionRenderType renderType;
+		std::unordered_map<uint, CharacterMetrics> characterMap;
 
-		CharacterData GetCharacterData(UnicodeChar ch);
-		uint GetResolution() const { return resolution; }		
-		Graphics::Core::Texture2D& GetAtlas() { return atlas; }
-		Font* GetFont() { return font; }
-		const Font* GetFont() const { return font; }
-		inline float GetBaselineDistance() const { return baselineDistance; }
+		uint resolution;
+		uint baselineDistance;
+
+		uint characterCount;		
+	public:
+		FontResolution();
+
+		Result LoadCharacters(uint32 firsrt, uint32 last);
+		Result LoadAllCharacters();
+
+		Result CreateAtlas();
+
+		CharacterMetrics GetCharacterData(UnicodeChar ch);
+
+		Vec2f GetKerning(UnicodeChar left, UnicodeChar right);
+
+		inline uint GetResolution() const { return resolution; }		
+		inline FontResolutionRenderType GetRenderType() const { return renderType; }
+		inline Graphics::Core::Texture2D& GetAtlas() { return atlas; }
+		inline const Graphics::Core::Texture2D& GetAtlas() const { return atlas; }		
+		inline const Font* GetFont() const { return font; }
+		inline uint GetBaselineDistance() const { return baselineDistance; }
+
+		static constexpr const char* typeName = "FontResolution";
 
 		friend class Font;
 	};
@@ -65,22 +75,25 @@ namespace Blaze
 		void* ptr;					
 
 		std::vector<FontResolution*> resolutions;				
-		std::unordered_map<uint, CharacterMetrics> characterMap;				
-		uint characterCount;
+				
 		uint pixelsPerUnit; //How many pixels fit in one font unit
+		float baselineDistance;
 
-		void LoadFontMetrics();
 	public:
 		Font();		
 		~Font();				
-					
-		int Load(StringView path, bool emitLogOnFail = true);
-		FontResolution* CreateFontResolution(uint resolution);				
-						
-		inline std::vector<FontResolution*> GetResolutions() const { return resolutions; }
+				
+		/// <summary>					Load a font file. </summary>
+		/// <param name='path'>			- Path to the file </param>
+		/// <param name='characters'>	- All characters to be loaded. If empty loads all characters from the file </param>		
+		Result Load(StringView path);		
 
-		friend class FontResolution;
-		inline FontType GetType() const { return type; }
-		inline uint GetBaselineDistance() const { return baselineDistance; }
+		FontResolution* CreateFontResolution(uint resolution, FontResolutionRenderType renderType);												
+		inline std::vector<FontResolution*> GetResolutions() const { return resolutions; }
+		FontResolution* GetClosestResolution(float res) const;		
+
+		static constexpr const char* typeName = "Font";
+
+		friend class FontResolution;		
 	};	
 }

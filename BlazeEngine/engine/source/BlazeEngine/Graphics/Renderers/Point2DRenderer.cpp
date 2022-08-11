@@ -141,11 +141,11 @@ namespace Blaze::Graphics
 
 		vb.AllocateDynamicStorage(BufferView(nullptr, sizeof(PointVertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
 	}
-	void Point2DRenderer::Draw(Vec2f pos, ColorRGBA color, float radius)
+	void Point2DRenderer::Draw(Vec2f pos, ColorRGBAf color, float radius)
 	{
 		PointVertex vertex;
 		vertex.pos = pos;
-		vertex.color = color;
+		vertex.color = (Vec4f)color;
 		vertex.radius = radius;
 
 		if (cache != nullptr)

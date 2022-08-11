@@ -2,11 +2,13 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/UnicodeChar.h"
+#include "BlazeEngine/DataStructures/String.h"
 
 namespace Blaze
 {
 	class StringUTF8;
 	class StringView;	
+	class String;
 
 	class BLAZE_API StringViewUTF8
 	{
@@ -46,7 +48,8 @@ namespace Blaze
 		StringViewUTF8(const char* ptr);
 		StringViewUTF8(const char* ptr, size_t size);		
 		StringViewUTF8(const StringUTF8&);
-		StringViewUTF8(const StringView&);		
+		explicit StringViewUTF8(const StringView&);		
+		explicit StringViewUTF8(const String&);
 
 		const void* Buffer() const { return buffer; }
 		size_t BufferSize() const { return bufferSize; }

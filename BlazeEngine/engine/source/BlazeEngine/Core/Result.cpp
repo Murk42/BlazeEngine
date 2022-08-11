@@ -1,6 +1,6 @@
 #include "BlazeEngine/Core/Result.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 
 namespace Blaze
 {

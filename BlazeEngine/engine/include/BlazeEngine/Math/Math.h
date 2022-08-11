@@ -117,5 +117,17 @@ namespace Blaze
 				T(0), T(0), 1, T(0)
 				});				
 		}			
+
+		template<typename T>
+		constexpr inline T MatrixDeterminant(const Matrix<T, 3, 3> mat)
+		{			
+			return
+				mat.arr[0 + 0 * 3] * mat.arr[1 + 1 * 3] * mat.arr[2 + 2 * 3] +
+				mat.arr[1 + 0 * 3] * mat.arr[2 + 1 * 3] * mat.arr[0 + 2 * 3] +
+				mat.arr[2 + 0 * 3] * mat.arr[0 + 1 * 3] * mat.arr[1 + 2 * 3] -
+				mat.arr[2 + 0 * 3] * mat.arr[1 + 1 * 3] * mat.arr[0 + 2 * 3] - 
+				mat.arr[1 + 0 * 3] * mat.arr[0 + 1 * 3] * mat.arr[2 + 2 * 3] - 
+				mat.arr[0 + 0 * 3] * mat.arr[2 + 1 * 3] * mat.arr[1 + 2 * 3];
+		}
 	};
 }

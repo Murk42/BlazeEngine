@@ -1,8 +1,9 @@
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Core/Window.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Logger/Logger.h"
+#include "BlazeEngine/Logging/Logger.h"
 #include "source/BlazeEngine/Internal/InternalKeyStateData.h"
+#include "BlazeEngine/Core/Startup.h"
 #include "BlazeEngine/Event/EventDispatcher.h"
 #include "BlazeEngine/Event/EventHandler.h"
 #include "BlazeEngine/Event/Events.h"
@@ -52,8 +53,11 @@ namespace Blaze
 
 	static Window* focusedWindow = nullptr;
 
-	void InitializeInput()
+	Startup::InputInitInfo InitializeInput()
 	{		
+		Startup::InputInitInfo initInfo;
+		TimePoint startTimePoint = TimePoint::GetWorldTime();
+
 		SDL_GetGlobalMouseState(&mousePos.x, &mousePos.y);
 
 		for (auto& keyState : keyStates)
@@ -72,6 +76,9 @@ namespace Blaze
 			keyState.pressed = false;
 			keyState.released = false;
 		}
+
+		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
+		return initInfo;
 	}
 	void TerminateInput()
 	{
@@ -327,7 +334,7 @@ namespace Blaze
 
 		void ShowCursor(bool show)
 		{
-			SDL_SetRelativeMouseMode(show ? SDL_TRUE : SDL_FALSE);
+			SDL_ShowCursor(show);			
 		}
 
 		void LockCursor(bool lock)

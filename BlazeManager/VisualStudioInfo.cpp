@@ -39,9 +39,9 @@ VisualStudioInfo GetVisualStudioInfo()
 void PrintVisualStudioInfo(VisualStudioInfo info)
 {
 	std::cout << "\n\tVisual Studio info\n";
-	std::cout << "-instalationPath = " << info.instalationPath << "\n";
-	std::cout << "-devenvPath = " << info.devenvPath << "\n";
-	std::cout << "-MSBuildPath = " << info.MSBuildPath << "\n";
+	std::cout << "instalationPath = \"" << info.instalationPath << "\"\n";
+	std::cout << "devenvPath      = \"" << info.devenvPath << "\"\n";
+	std::cout << "MSBuildPath     = \"" << info.MSBuildPath << "\"\n";
 	std::cout << "\n";
 
 }

@@ -59,9 +59,9 @@ namespace Blaze
 		: value(ch)
 	{
 	}
-	UnicodeChar::UnicodeChar(const StringViewUTF8& s)
+	UnicodeChar::UnicodeChar(const char* ptr)
 	{
-		UTF8ToUnicode((const char*)s.Buffer(), value);
+		UTF8ToUnicode(ptr, value);
 	}	
 
 	size_t UnicodeChar::UTF8Size()

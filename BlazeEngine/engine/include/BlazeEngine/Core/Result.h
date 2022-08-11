@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/Logger/Log.h"
+#include "BlazeEngine/Logging/Log.h"
 #include <vector>
 
 namespace Blaze

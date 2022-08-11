@@ -2,50 +2,10 @@
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 
-#include "ft2build.h"
 #include "freetype/freetype.h"
-#include "freetype/ftbitmap.h"
-#include "freetype/ftoutln.h"
+#include "source/BlazeEngine/Internal/Conversions.h"
 
-
-#include <cassert>
-#include <algorithm>
-#include <string>
-#include <codecvt> // for std::codecvt_utf8
-#include <locale>  // for std::wstring_convert
-
-#include "C:/Programming/Libraries/rectpack2D/include/rectpack2D/finders_interface.h"
-
-constexpr bool allow_flip = false;
-using spaces_type = rectpack2D::empty_spaces<allow_flip, rectpack2D::default_empty_spaces>;
-using rect_type = rectpack2D::output_rect_t<spaces_type>;
-
-rectpack2D::rect_wh PackRects(std::vector<rect_type>& rectangles)
-{
-	const auto runtime_flipping_mode = rectpack2D::flipping_option::DISABLED;
-	const auto max_side = 4096;
-	const auto discard_step = 1;
-
-	auto report_successful = [](rect_type&) {
-		return rectpack2D::callback_result::CONTINUE_PACKING;
-	};
-
-	auto report_unsuccessful = [](rect_type&) {
-		return rectpack2D::callback_result::ABORT_PACKING;
-	};
-
-	const auto result_size = rectpack2D::find_best_packing<spaces_type>(
-		rectangles,
-		make_finder_input(
-			max_side,
-			discard_step,
-			report_successful,
-			report_unsuccessful,
-			runtime_flipping_mode
-		));
-
-	return result_size;
-}
+#include "rectpack2D.h"
 
 namespace Blaze
 {
@@ -53,103 +13,313 @@ namespace Blaze
 
 	struct CharacterBitmap
 	{
-		uint character;		
+		uint character = 0;		
 
 		Vec2i size;
-		size_t stride;
-		uint8* data;
+		size_t stride = 0;
+		uint8* data = nullptr;
 	};	
 
-	void FontResolution::LoadAtlas()
-	{		
+	void CopyBitmapData(CharacterBitmap& dst, const FT_Bitmap& src, bool isMonochrome)
+	{
+		delete[] dst.data;
+		
+		if (isMonochrome)
+		{
+			dst.data = new uint8[src.width * src.rows];
+
+			uint offset = 0;
+			uint srcOffset = 0;
+			for (uint y = 0; y < src.rows; ++y)
+			{
+				for (uint x = 0; x < src.width; ++x)				
+					dst.data[offset + x] = ((src.buffer[x / 8 + srcOffset] >> (7 - x % 8)) & 1) ? 255 : 0;
+					//dst.data[offset + x] = (src.buffer[x + offset]) ? 255 : 0;
+				
+				offset += src.width;
+				srcOffset += src.pitch;
+			}
+
+			dst.size = Vec2i(src.width, src.rows);
+			dst.stride = src.width;
+		}
+		else
+		{
+			dst.data = new uint8[src.pitch * src.rows];
+			dst.size = Vec2i(src.width, src.rows);
+			dst.stride = src.pitch;
+
+			memcpy(dst.data, src.buffer, dst.stride * dst.size.y);
+		}
+
+	}
+	void FreeBitmapData(CharacterBitmap& bm)
+	{
+		delete[] bm.data;
+	}
+
+	void SelectPixelFormats(Graphics::Core::TextureInternalPixelFormat& internalFormat, BitmapPixelFormat& bitmapFormat, FontResolutionRenderType renderType)
+	{
+		using namespace Graphics::Core;
+		switch (renderType)
+		{
+		case Blaze::FontResolutionRenderType::Monochrome:		
+			internalFormat = TextureInternalPixelFormat::R; 
+			bitmapFormat = BitmapPixelFormat::Red;
+			break;
+		case Blaze::FontResolutionRenderType::Antialiased:		
+			internalFormat = TextureInternalPixelFormat::R; 
+			bitmapFormat = BitmapPixelFormat::Red;
+			break;
+		case Blaze::FontResolutionRenderType::HorizontalLCD:	
+			internalFormat = TextureInternalPixelFormat::RGB; 
+			bitmapFormat = BitmapPixelFormat::RGB;
+			break;
+		case Blaze::FontResolutionRenderType::VerticalLCD:		
+			internalFormat = TextureInternalPixelFormat::RGB;
+			bitmapFormat = BitmapPixelFormat::RGB;
+			break;
+		case Blaze::FontResolutionRenderType::SDF:				
+			internalFormat = TextureInternalPixelFormat::R; 
+			bitmapFormat = BitmapPixelFormat::Red;
+			break;
+		}
+	}
+	void SelectRenderMode(uint32& mode, FontResolutionRenderType type)
+	{
+		switch (type)
+		{
+		case Blaze::FontResolutionRenderType::Monochrome:
+			mode = FT_RENDER_MODE_MONO;
+			//mode = FT_LOAD_TARGET_MONO;
+			break;
+		case Blaze::FontResolutionRenderType::Antialiased:
+			mode = FT_RENDER_MODE_NORMAL;
+			//mode = FT_LOAD_TARGET_NORMAL;
+			break;
+		case Blaze::FontResolutionRenderType::HorizontalLCD:
+			mode = FT_RENDER_MODE_LCD;
+			//mode = FT_LOAD_TARGET_LCD;
+			break;
+		case Blaze::FontResolutionRenderType::VerticalLCD:
+			mode = FT_RENDER_MODE_LCD_V;
+			//mode = FT_LOAD_TARGET_LCD_V ;
+			break;
+		case Blaze::FontResolutionRenderType::SDF:
+			mode = FT_RENDER_MODE_SDF;
+			//mode = 0;
+			break;		
+		}
+	}
+	
+	void CreateTexture(Graphics::Core::Texture2D& atlas, std::vector<rect_type>& rectangles, Graphics::Core::TextureInternalPixelFormat internalPixelFormat)
+	{
+		const auto result_size = PackRects(rectangles);
+		Vec2i textureSize = Vec2i(result_size.w, result_size.h);
+		//int bigger = std::max(textureSize.x, textureSize.y);
+		//bigger = 1 << (int)std::ceil(log2(bigger));
+		//textureSize = { bigger, bigger };
+		atlas.Create(textureSize, internalPixelFormat);
+
+		atlas.SetSettings({
+			Graphics::Core::TextureWrapping::ClampToEdge,
+			Graphics::Core::TextureWrapping::ClampToEdge,
+			Graphics::Core::TextureSampling::Linear,
+			Graphics::Core::TextureSampling::Linear,
+			Graphics::Core::TextureSampling::Nearest,
+			false
+			});
+	}
+
+	void CopyGlypMetrics(CharacterMetrics& out, FT_GlyphSlot& in, uint pixelsPerUnit, FontResolutionRenderType renderType)
+	{
+		//if (renderType == FontResolutionRenderType::SDF)
+		//{
+		//	out.size = Vec2f(in->metrics.width, in->metrics.height);
+		//	out.advance = float(in->metrics.horiAdvance);
+		//	out.renderOffset = Vec2f(in->metrics.horiBearingX, in->metrics.horiBearingY - in->metrics.height) - out.size / 2;
+		//	out.size *= 2;
+		//}
+		//else
+		//{
+		out.size = Vec2f(in->metrics.width, in->metrics.height) / 64.0f;
+		out.advance = float(in->metrics.horiAdvance) / 64.0f;
+		out.renderOffset = Vec2f(in->metrics.horiBearingX, in->metrics.horiBearingY - in->metrics.height) / 64.0f;
+		//}
+		
+		//float k = 1.0f / pixelsPerUnit;
+		//out.size *= k;
+		//out.advance *= k;
+		//out.renderOffset *= k;		
+	}		
+
+	FontResolution::FontResolution()
+		: font(nullptr), resolution(0), characterCount(0)
+	{
+	}
+
+	Result FontResolution::LoadCharacters(uint32 first, uint32 last)
+	{
 		FT_Face face = (FT_Face)font->ptr;
 
-		CharacterBitmap* characterBitmaps;
-
-		uint character;
-		uint glyphIndex;
+		uint32 renderMode;
+		SelectRenderMode(renderMode, renderType);
 
 		FT_Set_Pixel_Sizes(face, 0, resolution);
 
-		std::vector<rect_type> rectangles;
-		rectangles.resize(font->characterCount);
-		characterBitmaps = new CharacterBitmap[font->characterCount];
+		int notLoadedCount = 0;
+		for (uint32 ch = first; ch != last + 1; ++ch)			
+			if (characterMap.find(ch) == characterMap.end())
+			{
+				uint glyphIndex = FT_Get_Char_Index(face, ch);
 
-		character = FT_Get_First_Char(face, &glyphIndex);
-		for (uint i = 0; glyphIndex != 0; ++i)
+				if (glyphIndex == 0)
+				{
+					++notLoadedCount;
+					continue;
+				}
+
+				CharacterMetrics data;
+								
+				FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
+				CopyGlypMetrics(data, face->glyph, font->pixelsPerUnit, renderType);
+
+				characterMap.insert({ ch, data });
+
+				++characterCount;
+			}
+
+		if (notLoadedCount == 0)
+			return Result();
+		else
+			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
+				"Not all characters were loaded. " + String::Convert(notLoadedCount) + " out of " + String::Convert(last - first + 1) + "."));
+	}
+	Result FontResolution::LoadAllCharacters()
+	{
+		FT_Face face = (FT_Face)font->ptr;
+
+		uint glyphIndex;
+		uint character = FT_Get_First_Char(face, &glyphIndex);
+
+		while (glyphIndex != 0)
+			if (characterMap.find(character) == characterMap.end())
+			{
+				CharacterMetrics data;
+
+				FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
+				CopyGlypMetrics(data, face->glyph, font->pixelsPerUnit, renderType);
+
+				characterMap.insert({ character, data });
+
+				character = FT_Get_Next_Char(face, character, &glyphIndex);
+				++characterCount;
+			}
+
+		return Result();
+	}
+
+	Result FontResolution::CreateAtlas()
+	{		
+		FT_Face face = (FT_Face)font->ptr;
+		CharacterBitmap* characterBitmaps = new CharacterBitmap[characterCount];		
+		std::vector<rect_type> rectangles(characterCount);	
+						
+		//resolution = font->baselineDistance;
+		//FT_Set_Char_Size(face, 0, resolution * 64, 0, 0);
+		FT_Set_Pixel_Sizes(face, 0, resolution);		
+
+		Graphics::Core::TextureInternalPixelFormat internalPixelFormat;		
+		BitmapPixelFormat bitmapPixelFormat;
+		BitmapPixelType bitmapPixelType = BitmapPixelType::Uint8;
+		SelectPixelFormats(internalPixelFormat, bitmapPixelFormat, renderType);
+
+		uint32 renderMode;
+		SelectRenderMode(renderMode, renderType);
+
+		bool isMonochrome = renderType == FontResolutionRenderType::Monochrome;		
+		uint bitmapPixelDepth = GetFormatDepth(bitmapPixelFormat);
+
+		uint i;
+
+		i = 0;
+		for (auto& metricsIT : characterMap)
 		{
+			uint character = metricsIT.first;
+			uint glyphIndex = FT_Get_Char_Index(face, character);
 			CharacterBitmap& bitmap = characterBitmaps[i];
-			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			
-			FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 
-			bitmap.data = new uint8[face->glyph->bitmap.pitch * face->glyph->bitmap.rows];
-			bitmap.size = Vec2i(face->glyph->bitmap.width, face->glyph->bitmap.rows);
-			bitmap.stride = face->glyph->bitmap.pitch;
+			//if (face->glyph->format != FT_GLYPH_FORMAT_BITMAP)
+			FT_Render_Glyph(face->glyph, (FT_Render_Mode)renderMode);
 
-			memcpy(bitmap.data, face->glyph->bitmap.buffer, bitmap.stride * bitmap.size.y);
+			if (metricsIT.second.size != Vec2f())
+			{
+				CopyBitmapData(bitmap, face->glyph->bitmap, isMonochrome);
+				bitmap.size.x /= bitmapPixelDepth;
+				bitmap.character = character;
+								
+				rectangles[i].x = 0;
+				rectangles[i].y = 0;
+				rectangles[i].w = characterBitmaps[i].size.x + 2;
+				rectangles[i].h = characterBitmaps[i].size.y + 2;
+			}
+			else
+			{
+				rectangles[i].x = 0;
+				rectangles[i].y = 0;
+				rectangles[i].w = 0;
+				rectangles[i].h = 0;
+			}
 
-			bitmap.character = character;			
+			++i;
+		}				
 
-			character = FT_Get_Next_Char(face, character, &glyphIndex);
+		CreateTexture(atlas, rectangles, internalPixelFormat);		
 
-			rectangles[i].x = 0;
-			rectangles[i].y = 0;
-			rectangles[i].w = characterBitmaps[i].size.x + 2;
-			rectangles[i].h = characterBitmaps[i].size.y + 2;
-		}		
-
-		const auto result_size = PackRects(rectangles);
-
-		Vec2i textureSize = Vec2i(result_size.w, result_size.h);
-
-		atlas.Create(textureSize, Graphics::Core::TextureInternalPixelFormat::R8);
-
-		Graphics::Core::Texture2DSettings settings;
-		settings.mag = Graphics::Core::TextureSampling::Linear;
-		settings.min = Graphics::Core::TextureSampling::Linear;
-		settings.mip = Graphics::Core::TextureSampling::Nearest;
-		settings.xWrap = Graphics::Core::TextureWrapping::ClampToEdge;
-		settings.yWrap = Graphics::Core::TextureWrapping::ClampToEdge;
-		settings.mipmaps = false;
-
-		atlas.SetSettings(settings);
-
-		for (uint i = 0; i < font->characterCount; ++i)
+		Vec2i textureSize = atlas.GetSize();
+		i = 0;
+		for (auto& metricsIT : characterMap)
 		{
 			CharacterBitmap& bitmap = characterBitmaps[i];
-			CharacterUV uv;
+			CharacterMetrics& metrics = metricsIT.second;
 
 			if (bitmap.size.x != 0)
 			{
 				Vec2i offset = Vec2i(rectangles[i].x + 1, rectangles[i].y + 1);
 
-				atlas.SetPixels(offset, bitmap.size, bitmap.stride, BitmapPixelFormat::Red, BitmapPixelType::Uint8, bitmap.data);
+				atlas.SetPixels(offset, bitmap.size, bitmap.stride, bitmapPixelFormat, bitmapPixelType, bitmap.data);
+				
+				metrics.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
+				metrics.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);				
 
-				uv.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
-				uv.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);
-
-				std::swap(uv.uv1.y, uv.uv2.y);				
+				if (renderType == FontResolutionRenderType::SDF)
+					metrics.renderOffset -= ((Vec2f)bitmap.size - metrics.size) / 2;
+				metrics.size = (Vec2f)bitmap.size;
+				std::swap(metrics.uv1.y, metrics.uv2.y);
 			}
 			else
 			{
-				uv.uv1 = { };
-				uv.uv2 = { };
-			}
+				metrics.uv1 = { };
+				metrics.uv2 = { };
+			}			
 
-			uv.metrics = &font->characterMap[bitmap.character];
+			++i;
+		}	
+		
+		auto metr = characterMap['v'];
 
-			characterMap.insert({ bitmap.character, uv });
-		}
+		for (uint i = 0; i < characterCount; ++i)
+			FreeBitmapData(characterBitmaps[i]);
+		delete[] characterBitmaps;				
 
-		for (uint i = 0; i < font->characterCount; ++i)
-			delete[] characterBitmaps[i].data;
-		delete[] characterBitmaps;
+		return Result();
 	}
 
-	CharacterData FontResolution::GetCharacterData(UnicodeChar ch)
+	CharacterMetrics FontResolution::GetCharacterData(UnicodeChar ch)
 	{
-		CharacterData out;
+		CharacterMetrics out;
 		uint32 chValue = ch.Value();
 
 		auto it = characterMap.find(chValue);
@@ -165,17 +335,31 @@ namespace Blaze
 		{
 			auto data = it->second;
 
-			out.advance = data.metrics->advance * resolution;
-			out.renderOffset = data.metrics->renderOffset * resolution;
-			out.size = data.metrics->size * resolution;
+			out.advance = data.advance;
+			out.renderOffset = data.renderOffset;
+			out.size = data.size;
 			out.uv1 = data.uv1;
 			out.uv2 = data.uv2;
+			out.bitmapSize = data.bitmapSize;
 		}
 		return out;
 	}
 
+	Vec2f FontResolution::GetKerning(UnicodeChar left, UnicodeChar right)
+	{
+		FT_Face face = (FT_Face)font->ptr;
+		uint l = FT_Get_Char_Index(face, left.Value());
+		uint r = FT_Get_Char_Index(face, right.Value());
+		FT_Vector vec;
+		FT_Get_Kerning(face, l, r, FT_KERNING_UNSCALED, &vec);
+		vec.x *= resolution / font->pixelsPerUnit;
+		vec.y *= resolution / font->pixelsPerUnit;
+		return Vec2f(vec.x, vec.y);
+	}
+
+
 	Font::Font()
-		: ptr(nullptr), characterCount(0), pixelsPerUnit(0)
+		: ptr(nullptr), pixelsPerUnit(0), baselineDistance(0)
 	{
 	}
 	Font::~Font()
@@ -190,38 +374,7 @@ namespace Blaze
 		}		
 	}
 
-	void Font::LoadFontMetrics()
-	{
-		FT_Face face = (FT_Face)ptr;
-
-		pixelsPerUnit = face->units_per_EM;
-
-		uint glyphIndex;
-		uint character = FT_Get_First_Char(face, &glyphIndex);
-
-		characterCount = 0;
-		while (glyphIndex != 0)
-		{
-			CharacterMetrics data;
-
-			FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_SCALE);			
-
-			data.size = Vec2f(face->glyph->metrics.width, face->glyph->metrics.height);
-			data.advance = float(face->glyph->metrics.horiAdvance);
-			data.renderOffset = Vec2f(face->glyph->metrics.horiBearingX, face->glyph->metrics.horiBearingY - face->glyph->metrics.height);
-
-			data.size /= pixelsPerUnit ;
-			data.advance /= pixelsPerUnit;
-			data.renderOffset /= pixelsPerUnit;
-
-			characterMap.insert({ character, data });
-
-			character = FT_Get_Next_Char(face, character, &glyphIndex);
-			++characterCount;
-		}
-	}
-
-	int Font::Load(StringView path, bool emitLogOnFail)
+	Result Font::Load(StringView path)
 	{
 		FT_Error ftError;
 		FT_Face face;
@@ -234,521 +387,66 @@ namespace Blaze
 				ptr = nullptr;
 			}
 
-			FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
+			ftError = FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
 
+			if (ftError != 0)
+				return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
+					"BlazeEngine", "Failed to open font file!"));
 			ptr = face;
 		}
 
 		if (!(face->face_flags & FT_FACE_FLAG_SCALABLE))
 		{
-			if (emitLogOnFail)
-				BLAZE_ERROR_LOG("Blaze Engine", "The font isnt a vector font");
-			return BLAZE_ERROR;
+			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
+				"BlazeEngine", "Font file not supported, it's not a scalable font!"));			
 		}
 
-		LoadFontMetrics();
+		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+		bool kern = FT_HAS_KERNING(face);
 
-		return BLAZE_OK;
+		pixelsPerUnit = face->units_per_EM;
+		baselineDistance = (float)face->height / pixelsPerUnit;
+
+		return Result();
 	}
 
-	FontResolution* Font::CreateFontResolution(uint resolution)
+	FontResolution* Font::CreateFontResolution(uint resolution, FontResolutionRenderType renderType)
 	{
 		FT_Error ftError;
 		FT_Face face = (FT_Face)ptr;		
 		
 		FontResolution& res = *resolutions.emplace_back(new FontResolution);
-		res.resolution = resolution;
-		res.baselineDistance = (float)face->height / pixelsPerUnit * resolution;
-		res.font = this;
-
-		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-
-		res.LoadAtlas();
-
+		res.resolution = resolution;				
+		res.renderType = renderType;
+		res.baselineDistance = std::round(baselineDistance * resolution);
+		res.font = this;				
 
 		return &res;
 	}
 
-	/*
-	uint CountCharacters(FT_Face face)
+	inline FontResolution* Font::GetClosestResolution(float res) const
 	{
-		uint characterCount = 0;
-		uint glyphIndex;
-		uint character;
-		for (character = FT_Get_First_Char(face, &glyphIndex); glyphIndex != 0; character = FT_Get_Next_Char(face, character, &glyphIndex))
-			++characterCount;
-		return characterCount;
+		if (resolutions.size() == 0)
+			return 0;
+
+		FontResolution* upper = nullptr;
+		FontResolution* lower = nullptr;
+
+		for (auto& fontRes : resolutions)
+		{
+			int currRes = fontRes->GetResolution();
+
+			if (currRes == res)
+				return fontRes;
+			else if (currRes < res && (lower == nullptr || currRes > lower->GetResolution()))
+				lower = fontRes;
+			else if (currRes > res && (upper == nullptr || currRes < upper->GetResolution()))
+				upper = fontRes;
+		}
+
+		if (upper == nullptr)
+			return lower;
+
+		return upper;
 	}
-
-	//TODO remove ' ' from font
-	void ConvertMonochrome(uint8* output, size_t outputStride, uint8* input, size_t inputStride, size_t width, size_t height)
-	{						
-		for (size_t y = 0; y < height; ++y)
-		{
-			for (size_t x = 0; x < width; ++x)
-			{
-				*output = ((input[x >> 3] >> (x & 7)) & 1) * 255;
-
-				++output;
-			}
-			output += outputStride;
-			input += inputStride;
-		}
-	}	
-
-	Font::Font()
-		: ptr(nullptr), resolution(0), type(FontType::Monochrome)
-	{
-	}
-	Font::~Font()
-	{
-		if (ptr != nullptr)
-		{
-			FT_Error ftError;
-			FT_Face face = (FT_Face)ptr;
-			FT_Done_Face(face);
-			ptr = nullptr;
-
-			if (ftError != 0)
-				BLAZE_ERROR_LOG("FreeType", FT_Error_String(ftError));
-		}
-	}
-
-	bool Font::GetCharacterData(UnicodeChar character, CharacterData& data) const
-	{
-		auto it = characterMap.find(character.Value());
-		if (it != characterMap.end())
-		{
-			data = it->second;
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}		
-
-	Font::CharacterVertex vertices[1024];
-	Font::CharacterVertex* Font::GenerateVertices(StringViewUTF8 text, uint& vertexCount, Vec2f& size, Vec2f& bottomLeft, Vec2f& topRight) const
-	{	
-		if (text.Size() == 0)
-		{
-			vertexCount = 0;
-			size = Vec2f();
-			return nullptr;
-		}
-		Vec2f texturePixel = Vec2f(1, 1) / Vec2f(texture.GetSize());
-		Font::CharacterData data;
-
-		size = Vec2f();		
-
-		uint characterCount = 0;
-		for (auto it = text.begin(); it != text.end(); ++it)		
-		{
-			UnicodeChar character = it.ToUnicode();			
-
-			GetCharacterData(character, data);
-
-			if (data.size != Vec2i(0, 0))
-			{
-				vertices[characterCount].p1.x = data.offset.x + size.x;
-				vertices[characterCount].p1.y = data.offset.y;
-				vertices[characterCount].p2 = vertices[characterCount].p1 + Vec2f(data.size);
-				vertices[characterCount].uv1 = data.uv1;
-				vertices[characterCount].uv2 = data.uv2;
-
-				topRight.x = std::max(topRight.x, vertices[characterCount].p2.x);
-				topRight.y = std::max(topRight.y, vertices[characterCount].p2.y);
-				bottomLeft.x = std::min(bottomLeft.x, vertices[characterCount].p1.x);
-				bottomLeft.y = std::min(bottomLeft.y, vertices[characterCount].p1.y);
-
-				switch (type)
-				{
-				case Blaze::FontType::Monochrome:
-					break;
-				case Blaze::FontType::Antialiased:
-					vertices[characterCount].p1 -= Vec2f(1, 1);
-					vertices[characterCount].p2 += Vec2f(1, 1);
-					vertices[characterCount].uv1 -= Vec2f(texturePixel.x, -texturePixel.x);
-					vertices[characterCount].uv2 += Vec2f(texturePixel.x, -texturePixel.x);
-					break;
-				}
-
-				vertices[characterCount].p1 += Vec2f(0.0001f);
-				vertices[characterCount].p2 -= Vec2f(0.0001f);
-				vertices[characterCount].uv1 += Vec2f(texturePixel.x, -texturePixel.y) * 0.005f;
-				vertices[characterCount].uv2 -= Vec2f(texturePixel.x, -texturePixel.y) * 0.005f;
-			}
-			else
-			{
-				vertices[characterCount].p1.x = data.offset.x + size.x;
-				vertices[characterCount].p1.y = data.offset.y;
-				vertices[characterCount].p2 = vertices[characterCount].p1 + Vec2f(data.size);
-				vertices[characterCount].uv1 = data.uv1;
-				vertices[characterCount].uv2 = data.uv2;
-			}
-
-			vertices[characterCount].p1 /= resolution;
-			vertices[characterCount].p2 /= resolution;
-
-
-			size.x += data.advance;
-
-			++characterCount;
-			//if (data.size.y > size.y)
-			//	size.y = data.size.y;
-		}
-
-		topRight /= resolution;
-		bottomLeft /= resolution;
-		size = topRight;
-		//size = topRight - bottomLeft;
-		//size.x += -(int)data.advance + data.size.x;		
-		//size.y = topRi;
-
-		//for (size_t i = 0; i < text.Size(); ++i)
-		//{
-		//	vertices[i].p1 /= size;
-		//	vertices[i].p2 /= size;
-		//}
-
-		//size *= (float)height / resolution;			
-		//bottomLeft *= (float)height / resolution;
-		//topRight *= (float)height / resolution;
-		//
-		//size.y = height;
-		vertexCount = characterCount;
-
-		return vertices;
-	}
-
-
-	int LoadFontMonochrome(uint resolution, FT_Face face, Graphics::Core::Texture2D& atlas, std::unordered_map<uint, Font::CharacterData>& characterMap, bool emitLogOnFail);
-	int LoadFontAntialiased(uint resolution, FT_Face face, Graphics::Core::Texture2D& atlas, std::unordered_map<uint, Font::CharacterData>& characterMap, bool emitLogOnFail);
-
-	int Font::Load(StringView path, FontType type, uint resolution, bool emitLogOnFail)
-	{
-		FT_Error ftError;
-		FT_Face face;		
-
-		//Load face
-		{
-			if (ptr != nullptr)
-			{
-				FT_Done_Face((FT_Face)ptr);
-				ptr = nullptr;
-				FT_CHECK(ftError);
-			}
-
-			FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
-			FT_CHECK(ftError);
-			ptr = face;
-		}
-
-		if (!IsFaceSupported(face))
-		{
-			if (emitLogOnFail)
-				BLAZE_ERROR_LOG("Blaze Engine", "The font isnt a vector font");
-			return BLAZE_ERROR;
-		}
-
-		this->type = type;
-		this->resolution = resolution;
-
-		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-		FT_CHECK(ftError);
-		 
-		int returned;
-		switch (type)
-		{
-		case Blaze::FontType::Monochrome:			returned = LoadFontMonochrome	(resolution, face, texture, characterMap, emitLogOnFail); break;
-		case Blaze::FontType::Antialiased:			returned = LoadFontAntialiased	(resolution, face, texture, characterMap, emitLogOnFail); break;		
-		}		
-		if (returned != BLAZE_OK)
-			return returned;		
-
-		baselineDistance = (float)face->size->metrics.height / (1 << 6) / resolution;
-
-		return BLAZE_OK;
-	}
-	
-	constexpr bool allow_flip = false;
-	using spaces_type = rectpack2D::empty_spaces<allow_flip, rectpack2D::default_empty_spaces>;
-	using rect_type = rectpack2D::output_rect_t<spaces_type>;
-
-	rectpack2D::rect_wh PackRects(std::vector<rect_type>& rectangles)
-	{
-		const auto runtime_flipping_mode = rectpack2D::flipping_option::DISABLED;		
-		const auto max_side = 4096;
-		const auto discard_step = 1;
-
-		auto report_successful = [](rect_type&) {
-			return rectpack2D::callback_result::CONTINUE_PACKING;
-		};
-
-		auto report_unsuccessful = [](rect_type&) {
-			return rectpack2D::callback_result::ABORT_PACKING;
-		};		
-
-		const auto result_size = rectpack2D::find_best_packing<spaces_type>(
-			rectangles,
-			make_finder_input(
-				max_side,
-				discard_step,
-				report_successful,
-				report_unsuccessful,
-				runtime_flipping_mode
-			));
-
-		return result_size;
-	}
-
-	int LoadFontMonochrome(uint resolution, FT_Face face, Graphics::Core::Texture2D& texture, std::unordered_map<uint, Font::CharacterData>& characterMap, bool emitLogOnFail)
-	{
-		FT_Error ftError;
-		CharacterBitmap* characterBitmaps;
-
-		uint characterCount;		
-		uint character;
-		uint glyphIndex;
-
-		FT_Set_Pixel_Sizes(face, 0, resolution);
-		FT_CHECK(ftError);		
-
-		characterCount = CountCharacters(face);
-		characterBitmaps = new CharacterBitmap[characterCount];		
-
-		character = FT_Get_First_Char(face, &glyphIndex);
-		for (uint i = 0; i < characterCount; ++i)
-		{
-			CharacterBitmap& bitmap = characterBitmaps[i];
-			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
-			FT_CHECK(ftError);
-			
-			FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO);
-			FT_CHECK(ftError);			
-
-			bitmap.size = Vec2i(face->glyph->bitmap.width, face->glyph->bitmap.rows);
-			bitmap.data = new uint8[characterBitmaps[i].size.x * characterBitmaps[i].size.y];			
-			bitmap.stride = face->glyph->bitmap.width;
-
-			ConvertMonochrome(bitmap.data, bitmap.size.x, face->glyph->bitmap.buffer, face->glyph->bitmap.pitch, bitmap.size.x, bitmap.size.y);			
-
-			bitmap.character = character;
-			bitmap.advance = float(face->glyph->metrics.horiAdvance) / 64.0f;
-			bitmap.renderOffset = Vec2f(face->glyph->metrics.horiBearingX, face->glyph->metrics.horiBearingY - face->glyph->metrics.height) / 64.0f;
-
-			character = FT_Get_Next_Char(face, character, &glyphIndex);
-		}
-		std::vector<rect_type> rectangles;
-
-		rectangles.resize(characterCount);
-		for (uint i = 0; i < characterCount; ++i)
-		{
-			rectangles[i].x = 0;
-			rectangles[i].y = 0;
-			rectangles[i].w = characterBitmaps[i].size.x;
-			rectangles[i].h = characterBitmaps[i].size.y;
-		}
-		auto result_size = PackRects(rectangles);
-
-		Vec2i textureSize = Vec2i(result_size.w, result_size.h);
-
-		texture.Create(textureSize, Graphics::Core::TextureInternalPixelFormat::R8);
-
-		Graphics::Core::Texture2DSettings settings;		
-		settings.mag = Graphics::Core::TextureSampling::Nearest;
-		settings.min = Graphics::Core::TextureSampling::Nearest;
-		settings.mip = Graphics::Core::TextureSampling::Nearest;			
-		settings.xWrap = Graphics::Core::TextureWrapping::ClampToEdge;
-		settings.yWrap = Graphics::Core::TextureWrapping::ClampToEdge;
-		settings.mipmaps = false;
-
-		texture.SetSettings(settings);
-
-		for (uint i = 0; i < characterCount; ++i)
-		{
-			CharacterBitmap& bitmap = characterBitmaps[i];
-			Font::CharacterData data;
-
-			if (bitmap.size.x != 0)
-			{
-				Vec2i offset = Vec2i(rectangles[i].x, rectangles[i].y);
-
-				texture.SetPixels(offset, bitmap.size, bitmap.stride, BitmapPixelFormat::Red, BitmapPixelType::Uint8, bitmap.data);
-
-				data.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
-				data.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);
-				data.size = bitmap.size;				
-			}
-			else
-			{
-				data.uv2 = data.uv1 = Vec2f();
-				data.size = Vec2i();
-			}
-
-			data.character = bitmap.character;
-			data.advance = bitmap.advance;
-			data.offset = Vec2i(bitmap.renderOffset);
-
-			std::swap(data.uv1.y, data.uv2.y);
-
-			characterMap.insert({ bitmap.character, data });
-		}		
-
-		for (uint i = 0; i < characterCount; ++i)
-			delete[] characterBitmaps[i].data;
-		delete[] characterBitmaps;		
-
-		return BLAZE_OK;
-	}
-	int LoadFontAntialiased(uint resolution, FT_Face face, Graphics::Core::Texture2D& texture, std::unordered_map<uint, Font::CharacterData>& characterMap, bool emitLogOnFail)
-	{
-		FT_Error ftError;
-		CharacterBitmap* characterBitmaps;
-
-		uint characterCount;
-		uint character;
-		uint glyphIndex;
-
-		FT_Set_Pixel_Sizes(face, 0, resolution);
-		FT_CHECK(ftError);
-
-
-		characterCount = CountCharacters(face);
-		characterBitmaps = new CharacterBitmap[characterCount];
-
-		character = FT_Get_First_Char(face, &glyphIndex);
-		for (uint i = 0; i < characterCount; ++i)
-		{
-			CharacterBitmap& bitmap = characterBitmaps[i];
-			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
-			FT_CHECK(ftError);
-			
-			FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
-			FT_CHECK(ftError);
-
-			bitmap.data = new uint8[face->glyph->bitmap.pitch * face->glyph->bitmap.rows];			
-			bitmap.size = Vec2i(face->glyph->bitmap.width, face->glyph->bitmap.rows);
-			bitmap.stride = face->glyph->bitmap.pitch;			
-
-			memcpy(bitmap.data, face->glyph->bitmap.buffer, bitmap.stride * bitmap.size.y);
-
-			bitmap.character = character;
-			bitmap.advance = float(face->glyph->metrics.horiAdvance) / 64.0f;
-			bitmap.renderOffset = Vec2f(face->glyph->metrics.horiBearingX, face->glyph->metrics.horiBearingY - face->glyph->metrics.height) / 64.0f;
-
-			character = FT_Get_Next_Char(face, character, &glyphIndex);
-		}
-		
-		std::vector<rect_type> rectangles;
-		rectangles.resize(characterCount);
-
-		for (uint i = 0; i < characterCount; ++i)
-		{
-			rectangles[i].x = 0;
-			rectangles[i].y = 0;
-			rectangles[i].w = characterBitmaps[i].size.x + 2;
-			rectangles[i].h = characterBitmaps[i].size.y + 2;				
-		}
-
-
-		const auto result_size = PackRects(rectangles);
-
-		Vec2i textureSize = Vec2i(result_size.w, result_size.h);
-
-		texture.Create(textureSize, Graphics::Core::TextureInternalPixelFormat::R8);
-
-		Graphics::Core::Texture2DSettings settings;		
-		settings.mag = Graphics::Core::TextureSampling::Linear;
-		settings.min = Graphics::Core::TextureSampling::Linear;
-		settings.mip = Graphics::Core::TextureSampling::Linear;		
-		settings.xWrap = Graphics::Core::TextureWrapping::ClampToEdge;
-		settings.yWrap = Graphics::Core::TextureWrapping::ClampToEdge;
-		settings.mipmaps = false;
-
-		texture.SetSettings(settings);
-
-		for (uint i = 0; i < characterCount; ++i)
-		{
-			CharacterBitmap& bitmap = characterBitmaps[i];
-			Font::CharacterData data;
-
-			if (bitmap.size.x != 0)
-			{
-				Vec2i offset = Vec2i(rectangles[i].x + 1, rectangles[i].y + 1);				
-
-				texture.SetPixels(offset, bitmap.size, bitmap.stride, BitmapPixelFormat::Red, BitmapPixelType::Uint8, bitmap.data);
-				data.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
-				data.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);
-				data.size = bitmap.size;
-			}
-			else
-			{
-				data.uv2 = data.uv1 = Vec2f();
-				data.size = Vec2i();
-			}
-
-			data.character = bitmap.character;
-			data.advance = bitmap.advance;
-			data.offset = Vec2i(bitmap.renderOffset);
-
-			std::swap(data.uv1.y, data.uv2.y);
-
-			characterMap.insert({ bitmap.character, data });
-		}
-
-		for (uint i = 0; i < characterCount; ++i)
-			delete[] characterBitmaps[i].data;
-		delete[] characterBitmaps;
-
-		return BLAZE_OK;
-	}	
-		*/
-
-	/* SDF generation shader
-#version 330 core
-
-in vec2 p_uv;
-
-uniform sampler2D u_texture;
-uniform float limit;
-
-float map(float value, float min1, float max1, float min2, float max2)
-{
-	return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
-}
-
-void main()
-{
-	float limitSqr = limit * limit;
-	vec2 texSize = textureSize(u_texture, 0);
-	float pixel = texture(u_texture, p_uv).r;
-
-	if (pixel == 1.0f)
-	{
-		gl_FragColor = vec4(1, 0, 0, 1);
-		return;
-	}
-
-	float value = 1.0f;
-	for (float y = -limit; y <= limit; y += 1.0f)
-		for (float x = -limit; x <= limit; x += 1.0f)
-		{
-			float dist = x * x + y * y;
-			if (dist <= limitSqr)
-			{
-				float pixel2 = texture(u_texture, p_uv + vec2(x, y) / texSize).r;
-
-				if (pixel2 == 1.0f)
-					value = min(value,  dist / limitSqr);
-			}
-		}
-
-
-	//value = value / sum ;
-	vec4 color = vec4(1.0f - sqrt(value), 0, 0, 1);
-	gl_FragColor = color;
-}
-	*/	
 }
