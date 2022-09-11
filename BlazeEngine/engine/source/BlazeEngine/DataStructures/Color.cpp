@@ -15,6 +15,11 @@ namespace Blaze
 	{
 	}
 
+	ColorRGB::ColorRGB(uint32 hex)
+		: r((hex >> 16) & 255), g((hex >> 8) & 255), b((hex >> 0) & 255)
+	{
+	}
+
 	ColorRGB::operator Vec3<uint8>() const
 	{
 		return Vec3<uint8>(r, g, b);
@@ -80,6 +85,11 @@ namespace Blaze
 	}
 	ColorRGBf::ColorRGBf(const ColorRGBAf& c)
 		: r(c.r), g(c.g), b(c.b)
+	{
+	}
+
+	ColorRGBf::ColorRGBf(uint32 hex)
+		: r((float)((hex >> 16) & 255) / 255), g((float)((hex >> 8) & 255) / 255), b((float)((hex >> 0) & 255) / 255)
 	{
 	}
 

@@ -1,6 +1,7 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Image.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "BlazeEngine/Math/Math.h"
+#include "BlazeEngine/Application/UI System/UIScene.h"
 
 namespace Blaze::UI
 {
@@ -12,7 +13,7 @@ namespace Blaze::UI
 	};
 
 	Image::Image()
-		: shown(true), mask(0, 0, 0, 0), texture(nullptr)
+		: mask(0, 0, 0, 0), texture(nullptr)
 	{
 	}
 
@@ -38,11 +39,11 @@ namespace Blaze::UI
 		Vec2i size = Renderer::GetViewportSize();
 		Mat4f vp2d = Math::OrthographicMatrix<float>(0, size.x, 0, size.y, -1000, 1000);
 
-		for (; index != end; ++end)
+		for (; index != end; ++index)
 		{
 			Image& image = *GetElement(index);
 
-			if (!image.shown)
+			if (!image.IsActive())
 				continue;
 
 			Renderer::SelectProgram(&imagesSP);
@@ -53,12 +54,12 @@ namespace Blaze::UI
 			float depth = image.GetDepth();
 
 			ImageVertex vertices[6];
-			vertices[0].pos = Vec3f(alignedRect.pos, depth); vertices[0].uv = image.sourceRect.pos; vertices[0].color = (Vec4f)image.mask;
-			vertices[1].pos = Vec3f(alignedRect.pos + Vec2f(0, alignedRect.h), depth); vertices[1].uv = image.sourceRect.pos + Vec2f(0, image.sourceRect.h); vertices[1].color = (Vec4f)image.mask;
-			vertices[2].pos = Vec3f(alignedRect.pos + Vec2f(alignedRect.w, 0), depth); vertices[2].uv = image.sourceRect.pos + Vec2f(image.sourceRect.w, 0); vertices[2].color = (Vec4f)image.mask;
-			vertices[3].pos = Vec3f(alignedRect.pos + Vec2f(alignedRect.w, 0), depth); vertices[3].uv = image.sourceRect.pos + Vec2f(image.sourceRect.w, 0); vertices[3].color = (Vec4f)image.mask;
-			vertices[4].pos = Vec3f(alignedRect.pos + Vec2f(0, alignedRect.h), depth); vertices[4].uv = image.sourceRect.pos + Vec2f(0, image.sourceRect.h); vertices[4].color = (Vec4f)image.mask;
-			vertices[5].pos = Vec3f(alignedRect.pos + alignedRect.size, depth); vertices[5].uv = image.sourceRect.pos + image.sourceRect.size; vertices[5].color = (Vec4f)image.mask;
+			vertices[0].pos = Vec3f(alignedRect.pos, depth);							vertices[0].uv = image.sourceRect.pos + Vec2f(0, image.sourceRect.h);	vertices[0].color = (Vec4f)image.mask;
+			vertices[1].pos = Vec3f(alignedRect.pos + Vec2f(0, alignedRect.h), depth);	vertices[1].uv = image.sourceRect.pos;									vertices[1].color = (Vec4f)image.mask;
+			vertices[2].pos = Vec3f(alignedRect.pos + Vec2f(alignedRect.w, 0), depth);	vertices[2].uv = image.sourceRect.pos + image.sourceRect.size;			vertices[2].color = (Vec4f)image.mask;
+			vertices[3].pos = Vec3f(alignedRect.pos + Vec2f(alignedRect.w, 0), depth);	vertices[3].uv = image.sourceRect.pos + image.sourceRect.size;			vertices[3].color = (Vec4f)image.mask;
+			vertices[4].pos = Vec3f(alignedRect.pos + Vec2f(0, alignedRect.h), depth);	vertices[4].uv = image.sourceRect.pos;									vertices[4].color = (Vec4f)image.mask;
+			vertices[5].pos = Vec3f(alignedRect.pos + alignedRect.size, depth);			vertices[5].uv = image.sourceRect.pos + Vec2f(image.sourceRect.w, 0);	vertices[5].color = (Vec4f)image.mask;
 
 			imagesVB.AllocateDynamicStorage({ vertices, sizeof(vertices) }, Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
 
@@ -70,5 +71,16 @@ namespace Blaze::UI
 			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Triangles, 0, 6);
 
 		}
+	}
+	UIElementParsingData ImageManager::GetElementParsingData()
+	{
+		UIElementParsingData data = UIBaseElementManager::GetElementParsingData();
+		data.AddMember("mask", &Image::mask);
+		data.AddMember("sourceRect", &Image::sourceRect);
+		data.AddMember<Image, String>("texture", 
+			[](UIScene& scene, Image& image, String name) {
+				image.texture = scene.GetResourceManager()->GetResource<Graphics::Core::Texture2D>(name);
+			}, nullptr);
+		return data;
 	}
 }

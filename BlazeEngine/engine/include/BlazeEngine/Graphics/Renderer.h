@@ -39,6 +39,9 @@ namespace Blaze
 
 		BLAZE_API void SetActiveTextureSlot(uint slot);
 
+		BLAZE_API void SelectTexture(Graphics::Core::Texture1D*);
+		BLAZE_API Graphics::Core::Texture1D* GetSelectedTexture1D();
+
 		BLAZE_API void SelectTexture(Graphics::Core::Texture2D*);
 		BLAZE_API Graphics::Core::Texture2D* GetSelectedTexture2D();
 
@@ -47,6 +50,9 @@ namespace Blaze
 
 		BLAZE_API void SelectTexture(Graphics::Core::TextureCubemap*);		
 		BLAZE_API Graphics::Core::TextureCubemap* GetSelectedTextureCubemap();
+
+		BLAZE_API void SelectTexture(Graphics::Core::Texture3D*);
+		BLAZE_API Graphics::Core::Texture3D* GetSelectedTexture3D();
 
 		BLAZE_API void SelectTexture(Graphics::Core::TextureBuffer*);
 		BLAZE_API Graphics::Core::TextureBuffer* GetTextureBuffer();
@@ -113,5 +119,6 @@ namespace Blaze
 		BLAZE_API void MemoryBarrier();
 
 		BLAZE_API void SelectImage(uint slot, const Graphics::Core::Texture2D& texture, uint level, ImageAccess access, ImageFormat format);		
+		BLAZE_API void SelectImage(uint slot, const Graphics::Core::Texture1D& texture, uint level, ImageAccess access, ImageFormat format);
 	}
 }

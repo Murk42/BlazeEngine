@@ -161,6 +161,7 @@ namespace Blaze::Graphics
 
 	void Line2DRenderer::SetBatchMode(uint batchSize)
 	{
+		delete[] cache;
 		cache = new Vertex[batchSize];
 		this->batchSize = batchSize;
 
@@ -201,9 +202,10 @@ namespace Blaze::Graphics
 	}
 	void Line2DRenderer::Flush()
 	{
-		vb.ChangeData(BufferView(cache, sizeof(Vertex) * batchSize), 0);
+		vb.ChangeData(BufferView(cache, sizeof(Vertex) * batchOffset), 0);
 		Renderer::SelectVertexArray(&va);
 		Renderer::SelectProgram(&program);
-		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, 1);
+		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, batchOffset);
+		batchOffset = 0;
 	}
 }

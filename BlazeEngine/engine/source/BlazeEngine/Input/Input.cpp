@@ -133,14 +133,7 @@ namespace Blaze
 		//Event detection
 		void Update()
 		{
-			double frameTime = TimePoint::GetRunTime();			
-
-			SDL_Rect rect;
-			rect.x = 50;
-			rect.y = 50;
-			rect.w = 50;
-			rect.h = 50;
-			SDL_SetTextInputRect(&rect);
+			double frameTime = TimePoint::GetRunTime();						
 
 			auto GetWindowFromSDLid = [](uint32 id) -> Window*
 			{
@@ -284,16 +277,22 @@ namespace Blaze
 			Vec2i mouseRealPos;
 			SDL_GetGlobalMouseState(&mouseRealPos.x, &mouseRealPos.y);			
 
+			SDL_Rect rect;
+			SDL_GetDisplayBounds(0, &rect);
+			mouseRealPos.y = rect.h - mouseRealPos.y;
+
 			SDL_GetRelativeMouseState(&mouseMovement.x, &mouseMovement.y);
 			mouseMovement.y = -mouseMovement.y;
 
 			if (focusedWindow != nullptr)
 			{
 				mousePos = mouseRealPos - focusedWindow->GetPos();
-				mousePos.y = focusedWindow->GetSize().y - mousePos.y;
+				//mousePos.y = focusedWindow->GetSize().y - mousePos.y;
 			}
 			else
-				mousePos = mouseRealPos;
+			{ 
+				mousePos = mouseRealPos;								
+			}
 
 			if (mouseMovement != Vec2i(0))
 			{				

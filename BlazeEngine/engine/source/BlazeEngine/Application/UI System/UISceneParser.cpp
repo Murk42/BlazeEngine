@@ -308,15 +308,19 @@ namespace Blaze::UI
 
 			if (COMPARE_VALUE("layer"))
 			{
-				if (EvaluateLayer()) return BadResult();
+				if (Result r = EvaluateLayer()) return r;
 			}
 			else if (COMPARE_VALUE("Font"))
 			{
-				if (EvaluateFont()) return BadResult();
+				if (Result r = EvaluateFont()) return r;
+			}
+			else if (COMPARE_VALUE("Texture2D"))
+			{
+				if (Result r = EvaluateTexture2D()) return r;
 			}
 			else if (COMPARE_VALUE("element"))
 			{
-				if (EvaluateElement()) return BadResult();
+				if (Result r = EvaluateElement()) return r;
 			}
 			else
 				return BadResult("Invalid word in global scope: \"" + token.value + "\"");
@@ -332,22 +336,170 @@ namespace Blaze::UI
 
 		return Result();
 	}
+	Result UISceneParser::EvaluateTexture2D()
+	{
+		EXPECT_LITERAL();
+		std::string name = token.value;
+		EXPECT_WORD();
+
+		Graphics::Core::Texture2D* tex;
+
+		if (COMPARE_VALUE("path"))
+		{
+			EXPECT_VALUE("=");
+			EXPECT_LITERAL();
+
+			String path = String(token.value.data(), token.value.size());
+
+			if (!FileSystem::Exists(path))
+				return BadResult();
+
+			auto res = resourceStorage->CreateResource<Graphics::Core::Texture2D>(name.c_str());			
+
+			if (res)			
+				return res.result;			
+
+			tex = res.value;
+
+			tex->Load(path);
+		}
+		else if (COMPARE_VALUE("name"))
+		{
+			EXPECT_VALUE("=");
+			EXPECT_LITERAL();
+
+			String name = String(token.value.data(), token.value.size());
+
+			auto* manager = resourceStorage->GetResourceManager();
+
+			if (manager == nullptr)
+				return BadResult("No resource manager set");
+
+			tex = manager->GetResource<Graphics::Core::Texture2D>(name);
+
+			if (tex == nullptr)
+				return BadResult("Theres no font resource with a given name");
+		}
+		else if (COMPARE_VALUE("index"))
+		{
+			EXPECT_VALUE("=");
+			EXPECT_INT();
+
+			auto* manager = resourceStorage->GetResourceManager();
+
+			if (manager == nullptr)
+				return BadResult("No resource manager set");
+
+			tex = manager->GetResource<Graphics::Core::Texture2D>(token.GetInt());
+
+			if (tex == nullptr)
+				return BadResult("Theres no font resource with a given index");
+		}
+
+		texture2DNames[name] = tex;
+
+		Graphics::Core::Texture2DSettings settings;
+
+		if (!CHECK_NEXT_TOKEN())
+			if (COMPARE_VALUE("{"))
+			{
+
+				EXPECT();
+				while (!COMPARE_VALUE("}"))
+				{
+					CHECK_TYPE(Word);
+					std::string name = token.value;
+
+					EXPECT_VALUE("=");
+
+					EXPECT_WORD();
+					std::string value = token.value;
+
+					if (name == "min")
+					{
+						if (value == "Linear")
+							settings.min = Graphics::Core::TextureSampling::Linear;
+						else if (value == "Nearest")
+							settings.min = Graphics::Core::TextureSampling::Nearest;
+						else
+							return BadResult("Invalid texture filtering value");
+					}
+					else if (name == "mag")
+					{
+						if (value == "Linear")
+							settings.mag = Graphics::Core::TextureSampling::Linear;
+						else if (value == "Nearest")
+							settings.mag = Graphics::Core::TextureSampling::Nearest;
+						else
+							return BadResult("Invalid texture filtering value");
+					}
+					else if (name == "mip")
+					{
+						if (value == "Linear")
+							settings.mip = Graphics::Core::TextureSampling::Linear;
+						else if (value == "Nearest")
+							settings.mip = Graphics::Core::TextureSampling::Nearest;
+						else
+							return BadResult("Invalid texture filtering value");
+					}
+					else if (name == "xWrap")
+					{
+						if (value == "ClampToBorder")
+							settings.xWrap = Graphics::Core::TextureWrapping::ClampToBorder;
+						else if (value == "ClampToEdge")
+							settings.xWrap = Graphics::Core::TextureWrapping::ClampToEdge;
+						else if (value == "MirroredRepeat")
+							settings.xWrap = Graphics::Core::TextureWrapping::MirroredRepeat;
+						else if (value == "Repeat")
+							settings.xWrap = Graphics::Core::TextureWrapping::Repeat;
+						else
+							return BadResult("Invalid texture wrapping value");
+					}
+					else if (name == "yWrap")
+					{
+						if (value == "ClampToBorder")
+							settings.yWrap = Graphics::Core::TextureWrapping::ClampToBorder;
+						else if (value == "ClampToEdge")
+							settings.yWrap = Graphics::Core::TextureWrapping::ClampToEdge;
+						else if (value == "MirroredRepeat")
+							settings.yWrap = Graphics::Core::TextureWrapping::MirroredRepeat;
+						else if (value == "Repeat")
+							settings.yWrap = Graphics::Core::TextureWrapping::Repeat;
+						else
+							return BadResult("Invalid texture wrapping value");
+					}
+					else if (name == "mipmaps")
+					{
+						if (value == "true")
+							settings.mipmaps = true;
+						else if (value == "false")
+							settings.mipmaps = false;
+						else
+							return BadResult("Invalid texture mipmap flag value");
+					}
+					EXPECT();
+				}
+			}
+			else
+				ReverseToken();		
+
+		tex->SetSettings(settings);		
+		return Result();
+	}
 	Result UISceneParser::EvaluateElement()
 	{
-		enum class Types {
-			Panel,
-			Text,
-			Button,
-			Image
-		} type;
-
 		EXPECT_WORD();
-		
-		if (COMPARE_VALUE("Panel")) type = Types::Panel;
-		else if (COMPARE_VALUE("Text")) type = Types::Text;
-		else if (COMPARE_VALUE("Button")) type = Types::Button;
-		else if (COMPARE_VALUE("Image")) type = Types::Image;
-		else return BadResult("Invalid object \"" + token.value + "\"");
+				
+		int typeIndex = registry.GetElementTypeIndex(StringView(token.value.c_str()));
+		auto& typeData = registry.GetElementTypeData(typeIndex);
+
+		if (typeIndex == -1)		
+			return BadResult("Invalid element type");		
+
+		if (this->parsingData == nullptr)
+			return BadResult("No parsing data set");				
+
+		const auto& parsingData = this->parsingData[typeIndex];
 
 		bool hasName = false;
 		std::string name;
@@ -373,15 +525,36 @@ namespace Blaze::UI
 		activeLayer = layerNames[layerName];		
 
 		UIElement* element;
-		switch (type)
+
+		if (hasName)
 		{
-		case Types::Panel: if (EvaluatePanel(element, name)) return BadResult(); break;
-		case Types::Text: if (EvaluateText(element, name)) return BadResult(); break;
-		case Types::Button: if (EvaluateButton(element, name)) return BadResult(); break;
-		case Types::Image: if (EvaluateImage(element, name)) return BadResult(); break;
+			auto result = scene->CreateElement(name.c_str(), typeIndex, activeLayer);
+
+			if (result)
+				return result.result;
+
+			element = result.value;
+		}
+		else
+			element = scene->CreateElement(typeIndex, activeLayer);
+		
+		if (CHECK_NEXT_TOKEN())		
+			return Result();
+
+		if (!COMPARE_VALUE("{"))
+		{
+			ReverseToken();
+			return Result();
+		}
+
+		EXPECT();
+		while (!COMPARE_VALUE("}"))
+		{
+			EvalueateUIElementMember(element, typeData, parsingData);
+
+			EXPECT();
 		}		
 
-		if (hasName) elementNames[name] = element;
 		
 		return Result();
 	}
@@ -415,7 +588,14 @@ namespace Blaze::UI
 			String name = String(token.value.data(), token.value.size());
 
 			auto* manager = resourceStorage->GetResourceManager();
+
+			if (manager == nullptr)
+				return BadResult("No resource manager set");
+
 			font = manager->GetResource<Font>(name);
+
+			if (font == nullptr)
+				return BadResult("Theres no font resource with a given name");
 		}
 		else if (COMPARE_VALUE("index"))
 		{
@@ -423,7 +603,14 @@ namespace Blaze::UI
 			EXPECT_INT();
 
 			auto* manager = resourceStorage->GetResourceManager();
+
+			if (manager == nullptr)
+				return BadResult("No resource manager set");
+
 			font = manager->GetResource<Font>(token.GetInt());
+
+			if (font == nullptr)
+				return BadResult("Theres no font resource with a given index");
 		}
 
 		fontNames[name] = font;
@@ -449,6 +636,9 @@ namespace Blaze::UI
 			FontResolution* res = font->CreateFontResolution(resolution, renderType);
 			res->LoadCharacters(0, 127);
 			res->CreateAtlas();
+
+			scene->GetResourceManager()->AddResource<FontResolution>(name.c_str(), res);
+
 			fontResolutionNames[name] = res;
 
 			EXPECT();
@@ -457,326 +647,81 @@ namespace Blaze::UI
 		return Result();
 	}
 
-	Result UISceneParser::EvaluatePanel(UIElement*& element, std::string name)
-	{		
-		UI::Panel* panel = scene->CreateElement<UI::Panel>(String(name.data(), name.size()), activeLayer);
-		element = panel;
+	Result UISceneParser::EvalueateUIElementMember(UIElement* element, const UIElementTypeData& typeData, const UIElementParsingData& parsingData)
+	{
+		std::string memberTypeName = token.value;
+		int memberIndex = parsingData.GetMemberIndex(token.value.c_str());
 
-		if (CHECK_NEXT_TOKEN())
-			return Result();
+		EXPECT("=");
 
-		CHECK_VALUE("{");
+		if (memberIndex != -1)
+		{			
+			auto memberTypeData = parsingData.GetMember(memberIndex).GetTypeData();
+			switch (memberTypeData.type)
+			{
+			case UIElementMemberTypeData::UIElementMemberType::Int:			EvaluateUIElementMemberType<int>		(element, parsingData, memberIndex, memberTypeData.list); break;			
+			case UIElementMemberTypeData::UIElementMemberType::Float:		EvaluateUIElementMemberType<float>		(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::Bool:		EvaluateUIElementMemberType<bool>		(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::Vec2f:		EvaluateUIElementMemberType<Vec2f>		(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::Vec3f:		EvaluateUIElementMemberType<Vec3f>		(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::ColorRGBf:	EvaluateUIElementMemberType<ColorRGBf>	(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::ColorRGBAf:	EvaluateUIElementMemberType<ColorRGBAf>	(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::Align:		EvaluateUIElementMemberType<Align>		(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::Rectf:		EvaluateUIElementMemberType<Rectf>		(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::String:		EvaluateUIElementMemberType<String>		(element, parsingData, memberIndex, memberTypeData.list); break;
+			case UIElementMemberTypeData::UIElementMemberType::StringUTF8:	EvaluateUIElementMemberType<StringUTF8>	(element, parsingData, memberIndex, memberTypeData.list); break;
+			default: {
+				return BadResult("Invalid element member");
+				break;
+			}
+			}
+		}
+		else
+			return BadResult("Invalid element member name");
 
-		EXPECT();		
-		while (!COMPARE_VALUE("}"))
+		return Result();
+	}
+
+	template<typename T>
+	Result UISceneParser::EvaluateUIElementMemberType(UIElement* element, const UIElementParsingData& parsingData, uint memberIndex, bool isList)
+	{
+		if (isList)
 		{
-			if (COMPARE_VALUE("rect"))
-			{
-				EXPECT_VALUE("=");
-				Rectf rect;
-				EvaluateProperty(rect);
-				panel->SetRect(rect);
-			}
-			else if (COMPARE_VALUE("borderWidth"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(panel->borderWidth);
-			}
-			else if (COMPARE_VALUE("cornerRadius"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(panel->cornerRadius);
-			}
-			else if (COMPARE_VALUE("depth"))
-			{
-				EXPECT_VALUE("=");
-				float depth;
-				EvaluateProperty(depth);
-				panel->SetDepth(depth);
-			}
-			else if (COMPARE_VALUE("fillColor"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(panel->fillColor);
-			}
-			else if (COMPARE_VALUE("borderColor"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(panel->borderColor);
-			}
-			else if (COMPARE_VALUE("localAlignment"))
-			{
-				EXPECT_VALUE("=");
-				Align align;
-				EvaluateProperty(align);
-				panel->SetLocalAlignment(align);
-			}
-			else if (COMPARE_VALUE("anchorAlignment"))
-			{
-				EXPECT_VALUE("=");
-				Align align;
-				EvaluateProperty(align);
-				panel->SetAnchorAlignment(align);
-			}
-			else if (COMPARE_VALUE("anchor"))
-			{
-				EXPECT_VALUE("=");
-				
-				EXPECT_LITERAL();
+			std::vector<T> value;
 
-				if (token.value.size() == 0)
-					panel->SetAnchor(nullptr);
-				else
-				{
-					auto it = elementNames.find(token.value);
-					if (it != elementNames.end())
-						panel->SetAnchor(it->second);
-				}
-			}
-			else if (COMPARE_VALUE("shown"))
-			{
-				EXPECT_VALUE("=");				
-				EvaluateProperty(panel->shown);				
-			}
-			else if (COMPARE_VALUE("clickable"))
-			{
-				EXPECT_VALUE("=");
-				bool value;
-				EvaluateProperty(value);
-				panel->SetClickableFlag(value);
-			}
-			else
-				return BadResult();
+			EvaluateList<T>(value);
 
-			EXPECT();			
+			if (auto r = parsingData.SetValue<std::vector<T>>(memberIndex, scene, element, value))
+				return r;
+		}
+		else
+		{
+			T value;
+
+			EvaluateProperty<T>(value);
+
+			if (auto r = parsingData.SetValue<T>(memberIndex, scene, element, value))
+				return r;
 		}
 
 		return Result();
 	}
-	Result UISceneParser::EvaluateText(UIElement*& element, std::string name)
+
+	template<> Result UISceneParser::EvaluateProperty(int& value)
 	{
-		UI::Text* el = scene->CreateElement<UI::Text>(String(name.data(), name.size()), activeLayer);
-		element = el;
-
-		if (CHECK_NEXT_TOKEN())
-			return Result();
-
-		CHECK_VALUE("{");
-
-		EXPECT();
-		while (!COMPARE_VALUE("}"))
-		{
-			if (COMPARE_VALUE("pos"))
-			{
-				EXPECT_VALUE("=");
-				Vec2f pos;
-				EvaluateProperty(pos);
-				el->SetPos(pos);
-			}
-			else if (COMPARE_VALUE("depth"))
-			{
-				EXPECT_VALUE("=");
-				float depth;
-				EvaluateProperty(depth);
-				el->SetDepth(depth);
-			}
-			else if (COMPARE_VALUE("localAlignment"))
-			{
-				EXPECT_VALUE("=");
-				Align align;
-				EvaluateProperty(align);
-				el->SetLocalAlignment(align);
-			}
-			else if (COMPARE_VALUE("anchorAlignment"))
-			{
-				EXPECT_VALUE("=");
-				Align align;
-				EvaluateProperty(align);
-				el->SetAnchorAlignment(align);
-			}
-			else if (COMPARE_VALUE("anchor"))
-			{
-				EXPECT_VALUE("=");
-
-				EXPECT_LITERAL();
-
-				auto it = elementNames.find(token.value);
-				if (it != elementNames.end())
-					el->SetAnchor(it->second);
-			}
-			else if (COMPARE_VALUE("shown"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(el->shown);
-			}
-			else if (COMPARE_VALUE("clickable"))
-			{
-				EXPECT_VALUE("=");
-				bool value;
-				EvaluateProperty(value);
-				el->SetClickableFlag(value);
-			}
-			else if (COMPARE_VALUE("clipRect"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(el->clipRect);
-			}
-			else if (COMPARE_VALUE("color"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(el->color);
-			}
-			else if (COMPARE_VALUE("fontSize"))
-			{
-				EXPECT_VALUE("=");
-				EvaluateProperty(el->fontSize);
-			}
-			else if (COMPARE_VALUE("text"))
-			{
-				EXPECT_VALUE("=");
-				StringUTF8 text;
-				EvaluateProperty(text);
-				el->SetText(text);
-			}
-			else if (COMPARE_VALUE("font"))
-			{
-				EXPECT_VALUE("=");
-				EXPECT_LITERAL();
-				el->SetFontResolution(fontResolutionNames[token.value]);
-				//EXPECT_LITERAL();
-				//std::string fontName = token.value;
-				//EXPECT_WORD();
-				//std::string renderTypeS = token.value;
-				//EXPECT_INT();
-				//int resolution = token.GetInt();
-				//
-				//FontResolutionRenderType renderType;
-				//if (renderTypeS == "Monochrome") renderType = FontResolutionRenderType::Monochrome;
-				//else if (renderTypeS == "Antialiased") renderType = FontResolutionRenderType::Antialiased;
-				//else if (renderTypeS == "HorizontalLCD") renderType = FontResolutionRenderType::HorizontalLCD;
-				//else if (renderTypeS == "VerticalLCD") renderType = FontResolutionRenderType::VerticalLCD;
-				//else if (renderTypeS == "SDF") renderType = FontResolutionRenderType::SDF;
-				//
-				//Font* font = fontNames[fontName];
-				//
-				//auto& resolutions = font->GetResolutions();
-				//auto it = resolutions.begin();
-				//for (; it != resolutions.end(); ++it)
-				//	if ((*it)->GetRenderType() == renderType && (*it)->GetResolution() == resolution)
-				//		break;
-				//
-				//el->SetFontResolution(*it);
-			}
-			else if (COMPARE_VALUE("sizeChanged"))
-			{
-			EXPECT_VALUE("=");
-			EXPECT_LITERAL();
-			el->sizeChanged = scene->GetEventFunction({ token.value.data(), token.value.size() });
-			}
-			else
-				return BadResult();
-
-			EXPECT();
-		}
+		EXPECT_INT();
+		value = token.GetInt();
 
 		return Result();
 	}
-	Result UISceneParser::EvaluateButton(UIElement*& element, std::string name)
+	template<> Result UISceneParser::EvaluateProperty(float& value)
 	{
-		UI::Button* el = scene->CreateElement<UI::Button>(String(name.data(), name.size()), activeLayer);
-		element = el;
-
-		if (CHECK_NEXT_TOKEN())
-			return Result();
-
-		CHECK_VALUE("{");
-
-		EXPECT();
-		while (!COMPARE_VALUE("}"))
-		{
-			if (COMPARE_VALUE("rect"))
-			{
-				EXPECT_VALUE("=");
-				Rectf rect;
-				EvaluateProperty(rect);
-				el->SetRect(rect);
-			}
-			else if (COMPARE_VALUE("depth"))
-			{
-				EXPECT_VALUE("=");
-				float depth;
-				EvaluateProperty(depth);
-				el->SetDepth(depth);
-			}
-			else if (COMPARE_VALUE("localAlignment"))
-			{
-				EXPECT_VALUE("=");
-				Align align;
-				EvaluateProperty(align);
-				el->SetLocalAlignment(align);
-			}
-			else if (COMPARE_VALUE("anchorAlignment"))
-			{
-				EXPECT_VALUE("=");
-				Align align;
-				EvaluateProperty(align);
-				el->SetAnchorAlignment(align);
-			}
-			else if (COMPARE_VALUE("anchor"))
-			{
-				EXPECT_VALUE("=");
-
-				EXPECT_LITERAL();
-
-				auto it = elementNames.find(token.value);
-				if (it != elementNames.end())
-					el->SetAnchor(it->second);
-			}			
-			else if (COMPARE_VALUE("clickable"))
-			{
-				EXPECT_VALUE("=");
-				bool value;
-				EvaluateProperty(value);
-				el->SetClickableFlag(value);
-			}											
-			else if (COMPARE_VALUE("pressed"))
-			{
-				EXPECT_VALUE("=");
-				EXPECT_LITERAL();
-				el->pressed = scene->GetEventFunction({ token.value.data(), token.value.size() });				
-			}
-			else if (COMPARE_VALUE("released"))
-			{
-				EXPECT_VALUE("=");
-				EXPECT_LITERAL();
-				el->released = scene->GetEventFunction({ token.value.data(), token.value.size() });
-			}
-			else if (COMPARE_VALUE("entered"))
-			{
-				EXPECT_VALUE("=");
-				EXPECT_LITERAL();
-				el->entered = scene->GetEventFunction({ token.value.data(), token.value.size() });
-			}
-			else if (COMPARE_VALUE("left"))
-			{
-				EXPECT_VALUE("=");
-				EXPECT_LITERAL();
-				el->left = scene->GetEventFunction({ token.value.data(), token.value.size() });			
-			}
-			else
-				return BadResult();
-
-			EXPECT();
-		}
+		EXPECT_NUMBER();
+		value = token.GetFloat();
 
 		return Result();
-	}
-	Result UISceneParser::EvaluateImage(UIElement*& element, std::string name)
-	{
-		return Result();
-	}
-
-	Result UISceneParser::EvaluateProperty(bool& value)
+	}	
+	template<> Result UISceneParser::EvaluateProperty(bool& value)
 	{		
 		EXPECT_VALUE("=");
 
@@ -787,15 +732,69 @@ namespace Blaze::UI
 		else if (COMPARE_VALUE("false"))
 			value = false;
 	}
-
-	Result UISceneParser::EvaluateProperty(float& value)
+	template<> Result UISceneParser::EvaluateProperty(Vec2f& value)
 	{
+		EXPECT_VALUE("(");
+
 		EXPECT_NUMBER();
-		value = token.GetFloat();
+		value.x = token.GetFloat();
+
+		EXPECT_VALUE(",");
+
+		EXPECT_NUMBER();
+		value.y = token.GetFloat();
+
+		EXPECT_VALUE(")");
 
 		return Result();
 	}
-	Result UISceneParser::EvaluateProperty(ColorRGBAf& value)
+	template<> Result UISceneParser::EvaluateProperty(Vec3f& value)
+	{
+		EXPECT_VALUE("(");
+
+		EXPECT_NUMBER();
+		value.x = token.GetFloat();
+
+		EXPECT_VALUE(",");
+
+		EXPECT_NUMBER();
+		value.y = token.GetFloat();
+
+		EXPECT_VALUE(",");
+
+		EXPECT_NUMBER();
+		value.z = token.GetFloat();
+
+		EXPECT_VALUE(")");
+
+		return Result();
+	}
+	template<> Result UISceneParser::EvaluateProperty(ColorRGBf& value)
+	{
+		EXPECT();
+
+		if (COMPARE_VALUE("("))
+		{
+			EXPECT_INT();
+			value.r = (float)token.GetInt() / 255;
+			EXPECT_VALUE(",");
+			EXPECT_INT();
+			value.g = (float)token.GetInt() / 255;
+			EXPECT_VALUE(",");
+			EXPECT_INT();
+			value.b = (float)token.GetInt() / 255;
+
+			EXPECT_VALUE(")");			
+			return Result();						
+		}
+		else if (COMPARE_TYPE(NumberHex) || COMPARE_TYPE(NumberInt))
+		{
+			value = token.GetInt();
+		}
+
+		return Result();
+	}
+	template<> Result UISceneParser::EvaluateProperty(ColorRGBAf& value)
 	{	
 		EXPECT();
 
@@ -833,41 +832,7 @@ namespace Blaze::UI
 
 		return Result();
 	}
-	Result UISceneParser::EvaluateProperty(Align& value)
-	{
-		EXPECT_WORD();
-
-		if (COMPARE_VALUE("Top")) value = Align::Top;
-		else if (COMPARE_VALUE("TopRight")) value = Align::TopRight;
-		else if (COMPARE_VALUE("Right")) value = Align::Right;
-		else if (COMPARE_VALUE("BottomRight")) value = Align::BottomRight;
-		else if (COMPARE_VALUE("Bottom")) value = Align::Bottom;
-		else if (COMPARE_VALUE("BottomLeft")) value = Align::BottomLeft;
-		else if (COMPARE_VALUE("Left")) value = Align::Left;
-		else if (COMPARE_VALUE("TopLeft")) value = Align::TopLeft;
-		else if (COMPARE_VALUE("Center")) value = Align::Center;
-		else
-			return BadResult();
-
-		return Result();
-	}
-	Result UISceneParser::EvaluateProperty(Vec2f& value)
-	{
-		EXPECT_VALUE("(");
-
-		EXPECT_NUMBER();
-		value.x = token.GetFloat();
-
-		EXPECT_VALUE(",");
-
-		EXPECT_NUMBER();
-		value.y = token.GetFloat();
-
-		EXPECT_VALUE(")");
-
-		return Result();
-	}
-	Result UISceneParser::EvaluateProperty(Rectf& rect)
+	template<> Result UISceneParser::EvaluateProperty(Rectf& rect)
 	{
 		EXPECT_VALUE("(");	
 
@@ -891,7 +856,33 @@ namespace Blaze::UI
 
 		return Result();
 	}
-	Result UISceneParser::EvaluateProperty(StringUTF8& value)
+	template<> Result UISceneParser::EvaluateProperty(Align& value)
+	{
+		EXPECT_WORD();
+
+		if (COMPARE_VALUE("Top")) value = Align::Top;
+		else if (COMPARE_VALUE("TopRight")) value = Align::TopRight;
+		else if (COMPARE_VALUE("Right")) value = Align::Right;
+		else if (COMPARE_VALUE("BottomRight")) value = Align::BottomRight;
+		else if (COMPARE_VALUE("Bottom")) value = Align::Bottom;
+		else if (COMPARE_VALUE("BottomLeft")) value = Align::BottomLeft;
+		else if (COMPARE_VALUE("Left")) value = Align::Left;
+		else if (COMPARE_VALUE("TopLeft")) value = Align::TopLeft;
+		else if (COMPARE_VALUE("Center")) value = Align::Center;
+		else
+			return BadResult();
+
+		return Result();
+	}
+	template<> Result UISceneParser::EvaluateProperty(String& value)
+	{
+		EXPECT_LITERAL();
+
+		value = String(token.value.data(), token.value.size());
+
+		return Result();
+	}
+	template<> Result UISceneParser::EvaluateProperty(StringUTF8& value)
 	{
 		EXPECT_LITERAL();
 
@@ -900,8 +891,38 @@ namespace Blaze::UI
 		return Result();
 	}
 
-	Result UISceneParser::Parse(UIScene* scene, Resource::ResourceStorage* storage, const Path& path)
+	template<typename T>
+	Result UISceneParser::EvaluateList(std::vector<T>& vector)
 	{
+		EXPECT_VALUE("{");
+		
+		T val;						
+		
+		EXPECT();
+		if (COMPARE_VALUE("}"))
+			return Result();
+		ReverseToken();
+
+		while (true)
+		{
+			EvaluateProperty<T>(val);
+			vector.emplace_back(val);
+
+			EXPECT();
+			if (!COMPARE_VALUE(","))
+				if (COMPARE_VALUE("}"))
+					break;
+				else
+					return BadResult("Expected a '}' or ',' inside a list");
+		}
+
+		return Result();
+	}
+
+	Result UISceneParser::Parse(UIScene* scene, Resource::ResourceStorage* storage, UIElementParsingData* parsingData, const Path& path)
+	{
+		this->parsingData = parsingData;
+		this->registry = scene->GetManager().GetElementTypeRegistry();
 		this->resourceStorage = storage;
 		this->scene = scene;
 		

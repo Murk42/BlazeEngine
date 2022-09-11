@@ -1,33 +1,41 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Button.h"
 #include "BlazeEngine/Application/UI System/UIManager.h"
 #include "BlazeEngine/Input/Input.h"
-
+#include "BlazeEngine/Application/UI System/UIScene.h"
 
 namespace Blaze::UI
 {
 	Button::Button()
-		: active(true), state(UI::ButtonState::None)
+		: state(UI::ButtonState::None)
+	{
+		SetClickableFlag(true);
+	}
+	Button::~Button()
 	{
 	}
 
+
 	void ButtonManager::Update(size_t index, size_t end)
 	{		
+		size_t front = index - 1;
+		index = end - 1;
 		auto mouseState = Input::GetKeyState(MouseKey::MouseLeft);
 		Vec2f mp = (Vec2f)Input::GetMousePos();
-		for (; index != end; ++index)
+		for (; index != front; --index)
 		{
 			Button& button = *GetElement(index);
-			if (!button.active)
-			{
+			if (!button.IsActive())
+			{ 
+				UI::ButtonState old = button.state;
 				button.state = UI::ButtonState::None;
-				if (button.state == UI::ButtonState::Down)
+				if (old == UI::ButtonState::Down)
 				{
 					button.released();
 					button.left();
 				}
-				else if (button.state == UI::ButtonState::Hovered)
+				else if (old == UI::ButtonState::Hovered)
 					button.left();
-				return;
+				continue;
 			}
 
 			Rectf alignedRect = button.GetAlignedRect();
@@ -41,7 +49,7 @@ namespace Blaze::UI
 			bool callEntered = false;
 			bool callLeft = false;
 
-			if (isOver && mouseState.pressed == true && !GetManager()->IsFocusTaken())
+			if (isOver && mouseState.pressed == true && !GetManager()->IsFocusTaken() && button.IsClickable())
 				callPressed = true;
 			if (mouseState.released == true && button.state == UI::ButtonState::Down)
 				callReleased = true;
@@ -62,14 +70,27 @@ namespace Blaze::UI
 			if (callReleased)
 				GetManager()->ReturnFocus();
 
-			if (callEntered && button.entered)
-				button.entered();
-			if (callPressed && button.pressed)
-				button.pressed();
-			if (callReleased && button.released)
-				button.released();
-			if (callLeft && button.left)
-				button.left();
+			if (callEntered) button.entered();
+			if (callPressed) button.pressed();
+			if (callReleased) button.released();
+			if (callLeft) button.left();
 		}		
+	}
+	UIElementParsingData ButtonManager::GetElementParsingData()
+	{
+		UIElementParsingData data = UIBaseElementManager::GetElementParsingData();		
+		data.AddMember<Button, String>("pressed", [](UIScene& scene, Button& el, const String& name) {
+			el.pressed += scene.GetEventFunction(name);
+			}, nullptr);
+		data.AddMember<Button, String>("released", [](UIScene& scene, Button& el, const String& name) {
+			el.released += scene.GetEventFunction(name);
+			}, nullptr);
+		data.AddMember<Button, String>("entered", [](UIScene& scene, Button& el, const String& name) {
+			el.entered += scene.GetEventFunction(name);
+			}, nullptr);
+		data.AddMember<Button, String>("left", [](UIScene& scene, Button& el, const String& name) {
+			el.left += scene.GetEventFunction(name);
+			}, nullptr);
+		return data;
 	}
 }

@@ -11,7 +11,7 @@ namespace Blaze
 	{
 		bool supress = false;
 		std::vector<T> events;
-		EventDispatcher<T>* dispatcher;
+		EventDispatcher<T>* dispatcher = nullptr;
 	public:
 		~EventHandler();
 

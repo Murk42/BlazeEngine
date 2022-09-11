@@ -11,7 +11,7 @@ namespace Blaze
 {
 	namespace UI
 	{				
-		struct ElementTypeData
+		struct UIElementTypeData
 		{
 			String name;
 
@@ -26,7 +26,7 @@ namespace Blaze
 
 		class BLAZE_API UIElementTypeRegistry
 		{			
-			std::vector<ElementTypeData> types;						
+			std::vector<UIElementTypeData> types;						
 			std::unordered_map<String, uint> nameTable;		
 
 			template<typename T>
@@ -86,7 +86,7 @@ namespace Blaze
 			int GetElementTypeIndex(StringView name) const;
 
 			uint GetElementTypeCount() const;
-			const ElementTypeData& GetElementTypeData(uint index) const;
+			const UIElementTypeData& GetElementTypeData(uint index) const;
 
 			static UIElementTypeRegistry CoreRegistry();
 		};

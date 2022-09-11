@@ -73,7 +73,7 @@ namespace Blaze
 		
 		constexpr Vector<T, 2>& operator=(const Vector<T, 2>& v) { x = v.x; y = v.y; return* this; }
 
-		constexpr T Lenght() const { return Math::Sqrt<T>(x * x + y * y); }
+		constexpr T Lenght() const { return Math::Sqrt(x * x + y * y); }
 		constexpr T SqrLenght() const { return x * x + y * y; }
 		constexpr void Normalise()
 		{
@@ -199,7 +199,7 @@ namespace Blaze
 		{
 		}		
 		constexpr Vector(const Vector<T, 4>& v)
-			: x(v.x), y(v.y), z(v.y), w(v.w)
+			: x(v.x), y(v.y), z(v.z), w(v.w)
 		{
 		}
 		constexpr Vector(T x, T y, T z, T w)

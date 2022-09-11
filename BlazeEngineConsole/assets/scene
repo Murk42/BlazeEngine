@@ -1,0 +1,30 @@
+layer "mainLayer"
+/*
+Font "font" name = "Default font" {
+	"font32" Antialiased 32
+	"font14" Antialiased 14
+}
+
+element Panel "MenuPanel" ("mainLayer")
+{
+	anchorAlignment = TopLeft
+	localAlignment	= TopLeft
+	rect			= (0, 0) 640x50
+
+	cornerRadius	= 0
+	borderWidth		= 0
+} 
+
+element Text "Title" ("mainLayer")
+{
+	pos				= (0, -5)
+	anchor			= "MenuPanel"
+	anchorAlignment	= TopLeft
+	localAlignment	= TopLeft 
+
+	font			= "font32"
+	text			= "Blaze Console"
+	fontSize		= 32
+	color			= 0xffffffff
+}
+*/

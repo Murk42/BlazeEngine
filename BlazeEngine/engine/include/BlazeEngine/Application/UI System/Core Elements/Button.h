@@ -22,15 +22,15 @@ namespace Blaze
 		class BLAZE_API Button : public UIElement
 		{
 		public:
-			bool active;
-			ButtonState state;					
+			ButtonState state;
 
-			std::function<void()> left;
-			std::function<void()> entered;
-			std::function<void()> pressed;
-			std::function<void()> released;
+			UIEvent left;
+			UIEvent entered;
+			UIEvent pressed;
+			UIEvent released;
 
-			Button();					
+			Button();
+			~Button();
 			
 			using ManagerType = ButtonManager;
 			static constexpr const char* typeName = "Button";
@@ -39,7 +39,9 @@ namespace Blaze
 		class BLAZE_API ButtonManager : public UIElementManager<Button>
 		{			
 		public:
-			void Update(size_t index, size_t end);			
+			void Update(size_t index, size_t end);
+
+			static UIElementParsingData GetElementParsingData();
 		};
 	}
 }

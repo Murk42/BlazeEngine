@@ -104,8 +104,12 @@ namespace Blaze
 
 		Result UIManager::AddElement(UIElement* ptr, uint typeIndex, uint layer)
 		{
+			ptr->manager = this;
+			ptr->layer = layer;
 			layers[layer][typeIndex]++;
 			managers[typeIndex]->AddElement(ptr);			
+
+			ptr->AttachedToManager();
 
 			return Result();
 		}
@@ -175,7 +179,7 @@ namespace Blaze
 						if (!blocked && 
 							mp.x >= rect.pos.x && mp.x < rect.pos.x + rect.size.x &&
 							mp.y >= rect.pos.y && mp.y < rect.pos.y + rect.size.y && 
-							element->clickable)
+							element->clickable && element->active)
 							blocked = true;						
 					}
 
@@ -190,7 +194,28 @@ namespace Blaze
 			}			
 							
 			return Result();
-		}		
+		}
+
+		void UIManager::DrawDebugLines() const
+		{
+			for (uint i = 0; i < typeCount; ++i)
+			{
+				if (managers[i] != nullptr)
+				{
+					for (uint j = 0; j < managers[i]->GetElementCount(); ++j)
+					{
+						UIElement* element = managers[i]->GetElementBase(j);
+
+						if (!element->active)
+							continue;
+
+						Rectf rect = element->alignedRect;
+						Graphics::DrawBoxOutline2D(rect.pos, rect.pos + rect.size, 0x00ff00ff, 0.5f);						
+					}
+				}
+			}
+
+		}
 
 		bool UIManager::TakeFocus()
 		{

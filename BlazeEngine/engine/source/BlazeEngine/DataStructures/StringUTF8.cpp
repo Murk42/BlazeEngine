@@ -178,7 +178,7 @@ namespace Blaze
 	StringUTF8::StringUTF8(const StringViewUTF8& s)
 		: buffer(nullptr), bufferSize(s.BufferSize()), characterCount(s.CharacterCount())
 	{
-		if (s.Buffer() == nullptr)
+		if (s.Buffer() != nullptr)
 		{
 			buffer = Memory::Allocate(bufferSize);
 			memcpy(buffer, s.Buffer(), bufferSize);
@@ -297,6 +297,24 @@ namespace Blaze
 		return *this;
 	}
 
+	StringUTF8& StringUTF8::operator=(const StringUTF8& s)
+	{ 
+		if (s.Buffer() != nullptr)
+		{
+			bufferSize = s.BufferSize();
+			characterCount = s.CharacterCount();
+			buffer = Memory::Allocate(bufferSize);
+			memcpy(buffer, s.Buffer(), bufferSize);
+		}
+		else
+		{
+			buffer = nullptr;
+			bufferSize = 0;
+			characterCount = 0;
+		}
+		return *this;
+	}
+
 	StringUTF8& StringUTF8::operator=(StringUTF8&& s) noexcept
 	{
 		bufferSize = s.bufferSize;
@@ -308,20 +326,55 @@ namespace Blaze
 		return *this;
 	}
 
+	StringUTF8& StringUTF8::operator=(const StringView& s) noexcept
+	{
+		if (s.Ptr() != nullptr)
+		{
+			bufferSize = s.Size();
+			characterCount = s.Size();
+			buffer = Memory::Allocate(bufferSize);
+			memcpy(buffer, s.Ptr(), bufferSize);
+		}
+		else
+		{
+			buffer = nullptr;
+			bufferSize = 0;
+			characterCount = 0;
+		}
+		return *this;
+	}
+
+	StringUTF8& StringUTF8::operator=(const String& s) noexcept
+	{
+		if (s.Ptr() != nullptr)
+		{
+			bufferSize = s.Size();
+			characterCount = s.Size();
+			buffer = Memory::Allocate(bufferSize);
+			memcpy(buffer, s.Ptr(), bufferSize);
+		}
+		else
+		{
+			buffer = nullptr;
+			bufferSize = 0;
+			characterCount = 0;
+		}
+		return *this;
+	}
+
 	bool StringUTF8::operator==(const StringViewUTF8& s) const
 	{
-		if (bufferSize != s.BufferSize())
-			return false;
+		if (buffer == nullptr && s.Buffer() == nullptr)
+			return true;
+		if (buffer == nullptr || s.Buffer() == nullptr || bufferSize != s.BufferSize())
+			return false;		
 
 		return memcmp(buffer, s.Buffer(), bufferSize) == 0;
 	}
 
 	bool StringUTF8::operator!=(const StringViewUTF8& s) const
 	{
-		if (bufferSize != s.BufferSize())
-			return true;
-
-		return memcmp(buffer, s.Buffer(), bufferSize) != 0;
+		return !(*this == s);
 	}
 
 	extern char buffer[128];

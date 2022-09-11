@@ -32,6 +32,7 @@ namespace Blaze
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);		
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 
 		TimePoint otherTimePoint = TimePoint::GetWorldTime();
 		const Vec2i winSize = { 640, 360 };

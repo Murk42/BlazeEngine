@@ -3,9 +3,9 @@
 in vec2 frag_uv;							
 in vec2 frag_pos;
 													 
-layout(location = 3) uniform sampler2D u_texture;	 
-layout(location = 4) uniform vec4 u_color;			 
-layout(location = 5) uniform vec4 u_clipRect;			
+layout(location = 2) uniform sampler2D u_texture;	 
+layout(location = 3) uniform vec4 u_color;			 
+layout(location = 4) uniform vec4 u_clipRect;			
 													 
 void main()										 
 {													 

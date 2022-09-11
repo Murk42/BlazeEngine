@@ -30,6 +30,8 @@ namespace Blaze
 
 		Result& operator=(const Result&) = delete;
 		Result& operator=(Result&&) noexcept;
+
+		Result& operator+(const Log&);
 	private:
 		bool failed;
 		LogType type;

@@ -39,10 +39,10 @@ namespace Blaze
 
 		class BLAZE_API VertexArray
 		{
-			static constexpr size_t maxVertexAttributes = 8;
+			//static constexpr size_t maxVertexAttributes = 8;
 			uint id; 			
 			GraphicsBuffer* indexBuffer;
-			VertexAttribute attributes[maxVertexAttributes];
+			//VertexAttribute attributes[maxVertexAttributes];
 		public:
 			VertexArray();
 			VertexArray(const VertexArray&) = delete;

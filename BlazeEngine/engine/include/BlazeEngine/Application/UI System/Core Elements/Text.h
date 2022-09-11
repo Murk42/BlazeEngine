@@ -8,6 +8,7 @@
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/Application/UI System/UIManager.h"
+#include "BlazeEngine/Application/UI System/UIEvent.h"
 
 namespace Blaze
 {
@@ -26,21 +27,19 @@ namespace Blaze
 			Vec2f bottomLeft;
 			Vec2f topRight;
 
-			StringUTF8 text;			
-			bool dirty;			
+			StringUTF8 text;
+			bool dirty;
 		public:
 			Text();
 			
 			float fontSize;
-			bool shown;
 			ColorRGBAf color;
-			Rectf clipRect;						
-
-			std::function<void()> sizeChanged;
+			Rectf clipRect;			
 			
 			void SetFontResolution(FontResolution* fontResolution);
-			void SetText(StringViewUTF8 text);
+			void SetText(StringUTF8 text);
 
+			float GetBaselineDistance() const;
 			inline FontResolution* GetFontResolution() const { return fontResolution; }
 			inline StringUTF8 GetText() const { return text; }			
 
@@ -63,6 +62,8 @@ namespace Blaze
 			
 			void Render(size_t index, size_t end) override;
 			void Update(size_t index, size_t end) override;
+
+			static UIElementParsingData GetElementParsingData();
 		};
 	}
 }

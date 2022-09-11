@@ -14,7 +14,7 @@ namespace Blaze
 			size_t size, void(*construct)(void*), void(*destruct)(void*),
 			size_t managerSize, void(*constructManager)(void*), void(*destructManager)(void*))
 		{			
-			ElementTypeData data;
+			UIElementTypeData data;
 			data.name = name;
 			data.size = size;
 			data.construct = construct;
@@ -59,11 +59,7 @@ namespace Blaze
 		{
 			auto it = nameTable.find((String)name);
 			if (it == nameTable.end())
-			{
-				Logger::AddLog(LogType::Error, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"Blaze Engine", "Trying to get element type data with a name that wasnt registered. The name is: \"" + name + "\"");
 				return -1;
-			}
 			else 
 				return it->second;
 		}
@@ -71,7 +67,7 @@ namespace Blaze
 		{
 			return types.size();
 		}
-		const ElementTypeData& UIElementTypeRegistry::GetElementTypeData(uint index) const
+		const UIElementTypeData& UIElementTypeRegistry::GetElementTypeData(uint index) const
 		{
 			if (index > types.size())
 			{				

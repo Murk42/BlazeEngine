@@ -41,7 +41,7 @@ namespace Blaze::Resource
 		template<typename T>
 		T* GetResource(uint index)
 		{
-			return (T*)GetResource(index, registry.GetTypeIndex<typename T>());
+			return (T*)GetResource(index, registry.GetTypeIndex<T>());
 		}
 		void* GetResource(uint index, size_t typeIndex);
 

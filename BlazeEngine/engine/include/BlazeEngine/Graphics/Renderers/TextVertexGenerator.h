@@ -6,7 +6,7 @@
 namespace Blaze::Graphics
 {
 	class BLAZE_API BaseTextVertexGenerator
-	{
+	{	
 	public:
 		virtual void Setup(StringViewUTF8 text, FontResolution* fontResolution) = 0;
 		virtual bool GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2) = 0;
@@ -27,7 +27,7 @@ namespace Blaze::Graphics
 	public:
 		DefaultTextVertexGenerator();
 
-		void Setup(StringViewUTF8 text, FontResolution* fontResolution) override;
+		void Setup(StringViewUTF8 text, FontResolution* fontResolution) override;		
 		bool GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2) override;
 		bool IsEnd() const override;
 

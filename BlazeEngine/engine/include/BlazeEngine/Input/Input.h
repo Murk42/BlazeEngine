@@ -32,7 +32,7 @@ namespace Blaze
 		BLAZE_API KeyState GetKeyState(MouseKey key);
 
 		BLAZE_API int GetMouseScroll();
-		BLAZE_API Vec2i GetMousePos();
+		BLAZE_API Vec2i GetMousePos();		
 		BLAZE_API Vec2i GetMouseMovement();
 		BLAZE_API Window* GetFocusedWindow();
 		BLAZE_API double GetDoubleClickInterval();

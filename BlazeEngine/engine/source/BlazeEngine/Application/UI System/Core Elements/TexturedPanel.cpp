@@ -5,7 +5,7 @@ namespace Blaze
 	namespace UI
 	{
 		TexturedPanel::TexturedPanel()
-			: shown(true), mask(0, 0, 0, 0),
+			: mask(0, 0, 0, 0),
 			sourceRect(0, 0, 100, 100), texture(nullptr), dimensions({ 20, 20, 20, 20 })
 		{
 		}

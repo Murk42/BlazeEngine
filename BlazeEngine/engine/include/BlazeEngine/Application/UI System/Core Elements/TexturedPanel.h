@@ -23,8 +23,7 @@ namespace Blaze
 				int top;
 				int bottom;
 			};
-
-			bool shown;
+			
 			ColorRGBAf mask;			
 			Rectf sourceRect;
 			Graphics::Core::Texture2D* texture;

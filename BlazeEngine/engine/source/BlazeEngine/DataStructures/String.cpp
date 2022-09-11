@@ -60,8 +60,13 @@ namespace Blaze
 	String::String(const StringView& sv)
 		: size(sv.Size())
 	{
-		ptr = new char[size + 1];
-		memcpy(ptr, sv.Ptr(), size + 1);
+		if (size == 0)
+			ptr = nullptr;
+		else
+		{
+			ptr = new char[size + 1];
+			memcpy(ptr, sv.Ptr(), size + 1);
+		}
 	}	
 	String::String(const char* ptr)
 		: String(ptr, (ptr == nullptr ? 0 : strlen(ptr)))
@@ -110,11 +115,21 @@ namespace Blaze
 	}
 	String& String::operator= (const String& s)
 	{
-		delete[] ptr;
-		size = s.Size();
-		ptr = new char[size + 1];
-		memcpy(ptr, s.Ptr(), size + 1);
-		return *this;
+		if (s.Size() == 0)
+		{
+			delete[] ptr;
+			ptr = nullptr;
+			size = 0;
+			return *this;
+		}
+		else
+		{
+			delete[] ptr;
+			size = s.Size();
+			ptr = new char[size + 1];
+			memcpy(ptr, s.Ptr(), size + 1);
+			return *this;
+		}
 	}
 	String& String::operator=(String&& s) noexcept
 	{
@@ -127,11 +142,15 @@ namespace Blaze
 	}
 	bool String::operator==(const StringView& s) const
 	{
-		return strcmp(ptr, s.Ptr()) == 0;
+		if (ptr == nullptr && s.Ptr() == nullptr)
+			return true;
+		if (ptr == nullptr || s.Ptr() == nullptr || size != s.Size())
+			return false;
+		return memcmp(ptr, s.Ptr(), size) == 0;
 	}
 	bool String::operator!=(const StringView& s) const
 	{
-		return strcmp(ptr, s.Ptr()) != 0;
+		return !(*this == s);
 	}
 
 	String& String::operator+=(const StringView& string)

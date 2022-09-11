@@ -23,7 +23,7 @@ void RenderFrames(int fps)
 {
 	Vec2i viewportSize = Renderer::GetViewportSize();
 
-	Graphics::Write("FPS: " + StringUTF8::Convert(fps), 20.0f, Vec2f(), ColorRGBAf(0.0f, 0.9f, 0.0f, 1.0f));
+	Graphics::Write("FPS: " + StringUTF8::Convert(fps), Vec2f(5, 5), 32, 0x00ff00ff);
 }
 
 void RenderCube()
@@ -34,7 +34,7 @@ void RenderCube()
 	cameraRot *= Quatf(Vec3f(0, 1, 0), 0.001f);
 
 	Graphics::Set3DViewMatrix(Math::RotationMatrix(cameraRot.Conjugated()) * Math::TranslationMatrix(-cameraPos));
-	Graphics::DrawBoxOutline3D(Vec3f(-1, -1, -1), Vec3f(1, 1, 1), Colors::White, 3.0f);
+	Graphics::DrawBoxOutline3D(Vec3f(-1, -1, -1), Vec3f(1, 1, 1), 0xffffffff, 3.0f);
 }
 
 CLIENT_API void Setup()

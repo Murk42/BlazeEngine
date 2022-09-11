@@ -17,7 +17,8 @@ namespace Blaze
 		ColorRGB(uint8 r, uint8 g, uint8 b) : r(r), g(g), b(b) { }
 		explicit ColorRGB(const ColorRGBf&);
 		explicit ColorRGB(const ColorRGBA&);
-		explicit ColorRGB(const ColorRGBAf&);				
+		explicit ColorRGB(const ColorRGBAf&);		
+		ColorRGB(uint32 hex);
 
 		explicit operator Vec3<uint8>() const;				
 
@@ -52,6 +53,7 @@ namespace Blaze
 		explicit ColorRGBf(const ColorRGB&);
 		explicit ColorRGBf(const ColorRGBA&);
 		explicit ColorRGBf(const ColorRGBAf&);				
+		ColorRGBf(uint32 hex);
 		
 		explicit operator Vec3f() const;
 

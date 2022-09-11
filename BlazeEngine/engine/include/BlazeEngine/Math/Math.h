@@ -99,8 +99,8 @@ namespace Blaze
 			Matrix<T, 4, 4> m({
 				T(2) / rml, T(0), T(0), T(0),
 				T(0), T(2) / tmb, T(0), T(0),
-				T(0), T(0), T(-2) / fmn, T(0),
-				 -(right + left) / rml, -(top + bottom) / tmb, -(far + near) / fmn, T(1),
+				T(0), T(0), T(2) / fmn, T(0),
+				-(right + left) / rml, -(top + bottom) / tmb, (far + near) / fmn, T(1),
 				});
 			m.Transpose();
 			return m;
@@ -111,11 +111,17 @@ namespace Blaze
 			T S = T(1) / Tan(fov / T(2));
 
 			return Matrix<T, 4, 4>({
-				S, T(0), T(0), T(0),
-				T(0), S * aspectRatio, T(0), T(0),
-				T(0), T(0), far / (far - near), -far * near / (far - near),
-				T(0), T(0), 1, T(0)
-				});				
+				S	, T(0)				, T(0)							, T(0),
+				T(0), S * aspectRatio	, T(0)							, T(0),
+				T(0), T(0)				, (far + near) / (far - near)	,-2 * near * far / (far - near),
+				T(0), T(0)				, 1	, 0
+				});
+			//return Matrix<T, 4, 4>({
+			//	S	, T(0)				, T(0)							, T(0),
+			//	T(0), S * aspectRatio	, T(0)							, T(0),
+			//	T(0), T(0)				, (far + near) / (far - near)	,-near * (far + near) / (far - near) - near,
+			//	T(0), T(0)				, 1	, 0
+			//	});				
 		}			
 
 		template<typename T>

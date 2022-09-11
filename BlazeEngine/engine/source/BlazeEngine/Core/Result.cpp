@@ -71,4 +71,9 @@ namespace Blaze
 
 		return *this;
 	}
+	Result& Result::operator+(const Log& log)
+	{
+		AddLog(log);
+		return *this;
+	}
 }

@@ -192,6 +192,15 @@ bool RunCommand(RunCommandOptions options)
 		
 		void(*RUNTIME_START)(RuntimeInfo) = (void(*)(RuntimeInfo))libraryRuntime.GetFunction("RUNTIME_START", r);
 		if (!r.sucessfull) { cout << r.log; return true; }
+		
+		filesystem::create_directory(projectDir + "assets");	
+		filesystem::copy(blazeOutputDir + "assets\\default", projectDir + "assets\\default", filesystem::copy_options::overwrite_existing | filesystem::copy_options::recursive, ec);
+		if (ec)
+		{
+			std::cout << "Failed to copy default assets.";
+			if (ec)	cout << ec.category().name() << ": " << ec.message();
+			return true;
+		}
 
 		if (options.managerLog)
 			cout << "<BlazeEngineManager> Statring runtime\n\n";

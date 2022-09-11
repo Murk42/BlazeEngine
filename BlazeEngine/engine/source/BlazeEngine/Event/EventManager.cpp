@@ -2,7 +2,10 @@
 
 #define PerEvent(ev, name) \
 	EventDispatcher<ev> name; \
-	namespace EventManager { template<> void AddEventHandler(Blaze::EventHandler<ev>& handler) { name.AddHandler(handler); } }
+	namespace EventManager { \
+		template<> void AddEventHandler(Blaze::EventHandler<ev>& handler) { name.AddHandler(handler); } \
+		template<> void RemoveEventHandler(Blaze::EventHandler<ev>& handler) { name.RemoveHandler(handler); } \
+	}
 
 namespace Blaze
 {	

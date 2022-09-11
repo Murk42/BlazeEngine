@@ -15,13 +15,13 @@ namespace Blaze
 
 		class BLAZE_API Image : public UIElement
 		{
-		public:
-			bool shown;
+		public:			
 			ColorRGBAf mask;			
 			Rectf sourceRect;
 			Graphics::Core::Texture2D* texture;
 
-			Image();			
+			Image();
+
 
 			using ManagerType = ImageManager;
 			static constexpr const char* typeName = "Image";
@@ -35,7 +35,9 @@ namespace Blaze
 		public:
 			void Setup() override;
 
-			void Render(size_t index, size_t end) override;						
+			void Render(size_t index, size_t end) override;
+
+			static UIElementParsingData GetElementParsingData();
 		};
 	}
 }

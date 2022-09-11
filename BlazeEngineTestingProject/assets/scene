@@ -1,3 +1,4 @@
+layer "bgLayer"
 layer "mainLayer"
 
 Font "font" name = "Default font" {
@@ -5,53 +6,81 @@ Font "font" name = "Default font" {
 	"font14" Antialiased 14
 }
 
-element Panel "propertiesPanel" ("mainLayer") 
+Texture2D "defaultImage" path = "assets/default/default.png"
+Texture2D "logo" path = "assets/logo.png"
+	
+element Panel "propertiesPanel" ("bgLayer") 
 {			
-	rect			= (50,-50) 200x400	
-	anchor			= ""
+	pos				= (10,-10) 
+	size			= (200, 400)
 	localAlignment	= TopLeft
-	anchorAlignment = TopLeft			
+	anchorAlignment = TopLeft
 
-	borderWidth		= 1
-	cornerRadius	= 1
-	fillColor		= 0x44444488
-	borderColor		= 0x333333FF		
+	borderWidth		= 0
+	cornerRadius	= 5
+	fillColor		= 0x222222EE
 }
 
 element Text "propertiesText" ("mainLayer") 
 {
-	pos				= (10,-10)
-	anchor			= "propertiesPanel"
-	localAlignment	= TopLeft
-	anchorAlignment = TopLeft				
-
 	font			= "font32"
 	text			= "Properties"
 	fontSize		= 32
-	color			= 0xFFFFFFFF
-
-	sizeChanged		= "PropertiesTextSizeChanged"
+	color			= 0xFFFFFFFF	
 }
 
 element Text "smallText" ("mainLayer") 
-{
-	pos				= (0,-10)
-	anchor			= "propertiesText"
-	localAlignment	= TopLeft
-	anchorAlignment = BottomLeft			
-
+{	
 	font			= "font14"
 	text			= "Panel"
 	fontSize		= 14
 	color			= 0xFF0000FF
+} 
+
+element Image "image" ("mainLayer")
+{
+	size			= (32, 32)
+
+	texture			= "defaultImage"
+	sourceRect		= (0, 0) 32x32
 }
 
-element Button "button" ("mainLayer")
+element Slider "slider" ("mainLayer")
 {
-	anchor			= "propertiesText"
-	anchorAlignment = Center
-	localAlignment	= Center
-	rect			= (0, 0) 200x30
+	size			= (180, 10)
+	valueChanged	= "valueChanged"
+}
 
-	pressed			= "PropertiesButtonPressed"
+element List "list" ("mainLayer")
+{
+	localAlignment	= TopLeft
+	anchorAlignment = TopLeft
+	anchor			= "propertiesPanel"	
+
+	elements		= { 
+		"propertiesText",
+		"smallText",
+		"image",
+		"slider",
+		"a"
+	}	
+}
+
+element Dropdown "dropdown" ("mainLayer")
+{
+	pos				= (10, -10)
+	anchor			= "propertiesPanel"
+	anchorAlignment	= TopLeft
+	localAlignment	= TopLeft
+
+	text			= "Dropdown"
+
+	openTexture		= "logo"
+	openTextureRect	= (0, 0) 32x32
+
+	closedTexture	= "logo"
+	closedTextureRect	= (0, 0) 32x32
+
+	font			= "font32"
+	list			= "list"
 }

@@ -189,11 +189,12 @@ namespace Blaze
 				++characterCount;
 			}
 
-		if (notLoadedCount == 0)
-			return Result();
-		else
-			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-				"Not all characters were loaded. " + String::Convert(notLoadedCount) + " out of " + String::Convert(last - first + 1) + "."));
+		return Result();
+		//if (notLoadedCount == 0)
+		//	return Result();
+		//else
+		//	return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
+		//		"Not all characters were loaded. " + String::Convert(notLoadedCount) + " out of " + String::Convert(last - first + 1) + "."));
 	}
 	Result FontResolution::LoadAllCharacters()
 	{

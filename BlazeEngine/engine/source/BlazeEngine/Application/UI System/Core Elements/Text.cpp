@@ -1,6 +1,7 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Text.h"
 #include "BlazeEngine/Graphics/Renderer.h"
 #include "BlazeEngine/Math/Math.h"
+#include "BlazeEngine/Application/UI System/UIScene.h"
 
 #include "BlazeEngine/Graphics/Renderers/TextVertexGenerator.h"
 
@@ -18,7 +19,7 @@ namespace Blaze
 
 		Text::Text()
 			: text("Text!"),
-			color(1, 1, 1, 1), shown(true), dirty(true),
+			color(1, 1, 1, 1), dirty(true),
 			vertexCount(0), clipRect(0, 0, 0, 0), fontSize(20.0f), fontResolution(Graphics::GetDefaultFontResolution())
 		{
 			va.EnableVertexAttribute(0);
@@ -41,11 +42,16 @@ namespace Blaze
 			dirty = true;
 		}
 
-		void Text::SetText(StringViewUTF8 text)
+		void Text::SetText(StringUTF8 text)
 		{
 			this->text = text;
 			dirty = true;
-		}		
+		}
+
+		float Text::GetBaselineDistance() const
+		{
+			return (float)fontResolution->GetBaselineDistance() / fontResolution->GetResolution() * fontSize;
+		}
 
 		void TextManager::GenerateVertices(Text& text, FontResolution* fontResolution)
 		{			
@@ -102,7 +108,7 @@ namespace Blaze
 
 		void TextManager::Setup()
 		{			
-			Graphics::Core::VertexShader vert			{ "assets/default/shaders/ui_text.vert" };
+  			Graphics::Core::VertexShader vert			{ "assets/default/shaders/ui_text.vert" };
 			Graphics::Core::GeometryShader geom			{ "assets/default/shaders/ui_text.geom" };
 			Graphics::Core::FragmentShader fragNormal	{ "assets/default/shaders/ui_text_normal.frag" };
 			Graphics::Core::FragmentShader fragSDF		{ "assets/default/shaders/ui_text_sdf.frag" };
@@ -114,7 +120,7 @@ namespace Blaze
 		}
 		
 		void TextManager::Render(size_t index, size_t end)
-		{			
+		{						
 			Vec2i size = Renderer::GetViewportSize();
 			Mat4f vp2d = Math::OrthographicMatrix<float>(0, size.x, 0, size.y, -1000, 1000);
 
@@ -128,30 +134,29 @@ namespace Blaze
 						"Text has its font resolution set to nullptr"));
 					continue;
 				}
-								
+
 				auto* program = SelectProgram(text);
 				auto* fontResolution = text.fontResolution;
 
 				Renderer::SelectProgram(program);
 
-				if (text.shown)
-				{					
-					Vec2f alignedPos = text.GetAlignedPos();
-										
-					float scale = text.fontSize / fontResolution->GetResolution();
+				if (!text.IsActive())
+					continue;
 
-					Renderer::SelectVertexArray(&text.va);
-					Renderer::SetActiveTextureSlot(0);
-					Renderer::SelectTexture(&fontResolution->GetAtlas());
-					program->SetUniform(0, vp2d * Math::TranslationMatrix<float>(Vec3f(alignedPos, text.GetDepth())) * Math::ScalingMatrix(Vec3f(scale, scale, 1)));
-					program->SetUniform(1, Vec2f(1, 1));					
-					program->SetUniform(2, 0);
-					program->SetUniform(3, (Vec4f)text.color);
-					program->SetUniform(4
-						, Vec4f(text.clipRect.pos, text.clipRect.pos + text.clipRect.size));
+				Vec2f alignedPos = text.GetAlignedPos();
 
-					Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, text.vertexCount);
-				}
+				float scale = text.fontSize / fontResolution->GetResolution();
+
+				Renderer::SelectVertexArray(&text.va);
+				Renderer::SetActiveTextureSlot(0);
+				Renderer::SelectTexture(&fontResolution->GetAtlas());
+				program->SetUniform(0, vp2d * Math::TranslationMatrix<float>(Vec3f(alignedPos, text.GetDepth())));
+				program->SetUniform(1, Vec2f(scale));
+				program->SetUniform(2, 0);
+				program->SetUniform(3, (Vec4f)text.color);
+				program->SetUniform(4, Vec4f(text.clipRect.pos, text.clipRect.pos + text.clipRect.size));
+
+				Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, text.vertexCount);
 			}
 		}
 
@@ -172,11 +177,23 @@ namespace Blaze
 					
 
 					GenerateVertices(text, text.fontResolution);
-
-					if (text.sizeChanged)
-						text.sizeChanged();
+					
+					text.sizeChanged();
 				}
 			}
+		}
+		UIElementParsingData TextManager::GetElementParsingData()
+		{
+			UIElementParsingData data = UIBaseElementManager::GetElementParsingData();
+			data.AddMember("fontSize", &Text::fontSize);
+			data.AddMember("color", &Text::color);
+			data.AddMember("clipRect", &Text::clipRect);
+			data.AddMember<Text, StringUTF8>("text", &Text::SetText, &Text::GetText);
+			data.AddMember<Text, String>("font", 
+				[](UIScene& scene, Text& text, String name) {
+					text.SetFontResolution(scene.GetResourceManager()->GetResource<FontResolution>(name));
+				}, nullptr);
+			return data;
 		}
 	}
 }

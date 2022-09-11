@@ -38,6 +38,7 @@ namespace Blaze
 			bool operator==(const Iterator&) const;
 			bool operator!=(const Iterator&) const;
 
+			UnicodeChar operator*() const;
 			Iterator& operator=(const Iterator&);
 
 			friend class StringViewUTF8;

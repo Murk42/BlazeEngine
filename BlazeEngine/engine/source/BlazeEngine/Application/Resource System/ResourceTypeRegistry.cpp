@@ -36,6 +36,7 @@ namespace Blaze::Resource
 	{
 		RegisterType<Font>();
 		RegisterType<FontResolution>();
+		RegisterType<Graphics::Core::Texture2D>();
 		//RegisterType<Button>();
 		//RegisterType<Image>();
 		//RegisterType<Panel>();
@@ -46,12 +47,8 @@ namespace Blaze::Resource
 	uint ResourceTypeRegistry::GetTypeIndex(StringView name) 
 	{
 		auto it = nameTable.find((String)name);
-		if (it == nameTable.end())
-		{
-			Logger::AddLog(LogType::Error, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-				"Blaze Engine", "Trying to get resource type data with a name that wasnt registered. The name is: \"" + name + "\"");
-			return -1;
-		}
+		if (it == nameTable.end())					
+			return -1;		
 		else
 			return it->second;
 	}

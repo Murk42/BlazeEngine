@@ -98,6 +98,10 @@ namespace Blaze
 	{
 		return ptr != i.ptr;
 	}
+	UnicodeChar StringViewUTF8::Iterator::operator*() const
+	{
+		return ToUnicode();
+	}
 	StringViewUTF8::Iterator& StringViewUTF8::Iterator::operator=(const Iterator& i)
 	{
 		ptr = i.ptr;

@@ -62,7 +62,10 @@ namespace Blaze
 	Vec2i Window::GetPos() const
 	{
 		Vec2i pos;
-		SDL_GetWindowPosition((SDL_Window*)ptr, &pos.x, &pos.y);
+		SDL_GetWindowPosition((SDL_Window*)ptr, &pos.x, & pos.y);
+		SDL_Rect rect;
+		SDL_GetDisplayBounds(0, &rect);		
+		pos.y = rect.h - pos.y - GetSize().y;
 		return pos;
 	}
 	Vec2i Window::GetSize() const
@@ -108,6 +111,7 @@ namespace Blaze
 	}
 	void Window::SetPos(Vec2i s)
 	{
+		s.y = GetSize().y - s.y;
 		SDL_SetWindowPosition((SDL_Window*)ptr, s.x, s.y);
 	}
 	void Window::SetSize(Vec2i s)

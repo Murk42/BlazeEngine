@@ -63,7 +63,22 @@ namespace Blaze::Resource
 		typeData.construct(ptr);
 
 		if (manager != nullptr)
-			manager->AddResource(ptr);
+			manager->AddResource(ptr, typeIndex);
+
+		resources[typeIndex].emplace_back(ptr);
+		return ptr;
+	}
+
+	void* ResourceStorage::CreateResource(StringView name, size_t typeIndex)
+	{
+		ResourceTypeData typeData = registry.GetResourceTypeData(typeIndex);
+
+		void* ptr = Memory::Allocate(typeData.size);
+
+		typeData.construct(ptr);
+
+		if (manager != nullptr)
+			manager->AddResource(name, ptr, typeIndex);
 
 		resources[typeIndex].emplace_back(ptr);
 		return ptr;

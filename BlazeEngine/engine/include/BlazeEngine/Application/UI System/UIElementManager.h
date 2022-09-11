@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngine/Application/UI System/UIElement.h"
+#include "BlazeEngine/Application/UI System/UIElementParsingData.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include <vector>
 
@@ -22,9 +23,11 @@ namespace Blaze
 			virtual void Cleanup() { }
 
 			virtual void Render(size_t start, size_t end) { }
-			virtual void Update(size_t start, size_t end);
+			virtual void Update(size_t start, size_t end) { }
 
 			UIManager* GetManager() const { return manager; }
+
+			static UIElementParsingData GetElementParsingData();
 
 			template<typename T>
 			friend class UIElementManager;

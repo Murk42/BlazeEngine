@@ -2,56 +2,72 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/DataStructures/Common.h"
+#include "BlazeEngine/Application/UI System/UIEvent.h"
 
 namespace Blaze
 {
 	namespace UI
-	{					
-		class UIBaseElementManager;		
+	{
+		class UIBaseElementManager;
+		class UIManager;
 
 		class BLAZE_API UIElement
-		{						
-			uint64 updateState;						
+		{
+			UIManager* manager;
+			uint64 updateState;
+			uint layer;
 
 			Rectf alignedRect;
 			Rectf rect;
 			
-			float depth;			
-			bool clickable;			
+			float depth;
+			bool clickable;
+			bool active;
 
 			Align localAlignment;
 			Align anchorAlignment;
-			UIElement* anchor;										
-		public:							
-			UIElement();				
+			UIElement* anchor;
+		protected:
+			virtual void AttachedToManager() { }
 
-			void SetPos(Vec2f pos);
-			void SetSize(Vec2f size);
-			void SetRect(Rectf rect);
+		public:
+			UIElement();
+			~UIElement();
 
-			void SetDepth(float depth);
-			void SetClickableFlag(bool clickable);
-			void SetLocalAlignment(Align align);
-			void SetAnchorAlignment(Align align);
-			void SetAnchor(UIElement* anchor);
+			UIEvent sizeChanged;
 
-			inline Vec2f GetPos()	{ return rect.pos; }
-			inline Vec2f GetSize() { return rect.size; }
-			inline Rectf GetRect() { return rect; }
+			virtual void SetPos(Vec2f pos);
+			virtual void SetSize(Vec2f size);
+			virtual void SetRect(Rectf rect);
 
-			inline Vec2f GetAlignedPos()	{ return alignedRect.pos;}
-			inline Vec2f GetAlignedSize()	{ return alignedRect.size; }
-			inline Rectf GetAlignedRect()	{ return alignedRect; }
+			virtual void SetDepth(float depth);
+			virtual void SetClickableFlag(bool clickable);
+			virtual void SetLocalAlignment(Align align);
+			virtual void SetAnchorAlignment(Align align);
+			virtual void SetAnchor(UIElement* anchor);
+			virtual void SetActiveFlag(bool active);
 
-			inline float GetDepth() { return depth; }
-			inline bool GetClickableFlag() { return clickable; }
-			inline Align GetLocalAlignment() { return localAlignment; }
-			inline Align GetAnchorAlignment() { return anchorAlignment; }
-			inline UIElement* GetAnchor() { return anchor; }
+			inline Vec2f GetPos() const { return rect.pos; }
+			inline Vec2f GetSize() const { return rect.size; }
+			inline Rectf GetRect() const { return rect; }
 
+			inline Vec2f GetAlignedPos() const { return alignedRect.pos;}
+			inline Vec2f GetAlignedSize() const { return alignedRect.size; }
+			inline Rectf GetAlignedRect() const { return alignedRect; }
+
+			inline float GetDepth() const { return depth; }
+			inline Align GetLocalAlignment() const { return localAlignment; }
+			inline Align GetAnchorAlignment() const { return anchorAlignment; }
+			inline UIElement* GetAnchor() const { return anchor; }
+
+			inline bool IsClickable() const { return clickable; }
 			inline bool IsDirty() const { return updateState == 0; }
+			inline bool IsActive() const { return active; }
 
-			using ManagerType = UIBaseElementManager;
+			inline UIManager* GetManager() const { return manager; }
+			inline uint GetLayer() const { return layer; }			
+
+			using ManagerType = UIBaseElementManager;			
 			static constexpr const char* typeName = "UIElement";
 
 			friend class UIManager;

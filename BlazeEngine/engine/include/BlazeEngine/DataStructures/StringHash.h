@@ -8,35 +8,23 @@
 namespace std
 {
     template <>
-    struct hash<Blaze::String>
+    struct BLAZE_API  hash<Blaze::String>
     {
-        std::size_t operator()(const Blaze::String& k) const
-        {                        
-            return hash<string_view>()(std::string_view(k.Ptr(), k.Size()));
-        }
+        std::size_t operator()(const Blaze::String& k) const;
     };
     template <>
-    struct hash<Blaze::StringView>
+    struct BLAZE_API  hash<Blaze::StringView>
     {
-        std::size_t operator()(const Blaze::StringView& k) const
-        {
-            return hash<string_view>()(std::string_view(k.Ptr(), k.Size()));
-        }
+        std::size_t operator()(const Blaze::StringView& k) const;
     };
     template <>
-    struct hash<Blaze::StringUTF8>
+    struct BLAZE_API  hash<Blaze::StringUTF8>
     {
-        std::size_t operator()(const Blaze::StringUTF8& k) const
-        {
-            return hash<string_view>()(std::string_view((const char*)k.Buffer(), k.BufferSize()));
-        }
+        std::size_t operator()(const Blaze::StringUTF8& k) const;
     };
     template <>
-    struct hash<Blaze::StringViewUTF8>
+    struct BLAZE_API  hash<Blaze::StringViewUTF8>
     {
-        std::size_t operator()(const Blaze::StringViewUTF8& k) const
-        {
-            return hash<string_view>()(std::string_view((const char*)k.Buffer(), k.BufferSize()));
-        }
+        std::size_t operator()(const Blaze::StringViewUTF8& k) const;
     };
 }

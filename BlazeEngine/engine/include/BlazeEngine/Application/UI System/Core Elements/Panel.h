@@ -15,14 +15,14 @@ namespace Blaze
 
 		class BLAZE_API Panel : public UIElement
 		{
-		public:
-			bool shown;
+		public:			
 			ColorRGBAf fillColor;
 			ColorRGBAf borderColor;
 			float borderWidth;
 			float cornerRadius;			
 
-			Panel();			
+			Panel();
+			~Panel();
 			 
 			using ManagerType = PanelManager;
 			static constexpr const char* typeName = "Panel";
@@ -37,6 +37,8 @@ namespace Blaze
 			void Setup() override;
 			
 			void Render(size_t index, size_t end) override;
+
+			static UIElementParsingData GetElementParsingData();
 		};
 	}
 }

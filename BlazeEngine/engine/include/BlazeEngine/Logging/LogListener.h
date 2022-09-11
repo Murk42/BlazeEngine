@@ -11,12 +11,15 @@ namespace Blaze
 		LogListener(const LogListener&) = delete;		
 		~LogListener();
 
-		void SupressLogs(bool supress);
 
 		void AddLog(const Log& log);
 
 		void StartListening();
 		void StopListening();
+
+		void SupressLogs(bool supress);
+		void PushLogs();
+		void ClearLogs();
 
 		inline std::vector<Log> GetLogs() const { return logs; }
 		inline bool DoesSupress() const { return supress; }

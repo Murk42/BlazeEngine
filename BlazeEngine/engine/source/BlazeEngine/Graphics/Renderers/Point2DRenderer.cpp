@@ -128,6 +128,7 @@ namespace Blaze::Graphics
 
 	void Point2DRenderer::SetBatchMode(uint batchSize)
 	{
+		delete[] cache;
 		cache = new PointVertex[batchSize];
 		this->batchSize = batchSize;
 

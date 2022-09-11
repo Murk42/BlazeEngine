@@ -1,4 +1,5 @@
 #include "BlazeEngine/Logging/LogListener.h"
+#include "BlazeEngine/Logging/Logger.h"
 
 namespace Blaze
 {
@@ -21,12 +22,22 @@ namespace Blaze
 	{
 		logs.emplace_back(log);
 	}
+	void LogListener::StartListening()
+	{ 
+		AddLogListener(this);
+	}
 	void LogListener::StopListening()
 	{
 		RemoveLogListener(this);
 	}
-	void LogListener::StartListening()
-	{ 
-		AddLogListener(this);
+	void LogListener::PushLogs()
+	{
+		for (auto log : logs)
+			Logger::AddLog(log);
+		logs.clear();
+	}
+	void LogListener::ClearLogs()
+	{
+		logs.clear();
 	}
 }

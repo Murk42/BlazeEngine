@@ -15,7 +15,7 @@ namespace Blaze
 			UIElementTypeRegistry registry;			
 			size_t typeCount;
 			UIBaseElementManager** managers;
-			std::vector<uint*> layers;						
+			std::vector<uint*> layers;
 			
 			bool focusTaken = false;
 			bool blocked = false;			
@@ -49,6 +49,7 @@ namespace Blaze
 
 			Result Render();
 			Result Update();
+			void DrawDebugLines() const;
 
 			bool TakeFocus();
 			void ReturnFocus();

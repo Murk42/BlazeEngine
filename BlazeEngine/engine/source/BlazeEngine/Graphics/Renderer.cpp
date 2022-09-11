@@ -33,7 +33,9 @@ namespace Blaze
 	static Graphics::Core::Framebuffer* selectedDrawFramebuffer = nullptr;
 	static Graphics::Core::Framebuffer* selectedReadFramebuffer = nullptr;
 
+	static Graphics::Core::Texture1D* selectedTexture1D = nullptr;
 	static Graphics::Core::Texture2D* selectedTexture2D = nullptr;
+	static Graphics::Core::Texture3D* selectedTexture3D = nullptr;
 	static Graphics::Core::Texture2DArray* selectedTexture2DArray = nullptr;
 	static Graphics::Core::TextureCubemap* selectedTextureCubemap = nullptr;
 	static Graphics::Core::TextureBuffer* selectedTextureBuffer = nullptr;
@@ -221,6 +223,17 @@ namespace Blaze
 		{
 			glActiveTexture(GL_TEXTURE0 + slot);
 		}
+
+		void SelectTexture(Graphics::Core::Texture1D* obj)
+		{
+			glBindTexture(GL_TEXTURE_1D, obj == nullptr ? 0 : obj->GetHandle());
+			selectedTexture1D = obj;
+		}
+		Graphics::Core::Texture1D* GetSelectedTexture1D()
+		{
+			return selectedTexture1D;
+		}
+
 		void SelectTexture(Graphics::Core::Texture2D* obj)
 		{			
 			glBindTexture(GL_TEXTURE_2D, obj == nullptr ? 0 : obj->GetHandle());
@@ -249,6 +262,16 @@ namespace Blaze
 		Graphics::Core::TextureCubemap* GetSelectedTextureCubemap()
 		{
 			return selectedTextureCubemap;
+		}
+
+		void SelectTexture(Graphics::Core::Texture3D* obj)
+		{
+			glBindTexture(GL_TEXTURE_3D, obj == nullptr ? 0 : obj->GetHandle());
+			selectedTexture3D = obj;
+		}
+		Graphics::Core::Texture3D* GetSelectedTexture3D()
+		{
+			return selectedTexture3D;
 		}
 
 		void SelectTexture(Graphics::Core::TextureBuffer* obj)
@@ -509,6 +532,10 @@ namespace Blaze
 		void SelectImage(uint slot, const Graphics::Core::Texture2D& texture, uint level, ImageAccess access, ImageFormat format)
 		{
 			glBindImageTexture(slot, texture.GetHandle(), level, GL_FALSE, 0, OpenGLImageAccess(access), OpenGLImageFormat(format));
-		}		
+		}
+		void SelectImage(uint slot, const Graphics::Core::Texture1D& texture, uint level, ImageAccess access, ImageFormat format)
+		{
+			glBindImageTexture(slot, texture.GetHandle(), level, GL_FALSE, 0, OpenGLImageAccess(access), OpenGLImageFormat(format));
+		}
 	}
 }

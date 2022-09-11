@@ -67,8 +67,11 @@ namespace Blaze
 
 		StringUTF8& Resize(size_t newCharacterCount, UnicodeChar fill);
 
-		StringUTF8& operator= (const StringViewUTF8& s);		
+		StringUTF8& operator= (const StringViewUTF8& s);
+		StringUTF8& operator= (const StringUTF8& s);
 		StringUTF8& operator= (StringUTF8&& s) noexcept;
+		StringUTF8& operator= (const StringView& s) noexcept;
+		StringUTF8& operator= (const String& s) noexcept;
 
 		bool operator==(const StringViewUTF8& s) const;
 		bool operator!=(const StringViewUTF8& s) const;		

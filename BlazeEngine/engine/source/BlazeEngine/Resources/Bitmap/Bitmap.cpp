@@ -82,9 +82,9 @@ namespace Blaze
 	{
 		this->size = size;
 		this->format = format;
-		this->type = type;		
+		this->type = type;		 
 
-		size_t stride = size.x * PixelTypeSize(type);
+		size_t stride = size.x * PixelTypeSize(type) * GetFormatDepth(format);
 		size_t pixelsSize = size.y * stride;
 		free(this->pixels);
 		this->pixels = malloc(pixelsSize);

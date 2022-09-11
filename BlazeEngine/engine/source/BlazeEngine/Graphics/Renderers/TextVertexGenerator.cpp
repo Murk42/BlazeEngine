@@ -10,11 +10,21 @@ namespace Blaze::Graphics
 	}
 	void DefaultTextVertexGenerator::Setup(StringViewUTF8 text, FontResolution* fontResolution)
 	{
-		this->text = text;
-		this->fontResolution = fontResolution;		
-		cursor = Vec2f();
-		it = this->text.begin();
-		first = true;
+		if (text.BufferSize() != 0)
+		{
+			this->text = text;
+			this->fontResolution = fontResolution;
+			cursor = Vec2f();
+			it = this->text.begin();
+			first = true;
+		}
+		else
+		{
+			this->text = StringUTF8();
+			fontResolution = nullptr;
+			it = this->text.end();
+			first = true;
+		}
 	}
 	bool DefaultTextVertexGenerator::IsEnd() const
 	{
