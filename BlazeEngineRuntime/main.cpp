@@ -6,6 +6,7 @@
 #include <iostream>
 #include <chrono>
 #include <fstream>
+#include <mutex>
 using namespace std;
 
 #include "BlazeEngine/Core/Startup.h"
@@ -23,6 +24,7 @@ extern "C" void Setup();
 #include "Result.h"
 #include "Library.h"
 
+
 struct AllocationData
 {
 	size_t size;
@@ -30,7 +32,8 @@ struct AllocationData
 };
 struct MemoryReport
 {
-	size_t count;
+	std::mutex m;
+	size_t count = 0;
 	AllocationData data[1024];
 };
 
@@ -38,7 +41,7 @@ Blaze::Startup::BlazeInitInfo(*InitializeBlaze)();
 void(*TerminateBlaze)();
 void(*SetStartupInfo)(Blaze::Startup::StartupInfo);
 void(*Setup)();
-MemoryReport* (*GetMemoryReport)();
+void(*SetMemoryReport)(MemoryReport*);
 
 LibraryView blazeLibrary;
 LibraryView clientLibrary;
@@ -53,7 +56,7 @@ Result LoadBlazeFunctions()
 	LOAD_FUNC(InitializeBlaze, blazeLibrary, result);	
 	LOAD_FUNC(TerminateBlaze, blazeLibrary, result);	
 	LOAD_FUNC(SetStartupInfo, blazeLibrary, result);
-	LOAD_FUNC(GetMemoryReport, blazeLibrary, result);
+	LOAD_FUNC(SetMemoryReport, blazeLibrary, result);
 
 	return Result();
 }
@@ -120,12 +123,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 #endif
 	auto startTimePoint = chrono::high_resolution_clock::now();
 
-#if !defined(FINAL_BUILD)	
+#if !defined(FINAL_BUILD)
 	RESOLVE(blazeLibrary.Set("BlazeEngine.dll"));
 	RESOLVE(clientLibrary.Set("Client.dll"));
 	
 	RESOLVE(LoadBlazeFunctions());
 	RESOLVE(LoadClientFunctions());
+
+	MemoryReport* memoryReport = new MemoryReport;
+	SetMemoryReport(memoryReport);
 
 	if (runtimeInfo.runtimeLog)
 	{
@@ -159,9 +165,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		runtimeInfo.timings.all +
 		MeasureTime(startTimePoint);
 
-	startupInfo.blazeInitInfo = blazeInitInfo;
-
-	MemoryReport* memoryReport = GetMemoryReport();
+	startupInfo.blazeInitInfo = blazeInitInfo;	
 
 	SetStartupInfo(startupInfo);
 	Setup();
@@ -177,7 +181,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 #endif
 
 	SaveMemoryReport(memoryReport);
-	free(memoryReport);
+	delete memoryReport;
 
 	return 0;
 }

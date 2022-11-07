@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
+
 #include "BlazeEngine/Event/EventHandler.h"
 #include "BlazeEngine/Event/EventDispatcher.h"
 #include "BlazeEngine/Event/Events.h"

@@ -4,7 +4,7 @@
 using namespace Blaze;
 
 #include <memory>
-#include <mutex>
+#include <cstdio>
 
 #include "BlazeEngine/File/File.h"
 
@@ -24,25 +24,26 @@ struct AllocationHeader
 	size_t dataIndex;
 };
 
-std::mutex* m;
-MemoryReport* report = nullptr;
-AllocationData* data = nullptr;
+//File file;
 size_t allocCount = 0;
 size_t freeCount = 0;
 
-void* operator new(size_t size) {
-	if (report == nullptr)
-	{
-		static std::mutex _m;
-		m = &_m;
-		std::lock_guard<std::mutex> lk(*m);
-
-		report = (MemoryReport*)malloc(sizeof(MemoryReport));
-		data = report->data;
-		report->count = 0;
-
-		data = report->data;
-	}
+void* operator new(size_t size)
+{
+	//if (report == nullptr)
+	//{		
+	//	//std::lock_guard<std::mutex> lk(m);
+	//
+	//	report = (MemoryReport*)malloc(sizeof(MemoryReport));
+	//	new (report) MemoryReport();
+	//
+	//	data = report->data;
+	//	report->count = 0;
+	//
+	//	data = report->data;
+	//}
+	//if (!file.IsOpen())
+	//	file.Open("memory.txt", FileOpenMode::Write, FileOpenFlags::Truncate);
 	
 	return Memory::Allocate(size);
 }	
@@ -50,9 +51,16 @@ void operator delete(void* ptr) {
 	Memory::Free(ptr);
 }
 
-extern "C" BLAZE_API MemoryReport* GetMemoryReport()
+extern "C" BLAZE_API void SetMemoryReport(MemoryReport* newReport)
 {
-	return report;
+	//std::lock_guard<std::mutex> lk(m);
+	//std::lock_guard<std::mutex> lk2(newReport->m);
+	//newReport->count = report->count;
+	//memcpy(newReport->data, report->data, sizeof(AllocationData) * report->count);
+	//report->~MemoryReport();
+	//free(report);
+	//report = newReport;
+	//data = report->data;
 }
 
 namespace Blaze
@@ -83,24 +91,17 @@ namespace Blaze
 	namespace Memory
 	{
 		void* Allocate(size_t size)
-		{			
+		{
 			void* ptr = malloc(size + sizeof(AllocationHeader));
 
 			AllocationHeader* header = (AllocationHeader*)ptr;
-			header->dataIndex = report->count;
-
-			{
-				std::lock_guard<std::mutex> lk(*m);
-				data[report->count].type = 0;
-				data[report->count].ptr = ptr;
-				data[report->count].size = size;
-				report->count++;
-
-				if (report->count >= 1024 * 16)
-					throw;
-
-				allocCount++;
-			}
+			//header->dataIndex = report->count;
+			
+			allocCount++;
+			
+			//char buffer[128];
+			//uint messageSize = sprintf_s(buffer, 128, "%u %p %u", allocCount, ptr, size);
+			//file.Write({ buffer, messageSize });			
 
 			
 			return (char*)ptr + sizeof(AllocationHeader);
@@ -121,19 +122,22 @@ namespace Blaze
 			ptr = (char*)ptr - sizeof(AllocationHeader);
 			AllocationHeader* header = (AllocationHeader*)ptr;
 
-			{
-				std::lock_guard<std::mutex> lk(*m);
-
-				data[report->count].type = 1;
-				data[report->count].ptr = ptr;
-				data[report->count].size = data[header->dataIndex].size;
-				report->count++;
-
-				if (report->count >= 1024 * 16)
-					throw;
-
+			//{
+			//	std::lock_guard<std::mutex> lk(report->m);
+			//
+			//	data[report->count].type = 1;
+			//	data[report->count].ptr = ptr;
+			//	data[report->count].size = data[header->dataIndex].size;
+			//	report->count++;
+			//
+			//	if (report->count >= 1024 * 16)
+			//		throw;
+			//
 				freeCount++;
-			}
+			//
+			//	if (allocCount + freeCount != report->count)
+			//		throw;
+			//}
 			
 			free(ptr);
 		}

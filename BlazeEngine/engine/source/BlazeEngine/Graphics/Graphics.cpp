@@ -39,7 +39,7 @@ namespace Blaze
 			FontResolution* defaultFontResolution;
 		};
 		static GraphicsData* graphicsData;
-		char _graphicsData[sizeof(GraphicsData)];
+		byte _graphicsData[sizeof(GraphicsData)];
 
 		void Graphics_ViewportChanged(Event::ViewportChanged event)
 		{

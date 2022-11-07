@@ -23,6 +23,9 @@ extern "C" BLAZE_API Blaze::Startup::BlazeInitInfo InitializeBlaze()
 {
 	Blaze::TimePoint timePoint = Blaze::TimePoint::GetWorldTime();
 	Blaze::Startup::BlazeInitInfo initInfo;
+
+	engineData = new EngineData;
+
 	Blaze::InitializeMemory();
 	initInfo.libraryInitInfo = Blaze::InitializeLibraries();
 	initInfo.consoleInitInfo = Blaze::InitializeConsole();
@@ -42,4 +45,6 @@ extern "C" BLAZE_API void TerminateBlaze()
 	Blaze::TerminateConsole();
 	Blaze::TerminateLibraries();
 	Blaze::TerminateMemory();
+
+	delete engineData;
 }

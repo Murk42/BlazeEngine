@@ -1,5 +1,6 @@
 #define BLAZE_ENGINE
 
+#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Application.h"
 #include "BlazeEngine/Console.h"
 #include "BlazeEngine/Core.h"

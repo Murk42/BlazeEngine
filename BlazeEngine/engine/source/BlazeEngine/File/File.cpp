@@ -21,11 +21,15 @@ namespace Blaze
 
 		Result File::Open(const Path& path, FileOpenMode mode, FileOpenFlags flags, FilePermission perms)
 		{
-			errno_t returned = _sopen_s(&fd, path.GetString().Ptr(), (int)mode | (int)flags | _O_BINARY, _SH_DENYNO, (int)perms);
+			return Open(path.GetString().Ptr(), mode, flags, perms);
+		}
+		Result File::Open(const char* path, FileOpenMode mode, FileOpenFlags flags, FilePermission perms)
+		{
+			errno_t returned = _sopen_s(&fd, path, (int)mode | (int)flags | _O_BINARY, _SH_DENYNO, (int)perms);
 
-			if (returned != 0)			
-				return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, 
-					"stdlib", "_sopen_s failed with error: " + String::Convert(returned)), true);							
+			if (returned != 0)
+				return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
+					"stdlib", "_sopen_s failed with error: " + String::Convert(returned)), true);
 
 			return Result();
 		}
