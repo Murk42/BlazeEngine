@@ -1,33 +1,48 @@
 #pragma once
-#include "BlazeEngine/Application/UI System/UIElement.h"
-#include "BlazeEngine/Application/UI System/UIElementParsingData.h"
 #include "BlazeEngine/DataStructures/Common.h"
+#include "BlazeEngine/DataStructures/BinaryInputStream.h"
+#include "BlazeEngine/DataStructures/BinaryOutputStream.h"
+#include "BlazeEngine/DataStructures/Rect.h"
+#include "BlazeEngine/DataStructures/Color.h"
 #include <vector>
 
 namespace Blaze
 {
 	namespace UI
 	{		
+		class UIElement;
 		class UIManager;
+		class UIScene;
+
+		struct UIDebugRenderData
+		{
+			struct ElementData
+			{
+				Rectf rect;
+				float thickness;
+				bool overrideLayerColor;
+				ColorRGBAf color;
+			};
+
+			std::vector<ElementData> elements;
+		};
 		
 		class BLAZE_API UIBaseElementManager
 		{
-			UIManager* manager;
-		
-			virtual void AddElement(UIElement* el) = 0;
-		public:
-			virtual size_t GetElementCount() = 0;
-			virtual UIElement* GetElementBase(size_t index) = 0;
-
+			UIManager* manager = nullptr;
+		public:			
 			virtual void Setup() { }
 			virtual void Cleanup() { }
 
-			virtual void Render(size_t start, size_t end) { }
-			virtual void Update(size_t start, size_t end) { }
+			virtual void Render(UIElement*) { }
+			virtual void Update(UIElement*) { }
+
+			virtual UIDebugRenderData GetDebugRenderData(UIElement*);
+
+			virtual void Serialize(UIElement*, BinaryOutputStream&);
+			virtual void Deserialize(UIElement*, BinaryInputStream&);
 
 			UIManager* GetManager() const { return manager; }
-
-			static UIElementParsingData GetElementParsingData();
 
 			template<typename T>
 			friend class UIElementManager;
@@ -37,25 +52,7 @@ namespace Blaze
 		template<typename T>
 		class UIElementManager : public UIBaseElementManager
 		{
-			std::vector<T*> elements;
-
-			void AddElement(UIElement* el) override
-			{
-				elements.emplace_back((T*)el);
-			}
-		public:
-			size_t GetElementCount() override
-			{
-				return elements.size();
-			}			
-			UIElement* GetElementBase(size_t index) override
-			{
-				return elements[index];
-			}
-			T* GetElement(uint index)
-			{
-				return elements[index];
-			}
+		public:			
 
 			using ElementType = T;
 		};

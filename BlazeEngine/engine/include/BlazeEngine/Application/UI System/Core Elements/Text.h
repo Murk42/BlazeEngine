@@ -1,7 +1,6 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Application/UI System/UIElement.h"
-#include "BlazeEngine/Application/UI System/UIAlignment.h"
 #include "BlazeEngine/Graphics/Graphics.h"
 #include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/StringUTF8.h"
@@ -16,32 +15,57 @@ namespace Blaze
 	{
 		class TextManager;
 
+		struct TextProperties
+		{
+			UIElementProperty<StringUTF8> text;
+			UIElementProperty<ColorRGBAf> textColor;
+
+			UIElementProperty<FontResolution*> fontResolution;
+			UIElementProperty<uint> fontSize;
+		};
+
 		class BLAZE_API Text : public UIElement
 		{		
+			struct Vertex
+			{
+				Vec2f p1;
+				Vec2f p2;
+				Vec2f uv1;
+				Vec2f uv2;
+				float next;
+			};
+
 			Graphics::Core::VertexArray va;
 			Graphics::Core::GraphicsBuffer vb;
+			std::vector<Vertex> vertices;
+			
 			FontResolution* fontResolution;
-
-			uint vertexCount;
+			size_t fontSize;
 
 			Vec2f bottomLeft;
 			Vec2f topRight;
 
 			StringUTF8 text;
-			bool dirty;
+
+			void GenerateTextVertices();
 		public:
 			Text();
+			~Text();
 			
-			float fontSize;
 			ColorRGBAf color;
-			Rectf clipRect;			
 			
+			void SetFontSize(size_t fontSize);
 			void SetFontResolution(FontResolution* fontResolution);
 			void SetText(StringUTF8 text);
 
+
 			float GetBaselineDistance() const;
 			inline FontResolution* GetFontResolution() const { return fontResolution; }
+			inline size_t GetFontSize() const { return fontSize; }			
 			inline StringUTF8 GetText() const { return text; }			
+			inline const std::vector<Vertex>& GetVertices() const { return vertices; }
+			
+			void SetProperties(const TextProperties&);
 
 			using ManagerType = TextManager;
 			static constexpr const char* typeName = "Text";
@@ -54,16 +78,13 @@ namespace Blaze
 			Graphics::Core::ShaderProgram programNormal;			
 			Graphics::Core::ShaderProgram programSDF;
 			Graphics::Core::ShaderProgram programLCD;			
-
-			void GenerateVertices(Text& text, FontResolution*);
-			Graphics::Core::ShaderProgram* SelectProgram(Text& text);
+			
+			Graphics::Core::ShaderProgram* SelectProgram(FontResolutionRenderType);
 		public:
 			void Setup() override;
 			
-			void Render(size_t index, size_t end) override;
-			void Update(size_t index, size_t end) override;
-
-			static UIElementParsingData GetElementParsingData();
+			void Render(UIElement*) override;
+			void Update(UIElement*) override;
 		};
 	}
 }

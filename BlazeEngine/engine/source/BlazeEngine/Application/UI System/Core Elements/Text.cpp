@@ -9,19 +9,11 @@ namespace Blaze
 {
 	namespace UI
 	{
-		struct Vertex
-		{
-			Vec2f p1;
-			Vec2f p2;
-			Vec2f uv1;
-			Vec2f uv2;
-		};
-
 		Text::Text()
-			: text("Text!"),
-			color(1, 1, 1, 1), dirty(true),
-			vertexCount(0), clipRect(0, 0, 0, 0), fontSize(20.0f), fontResolution(Graphics::GetDefaultFontResolution())
+			: fontResolution(Graphics::GetDefaultFontResolution()), fontSize(Graphics::GetDefaultFontResolution()->GetResolution())
 		{
+			SetText("Text");
+
 			va.EnableVertexAttribute(0);
 			va.EnableVertexAttribute(1);
 			va.EnableVertexAttribute(2);
@@ -33,19 +25,72 @@ namespace Blaze
 			va.SetVertexAttributeBuffer(0, &vb, sizeof(Vertex), 0);
 			va.SetVertexAttributeBuffer(1, &vb, sizeof(Vertex), 0);
 			va.SetVertexAttributeBuffer(2, &vb, sizeof(Vertex), 0);
-			va.SetVertexAttributeBuffer(3, &vb, sizeof(Vertex), 0);		
-		}				
+			va.SetVertexAttributeBuffer(3, &vb, sizeof(Vertex), 0);
+		}
+
+		Text::~Text()
+		{
+			vertices.clear();
+		}
+
+		void Text::SetFontSize(size_t fontSize)
+		{
+			this->fontSize = fontSize;
+			if (fontResolution != nullptr)
+				GenerateTextVertices();
+		}
 
 		void Text::SetFontResolution(FontResolution* fontResolution)
 		{
 			this->fontResolution = fontResolution;
-			dirty = true;
+			GenerateTextVertices();
 		}
 
 		void Text::SetText(StringUTF8 text)
 		{
 			this->text = text;
-			dirty = true;
+			if (fontResolution != nullptr)
+				GenerateTextVertices();
+		}
+
+		void Text::GenerateTextVertices()
+		{	
+			Graphics::DefaultTextVertexGenerator generator;
+			generator.Setup(text, fontResolution);
+
+			vertices.clear();
+			vertices.reserve(generator.GetMaxVertexCount());
+
+			bottomLeft = { };
+			topRight = { };
+
+			float scale = (float)fontSize / fontResolution->GetResolution();
+
+			while (!generator.IsEnd())
+			{
+				Text::Vertex vertex;
+
+				if (generator.GenerateVertex(vertex.p1, vertex.p2, vertex.uv1, vertex.uv2, vertex.next))
+				{
+					vertex.p1 *= scale;
+					vertex.p2 *= scale;
+					vertex.next *= scale;
+
+					bottomLeft.x = std::min({ bottomLeft.x, vertex.p1.x, vertex.p2.x });
+					bottomLeft.y = std::min({ bottomLeft.y, vertex.p1.y, vertex.p2.y });
+					topRight.x = std::max({ topRight.x, vertex.p1.x, vertex.p2.x });
+					topRight.y = std::max({ topRight.y, vertex.p1.y, vertex.p2.y });
+
+					vertices.emplace_back(vertex);
+				}
+			}			
+
+			SetSize(Vec2f(topRight.x, std::round(fontSize * 0.6f)));
+
+			vb.AllocateDynamicStorage(
+				BufferView(vertices.data(), vertices.size() * sizeof(Text::Vertex)),
+				Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw
+			);
 		}
 
 		float Text::GetBaselineDistance() const
@@ -53,147 +98,86 @@ namespace Blaze
 			return (float)fontResolution->GetBaselineDistance() / fontResolution->GetResolution() * fontSize;
 		}
 
-		void TextManager::GenerateVertices(Text& text, FontResolution* fontResolution)
+		void Text::SetProperties(const TextProperties& p)
 		{			
-			text.dirty = false;
-			text.vertexCount = 0;
+			if (p.text.edited) SetText(p.text);
+			if (p.textColor.edited) color = p.textColor;
 
-			Graphics::DefaultTextVertexGenerator generator;
-			generator.Setup(text.text, fontResolution);
-
-			Vertex* vertices = new Vertex[generator.GetMaxVertexCount()];
-			Vertex* it = vertices;
-
-			while (!generator.IsEnd())
-			{
-				if (generator.GenerateVertex(it->p1, it->p2, it->uv1, it->uv2))
-				{
-					text.bottomLeft.x = std::min({ text.bottomLeft.x, it->p1.x, it->p2.x });
-					text.bottomLeft.y = std::min({ text.bottomLeft.y, it->p1.y, it->p2.y });
-					text.topRight.x = std::max({ text.topRight.x, it->p1.x, it->p2.x });
-					text.topRight.y = std::max({ text.topRight.y, it->p1.y, it->p2.y });					
-
-					++it;
-					++text.vertexCount;
-				}
-			}		
-
-			text.bottomLeft *= text.fontSize / fontResolution->GetResolution();
-			text.topRight *= text.fontSize / fontResolution->GetResolution();
-
-			text.SetSize(text.topRight);
-
-			text.vb.AllocateDynamicStorage(
-				BufferView(vertices, text.vertexCount * sizeof(Vertex)),
-				Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw
-			);
-
-			delete[] vertices;
+			if (p.fontSize.edited) SetFontSize(p.fontSize);
+			if (p.fontResolution.edited) SetFontResolution(p.fontResolution);
 		}
 
-		Graphics::Core::ShaderProgram* TextManager::SelectProgram(Text& text)
-		{			
-			switch (text.fontResolution->GetRenderType())
-			{			
-			case Blaze::FontResolutionRenderType::Monochrome:				
+		Graphics::Core::ShaderProgram* TextManager::SelectProgram(FontResolutionRenderType renderType)
+		{
+			switch (renderType)
+			{
+			case Blaze::FontResolutionRenderType::Monochrome:
 			case Blaze::FontResolutionRenderType::Antialiased:
 				return &programNormal;
-			case Blaze::FontResolutionRenderType::HorizontalLCD:			
+			case Blaze::FontResolutionRenderType::HorizontalLCD:
 			case Blaze::FontResolutionRenderType::VerticalLCD:
 				return &programLCD;
 			case Blaze::FontResolutionRenderType::SDF:
 				return &programSDF;
+			default:
+				return nullptr;
 			}
 		}
 
 		void TextManager::Setup()
-		{			
-  			Graphics::Core::VertexShader vert			{ "assets/default/shaders/ui_text.vert" };
-			Graphics::Core::GeometryShader geom			{ "assets/default/shaders/ui_text.geom" };
-			Graphics::Core::FragmentShader fragNormal	{ "assets/default/shaders/ui_text_normal.frag" };
-			Graphics::Core::FragmentShader fragSDF		{ "assets/default/shaders/ui_text_sdf.frag" };
-			Graphics::Core::FragmentShader fragLCD		{ "assets/default/shaders/ui_text_lcd.frag" };
+		{
+			Graphics::Core::VertexShader vert{ "assets/default/shaders/ui_text.vert" };
+			Graphics::Core::GeometryShader geom{ "assets/default/shaders/ui_text.geom" };
+			Graphics::Core::FragmentShader fragNormal{ "assets/default/shaders/ui_text_normal.frag" };
+			Graphics::Core::FragmentShader fragSDF{ "assets/default/shaders/ui_text_sdf.frag" };
+			Graphics::Core::FragmentShader fragLCD{ "assets/default/shaders/ui_text_lcd.frag" };
 
 			programNormal.LinkShaders({ &vert, &geom, &fragNormal });
 			programSDF.LinkShaders({ &vert, &geom, &fragSDF });
 			programLCD.LinkShaders({ &vert, &geom, &fragLCD });
 		}
-		
-		void TextManager::Render(size_t index, size_t end)
-		{						
-			Vec2i size = Renderer::GetViewportSize();
-			Mat4f vp2d = Math::OrthographicMatrix<float>(0, size.x, 0, size.y, -1000, 1000);
 
-			for (; index != end; ++index)
+		void TextManager::Render(UIElement* element)
+		{
+			auto vp2d = GetManager()->GetProjectionMatrix();
+
+			Text& text = (Text&)*element;
+
+			if (text.fontResolution == nullptr)
 			{
-				Text& text = *GetElement(index);
-
-				if (text.fontResolution == nullptr)
-				{
-					Logger::AddLog(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-						"Text has its font resolution set to nullptr"));
-					continue;
-				}
-
-				auto* program = SelectProgram(text);
-				auto* fontResolution = text.fontResolution;
-
-				Renderer::SelectProgram(program);
-
-				if (!text.IsActive())
-					continue;
-
-				Vec2f alignedPos = text.GetAlignedPos();
-
-				float scale = text.fontSize / fontResolution->GetResolution();
-
-				Renderer::SelectVertexArray(&text.va);
-				Renderer::SetActiveTextureSlot(0);
-				Renderer::SelectTexture(&fontResolution->GetAtlas());
-				program->SetUniform(0, vp2d * Math::TranslationMatrix<float>(Vec3f(alignedPos, text.GetDepth())));
-				program->SetUniform(1, Vec2f(scale));
-				program->SetUniform(2, 0);
-				program->SetUniform(3, (Vec4f)text.color);
-				program->SetUniform(4, Vec4f(text.clipRect.pos, text.clipRect.pos + text.clipRect.size));
-
-				Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, text.vertexCount);
+				Logger::AddLog(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
+					"Text has its font resolution set to nullptr"));
+				Graphics::GetPoint2DRenderer().SetImmediateMode();
+				Graphics::DrawPoint2D(text.GetViewportPos() + text.GetSize() / 2, 0xff0000ff, 10);
+				return;
 			}
+
+			auto* program = SelectProgram(text.fontResolution->GetRenderType());
+			auto* fontResolution = text.fontResolution;
+
+			Renderer::SelectProgram(program);
+
+			if (!text.IsActive() || text.text.BufferSize() == 0)
+				return;
+
+			Vec2f alignedPos = text.GetViewportPos();			
+			Rectf clipRect = text.GetClipRect();
+
+			Renderer::SelectVertexArray(&text.va);
+			Renderer::SetActiveTextureSlot(0);
+			Renderer::SelectTexture(&fontResolution->GetAtlas());
+			program->SetUniform(0, Math::TranslationMatrix<float>(Vec3f(alignedPos, text.GetDepth())));
+			program->SetUniform(1, GetManager()->GetProjectionMatrix());
+			program->SetUniform(2, 0);
+			program->SetUniform(3, (Vec4f)text.color);
+			program->SetUniform(4, Vec4f(clipRect.pos, clipRect.size));
+
+			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, text.vertices.size());
 		}
 
-		void TextManager::Update(size_t index, size_t end)
+		void TextManager::Update(UIElement* element)
 		{
-			for (; index != end; ++index)
-			{
-				Text& text = *GetElement(index);
-
-				if (text.dirty)
-				{								
-					if (text.fontResolution == nullptr)
-					{
-						Logger::AddLog(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-							"Text has its font resolution set to nullptr"));
-						continue;
-					}					
-					
-
-					GenerateVertices(text, text.fontResolution);
-					
-					text.sizeChanged();
-				}
-			}
-		}
-		UIElementParsingData TextManager::GetElementParsingData()
-		{
-			UIElementParsingData data = UIBaseElementManager::GetElementParsingData();
-			data.AddMember("fontSize", &Text::fontSize);
-			data.AddMember("color", &Text::color);
-			data.AddMember("clipRect", &Text::clipRect);
-			data.AddMember<Text, StringUTF8>("text", &Text::SetText, &Text::GetText);
-			data.AddMember<Text, String>("font", 
-				[](UIScene& scene, Text& text, String name) {
-					text.SetFontResolution(scene.GetResourceManager()->GetResource<FontResolution>(name));
-				}, nullptr);
-			return data;
+			Text& text = (Text&)*element;
 		}
 	}
 }

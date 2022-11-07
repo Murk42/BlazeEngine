@@ -4,6 +4,7 @@
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Utilities/Time.h"
 #include "BlazeEngine/Logging/LogListener.h"
+#include "BlazeEngine/File/File.h"
 
 #include "GL/glew.h"
 #include <mutex>
@@ -11,13 +12,10 @@
 #include <stack>
 
 namespace Blaze
-{		
-	static std::mutex mutex;
-	static std::unordered_map<std::thread::id, std::vector<Log*>> threadLogs;
-	static std::vector<Log> logs;
+{			
 	static std::vector<LogListener*> handlers;
-
-	static LoggingPolicy policy = LoggingPolicy::PrintInstantly;	
+	static File logFile;
+	static bool printToConsole = true;
 
 	void AddLogListener(LogListener* listener)
 	{
@@ -56,75 +54,66 @@ namespace Blaze
 			default:
 				logType = LogType::Warning;
 				break;
-			}				
-
+			}
+		
 			AddLog(logType, BLAZE_FILE_NAME, __FUNCTION__, __LINE__, "OpenGL", message);
-		}		
-
-		void FlushLogs()
-		{
-			std::lock_guard<std::mutex> lk(mutex);
-			for (auto& log : logs)
-				;
-				//TODO: SEND LOGS				
-				//engine->AppInstance.ptr->NewLog(log);
-
-			logs.clear();
-			threadLogs.clear();
 		}
 
-		void BLAZE_API AddLog(Log log)
+		void RecordLog(String string)
 		{
-			std::lock_guard<std::mutex> lk(mutex);
+			if (printToConsole)
+				Console::WriteLine(string);
 
-			if (log.GetType() == LogType::Fatal)			
-				throw log.FormatString();			
+			string += "\n";
+
+			if (logFile.IsOpen())
+				logFile.Write({ string.Ptr(), string.Size() });
+		}
+
+		void AddLog(Log log)
+		{
+			if (log.GetType() == LogType::Fatal)
+			{
+				RecordLog(log.FormatString());
+
+				exit(1);
+			}
+
+			if (log.GetType() == LogType::Fatal)
+				throw log.FormatString();
 
 			bool supress = false;
 			for (auto& listener : handlers)
 			{
 				listener->AddLog(log);
-				
+
 				if (listener->DoesSupress())
 				{
 					supress = true;
 					break;
 				}
-			}			
+			}
 
 			if (supress)
 				return;
 
-			logs.emplace_back(log);
-
-			switch (policy)
-			{
-			case Blaze::LoggingPolicy::WaitForFlush: {
-
-				std::thread::id id = std::this_thread::get_id();
-				threadLogs[id].emplace_back(&log);
-
-				break;
-			}
-			case Blaze::LoggingPolicy::PrintInstantly: {
-
-				Console::Write(log.FormatString());
-				//if (log.GetType() == LogType::Error)
-				//	throw log.GetMessage();
-
-				break;
-			}
-			}						
+			RecordLog(log.FormatString());
 		}
 
 		void AddLog(LogType type, String&& fileName, String&& functionName, uint line, String&& source, String&& message)
-		{			
+		{	
 			AddLog(Log(type, std::move(fileName), std::move(functionName), line, std::move(source), std::move(message)));
 		}
-		void SetLoggingPolicy(LoggingPolicy policy)
+		void SetOutputFile(const Path& path)
 		{
-			std::lock_guard<std::mutex> lk(mutex);
-			policy = policy;
+			if (logFile.IsOpen())
+				logFile.Close();
+
+			logFile.Open(path, FileOpenMode::Write, FileOpenFlags::Create | FileOpenFlags::Truncate);
+		}
+		void PrintLogsToConsole(bool print)
+		{
+			printToConsole = print;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureEnums.h"
+#include "BlazeEngine/Application/ResourceSystem/Resource.h"
 
 namespace Blaze::OpenGL
 {	
@@ -14,7 +15,7 @@ namespace Blaze::OpenGL
 		bool mipmaps = false;
 	};
 
-	class BLAZE_API Texture2D
+	class BLAZE_API Texture2D : public ResourceSystem::Resource
 	{
 		unsigned id;
 		Vec2i size;			

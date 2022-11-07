@@ -1,31 +1,78 @@
 #include "BlazeEngine/Application/UI System/UIElementManager.h"
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Application/UI System/UIScene.h"
+#include "BlazeEngine/Application/UI System/UIElement.h"
 
 namespace Blaze::UI
 {
-	UIElementParsingData UIBaseElementManager::GetElementParsingData()
+	UIDebugRenderData UIBaseElementManager::GetDebugRenderData(UIElement* ptr)
 	{
-		UIElementParsingData data;
-
-		data.AddMember<UIElement, Vec2f>("pos", &UIElement::SetPos, &UIElement::GetPos);
-		data.AddMember<UIElement, Vec2f>("size", &UIElement::SetSize, &UIElement::GetSize);
-		data.AddMember<UIElement, float>("depth", &UIElement::SetDepth, &UIElement::GetDepth);
-		data.AddMember<UIElement, bool>("clickable", &UIElement::SetClickableFlag, &UIElement::IsClickable);
-		data.AddMember<UIElement, bool>("active", &UIElement::SetActiveFlag, &UIElement::IsActive);
-		data.AddMember<UIElement, Align>("localAlignment", &UIElement::SetLocalAlignment, &UIElement::GetLocalAlignment);
-		data.AddMember<UIElement, Align>("anchorAlignment", &UIElement::SetAnchorAlignment, &UIElement::GetAnchorAlignment);
-		data.AddMember<UIElement, String>("anchor",
-		    [](UIScene& scene, UIElement& el, const String& name) {
-		        el.SetAnchor(scene.GetElement(name).first);
-		    },
-		    nullptr
-		    );
-		data.AddMember<UIElement, String>("sizeChanged",
-		    [](UIScene& scene, UIElement& el, const String& name) {
-		        el.sizeChanged += scene.GetEventFunction(name);
-		    }, nullptr);
-
-		return data;
+		return { { { Rectf(ptr->GetViewportPos(), ptr->GetSize()), 1, false, ColorRGBAf() }}};
 	}
+	void UIBaseElementManager::Serialize(UIElement* el, BinaryOutputStream& stream)
+	{
+		String name = el->GetName();
+
+		stream.Write(name.Size());
+		for (auto ch : name) stream.Write(ch);
+
+		stream.WriteString(el->GetLayerName());
+		stream.WriteVector(el->GetPos());
+		stream.WriteVector(el->GetSize());
+		stream.Write<uint8>((uint8)el->GetAnchorAlignment());
+		stream.Write<uint8>((uint8)el->GetLocalAlignment());
+		stream.Write(el->IsActive());
+		stream.Write(el->IsSolid());
+		stream.Write(el->GetDepth());
+
+		if (el->GetAnchor() != 0)
+		{
+			name = el->GetAnchor()->GetName();
+
+			stream.Write(name.Size());
+			for (auto ch : name) stream.Write(ch);
+		}
+		else
+			stream.Write<size_t>(0);
+	}
+	void UIBaseElementManager::Deserialize(UIElement* el, BinaryInputStream& stream)
+	{				
+		Vec2f pos;
+		Vec2f size;
+		uint8 anchorAlign;
+		uint8 localAlign;
+		uint8 active;
+		uint8 clickable;
+		float depth;
+		String anchor;		
+		
+		stream.ReadVector(pos);
+		stream.ReadVector(size);
+		stream.Read(anchorAlign);
+		stream.Read(localAlign);
+		stream.Read(active);
+		stream.Read(clickable);
+		stream.Read(depth);
+		stream.ReadString(anchor);
+
+		auto* scene = el->GetScene();
+
+		el->SetPos(pos);
+		el->SetSize(size);
+		el->SetAnchorAlignment((Align)anchorAlign);
+		el->SetLocalAlignment((Align)localAlign);
+		el->SetActiveFlag(active);
+		el->SetSolidFlag(clickable);
+		el->SetDepth(depth);
+		el->SetAnchor(scene->GetElementBase(anchor));
+
+		uint eventCount;
+		stream.Read(eventCount);
+		for (int i = 0; i < eventCount; ++i)
+		{
+			String name;
+			stream.ReadString(name);
+			el->sizeChanged += scene->GetEventFunction(name);
+		}
+	}		
 }

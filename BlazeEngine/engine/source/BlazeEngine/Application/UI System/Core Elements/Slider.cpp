@@ -1,4 +1,5 @@
-#include "Slider.h"
+#include "BlazeEngine/Application/UI System/Core Elements/Slider.h"
+#include "BlazeEngine/Input/Input.h"
 
 namespace Blaze::UI
 {
@@ -13,7 +14,7 @@ namespace Blaze::UI
 		value = newValue;
 
 		if (value != old)
-			valueChanged();
+			GetManager()->AddEventToQueue(valueChanged);
 	}
 
 	void Slider::OnEvent(Event::MouseMotion event)
@@ -28,7 +29,7 @@ namespace Blaze::UI
 	{
 		if (!GetManager()->IsFocusTaken())
 		{
-			if (backgroundButton.state == ButtonState::Hovered)
+			if (backgroundButton.GetState() == ButtonState::Hovered)
 			{
 				float size = backgroundPanel.GetSize().x - sliderPanel.GetSize().x;
 				SetRawValue(value + (float)event.value / size * 5);
@@ -39,7 +40,7 @@ namespace Blaze::UI
 	void Slider::AttachedToManager()
 	{
 		auto* manager = GetManager();
-		uint layer = GetLayer();
+		StringView layer = GetLayerName();
 
 		manager->AddElement(&backgroundPanel, layer);
 		manager->AddElement(&backgroundButton, layer);
@@ -47,9 +48,22 @@ namespace Blaze::UI
 		manager->AddElement(&sliderButton, layer);
 	}
 
+	void Slider::DetachedFromManager()
+	{
+		auto* manager = GetManager();		
+
+		manager->RemoveElement(&sliderButton);
+		manager->RemoveElement(&sliderPanel);
+		manager->RemoveElement(&backgroundButton);
+		manager->RemoveElement(&backgroundPanel);
+	}
+
 	Slider::Slider()
 		: value(0), min(0), max(1)
 	{
+		sliderButton.SetSolidFlag(false);		
+		backgroundButton.SetSolidFlag(false);
+
 		EventManager::AddEventHandler<Event::MouseScroll>(*this);
 
 		sliderButton.entered += [&]() {
@@ -57,7 +71,7 @@ namespace Blaze::UI
 				sliderPanel.fillColor = 0x484848ff;
 		};
 		sliderButton.pressed += [&]() {
-			if (!GetManager()->TakeFocus())
+			if (!GetManager()->TakeFocus(this))
 			{
 				sliderPanel.fillColor = 0x404040ff;
 				moving = true;
@@ -78,7 +92,8 @@ namespace Blaze::UI
 			sliderPanel.fillColor = 0x555555ff;
 		};
 		
-		SetRect({ 0, 0, 200, 20 });
+		SetPos({ 0, 0 });
+		SetSize({ 200, 20 });
 
 		backgroundPanel.borderWidth = 0;
 		backgroundPanel.fillColor = 0x333333ff;
@@ -88,7 +103,7 @@ namespace Blaze::UI
 
 		backgroundButton.pressed += [&]() {
 			float size = backgroundPanel.GetSize().x - sliderPanel.GetSize().x;
-			SetRawValue(((float)Input::GetMousePos().x - backgroundButton.GetAlignedPos().x - sliderPanel.GetSize().x / 2) / size);
+			SetRawValue(((float)Input::GetMousePos().x - backgroundButton.GetViewportPos().x - sliderPanel.GetSize().x / 2) / size);
 		};
 
 		sliderPanel.SetAnchor(&backgroundPanel);
@@ -104,16 +119,7 @@ namespace Blaze::UI
 
 	Slider::~Slider()
 	{
-	}
-
-	void Slider::SetRect(Rectf rect)
-	{
-		UIElement::SetRect(rect);
-		sliderButton.SetSize(rect.size);
-		sliderPanel.SetSize(Vec2f(sliderPanel.GetSize().x, rect.h));
-		backgroundPanel.SetRect(rect);
-		backgroundButton.SetSize(backgroundPanel.GetSize());
-	}
+	}	
 
 	void Slider::SetPos(Vec2f pos)
 	{
@@ -128,14 +134,7 @@ namespace Blaze::UI
 		sliderButton.SetSize(sliderPanel.GetSize());
 		backgroundButton.SetSize(backgroundPanel.GetSize());
 		UIElement::SetSize(size);
-	}
-
-	void Slider::SetClickableFlag(bool clickable)
-	{
-		backgroundButton.SetClickableFlag(clickable);
-		sliderButton.SetClickableFlag(clickable);
-		UIElement::SetClickableFlag(clickable);
-	}
+	}	
 
 	void UI::Slider::SetActiveFlag(bool active)
 	{
@@ -162,6 +161,15 @@ namespace Blaze::UI
 	{
 		backgroundPanel.SetAnchor(anchor);
 		UIElement::SetAnchor(anchor);
+	}
+
+	void Slider::SetDepth(float value)
+	{
+		backgroundPanel.SetDepth(value);
+		backgroundButton.SetDepth(value);
+		sliderPanel.SetDepth(value);
+		sliderButton.SetDepth(value);
+		UIElement::SetDepth(value);
 	}
 
 	void Slider::SetSliderWidth(float width)
@@ -195,24 +203,4 @@ namespace Blaze::UI
 	{
 		return value * (max - min) + min;
 	}
-	UIElementParsingData SliderManager::GetElementParsingData()
-	{
-		UIElementParsingData data = UIBaseElementManager::GetElementParsingData();
-
-		data.AddMember<Slider, ColorRGBAf>("backgroundColor", &Slider::SetBackgroundColor, &Slider::GetBackgroundColor);
-		data.AddMember<Slider, ColorRGBAf>("sliderColor", &Slider::SetSliderColor, &Slider::GetSliderColor);
-		data.AddMember<Slider, float>("sliderWidth", &Slider::SetSliderWidth, &Slider::GetSliderWidth);
-		data.AddMember<Slider, Vec2f>("range", [](UIScene&, Slider& slider, Vec2f range) {
-				slider.SetRange(range.x, range.y);
-			}, [](UIScene&, Slider& slider) {
-				return slider.GetRange();
-			});
-		data.AddMember<Slider, float>("value", &Slider::SetValue, &Slider::GetValue);
-		data.AddMember<Slider, String>("valueChanged", [](UIScene& scene, Slider& slider, const String& name) {
-			slider.valueChanged += scene.GetEventFunction(name);
-			}, nullptr);
-
-		return data;
-	}
-
 }

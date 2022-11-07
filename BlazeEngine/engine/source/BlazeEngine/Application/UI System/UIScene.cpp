@@ -8,176 +8,129 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Text.h"
 #include "BlazeEngine/Application/UI System/Core Elements/TexturedPanel.h"
 
-
-#include "UISceneParser.h"
-
 namespace Blaze::UI
 {
 	UIScene::UIScene()
-		: typeCount(0), managers(nullptr), parsingData(nullptr)
-	{
-		SetElementTypeRegistry(UIElementTypeRegistry::CoreRegistry());
-		SetupElementManagers();
+		: manager(nullptr)
+	{		
 	}
 	UIScene::~UIScene()
 	{
-		for (auto& layer : layers)
-		{
-			for (int i = 0; i < typeCount; ++i)
-			{
-				const auto& typeData = manager.GetElementTypeRegistry().GetElementTypeData(i);
-				for (auto& element : layer.arrays[i].elements)
-				{
-					typeData.destruct(element);
-					Memory::Free(element);
-				}
-			}
-
-			delete[] layer.arrays;
-		}
-
-		CleanupElementManagers();
-
-		for (int i = 0; i < typeCount; ++i)
-		{
-			const auto& typeData = manager.GetElementTypeRegistry().GetElementTypeData(i);
-			typeData.destructManager(managers[i]);
-			Memory::Free(managers[i]);
-		}
-		delete[] managers;
+		if (manager == nullptr)
+			return;
+		
+		while(!elements.empty())
+			DestroyElement(elements.back());
 	}
 
-	void UIScene::SetElementTypeRegistry(const UIElementTypeRegistry& registry)
-	{		
-		CleanupElementManagers();
+	Result UIScene::SetManager(UIManager* manager)
+	{
+		if (this->manager != nullptr)
+			return BLAZE_ERROR_RESULT("BlazeEngine", "You cant change the scene manager");
+		else if (manager == nullptr)
+			return BLAZE_ERROR_RESULT("BlazeEngine", "You cant set the scene manager to nullptr");
 
-		for (int i = 0; i < typeCount; ++i)
-		{
-			const auto& typeData = manager.GetElementTypeRegistry().GetElementTypeData(i);
-			typeData.destructManager(managers[i]);
-			Memory::Free(managers[i]);
-		}
-		delete[] managers;
-		delete[] parsingData;
-
-		parsingData = nullptr;
-
-		typeCount = registry.GetElementTypeCount();
-		manager.SetElementTypeRegistry(registry);
-
-		managers = new UIBaseElementManager * [typeCount];
-
-		for (int i = 0; i < typeCount; ++i)
-		{
-			const auto& typeData = registry.GetElementTypeData(i);
-			managers[i] = (UIBaseElementManager*)Memory::Allocate(typeData.managerSize);
-			typeData.constructManager(managers[i]);
-
-			manager.SetElementManager(managers[i], i);
-		}
-
-		SetupElementManagers();
+		this->manager = manager;		
+		return { };
 	}
 
-	void UIScene::SetResourceManager(Resource::ResourceManager* resourceManager)
+	void UIScene::SetResourceManager(ResourceSystem::ResourceManager* resourceManager)
 	{
 		this->resourceStorage.SetResourceManager(resourceManager);
-	}
+	}	
+	
+	void UIScene::SetEventFunction(StringView name, const EventFunction& func)
+	{		
+		functions[name] = func;		
+	}	
 
-	uint UIScene::CreateLayer()
-	{
-		uint layer = manager.CreateLayer();
-		LayerStorage& storage = layers.emplace_back();
-		storage.arrays = new TypeStorage[manager.GetElementTypeCount()];
+	ResultValue<UIElement*> UIScene::CreateElement(uint typeIndex, StringView layer)
+	{		
+		if (manager == nullptr)
+			return { nullptr, BLAZE_ERROR_RESULT("BlazeEngine", "Scene manager was not set") };
 
-		return layer;
-	}
-	void UIScene::AddElementParsingData(const UIElementParsingData& parsingData, uint type)
-	{
-		if (this->parsingData == nullptr)
-			this->parsingData = new UIElementParsingData[typeCount];
+		if (!manager->HasLayer(layer))
+			return { nullptr, BLAZE_WARNING_RESULT("BlazeEngine", "Invalid layer. Layer was: \"" + layer + "\"") };
 
-		this->parsingData[type] = parsingData;
-	}
-	void UIScene::AddElementParsingData(UIElementParsingData&& parsingData, uint type)
-	{
-		if (this->parsingData == nullptr)
-			this->parsingData = new UIElementParsingData[typeCount];
+		const auto& registry = manager->GetElementTypeRegistry();
 
-		this->parsingData[type] = std::move(parsingData);
-	}
-	void UIScene::AddCoreElementsParsingData()
-	{
-		AddElementParsingData<UI::Button>();
-		AddElementParsingData<UI::Image>();
-		AddElementParsingData<UI::Panel>();
-		AddElementParsingData<UI::Text>();
-		AddElementParsingData<UI::TexturedPanel>();
-	}
-	void UIScene::AddEventFunction(StringView name, EventFunction func)
-	{
-		functions.insert({ name, func });
-	}
-	ResultValue<UIElement*> UIScene::CreateElement(uint typeIndex, uint layer)
-	{
-		const auto& typeData = manager.GetElementTypeRegistry().GetElementTypeData(typeIndex);
+		if (!registry.IsValidTypeIndex(typeIndex))
+			return { nullptr, BLAZE_WARNING_RESULT("BlazeEngine", "Invalid type index. Index was: " + String::Convert(typeIndex)) };
 
-		auto& elements = layers[layer].arrays[typeIndex].elements;
-		void*& element = elements.emplace_back();
-		element = Memory::Allocate(typeData.size);
+		const auto& typeData = registry.GetElementTypeData(typeIndex);		
+						
+		UIElement*& element = elements.emplace_back();
+		element = (UIElement*)Memory::Allocate(typeData.size);
 		typeData.construct(element);
+		((UIElement*)element)->scene = this;
+		((UIElement*)element)->typeIndex = typeIndex;
 
-		manager.AddElement((UIElement*)element, typeIndex, layer);
+		if (Result r = manager->AddElement((UIElement*)element, typeIndex, layer))
+		{
+			typeData.destruct(element);
+			Memory::Free(element);
+			elements.pop_back();
+
+			return { nullptr, std::move(r) };
+		}
 		return (UIElement*)element;
 	}
-	ResultValue<UIElement*> UIScene::CreateElement(StringView name, uint typeIndex, uint layer)
+	ResultValue<UIElement*> UIScene::CreateElement(StringView name, uint typeIndex, StringView layer)
 	{		
-		auto p = elementNames.insert({ name, { nullptr, 0 } });
+		if (manager == nullptr)
+			return { nullptr, BLAZE_ERROR_RESULT("BlazeEngine", "Scene manager was not set") };
+
+		auto p = nameToElementMap.insert({ name, nullptr });
+
 		if (p.second)
 		{
-			UIElement* element = CreateElement(typeIndex, layer);
+			auto res = CreateElement(typeIndex, layer);
 
-			p.first->second = { element, typeIndex };
+			if (res.result)
+			{
+				nameToElementMap.erase(p.first);
+				return { nullptr, std::move(res.result) };
+			}
 
-			return element;
+			p.first->second = res.value;
+			res.value->name = name;
+
+			return res.value;
 		}
 		else
-			return { nullptr, Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, 
-				"Blaze Engine", "Trying to create a element, but there already exists a element with the same name")) };
+			return { nullptr, BLAZE_WARNING_RESULT("Blaze Engine", "Trying to create a element, but there already exists a element with the same name") };
 	}
+
+	Result UIScene::DestroyElement(UIElement* element)
+	{
+		if (element->scene != this)
+			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
+				"BlazeEngine", "Trying to destroy a element from a scene that it doesnt belong to"));
+
+		if (Result r = manager->RemoveElement(element)) return r;
+		
+		elements.erase(std::find(elements.begin(), elements.end(), element));
+		nameToElementMap.erase(element->name);
+		
+		manager->GetElementTypeRegistry().GetElementTypeData(element->typeIndex).destruct(element);
+		Memory::Free(element);
+		
+		return Result();
+	}	
 
 	Result UIScene::Load(const Path& path)
 	{
-		UISceneParser parser;
-		return parser.Parse(this, &resourceStorage, parsingData, path);
-	}
+		if (path.FileExtension() == ".bin")
+		{
 
-	UIBaseElementManager* UIScene::GetElementManager(uint type)
-	{
-		return managers[type];
-	}
+		}
+		else
+		{			
+		}
 
-	Result UIScene::SetupElementManagers()
-	{
-		return manager.SetupElementManagers();
-	}
-	Result UIScene::CleanupElementManagers()
-	{
-		return manager.CleanupElementManagers();
-	}
+		return Result();
+	}		
 
-	Result UIScene::Render()
-	{
-		return manager.Render();
-	}
-	Result UIScene::Update()
-	{
-		return manager.Update();
-	}
-	inline uint UIScene::GetLayerCount() const
-	{
-		return layers.size();
-	}
 	UIScene::EventFunction UIScene::GetEventFunction(StringView name) const
 	{
 		auto it = functions.find(name);
@@ -185,11 +138,18 @@ namespace Blaze::UI
 			return EventFunction();
 		return it->second;
 	}
-	std::pair<UIElement*, uint> UIScene::GetElement(StringView name) const
+	bool UIScene::IsAvailableName(String name)
 	{
-		auto it = elementNames.find((String)name);
-		if (elementNames.end() == it)
-			return { nullptr, -1 };
+		auto it = nameToElementMap.find(name);
+		if (it == nameToElementMap.end())
+			return true;
+		return false;
+	}
+	UIElement* UIScene::GetElementBase(StringView name) const
+	{
+		auto it = nameToElementMap.find(name);
+		if (nameToElementMap.end() == it)
+			return nullptr;
 		return 
 			it->second;
 	}

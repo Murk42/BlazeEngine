@@ -5,41 +5,46 @@
 
 #include <iostream>
 #include <chrono>
+#include <fstream>
 using namespace std;
 
 #include "BlazeEngine/Core/Startup.h"
 #include "RuntimeInfo.h"
 
+
 #if defined(FINAL_BUILD)
+#define RUNTIME_API
 extern "C" Blaze::Startup::BlazeInitInfo InitializeBlaze();
 extern "C" void TerminateBlaze();
 extern "C" void SetStartupInfo(Blaze::Startup::StartupInfo);
-#endif
-
-#if defined(FINAL_BUILD_EMPTY)
-void Setup()
-{
-
-}
-#elif defined(FINAL_BUILD)
 extern "C" void Setup();
-#endif
-
-#if !defined(FINAL_BUILD)
+#else
+#define RUNTIME_API extern "C" __declspec(dllexport)
 #include "Result.h"
 #include "Library.h"
 
-
-LibraryView blazeLibrary;
-LibraryView clientLibrary;
+struct AllocationData
+{
+	size_t size;
+	void* ptr;
+};
+struct MemoryReport
+{
+	size_t count;
+	AllocationData data[1024];
+};
 
 Blaze::Startup::BlazeInitInfo(*InitializeBlaze)();
 void(*TerminateBlaze)();
 void(*SetStartupInfo)(Blaze::Startup::StartupInfo);
-
 void(*Setup)();
+MemoryReport* (*GetMemoryReport)();
+
+LibraryView blazeLibrary;
+LibraryView clientLibrary;
 
 #define LOAD_FUNC(x, y, z) x = (decltype(x))y.GetFunction(#x, z); if (!z.sucessfull) { result.log += "Failed to load function \"" #x "\"\n"; return result; }
+#define RESOLVE(x) if (ResolveResult(x)) exit(1);
 
 Result LoadBlazeFunctions()
 {
@@ -48,7 +53,8 @@ Result LoadBlazeFunctions()
 	LOAD_FUNC(InitializeBlaze, blazeLibrary, result);	
 	LOAD_FUNC(TerminateBlaze, blazeLibrary, result);	
 	LOAD_FUNC(SetStartupInfo, blazeLibrary, result);
-	
+	LOAD_FUNC(GetMemoryReport, blazeLibrary, result);
+
 	return Result();
 }
 Result LoadClientFunctions()
@@ -69,8 +75,9 @@ bool ResolveResult(Result r)
 	}
 	return false;
 }
-#define RESOLVE(x) if (ResolveResult(x)) exit(1);
-#endif 
+
+
+#endif
 
 double MeasureTime(chrono::high_resolution_clock::time_point& time_point)
 {
@@ -80,10 +87,19 @@ double MeasureTime(chrono::high_resolution_clock::time_point& time_point)
 	return duration;
 }
 
-#if !defined(FINAL_BUILD)	
+void SaveMemoryReport(MemoryReport* report)
+{
+	std::ofstream file("memory.txt");
 
+	for (int i = 0; i < report->count; ++i)	
+		file << report->data[i].ptr << " " << report->data[i].size << "\n";
+
+	file.close();
+}
+
+#if !defined(FINAL_BUILD)
 extern "C" __declspec(dllexport) int RUNTIME_START(RuntimeInfo runtimeInfo)
-{				
+{
 #else
 #if !defined(_WIN32)
 int main()
@@ -102,16 +118,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	runtimeInfo.timings.loadingRuntime = 0;
 	runtimeInfo.timings.other = 0;
 #endif
-
-	auto startTimePoint = chrono::high_resolution_clock::now();		
+	auto startTimePoint = chrono::high_resolution_clock::now();
 
 #if !defined(FINAL_BUILD)	
 	RESOLVE(blazeLibrary.Set("BlazeEngine.dll"));
 	RESOLVE(clientLibrary.Set("Client.dll"));
 	
-	RESOLVE(LoadBlazeFunctions());	
-	RESOLVE(LoadClientFunctions());	
-
+	RESOLVE(LoadBlazeFunctions());
+	RESOLVE(LoadClientFunctions());
 
 	if (runtimeInfo.runtimeLog)
 	{
@@ -147,6 +161,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	startupInfo.blazeInitInfo = blazeInitInfo;
 
+	MemoryReport* memoryReport = GetMemoryReport();
+
 	SetStartupInfo(startupInfo);
 	Setup();
 
@@ -159,6 +175,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	if (runtimeInfo.runtimeLog)
 	cout << "BlazeEngineRuntime: Blaze terminated\n";
 #endif
+
+	SaveMemoryReport(memoryReport);
+	free(memoryReport);
 
 	return 0;
 }

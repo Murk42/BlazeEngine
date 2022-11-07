@@ -16,11 +16,13 @@ namespace Blaze
 		String typeStr;
 		switch (type)
 		{
+		case Blaze::LogType::Debug: typeStr = "DEBUG"; break;
 		case Blaze::LogType::Error: typeStr = "ERROR";  break;
 		case Blaze::LogType::Info: typeStr = "INFO"; break;
 		case Blaze::LogType::Warning: typeStr = "WARNING"; break;
+		case Blaze::LogType::Fatal: typeStr = "FATAL"; break;
 		}
-		return "[" + timeStr + "] [" + typeStr + "] " + filePath + ": " + message + "\n";
+		return "[" + timeStr + "] [" + typeStr + "] " + filePath + "(" + functionName + "): " + message + " (line " + String::Convert(line) + ")";
 	}
 
 	bool Log::operator==(const Log& log)

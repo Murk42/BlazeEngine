@@ -1,7 +1,6 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Application/UI System/UIElement.h"
-#include "BlazeEngine/Application/UI System/UIAlignment.h"
 #include "BlazeEngine/Application/UI System/UIManager.h"
 #include "BlazeEngine/DataStructures/Color.h"
 #include "BlazeEngine/DataStructures/Rect.h"
@@ -42,7 +41,7 @@ namespace Blaze
 		public:
 			void Setup() override;
 
-			void Render(size_t index, size_t end) override;
+			void Render(UIElement*) override;
 		};
 	}
 }

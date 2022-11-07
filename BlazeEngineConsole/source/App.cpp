@@ -98,7 +98,7 @@ CLIENT_API void Setup()
 	Renderer::SetViewport({}, window.GetSize());
 	Renderer::SetClearColor(0x333333ff);
 
-	Resource::ResourceManager resourceManager;
+	ResourceSystem::ResourceManager resourceManager;
 	resourceManager.AddResource("Default font", &Graphics::GetDefaultFont());
 
 	UI::UIScene scene;		

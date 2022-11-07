@@ -52,3 +52,9 @@ namespace Blaze
 		bool operator!=(const Log&);
 	};
 }
+
+#define BLAZE_DEBUG_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Debug	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
+#define BLAZE_INFO_LOG(source, message)		::Blaze::Log(::Blaze::LogType::Info		, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
+#define BLAZE_WARNING_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Warning	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
+#define BLAZE_ERROR_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Error	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
+#define BLAZE_FATAL_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Fatal	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)

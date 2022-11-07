@@ -10,7 +10,7 @@ enum class Configuration
 	Debug,
 	Release,
 	FinalBuild_Debug,
-	FinalBuild_Release,
+	FinalBuild_Release
 };
 enum class Platform
 {

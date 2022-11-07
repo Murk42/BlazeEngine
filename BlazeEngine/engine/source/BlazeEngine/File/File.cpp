@@ -15,8 +15,8 @@ namespace Blaze
 		}
 		File::~File()
 		{
-			if (fd != -1 && _close(fd) == -1)			
-					BLAZE_ERROR_LOG("stdlib", "Failed to close file");
+			if (fd != -1 && _close(fd) == -1)
+				Logger::AddLog(BLAZE_ERROR_LOG("stdlib", "Failed to close file"));
 		}
 
 		Result File::Open(const Path& path, FileOpenMode mode, FileOpenFlags flags, FilePermission perms)
@@ -49,7 +49,11 @@ namespace Blaze
 		size_t File::Read(Buffer& buffer)
 		{
 			return _read(fd, buffer.Ptr(), buffer.Size());
-		}		
+		}
+		size_t File::Read(void* ptr, size_t readAmount)
+		{
+			return _read(fd, ptr, readAmount);
+		}
 		size_t File::Write(BufferView buffer)
 		{
 			return _write(fd, buffer.Ptr(), buffer.Size());

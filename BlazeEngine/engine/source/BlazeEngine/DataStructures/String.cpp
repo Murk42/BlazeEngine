@@ -97,6 +97,14 @@ namespace Blaze
 		ptr[size] = '\0';
 		return *this;		
 	}
+	char* String::begin()
+	{
+		return ptr;
+	}
+	char* String::end()
+	{
+		return ptr + size;
+	}
 	String& String::operator=(const StringView& s)
 	{
 		delete[] ptr;
@@ -196,8 +204,9 @@ namespace Blaze
 
 	bool SpaceTillEnd(const char* begin, const char* end)
 	{
+		end--;
 		while (begin != end)
-			if (!isspace(*begin))
+			if (!isblank(*begin))
 				return false;
 			else
 				++begin;

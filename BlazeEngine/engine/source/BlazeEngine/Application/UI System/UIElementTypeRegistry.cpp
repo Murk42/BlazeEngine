@@ -5,6 +5,13 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Panel.h"
 #include "BlazeEngine/Application/UI System/Core Elements/Text.h"
 #include "BlazeEngine/Application/UI System/Core Elements/TexturedPanel.h"
+#include "BlazeEngine/Application/UI System/Core Elements/DropdownSelection.h"
+#include "BlazeEngine/Application/UI System/Core Elements/ImageButton.h"
+#include "BlazeEngine/Application/UI System/Core Elements/List.h"
+#include "BlazeEngine/Application/UI System/Core Elements/SelectionMenu.h"
+#include "BlazeEngine/Application/UI System/Core Elements/Slider.h"
+#include "BlazeEngine/Application/UI System/Core Elements/TextButton.h"
+#include "BlazeEngine/Application/UI System/Core Elements/TextField.h"
 
 namespace Blaze
 {
@@ -49,11 +56,19 @@ namespace Blaze
 		}
 		void UIElementTypeRegistry::RegisterCoreTypes()
 		{
+			RegisterType<UIElement>();
 			RegisterType<Button>();
 			RegisterType<Image>();
 			RegisterType<Panel>();
 			RegisterType<Text>();
 			RegisterType<TexturedPanel>();
+			RegisterType<UI::List>();
+			RegisterType<UI::Slider>();
+			RegisterType<UI::TextButton>();
+			RegisterType<UI::DropdownSelection>();
+			RegisterType<UI::TextField>();
+			RegisterType<UI::ImageButton>();
+			RegisterType<UI::SelectionMenu>();
 		}		
 		int UIElementTypeRegistry::GetElementTypeIndex(StringView name) const
 		{
@@ -67,7 +82,7 @@ namespace Blaze
 		{
 			return types.size();
 		}
-		const UIElementTypeData& UIElementTypeRegistry::GetElementTypeData(uint index) const
+		UIElementTypeData UIElementTypeRegistry::GetElementTypeData(uint index) const
 		{
 			if (index > types.size())
 			{				
@@ -76,6 +91,10 @@ namespace Blaze
 				return { "" };
 			}
 			return types[index];
+		}
+		bool UIElementTypeRegistry::IsValidTypeIndex(uint index) const
+		{
+			return index < types.size();
 		}
 		UIElementTypeRegistry UIElementTypeRegistry::CoreRegistry()
 		{

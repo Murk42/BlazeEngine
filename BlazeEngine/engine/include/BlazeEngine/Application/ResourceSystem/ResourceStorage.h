@@ -2,54 +2,56 @@
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Core/ResultValue.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceTypeRegistry.h"
+#include "BlazeEngine/Application/ResourceSystem/Resource.h"
 
-namespace Blaze::Resource
+namespace Blaze::ResourceSystem
 {
 	class ResourceManager;
 
 	class BLAZE_API ResourceStorage
 	{
-		ResourceTypeRegistry registry;
-		size_t typeCount;
-		
 		ResourceManager* manager;
 
-		std::list<void*>* resources;
+		std::list<Resource*>* resources;
 	public:
 		ResourceStorage();
 		~ResourceStorage();
-
-		void SetResourceTypeRegistry(const ResourceTypeRegistry&);
+		
 		void SetResourceManager(ResourceManager* manager);
 
 		template<typename T>
 		ResultValue<T*> CreateResource()
-		{
-			int typeIndex = registry.GetTypeIndex<T>();
-			if (typeIndex == -1)
-			{				
-				return { nullptr, Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"Blaze Engine", "Creating resource of an unregistered type")) };
-			}
-			else
-				return (T*)CreateResource(registry.GetTypeIndex<T>());
+		{			
+			return (T*)CreateResource(manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
 		}
 		template<typename T>
 		ResultValue<T*> CreateResource(StringView name)
-		{
-			int typeIndex = registry.GetTypeIndex<T>();
-			if (typeIndex == -1)
-			{
-				return { nullptr, Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"Blaze Engine", "Creating resource of an unregistered type")) };
-			}
-			else
-				return (T*)CreateResource(name, registry.GetTypeIndex<T>());
+		{			
+			return (T*)CreateResource(name, manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
 		}
-		void* CreateResource(size_t typeIndex);
-		void* CreateResource(StringView name, size_t typeIndex);
+		Resource* CreateResource(size_t typeIndex);
+		Resource* CreateResource(StringView name, size_t typeIndex);
 
-		inline const ResourceTypeRegistry& GetResourceTypeRegistry() const { return registry; }
+		template<typename T>
+		Result DestroyResource(T* resource)
+		{
+			return DestroyResource(resource, manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
+		}
+		template<typename T>
+		Result DestroyResource(StringView name)
+		{
+			return DestroyResource(name, manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
+		}
+		Result DestroyResource(Resource* resource, size_t typeIndex);
+		Result DestroyResource(StringView name, size_t typeIndex);
+		
+		template<typename T>
+		const std::list<Resource*>& GetResourceList() const
+		{
+			return GetResourceList(manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
+		}
+		const std::list<Resource*>& GetResourceList(size_t typeIndex) const;
+		
 		inline ResourceManager* GetResourceManager() const { return manager; }
 	};
 }

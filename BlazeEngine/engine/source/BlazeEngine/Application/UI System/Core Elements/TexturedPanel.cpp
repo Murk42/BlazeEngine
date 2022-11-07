@@ -13,7 +13,7 @@ namespace Blaze
 		void TexturedPanelManager::Setup()
 		{
 		}
-		void TexturedPanelManager::Render(size_t index, size_t end)
+		void TexturedPanelManager::Render(UIElement*)
 		{
 		}
 	}

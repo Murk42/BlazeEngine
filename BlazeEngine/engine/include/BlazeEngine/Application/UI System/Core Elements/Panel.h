@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngine/Application/UI System/UIElement.h"
-#include "BlazeEngine/Application/UI System/UIAlignment.h"
 #include "BlazeEngine/Application/UI System/UIManager.h"
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Graphics/Graphics.h"
@@ -13,6 +12,14 @@ namespace Blaze
 	{
 		class PanelManager;
 
+		struct PanelProperties
+		{
+			UIElementProperty<float> borderWidth;
+			UIElementProperty<float> cornerRadius;
+			UIElementProperty<ColorRGBAf> fillColor;
+			UIElementProperty<ColorRGBAf> borderColor;
+		};
+
 		class BLAZE_API Panel : public UIElement
 		{
 		public:			
@@ -23,6 +30,8 @@ namespace Blaze
 
 			Panel();
 			~Panel();
+			
+			void SetProperties(const PanelProperties&);
 			 
 			using ManagerType = PanelManager;
 			static constexpr const char* typeName = "Panel";
@@ -36,9 +45,7 @@ namespace Blaze
 		public:
 			void Setup() override;
 			
-			void Render(size_t index, size_t end) override;
-
-			static UIElementParsingData GetElementParsingData();
+			void Render(UIElement*) override;
 		};
 	}
 }

@@ -1,12 +1,15 @@
 #pragma once
-#include "BlazeEngine/BlazeEngine.h"
-using namespace Blaze;
+#include "BlazeEngine/Core/EngineCore.h"
+#include "BlazeEngine/Application/UI System/UIElement.h"
+#include "BlazeEngine/Application/UI System/Core Elements/Panel.h"
+#include "BlazeEngine/Application/UI System/Core Elements/Button.h"
+#include "BlazeEngine/Event/EventManager.h"
 
 namespace Blaze::UI
 {
 	class SliderManager;
 
-	class Slider : public UIElement,
+	class BLAZE_API Slider : public UIElement,
 		EventHandler<Event::MouseMotion>,
 		EventHandler<Event::MouseScroll>
 	{
@@ -24,22 +27,23 @@ namespace Blaze::UI
 
 		void OnEvent(Event::MouseMotion event) override;
 		void OnEvent(Event::MouseScroll event) override;
+
 		void AttachedToManager() override;
+		void DetachedFromManager() override;
 	public:
 		Slider();
 		~Slider();
 
 		UIEvent valueChanged;
-
-		void SetRect(Rectf rect) override;
+		
 		void SetPos(Vec2f pos) override;
 		void SetSize(Vec2f size) override;
-
-		void SetClickableFlag(bool clickable) override;
+		
 		void SetActiveFlag(bool active) override;
 		void SetLocalAlignment(Align align) override;
 		void SetAnchorAlignment(Align align) override;
 		void SetAnchor(UIElement* anchor) override;
+		void SetDepth(float value) override;
 
 		void SetSliderWidth(float width);
 
@@ -61,9 +65,8 @@ namespace Blaze::UI
 		using ManagerType = SliderManager;
 	};
 
-	class SliderManager : public UIElementManager<Slider>
+	class BLAZE_API SliderManager : public UIElementManager<Slider>
 	{
-	public:
-		static UIElementParsingData GetElementParsingData();
+	public:		
 	};
 }

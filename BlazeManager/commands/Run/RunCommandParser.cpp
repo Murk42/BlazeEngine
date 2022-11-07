@@ -9,9 +9,10 @@ static void PrintHelp()
 {
 	cout << "\n ---- run help ----\n";
 	cout << "run <project path> [switches]\n\n";
-	cout << "A switch can be one of:\n"
-		"\"Debug\", \"Release\", \"exit\", \"dontBuildBlaze\", \"dontBuildClient\",\n"
-		"\"dontBuildRuntime\", \"dontBuildAny\", \"noLog\", \"noManagerLog\", \"noRuntimeLog\".\n";
+	cout << "All available switches:\n"
+		"\"Debug\" \"Release\", \"noExit\", \"forceExit\", \"buildBlaze\", \"buildClient\",\n"
+		"\"buildRuntime\", \"buildAll\", \"noLog\", \"noManagerLog\", \"noRuntimeLog\", \n"
+		"\"logTimings\" \"guiOpenFile\".\n";
 	cout << "\n";
 }
 
@@ -51,30 +52,38 @@ static bool GetProjectPathFromArgs(const std::vector<string>& args, string& path
 static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& options)
 {		
 	if (symbols.size() == 2)
-	{
-		if (symbols[1] == "Release")
+	{	
+		if (symbols[1] == "Debug")
 		{
-			options.release = true;
+			options.configuration = RunCommandConfiguration::Debug;
 		}
-		else if (symbols[1] == "exit")
-		{
-			options.stopAfter = true;
+		else if (symbols[1] == "Release")
+		{			
+			options.configuration = RunCommandConfiguration::Release;
 		}
-		else if (symbols[1] == "dontBuildBlaze")
+		else if (symbols[1] == "noExit")
 		{
-			options.dontBuildBlaze = true;
+			options.exitCondition = RunCommandExitCondition::NoExit;
 		}
-		else if (symbols[1] == "dontBuildClient")
+		else if (symbols[1] == "forceExit")
 		{
-			options.dontBuildClient = true;
+			options.exitCondition = RunCommandExitCondition::ForceExit;
+		}		
+		else if (symbols[1] == "buildBlaze")
+		{
+			options.buildBlaze = true;
 		}
-		else if (symbols[1] == "dontBuildRuntime")
+		else if (symbols[1] == "buildClient")
 		{
-			options.dontBuildRuntime = true;
+			options.buildClient = true;
 		}
-		else if (symbols[1] == "dontBuildAny")
+		else if (symbols[1] == "buildRuntime")
 		{
-			options.dontBuildBlaze = options.dontBuildClient = options.dontBuildRuntime = true;
+			options.buildRuntime = true;
+		}
+		else if (symbols[1] == "buildAll")
+		{
+			options.buildBlaze = options.buildClient = options.buildRuntime = true;
 		}
 		else if (symbols[1] == "noLog")
 		{
@@ -96,7 +105,7 @@ static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& option
 		else if (symbols[1] == "logTimings")
 		{
 			options.logTimings = true;
-		}
+		}		
 	}
 	else
 	{

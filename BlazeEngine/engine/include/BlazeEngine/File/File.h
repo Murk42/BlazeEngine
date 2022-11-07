@@ -42,7 +42,8 @@ namespace Blaze
 		Result Close();
 		size_t Size();
 		//Puts the buffer size amount of bytes from the file into the buffer without allocating or freeing it.
-		size_t Read(Buffer& buffer);		
+		size_t Read(Buffer& buffer);
+		size_t Read(void* ptr, size_t readAmount);		
 		size_t Write(BufferView buffer);
 		bool IsOpen() const;
 	};

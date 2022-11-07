@@ -37,4 +37,10 @@ namespace Blaze
 		LogType type;
 		std::vector<Log> logs;
 	};
+
+#define BLAZE_DEBUG_RESULT(source, message)		::Blaze::Result(::Blaze::Log(::Blaze::LogType::Debug	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message))
+#define BLAZE_INFO_RESULT(source, message)		::Blaze::Result(::Blaze::Log(::Blaze::LogType::Info		, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message))
+#define BLAZE_WARNING_RESULT(source, message)	::Blaze::Result(::Blaze::Log(::Blaze::LogType::Warning	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message))
+#define BLAZE_ERROR_RESULT(source, message)		::Blaze::Result(::Blaze::Log(::Blaze::LogType::Error	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message))
+#define BLAZE_FATAL_RESULT(source, message)		::Blaze::Result(::Blaze::Log(::Blaze::LogType::Fatal	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message))
 }

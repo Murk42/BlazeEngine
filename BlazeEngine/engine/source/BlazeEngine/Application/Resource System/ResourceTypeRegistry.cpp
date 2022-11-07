@@ -2,7 +2,7 @@
 #include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 
-namespace Blaze::Resource
+namespace Blaze::ResourceSystem
 {
 	Result ResourceTypeRegistry::RegisterType(StringView name, size_t size, void(*construct)(void*), void(*destruct)(void*))
 	{
@@ -35,20 +35,15 @@ namespace Blaze::Resource
 	void ResourceTypeRegistry::RegisterCoreTypes()
 	{
 		RegisterType<Font>();
-		RegisterType<FontResolution>();
 		RegisterType<Graphics::Core::Texture2D>();
-		//RegisterType<Button>();
-		//RegisterType<Image>();
-		//RegisterType<Panel>();
-		//RegisterType<Text>();
-		//RegisterType<TexturedPanel>();
+		//RegisterType<FontResolution>();
 	}
 
-	uint ResourceTypeRegistry::GetTypeIndex(StringView name) 
+	uint ResourceTypeRegistry::GetResourceTypeIndex(StringView name) const
 	{
 		auto it = nameTable.find((String)name);
-		if (it == nameTable.end())					
-			return -1;		
+		if (it == nameTable.end())
+			return -1;
 		else
 			return it->second;
 	}
@@ -67,6 +62,11 @@ namespace Blaze::Resource
 			return { "" };
 		}
 		return types[index];
+	}
+
+	bool ResourceTypeRegistry::IsValidTypeIndex(uint index) const
+	{
+		return index < types.size();
 	}
 
 	ResourceTypeRegistry ResourceTypeRegistry::CoreRegistry()

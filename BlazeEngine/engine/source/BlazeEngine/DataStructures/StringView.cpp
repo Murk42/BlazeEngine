@@ -14,16 +14,28 @@ namespace Blaze
 	{
 	}	
 	StringView::StringView(const char* ptr)
-		: ptr(ptr), size(ptr != nullptr ? strlen(ptr) : 0)
+		: size(ptr != nullptr ? strlen(ptr) : 0)
 	{
+		if (size == 0)
+			this->ptr = nullptr; //When ptr is "" its not nullptr
+		else
+			this->ptr = ptr;
 	}
 	StringView::StringView(const char* ptr, size_t size)
-		: ptr(ptr), size(size)
+		: size(size)
 	{
+		if (size == 0)
+			this->ptr = nullptr;
+		else
+			this->ptr = ptr;
 	}
 	StringView::StringView(const char* begin, const char* end)
-		: ptr(begin), size(end - begin)
+		: size(end - begin)
 	{
+		if (size == 0)
+			this->ptr = nullptr; //When ptr is "" its not nullptr
+		else
+			this->ptr = begin;
 	}
 	StringView::StringView(const String& string)
 		: ptr(string.Ptr()), size(string.Size())

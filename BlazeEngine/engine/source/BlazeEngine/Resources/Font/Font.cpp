@@ -133,19 +133,11 @@ namespace Blaze
 
 	void CopyGlypMetrics(CharacterMetrics& out, FT_GlyphSlot& in, uint pixelsPerUnit, FontResolutionRenderType renderType)
 	{
-		//if (renderType == FontResolutionRenderType::SDF)
-		//{
-		//	out.size = Vec2f(in->metrics.width, in->metrics.height);
-		//	out.advance = float(in->metrics.horiAdvance);
-		//	out.renderOffset = Vec2f(in->metrics.horiBearingX, in->metrics.horiBearingY - in->metrics.height) - out.size / 2;
-		//	out.size *= 2;
-		//}
-		//else
-		//{
+		
 		out.size = Vec2f(in->metrics.width, in->metrics.height) / 64.0f;
 		out.advance = float(in->metrics.horiAdvance) / 64.0f;
 		out.renderOffset = Vec2f(in->metrics.horiBearingX, in->metrics.horiBearingY - in->metrics.height) / 64.0f;
-		//}
+		//} 
 		
 		//float k = 1.0f / pixelsPerUnit;
 		//out.size *= k;
@@ -154,7 +146,7 @@ namespace Blaze
 	}		
 
 	FontResolution::FontResolution()
-		: font(nullptr), resolution(0), characterCount(0)
+		: font(nullptr), resolution(0), characterCount(0), baselineDistance(0), renderType((FontResolutionRenderType)-1)
 	{
 	}
 
@@ -428,7 +420,7 @@ namespace Blaze
 	inline FontResolution* Font::GetClosestResolution(float res) const
 	{
 		if (resolutions.size() == 0)
-			return 0;
+			return nullptr;
 
 		FontResolution* upper = nullptr;
 		FontResolution* lower = nullptr;

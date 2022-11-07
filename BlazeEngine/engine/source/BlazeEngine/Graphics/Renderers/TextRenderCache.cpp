@@ -45,10 +45,11 @@ namespace Blaze::Graphics
 
 		Vertex* vertices = new Vertex[generator.GetMaxVertexCount()];
 		Vertex* it = vertices;
+		float advance;
 
 		while (!generator.IsEnd())
 		{
-			if (generator.GenerateVertex(it->p1, it->p2, it->uv1, it->uv2))
+			if (generator.GenerateVertex(it->p1, it->p2, it->uv1, it->uv2, advance))
 			{
 				bottomLeft.x = std::min({ bottomLeft.x, it->p1.x, it->p2.x });
 				bottomLeft.y = std::min({ bottomLeft.y, it->p1.y, it->p2.y });

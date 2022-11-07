@@ -7,14 +7,23 @@ namespace Blaze
 	namespace UI
 	{
 		Panel::Panel()
-			: fillColor(0.5, 0.5, 0.5, 0.5), borderColor(0.4, 0.4, 0.4, 1.0f), cornerRadius(5.0f), borderWidth(30)
-		{
+			: borderWidth(1), cornerRadius(5), fillColor(0x000000ff), borderColor(0xffffffff)
+		{			
 		}
 
 		Panel::~Panel()
 		{
 
 		}
+
+		void Panel::SetProperties(const PanelProperties& p)
+		{
+			if (p.fillColor.edited) fillColor = p.fillColor;
+			if (p.borderColor.edited) borderColor = p.borderColor;
+			if (p.borderWidth.edited) borderWidth = p.borderWidth;
+			if (p.cornerRadius.edited) cornerRadius = p.cornerRadius;
+		}
+
 		struct PanelVertex
 		{
 			Vec3f pos;
@@ -66,60 +75,49 @@ namespace Blaze
 
 			panelsSP.LinkShaders({ &vs, &fs });
 		}		
-		void PanelManager::Render(size_t index, size_t end)
-		{
-			Vec2i size = Renderer::GetViewportSize();
-			Mat4f vp2d = Math::OrthographicMatrix<float>(0, size.x, 0, size.y, -1000, 1000);
-			
-			for (; index != end; ++index)
+		void PanelManager::Render(UIElement* element)
+		{			
+			Panel& panel = (Panel&)*element;
+
+			PanelVertex vertices[6];
+
+			if (!panel.IsActive())
+				return;
+
+			Vec2f pos = panel.GetViewportPos();
+			Vec2f size = panel.GetSize();
+			Rectf clipRect = panel.GetClipRect();
+
+			Vec3f p1, p2, p3, p4;
+			SetPoints(p1, p2, p3, p4, { pos, size }, panel.GetDepth());
+
+			vertices[0].pos = p1;
+			vertices[1].pos = p3;
+			vertices[2].pos = p2;
+			vertices[3].pos = p2;
+			vertices[4].pos = p3;
+			vertices[5].pos = p4;
+
+			for (int i = 0; i < 6; ++i)
 			{
-				Panel& panel = *GetElement(index);
-
-				PanelVertex vertices[6];
-
-				if (!panel.IsActive())
-					continue;
-				Rectf alignedRect = panel.GetAlignedRect();
-
-				Vec3f p1, p2, p3, p4;
-				SetPoints(p1, p2, p3, p4, alignedRect, panel.GetDepth());
-
-				vertices[0].pos = p1;
-				vertices[1].pos = p3;
-				vertices[2].pos = p2;
-				vertices[3].pos = p2;
-				vertices[4].pos = p3;
-				vertices[5].pos = p4;
-
-				for (int i = 0; i < 6; ++i)
-				{
-					vertices[i].rect = Vec4f(alignedRect.pos, alignedRect.size);
-					vertices[i].fillColor = (Vec4f)panel.fillColor;
-					vertices[i].borderColor = (Vec4f)panel.borderColor;
-					vertices[i].radius = panel.cornerRadius;
-					vertices[i].borderWidth = panel.borderWidth;
-				}
-
-				Renderer::SelectProgram(&panelsSP);
-				Renderer::SelectVertexArray(&panelsVA);
-				panelsSP.SetUniform(0, vp2d);
-
-				panelsVB.AllocateDynamicStorage({ vertices, sizeof(PanelVertex) * 6 }, Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
-
-
-				Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Triangles, 0, 6);			
+				vertices[i].rect = Vec4f(pos, size);
+				vertices[i].fillColor = (Vec4f)panel.fillColor;
+				vertices[i].borderColor = (Vec4f)panel.borderColor;
+				vertices[i].radius = panel.cornerRadius;
+				vertices[i].borderWidth = panel.borderWidth;
 			}
-		}
 
-		UIElementParsingData PanelManager::GetElementParsingData()
-		{
-			UIElementParsingData data = UIBaseElementManager::GetElementParsingData();
-			data.AddMember("fillColor", &Panel::fillColor);
-			data.AddMember("borderColor", &Panel::borderColor);
-			data.AddMember("borderWidth", &Panel::borderWidth);
-			data.AddMember("cornerRadius", &Panel::cornerRadius);
-			return data;
-		}
+			Renderer::SelectProgram(&panelsSP);
+			Renderer::SelectVertexArray(&panelsVA);
+			panelsSP.SetUniform(0, GetManager()->GetProjectionMatrix());
+			panelsSP.SetUniform(1, Vec4f(clipRect.pos, clipRect.size));
 
+			panelsVB.AllocateDynamicStorage({ vertices, sizeof(PanelVertex) * 6 }, Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+
+
+			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Triangles, 0, 6);
+
+		}
+	
 	}
 }

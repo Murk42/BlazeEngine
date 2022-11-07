@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 			RunCommandOptions options;
 			if (ParseRunCommand(args, options)) continue;
 			bool ret = RunCommand(options);
-			if (options.stopAfter)
+			if (options.exitCondition == RunCommandExitCondition::ForceExit)
 				return 0;
 			if (ret)
 				continue;

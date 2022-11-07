@@ -65,6 +65,7 @@ namespace Blaze
 		Iterator begin() const;		
 		Iterator end() const;
 
+		StringUTF8 SubString(size_t start, size_t size) const;
 		StringUTF8& Resize(size_t newCharacterCount, UnicodeChar fill);
 
 		StringUTF8& operator= (const StringViewUTF8& s);
@@ -108,7 +109,7 @@ namespace Blaze
 		template<> static bool ConvertTo<double>(const StringViewUTF8&, double&);
 
 		friend BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);				
-	};
+	};	
 	
 	BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);
 	BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringView& right);

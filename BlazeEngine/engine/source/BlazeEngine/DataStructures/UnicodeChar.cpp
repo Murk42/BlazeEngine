@@ -61,7 +61,10 @@ namespace Blaze
 	}
 	UnicodeChar::UnicodeChar(const char* ptr)
 	{
-		UTF8ToUnicode(ptr, value);
+		if (ptr == nullptr)
+			value = 0;
+		else
+			UTF8ToUnicode(ptr, value);
 	}	
 
 	size_t UnicodeChar::UTF8Size()

@@ -9,7 +9,7 @@ namespace Blaze::Graphics
 	{	
 	public:
 		virtual void Setup(StringViewUTF8 text, FontResolution* fontResolution) = 0;
-		virtual bool GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2) = 0;
+		virtual bool GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2, float& next) = 0;
 		virtual bool IsEnd() const = 0;
 		virtual uint GetMaxVertexCount() const = 0;
 	};
@@ -28,7 +28,7 @@ namespace Blaze::Graphics
 		DefaultTextVertexGenerator();
 
 		void Setup(StringViewUTF8 text, FontResolution* fontResolution) override;		
-		bool GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2) override;
+		bool GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2, float& next) override;
 		bool IsEnd() const override;
 
 		uint GetMaxVertexCount() const override;		

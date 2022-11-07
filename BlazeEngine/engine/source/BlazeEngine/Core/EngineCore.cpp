@@ -7,6 +7,8 @@
 
 namespace Blaze
 {
+	void InitializeMemory();
+	void TerminateMemory();
 	Startup::ConsoleInitInfo InitializeConsole();
 	void TerminateConsole();
 	Startup::InputInitInfo InitializeInput();
@@ -21,6 +23,7 @@ extern "C" BLAZE_API Blaze::Startup::BlazeInitInfo InitializeBlaze()
 {
 	Blaze::TimePoint timePoint = Blaze::TimePoint::GetWorldTime();
 	Blaze::Startup::BlazeInitInfo initInfo;
+	Blaze::InitializeMemory();
 	initInfo.libraryInitInfo = Blaze::InitializeLibraries();
 	initInfo.consoleInitInfo = Blaze::InitializeConsole();
 	initInfo.inputInitInfo = Blaze::InitializeInput();
@@ -38,4 +41,5 @@ extern "C" BLAZE_API void TerminateBlaze()
 	Blaze::TerminateInput();
 	Blaze::TerminateConsole();
 	Blaze::TerminateLibraries();
+	Blaze::TerminateMemory();
 }

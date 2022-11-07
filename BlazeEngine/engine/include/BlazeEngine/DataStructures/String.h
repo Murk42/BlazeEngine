@@ -32,6 +32,9 @@ namespace Blaze
 		void Clear();	
 		String& Resize(size_t newSize, char fill = ' ');
 
+		char* begin();
+		char* end();
+
 		String& operator= (const StringView& s);
 		String& operator= (const String& s);
 		String& operator= (String&& s) noexcept;				

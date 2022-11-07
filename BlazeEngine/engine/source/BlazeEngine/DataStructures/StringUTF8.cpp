@@ -22,7 +22,7 @@ namespace Blaze
 	{
 	}
 	UnicodeChar StringUTF8::Iterator::ToUnicode() const
-	{
+	{		
  		return UnicodeChar((const char*)ptr);
 	}
 	StringUTF8::Iterator StringUTF8::Iterator::operator++()
@@ -133,19 +133,27 @@ namespace Blaze
 	}
 
 	StringUTF8::StringUTF8(void* buffer, size_t bufferSize)
-		: buffer(nullptr), bufferSize(bufferSize), characterCount(0)
+		: buffer(nullptr), bufferSize(bufferSize + 1), characterCount(0)
 	{
-		this->buffer = Memory::Allocate(bufferSize);
-		memcpy(this->buffer, buffer, bufferSize);
+		if (bufferSize == 0 || buffer == nullptr)
+		{
+			this->bufferSize = 0;
+		}
+		else
+		{
+			this->buffer = Memory::Allocate(bufferSize + 1);
+			memcpy(this->buffer, buffer, bufferSize);
 
-		for (auto it = begin(); it != end(); ++it, ++characterCount);
+			((char*)this->buffer)[bufferSize] = '\0';
+
+			for (auto it = begin(); it != end(); ++it, ++characterCount);
+		}
 	}
 
 	StringUTF8::StringUTF8(const char* ptr)
 	{
-		if (ptr != nullptr)
-		{
-			characterCount = strlen(ptr);
+		if (ptr != nullptr && (characterCount = strlen(ptr)) != 0)
+		{			
 			bufferSize = characterCount + 1;
 			buffer = Memory::Allocate(bufferSize);
 			memcpy(buffer, ptr, bufferSize);
@@ -234,7 +242,19 @@ namespace Blaze
 	}
 	StringUTF8::Iterator StringUTF8::end() const
 	{
+		if (buffer == nullptr)
+			return Iterator(nullptr);
 		return Iterator((byte*)buffer + bufferSize - 1);
+	}
+
+	StringUTF8 StringUTF8::SubString(size_t start, size_t size) const
+	{
+		auto b = begin();
+		for (uint i = 0; i != start; ++i, ++b);
+		auto e = b;
+		for (uint i = 0; i != size; ++i, ++e);
+
+		return StringUTF8(b.ptr, (char*)e.ptr - (char*)b.ptr);
 	}
 
 	StringUTF8& StringUTF8::Resize(size_t newCharacterCount, UnicodeChar fill)
@@ -413,9 +433,12 @@ namespace Blaze
 	
 	template<> bool StringUTF8::ConvertTo<uint32>(const StringViewUTF8& sv, uint32& value)
 	{
-		char* ptr;
-		uint32 temp = strtoul((char*)sv.Buffer(), &ptr, 10);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize() - 1 - 1))
+		if (sv.Buffer() == nullptr)
+			return false;
+
+		char* ptr = nullptr;
+		uint32 temp = strtoul((char*)sv.Buffer(), &ptr, 10);		
+		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
 		{
 			value = temp;
 			return true;
@@ -424,9 +447,12 @@ namespace Blaze
 	}
 	template<> bool StringUTF8::ConvertTo<int32 >(const StringViewUTF8& sv, int32& value)
 	{
-		char* ptr;
+		if (sv.Buffer() == nullptr)
+			return false;
+
+		char* ptr = nullptr;
 		int32 temp = strtol((char*)sv.Buffer(), &ptr, 10);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize() - 1 - 1))
+		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
 		{
 			value = temp;
 			return true;
@@ -435,9 +461,12 @@ namespace Blaze
 	}
 	template<> bool StringUTF8::ConvertTo<uint64>(const StringViewUTF8& sv, uint64& value)
 	{
-		char* ptr;
+		if (sv.Buffer() == nullptr)
+			return false;
+
+		char* ptr = nullptr;
 		uint64 temp = strtoull((char*)sv.Buffer(), &ptr, 10);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize() - 1 - 1))
+		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
 		{
 			value = temp;
 			return true;
@@ -446,9 +475,12 @@ namespace Blaze
 	}
 	template<> bool StringUTF8::ConvertTo<int64 >(const StringViewUTF8& sv, int64& value)
 	{
-		char* ptr;
+		if (sv.Buffer() == nullptr)
+			return false;
+
+		char* ptr = nullptr;
 		int64 temp = strtoll((char*)sv.Buffer(), &ptr, 10);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize() - 1 - 1))
+		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
 		{
 			value = temp;
 			return true;
@@ -457,9 +489,12 @@ namespace Blaze
 	}
 	template<> bool StringUTF8::ConvertTo<float >(const StringViewUTF8& sv, float& value)
 	{
-		char* ptr;
+		if (sv.Buffer() == nullptr)
+			return false;
+
+		char* ptr = nullptr;
 		float temp = strtof((char*)sv.Buffer(), &ptr);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize() - 1 - 1))
+		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
 		{
 			value = temp;
 			return true;
@@ -468,9 +503,12 @@ namespace Blaze
 	}
 	template<> bool StringUTF8::ConvertTo<double>(const StringViewUTF8& sv, double& value)
 	{
-		char* ptr;
+		if (sv.Buffer() == nullptr)
+			return false;
+
+		char* ptr = nullptr;
 		double temp = strtod((char*)sv.Buffer(), &ptr);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize() - 1 - 1))
+		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
 		{
 			value = temp;
 			return true;
@@ -478,12 +516,16 @@ namespace Blaze
 		return false;
 	}
 
+	StringUTF8 operator "" utf8 (const char* ptr, size_t size)
+	{
+		return StringUTF8(ptr, size);
+	}
 
 	StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right)
 	{
-		if (left.BufferSize() - 1 == 0)
+		if (left.BufferSize() == 0)
 			return right;
-		if (right.BufferSize() - 1 == 0)
+		if (right.BufferSize() == 0)
 			return left;
 		size_t lSize = left.BufferSize();
 		size_t rSize = right.BufferSize();

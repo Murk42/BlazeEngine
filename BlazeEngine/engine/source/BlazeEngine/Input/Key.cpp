@@ -289,7 +289,10 @@ namespace Blaze
 	}
 	Key GetKeyFromScancode(SDL_Scancode code)
 	{
-		return keymap.at(code);
+		auto it = keymap.find(code);
+		if (it != keymap.end())
+			return it->second;
+		return Key::Unknown;
 	}
 
 	String GetKeyName(Key key)

@@ -23,10 +23,10 @@ namespace Blaze
 	struct Vector<T, 2>
 	{
 		union {
-			T arr[2];
 			struct {
 				T x, y;
 			};
+			T arr[2];
 		};
 
 		constexpr Vector()
@@ -99,12 +99,12 @@ namespace Blaze
 	struct Vector<T, 3>
 	{
 		union {
+			struct {
+				T x, y, z;
+			};
 			T arr[3];
 			struct {
 				Vec2<T> xy;
-			};
-			struct {
-				T x, y, z;
 			};
 		};
 
@@ -182,10 +182,10 @@ namespace Blaze
 	struct Vector<T, 4>
 	{
 		union {
-			T arr[4];
 			struct {
 				T x, y, z, w;
 			};
+			T arr[4];
 			struct {
 				Vec2<T> xy;
 			};

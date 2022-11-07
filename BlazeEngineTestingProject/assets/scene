@@ -1,86 +1,51 @@
 layer "bgLayer"
 layer "mainLayer"
 
-Font "font" name = "Default font" {
-	"font32" Antialiased 32
-	"font14" Antialiased 14
-}
-
-Texture2D "defaultImage" path = "assets/default/default.png"
-Texture2D "logo" path = "assets/logo.png"
-	
-element Panel "propertiesPanel" ("bgLayer") 
-{			
-	pos				= (10,-10) 
-	size			= (200, 400)
-	localAlignment	= TopLeft
-	anchorAlignment = TopLeft
-
-	borderWidth		= 0
-	cornerRadius	= 5
-	fillColor		= 0x222222EE
-}
-
-element Text "propertiesText" ("mainLayer") 
+Font font (name = "Default font")
 {
-	font			= "font32"
-	text			= "Properties"
-	fontSize		= 32
-	color			= 0xFFFFFFFF	
+	font32 Antialiased 32
+	font18 Antialiased 18
+	font14 Antialiased 14
 }
 
-element Text "smallText" ("mainLayer") 
-{	
-	font			= "font14"
-	text			= "Panel"
-	fontSize		= 14
-	color			= 0xFF0000FF
-} 
+Texture2D "defaultImage" (path = "assets/default/default.png")
+Texture2D "logo" (path = "assets/logo.png")
+Texture2D "cursor" (path = "assets/cursor.png")
 
-element Image "image" ("mainLayer")
+element TextButton "createElementButton" ("mainLayer")
 {
-	size			= (32, 32)
-
-	texture			= "defaultImage"
-	sourceRect		= (0, 0) 32x32
-}
-
-element Slider "slider" ("mainLayer")
-{
-	size			= (180, 10)
-	valueChanged	= "valueChanged"
-}
-
-element List "list" ("mainLayer")
-{
-	localAlignment	= TopLeft
-	anchorAlignment = TopLeft
-	anchor			= "propertiesPanel"	
-
-	elements		= { 
-		"propertiesText",
-		"smallText",
-		"image",
-		"slider",
-		"a"
-	}	
-}
-
-element Dropdown "dropdown" ("mainLayer")
-{
-	pos				= (10, -10)
-	anchor			= "propertiesPanel"
 	anchorAlignment	= TopLeft
 	localAlignment	= TopLeft
+	size			= (130, 30)
+	pos				= (5, -5)
+	
+	borderColor		= 0x444444ff
+	borderWidth		= 0
+	cornerRadius	= 3
 
-	text			= "Dropdown"
+	text			= "New Element"
+	font			= "font"
+	fontSize		= 18
 
-	openTexture		= "logo"
-	openTextureRect	= (0, 0) 32x32
+	pressed			= "createElementPressed"
+}
 
-	closedTexture	= "logo"
-	closedTextureRect	= (0, 0) 32x32
+element Panel "elementsPanel" ("bgLayer") 
+{
+	anchorAlignment	= TopLeft
+	localAlignment	= TopLeft
+	size			= (200, 500)
+	pos				= (5, -40)
 
-	font			= "font32"
-	list			= "list"
+	fillColor		= 0x333333ee	
+	borderWidth		= 0
+	cornerRadius	= 3
+}
+
+element List "elementsList" ("mainLayer")
+{
+	anchor			= "elementsPanel"
+	anchorAlignment	= TopLeft
+	localAlignment	= TopLeft
+	pos				= (10, -10)
 }

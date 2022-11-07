@@ -12,8 +12,8 @@ void main()
 	vec4 color = texture(u_texture, frag_uv);		 
 
 	if (color.a == 0 ||
-		(frag_pos.x < u_clipRect.x || frag_pos.x > u_clipRect.z) && u_clipRect.x != u_clipRect.z || 
-		(frag_pos.y < u_clipRect.y || frag_pos.y > u_clipRect.w) && u_clipRect.y != u_clipRect.w)								 
+		(frag_pos.x < u_clipRect.x || frag_pos.x > u_clipRect.x + u_clipRect.z) && !isnan(u_clipRect.z) ||
+		(frag_pos.y < u_clipRect.y || frag_pos.y > u_clipRect.y + u_clipRect.w) && !isnan(u_clipRect.w))
 		discard;
 
 	if (color.r < 0.45)								  

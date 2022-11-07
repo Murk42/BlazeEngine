@@ -6,27 +6,56 @@ namespace Blaze::UI
 		: functions()
 	{
 	}
+	UIEvent::UIEvent(const UIEvent& e)
+		: functions(e.functions)
+	{
+	}
+
+	UIEvent::UIEvent(UIEvent&& e) noexcept
+		: functions(std::move(e.functions))
+	{
+	}
+	UIEvent::UIEvent(UIEventFunction const& func)
+		: functions({ func})
+	{
+
+	}
+	UIEvent::UIEvent(std::initializer_list<UIEventFunction> const& functions)
+		: functions(functions)
+	{
+
+	}
 	UIEvent::~UIEvent()
 	{
-		functions.clear();
-	}
-	void UIEvent::CallEvent() const
-	{
-		for (auto& f : functions)
-			f();
-	}
-	void UIEvent::AddFunction(const std::function<void()>& func)
+		size_t count = functions.size();
+		for (int i = 0; i < count; ++i)	
+			functions.erase(functions.begin());
+		
+	}	
+	void UIEvent::AddFunction(const UIEventFunction& func)
 	{
 		if (func)
 			functions.push_back(func);
 	}
-	UIEvent& UIEvent::operator+=(const std::function<void()>& func)
+	UIEvent& UIEvent::operator+=(const UIEventFunction& func)
 	{		
 		AddFunction(func);
 		return *this;
 	}
-	void UIEvent::operator() () const
+	UIEvent& UIEvent::operator+=(const UIEvent& event)
 	{
-		CallEvent();		
+		for (auto& f : event.functions)
+			AddFunction(f);
+		return *this;
+	}	
+	UIEvent& UIEvent::operator=(const UIEvent& event)
+	{
+		functions = event.functions;
+		return *this;
+	}
+	UIEvent& UIEvent::operator=(UIEvent&& event) noexcept
+	{
+		functions = std::move(event.functions);
+		return *this;
 	}
 }

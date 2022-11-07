@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <algorithm>
 
-namespace Blaze
+namespace Blaze::Random
 {
     static const uint8_t perm[256] = {
         151, 160, 137, 91, 90, 15,
@@ -72,22 +72,22 @@ namespace Blaze
         return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
     }
     
-    void Random::SetSeed(int64 seed)
+    void SetSeed(int64 seed)
     {
         srand(seed);
     }
 
-    float Random::Float()
+    float Float()
     {
         return ((float)rand()) / (float)RAND_MAX;        
     }
 
-    float Random::Float(float min, float max)
+    float Float(float min, float max)
     {
         return ((float)rand()) * (max - min) / (float)RAND_MAX + min;
     }
 
-    float Random::Simplex(float x) {
+    float Simplex(float x) {
         float n0, n1;
         
         int32_t i0 = fastfloor_float(x);
@@ -105,7 +105,7 @@ namespace Blaze
         n1 = t1 * t1 * grad_float(hash(i1), x1);        
         return 0.395f * (n0 + n1);
     }
-    float Random::Simplex(Vec2f v) {
+    float Simplex(Vec2f v) {
         float n0, n1, n2;   
         
         static const float F2 = 0.366025403f; 
@@ -171,7 +171,7 @@ namespace Blaze
         
         return 45.23065f * (n0 + n1 + n2);
     }
-    float Random::Simplex(Vec3f v) {
+    float Simplex(Vec3f v) {
         float n0, n1, n2, n3; 
         
         static const float F3 = 1.0f / 3.0f;
@@ -264,7 +264,7 @@ namespace Blaze
         return 32.0f * (n0 + n1 + n2 + n3);
     }
 
-    double Random::Simplex(double x) {
+    double Simplex(double x) {
         double n0, n1;
 
         int64_t i0 = fastfloor_double(x);
@@ -282,7 +282,7 @@ namespace Blaze
         n1 = t1 * t1 * grad_double(hash(i1), x1);
         return 0.395f * (n0 + n1);
     }
-    double Random::Simplex(Vec2d v) {
+    double Simplex(Vec2d v) {
         double n0, n1, n2;
 
         static const double F2 = 0.366025403f;
@@ -348,7 +348,7 @@ namespace Blaze
 
         return 45.23065f * (n0 + n1 + n2);
     }
-    double Random::Simplex(Vec3d v) {
+    double Simplex(Vec3d v) {
         double n0, n1, n2, n3;
 
         static const double F3 = 1.0f / 3.0f;
@@ -439,5 +439,22 @@ namespace Blaze
             n3 = t3 * t3 * grad_double(gi3, x3, y3, z3);
         }
         return 32.0f * (n0 + n1 + n2 + n3);
+    }
+
+    Blaze::ColorRGB ColorRGB()
+    {
+        return Blaze::ColorRGB(Float(0, 255), Float(0, 255), Float(0, 255));
+    }
+    Blaze::ColorRGBf ColorRGBf()
+    {
+        return Blaze::ColorRGBf(Float(0, 1), Float(0, 1), Float(0, 1));
+    }
+    Blaze::ColorRGBA ColorRGBA()
+    {
+        return Blaze::ColorRGBA(Float(0, 255), Float(0, 255), Float(0, 255), 255);
+    }
+    Blaze::ColorRGBAf ColorRGBAf()
+    {
+        return Blaze::ColorRGBAf(Float(0, 1), Float(0, 1), Float(0, 1), 1);
     }
 }

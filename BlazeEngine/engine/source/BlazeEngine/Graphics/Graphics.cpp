@@ -16,9 +16,7 @@ using namespace Blaze::Graphics::Core;
 namespace Blaze
 {
 	namespace Graphics
-	{
-		constexpr size_t maxPoint2DvertexCount = 4096;
-
+	{		
 		struct GraphicsData
 		{
 			bool userProj3D = false;
@@ -30,17 +28,18 @@ namespace Blaze
 
 			Line2DRenderer line2DRenderer;
 			Line3DRenderer line3DRenderer;
-			Point2DRenderer point2DRenderer;			
+			Point2DRenderer point2DRenderer;
 			TextRenderer textRenderer;
 
 			ShaderProgram drawTexShaderProgram;
 			VertexArray drawTexVA;
 			GraphicsBuffer drawTexVB;
 
-			Font defaultFont;						
+			Font defaultFont;
 			FontResolution* defaultFontResolution;
 		};
-		static GraphicsData* graphicsData;		
+		static GraphicsData* graphicsData;
+		char _graphicsData[sizeof(GraphicsData)];
 
 		void Graphics_ViewportChanged(Event::ViewportChanged event)
 		{
@@ -64,7 +63,8 @@ namespace Blaze
 		Startup::GraphicsInitInfo initInfo;
 		TimePoint startTimePoint = TimePoint::GetWorldTime();
 
-		graphicsData = new GraphicsData;
+		new (_graphicsData) GraphicsData();
+		graphicsData = (GraphicsData*)_graphicsData;
 
 		graphicsData->line2DRenderer.SetBatchMode(4);
 		graphicsData->line3DRenderer.SetBatchMode(12);
@@ -126,7 +126,7 @@ namespace Blaze
 	}
 	void TerminateGraphics()
 	{
-		delete Graphics::graphicsData;
+		Graphics::graphicsData->~GraphicsData();
 	}
 
 	namespace Graphics

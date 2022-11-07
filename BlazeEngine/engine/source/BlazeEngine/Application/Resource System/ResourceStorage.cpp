@@ -2,32 +2,20 @@
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
 #include "BlazeEngine/Core/MemoryManager.h"
 
-namespace Blaze::Resource
+namespace Blaze::ResourceSystem
 {
 	ResourceStorage::ResourceStorage()
-		: resources(nullptr), typeCount(0), manager(nullptr)
-	{
-		SetResourceTypeRegistry(ResourceTypeRegistry::CoreRegistry());
+		: resources(nullptr), manager(nullptr)
+	{		
 	}
 
 	ResourceStorage::~ResourceStorage()
 	{
-		for (int i = 0; i < typeCount; ++i)
-		{
-			ResourceTypeData typeData = registry.GetResourceTypeData(i);
+		if (manager == nullptr)
+			return;
 
-			for (auto& res : resources[i])
-			{
-				typeData.destruct(res);
-				Memory::Free(res);
-			}
-		}
-
-		delete[] resources;
-	}
-
-	void ResourceStorage::SetResourceTypeRegistry(const ResourceTypeRegistry& typeRegistry)
-	{
+		const auto& registry = manager->GetResourceTypeRegistry();
+		size_t typeCount = registry.GetResourceTypeCount();
 
 		for (int i = 0; i < typeCount; ++i)
 		{
@@ -41,47 +29,99 @@ namespace Blaze::Resource
 		}
 
 		delete[] resources;
-
-		registry = typeRegistry;
-		typeCount = registry.GetResourceTypeCount();
-
-		resources = new std::list<void*>[typeCount];
-	}
+	}	
 
 	void ResourceStorage::SetResourceManager(ResourceManager* manager)
 	{
-		SetResourceTypeRegistry(manager->GetResourceTypeRegistry());
+		if (this->manager != nullptr)
+		{
+			const auto& registry = this->manager->GetResourceTypeRegistry();
+			size_t typeCount = registry.GetResourceTypeCount();
+
+			for (int i = 0; i < typeCount; ++i)
+			{
+				ResourceTypeData typeData = registry.GetResourceTypeData(i);
+
+				for (auto& res : resources[i])
+				{
+					typeData.destruct(res);
+					Memory::Free(res);
+				}
+			}
+
+			delete[] resources;
+		}
+
 		this->manager = manager;
+
+		const auto& registry = this->manager->GetResourceTypeRegistry();
+		size_t typeCount = registry.GetResourceTypeCount();
+
+		resources = new std::list<Resource*>[typeCount];
+		
 	}
 
-	void* ResourceStorage::CreateResource(size_t typeIndex)
+	Resource* ResourceStorage::CreateResource(size_t typeIndex)
 	{
+		const auto& registry = manager->GetResourceTypeRegistry();		
+
 		ResourceTypeData typeData = registry.GetResourceTypeData(typeIndex);
 
-		void* ptr = Memory::Allocate(typeData.size);
+		Resource* ptr = (Resource*)Memory::Allocate(typeData.size);
 
 		typeData.construct(ptr);
-
-		if (manager != nullptr)
-			manager->AddResource(ptr, typeIndex);
+		
+		manager->AddResource(ptr, typeIndex);
 
 		resources[typeIndex].emplace_back(ptr);
 		return ptr;
 	}
 
-	void* ResourceStorage::CreateResource(StringView name, size_t typeIndex)
+	Resource* ResourceStorage::CreateResource(StringView name, size_t typeIndex)
 	{
+		const auto& registry = manager->GetResourceTypeRegistry();		
+
 		ResourceTypeData typeData = registry.GetResourceTypeData(typeIndex);
 
-		void* ptr = Memory::Allocate(typeData.size);
+		Resource* ptr = (Resource*)Memory::Allocate(typeData.size);
 
 		typeData.construct(ptr);
-
-		if (manager != nullptr)
-			manager->AddResource(name, ptr, typeIndex);
+		ptr->name = name;
+		manager->AddResource(name, ptr, typeIndex);
 
 		resources[typeIndex].emplace_back(ptr);
 		return ptr;
 	}
 
+	Result ResourceStorage::DestroyResource(Resource* resource, size_t typeIndex)
+	{		
+		const auto& registry = manager->GetResourceTypeRegistry();
+		ResourceTypeData typeData = registry.GetResourceTypeData(typeIndex);
+
+		auto& list = resources[typeIndex];
+		auto it = list.begin();
+
+		for (; it != list.end(); ++it)
+			if (*it == resource)
+				break;
+
+		list.erase(it);
+
+		manager->RemoveResource(resource, typeIndex);
+
+		typeData.destruct(resource);
+		Memory::Free(resource);
+
+		return Result();
+	}
+
+	Result ResourceStorage::DestroyResource(StringView name, size_t typeIndex)
+	{
+		return DestroyResource(manager->GetResource(name, typeIndex), typeIndex);
+	}
+
+	const std::list<Resource*>& ResourceStorage::GetResourceList(size_t typeIndex) const
+	{
+		return resources[typeIndex];
+	}
 }

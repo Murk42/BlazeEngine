@@ -30,12 +30,12 @@ namespace Blaze::Graphics
 	{
 		return it == text.end();
 	}
-	bool DefaultTextVertexGenerator::GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2)
+	bool DefaultTextVertexGenerator::GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2, float& next)
 	{
 		if (it == text.end())
 			return false;
 
-		UnicodeChar ch = it.ToUnicode();		
+		UnicodeChar ch = it.ToUnicode();
 
 		if (ch.Value() == '\n')
 		{
@@ -49,26 +49,19 @@ namespace Blaze::Graphics
 
 		CharacterMetrics data = fontResolution->GetCharacterData(ch);
 
-		if (data.size == Vec2f())
-		{
-			cursor.x += data.advance;
-			prev = it.ToUnicode();
-			first = false;
-			++it;
-			return false;
-		}
-
 		Vec2f kerning = fontResolution->GetKerning(prev, ch);
-
-		if (!Input::GetKeyState(Key::T).down)
-			kerning = Vec2f();
 
 		p1 = data.renderOffset + Vec2f(std::floor(cursor.x + kerning.x), std::floor(cursor.y + kerning.y));
 		p2 = p1 + data.size;
 		uv1 = data.uv1;
 		uv2 = data.uv2;
 
+		if (data.size.x == 0)
+			p2.x += data.advance;
+
 		cursor.x += data.advance;
+
+		next = cursor.x;
 
 		prev = it.ToUnicode();
 		first = false;

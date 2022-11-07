@@ -2,17 +2,32 @@
 #include <string>
 using namespace std;
 
+enum class RunCommandConfiguration
+{
+	Debug,
+	Release
+};
+enum class RunCommandExitCondition
+{
+	NoExit,
+	ForceExit
+};
+
 struct RunCommandOptions
 {
 	bool managerLog = true;
 	bool runtimeLog = true;
-	bool logTimings = true;
-	bool release = false;
-	bool stopAfter = false;
-	bool dontBuildClient = true;
-	bool dontBuildBlaze = true;
-	bool dontBuildRuntime = true;
+	bool logTimings = false;
+
+	RunCommandConfiguration configuration = RunCommandConfiguration::Debug;
+	RunCommandExitCondition exitCondition = RunCommandExitCondition::NoExit;
+	
+	bool buildClient = false;
+	bool buildBlaze = false;
+	bool buildRuntime = false;
+
 	bool guiOpenFile = false;
+
 	string projectPath = "";
 };
 

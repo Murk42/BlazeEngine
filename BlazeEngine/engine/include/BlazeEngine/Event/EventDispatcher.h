@@ -42,10 +42,10 @@ namespace Blaze
 		}
 	};
 
-	template<typename T>
-	inline EventHandler<T>::~EventHandler()
-	{		
-		if (dispatcher)
-			dispatcher->RemoveHandler(*this);			
-	}		
+	//template<typename T>
+	//EventHandler<T>::~EventHandler()
+	//{
+	//	//if (dispatcher)
+	//	//	dispatcher->RemoveHandler(*this);
+	//}		
 }

@@ -4,7 +4,6 @@
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/Graphics/Graphics.h"
 #include "BlazeEngine/Application/UI System/UIElement.h"
-#include "BlazeEngine/Application/UI System/UIAlignment.h"
 #include "BlazeEngine/Application/UI System/UIElementManager.h"
 
 namespace Blaze
@@ -12,6 +11,13 @@ namespace Blaze
 	namespace UI
 	{
 		class ImageManager;
+
+		struct ImageProperties
+		{
+			UIElementProperty<Graphics::Core::Texture2D*> texture;
+			UIElementProperty<Rectf> sourceRect;
+			UIElementProperty<ColorRGBAf> mask;
+		};
 
 		class BLAZE_API Image : public UIElement
 		{
@@ -21,7 +27,8 @@ namespace Blaze
 			Graphics::Core::Texture2D* texture;
 
 			Image();
-
+			
+			void SetProperties(const ImageProperties&);
 
 			using ManagerType = ImageManager;
 			static constexpr const char* typeName = "Image";
@@ -35,9 +42,7 @@ namespace Blaze
 		public:
 			void Setup() override;
 
-			void Render(size_t index, size_t end) override;
-
-			static UIElementParsingData GetElementParsingData();
+			void Render(UIElement*) override;
 		};
 	}
 }

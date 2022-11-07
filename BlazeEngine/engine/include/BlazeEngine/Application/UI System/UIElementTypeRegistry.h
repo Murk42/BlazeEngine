@@ -1,94 +1,92 @@
 #pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/Application/UI System/UIElement.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/StringHash.h"
 #include <unordered_map>
 
-namespace Blaze
+namespace Blaze::UI
 {
-	namespace UI
-	{				
-		struct UIElementTypeData
+	struct UIElementTypeData
+	{
+		String name;
+
+		size_t size;
+		void(*construct)(void*);
+		void(*destruct)(void*);
+
+		size_t managerSize;
+		void(*constructManager)(void*);
+		void(*destructManager)(void*);
+	};
+
+	class BLAZE_API UIElementTypeRegistry
+	{
+		std::vector<UIElementTypeData> types;
+		std::unordered_map<String, uint> nameTable;
+
+		template<typename T>
+		static void Construct(void* ptr)
 		{
-			String name;
+			new (ptr) T();
+		}
+		template<typename T>
+		static void Destruct(void* ptr)
+		{
+			((T*)ptr)->~T();
+		}
 
-			size_t size;
-			void(*construct)(void*);
-			void(*destruct)(void*);
+		Result RegisterType(StringView,
+			size_t, void(*)(void*), void(*)(void*),
+			size_t, void(*)(void*), void(*)(void*));
 
-			size_t managerSize;
-			void(*constructManager)(void*);
-			void(*destructManager)(void*);			
-		};
+		Result OverrideManager(StringView,
+			size_t, void(*)(void*), void(*)(void*));
+	public:
+		UIElementTypeRegistry();
+		UIElementTypeRegistry(const UIElementTypeRegistry&);
+		~UIElementTypeRegistry();
 
-		class BLAZE_API UIElementTypeRegistry
-		{			
-			std::vector<UIElementTypeData> types;						
-			std::unordered_map<String, uint> nameTable;		
+		template<typename T>
+		Result RegisterType()
+		{
+			return RegisterType(
+				T::typeName,
+				sizeof(T), Construct<T>, Destruct<T>,
+				sizeof(typename T::ManagerType), Construct<typename T::ManagerType>, Destruct<typename T::ManagerType>);
+		}
+		template<typename T, typename M>
+		Result RegisterType()
+		{
+			return RegisterType(
+				T::typeName,
+				sizeof(T), Construct<T>, Destruct<T>,
+				sizeof(M), Construct<M>, Destruct<M>);
+		}
 
-			template<typename T>
-			static void Construct(void* ptr)
-			{
-				new (ptr) T();
-			}
-			template<typename T>
-			static void Destruct(void* ptr)
-			{
-				((T*)ptr)->~T();
-			}
+		template<typename T, typename M>
+		Result OverrideManager()
+		{
+			return OverrideManager(
+				T::typeName,
+				sizeof(M), Construct<M>, Destruct<M>);
+		}
 
-			Result RegisterType(StringView, 
-				size_t, void(*)(void*), void(*)(void*),
-				size_t, void(*)(void*), void(*)(void*));
-			
-			Result OverrideManager(StringView,
-				size_t, void(*)(void*), void(*)(void*));
-		public:					
-			UIElementTypeRegistry();
-			UIElementTypeRegistry(const UIElementTypeRegistry&);
-			~UIElementTypeRegistry();
+		void RegisterCoreTypes();
 
-			template<typename T>
-			Result RegisterType()
-			{			
-				return RegisterType(
-					T::typeName, 
-					sizeof(T), Construct<T>, Destruct<T>,
-					sizeof(T::ManagerType), Construct<T::ManagerType>, Destruct<T::ManagerType>);
-			}			
-			template<typename T, typename M>
-			Result RegisterType()
-			{
-				return RegisterType(
-					T::typeName,
-					sizeof(T), Construct<T>, Destruct<T>,
-					sizeof(M), Construct<M>, Destruct<M>);
-			}
+		template<typename T>
+		uint GetElementTypeIndex() const
+		{
+			return GetElementTypeIndex(T::typeName);
+		}
+		int GetElementTypeIndex(StringView name) const;
 
-			template<typename T, typename M>
-			Result OverrideManager()
-			{
-				return OverrideManager(
-					T::typeName,
-					sizeof(M), Construct<M>, Destruct<M>);
-			}
+		uint GetElementTypeCount() const;
+		UIElementTypeData GetElementTypeData(uint index) const;
 
-			void RegisterCoreTypes();
-			
-			template<typename T>
-			uint GetElementTypeIndex() const
-			{
-				return GetElementTypeIndex(T::typeName);
-			}
-			int GetElementTypeIndex(StringView name) const;
+		bool IsValidTypeIndex(uint index) const;
 
-			uint GetElementTypeCount() const;
-			const UIElementTypeData& GetElementTypeData(uint index) const;
-
-			static UIElementTypeRegistry CoreRegistry();
-		};
-	}
+		static UIElementTypeRegistry CoreRegistry();
+	};
 }

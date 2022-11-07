@@ -56,6 +56,11 @@ namespace Blaze
 		target = GetOpenGLInitWindow();
 		selectedVertexArray = &defaultVertexArray;
 
+		int val[4];
+		glGetIntegerv(GL_VIEWPORT, val);
+		viewportPos = { val[0], val[1] };
+		viewportSize = { val[2], val[3] };
+
 		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
 		return initInfo;
 	}

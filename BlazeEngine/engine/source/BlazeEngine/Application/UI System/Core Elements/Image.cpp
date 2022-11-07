@@ -13,8 +13,15 @@ namespace Blaze::UI
 	};
 
 	Image::Image()
-		: mask(0, 0, 0, 0), texture(nullptr)
+		: texture(nullptr), mask(0x00000000)
+	{		
+	}	
+
+	void Image::SetProperties(const ImageProperties& p)
 	{
+		if (p.texture.edited) texture = p.texture;
+		if (p.sourceRect.edited) sourceRect = p.sourceRect;
+		if (p.mask.edited) mask = p.mask;
 	}
 
 	void ImageManager::Setup()
@@ -34,53 +41,39 @@ namespace Blaze::UI
 
 		imagesSP.LinkShaders({ &vs, &fs });
 	}
-	void ImageManager::Render(size_t index, size_t end)
-	{
-		Vec2i size = Renderer::GetViewportSize();
-		Mat4f vp2d = Math::OrthographicMatrix<float>(0, size.x, 0, size.y, -1000, 1000);
+	void ImageManager::Render(UIElement* element)
+	{		
+		Image& image = *(Image*)element;
 
-		for (; index != end; ++index)
-		{
-			Image& image = *GetElement(index);
+		if (!image.IsActive())
+			return; 
+		 
+		Renderer::SelectProgram(&imagesSP);
 
-			if (!image.IsActive())
-				continue;
+		Renderer::SelectVertexArray(&imagesVA);
 
-			Renderer::SelectProgram(&imagesSP);
+		Vec2f pos = image.GetViewportPos();
+		Vec2f size = image.GetSize();
+		float depth = image.GetDepth();
+		Rectf clipRect = image.GetClipRect();
 
-			Renderer::SelectVertexArray(&imagesVA);
+		ImageVertex vertices[6];
+		vertices[0].pos = Vec3f(pos, depth);							vertices[0].uv = image.sourceRect.pos + Vec2f(0, image.sourceRect.h);	vertices[0].color = (Vec4f)image.mask;
+		vertices[1].pos = Vec3f(pos + Vec2f(0, size.y), depth);	vertices[1].uv = image.sourceRect.pos;									vertices[1].color = (Vec4f)image.mask;
+		vertices[2].pos = Vec3f(pos + Vec2f(size.x, 0), depth);	vertices[2].uv = image.sourceRect.pos + image.sourceRect.size;			vertices[2].color = (Vec4f)image.mask;
+		vertices[3].pos = Vec3f(pos + Vec2f(size.x, 0), depth);	vertices[3].uv = image.sourceRect.pos + image.sourceRect.size;			vertices[3].color = (Vec4f)image.mask;
+		vertices[4].pos = Vec3f(pos + Vec2f(0, size.y), depth);	vertices[4].uv = image.sourceRect.pos;									vertices[4].color = (Vec4f)image.mask;
+		vertices[5].pos = Vec3f(pos + size, depth);			vertices[5].uv = image.sourceRect.pos + Vec2f(image.sourceRect.w, 0);	vertices[5].color = (Vec4f)image.mask;
 
-			Rectf alignedRect = image.GetAlignedRect();
-			float depth = image.GetDepth();
+		imagesVB.AllocateDynamicStorage({ vertices, sizeof(vertices) }, Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
 
-			ImageVertex vertices[6];
-			vertices[0].pos = Vec3f(alignedRect.pos, depth);							vertices[0].uv = image.sourceRect.pos + Vec2f(0, image.sourceRect.h);	vertices[0].color = (Vec4f)image.mask;
-			vertices[1].pos = Vec3f(alignedRect.pos + Vec2f(0, alignedRect.h), depth);	vertices[1].uv = image.sourceRect.pos;									vertices[1].color = (Vec4f)image.mask;
-			vertices[2].pos = Vec3f(alignedRect.pos + Vec2f(alignedRect.w, 0), depth);	vertices[2].uv = image.sourceRect.pos + image.sourceRect.size;			vertices[2].color = (Vec4f)image.mask;
-			vertices[3].pos = Vec3f(alignedRect.pos + Vec2f(alignedRect.w, 0), depth);	vertices[3].uv = image.sourceRect.pos + image.sourceRect.size;			vertices[3].color = (Vec4f)image.mask;
-			vertices[4].pos = Vec3f(alignedRect.pos + Vec2f(0, alignedRect.h), depth);	vertices[4].uv = image.sourceRect.pos;									vertices[4].color = (Vec4f)image.mask;
-			vertices[5].pos = Vec3f(alignedRect.pos + alignedRect.size, depth);			vertices[5].uv = image.sourceRect.pos + Vec2f(image.sourceRect.w, 0);	vertices[5].color = (Vec4f)image.mask;
+		imagesSP.SetUniform(0, GetManager()->GetProjectionMatrix());
+		imagesSP.SetUniform(1, 0);
+		imagesSP.SetUniform(2, Vec4f(clipRect.pos, clipRect.size));
 
-			imagesVB.AllocateDynamicStorage({ vertices, sizeof(vertices) }, Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+		Renderer::SetActiveTextureSlot(0);
+		Renderer::SelectTexture(image.texture);
 
-			imagesSP.SetUniform(0, vp2d);
-			imagesSP.SetUniform(1, 0);
-			Renderer::SetActiveTextureSlot(0);
-			Renderer::SelectTexture(image.texture);
-
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Triangles, 0, 6);
-
-		}
-	}
-	UIElementParsingData ImageManager::GetElementParsingData()
-	{
-		UIElementParsingData data = UIBaseElementManager::GetElementParsingData();
-		data.AddMember("mask", &Image::mask);
-		data.AddMember("sourceRect", &Image::sourceRect);
-		data.AddMember<Image, String>("texture", 
-			[](UIScene& scene, Image& image, String name) {
-				image.texture = scene.GetResourceManager()->GetResource<Graphics::Core::Texture2D>(name);
-			}, nullptr);
-		return data;
+		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Triangles, 0, 6);
 	}
 }

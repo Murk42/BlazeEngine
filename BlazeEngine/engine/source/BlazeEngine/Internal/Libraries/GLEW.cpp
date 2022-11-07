@@ -30,6 +30,7 @@ namespace Blaze
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);		
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
@@ -76,6 +77,9 @@ namespace Blaze
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 		
 		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
+
+		glViewport(0, 0, winSize.x, winSize.y);
+
 		return initInfo;
 
 	}
