@@ -1,14 +1,14 @@
 #Build files
-build/
+#build/
 .vs/
-*.lib
-*.dll
+#*.lib
+#*.dll
 
 #Project files
-*.sln
-*.user
-*.vcxproj
-*.filters
+#*.sln
+#*.user
+#*.vcxproj
+#*.filters
 
 *.hint
 *.props
