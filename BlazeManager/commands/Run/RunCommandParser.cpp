@@ -97,11 +97,7 @@ static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& option
 		else if (symbols[1] == "noRuntimeLog")
 		{
 			options.runtimeLog = false;
-		}
-		else if (symbols[1] == "guiOpenFile")
-		{
-			options.guiOpenFile = true;
-		}
+		}		
 		else if (symbols[1] == "logTimings")
 		{
 			options.logTimings = true;

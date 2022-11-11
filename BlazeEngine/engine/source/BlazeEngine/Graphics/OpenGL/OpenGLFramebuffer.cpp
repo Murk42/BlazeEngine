@@ -3,7 +3,7 @@
 
 #include <GL/glew.h>
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::OpenGL
 {
@@ -24,24 +24,24 @@ namespace Blaze::OpenGL
 	}	
 	void Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer)
 	{
-		Renderer::SelectFramebuffer(this);
+		Graphics::Core::SelectFramebuffer(this);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());
 	}
 	void Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture)
 	{	
-		Renderer::SelectFramebuffer(this);
-		Renderer::SelectTexture(&texture);		
+		Graphics::Core::SelectFramebuffer(this);
+		Graphics::Core::SelectTexture(&texture);		
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_TEXTURE_2D, texture.GetHandle(), 0);
 	}
 	void Framebuffer::SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer)
 	{
-		Renderer::SelectFramebuffer(this);
+		Graphics::Core::SelectFramebuffer(this);
 		GLenum _attachment = OpenGLFramebufferAttachment(attachment);		
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, _attachment, GL_RENDERBUFFER, renderbuffer.GetHandle());
 	}
 	void Framebuffer::SetAttachment(FramebufferAttachment attachment, Texture2D& texture)
 	{
-		Renderer::SelectFramebuffer(this);
+		Graphics::Core::SelectFramebuffer(this);
 		GLenum _attachment = OpenGLFramebufferAttachment(attachment);				
 		glFramebufferTexture(GL_FRAMEBUFFER, _attachment, texture.GetHandle(), 0);
 	}
@@ -58,7 +58,7 @@ namespace Blaze::OpenGL
 				values[i] = GL_NONE;
 			else
 				values[i] = GL_COLOR_ATTACHMENT0 + outputs.begin()[i];
-		Renderer::SelectFramebuffer(this);
+		Graphics::Core::SelectFramebuffer(this);
 		glDrawBuffers(outputs.size(), values.data());
 	}
 	Framebuffer& Framebuffer::operator=(Framebuffer&& fb) noexcept

@@ -4,5 +4,6 @@ using namespace Blaze;
 
 namespace GameImage
 {	
+	void Update();
 	void Setup();
 }

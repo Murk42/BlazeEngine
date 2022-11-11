@@ -1,7 +1,7 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLVertexArray.h"
 #include "GL/glew.h"
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze
 {    
@@ -51,7 +51,7 @@ namespace Blaze
 
         void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, size_t stride, size_t offset)
         {   
-            Renderer::SelectVertexArray(this);
+            Graphics::Core::SelectVertexArray(this);
             if (buffer != nullptr)
                 glBindVertexBuffer(index, buffer->GetHandle(), offset, stride);
             else  

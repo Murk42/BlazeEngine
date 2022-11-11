@@ -32,7 +32,7 @@ namespace Blaze
 		ARGB2101010
 	};
 
-	namespace Renderer
+	namespace Graphics::Core
 	{
 		enum class IndexType
 		{

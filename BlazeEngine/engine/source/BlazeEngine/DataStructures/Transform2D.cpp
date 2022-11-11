@@ -1,5 +1,5 @@
 #include "BlazeEngine/DataStructures/Transform2D.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze
 {
@@ -24,7 +24,7 @@ namespace Blaze
 		}
 		else
 		{
-			parentAbsoluteSize = Vec2f(Renderer::GetViewportSize());
+			parentAbsoluteSize = Vec2f(Graphics::Core::GetViewportSize());
 			parentAbsolutePos = Vec2f();
 		}
 		

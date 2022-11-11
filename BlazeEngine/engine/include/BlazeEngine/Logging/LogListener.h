@@ -8,9 +8,8 @@ namespace Blaze
 	{
 	public:
 		LogListener();
-		LogListener(const LogListener&) = delete;		
+		LogListener(const LogListener&) = delete;
 		~LogListener();
-
 
 		void AddLog(const Log& log);
 

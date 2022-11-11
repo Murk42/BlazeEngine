@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngine/Event/Events.h"
+#include "BlazeEngine/DataStructures/List.h"
 
 namespace Blaze
 {
@@ -10,10 +11,10 @@ namespace Blaze
 	class EventHandler
 	{
 		bool supress = false;
-		std::vector<T> events;
+		List<T> events;
 		EventDispatcher<T>* dispatcher = nullptr;
 	public:
-		EventHandler()			
+		EventHandler()
 		{
 		}
 		~EventHandler()
@@ -29,13 +30,13 @@ namespace Blaze
 		{
 			for (auto& event : events)
 				OnEvent(event);
-			events.clear();
+			events.Clear();
 		}
 
 		void AddEvent(T event)
 		{
 			if (supress)
-				events.emplace_back(event);
+				events.AddBack(event);
 			else
 				OnEvent(event);
 		}

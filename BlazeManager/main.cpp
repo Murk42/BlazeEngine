@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 #include "VisualStudioInfo.h"
 #include "Parsing.h"
 #include "commands/Build/BuildCommandParser.h"
@@ -6,8 +7,12 @@
 #include "commands/Help/PrintHelp.h"
 
 VisualStudioInfo vsInfo;
-string blazeDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngine\\";
-string runtimeDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngineRuntime\\";
+string engineProjectDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngine\\";
+string enginePathDLL;
+string enginePathLIB;
+string runtimeProjectDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngineRuntime\\";
+string runtimePathDLL;
+string runtimePathLIB;
 
 string GetLine()
 {	
@@ -23,6 +28,8 @@ string GetLine()
 
 bool superDebug = false;
 
+string GuiOpenFile();
+
 int main(int argc, char* argv[])
 {			
 	if (argc > 1 && strcmp(argv[1], "superDebug") == 0)
@@ -37,6 +44,9 @@ int main(int argc, char* argv[])
 		for (int i = 0; i < argc; ++i)
 			cout << argv[i] << (i == argc - 1 ? " }\n" : ", ");
 	}
+
+	if (!std::filesystem::exists(engineProjectDir)) engineProjectDir.clear();
+	if (!std::filesystem::exists(runtimeProjectDir)) engineProjectDir.clear();
 
 	vsInfo = GetVisualStudioInfo();
 
@@ -105,6 +115,30 @@ int main(int argc, char* argv[])
 			if (ret)
 				continue;
 		}
+		else if (args[0] == "setRuntimeLIB")
+		{
+			runtimePathLIB = GuiOpenFile();
+		}
+		else if (args[0] == "setRuntimeDLL")
+		{
+			runtimePathDLL = GuiOpenFile();
+		}
+		else if (args[0] == "setRuntimeProject")
+		{
+			runtimeProjectDir = GuiOpenFile();
+		}
+		else if (args[0] == "setEngineLIB")
+		{
+			enginePathLIB = GuiOpenFile();
+		}
+		else if (args[0] == "setEngineDLL")
+		{
+			enginePathDLL = GuiOpenFile();
+		}
+		else if (args[0] == "setEngineProject")
+		{
+			engineProjectDir = GuiOpenFile();
+		}
 		else if (args[0] == "help")
 		{
 			PrintHelp();
@@ -112,6 +146,14 @@ int main(int argc, char* argv[])
 		else if (args[0] == "vsInfo")
 		{
 			PrintVisualStudioInfo(vsInfo);
+		}
+		else if (args[0] == "exit")
+		{
+			return 0;
+		}
+		else
+		{
+			cout << "Invalid command. Type help for help\n";
 		}
 	}
 	

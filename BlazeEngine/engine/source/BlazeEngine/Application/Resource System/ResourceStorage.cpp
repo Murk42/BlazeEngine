@@ -1,6 +1,6 @@
 #include "BlazeEngine/Application/ResourceSystem/ResourceStorage.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
-#include "BlazeEngine/Core/MemoryManager.h"
+#include "BlazeEngine/Memory/MemoryManager.h"
 
 namespace Blaze::ResourceSystem
 {

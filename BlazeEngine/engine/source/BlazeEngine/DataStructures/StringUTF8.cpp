@@ -1,7 +1,7 @@
 #include "BlazeEngine/DataStructures/StringUTF8.h"
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
 #include "BlazeEngine/DataStructures/StringView.h"
-#include "BlazeEngine/Core/MemoryManager.h"
+#include "BlazeEngine/Memory/MemoryManager.h"
 #include <cstring>
 #include <cstdio>
 #include <cctype>
@@ -431,7 +431,7 @@ namespace Blaze
 		return StringUTF8(Blaze::buffer, size);
 	}
 	
-	template<> bool StringUTF8::ConvertTo<uint32>(const StringViewUTF8& sv, uint32& value)
+	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, uint32& value)
 	{
 		if (sv.Buffer() == nullptr)
 			return false;
@@ -445,7 +445,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> bool StringUTF8::ConvertTo<int32 >(const StringViewUTF8& sv, int32& value)
+	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, int32& value)
 	{
 		if (sv.Buffer() == nullptr)
 			return false;
@@ -459,7 +459,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> bool StringUTF8::ConvertTo<uint64>(const StringViewUTF8& sv, uint64& value)
+	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, uint64& value)
 	{
 		if (sv.Buffer() == nullptr)
 			return false;
@@ -473,7 +473,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> bool StringUTF8::ConvertTo<int64 >(const StringViewUTF8& sv, int64& value)
+	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, int64& value)
 	{
 		if (sv.Buffer() == nullptr)
 			return false;
@@ -487,7 +487,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> bool StringUTF8::ConvertTo<float >(const StringViewUTF8& sv, float& value)
+	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, float& value)
 	{
 		if (sv.Buffer() == nullptr)
 			return false;
@@ -501,7 +501,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> bool StringUTF8::ConvertTo<double>(const StringViewUTF8& sv, double& value)
+	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, double& value)
 	{
 		if (sv.Buffer() == nullptr)
 			return false;

@@ -1,4 +1,5 @@
-/*#include "Globals.h"
+/*
+#include "Globals.h"
 
 #include "UI Scenes/CreateElementMenu.h"
 #include "UI Scenes/CreateSceneMenu.h"
@@ -32,17 +33,17 @@ class MainEventHangler :
 public:
 	void OnEvent(Event::WindowResized event) override
 	{
-		Renderer::SetViewport({}, event.size);
+		Graphics::Core::SetViewport({}, event.size);
 
 		Vec2i gameImageSize(event.size.x - 640, (event.size.x - 640) / 16 * 9);
 
-		mainScene->GetElementBase("gameImage")->SetSize((Vec2f)gameImageSize);
+		globals->mainScene->GetElementBase("gameImage")->SetSize((Vec2f)gameImageSize);
 	}
 	void OnEvent(Event::ViewportChanged event) override
 	{		
 		Graphics::Set3DProjectionMatrix(90, 0.1, 1000);
 
-		uiManager.SetViewport(Vec2i(), event.size);		
+		globals->uiManager.SetViewport(Vec2i(), event.size);
 	}
 };
 
@@ -52,42 +53,42 @@ void SetupResources()
 	registry.RegisterCoreTypes();
 	registry.RegisterType<UI::UIScene>();
 
-	resourceManager.SetResourceTypeRegistry(registry);
-	gameResourceManager.SetResourceTypeRegistry(registry);
-	resourceStorage.SetResourceManager(&resourceManager);
-	gameResourceStorage.SetResourceManager(&gameResourceManager);
+	globals->resourceManager.SetResourceTypeRegistry(registry);
+	globals->gameResourceManager.SetResourceTypeRegistry(registry);
+	globals->resourceStorage.SetResourceManager(&globals->resourceManager);
+	globals->gameResourceStorage.SetResourceManager(&globals->gameResourceManager);
 
-	resourceManager.AddResource("Default font", &Graphics::GetDefaultFont());	
+	globals->resourceManager.AddResource("Default font", &Graphics::GetDefaultFont());
 
 	{
-		fontResolution18 = Graphics::GetDefaultFont().CreateFontResolution(18, FontResolutionRenderType::Antialiased);
-		fontResolution18->LoadCharacters(0, 128);
-		fontResolution18->CreateAtlas();
+		globals->fontResolution18 = Graphics::GetDefaultFont().CreateFontResolution(18, FontResolutionRenderType::Antialiased);
+		globals->fontResolution18->LoadCharacters(0, 128);
+		globals->fontResolution18->CreateAtlas();
 	}
 	{
-		fontResolution14 = Graphics::GetDefaultFont().CreateFontResolution(14, FontResolutionRenderType::Antialiased);
-		fontResolution14->LoadCharacters(0, 128);
-		fontResolution14->CreateAtlas();
+		globals->fontResolution14 = Graphics::GetDefaultFont().CreateFontResolution(14, FontResolutionRenderType::Antialiased);
+		globals->fontResolution14->LoadCharacters(0, 128);
+		globals->fontResolution14->CreateAtlas();
 	}
 	{
-		fontResolution8 = Graphics::GetDefaultFont().CreateFontResolution(10, FontResolutionRenderType::Antialiased);
-		fontResolution8->LoadCharacters(0, 128);
-		fontResolution8->CreateAtlas();
+		globals->fontResolution8 = Graphics::GetDefaultFont().CreateFontResolution(10, FontResolutionRenderType::Antialiased);
+		globals->fontResolution8->LoadCharacters(0, 128);
+		globals->fontResolution8->CreateAtlas();
 	}
 	{
-		auto* tex = resourceStorage.CreateResource<Graphics::Core::Texture2D>("plusIcon").value;
+		auto* tex = globals->resourceStorage.CreateResource<Graphics::Core::Texture2D>("plusIcon").value;
 		tex->Load("assets/plusIcon.png");
 		tex->SetSettings({});
 	}
 }
 void SetupUI()
 {	
-	uiManager.CreateLayer("main");
+	globals->uiManager.CreateLayer("main");
 
-	mainScene = resourceStorage.CreateResource<UI::UIScene>();
-	SetupUIScene(mainScene, &uiManager);
+	globals->mainScene = globals->resourceStorage.CreateResource<UI::UIScene>();
+	SetupUIScene(globals->mainScene, &globals->uiManager);
 
-	gameUIManager.CreateLayer("base");
+	globals->gameUIManager.CreateLayer("base");
 
 	SceneListMenu::Setup();
 	GameImage::Setup();
@@ -99,13 +100,15 @@ void SetupUI()
 
 CLIENT_API void Setup()
 {
+	globals = new Globals;
+
 	MainEventHangler eventHandler;
 
 	EventManager::AddEventHandler<Event::WindowResized>(eventHandler);
 	EventManager::AddEventHandler<Event::ViewportChanged>(eventHandler);
 
-	SetupUIManager(&uiManager);
-	SetupUIManager(&gameUIManager);
+	SetupUIManager(&globals->uiManager);
+	SetupUIManager(&globals->gameUIManager);
 	SetupResources();
 	SetupUI();
 	
@@ -114,8 +117,8 @@ CLIENT_API void Setup()
 	window.ShowWindow(true);
 	window.SetMinimumSize({ 1000, 500 });	
 
-	Renderer::SetTarget(window);
-	Renderer::SetViewport({}, window.GetSize());
+	Graphics::Core::SetTarget(window);
+	Graphics::Core::SetViewport({}, window.GetSize());
 
 	while (!Input::GetKeyState(Key::Escape).pressed)
 	{
@@ -123,11 +126,12 @@ CLIENT_API void Setup()
 
 		Input::Update();
 
+
 		{
-			auto* elementLayer = mainScene->GetElement<UI::DropdownSelection>("createElementMenu_elementLayer").value;
+			auto* elementLayer = globals->mainScene->GetElement<UI::DropdownSelection>("createElementMenu_elementLayer").value;
 			std::vector<StringUTF8> o;
 		
-			auto& layers = gameUIManager.GetLayers();
+			auto& layers = globals->gameUIManager.GetLayers();
 		
 			for (auto l : layers)
 				o.push_back((StringUTF8)l.name);
@@ -135,113 +139,106 @@ CLIENT_API void Setup()
 			elementLayer->SetOptions(o);
 		}
 
-		gameUIManager.Update();
-		uiManager.Update();
-
-		if (Input::GetKeyState(MouseKey::MouseLeft).pressed)
-		{			
-			UI::UIElement* el = gameUIManager.GetBlockingElement();
-			ElementPropertiesMenu::SelectElement(el);
-		}
+		globals->uiManager.Update();
+		globals->gameUIManager.Update();
+		GameImage::Update();
+		ElementPropertiesMenu::Update();
 
 		{
-			Renderer::ClearTarget();
+			Graphics::Core::ClearTarget();
 			
-			gameUIManager.Render();
+			globals->gameUIManager.Render();
 
 			if (Input::GetKeyState(Key::Q).down && Input::GetKeyState(Key::LShift	).down)
-				gameUIManager.DrawDebugLines();
+				globals->gameUIManager.DrawDebugLines();
 
-			uiManager.Render();
+			globals->uiManager.Render();
 
 			if (Input::GetKeyState(Key::Q).down)
-				uiManager.DrawDebugLines();
+				globals->uiManager.DrawDebugLines();
 			
-			Renderer::SwapWindowBuffers();
+			Graphics::Core::SwapWindowBuffers();
 		}
 	}
 
 	{
-		const auto& scenes = gameResourceStorage.GetResourceList<UI::UIScene>();
+		const auto& scenes = globals->gameResourceStorage.GetResourceList<UI::UIScene>();
 		while (!scenes.empty())
-			gameResourceStorage.DestroyResource<UI::UIScene>((UI::UIScene*)*scenes.begin());
+			globals->gameResourceStorage.DestroyResource<UI::UIScene>((UI::UIScene*)*scenes.begin());
 	}
 
 	{
-		const auto& scenes = resourceStorage.GetResourceList<UI::UIScene>();
+		const auto& scenes = globals->resourceStorage.GetResourceList<UI::UIScene>();
 		while (!scenes.empty())
-			resourceStorage.DestroyResource<UI::UIScene>((UI::UIScene*)*scenes.begin());
+			globals->resourceStorage.DestroyResource<UI::UIScene>((UI::UIScene*)*scenes.begin());
 	}
+
+	delete globals;
 }*/
 
-void* operator new(size_t size) {
-	return Memory::Allocate(size);	
-}
-void operator delete(void* ptr) {
-	Memory::Free(ptr);
-}
+template<typename ... T>
+class PropertyField
+{
+public:
+	using Properties = TemplateGroup<T...>;
+private:
+	std::bitset<Properties::Size> flags;
+	Tuple<T...> values;
+	Tuple<std::vector<std::function<void(const T&)>>*...> functions;
+
+	template<size_t I>
+	void FreeEvents()
+	{
+		delete functions.GetValueByIndex<I>();
+
+		if constexpr (I < sizeof ... (T) - 1)
+			FreeEvents<I + 1>();
+	}
+public:
+	~PropertyField()
+	{
+		FreeEvents<0>();
+	}
+
+	template<size_t I>
+	constexpr const auto& GetProperty()
+	{
+		return values.GetValueByIndex<I>();
+	}
+	template<size_t I, typename O>
+	constexpr void SetProperty(O value)
+	{
+		values.GetValueByIndex<I>() = std::forward<O>(value);
+		auto*& functions = this->functions.GetValueByIndex<I>();
+		if (functions != nullptr)
+			for (auto& f : *functions)
+				f(values.GetValueByIndex<I>());
+	}
+
+	template<size_t I>
+	inline void AddPropertyChangedEvent(const std::function<void(const typename Properties::template TypeAtIndex<I>&)>& event)
+	{
+		auto*& functions = this->functions.GetValueByIndex<I>();
+
+		if (functions == nullptr)
+			functions = new std::remove_pointer_t<std::remove_reference_t<decltype(functions)>>;
+
+		functions->push_back(event);
+	}
+};
 
 CLIENT_API void Setup()
-{
-	int* a = new int();
-	delete a;
+{	
+	PropertyField<int, String, double> a;
+
+	a.AddPropertyChangedEvent<1>([](const String& a) {
+		Console::WriteLine("property[1] changed: " + a);
+		});
+
+	a.SetProperty<1>("Marko");
 
 	
-	//bool exit = false;
-	//Logger::SetOutputFile("log.txt");
-	//
-	//Window window;
-	//window.ShowWindow(true);
-	//
-	//Renderer::SetTarget(window);	
-	//
-	//UI::UIManager manager;
-	//manager.SetElementTypeRegistry(UI::UIElementTypeRegistry::CoreRegistry());	
-	//
-	//manager.CreateLayer("main");
-
-	//UI::TextField el2;
-	//el2.EventHandler<Event::TextInput>::~EventHandler();
-
-	//el2.SetSize(Vec2f(400, 30));
-	//el2.SetValidateTextFunction([&](StringUTF8 text) {				
-	//	bool dot = false;
-	//
-	//	for (auto it = text.begin(); it != text.end(); ++it)
-	//	{
-	//		char ch = it.ToUnicode().Value();
-	//		if (ch == '.')
-	//			if (dot)
-	//				return false;
-	//			else
-	//				dot = true;
-	//		else if (!isdigit(ch))
-	//			return false;
-	//			
-	//	}
-	//
-	//	return true;
-	//	});
-	//el2.AddValueEnteredFunction([&]() {
-	//	float value;
-	//	if (StringUTF8::ConvertTo<float>(el2.GetText(), value))
-	//		el2.SetText(StringUTF8::Convert(value));
-	//	else
-	//		el2.SetText("");
-	//	});
-
-	//while (!exit)
-	//{
-	//	Input::Update();
-	//
-	//	if (Input::GetKeyState(Key::Escape).pressed)
-	//		exit = true;
-	//
-	//	Renderer::ClearTarget();
-	//
-	//	manager.Update();
-	//	manager.Render();
-	//
-	//	Renderer::SwapWindowBuffers();
-	//}
+	Console::Read();
 }
+
+//build "" "C:\Users\Marko\Desktop\app" "app.exe" -guiOpenFile -p:Configuration=Debug -p:Platform=x64

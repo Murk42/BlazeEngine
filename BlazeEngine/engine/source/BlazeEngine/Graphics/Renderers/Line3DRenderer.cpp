@@ -1,5 +1,5 @@
 #include "BlazeEngine/Graphics/Renderers/Line3DRenderer.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::Graphics
 {
@@ -215,7 +215,7 @@ namespace Blaze::Graphics
 	void Line3DRenderer::SetProjectionMatrix(Mat4f mat)
 	{
 		program.SetUniform(0, mat);
-		program.SetUniform(1, (Vec2f)Renderer::GetViewportSize());
+		program.SetUniform(1, (Vec2f)Graphics::Core::GetViewportSize());
 	}
 
 	void Line3DRenderer::SetBatchMode(uint batchSize)
@@ -258,9 +258,9 @@ namespace Blaze::Graphics
 		else
 		{			
 			vb.AllocateDynamicStorage(BufferView(&vertex, sizeof(Vertex)), Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
-			Renderer::SelectVertexArray(&va);
-			Renderer::SelectProgram(&program);			
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, 1);
+			Graphics::Core::SelectVertexArray(&va);
+			Graphics::Core::SelectProgram(&program);			
+			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, 1);
 		}
 	}
 	void Line3DRenderer::Flush()
@@ -268,9 +268,9 @@ namespace Blaze::Graphics
 		if (batchOffset > 0)
 		{
 			vb.ChangeData(BufferView(cache, sizeof(Vertex) * batchOffset), 0);
-			Renderer::SelectVertexArray(&va);
-			Renderer::SelectProgram(&program);
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, batchOffset);
+			Graphics::Core::SelectVertexArray(&va);
+			Graphics::Core::SelectProgram(&program);
+			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, batchOffset);
 		}
 		batchOffset = 0;
 	}

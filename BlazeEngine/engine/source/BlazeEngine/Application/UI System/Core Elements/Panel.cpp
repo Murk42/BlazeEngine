@@ -1,5 +1,5 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Panel.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Math/Math.h"
 
 namespace Blaze
@@ -107,15 +107,15 @@ namespace Blaze
 				vertices[i].borderWidth = panel.borderWidth;
 			}
 
-			Renderer::SelectProgram(&panelsSP);
-			Renderer::SelectVertexArray(&panelsVA);
+			Graphics::Core::SelectProgram(&panelsSP);
+			Graphics::Core::SelectVertexArray(&panelsVA);
 			panelsSP.SetUniform(0, GetManager()->GetProjectionMatrix());
 			panelsSP.SetUniform(1, Vec4f(clipRect.pos, clipRect.size));
 
 			panelsVB.AllocateDynamicStorage({ vertices, sizeof(PanelVertex) * 6 }, Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
 
 
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Triangles, 0, 6);
+			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Triangles, 0, 6);
 
 		}
 	

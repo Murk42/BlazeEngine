@@ -4,7 +4,7 @@
 
 #include <GL/glew.h>
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::OpenGL
 {
@@ -59,7 +59,7 @@ namespace Blaze::OpenGL
 		this->size = size;
 		this->layers = layers;
 
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, layers, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}
 
@@ -68,7 +68,7 @@ namespace Blaze::OpenGL
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, bm.GetSize().x, bm.GetSize().y, 1, format, type, bm.GetPixels());
 	}
 

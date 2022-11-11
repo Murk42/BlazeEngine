@@ -1,5 +1,5 @@
 #include "BlazeEngine/Graphics/Graphics.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 #include "source/BlazeEngine/Graphics/Shaders.h"
 #include "BlazeEngine/Event/Events.h"
@@ -50,11 +50,14 @@ namespace Blaze
 
 			if (!graphicsData->userProj3D)
 			{
-				Graphics::Set3DProjectionMatrix(Math::PerspectiveMatrix<float>(90, Renderer::GetViewportRatio(), 0.1, 1000));
+				Graphics::Set3DProjectionMatrix(Math::PerspectiveMatrix<float>(90, Graphics::Core::GetViewportRatio(), 0.1, 1000));
 				graphicsData->line3DRenderer.SetProjectionMatrix(graphicsData->VP3D);
 			}
 		}
 	}
+
+	void InitializeCoreGraphics();
+	void TerminateCoreGraphics();
 	
 	Startup::GraphicsInitInfo InitializeGraphics()
 	{
@@ -62,6 +65,8 @@ namespace Blaze
 
 		Startup::GraphicsInitInfo initInfo;
 		TimePoint startTimePoint = TimePoint::GetWorldTime();
+
+		InitializeCoreGraphics();
 
 		new (_graphicsData) GraphicsData();
 		graphicsData = (GraphicsData*)_graphicsData;
@@ -127,6 +132,8 @@ namespace Blaze
 	void TerminateGraphics()
 	{
 		Graphics::graphicsData->~GraphicsData();
+
+		TerminateCoreGraphics();
 	}
 
 	namespace Graphics
@@ -187,14 +194,14 @@ namespace Blaze
 				{ { p2.x, p2.y, 0.0f }, { uv2.x, uv2.y } },
 			};
 			graphicsData->drawTexVB.AllocateDynamicStorage({ vertices, sizeof(vertices) }, GraphicsBufferDynamicStorageHint::DynamicDraw);
-			Renderer::SelectVertexArray(&graphicsData->drawTexVA);
-			Renderer::SelectProgram(&graphicsData->drawTexShaderProgram);
+			Graphics::Core::SelectVertexArray(&graphicsData->drawTexVA);
+			Graphics::Core::SelectProgram(&graphicsData->drawTexShaderProgram);
 			graphicsData->drawTexShaderProgram.SetUniform(0, graphicsData->proj2D);
 			graphicsData->drawTexShaderProgram.SetUniform(1, 0);
-			Renderer::SetActiveTextureSlot(0);
-			Renderer::SelectTexture(&tex);
+			Graphics::Core::SetActiveTextureSlot(0);
+			Graphics::Core::SelectTexture(&tex);
 
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::TriangleStrip, 0, 4);			
+			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::TriangleStrip, 0, 4);			
 		}
 		void DrawTexture(Vec2f p1, Vec2f p2, Graphics::Core::Texture1D& tex, float uv1, float uv2)
 		{
@@ -257,7 +264,7 @@ namespace Blaze
 		}	
 		Mat4f Set3DProjectionMatrix(float fov, float near, float far)
 		{
-			Mat4f mat = Math::PerspectiveMatrix(fov, Renderer::GetViewportRatio(), near, far);
+			Mat4f mat = Math::PerspectiveMatrix(fov, Graphics::Core::GetViewportRatio(), near, far);
 			Set3DProjectionMatrix(mat);
 			return mat;
 		}
@@ -275,7 +282,7 @@ namespace Blaze
 			//is in range [-1, 1]
 			Vec4f transformed = graphicsData->proj3D * graphicsData->view3D * Vec4f(position, 1.0f);			
 			transformed.xyz /= transformed.w;
-			Vec3f out = Vec3f((transformed.xy + Vec2f(1.0f)) / 2.0f * (Vec2f)Renderer::GetViewportSize(), transformed.z);
+			Vec3f out = Vec3f((transformed.xy + Vec2f(1.0f)) / 2.0f * (Vec2f)Graphics::Core::GetViewportSize(), transformed.z);
 			return out;
 		}
 	}	

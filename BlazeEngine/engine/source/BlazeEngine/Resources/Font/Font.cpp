@@ -1,6 +1,6 @@
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 #include "freetype/freetype.h"
 #include "source/BlazeEngine/Internal/Conversions.h"

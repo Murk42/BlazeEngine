@@ -94,9 +94,9 @@ CLIENT_API void Setup()
 
 	window.SetOpacity(1.0f);
 
-	Renderer::SetTarget(window);
-	Renderer::SetViewport({}, window.GetSize());
-	Renderer::SetClearColor(0x333333ff);
+	Graphics::Core::SetTarget(window);
+	Graphics::Core::SetViewport({}, window.GetSize());
+	Graphics::Core::SetClearColor(0x333333ff);
 
 	ResourceSystem::ResourceManager resourceManager;
 	resourceManager.AddResource("Default font", &Graphics::GetDefaultFont());
@@ -118,12 +118,12 @@ CLIENT_API void Setup()
 			str += log.GetFunctionName() + "\n";
 		listener.ClearLogs();
 
-		Renderer::ClearTarget( );		
+		Graphics::Core::ClearTarget( );		
 
 		scene.Render();		
 		Graphics::Write((StringUTF8)str, Vec2f(0, window.GetSize().y - 15), 14, 0xffffffff);
 
-		Renderer::SwapWindowBuffers();		
+		Graphics::Core::SwapWindowBuffers();		
 	}
 	listener.StopListening();
 }

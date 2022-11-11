@@ -1,5 +1,5 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Image.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Math/Math.h"
 #include "BlazeEngine/Application/UI System/UIScene.h"
 
@@ -48,9 +48,9 @@ namespace Blaze::UI
 		if (!image.IsActive())
 			return; 
 		 
-		Renderer::SelectProgram(&imagesSP);
+		Graphics::Core::SelectProgram(&imagesSP);
 
-		Renderer::SelectVertexArray(&imagesVA);
+		Graphics::Core::SelectVertexArray(&imagesVA);
 
 		Vec2f pos = image.GetViewportPos();
 		Vec2f size = image.GetSize();
@@ -71,9 +71,9 @@ namespace Blaze::UI
 		imagesSP.SetUniform(1, 0);
 		imagesSP.SetUniform(2, Vec4f(clipRect.pos, clipRect.size));
 
-		Renderer::SetActiveTextureSlot(0);
-		Renderer::SelectTexture(image.texture);
+		Graphics::Core::SetActiveTextureSlot(0);
+		Graphics::Core::SelectTexture(image.texture);
 
-		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Triangles, 0, 6);
+		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Triangles, 0, 6);
 	}
 }

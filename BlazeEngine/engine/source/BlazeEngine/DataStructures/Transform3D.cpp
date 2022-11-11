@@ -1,5 +1,5 @@
 #include "BlazeEngine/DataStructures/Transform3D.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze
 {

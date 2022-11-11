@@ -35,11 +35,7 @@ namespace Blaze
 		struct InputInitInfo
 		{
 			double initTime;
-		};
-		struct RendererInitInfo
-		{
-			double initTime;
-		};
+		};		
 		struct GraphicsInitInfo
 		{
 			double initTime;
@@ -49,22 +45,10 @@ namespace Blaze
 			BlazeLibrariesInitInfo libraryInitInfo;
 			ConsoleInitInfo consoleInitInfo;
 			InputInitInfo inputInitInfo;
-			RendererInitInfo rendererInitInfo;
 			GraphicsInitInfo graphicsInitInfo;
 			double initTime;
 		};
-		struct StartupInfo
-		{
-			double blazeLoadTime;
-			double clientLibrariesLoadTime;
-			double clientLoadTime;
 
-			double initializationTime; //Sum of all load times			
-
-			BlazeInitInfo blazeInitInfo;
-
-		};		
-
-		BLAZE_API StartupInfo GetStartupInfo();
+		BLAZE_API BlazeInitInfo GetInitInfo();
 	}
 }

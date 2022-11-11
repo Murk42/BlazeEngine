@@ -3,7 +3,7 @@
 
 #include <GL/glew.h>
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::OpenGL
 {
@@ -57,7 +57,7 @@ namespace Blaze::OpenGL
 	{
 		this->size = size;		
 
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		glTexImage3D(GL_TEXTURE_3D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, size.z, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}
 

@@ -4,6 +4,7 @@
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Application/UI System/UIEvent.h"
 #include "BlazeEngine/Application/UI System/UIManager.h"
+#include "BlazeEngine/DataStructures/Array.h"
 #include "BlazeEngine/DataStructures/String.h"
 #include <bitset>
 
@@ -135,7 +136,7 @@ namespace Blaze
 			UIElement* clipElement;
 			Rectf clipRect;
 
-			std::vector<UIElement*> tiedElements;
+			Array<UIElement*> tiedElements;
 			UIElement* tiedParent;
 		protected:
 			virtual void AttachedToManager() { }
@@ -148,7 +149,7 @@ namespace Blaze
 			//		return BLAZE_ERROR_LOG("BlazeEngine", "The element doesnt belong to a manager");
 			//
 			//	TieElement(&element, manager->GetElementTypeRegistry().GetElementTypeIndex<T>());
-			//}
+			//}						
 			Result TieElement(UIElement* element);
 			Result UntieElement(UIElement* element);
 			//void UntieElement(UIElement* element);
@@ -184,7 +185,7 @@ namespace Blaze
 			inline UIElement* GetAnchor() const { return anchor; }
 			inline UIElement* GetClipElement() const { return clipElement; }
 
-			inline std::vector<UIElement*> GetTiedElements() const { return tiedElements; }
+			inline Array<UIElement*> GetTiedElements() const { return tiedElements; }
 			inline UIElement* GetTiedParent() const { return tiedParent; }
 			inline bool IsTied() const { return tiedParent != nullptr; }
 

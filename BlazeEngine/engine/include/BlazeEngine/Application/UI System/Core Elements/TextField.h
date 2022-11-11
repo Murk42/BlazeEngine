@@ -24,6 +24,7 @@ namespace Blaze::UI
 		TextButton button;
 		Panel cursor;
 
+		StringUTF8 editingText;
 		StringUTF8 text;
 		StringUTF8 emptyText;
 
@@ -34,7 +35,7 @@ namespace Blaze::UI
 		TimePoint backspaceTime;
 		uint backspaceCount;
 		
-		void OnEvent(Event::TextInput) override;		
+		void OnEvent(Event::TextInput) override;
 
 		void UpdateText();
 		void UpdateCursor();

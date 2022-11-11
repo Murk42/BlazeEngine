@@ -65,11 +65,6 @@ namespace ElementPropertiesMenu
 		else
 		{
 			SetClickable(true);
-			name->SetText((StringUTF8)el->GetName());
-			posX->SetText((StringUTF8)String::Convert((int)el->GetPos().x));
-			posY->SetText((StringUTF8)String::Convert((int)el->GetPos().y));
-			sizeX->SetText((StringUTF8)String::Convert((int)el->GetSize().x));
-			sizeY->SetText((StringUTF8)String::Convert((int)el->GetSize().y));
 		}
 	}
 
@@ -107,7 +102,7 @@ namespace ElementPropertiesMenu
 	{
 		const char* layer = "elementPropertiesMenu";
 
-		uiManager.CreateLayer(layer);
+		globals->uiManager.CreateLayer(layer);
 
 		CREATE_ELEMENT(panel, layer);
 		CREATE_ELEMENT(label, layer);
@@ -125,17 +120,17 @@ namespace ElementPropertiesMenu
 		panel->UIElement::SetProperties({
 			.pos = Vec2f(-15, -50), .size = Vec2f(300, 500), .localAlign = Align::TopRight, .anchorAlign = Align::TopRight
 			});
-		panel->SetProperties(menuPanelProperties);
+		panel->SetProperties(GetMenuPanelProperties());
 
 		label->UIElement::SetProperties({
 			.pos = Vec2f(0, -5), .anchor = panel, .localAlign = Align::Top, .anchorAlign = Align::Top
 			});
 		label->SetProperties({
-			.text = (StringUTF8)"Element properties", .fontResolution = fontResolution18, .fontSize = 18
+			.text = (StringUTF8)"Element properties", .fontResolution = globals->fontResolution18, .fontSize = 18
 			});
 		
 		nameLabel->SetProperties({
-			.text = (StringUTF8)"Name:", .fontResolution = fontResolution14, .fontSize = 14,
+			.text = (StringUTF8)"Name:", .fontResolution = globals->fontResolution14, .fontSize = 14,
 			});
 
 		name->UIElement::SetProperties({
@@ -155,7 +150,7 @@ namespace ElementPropertiesMenu
 		nameInfo->SetFontSize(10);
 		
 		posLabel->SetProperties({
-			.text = (StringUTF8)"Pos:", .fontResolution = fontResolution14, .fontSize = 14,
+			.text = (StringUTF8)"Pos:", .fontResolution = globals->fontResolution14, .fontSize = 14,
 			});
 
 		posX->UIElement::SetProperties({
@@ -166,7 +161,7 @@ namespace ElementPropertiesMenu
 			.emptyText = (StringUTF8)"",
 			.valueEntered = (UI::UIEventFunction)[&]() {
 				float value;
-				if (StringUTF8::ConvertTo<float>(posX->GetText(), value))
+				if (StringUTF8::ConvertTo(posX->GetText(), value))
 					selected->SetPos({ std::floor(value), selected->GetPos().y});
 				else
 					posX->SetText(StringUTF8::Convert((int)selected->GetPos().x));
@@ -181,7 +176,7 @@ namespace ElementPropertiesMenu
 			.emptyText = (StringUTF8)"",
 			.valueEntered = (UI::UIEventFunction)[&]() {
 				float value;
-				if (StringUTF8::ConvertTo<float>(posY->GetText(), value))
+				if (StringUTF8::ConvertTo(posY->GetText(), value))
 					selected->SetPos({ selected->GetPos().x, std::floor(value) });
 				else
 					posY->SetText(StringUTF8::Convert((int)selected->GetPos().y));
@@ -192,7 +187,7 @@ namespace ElementPropertiesMenu
 			.pos = Vec2f(5, 0), .anchor = posY, .localAlign = Align::Left, .anchorAlign = Align::Right
 			});
 		sizeLabel->SetProperties({
-			.text = (StringUTF8)"Size:", .fontResolution = fontResolution14, .fontSize = 14,
+			.text = (StringUTF8)"Size:", .fontResolution = globals->fontResolution14, .fontSize = 14,
 			});		
 
 		sizeX->UIElement::SetProperties({
@@ -203,7 +198,7 @@ namespace ElementPropertiesMenu
 			.emptyText = (StringUTF8)"",
 			.valueEntered = (UI::UIEventFunction)[&]() {
 				float value;
-				if (StringUTF8::ConvertTo<float>(sizeX->GetText(), value))
+				if (StringUTF8::ConvertTo(sizeX->GetText(), value))
 					selected->SetSize({ std::floor(value), selected->GetSize().y});
 				else
 					sizeX->SetText(StringUTF8::Convert((int)selected->GetSize().x));
@@ -218,7 +213,7 @@ namespace ElementPropertiesMenu
 			.emptyText = (StringUTF8)"",
 			.valueEntered = (UI::UIEventFunction)[&]() {
 				float value;
-				if (StringUTF8::ConvertTo<float>(sizeY->GetText(), value))
+				if (StringUTF8::ConvertTo(sizeY->GetText(), value))
 					selected->SetSize({ selected->GetSize().x, std::floor(value) });
 				else
 					sizeY->SetText(StringUTF8::Convert((int)selected->GetSize().y));
@@ -237,5 +232,17 @@ namespace ElementPropertiesMenu
 			});
 
 		SelectElement(nullptr);
+	}
+
+	void Update()
+	{
+		if (selected != nullptr)
+		{
+			name->SetText((StringUTF8)selected->GetName());
+			posX->SetText((StringUTF8)String::Convert((int)selected->GetPos().x));
+			posY->SetText((StringUTF8)String::Convert((int)selected->GetPos().y));
+			sizeX->SetText((StringUTF8)String::Convert((int)selected->GetSize().x));
+			sizeY->SetText((StringUTF8)String::Convert((int)selected->GetSize().y));
+		}
 	}
 }

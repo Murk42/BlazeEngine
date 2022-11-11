@@ -37,7 +37,7 @@ namespace Blaze::UI
 	//	element->layer = "";
 	//	element->manager = nullptr;
 	//	element->flags.set(MANUAL, false);
-	//}
+	//}	
 	Result UIElement::TieElement(UIElement* element)
 	{		
 		element->manager = manager;
@@ -45,18 +45,25 @@ namespace Blaze::UI
 		element->typeIndex = -1;
 		element->tiedParent = this;
 
-		tiedElements.emplace_back(element);
+		tiedElements.Resize(tiedElements.Count() + 1);
+		tiedElements.Last() = element;
 
 		return { };
 	}
 	Result UIElement::UntieElement(UIElement* element)
 	{
 		auto it = std::find(tiedElements.begin(), tiedElements.end(), element);
+		size_t index = it - tiedElements.Ptr();
 
 		if (it == tiedElements.end())
 			return BLAZE_ERROR_RESULT("BlazeEngine", "Trying to untie a element from a element that it isnt tied to");
-
-		tiedElements.erase(it);
+		
+		Array<UIElement*> newArray(tiedElements.Count() - 1);
+		for (int i = 0; i < index; ++i)
+			newArray[i] = tiedElements[i];
+		for (int i = index; i < newArray.Count(); ++i)
+			newArray[i] = tiedElements[i + 1];
+		tiedElements = std::move(newArray);
 		
 		element->manager = nullptr;
 		element->tiedParent = nullptr;

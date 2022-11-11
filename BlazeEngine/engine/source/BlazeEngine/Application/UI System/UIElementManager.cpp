@@ -19,8 +19,8 @@ namespace Blaze::UI
 		stream.WriteString(el->GetLayerName());
 		stream.WriteVector(el->GetPos());
 		stream.WriteVector(el->GetSize());
-		stream.Write<uint8>((uint8)el->GetAnchorAlignment());
-		stream.Write<uint8>((uint8)el->GetLocalAlignment());
+		stream.Write((uint8)el->GetAnchorAlignment());
+		stream.Write((uint8)el->GetLocalAlignment());
 		stream.Write(el->IsActive());
 		stream.Write(el->IsSolid());
 		stream.Write(el->GetDepth());
@@ -33,7 +33,7 @@ namespace Blaze::UI
 			for (auto ch : name) stream.Write(ch);
 		}
 		else
-			stream.Write<size_t>(0);
+			stream.Write((size_t)0);
 	}
 	void UIBaseElementManager::Deserialize(UIElement* el, BinaryInputStream& stream)
 	{				

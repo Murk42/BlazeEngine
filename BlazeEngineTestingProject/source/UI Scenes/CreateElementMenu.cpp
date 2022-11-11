@@ -73,10 +73,10 @@ namespace CreateElementMenu
 			return;
 
 		uint typeIndicies[] = {
-			gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Button>(),
-			gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Text>(),
-			gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Panel>(),
-			gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Image>(),
+			globals->gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Button>(),
+			globals->gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Text>(),
+			globals->gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Panel>(),
+			globals->gameUIManager.GetElementTypeRegistry().GetElementTypeIndex<UI::Image>(),
 		};
 
 		String name = String((const char*)elementName->GetText().Buffer());
@@ -104,8 +104,8 @@ namespace CreateElementMenu
 	{
 		const char* layer = "createElementMenu";
 		const char* menuLayer = "createElementMenu_menu";
-		uiManager.CreateLayer(layer);
-		uiManager.CreateLayer(menuLayer);
+		globals->uiManager.CreateLayer(layer);
+		globals->uiManager.CreateLayer(menuLayer);
 		 
 		CREATE_ELEMENT(bgPanel			, layer);
 		CREATE_ELEMENT(menuPanel		, layer);
@@ -125,13 +125,13 @@ namespace CreateElementMenu
 		bgPanel->UIElement::SetProperties({
 			.name = (String)"createElementMenu_panel", .localAlign = Align::Center, .anchorAlign = Align::Center, .active = false
 			});
-		bgPanel->SetProperties(bgPanelProperties);
-		uiManager.AddViewportChangedFunction([&]() { bgPanel->SetSize((Vec2f)uiManager.GetViewport().size); });
+		bgPanel->SetProperties(GetBGPanelProperties());
+		globals->uiManager.AddViewportChangedFunction([&]() { bgPanel->SetSize((Vec2f)globals->uiManager.GetViewport().size); });
 
 		menuPanel->UIElement::SetProperties({
 			.size = Vec2f(500, 300), .anchor = bgPanel
 			});
-		menuPanel->SetProperties(menuPanelProperties);
+		menuPanel->SetProperties(GetMenuPanelProperties());
 
 		cancelButton->UIElement::SetProperties({
 			.pos = Vec2f(-10, 10), .size = Vec2f(70, 20), .anchor = menuPanel, .localAlign = Align::BottomRight, .anchorAlign = Align::BottomRight 
@@ -175,7 +175,7 @@ namespace CreateElementMenu
 			.buttonProperties = DefaultTextButtonProperties<14>(),
 			.menuProperties = {
 				.optionProperties = DefaultTextButtonProperties<14>(),
-				.panelProperties = menuPanelProperties,
+				.panelProperties = GetMenuPanelProperties(),
 				.options = elementTypeOptions, 
 				.defaultOption = 0 },
 			.menuLayer = (String)menuLayer 
@@ -195,7 +195,7 @@ namespace CreateElementMenu
 			.buttonProperties = DefaultTextButtonProperties<14>(),
 			.menuProperties = {
 				.optionProperties = DefaultTextButtonProperties<14>(),
-				.panelProperties = menuPanelProperties,
+				.panelProperties = GetMenuPanelProperties(),
 				.options = { },
 				.defaultOption = -1 },
 			.menuLayer = (String)menuLayer
@@ -219,9 +219,9 @@ namespace CreateElementMenu
 		newLayerButton->SetProperties({
 			.pos = { 5, 0}, .size = { 20, 20}, .anchor = elementLayer, .localAlign = Align::Left,.anchorAlign = Align::Right,
 			.borderWidth = 0,
-			.texture = resourceManager.GetResource<Graphics::Core::Texture2D>("plusIcon"), .sourceRect = { 0, 0, 20, 20}, .imageSize = { 20, 20},
+			.texture = globals->resourceManager.GetResource<Graphics::Core::Texture2D>("plusIcon"), .sourceRect = { 0, 0, 20, 20}, .imageSize = { 20, 20},
 			.imageMask = 0x00aa00ff,
-			.pressed = []() {
+			.pressed = (UI::UIEventFunction)[]() {
 				CreateLayerMenu::Open();
 				}
 			});

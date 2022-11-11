@@ -26,8 +26,6 @@ struct RunCommandOptions
 	bool buildBlaze = false;
 	bool buildRuntime = false;
 
-	bool guiOpenFile = false;
-
 	string projectPath = "";
 };
 

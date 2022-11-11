@@ -4,10 +4,8 @@
 
 #ifdef FINAL_BUILD
 #define BLAZE_API
-#define CLIENT_API
 #else
 #define BLAZE_API __declspec(dllexport)
-#define CLIENT_API extern "C" __declspec(dllexport)
 #endif
 
 #ifdef _WIN32 

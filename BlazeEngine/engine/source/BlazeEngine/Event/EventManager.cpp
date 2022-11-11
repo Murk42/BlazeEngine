@@ -1,4 +1,5 @@
 #include "BlazeEngine/Event/EventManager.h"
+#include "source/BlazeEngine/Internal/EngineData.h"
 
 #define PerEvent(ev, name) \
 	namespace EventManager { \

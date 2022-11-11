@@ -2,41 +2,24 @@
 #include "BlazeEngine/Core/Window.h"
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Logging/Logger.h"
-#include "source/BlazeEngine/Internal/InternalKeyStateData.h"
 #include "BlazeEngine/Core/Startup.h"
 #include "BlazeEngine/Event/EventDispatcher.h"
 #include "BlazeEngine/Event/EventHandler.h"
 #include "BlazeEngine/Event/Events.h"
+#include "source/BlazeEngine/Internal/InternalKeyStateData.h"
+#include "source/BlazeEngine/Internal/EngineData.h"
 #include <map>
 
 #include "SDL/SDL.h"
 
 #include "BlazeEngine/Utilities/Time.h"
 
-namespace Blaze	
-{			
+namespace Blaze
+{
 	void* GetOpenGLInitWindow();
 	const std::vector<Window*>& GetAllWindows();
 	Key GetKeyFromScancode(SDL_Scancode);
-	bool WasFirstWindowCreated();
-
-	extern EventDispatcher<Event::KeyPressed		 >        keyPressedDispatcher;
-	extern EventDispatcher<Event::KeyReleased		 >       keyReleasedDispatcher;
-	extern EventDispatcher<Event::MousePressed	     >      mousePressedDispatcher;
-	extern EventDispatcher<Event::MouseReleased	     >     mouseReleasedDispatcher;
-	extern EventDispatcher<Event::MouseMotion	     >       mouseMotionDispatcher;
-	extern EventDispatcher<Event::MouseScroll	     >       mouseScrollDispatcher;
-	extern EventDispatcher<Event::MouseEnter	     >        mouseEnterDispatcher;
-	extern EventDispatcher<Event::MouseLeave	     >        mouseLeaveDispatcher;
-	extern EventDispatcher<Event::WindowResized	     >     windowResizedDispatcher;
-	extern EventDispatcher<Event::WindowMoved		 >       windowMovedDispatcher;
-	extern EventDispatcher<Event::WindowMinimized	 >   windowMinimizedDispatcher;
-	extern EventDispatcher<Event::WindowMaximized	 >   windowMaximizedDispatcher;
-	extern EventDispatcher<Event::WindowFocusGained  > windowFocusGainedDispatcher;
-	extern EventDispatcher<Event::WindowFocusLost	 >   windowFocusLostDispatcher;
-	extern EventDispatcher<Event::WindowClosed	     >      windowClosedDispatcher;
-	extern EventDispatcher<Event::TextInput		     >         textInputDispatcher;
-	extern EventDispatcher<Event::ViewportChanged    >   viewportChangedDispatcher;
+	bool WasFirstWindowCreated();	
 
 	static Input::KeyState keyStates[(int)Key::KeyCount];
 	static Input::KeyState mouseKeyStates[(int)MouseKey::KeyCount];
@@ -105,7 +88,7 @@ namespace Blaze
 				data.pressed = true;
 				data.down = true;			
 
-				keyPressedDispatcher.Call({ key, time, data.combo });
+				engineData->keyPressedDispatcher.Call({ key, time, data.combo });
 				data.time = time;
 			}
 			else			
@@ -124,7 +107,7 @@ namespace Blaze
 				data.down = false;
 				data.released = true;
 
-				keyReleasedDispatcher.Call({ key, time - data.time });
+				engineData->keyReleasedDispatcher.Call({ key, time - data.time });
 			}
 			else			
 				BLAZE_WARNING_LOG("Blaze Engine", "keyReleasedArray got full, aborted keyReleased event.");			
@@ -163,7 +146,7 @@ namespace Blaze
 				{
 				case SDL_MOUSEWHEEL: {
 					mouseScroll = event.wheel.y;
-					mouseScrollDispatcher.Call({ event.wheel.y });
+					engineData->mouseScrollDispatcher.Call({ event.wheel.y });
 					break;
 				}
 				case SDL_MOUSEBUTTONDOWN: {
@@ -179,7 +162,7 @@ namespace Blaze
 					mouseKeyStates[(int)key].time = frameTime;
 
 					if (focusedWindow != nullptr)
-						mousePressedDispatcher.Call({ key, Vec2i(event.button.x, focusedWindow->GetSize().y - event.button.y) });
+						engineData->mousePressedDispatcher.Call({ key, Vec2i(event.button.x, focusedWindow->GetSize().y - event.button.y) });
 					break;
 				}
 				case SDL_MOUSEBUTTONUP: {
@@ -189,7 +172,7 @@ namespace Blaze
 					mouseKeyStates[(int)key].released = true;
 
 					if (focusedWindow != nullptr)
-						mouseReleasedDispatcher.Call({ key, Vec2i(event.button.x, focusedWindow->GetSize().y - event.button.y) });
+						engineData->mouseReleasedDispatcher.Call({ key, Vec2i(event.button.x, focusedWindow->GetSize().y - event.button.y) });
 					break;
 				}
 				case SDL_KEYDOWN: {
@@ -209,7 +192,7 @@ namespace Blaze
 					break;
 				}
 				case SDL_TEXTINPUT: {					
-					textInputDispatcher.Call({ StringUTF8((void*)event.text.text, strlen(event.text.text)) } );
+					engineData->textInputDispatcher.Call({ StringUTF8((void*)event.text.text, strlen(event.text.text)) } );
 					break;								
 				}
 				case SDL_WINDOWEVENT: {
@@ -217,22 +200,22 @@ namespace Blaze
 						switch (event.window.event) {
 						case SDL_WINDOWEVENT_MOVED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							windowMovedDispatcher.Call({ Vec2i(event.window.data1, event.window.data2), win });
+							engineData->windowMovedDispatcher.Call({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_MINIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							windowMinimizedDispatcher.Call({ win });
+							engineData->windowMinimizedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_MAXIMIZED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							windowMaximizedDispatcher.Call({ win });
+							engineData->windowMaximizedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_SIZE_CHANGED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							windowResizedDispatcher.Call({ Vec2i(event.window.data1, event.window.data2), win });
+							engineData->windowResizedDispatcher.Call({ Vec2i(event.window.data1, event.window.data2), win });
 							break;
 						}
 						case SDL_WINDOWEVENT_RESIZED: {
@@ -246,28 +229,28 @@ namespace Blaze
 						case SDL_WINDOWEVENT_FOCUS_GAINED: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
 							focusedWindow = win;
-							windowFocusGainedDispatcher.Call({ win });
+							engineData->windowFocusGainedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_LOST: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
 							focusedWindow = nullptr;
-							windowFocusLostDispatcher.Call({ win });
+							engineData->windowFocusLostDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_CLOSE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							windowClosedDispatcher.Call({ win });
+							engineData->windowClosedDispatcher.Call({ win });
 							break;
 						}
 						case SDL_WINDOWEVENT_ENTER: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							mouseEnterDispatcher.Call({ });
+							engineData->mouseEnterDispatcher.Call({ });
 							break;
 						}
 						case SDL_WINDOWEVENT_LEAVE: {
 							Window* win = GetWindowFromSDLid(event.window.windowID);
-							mouseLeaveDispatcher.Call({ });
+							engineData->mouseLeaveDispatcher.Call({ });
 							break;
 						}
 						}
@@ -275,7 +258,7 @@ namespace Blaze
 				}			
 			
 			Vec2i mouseRealPos;
-			SDL_GetGlobalMouseState(&mouseRealPos.x, &mouseRealPos.y);			
+			SDL_GetGlobalMouseState(&mouseRealPos.x, &mouseRealPos.y);
 
 			SDL_Rect rect;
 			SDL_GetDisplayBounds(0, &rect);
@@ -291,13 +274,11 @@ namespace Blaze
 			}
 			else
 			{ 
-				mousePos = mouseRealPos;								
+				mousePos = mouseRealPos;
 			}
 
 			if (mouseMovement != Vec2i(0))
-			{				
-				mouseMotionDispatcher.Call({ Vec2i(mousePos.x, mousePos.y), Vec2i(mouseMovement.x, mouseMovement.y) });
-			}
+				engineData->mouseMotionDispatcher.Call({ Vec2i(mousePos.x, mousePos.y), Vec2i(mouseMovement.x, mouseMovement.y) });			
 		}
 
 		KeyState GetKeyState(Key code)

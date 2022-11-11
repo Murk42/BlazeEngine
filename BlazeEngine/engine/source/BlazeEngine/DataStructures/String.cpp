@@ -9,7 +9,7 @@ namespace Blaze
 {
 	String::String()
 		: ptr(nullptr), size(0)
-	{
+	{		
 	}
 	String::String(const String& s)
 		: size(s.size)
@@ -212,7 +212,7 @@ namespace Blaze
 				++begin;
 		return true;
 	}
-	template<> inline bool String::ConvertTo<uint32>(const StringView& sv, uint32& value)
+	bool String::ConvertTo(const StringView& sv, uint32& value)
 	{
 		char* ptr;
 		uint32 temp = strtoul(sv.Ptr(), &ptr, 10);
@@ -223,7 +223,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> inline bool String::ConvertTo<int32 >(const StringView& sv, int32&  value)
+	bool String::ConvertTo(const StringView& sv, int32&  value)
 	{
 		char* ptr;
 		int32 temp = strtol(sv.Ptr(), &ptr, 10);
@@ -234,7 +234,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> inline bool String::ConvertTo<uint64>(const StringView& sv, uint64& value)
+	bool String::ConvertTo(const StringView& sv, uint64& value)
 	{
 		char* ptr;
 		uint64 temp = strtoull(sv.Ptr(), &ptr, 10);
@@ -245,7 +245,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> inline bool String::ConvertTo<int64 >(const StringView& sv, int64&  value)
+	bool String::ConvertTo(const StringView& sv, int64&  value)
 	{
 		char* ptr;
 		int64 temp = strtoll(sv.Ptr(), &ptr, 10);
@@ -256,7 +256,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> inline bool String::ConvertTo<float >(const StringView& sv, float&  value)
+	bool String::ConvertTo(const StringView& sv, float&  value)
 	{
 		char* ptr;
 		float temp = strtof(sv.Ptr(), &ptr);
@@ -267,7 +267,7 @@ namespace Blaze
 		}
 		return false;
 	}
-	template<> inline bool String::ConvertTo<double>(const StringView& sv, double& value)
+	bool String::ConvertTo(const StringView& sv, double& value)
 	{
 		char* ptr;
 		double temp = strtod(sv.Ptr(), &ptr);

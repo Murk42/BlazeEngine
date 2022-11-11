@@ -6,5 +6,5 @@
 #include "BlazeEngine/Graphics/Renderers/TextRenderer.h"
 #include "BlazeEngine/Graphics/Renderers/TextRenderCache.h"
 #include "BlazeEngine/Graphics/Renderers/TextVertexGenerator.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"

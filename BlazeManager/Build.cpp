@@ -22,7 +22,6 @@ Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string
 		settings.outputDir.size() > 0 ||
 		settings.intermediateDir.size() > 0;
 
-	//cd C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin && MSBuild.exe "C:\Programming\Projects\BlazeEngine\BlazeEngine\BlazeEngine.vcxproj"
 	std::string command =		
 		"cd " + std::filesystem::path(vsInfo.instalationPath).string() + "\\VC\\Auxiliary\\Build && "
 		+ "vcvarsall.bat x64 && "

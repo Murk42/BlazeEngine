@@ -1,5 +1,16 @@
 #pragma once
 #include <BlazeEngine/Event/EventDispatcher.h>
+#include "BlazeEngine/Logging/LogListener.h"
+#include "BlazeEngine/Input/Key.h"
+#include "BlazeEngine/Core/Startup.h"
+#include "SDL/SDL_scancode.h"
+#include <thread>
+#include <map>
+
+namespace Blaze
+{
+	class Window;
+}
 
 struct EngineData
 {
@@ -20,4 +31,18 @@ struct EngineData
 	Blaze::EventDispatcher<Blaze::Event::WindowClosed		> windowClosedDispatcher;
 	Blaze::EventDispatcher<Blaze::Event::TextInput			> textInputDispatcher;
 	Blaze::EventDispatcher<Blaze::Event::ViewportChanged	> viewportChangedDispatcher;
-}* engineData;
+
+	std::vector<Blaze::LogListener*> handlers;
+
+	std::map<Blaze::Key, SDL_Scancode> scancodemap;
+	std::map<SDL_Scancode, Blaze::Key> keymap;
+
+	std::vector<Blaze::Window*> allWindows;
+
+	std::unordered_map<std::thread::id, Blaze::uint> threadIDMap;
+
+	Blaze::Startup::BlazeInitInfo initInfo;
+
+	bool finishedInit = false;
+};
+extern EngineData* engineData;

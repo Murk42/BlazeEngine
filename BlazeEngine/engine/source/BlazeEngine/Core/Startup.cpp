@@ -1,20 +1,14 @@
 #include "BlazeEngine/Core/Startup.h"
+#include "source/BlazeEngine/Internal/EngineData.h"
 
 namespace Blaze
 {
 	namespace Startup
-	{
-		static StartupInfo startupInfo;
-
-		StartupInfo GetStartupInfo()
-		{			
-			return startupInfo;
+	{		
+		BlazeInitInfo GetInitInfo()
+		{
+			return engineData->initInfo;
 		}
 
 	}
-}
-
-extern "C" BLAZE_API void SetStartupInfo(Blaze::Startup::StartupInfo info)
-{
-	Blaze::Startup::startupInfo = info;
 }

@@ -6,7 +6,7 @@
 #include "GL/glew.h"
 #include "IL/il.h"
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::OpenGL
 {
@@ -67,14 +67,14 @@ namespace Blaze::OpenGL
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
 		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);
 
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		if (settings.mipmaps)
 			glGenerateMipmap(GL_TEXTURE_2D);
 	}		
 	void Texture2D::Create(Vec2i size, TextureInternalPixelFormat internalFormat)
 	{
 		this->size = size;		
-		Renderer::SelectTexture(this);				
+		Graphics::Core::SelectTexture(this);				
 		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}
 	void Texture2D::Create(BitmapView bm)
@@ -85,7 +85,7 @@ namespace Blaze::OpenGL
 	{
 		size = bm.GetSize();
 
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
@@ -147,7 +147,7 @@ namespace Blaze::OpenGL
 
 	void Texture2D::SetPixels(Vec2i offset, BitmapView bm)
 	{
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
@@ -172,7 +172,7 @@ namespace Blaze::OpenGL
 
 	void Texture2D::GenerateMipmaps()
 	{
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 

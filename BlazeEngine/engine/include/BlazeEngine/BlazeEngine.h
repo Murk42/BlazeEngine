@@ -13,3 +13,12 @@
 #include "BlazeEngine/Math.h"
 #include "BlazeEngine/Resources.h"
 #include "BlazeEngine/Utilities.h"
+#include "BlazeEngine/Memory/MallocAllocator.h"
+#include "BlazeEngine/Memory/MemoryListener.h"
+#include "BlazeEngine/Memory/MemoryManager.h"
+
+//#ifdef FINAL_BUILD
+//#define CLIENT_API extern "C"
+//#else
+#define CLIENT_API extern "C" __declspec(dllexport)
+//#endif

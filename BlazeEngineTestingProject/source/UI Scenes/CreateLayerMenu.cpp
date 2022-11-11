@@ -49,7 +49,7 @@ namespace CreateLayerMenu
 		if (!CheckName())
 			return;
 
-		gameUIManager.CreateLayer((const char*)layerName->GetText().Buffer());
+		globals->gameUIManager.CreateLayer((const char*)layerName->GetText().Buffer());
 
 		CancelButton();
 	}
@@ -66,7 +66,7 @@ namespace CreateLayerMenu
 	void Setup()
 	{
 		const char* layer = "createLayerMenu";
-		uiManager.CreateLayer(layer);		
+		globals->uiManager.CreateLayer(layer);
 		 
 		CREATE_ELEMENT(bgPanel, layer);
 		CREATE_ELEMENT(menuPanel		, layer);
@@ -80,13 +80,13 @@ namespace CreateLayerMenu
 		bgPanel->UIElement::SetProperties({
 			.name = (String)"createLayerMenu_panel", .active = false
 			});
-		bgPanel->SetProperties(bgPanelProperties);
-		uiManager.AddViewportChangedFunction([&]() { bgPanel->SetSize((Vec2f)uiManager.GetViewport().size); });
+		bgPanel->SetProperties(GetBGPanelProperties());
+		globals->uiManager.AddViewportChangedFunction([&]() { bgPanel->SetSize((Vec2f)globals->uiManager.GetViewport().size); });
 
 		menuPanel->UIElement::SetProperties({
 			.size = Vec2f(300, 100), .anchor = bgPanel
 			});
-		menuPanel->SetProperties(menuPanelProperties);		
+		menuPanel->SetProperties(GetMenuPanelProperties());		
 
 		cancelButton->UIElement::SetProperties({
 			.pos = Vec2f(75, 10), .size = Vec2f(70, 20), .anchor = menuPanel, .localAlign = Align::Bottom, .anchorAlign = Align::Bottom

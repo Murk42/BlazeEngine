@@ -5,6 +5,7 @@
 #include "BlazeEngine/Utilities/Time.h"
 #include "BlazeEngine/Logging/LogListener.h"
 #include "BlazeEngine/File/File.h"
+#include "source/BlazeEngine/Internal/EngineData.h"
 
 #include "GL/glew.h"
 #include <mutex>
@@ -13,19 +14,18 @@
 
 namespace Blaze
 {			
-	static std::vector<LogListener*> handlers;
 	static File logFile;
 	static bool printToConsole = true;
 
 	void AddLogListener(LogListener* listener)
 	{
-		handlers.emplace(handlers.begin(), listener);		
+		engineData->handlers.emplace(engineData->handlers.begin(), listener);
 	}
 	
 	void RemoveLogListener(LogListener* listener)
 	{
-		auto it = std::find(handlers.begin(), handlers.end(), listener);
-		handlers.erase(it);
+		auto it = std::find(engineData->handlers.begin(), engineData->handlers.end(), listener);
+		engineData->handlers.erase(it);
 	}
 
 	namespace Logger
@@ -83,7 +83,7 @@ namespace Blaze
 				throw log.FormatString();
 
 			bool supress = false;
-			for (auto& listener : handlers)
+			for (auto& listener : engineData->handlers)
 			{
 				listener->AddLog(log);
 

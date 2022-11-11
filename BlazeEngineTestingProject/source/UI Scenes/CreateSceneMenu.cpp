@@ -23,10 +23,10 @@ namespace CreateSceneMenu
 
 		UI::UIScene* scene;
 		if (name.Size() > 0)
-			scene = gameResourceStorage.CreateResource<UI::UIScene>(name);
+			scene = globals->gameResourceStorage.CreateResource<UI::UIScene>(name);
 		else
-			scene = gameResourceStorage.CreateResource<UI::UIScene>();
-		SetupUIScene(scene, &gameUIManager);
+			scene = globals->gameResourceStorage.CreateResource<UI::UIScene>();
+		SetupUIScene(scene, &globals->gameUIManager);
 		
 		SceneListMenu::AddScene(scene);
 		SceneListMenu::SelectScene(scene);
@@ -41,7 +41,7 @@ namespace CreateSceneMenu
 	void Setup()
 	{
 		const char* layer = "createSceneMenu";
-		uiManager.CreateLayer(layer);		
+		globals->uiManager.CreateLayer(layer);
 
 		CREATE_ELEMENT(bgPanel			, layer);
 		CREATE_ELEMENT(menuPanel		, layer);
@@ -54,13 +54,13 @@ namespace CreateSceneMenu
 		bgPanel->UIElement::SetProperties({
 			.name = (String)"createSceneMenu_panel", .localAlign = Align::Center, .anchorAlign = Align::Center, .active = false 
 			});
-		bgPanel->SetProperties(bgPanelProperties);
-		uiManager.AddViewportChangedFunction([&]() { bgPanel->SetSize((Vec2f)uiManager.GetViewport().size); });
+		bgPanel->SetProperties(GetBGPanelProperties());
+		globals->uiManager.AddViewportChangedFunction([&]() { bgPanel->SetSize((Vec2f)globals->uiManager.GetViewport().size); });
 
 		menuPanel->UIElement::SetProperties({
 			.size = Vec2f(300, 100), .anchor = bgPanel
 			});
-		menuPanel->SetProperties({menuPanelProperties});		
+		menuPanel->SetProperties({GetMenuPanelProperties()});
 
 		cancelButton->UIElement::SetProperties({
 			.pos = Vec2f(-5, 5), .size = Vec2f(70, 20), .anchor = menuPanel, .localAlign = Align::BottomRight, .anchorAlign = Align::BottomRight

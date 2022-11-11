@@ -3,7 +3,7 @@
 #include "BlazeEngine/Graphics/Renderers/TextRenderCache.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Math/Math.h"
 
 namespace Blaze::Graphics
@@ -235,15 +235,15 @@ namespace Blaze::Graphics
 
 		float scale = size / fontResolution->GetResolution();
 
-		Renderer::SelectProgram(&program);
-		Renderer::SelectVertexArray(&va);
-		Renderer::SetActiveTextureSlot(0);
-		Renderer::SelectTexture(&fontResolution->GetAtlas());
+		Graphics::Core::SelectProgram(&program);
+		Graphics::Core::SelectVertexArray(&va);
+		Graphics::Core::SetActiveTextureSlot(0);
+		Graphics::Core::SelectTexture(&fontResolution->GetAtlas());
 		program.SetUniform(0, proj);
 		program.SetUniform(1, Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0)) * Math::ScalingMatrix(Vec3f(scale, scale, 1)));
 		program.SetUniform(2, 0);
 		program.SetUniform(3, (Vec4f)color);
-		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, vertexCount);
+		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, vertexCount);
 
 		return Result();
 	}
@@ -260,15 +260,15 @@ namespace Blaze::Graphics
 
 		float scale = size / fontResolution->GetResolution();
 
-		Renderer::SelectProgram(&program);
-		Renderer::SelectVertexArray(&data.GetVertexArray());
-		Renderer::SetActiveTextureSlot(0);
-		Renderer::SelectTexture(&data.GetFontResolution()->GetAtlas());
+		Graphics::Core::SelectProgram(&program);
+		Graphics::Core::SelectVertexArray(&data.GetVertexArray());
+		Graphics::Core::SetActiveTextureSlot(0);
+		Graphics::Core::SelectTexture(&data.GetFontResolution()->GetAtlas());
 		program.SetUniform(0, proj);
 		program.SetUniform(1, Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0)) * Math::ScalingMatrix(Vec3f(scale, scale, 1)));
 		program.SetUniform(2, 0);
 		program.SetUniform(3, (Vec4f)color);
-		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, data.GetVertexCount());
+		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, data.GetVertexCount());
 
 		return Result();
 	}	

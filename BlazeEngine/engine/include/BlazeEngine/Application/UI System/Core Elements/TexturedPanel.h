@@ -12,23 +12,36 @@ namespace Blaze
 	{
 		class TexturedPanelManager;
 
+		struct TexturedPanelSpacing
+		{
+			float left;
+			float right;
+			float top;
+			float bottom;
+		};
+
+		struct TexturedPanelProperties
+		{
+			UIElementProperty<Graphics::Core::Texture2D*> texture;
+			UIElementProperty<ColorRGBAf> mask;
+			UIElementProperty<Rectf> sourceRect;
+			UIElementProperty<TexturedPanelSpacing> textureSpacing;
+			UIElementProperty<TexturedPanelSpacing> spacing;
+		};
+
 		class BLAZE_API TexturedPanel : public UIElement
 		{
-		public:
-			struct Dimensions
-			{
-				int left;
-				int right;
-				int top;
-				int bottom;
-			};
+		public:			
 			
-			ColorRGBAf mask;			
-			Rectf sourceRect;
 			Graphics::Core::Texture2D* texture;
-			Dimensions dimensions;
+			ColorRGBAf mask;
+			Rectf sourceRect;
+			TexturedPanelSpacing textureSpacing;
+			TexturedPanelSpacing spacing;
 
-			TexturedPanel();			
+			TexturedPanel();
+
+			void SetProperties(const TexturedPanelProperties& p);
 
 			using ManagerType = TexturedPanelManager;
 			static constexpr const char* typeName = "TexturedPanel";
@@ -36,9 +49,12 @@ namespace Blaze
 
 		class BLAZE_API TexturedPanelManager : public UIElementManager<TexturedPanel>
 		{
-			Graphics::Core::VertexArray texturedPanelsVA;
-			Graphics::Core::ShaderProgram texturedPanelsSP;
+			Graphics::Core::GraphicsBuffer VB;
+			Graphics::Core::VertexArray VA;
+			Graphics::Core::ShaderProgram SP;
 		public:
+			TexturedPanelManager();
+
 			void Setup() override;
 
 			void Render(UIElement*) override;

@@ -21,7 +21,7 @@ int CalculateFPS()
 
 void RenderFrames(int fps)
 {
-	Vec2i viewportSize = Renderer::GetViewportSize();
+	Vec2i viewportSize = Graphics::Core::GetViewportSize();
 
 	Graphics::Write("FPS: " + StringUTF8::Convert(fps), Vec2f(5, 5), 32, 0x00ff00ff);
 }
@@ -43,8 +43,8 @@ CLIENT_API void Setup()
 	window.SetWindowed(false, false);
 	window.ShowWindow(true);
 
-	Renderer::SetTarget(window);
-	Renderer::SetViewport({}, window.GetSize());
+	Graphics::Core::SetTarget(window);
+	Graphics::Core::SetViewport({}, window.GetSize());
 
 	while (!Input::GetKeyState(Key::Escape).pressed)
 	{
@@ -52,11 +52,11 @@ CLIENT_API void Setup()
 
 		Input::Update();
 
-		Renderer::ClearTarget();
+		Graphics::Core::ClearTarget();
 
 		RenderFrames(FPS);
 		RenderCube();
 
-		Renderer::SwapWindowBuffers();
+		Graphics::Core::SwapWindowBuffers();
 	}
 }

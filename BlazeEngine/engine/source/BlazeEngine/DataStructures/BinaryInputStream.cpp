@@ -40,15 +40,16 @@ namespace Blaze
 		offset += sizeof(value);
 	}
 
-	template<> void BinaryInputStream::Read(bool& out)		{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(int8& out)		{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(int16& out)		{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(int32& out)		{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(int64& out)		{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(uint8& out)		{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(uint16& out)	{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(uint32& out)	{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(uint64& out)	{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(float& out)		{ Blaze::Read(out, offset, buffer); }
-	template<> void BinaryInputStream::Read(double& out)	{ Blaze::Read(out, offset, buffer); }
+
+	void BinaryInputStream::Read(bool& out)		{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(int8& out)		{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(int16& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(int32& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(int64& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(uint8& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(uint16& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(uint32& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(uint64& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(float& out)	{ Blaze::Read(out, offset, buffer); }
+	void BinaryInputStream::Read(double& out)	{ Blaze::Read(out, offset, buffer); }
 }

@@ -5,8 +5,6 @@
 #include <fstream>
 
 extern VisualStudioInfo vsInfo;
-extern string blazeDir;
-extern string runtimeDir;
 
 Result LoadClientLibraryInfo(const string& path, bool log, ClientLibraryInfo& info)
 {
@@ -69,11 +67,11 @@ Result LoadClientLibraryInfo(const string& path, bool log, ClientLibraryInfo& in
 	return Result();
 }
 
-bool BuildBlaze(Configuration configuration, Platform platform)
+bool BuildBlaze(Configuration configuration, Platform platform, EngineBuildSettings settings)
 {
 	BuildSettings blazeBuildSettings{
-		.projectPath = blazeDir + "BlazeEngine.vcxproj",
-		.outputDir = blazeDir + GetOutputSubDir(configuration, platform),		
+		.projectPath = settings.projectPath,
+		.outputDir = settings.outputDir,		
 		.configuration = configuration,
 		.platform = platform,
 	};
@@ -89,9 +87,7 @@ bool BuildBlaze(Configuration configuration, Platform platform)
 }
 
 bool BuildClient(Configuration configuration, Platform platform, ClientBuildSettings settings)
-{		
-	string blazeOutputDir = blazeDir + GetOutputSubDir(configuration, platform);
-
+{
 	BuildSettings buildSettings{
 		.projectPath = settings.projectPath,
 		.outputDir = settings.outputDir,
@@ -102,10 +98,13 @@ bool BuildClient(Configuration configuration, Platform platform, ClientBuildSett
 
 	if (configuration == Configuration::FinalBuild_Debug || configuration == Configuration::FinalBuild_Release)
 	{
+		string engineDirLIB = filesystem::path(settings.enginePathLIB).parent_path().string();
+		string engineNameLIB = filesystem::path(settings.enginePathLIB).filename().string();
+
 		buildSettings.outputType = BuildOutputType::StaticLibrary;
 		buildSettings.properties = {
-			{ "BlazeManagerAdditianalLibraryDirectories", { blazeOutputDir } },
-			{ "BlazeManagerAdditionalDependencies", { "BlazeEngine.lib "}}
+			{ "BlazeManagerAdditionalLibraryDirectories", { engineDirLIB } },
+			{ "BlazeManagerAdditionalDependencies", { engineNameLIB}}
 		};
 	}	
 	else
@@ -126,10 +125,10 @@ bool BuildClient(Configuration configuration, Platform platform, ClientBuildSett
 bool BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSettings settings)
 {	
 	BuildSettings buildSettings{
-			.projectPath = runtimeDir + "BlazeEngineRuntime.vcxproj",
-			.outputDir = settings.outputDir,			
+			.projectPath = settings.projectPath,
+			.outputDir = settings.outputDir,
 			.configuration = configuration,
-			.platform = ::platform,			
+			.platform = ::platform,
 	};
 
 	if (configuration == Configuration::FinalBuild_Debug || configuration == Configuration::FinalBuild_Release)

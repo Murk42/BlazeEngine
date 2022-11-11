@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
-#include "BlazeEngine/Graphics/RendererEnums.h"
+#include "BlazeEngine/Graphics/GraphicsEnums.h"
 
 #include <IL/il.h>
 #include <GL/glew.h>

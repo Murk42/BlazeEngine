@@ -1,9 +1,10 @@
 #include "BlazeEngine/Core/Startup.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Core/MemoryManager.h"
+#include "BlazeEngine/Memory/MemoryManager.h"
 #include "BlazeEngine/Graphics/Graphics.h"
 #include "BlazeEngine/Utilities/Time.h"
 #include "source/BlazeEngine/Internal/Libraries.h"
+#include "source/BlazeEngine/Internal/EngineData.h"
 
 namespace Blaze
 {
@@ -12,39 +13,38 @@ namespace Blaze
 	Startup::ConsoleInitInfo InitializeConsole();
 	void TerminateConsole();
 	Startup::InputInitInfo InitializeInput();
-	void TerminateInput();
-	Startup::RendererInitInfo InitializeRenderer();
-	void TerminateRenderer();
+	void TerminateInput();	
 	Startup::GraphicsInitInfo InitializeGraphics();
 	void TerminateGraphics();
+	void InitializeEngineData();
+	void TerminateEngineData();
 }
 
-extern "C" BLAZE_API Blaze::Startup::BlazeInitInfo InitializeBlaze()
+
+extern "C" BLAZE_API void InitializeBlaze()
 {
 	Blaze::TimePoint timePoint = Blaze::TimePoint::GetWorldTime();
-	Blaze::Startup::BlazeInitInfo initInfo;
-
-	engineData = new EngineData;
 
 	Blaze::InitializeMemory();
+	Blaze::InitializeEngineData();
+
+	Blaze::Startup::BlazeInitInfo& initInfo = engineData->initInfo;
 	initInfo.libraryInitInfo = Blaze::InitializeLibraries();
 	initInfo.consoleInitInfo = Blaze::InitializeConsole();
-	initInfo.inputInitInfo = Blaze::InitializeInput();
-	initInfo.rendererInitInfo = Blaze::InitializeRenderer();
+	initInfo.inputInitInfo = Blaze::InitializeInput();	
 	initInfo.graphicsInitInfo = Blaze::InitializeGraphics();
 	initInfo.initTime = timePoint - Blaze::TimePoint::GetWorldTime();
 
-	initInfo.initTime = Blaze::TimePoint::GetWorldTime() - timePoint;
-	return initInfo;
+	initInfo.initTime = Blaze::TimePoint::GetWorldTime() - timePoint;	
+
+	engineData->finishedInit = true;
 }
 extern "C" BLAZE_API void TerminateBlaze()
 {
-	Blaze::TerminateGraphics();
-	Blaze::TerminateRenderer();
+	Blaze::TerminateGraphics();	
 	Blaze::TerminateInput();
 	Blaze::TerminateConsole();
 	Blaze::TerminateLibraries();
+	Blaze::TerminateEngineData();
 	Blaze::TerminateMemory();
-
-	delete engineData;
 }

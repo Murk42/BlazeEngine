@@ -55,15 +55,15 @@ namespace Blaze
 		offset = newOffset;
 	}
 
-	template<> void BinaryOutputStream::Write(const bool& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const int8& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const int16& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const int32& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const int64& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const uint8& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const uint16& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const uint32& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const uint64& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const float& out) { Blaze::Write(out, offset, buffer); }
-	template<> void BinaryOutputStream::Write(const double& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const bool& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const int8& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const int16& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const int32& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const int64& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const uint8& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const uint16& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const uint32& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const uint64& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const float& out) { Blaze::Write(out, offset, buffer); }
+	void BinaryOutputStream::Write(const double& out) { Blaze::Write(out, offset, buffer); }
 }

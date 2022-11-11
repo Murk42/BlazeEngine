@@ -1,12 +1,13 @@
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/Core/Window.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
 #include "BlazeEngine/Event/Events.h"
 #include "BlazeEngine/Event/EventDispatcher.h"
 #include "BlazeEngine/Event/EventHandler.h"
-#include "source/BlazeEngine/Internal/Conversions.h"
 #include "BlazeEngine/Core/Startup.h"
+#include "source/BlazeEngine/Internal/Conversions.h"
+#include "source/BlazeEngine/Internal/EngineData.h"
 
 #include "SDL/SDL.h"
 #include "GL/glew.h"
@@ -14,9 +15,7 @@
 namespace Blaze
 {	
 	void* GetOpenGLInitWindow();
-	void* GetOpenGLContext();	
-
-	extern EventDispatcher<Event::ViewportChanged   >   viewportChangedDispatcher;
+	void* GetOpenGLContext();		
 
 	namespace Graphics
 	{
@@ -48,28 +47,22 @@ namespace Blaze
 	static ColorRGBAf clearColor;
 
 
-	Startup::RendererInitInfo InitializeRenderer()
-	{
-		Startup::RendererInitInfo initInfo;
-		TimePoint startTimePoint = TimePoint::GetWorldTime();
-
+	void InitializeCoreGraphics()
+	{		
 		target = GetOpenGLInitWindow();
 		selectedVertexArray = &defaultVertexArray;
 
 		int val[4];
 		glGetIntegerv(GL_VIEWPORT, val);
 		viewportPos = { val[0], val[1] };
-		viewportSize = { val[2], val[3] };
-
-		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
-		return initInfo;
+		viewportSize = { val[2], val[3] };		
 	}
-	void TerminateRenderer()
+	void TerminateCoreGraphics()
 	{
 
 	}
 
-	namespace Renderer
+	namespace Graphics::Core
 	{
 
 		GLenum OpenGLRenderPrimitive(PrimitiveType type)
@@ -391,7 +384,7 @@ namespace Blaze
 			viewportPos = pos;
 			viewportSize = size;
 			glViewport(pos.x, pos.y, size.x, size.y);
-			viewportChangedDispatcher.Call({ pos, size });
+			engineData->viewportChangedDispatcher.Call({ pos, size });
 			Graphics::Graphics_ViewportChanged({ pos, size });
 		}
 		void SetPatchSize(uint size)

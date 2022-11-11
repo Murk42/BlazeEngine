@@ -11,14 +11,19 @@ namespace Blaze::UI
 	{		
 		if (text.CharacterCount() == 0 && !focused)
 		{
+			Logger::AddLog(BLAZE_INFO_LOG("Blaze Engine", "Text was set, center align"));
 			button.SetTextAlignment(Align::Center, Align::Center, Vec2f(0, 0));
 			button.SetText(emptyText);
 			button.SetTextColor(0x999999ff);
 		}
 		else
 		{
+			Logger::AddLog(BLAZE_INFO_LOG("Blaze Engine", "Text was set, left align"));
 			button.SetTextAlignment(Align::Left, Align::Left, Vec2f(5, 0));
-			button.SetText(text);
+			if (focused)
+				button.SetText(editingText);
+			else
+				button.SetText(text);
 			button.SetTextColor(0xffffffff);
 		}
 	}
@@ -53,13 +58,13 @@ namespace Blaze::UI
 		if (cursorPos == 0)
 			return;
 
-		StringUTF8 prefix = text.SubString(0, cursorPos - 1);
-		StringUTF8 sufix = text.SubString(cursorPos, text.CharacterCount() - cursorPos);		
+		StringUTF8 prefix = editingText.SubString(0, cursorPos - 1);
+		StringUTF8 sufix = editingText.SubString(cursorPos, editingText.CharacterCount() - cursorPos);
 		StringUTF8 newText = prefix + sufix;
 
 		if (validateTextFunction == nullptr || validateTextFunction(newText))
 		{
-			text = newText;
+			editingText = newText;
 			--cursorPos;
 			UpdateText();
 			UpdateCursor();
@@ -67,13 +72,13 @@ namespace Blaze::UI
 	}
 	void TextField::Insert(StringViewUTF8 x)
 	{
-		StringUTF8 prefix = text.SubString(0, cursorPos);
-		StringUTF8 sufix = text.SubString(cursorPos, text.CharacterCount() - cursorPos);		
+		StringUTF8 prefix = editingText.SubString(0, cursorPos);
+		StringUTF8 sufix = editingText.SubString(cursorPos, editingText.CharacterCount() - cursorPos);
 		StringUTF8 newText = prefix + x + sufix;
 
 		if (validateTextFunction == nullptr || validateTextFunction(newText))
 		{
-			text = newText;
+			editingText = newText;
 			
 			++cursorPos;
 			UpdateText();
@@ -83,18 +88,18 @@ namespace Blaze::UI
 	void TextField::MoveLeft()
 	{
 		cursorPos--;
-		cursorPos = std::clamp((int)cursorPos, 0, (int)text.CharacterCount());
+		cursorPos = std::clamp((int)cursorPos, 0, (int)editingText.CharacterCount());
 		UpdateCursor();
 	}
 	void TextField::MoveRight()
 	{
 		cursorPos++;
-		cursorPos = std::clamp((int)cursorPos, 0, (int)text.CharacterCount());
+		cursorPos = std::clamp((int)cursorPos, 0, (int)editingText.CharacterCount());
 		UpdateCursor();
 	}	
 
 	TextField::TextField()
-		: focused(false), emptyText(), cursorPos(0), EventHandler<Event::TextInput>()
+		: focused(false), emptyText(), cursorPos(0)
 	{
 		TieElement(&button);
 		TieElement(&cursor);
@@ -197,12 +202,12 @@ namespace Blaze::UI
 		cursor.cornerRadius = cursor.GetSize().x / 2;
 	}
 	void TextField::SetText(StringViewUTF8 newText)
-	{
+	{		
 		if (validateTextFunction == nullptr || validateTextFunction(newText))
 		{
 			text = newText;
-
-			UpdateText();			
+			if (!focused)
+				UpdateText();
 		}
 	}
 
@@ -219,6 +224,7 @@ namespace Blaze::UI
 		{
 			focused = true;
 			
+			editingText = text;
 			cursorPos = text.CharacterCount();
 
 			EventManager::AddEventHandler<Event::TextInput>(*this);			
@@ -243,7 +249,7 @@ namespace Blaze::UI
 			EventManager::RemoveEventHandler<Event::TextInput>(*this);
 
 			GetManager()->ReturnFocus();
-
+			
 			cursor.SetActiveFlag(false);
 
 			UpdateText();
@@ -278,10 +284,15 @@ namespace Blaze::UI
 			mp.x > p1.x && mp.x < p2.x&&
 			mp.y > p1.y && mp.y < p2.y;
 
-		if (el.focused && Input::GetKeyState(Key::Return).pressed || !inside && clickData.pressed)
+		if (el.focused && Input::GetKeyState(Key::Return).pressed || el.focused && !inside && clickData.pressed)
 		{
+			el.text = el.editingText;
 			el.ReturnFocus();
 		}
+		//if ()
+		//{			
+		//	el.ReturnFocus();
+		//}
 		if (el.focused)
 		{ 
 			if (Input::GetKeyState(Key::Home).pressed)
@@ -291,7 +302,7 @@ namespace Blaze::UI
 			}
 			if (Input::GetKeyState(Key::End).pressed)
 			{
-				el.cursorPos = el.text.CharacterCount();
+				el.cursorPos = el.editingText.CharacterCount();
 				el.UpdateCursor();
 			}
 
@@ -314,7 +325,7 @@ namespace Blaze::UI
 			if (backspace.down || backspace.pressed)
 				if (now - el.backspaceTime < 0.6f)
 				{
-					if (el.backspaceCount <= (now - el.backspaceTime) / 0.2f && el.text.CharacterCount() != 0)
+					if (el.backspaceCount <= (now - el.backspaceTime) / 0.2f && el.editingText.CharacterCount() != 0)
 					{
 						el.backspaceCount++;
 						el.Erase();
@@ -322,7 +333,7 @@ namespace Blaze::UI
 				}
 				else
 				{
-					if (el.backspaceCount - 3 < (now - el.backspaceTime - 0.6f) / 0.05f && el.text.CharacterCount() != 0)
+					if (el.backspaceCount - 3 < (now - el.backspaceTime - 0.6f) / 0.05f && el.editingText.CharacterCount() != 0)
 					{
 						el.backspaceCount++;
 						el.Erase();

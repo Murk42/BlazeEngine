@@ -7,4 +7,5 @@ namespace ElementPropertiesMenu
 	void SelectElement(UI::UIElement* el);
 
 	void Setup();
+	void Update();
 }

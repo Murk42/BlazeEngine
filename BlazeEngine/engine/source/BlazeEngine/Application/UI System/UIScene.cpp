@@ -1,6 +1,6 @@
 #include "BlazeEngine/Application/UI System/UIScene.h"
 #include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/Core/MemoryManager.h"
+#include "BlazeEngine/Memory/MemoryManager.h"
 
 #include "BlazeEngine/Application/UI System/Core Elements/Button.h"
 #include "BlazeEngine/Application/UI System/Core Elements/Image.h"
@@ -107,12 +107,14 @@ namespace Blaze::UI
 			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
 				"BlazeEngine", "Trying to destroy a element from a scene that it doesnt belong to"));
 
+		size_t typeIndex = element->typeIndex;
+
 		if (Result r = manager->RemoveElement(element)) return r;
 		
 		elements.erase(std::find(elements.begin(), elements.end(), element));
 		nameToElementMap.erase(element->name);
 		
-		manager->GetElementTypeRegistry().GetElementTypeData(element->typeIndex).destruct(element);
+		manager->GetElementTypeRegistry().GetElementTypeData(typeIndex).destruct(element);
 		Memory::Free(element);
 		
 		return Result();

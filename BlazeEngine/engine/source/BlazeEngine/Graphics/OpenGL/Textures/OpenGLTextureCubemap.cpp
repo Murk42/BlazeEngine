@@ -4,7 +4,7 @@
 
 #include <GL/glew.h>
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::OpenGL
 {
@@ -57,7 +57,7 @@ namespace Blaze::OpenGL
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
 		
-		Renderer::SelectTexture(this);		
+		Graphics::Core::SelectTexture(this);		
 
 		switch (fileType)
 		{
@@ -177,7 +177,7 @@ namespace Blaze::OpenGL
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
 
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		glTexImage2D((GLenum)face, 0, format, size, size, 0, format, type, bm.GetPixels());
 	}		
 

@@ -69,15 +69,13 @@ namespace Blaze
 		{
 			return "(" + Convert(vec.x) + ", " + Convert(vec.y) + ", " + Convert(vec.z) + ", " + Convert(vec.w) + ")";
 		}
-
-		template<typename T>
-		static bool ConvertTo(const StringView&, T&);
-		template<> static bool ConvertTo<uint32>(const StringView&, uint32&);
-		template<> static bool ConvertTo<int32 >(const StringView&, int32&);
-		template<> static bool ConvertTo<uint64>(const StringView&, uint64&);
-		template<> static bool ConvertTo<int64 >(const StringView&, int64&);
-		template<> static bool ConvertTo<float >(const StringView&, float&);
-		template<> static bool ConvertTo<double>(const StringView&, double&);
+		
+		static bool ConvertTo(const StringView&, uint32&);
+		static bool ConvertTo(const StringView&, int32&);
+		static bool ConvertTo(const StringView&, uint64&);
+		static bool ConvertTo(const StringView&, int64&);
+		static bool ConvertTo(const StringView&, float&);
+		static bool ConvertTo(const StringView&, double&);
 
 		friend BLAZE_API String operator+(const StringView& left, const StringView& right);
 		friend BLAZE_API String operator+(const StringView& left, const char& right);

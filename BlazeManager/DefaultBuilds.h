@@ -8,21 +8,29 @@ struct ClientLibraryInfo
 	std::vector<std::string> additionalDynamicLibraries;
 };
 
-struct ClientBuildSettings
+struct EngineBuildSettings
 {
 	std::string projectPath;
 	std::string outputDir;
 };
+
+struct ClientBuildSettings
+{
+	std::string projectPath;
+	std::string outputDir;
+	std::string enginePathLIB;	
+};
 struct RuntimeBuildSettings
 {
-	std::string clientOutputDir;
+	std::string projectPath;
 	std::string outputDir;
-	
+
+	std::string clientOutputDir;	
 	ClientLibraryInfo clientLibraryInfo;
 };
 
 Result LoadClientLibraryInfo(const string& path, bool log, ClientLibraryInfo& info);
 
-bool BuildBlaze(Configuration configuration, Platform platform);
+bool BuildBlaze(Configuration configuration, Platform platform, EngineBuildSettings settings);
 bool BuildClient(Configuration configuration, Platform platform, ClientBuildSettings settings);
 bool BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSettings settings);

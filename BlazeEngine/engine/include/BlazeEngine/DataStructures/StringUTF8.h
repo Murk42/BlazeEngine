@@ -1,4 +1,4 @@
-#pragma once
+		#pragma once
 #include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/Vector.h"
@@ -98,15 +98,13 @@ namespace Blaze
 		{
 			return "(" + Convert(vec.x) + ", " + Convert(vec.y) + ", " + Convert(vec.z) + ", " + Convert(vec.w) + ")";
 		}
-
-		template<typename T>
-		static bool ConvertTo(const StringViewUTF8&, T&);
-		template<> static bool ConvertTo<uint32>(const StringViewUTF8&, uint32&);
-		template<> static bool ConvertTo<int32 >(const StringViewUTF8&, int32&);
-		template<> static bool ConvertTo<uint64>(const StringViewUTF8&, uint64&);
-		template<> static bool ConvertTo<int64 >(const StringViewUTF8&, int64&);
-		template<> static bool ConvertTo<float >(const StringViewUTF8&, float&);
-		template<> static bool ConvertTo<double>(const StringViewUTF8&, double&);
+		
+		static bool ConvertTo(const StringViewUTF8&, uint32&);
+		static bool ConvertTo(const StringViewUTF8&, int32&);
+		static bool ConvertTo(const StringViewUTF8&, uint64&);
+		static bool ConvertTo(const StringViewUTF8&, int64&);
+		static bool ConvertTo(const StringViewUTF8&, float&);
+		static bool ConvertTo(const StringViewUTF8&, double&);
 
 		friend BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);				
 	};	

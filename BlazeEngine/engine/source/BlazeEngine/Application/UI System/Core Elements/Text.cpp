@@ -1,5 +1,5 @@
 #include "BlazeEngine/Application/UI System/Core Elements/Text.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Math/Math.h"
 #include "BlazeEngine/Application/UI System/UIScene.h"
 
@@ -155,7 +155,7 @@ namespace Blaze
 			auto* program = SelectProgram(text.fontResolution->GetRenderType());
 			auto* fontResolution = text.fontResolution;
 
-			Renderer::SelectProgram(program);
+			Graphics::Core::SelectProgram(program);
 
 			if (!text.IsActive() || text.text.BufferSize() == 0)
 				return;
@@ -163,16 +163,16 @@ namespace Blaze
 			Vec2f alignedPos = text.GetViewportPos();			
 			Rectf clipRect = text.GetClipRect();
 
-			Renderer::SelectVertexArray(&text.va);
-			Renderer::SetActiveTextureSlot(0);
-			Renderer::SelectTexture(&fontResolution->GetAtlas());
+			Graphics::Core::SelectVertexArray(&text.va);
+			Graphics::Core::SetActiveTextureSlot(0);
+			Graphics::Core::SelectTexture(&fontResolution->GetAtlas());
 			program->SetUniform(0, Math::TranslationMatrix<float>(Vec3f(alignedPos, text.GetDepth())));
 			program->SetUniform(1, GetManager()->GetProjectionMatrix());
 			program->SetUniform(2, 0);
 			program->SetUniform(3, (Vec4f)text.color);
 			program->SetUniform(4, Vec4f(clipRect.pos, clipRect.size));
 
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, text.vertices.size());
+			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, text.vertices.size());
 		}
 
 		void TextManager::Update(UIElement* element)

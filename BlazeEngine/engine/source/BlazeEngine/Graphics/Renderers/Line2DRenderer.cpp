@@ -1,5 +1,5 @@
 #include "BlazeEngine/Graphics/Renderers/Line2DRenderer.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Console/Console.h"
 
 namespace Blaze::Graphics
@@ -195,17 +195,17 @@ namespace Blaze::Graphics
 		else
 		{
 			vb.ChangeData(BufferView(&vertex, sizeof(Vertex)), 0);
-			Renderer::SelectVertexArray(&va);
-			Renderer::SelectProgram(&program);
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, 1);
+			Graphics::Core::SelectVertexArray(&va);
+			Graphics::Core::SelectProgram(&program);
+			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, 1);
 		}
 	}
 	void Line2DRenderer::Flush()
 	{
 		vb.ChangeData(BufferView(cache, sizeof(Vertex) * batchOffset), 0);
-		Renderer::SelectVertexArray(&va);
-		Renderer::SelectProgram(&program);
-		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, batchOffset);
+		Graphics::Core::SelectVertexArray(&va);
+		Graphics::Core::SelectProgram(&program);
+		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, batchOffset);
 		batchOffset = 0;
 	}
 }

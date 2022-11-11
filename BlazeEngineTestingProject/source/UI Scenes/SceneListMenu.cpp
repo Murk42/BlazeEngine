@@ -9,8 +9,9 @@ namespace SceneListMenu
 	UI::TextButton* newElementButton;
 	UI::Panel* panel;
 	UI::List* list;
-	
-	std::vector<UI::UIScene*> scenes;
+		
+	std::vector<UI::UIScene*> scenes;	
+
 	int selected = -1;
 	
 	UI::UIScene* GetSelectedScene()
@@ -39,7 +40,7 @@ namespace SceneListMenu
 		scenes.emplace_back(scene);
 		uint index = scenes.size() - 1;
 
-		UI::TextButton* elementText = mainScene->CreateElement<UI::TextButton>(list->GetLayerName()).value;
+		UI::TextButton* elementText = globals->mainScene->CreateElement<UI::TextButton>(list->GetLayerName()).value;
 
 		String name = scene->GetName();
 		if (name.Size() == 0)
@@ -76,9 +77,10 @@ namespace SceneListMenu
 	}
 
 	void Setup()
-	{
+	{		
+
 		const char* layer = "SceneListMenu_main";
-		uiManager.CreateLayer(layer);
+		globals->uiManager.CreateLayer(layer);
 
 		CREATE_ELEMENT(newSceneButton, "main");
 		CREATE_ELEMENT(newElementButton, "main");
@@ -100,7 +102,7 @@ namespace SceneListMenu
 		panel->UIElement::SetProperties({
 			.pos = Vec2f(15, -50), .size = Vec2f(300, 500), .localAlign = Align::TopLeft, .anchorAlign = Align::TopLeft
 			});
-		panel->SetProperties(menuPanelProperties);		
+		panel->SetProperties(GetMenuPanelProperties());		
 
 		list->UIElement::SetProperties({ .name = (String)"scenesList", .pos = Vec2f(5, -5), .anchor = panel, .localAlign = Align::TopLeft, .anchorAlign = Align::TopLeft });
 		list->SetProperties( { .elementsOffset = 2 });

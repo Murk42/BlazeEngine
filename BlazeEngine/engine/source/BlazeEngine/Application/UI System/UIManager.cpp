@@ -1,8 +1,8 @@
 #include "BlazeEngine/Application/UI System/UIManager.h"
 #include "BlazeEngine/Input/Input.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Math/Math.h"
-#include "BlazeEngine/Core/MemoryManager.h"
+#include "BlazeEngine/Memory/MemoryManager.h"
 #include "BlazeEngine/Math/Random.h"
 #include "BlazeEngine/Application/UI System/UIElement.h"
 
@@ -86,13 +86,13 @@ namespace Blaze::UI
 	void UIManager::CleanElement(UIElement* element)
 	{
 		if (element->updateState == updateState)
-			return;		
+			return;
 			
 		if (element->anchor != nullptr)
 		{
 			CleanElement(element->anchor);
 			element->flags.set(1, element->anchor->IsActive());
-		}
+ 		}
 		else
 			element->flags.set(1, true);
 
@@ -106,6 +106,7 @@ namespace Blaze::UI
 
 		for (auto tied : element->tiedElements)
 			CleanElement(tied);
+
 	}
 
 	Result UIManager::SetupElementManagers()
@@ -128,7 +129,7 @@ namespace Blaze::UI
 	UIManager::UIManager()
 		: managers(nullptr), typeCount(0), updateState(0), focusedElement(nullptr), blockingElement(nullptr)
 	{
-		SetViewport(Vec2i(), Renderer::GetViewportSize());
+		SetViewport(Vec2i(), Graphics::Core::GetViewportSize());
 	}
 	UIManager::~UIManager()
 	{
@@ -223,8 +224,8 @@ namespace Blaze::UI
 
 		for (auto el : ptr->tiedElements)
 		{
-			el->manager = nullptr;
 			el->DetachedFromManager();
+			el->manager = nullptr;
 		}
 
 		ptr->DetachedFromManager();
@@ -331,7 +332,7 @@ namespace Blaze::UI
 	Result UIManager::Update()
 	{
 		Vec2i mp = Input::GetMousePos() - viewport.pos;
-		bool focused = Input::GetFocusedWindow() != nullptr;
+		bool focused = Input::GetFocusedWindow() != nullptr;		
 
 		++updateState;
 		blockingElement = nullptr;
@@ -361,7 +362,7 @@ namespace Blaze::UI
 					mp.y >= pos.y && mp.y < pos.y + size.y)
 					blockingElement = element;
 
-			}
+			}		
 
 		std::queue<const UIEvent*> oldQueue;
 		eventQueue.swap(oldQueue);
@@ -373,6 +374,15 @@ namespace Blaze::UI
 
 			oldQueue.pop();
 		}
+
+		++updateState;
+		for (auto it = layers.rbegin(); it != layers.rend(); ++it)
+			for (auto elIT = it->elements.rbegin(); elIT != it->elements.rend(); ++elIT)
+			{
+				auto element = *elIT;
+
+				CleanElement(element);
+			}
 
 		return Result();
 	}
@@ -436,7 +446,7 @@ namespace Blaze::UI
 	void UIManager::SetViewport(Vec2i pos, Vec2i size)
 	{
 		viewport = { pos, size };
-		Vec2f screenVP = (Vec2f)Renderer::GetViewportSize();
+		Vec2f screenVP = (Vec2f)Graphics::Core::GetViewportSize();
 		vp2d = Math::OrthographicMatrix<float>(0, screenVP.x, 0, screenVP.y, -1000, 1000) * 
 			Math::ScalingMatrix(Vec3f(1, 1, 1))* Math::TranslationMatrix(Vec3f(pos.x, pos.y, 0));
 		//vp2d = Math::OrthographicMatrix<float>(+pos.x, +pos.x + size.x, +pos.y, +pos.y + size.y, -1000, 1000);

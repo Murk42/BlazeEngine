@@ -1,17 +1,17 @@
 #include "BlazeEngine/Core/Window.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
+#include "source/BlazeEngine/Internal/EngineData.h"
 
 #include <SDL/SDL.h>
 
 namespace Blaze
 {				
-	void* GetOpenGLInitWindow();
-	static std::vector<Window*> allWindows;
+	void* GetOpenGLInitWindow();	
 	static bool firstWindowCreated = false;
 
 	const std::vector<Window*>& GetAllWindows()
 	{
-		return allWindows;
+		return engineData->allWindows;
 	}
 
 	bool WasFirstWindowCreated()
@@ -35,26 +35,26 @@ namespace Blaze
 
 	Window::Window()
 	{
-		allWindows.emplace_back(this);				
+		engineData->allWindows.emplace_back(this);
 		ptr = CreateWindow("Blaze Engine Application", { 640, 360 });
 	}
 	Window::Window(StringView title)
 	{
-		allWindows.emplace_back(this);
+		engineData->allWindows.emplace_back(this);
 		ptr = CreateWindow(title, { 640, 360 });
 	}
 	Window::Window(StringView title, Vec2i size)
 	{
-		allWindows.emplace_back(this);
+		engineData->allWindows.emplace_back(this);
 		ptr = CreateWindow(title, size);
 	}
 
 	Window::~Window()
 	{
-		auto i = std::find(allWindows.begin(), allWindows.end(), this);
+		auto i = std::find(engineData->allWindows.begin(), engineData->allWindows.end(), this);
 
-		if (i != allWindows.end())
-			allWindows.erase(i);
+		if (i != engineData->allWindows.end())
+			engineData->allWindows.erase(i);
 
 		SDL_DestroyWindow((SDL_Window*)ptr);
 	}

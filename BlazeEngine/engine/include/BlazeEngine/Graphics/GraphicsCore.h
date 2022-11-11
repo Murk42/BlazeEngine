@@ -6,7 +6,7 @@
 
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
 
-#include "RendererEnums.h"
+#include "GraphicsEnums.h"
 
 namespace Blaze
 {		
@@ -19,7 +19,7 @@ namespace Blaze
 		uint refreshRate;
 	};
 
-	namespace Renderer
+	namespace Graphics::Core
 	{		
 		BLAZE_API uint GetVideoDisplayCount();
 

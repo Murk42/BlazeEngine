@@ -23,8 +23,11 @@ namespace Blaze
 {
 	namespace Graphics
 	{
+		namespace Core
+		{
 #ifdef BLAZE_GRAPHICS_OPENGL
-		namespace Core = Blaze::OpenGL;
+			using namespace Blaze::OpenGL;
 #endif
+		}
 	}
 }

@@ -1,5 +1,5 @@
 #include "BlazeEngine/Graphics/Renderers/Point2DRenderer.h"
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::Graphics
 {
@@ -161,16 +161,16 @@ namespace Blaze::Graphics
 		else
 		{
 			vb.ChangeData(BufferView(&vertex, sizeof(PointVertex)), 0);
-			Renderer::SelectVertexArray(&va);
-			Renderer::SelectProgram(&program);
-			Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, 1);
+			Graphics::Core::SelectVertexArray(&va);
+			Graphics::Core::SelectProgram(&program);
+			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, 1);
 		}
 	}
 	void Point2DRenderer::Flush()
 	{
 		vb.ChangeData(BufferView(cache, sizeof(PointVertex) * batchSize), 0);
-		Renderer::SelectVertexArray(&va);
-		Renderer::SelectProgram(&program);
-		Renderer::RenderPrimitiveArray(Renderer::PrimitiveType::Points, 0, 1);
+		Graphics::Core::SelectVertexArray(&va);
+		Graphics::Core::SelectProgram(&program);
+		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, 1);
 	}
 }

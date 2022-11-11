@@ -6,7 +6,7 @@
 #include "GL/glew.h"
 #include "IL/il.h"
 
-#include "BlazeEngine/Graphics/Renderer.h"
+#include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::OpenGL
 {
@@ -38,14 +38,14 @@ namespace Blaze::OpenGL
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
 		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);
 
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		if (settings.mipmaps)
 			glGenerateMipmap(GL_TEXTURE_2D);
 	}		
 	void Texture1D::Create(size_t size, TextureInternalPixelFormat internalFormat)
 	{
 		this->size = size;		
-		Renderer::SelectTexture(this);				
+		Graphics::Core::SelectTexture(this);				
 		glTexImage1D(GL_TEXTURE_1D, 0, OpenGLInternalPixelFormat(internalFormat), size, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}	
 
@@ -63,7 +63,7 @@ namespace Blaze::OpenGL
 
 	void Texture1D::GenerateMipmaps()
 	{
-		Renderer::SelectTexture(this);
+		Graphics::Core::SelectTexture(this);
 		glGenerateMipmap(GL_TEXTURE_1D);
 	}
 
