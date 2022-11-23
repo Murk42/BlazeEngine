@@ -1,5 +1,3 @@
-#include "BlazeEngine/BlazeEngine.h"
-using namespace Blaze;
 
 int CalculateFPS()
 {

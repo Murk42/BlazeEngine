@@ -39,8 +39,8 @@ namespace Blaze::Graphics
 		void SetProjectionMatrix(Mat4f mat);
 		void SetFontResolution(FontResolution* fontResolution);
 		
-		Result Write(const StringViewUTF8& text, Vec2f pos, ColorRGBAf color, float size);
-		Result Write(const StringViewUTF8& text, Vec2f pos, ColorRGBAf color, float size, BaseTextVertexGenerator& generator);
+		Result Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color);
+		Result Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color, BaseTextVertexGenerator& generator);
 		Result Write(TextRenderCache&, Vec2f pos, float size, ColorRGBAf color);
 
 		inline Core::ShaderProgram& GetShaderProgram() { return program; };

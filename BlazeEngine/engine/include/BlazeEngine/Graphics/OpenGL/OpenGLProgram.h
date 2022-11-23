@@ -20,11 +20,17 @@ namespace Blaze
 			Vec4 = 35666,
 			Vec3 = 35665,
 			Vec2 = 35664,
-			Sampler2D = 35678,			
+			Sampler2D = 35678,
+		};
+		enum class ShaderProgramState
+		{
+			Invalid,
+			Valid,
 		};
 
 		class BLAZE_API ShaderProgram
 		{
+			ShaderProgramState state;
 			uint id;
 			uint maxUniformNameLenght;
 			uint maxUniformBlockNameLenght;
@@ -40,22 +46,7 @@ namespace Blaze
 			Result LinkProgram();
 			String GetLinkingLog();
 					
-			Result LinkShaders(const std::initializer_list<Shader*>& shaders)
-			{
-				for (auto& s : shaders)
-					AttachShader(*s);
-
-				if (Result result = LinkProgram())
-				{
-					return Result(result, Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-						"Blaze Engine", GetLinkingLog()), true);
-				}
-
-				for (auto& s : shaders)
-					DetachShader(*s);
-
-				return Result();
-			}
+			Result LinkShaders(const std::initializer_list<Shader*>& shaders);
 
 			uint GetUniformCount() const;	
 			int GetUniformLocation(const StringView& name);
@@ -79,6 +70,7 @@ namespace Blaze
 			void SetUniform(int location, const Mat4f& value);
 
 			uint GetHandle() const { return id; }
+			ShaderProgramState GetState() const { return state; }
 
 			ShaderProgram& operator=(const ShaderProgram&) = delete;
 			ShaderProgram& operator=(ShaderProgram&&) noexcept;			

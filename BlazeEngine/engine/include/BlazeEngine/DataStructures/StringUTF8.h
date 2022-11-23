@@ -25,6 +25,7 @@ namespace Blaze
 			Iterator(const Iterator&);
 
 			UnicodeChar ToUnicode() const;
+			const void* Ptr() const;
 
 			Iterator operator++();
 			Iterator operator--();
@@ -47,7 +48,7 @@ namespace Blaze
 		StringUTF8(const StringUTF8& s);
 		StringUTF8(StringUTF8&& s) noexcept;
 				
-		StringUTF8(void* buffer, size_t bufferSize);
+		StringUTF8(const void* buffer, size_t bufferSize);
 		StringUTF8(const char* ptr);
 		StringUTF8(const char* ptr, size_t size);
 		StringUTF8(const StringViewUTF8&);

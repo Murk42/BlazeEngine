@@ -50,7 +50,10 @@ namespace Blaze
 			count += (*(ptr++) == ch);
 		return count;
 	}
-
+	StringView StringView::SubString(size_t start, size_t count)
+	{
+		return StringView(ptr + start, count);
+	}
 	StringView& StringView::operator=(const StringView& sv)
 	{
 		ptr = sv.ptr;

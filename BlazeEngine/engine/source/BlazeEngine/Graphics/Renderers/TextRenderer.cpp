@@ -187,6 +187,16 @@ namespace Blaze::Graphics
 
 	void TextRenderer::SetFontResolution(Blaze::FontResolution* resolution)
 	{
+		if (resolution == nullptr)
+		{
+			fontResolution = nullptr;
+
+			if (program.GetState() == Core::ShaderProgramState::Valid)
+				program = std::move(Core::ShaderProgram());
+
+			return;
+		}
+
 		int programIndex = GetRenderTypeProgramIndex(resolution->GetRenderType());
 		if (
 			fontResolution == nullptr ||
@@ -197,33 +207,36 @@ namespace Blaze::Graphics
 			Core::GeometryShader geom; geom.ShaderSource(geomSource); geom.CompileShader();
 			Core::FragmentShader frag; frag.ShaderSource(fragSource[programIndex]); frag.CompileShader();
 
+			if (program.GetState() == Core::ShaderProgramState::Valid)
+				program = std::move(Core::ShaderProgram());
+
 			program.LinkShaders({ &vert, &geom, &frag });
 		}
 
 		fontResolution = resolution;
 	}	
 
-	Result TextRenderer::Write(const StringViewUTF8& text, Vec2f pos, ColorRGBAf color, float size)
+	Result TextRenderer::Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color)
 	{
 		DefaultTextVertexGenerator generator;
-		return Write(text, pos, color, size, generator);
+		return Write(text, pos, size, color, generator);
 	}
-	Result TextRenderer::Write(const StringViewUTF8& text, Vec2f pos, ColorRGBAf color, float size, BaseTextVertexGenerator& generator)
+	Result TextRenderer::Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color, BaseTextVertexGenerator& generator)
 	{
 		if (fontResolution == nullptr)
 			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
 				"No font resolution set"));
-
+		
 		generator.Setup(text, fontResolution);
-
+		
 		Vertex* vertices = new Vertex[generator.GetMaxVertexCount()];
 		Vertex* it = vertices;
 		float advance;
-
+		
 		while (!generator.IsEnd())
 			if (generator.GenerateVertex(it->p1, it->p2, it->uv1, it->uv2, advance))
 				++it;
-
+		
 		uint vertexCount = it - vertices;
 
 		vb.AllocateDynamicStorage(
@@ -232,7 +245,7 @@ namespace Blaze::Graphics
 		);
 
 		delete[] vertices;
-
+		
 		float scale = size / fontResolution->GetResolution();
 
 		Graphics::Core::SelectProgram(&program);
@@ -243,7 +256,7 @@ namespace Blaze::Graphics
 		program.SetUniform(1, Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0)) * Math::ScalingMatrix(Vec3f(scale, scale, 1)));
 		program.SetUniform(2, 0);
 		program.SetUniform(3, (Vec4f)color);
-		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, vertexCount);
+		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, vertexCount);		
 
 		return Result();
 	}

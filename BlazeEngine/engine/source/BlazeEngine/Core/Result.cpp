@@ -60,6 +60,14 @@ namespace Blaze
 		type = LogType::Info;
 		failed = false;
 	}
+
+	String Result::FormatString() const
+	{
+		String text;		
+		for (auto l : logs)
+			text += l.FormatString() + "\n";
+		return text;
+	}
 	
 	Result& Result::operator=(Result&& result) noexcept
 	{

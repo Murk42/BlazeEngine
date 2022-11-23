@@ -26,6 +26,8 @@ namespace Blaze
 		std::vector<Log> GetLogs() const { return logs; }
 		void Clear();
 
+		String FormatString() const;
+
 		operator bool() const { return failed; }
 
 		Result& operator=(const Result&) = delete;

@@ -7,39 +7,22 @@ namespace Blaze::UI
 #define ANCHOR_ACTIVE 1
 #define SOLID 2
 
-	//Result UIElement::TieElement(UIElement* element, uint typeIndex)
-	//{		
-	//	if (manager == nullptr)	
-	//		return BLAZE_ERROR_LOG("BlazeEngine", "No element type registry set");
-	//
-	//	element->flags.set(MANUAL, true);
-	//
-	//	element->manager = manager;
-	//	element->layer = "";
-	//	element->typeIndex = typeIndex;
-	//
-	//	manager->elements.emplace_back(element);
-	//
-	//	element->AttachedToManager();
-	//	tiedElements.emplace_back(element);
-	//}
-	//Result UIElement::UntieElement(UIElement* element)
-	//{
-	//	element->DetachedFromManager();
-	//
-	//	if (element == manager->focusedElement)
-	//		manager->focusedElement = nullptr;
-	//	
-	//	tiedElements.erase(std::find(tiedElements.begin(), tiedElements.end(), element));
-	//
-	//	manager->elements.erase(std::find(manager->elements.begin(), manager->elements.end(), element));
-	//
-	//	element->layer = "";
-	//	element->manager = nullptr;
-	//	element->flags.set(MANUAL, false);
-	//}	
+#define NAME_TRIGGER			0
+#define POS_TRIGGER				1
+#define SIZE_TRIGGER			2
+#define ANCHOR_TRIGGER			3
+#define LOCAL_ALIGN_TRIGGER		4
+#define ANCHOR_ALIGN_TRIGGER	5
+#define ACTIVE_FLAG_TRIGGER		6
+#define SOLID_FLAG_TRIGGER		7
+#define VIEWPORT_POS_TRIGGER	8
+#define LAYER_TRIGGER			9
+
+#define TRIGGER(x) if (triggers[x]) triggers[x]();
+
 	Result UIElement::TieElement(UIElement* element)
-	{		
+	{
+		sizeof(UIElement);
 		element->manager = manager;
 		element->layer = "";
 		element->typeIndex = -1;
@@ -73,7 +56,7 @@ namespace Blaze::UI
 	UIElement::UIElement()
 		: updateState(0), layer(), manager(nullptr), scene(nullptr), flags(0b01111), typeIndex(-1), clipRect(0, 0, NAN, NAN),
 		name(), pos(), size(100, 100), anchor(nullptr), localAlignment(Align::Center), anchorAlignment(Align::Center),
-		depth(0.0f), clipElement(nullptr), tiedParent(nullptr)
+		depth(0.0f), clipElement(nullptr), tiedParent(nullptr), triggers({ })
 	{
 		SetProperties({ });
 	}
@@ -100,11 +83,14 @@ namespace Blaze::UI
 		layer = layerIT->name;
 		layerIT->elements.emplace_back(this);
 
+		TRIGGER(LAYER_TRIGGER);
+
 		return { };
 	}
 
 	void UIElement::SetName(String newName)
 	{
+		sizeof(UIElement);
 		if (scene != nullptr)
 		{
 			String oldName = std::move(name);
@@ -117,10 +103,12 @@ namespace Blaze::UI
 		}
 		else
 			name = newName;
+
+		TRIGGER(NAME_TRIGGER);
 	}
 	void UIElement::SetPos(Vec2f pos)
-	{
-		this->pos = pos;
+	{		
+;		this->pos = pos;
 		updateState = 0;
 	}
 

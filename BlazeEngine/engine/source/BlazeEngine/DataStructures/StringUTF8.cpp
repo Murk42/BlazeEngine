@@ -25,6 +25,10 @@ namespace Blaze
 	{		
  		return UnicodeChar((const char*)ptr);
 	}
+	const void* StringUTF8::Iterator::Ptr() const
+	{
+		return ptr;
+	}
 	StringUTF8::Iterator StringUTF8::Iterator::operator++()
 	{
 		Iterator old = *this;
@@ -132,7 +136,7 @@ namespace Blaze
 		s.characterCount = 0;
 	}
 
-	StringUTF8::StringUTF8(void* buffer, size_t bufferSize)
+	StringUTF8::StringUTF8(const void* buffer, size_t bufferSize)
 		: buffer(nullptr), bufferSize(bufferSize + 1), characterCount(0)
 	{
 		if (bufferSize == 0 || buffer == nullptr)
@@ -278,7 +282,7 @@ namespace Blaze
 
 			buffer = Memory::Allocate(newBufferSize);
 			memcpy(buffer, old, newBufferSize - 1);
-			delete[] old;
+			Memory::Free(old);
 			bufferSize = newBufferSize;
 			characterCount = newCharacterCount;
 			*((char*)buffer + bufferSize - 1) = '\0';
@@ -290,7 +294,7 @@ namespace Blaze
 			memcpy(buffer, old, newBufferSize - 1);
 			for (int i = 0; i < newCharacterCount - charCount; ++i)
 				fill.ToUTF8((char*)buffer + bufferSize - 1 + i * fillSize);
-			delete[] old;
+			Memory::Free(old);
 			bufferSize = newBufferSize;
 			characterCount = newCharacterCount;
 			*((char*)buffer + bufferSize - 1) = '\0';
@@ -337,6 +341,7 @@ namespace Blaze
 
 	StringUTF8& StringUTF8::operator=(StringUTF8&& s) noexcept
 	{
+		Memory::Free(buffer);
 		bufferSize = s.bufferSize;
 		characterCount = s.characterCount;
 		buffer = s.buffer;
@@ -348,9 +353,11 @@ namespace Blaze
 
 	StringUTF8& StringUTF8::operator=(const StringView& s) noexcept
 	{
+		Memory::Free(buffer);
+
 		if (s.Ptr() != nullptr)
 		{
-			bufferSize = s.Size();
+			bufferSize = s.Size() + 1;
 			characterCount = s.Size();
 			buffer = Memory::Allocate(bufferSize);
 			memcpy(buffer, s.Ptr(), bufferSize);
@@ -366,9 +373,11 @@ namespace Blaze
 
 	StringUTF8& StringUTF8::operator=(const String& s) noexcept
 	{
+		Memory::Free(buffer);
+
 		if (s.Ptr() != nullptr)
 		{
-			bufferSize = s.Size();
+			bufferSize = s.Size() + 1;
 			characterCount = s.Size();
 			buffer = Memory::Allocate(bufferSize);
 			memcpy(buffer, s.Ptr(), bufferSize);

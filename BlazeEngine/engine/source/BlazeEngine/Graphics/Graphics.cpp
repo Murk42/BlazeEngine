@@ -82,6 +82,7 @@ namespace Blaze
 		graphicsData->defaultFontResolution = graphicsData->defaultFont.CreateFontResolution(32, FontResolutionRenderType::SDF);
 		graphicsData->defaultFontResolution->LoadCharacters(0, 127);
 		graphicsData->defaultFontResolution->CreateAtlas();
+		graphicsData->textRenderer.SetFontResolution(graphicsData->defaultFontResolution);
 
 		{
 			const char* vSource =
@@ -115,7 +116,7 @@ namespace Blaze
 			VertexShader vs; vs.ShaderSource(vSource); vs.CompileShader();
 			FragmentShader fs; fs.ShaderSource(fSource); fs.CompileShader();
 			graphicsData->drawTexShaderProgram.LinkShaders({ &vs, &fs });
-
+			
 			graphicsData->drawTexVA.EnableVertexAttribute(0);
 			graphicsData->drawTexVA.EnableVertexAttribute(1);
 			graphicsData->drawTexVA.SetVertexAttributeFormat(0, VertexAttributeType::Float, 3, false, 0);
@@ -123,8 +124,6 @@ namespace Blaze
 			graphicsData->drawTexVA.SetVertexAttributeBuffer(0, &graphicsData->drawTexVB, 5 * sizeof(float), 0);
 			graphicsData->drawTexVA.SetVertexAttributeBuffer(1, &graphicsData->drawTexVB, 5 * sizeof(float), 0);
 		}
-
-		graphicsData->textRenderer.SetFontResolution(graphicsData->defaultFontResolution);
 
 		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
 		return initInfo;
@@ -209,7 +208,7 @@ namespace Blaze
 		}
 		void Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color)
 		{
-			graphicsData->textRenderer.Write(text, pos, color, size);
+			graphicsData->textRenderer.Write(text, pos, size, color);
 		}
 		void Write(TextRenderCache& data, Vec2f pos, float size, ColorRGBAf color)
 		{

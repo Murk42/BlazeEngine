@@ -3,3 +3,4 @@
 #include "BlazeEngine/Utilities/Thread.h"
 #include "BlazeEngine/Utilities/Threading.h"
 #include "BlazeEngine/Utilities/Time.h"
+#include "BlazeEngine/Utilities/StringParsing.h"

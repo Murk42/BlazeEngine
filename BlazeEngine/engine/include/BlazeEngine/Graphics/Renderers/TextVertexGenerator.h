@@ -15,7 +15,7 @@ namespace Blaze::Graphics
 	};
 
 	class BLAZE_API DefaultTextVertexGenerator : public BaseTextVertexGenerator
-	{
+	{	
 		FontResolution* fontResolution;
 		StringUTF8 text;		
 
@@ -24,6 +24,8 @@ namespace Blaze::Graphics
 
 		UnicodeChar prev;
 		bool first;
+
+		size_t wrapWidth;
 	public:
 		DefaultTextVertexGenerator();
 
@@ -31,8 +33,10 @@ namespace Blaze::Graphics
 		bool GenerateVertex(Vec2f& p1, Vec2f& p2, Vec2f& uv1, Vec2f& uv2, float& next) override;
 		bool IsEnd() const override;
 
-		uint GetMaxVertexCount() const override;		
+		uint GetMaxVertexCount() const override;
+
+		void SetWrapWidth(size_t width);
 
 		inline UnicodeChar GetCurrentCharacter() const { return it.ToUnicode(); }
-	};
+	};	
 }

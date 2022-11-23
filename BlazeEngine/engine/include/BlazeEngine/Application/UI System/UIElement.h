@@ -111,21 +111,22 @@ namespace Blaze
 			UIElementProperty<UIElement*> clipElement;
 		};
 
+		using TriggerFunction = std::function<void()>;
+
 		class BLAZE_API UIElement
 		{
 			uint typeIndex;
 			UIManager* manager;
+			StringView layer;
 			uint64 updateState;
 
 			UIScene* scene;
 			String name;
 
-			StringView layer;
-			
 			Vec2f viewportPos;
 			Vec2f pos;
 			Vec2f size;
-			
+
 			float depth;
 			std::bitset<16> flags;
 
@@ -138,21 +139,14 @@ namespace Blaze
 
 			Array<UIElement*> tiedElements;
 			UIElement* tiedParent;
+
+			std::array<std::function<void()>, 10> triggers;
 		protected:
 			virtual void AttachedToManager() { }
 			virtual void DetachedFromManager() { }
 
-			//template<typename T>
-			//Result TieElement(T& element)
-			//{
-			//	if (manager == nullptr)
-			//		return BLAZE_ERROR_LOG("BlazeEngine", "The element doesnt belong to a manager");
-			//
-			//	TieElement(&element, manager->GetElementTypeRegistry().GetElementTypeIndex<T>());
-			//}						
 			Result TieElement(UIElement* element);
 			Result UntieElement(UIElement* element);
-			//void UntieElement(UIElement* element);
 		public:
 			UIElement();
 			~UIElement();
@@ -160,43 +154,57 @@ namespace Blaze
 			UIEvent sizeChanged;
 
 			virtual Result ChangeLayer(StringView newLayer);
+			inline StringView GetLayerName() const { return layer; }
+			void SetLayerTrigger(const TriggerFunction& function);
 
 			virtual void SetName(String name);
-			virtual void SetPos(Vec2f pos);
-			virtual void SetSize(Vec2f size);
-
-			virtual void SetDepth(float depth);
-			virtual void SetLocalAlignment(Align align);
-			virtual void SetAnchorAlignment(Align align);
-			virtual void SetAnchor(UIElement* anchor);
-			virtual void SetActiveFlag(bool active);
-			virtual void SetSolidFlag(bool solid);
-			virtual void SetClipElement(UIElement* clipElement);
-
 			inline String GetName() const { return name; }
+			void SetNameTrigger(const TriggerFunction& function);
+
+			virtual void SetPos(Vec2f pos);
 			inline Vec2f GetPos() const { return pos; }
+			void SetPosTrigger(const TriggerFunction& function);
+
+			virtual void SetSize(Vec2f size);
 			inline Vec2f GetSize() const { return size; }
+			void SetSizeTrigger(const TriggerFunction& function);
+
+			virtual void SetAnchor(UIElement* anchor);
+			inline UIElement* GetAnchor() const { return anchor; }
+			void SetAnchorTrigger(const TriggerFunction& function);
+
+			virtual void SetLocalAlignment(Align align);
+			inline Align GetLocalAlignment() const { return localAlignment; }
+			void SetLocalAlignmentTrigger(const TriggerFunction& function);
+
+			virtual void SetAnchorAlignment(Align align);
+			inline Align GetAnchorAlignment() const { return anchorAlignment; }
+			void SetAnchorAlignmentTrigger(const TriggerFunction& function);
+
+			virtual void SetActiveFlag(bool active);
+			bool IsActive() const;
+			void SetActiveFlagTrigger(const TriggerFunction& function);
+
+			virtual void SetSolidFlag(bool solid);
+			bool IsSolid() const;
+			void SetSolidFlagTrigger(const TriggerFunction& function);
 
 			inline Vec2f GetViewportPos() const { return viewportPos;}
+			void SetViewportPosTrigger(const TriggerFunction& function);
 
-			inline float GetDepth() const { return depth; }
-			inline Align GetLocalAlignment() const { return localAlignment; }
-			inline Align GetAnchorAlignment() const { return anchorAlignment; }
-			inline UIElement* GetAnchor() const { return anchor; }
+			virtual void SetClipElement(UIElement* clipElement);
 			inline UIElement* GetClipElement() const { return clipElement; }
+			Rectf GetClipRect() const;
 
 			inline Array<UIElement*> GetTiedElements() const { return tiedElements; }
 			inline UIElement* GetTiedParent() const { return tiedParent; }
 			inline bool IsTied() const { return tiedParent != nullptr; }
 
-			Rectf GetClipRect() const;
-			
-			bool IsSolid() const;			
-			bool IsActive() const;
+			virtual void SetDepth(float depth);
+			inline float GetDepth() const { return depth; }
 
 			inline UIManager* GetManager() const { return manager; }
 			inline UIScene* GetScene() const { return scene; }
-			inline StringView GetLayerName() const { return layer; }
 
 			const uint GetTypeIndex() const { return typeIndex; }
 

@@ -87,7 +87,8 @@ bool RunCommand(RunCommandOptions options)
 {
 	auto all_timePoint = chrono::high_resolution_clock::now();
 	auto other_timePoint = chrono::high_resolution_clock::now();
-	RuntimeInfo runtimeInfo;	
+	RuntimeInfo runtimeInfo;
+	runtimeInfo.runtimeLog = options.runtimeLog;
 
 #ifdef _WIN32
 	if (options.projectPath.empty())	

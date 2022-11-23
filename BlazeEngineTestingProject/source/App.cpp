@@ -176,69 +176,111 @@ CLIENT_API void Setup()
 	delete globals;
 }*/
 
-template<typename ... T>
-class PropertyField
+struct Component
+{
+	size_t typeID;
+};
+
+
+class ElementHandler
 {
 public:
-	using Properties = TemplateGroup<T...>;
-private:
-	std::bitset<Properties::Size> flags;
-	Tuple<T...> values;
-	Tuple<std::vector<std::function<void(const T&)>>*...> functions;
+};
 
-	template<size_t I>
-	void FreeEvents()
+class Element
+{
+public:
+	ElementHandler* handler;
+};
+
+class ComponentTypeRegistry
+{
+public:
+	template<typename T>
+	size_t GetComponentTypeID()
 	{
-		delete functions.GetValueByIndex<I>();
+		return 0;
+	}
+};
 
-		if constexpr (I < sizeof ... (T) - 1)
-			FreeEvents<I + 1>();
+class Scene
+{
+	class ComponentContainer
+	{
+		size_t elementSize;
+		size_t size;
+		void* data;
+
+		ComponentContainer()
+			: elementSize(-1), size(0), data(nullptr)
+		{
+
+		}
+		
+		void* New()
+		{
+			size += elementSize;
+			void* old = data;
+			data = Memory::Allocate(size);
+			memcpy(data, old, size - elementSize);
+			Memory::Free(old);
+		}
+		void Delete(void* ptr)
+		{
+			size -= elementSize;
+			void* old = data;
+			data = Memory::Allocate(size);
+			size_t offset = (byte*)ptr - (byte*)old;
+			memcpy(data, old, offset);
+			memcpy((byte*)data + offset, (byte*)old + offset + elementSize, size - offset);
+			Memory::Free(old);
+		}
+	};
+
+	ComponentTypeRegistry registry;
+	std::vector<Element> elements;
+	std::vector<ComponentContainer> components;	
+
+	template<typename C>
+	void AddComponent(Element* element)
+	{
+		components[registry.GetComponentTypeID<C>()];
+		element->components[element->componentCount++];
+			
 	}
 public:
-	~PropertyField()
+	template<typename H>
+	Element* CreateElement()
 	{
-		FreeEvents<0>();
+		Element* element = &elements.emplace_back();
+		(AddComponent<T>(element), ...);
 	}
+};
 
-	template<size_t I>
-	constexpr const auto& GetProperty()
-	{
-		return values.GetValueByIndex<I>();
-	}
-	template<size_t I, typename O>
-	constexpr void SetProperty(O value)
-	{
-		values.GetValueByIndex<I>() = std::forward<O>(value);
-		auto*& functions = this->functions.GetValueByIndex<I>();
-		if (functions != nullptr)
-			for (auto& f : *functions)
-				f(values.GetValueByIndex<I>());
-	}
+class TextComponent
+{
 
-	template<size_t I>
-	inline void AddPropertyChangedEvent(const std::function<void(const typename Properties::template TypeAtIndex<I>&)>& event)
-	{
-		auto*& functions = this->functions.GetValueByIndex<I>();
+};
+class ButtonComponent
+{
 
-		if (functions == nullptr)
-			functions = new std::remove_pointer_t<std::remove_reference_t<decltype(functions)>>;
+};
+class PanelComponent
+{
 
-		functions->push_back(event);
-	}
+};
+
+class TextButtonHandler
+{
+public:
+	TemplateGroup<TextComponent, ButtonComponent, PanelComponent> Copmonents;
 };
 
 CLIENT_API void Setup()
 {	
-	PropertyField<int, String, double> a;
-
-	a.AddPropertyChangedEvent<1>([](const String& a) {
-		Console::WriteLine("property[1] changed: " + a);
-		});
-
-	a.SetProperty<1>("Marko");
-
-	
-	Console::Read();
+	Scene scene;
+	auto* element = scene.CreateElement<TextButtonHandler>();
+	element->
 }
 
 //build "" "C:\Users\Marko\Desktop\app" "app.exe" -guiOpenFile -p:Configuration=Debug -p:Platform=x64

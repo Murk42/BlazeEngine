@@ -70,7 +70,7 @@ namespace Blaze
 	size_t UnicodeChar::UTF8Size()
 	{
 		uint32 t = value;
-		if ((value >> 6) == 0)
+		if ((value >> 7) == 0)
 			return 1;
 		else if ((value >> 12) == 0)
 			return 2;

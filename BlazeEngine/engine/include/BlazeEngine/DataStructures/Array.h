@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <cstring>
 #include <memory>
+#include <utility>
 
 namespace Blaze
 {
@@ -22,6 +23,14 @@ namespace Blaze
 				memcpy(dst, src, sizeof(T) * count);
 			else for (int i = 0; i < count; ++i)
 				new (dst + i) T(src[i]);
+		}
+		static void MoveConstruct(T* dst, T* src, size_t count)
+		{
+			Allocator a;
+			if (std::is_trivially_copyable_v<T>)
+				memcpy(dst, src, sizeof(T) * count);
+			else for (int i = 0; i < count; ++i)
+				new (dst + i) T(std::move(src[i]));
 		}
 		static void CopyAssign(T* dst, T* src, size_t count)
 		{
@@ -83,7 +92,7 @@ namespace Blaze
 			ptr = a.allocate(newCount);
 			
 			size_t smaller = std::min(newCount, count);
-			CopyConstruct(ptr, old, smaller);
+			MoveConstruct(ptr, old, smaller);
 
 			for (int i = smaller; i < newCount; ++i)
 				new (ptr + i) T();

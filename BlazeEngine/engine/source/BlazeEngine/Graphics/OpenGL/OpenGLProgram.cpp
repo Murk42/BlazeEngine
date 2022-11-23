@@ -8,15 +8,17 @@ namespace Blaze
 	namespace OpenGL
 	{
 		ShaderProgram::ShaderProgram()
-			: id(-1)
+			: id(-1), state(ShaderProgramState::Invalid), maxUniformBlockNameLenght(0), maxUniformNameLenght(0)
 		{
 			id = glCreateProgram();
 		}
 		ShaderProgram::ShaderProgram(ShaderProgram&& p) noexcept
-			: id(-1)
-		{
-			id = p.id;
+			: state(p.state), maxUniformBlockNameLenght(p.maxUniformBlockNameLenght), maxUniformNameLenght(p.maxUniformNameLenght)
+		{			
 			p.id = -1;
+			p.state = ShaderProgramState::Invalid;
+			p.maxUniformBlockNameLenght = 0;
+			p.maxUniformNameLenght = 0;
 		}
 		ShaderProgram::~ShaderProgram()
 		{
@@ -39,6 +41,10 @@ namespace Blaze
 			LogListener listener;
 			listener.SupressLogs(true);
 			listener.StartListening();
+
+			if (state == ShaderProgramState::Valid)
+				Logger::AddLog(BLAZE_WARNING_LOG("Blaze Engine", "Relinking a shader program. This might cause driver errors. Recreate the shader program before linking again"));
+
 			glLinkProgram(id);
 
 			int linkStatus = 0;
@@ -46,12 +52,21 @@ namespace Blaze
 			listener.StopListening();
 
 			Result result;
-
 			result.AddLogs(listener.GetLogs());
 
 			if (linkStatus == GL_FALSE)
 			{
+				int lenght = 0;
+				glGetProgramiv(id, GL_INFO_LOG_LENGTH, &lenght);
+
+				String message(lenght);
+
+				glGetProgramInfoLog(id, lenght, &lenght, message.Ptr());
+
+				result.AddLog(BLAZE_INFO_LOG("OpenGL", std::move(message)));
 				result.SetFailed(true);
+
+				state = ShaderProgramState::Invalid;
 				return result;
 			}
 
@@ -61,16 +76,23 @@ namespace Blaze
 			glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_MAX_NAME_LENGTH, &lenght);
 			maxUniformBlockNameLenght = lenght;
 
-			return result;
-		}
+			state = ShaderProgramState::Valid;
 
-		String ShaderProgram::GetLinkingLog()
+			return result;
+		}		
+
+		Result ShaderProgram::LinkShaders(const std::initializer_list<Shader*>& shaders)
 		{
-			int lenght = 0;
-			glGetProgramiv(id, GL_INFO_LOG_LENGTH, &lenght);
-			String log(lenght);
-			glGetProgramInfoLog(id, lenght, &lenght, log.Ptr());
-			return log;
+			for (auto& s : shaders)
+				AttachShader(*s);			
+
+			if (Result result = LinkProgram())
+				return result;
+
+			for (auto& s : shaders)
+				DetachShader(*s);
+
+			return Result();
 		}
 
 		uint ShaderProgram::GetUniformCount() const
@@ -205,8 +227,18 @@ namespace Blaze
 		{
 			if (id != -1)
 				glDeleteProgram(id);
+
 			id = p.id;
 			p.id = -1;
+
+			state = p.state;
+			p.state = ShaderProgramState::Invalid;
+
+			maxUniformBlockNameLenght = p.maxUniformBlockNameLenght;
+			p.maxUniformBlockNameLenght = 0;
+
+			maxUniformNameLenght = p.maxUniformNameLenght;
+			p.maxUniformNameLenght = 0;
 
 			return *this;
 		}

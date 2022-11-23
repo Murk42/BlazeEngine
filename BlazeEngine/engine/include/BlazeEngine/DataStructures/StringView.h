@@ -23,6 +23,8 @@ namespace Blaze
 
 		size_t Count(char ch) const;
 
+		StringView SubString(size_t start, size_t count);
+
 		StringView& operator= (const StringView&);						
 
 		bool operator==(const StringView& s) const;				

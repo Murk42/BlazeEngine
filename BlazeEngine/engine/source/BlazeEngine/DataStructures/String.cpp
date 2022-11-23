@@ -204,7 +204,6 @@ namespace Blaze
 
 	bool SpaceTillEnd(const char* begin, const char* end)
 	{
-		end--;
 		while (begin != end)
 			if (!isblank(*begin))
 				return false;
@@ -214,6 +213,7 @@ namespace Blaze
 	}
 	bool String::ConvertTo(const StringView& sv, uint32& value)
 	{
+		if (sv.Size() == 0) return false;
 		char* ptr;
 		uint32 temp = strtoul(sv.Ptr(), &ptr, 10);
 		if (SpaceTillEnd(ptr, sv.Ptr() + sv.Size()))
@@ -225,6 +225,7 @@ namespace Blaze
 	}
 	bool String::ConvertTo(const StringView& sv, int32&  value)
 	{
+		if (sv.Size() == 0) return false;
 		char* ptr;
 		int32 temp = strtol(sv.Ptr(), &ptr, 10);
 		if (SpaceTillEnd(ptr, sv.Ptr() + sv.Size()))
@@ -236,6 +237,7 @@ namespace Blaze
 	}
 	bool String::ConvertTo(const StringView& sv, uint64& value)
 	{
+		if (sv.Size() == 0) return false;
 		char* ptr;
 		uint64 temp = strtoull(sv.Ptr(), &ptr, 10);
 		if (SpaceTillEnd(ptr, sv.Ptr() + sv.Size()))
@@ -247,6 +249,7 @@ namespace Blaze
 	}
 	bool String::ConvertTo(const StringView& sv, int64&  value)
 	{
+		if (sv.Size() == 0) return false;
 		char* ptr;
 		int64 temp = strtoll(sv.Ptr(), &ptr, 10);
 		if (SpaceTillEnd(ptr, sv.Ptr() + sv.Size()))
@@ -258,6 +261,7 @@ namespace Blaze
 	}
 	bool String::ConvertTo(const StringView& sv, float&  value)
 	{
+		if (sv.Size() == 0) return false;
 		char* ptr;
 		float temp = strtof(sv.Ptr(), &ptr);
 		if (SpaceTillEnd(ptr, sv.Ptr() + sv.Size()))
@@ -269,6 +273,7 @@ namespace Blaze
 	}
 	bool String::ConvertTo(const StringView& sv, double& value)
 	{
+		if (sv.Size() == 0) return false;
 		char* ptr;
 		double temp = strtod(sv.Ptr(), &ptr);
 		if (SpaceTillEnd(ptr, sv.Ptr() + sv.Size()))
