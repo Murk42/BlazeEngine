@@ -3,21 +3,7 @@
 #include "BlazeEngine/Resources/Font/Font.h"
 
 namespace Blaze::ResourceSystem
-{
-	Result ResourceTypeRegistry::RegisterType(StringView name, size_t size, void(*construct)(void*), void(*destruct)(void*))
-	{
-		ResourceTypeData data;
-		data.name = name;
-		data.size = size;
-		data.construct = construct;
-		data.destruct = destruct;		
-
-		if (nameTable.try_emplace(name, types.size()).second)
-			types.emplace_back(std::move(data));
-
-		return Result();
-	}
-
+{	
 	ResourceTypeRegistry::ResourceTypeRegistry()
 	{
 	}
@@ -32,11 +18,19 @@ namespace Blaze::ResourceSystem
 		nameTable.clear();
 	}
 
+	Result ResourceTypeRegistry::RegisterType(ResourceTypeData data)
+	{		
+		if (nameTable.try_emplace(data.typeName, types.size()).second)
+			types.emplace_back(std::move(data));
+		
+		return Result();
+	}
+
 	void ResourceTypeRegistry::RegisterCoreTypes()
 	{
 		RegisterType<Font>();
 		RegisterType<Graphics::Core::Texture2D>();
-		//RegisterType<FontResolution>();
+		RegisterType<FontResolution>();
 	}
 
 	uint ResourceTypeRegistry::GetResourceTypeIndex(StringView name) const

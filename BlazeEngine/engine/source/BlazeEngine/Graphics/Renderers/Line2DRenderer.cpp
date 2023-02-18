@@ -1,6 +1,5 @@
 #include "BlazeEngine/Graphics/Renderers/Line2DRenderer.h"
 #include "BlazeEngine/Graphics/GraphicsCore.h"
-#include "BlazeEngine/Console/Console.h"
 
 namespace Blaze::Graphics
 {

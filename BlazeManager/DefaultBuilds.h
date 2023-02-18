@@ -18,19 +18,19 @@ struct ClientBuildSettings
 {
 	std::string projectPath;
 	std::string outputDir;
-	std::string enginePathLIB;	
+
+	std::string engineLibraryDir;
 };
 struct RuntimeBuildSettings
 {
 	std::string projectPath;
 	std::string outputDir;
 
-	std::string clientOutputDir;	
-	ClientLibraryInfo clientLibraryInfo;
+	std::string clientLibraryDir;
 };
 
-Result LoadClientLibraryInfo(const string& path, bool log, ClientLibraryInfo& info);
+Result LoadClientLibraryInfo(const string& path, bool log, Configuration configuration, ClientLibraryInfo& info);
 
-bool BuildBlaze(Configuration configuration, Platform platform, EngineBuildSettings settings);
-bool BuildClient(Configuration configuration, Platform platform, ClientBuildSettings settings);
-bool BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSettings settings);
+Result BuildBlaze(Configuration configuration, Platform platform, EngineBuildSettings settings, std::string& result);
+Result BuildClient(Configuration configuration, Platform platform, ClientBuildSettings settings, std::string& result);
+Result BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSettings settings, std::string& result);

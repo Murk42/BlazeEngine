@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Result.h"
 
 struct VisualStudioInfo
 {
@@ -9,6 +10,6 @@ struct VisualStudioInfo
 	std::string MSBuildPath;
 };
 
-VisualStudioInfo GetVisualStudioInfo();
+Result GetVisualStudioInfo(VisualStudioInfo&);
 
 void PrintVisualStudioInfo(VisualStudioInfo info);

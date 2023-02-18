@@ -3,37 +3,25 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
+using namespace std;
 
 #include "Command.h"
 
-VisualStudioInfo GetVisualStudioInfo()
-{
-	VisualStudioInfo info;
+Result GetVisualStudioInfo(VisualStudioInfo& info)
+{	
 	//info.	
-	Result result = RunCommand("\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -property installationPath");
-	if (!result.sucessfull)
-	{
-		std::cout << result.log;
-		std::cout << "Finding Visual Studio instalation path failed\n";
-	}
-	else
-		info.instalationPath = result.log;
+	if (Result r = RunCommand("\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -property installationPath", info.instalationPath))
+		return string("Finding Visual Studio instalation path failed\n") + r;
+
 	info.instalationPath.pop_back();
 
-	result = RunCommand("\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -property productPath");
-	if (!result.sucessfull)
-	{
-		std::cout << result.log;
-		std::cout << "Finding Visual Studio devenv path failed";
-	}
-	else
-		info.devenvPath = result.log;
-
+	if (Result r = RunCommand("\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -property productPath", info.devenvPath))
+		return string("Finding Visual Studio devenv path failed\n") + r;	
 	info.devenvPath.pop_back();
 
 	info.MSBuildPath = info.instalationPath + "\\MSBuild\\Current\\Bin\\MSBuild.exe";
 
-	return info;
+	return Result();
 }
 
 void PrintVisualStudioInfo(VisualStudioInfo info)

@@ -4,6 +4,9 @@
 
 namespace Blaze::ResourceSystem
 {
+#define RESOURCE(name)								\
+	static constexpr const char* typeName = #name;	
+
 	class Resource
 	{
 		String name;

@@ -262,7 +262,7 @@ namespace Blaze::Graphics
 	}
 	Result TextRenderer::Write(TextRenderCache& data, Vec2f pos, float size, ColorRGBAf color)
 	{		
-		if (fontResolution == nullptr)
+		if (data.GetFontResolution() == nullptr)
 			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
 				"No font resolution set"));
 

@@ -236,12 +236,15 @@ Result SceneFileParser::ParseElement()
 		{
 			if (!literal && bracket1Depth == 0 && bracket2Depth == 0 && bracket3Depth == 0 && bracket4Depth == 0 && 
 				(ch == ',' || ch == '>'))
-				break;
+				break; 
 
-			CHECK(UpdateBrackets('(', ')', bracket1Depth));
-			CHECK(UpdateBrackets('[', ']', bracket2Depth));
-			CHECK(UpdateBrackets('{', '}', bracket3Depth));
-			CHECK(UpdateBrackets('<', '>', bracket4Depth));			
+			if (!literal)
+			{
+				CHECK(UpdateBrackets('(', ')', bracket1Depth));
+				CHECK(UpdateBrackets('[', ']', bracket2Depth));
+				CHECK(UpdateBrackets('{', '}', bracket3Depth));
+				CHECK(UpdateBrackets('<', '>', bracket4Depth));
+			}
 
 			if (ch == '"')
 				literal = !literal;

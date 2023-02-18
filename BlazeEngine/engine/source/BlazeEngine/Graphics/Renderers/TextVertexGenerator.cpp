@@ -12,7 +12,7 @@ namespace Blaze::Graphics
 			return;
 
 		const void* it = string.begin().Ptr();
-		const void* wrapPtr;
+		const void* wrapPtr = nullptr;
 
 		float width = 0;
 

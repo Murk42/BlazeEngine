@@ -1,67 +1,18 @@
-#ifdef _WIN32
-#include <Windows.h>
-#undef LoadLibrary
-#endif
-
 #include "RunCommand.h"
+
 #include <filesystem>
-#include <iostream>
-#include <fstream>
-#include "Build.h"
+#include <direct.h>
+
+#include "Globals.h"
 #include "DefaultBuilds.h"
 #include "Library.h"
-#include "Parsing.h"
 
-#include "../BlazeEngineRuntime/RuntimeInfo.h"
-
-#include <direct.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <chrono>
-
-#define CHECK(x) { if (x) return true; }
-
-extern VisualStudioInfo vsInfo;
-extern string engineProjectDir;
-extern string enginePathDLL;
-extern string runtimeProjectDir;
-extern string runtimePathDLL;
-
-#ifdef _WIN32
-static string GuiOpenFile()
-{
-	OPENFILENAMEA ofn = { 0 };
-	char Buffer[300];
-	fill(Buffer, Buffer + 300, '\0');
-
-	ofn.lStructSize = sizeof(OPENFILENAMEA);
-	ofn.hwndOwner = NULL;
-	ofn.lpstrFile = Buffer;
-	ofn.nMaxFile = 300;
-	ofn.Flags = OFN_EXPLORER;
-	ofn.lpstrFilter = NULL;
-	ofn.lpstrCustomFilter = NULL;
-	ofn.nFilterIndex = 0;
-	ofn.lpstrFileTitle = NULL;
-	ofn.lpstrInitialDir = NULL;
-	ofn.lpstrTitle = NULL;
-	GetOpenFileNameA(&ofn);
-
-	return string(Buffer, 300);
-}
-#endif
-
-static Result LoadClientDybamicLibraries(const ClientLibraryInfo& info, std::vector<Library>& libraries, bool log)
+static Result LoadClientDynamicLibraries(const ClientLibraryInfo& info, std::vector<Library>& libraries, bool log)
 {
 	libraries.resize(info.additionalDynamicLibraries.size());
 
 	for (int i = 0; i < libraries.size(); ++i)
-	{
-		//string newPath = outputPath + filesystem::path(paths[i]).filename().string();
-		//filesystem::copy_file(paths[i], newPath, filesystem::copy_options::overwrite_existing);
-		//
-		//Result r = libraries[i].LoadLibrary(newPath
+	{		
 		Result r = libraries[i].LoadLibrary(info.additionalDynamicLibraries[i]);
 
 		if (log)
@@ -74,33 +25,26 @@ static Result LoadClientDybamicLibraries(const ClientLibraryInfo& info, std::vec
 	return Result();
 }
 
-double MeasureTime(chrono::high_resolution_clock::time_point& time_point)
-{
+Result RunClient(Library& clientLib);
 
-	auto now = chrono::high_resolution_clock::now();		
-	double duration = chrono::duration<double>(now - time_point).count();
-	time_point = now;
-	return duration;
-}
-
-bool RunCommand(RunCommandOptions options)
+struct RuntimeInfo
 {
-	auto all_timePoint = chrono::high_resolution_clock::now();
-	auto other_timePoint = chrono::high_resolution_clock::now();
+	bool runtimeLog = true;
+	string clientLibraryName;
+};
+
+Result RunCommand(RunCommandOptions options)
+{	
 	RuntimeInfo runtimeInfo;
 	runtimeInfo.runtimeLog = options.runtimeLog;
-
-#ifdef _WIN32
-	if (options.projectPath.empty())	
-		options.projectPath = GuiOpenFile();
-#endif	
+	runtimeInfo.clientLibraryName = "Client.dll";
 
 	Configuration configuration;
 	switch (options.configuration)
 	{
-	case RunCommandConfiguration::Debug: configuration = Configuration::Debug; break;
-	case RunCommandConfiguration::Release: configuration = Configuration::Release; break;
-	default: cout << "Invalid configuration\n"; return true;
+	case RuntimeConfiguration::Debug: configuration = Configuration::Debug; break;
+	case RuntimeConfiguration::Release: configuration = Configuration::Release; break;
+	default: throw;
 	}
 
 	string projectDir = filesystem::path(options.projectPath).parent_path().string() + "\\";
@@ -110,39 +54,48 @@ bool RunCommand(RunCommandOptions options)
 	string clientOutputDir = projectDir + outputSubDir;
 	string runtimeOutputDir = runtimeProjectDir + outputSubDir;
 	
-	if (options.buildBlaze)
+	string buildLog;
+
+	if (options.buildEngine)
 	{
 		if (options.managerLog) cout << "<BlazeEngineManager> Building blaze...\n";
-		CHECK(BuildBlaze(configuration, platform, {
+		if (Result r = BuildBlaze(configuration, platform, {
 			.projectPath = engineProjectDir + "BlazeEngine.vcxproj",
 			.outputDir = engineOutputDir
-			}));
+			}, buildLog)) return buildLog + "\n" + r;
+
+		cout << buildLog;
 	}
 	if (options.buildClient)
 	{
 		if (options.managerLog) cout << "<BlazeEngineManager> Building client project...\n";
-		CHECK(BuildClient(configuration, platform, { 
-			.projectPath = options.projectPath, 
+		if (Result r = BuildClient(configuration, platform, {
+			.projectPath = options.projectPath,
 			.outputDir = clientOutputDir,
-			.enginePathLIB = "" 
-			}));
+			.engineLibraryDir = engineOutputDir
+			}, buildLog)) return buildLog + "\n" + r;
+
+		cout << buildLog;
 	}		
 	if (options.buildRuntime)
 	{		
 		if (options.managerLog) cout << "<BlazeEngineManager> Building runtime...\n";
-		CHECK(BuildRuntime(configuration, platform, { 
+		if (Result r = BuildRuntime(configuration, platform, {
 			.projectPath = runtimeProjectDir + "BlazeEngineRuntime.vcxproj",
-			.outputDir = runtimeOutputDir, 
-			.clientOutputDir = clientOutputDir,
-			}))
+			.outputDir = runtimeOutputDir,
+			.clientLibraryDir = clientOutputDir,
+			}, buildLog)) return buildLog + "\n" + r;
+
+		cout << buildLog;
 	}
 	
 	error_code ec;
-	if (!filesystem::exists(projectDir + outputSubDir + "Client.dll", ec))
 	{
-		std::cout << "Failed to find the client dll.";
-		if (ec)	cout << ec.category().name() << ": " << ec.message();
-		return true;
+		string path = projectDir + outputSubDir + "Client.dll";
+		bool exists = filesystem::exists(path, ec);
+		if (ec) return Result("Failed to see if client library exists: \"" + path + "\"\n" + (string)ec.category().name() + ": " + ec.message() + "\n");
+
+		if (!exists) return Result("The client library doesn't exists at the given location: \"" + path + "\"\n");		
 	}
 
 	if (options.managerLog)
@@ -150,105 +103,111 @@ bool RunCommand(RunCommandOptions options)
 
 	filesystem::create_directory(projectDir + "assets");
 	filesystem::copy(engineOutputDir + "assets\\default", projectDir + "assets\\default", filesystem::copy_options::overwrite_existing | filesystem::copy_options::recursive, ec);
-	if (ec)
-	{
-		std::cout << "Failed to copy default assets.";
-		if (ec)	cout << ec.category().name() << ": " << ec.message();
-		return true;
+
+	if (ec) return Result("Failed to copy default assets\n" + (string)ec.category().name() + ": " + ec.message() + "\n");
+			
+	vector<Library> engineLibraries(engineDependencies[(Configuration)options.configuration].size());
+	
+	for (int i = 0; i < engineLibraries.size(); ++i)
+	{ 
+		string path = engineOutputDir + engineDependencies[(Configuration)options.configuration][i];
+		if (Result r = engineLibraries[i].LoadLibrary(path))
+			return string("Failed to load engine dependency: \"" + path + "\"\n") + r;
 	}
-
-	Result r;
-	string path;
+			
 
 	{
-		Library libraryDevIL;
-		path = engineOutputDir + "DevIL.dll";
-		r = libraryDevIL.LoadLibrary(path);
-		if (!r.sucessfull) { cout << r.log; return true; }
+		Library engineLibrary;
+		void(*InitializeBlaze)();
+		void(*TerminateBlaze)();
 
 		{
-			Library libraryILU;
-			path = engineOutputDir + "ILU.dll";
-			r = libraryILU.LoadLibrary(path);
-			if (!r.sucessfull) { cout << r.log; return true; }
+			string path;
 
+			if (options.buildEngine || engineDLLPath.empty())
+				path = engineOutputDir + "BlazeEngine.dll";
+			else
+				path = engineDLLPath;
+
+			if (options.managerLog)  cout << "<BlazeEngineManager> Loading engine library: \"" + path + "\"\n";
+
+			if (Result r = engineLibrary.LoadLibrary(path))
+				return string("Failed to load engine library: \"" + path + "\"\n") + r;			
+			
+			if (Result r = engineLibrary.GetFunction("InitializeBlaze", InitializeBlaze)) return string("Failed to load engine function \"InitializeBlaze\"\n") + r;
+			if (Result r = engineLibrary.GetFunction("TerminateBlaze", TerminateBlaze)) return string("Failed to load engine function \"TerminateBlaze\"\n") + r;			
+		}
+
+
+
+		{
+			vector<Library> clientLibraries;
 			{
-				Library librarySDL2;
-				path = engineOutputDir + "SDL2.dll";
-				r = librarySDL2.LoadLibrary(path);
-				if (!r.sucessfull) { cout << r.log; return true; }
+				ClientLibraryInfo clientLibraryInfo;
+				string path = projectDir + "libraries.txt";
 
+				bool exists = filesystem::exists(path);
+
+				if (ec) return Result("Failed check if file exists: \"" + path + "\"\n" + (string)ec.category().name() + ": " + ec.message() + "\n");
+
+				if (exists)
 				{
-					Library libraryBlaze;
-
-					if (options.buildBlaze || enginePathDLL.empty())
-						path = engineOutputDir + "BlazeEngine.dll";
-					else
-						path = enginePathDLL;
-
-					r = libraryBlaze.LoadLibrary(path);
-					if (!r.sucessfull) { cout << r.log; return true; }
-
-					Result _r;
-					void(*InitializeBlaze)() = (void(*)())libraryBlaze.GetFunction("InitializeBlaze", _r);
-					if (!r.sucessfull) { cout << r.log; return true; }
-					void(*TerminateBlaze)() = (void(*)())libraryBlaze.GetFunction("TerminateBlaze", _r);
-					if (!r.sucessfull) { cout << r.log; return true; }
-
-					InitializeBlaze();
-
-					{
-						vector<Library> clientLibraries;
-						ClientLibraryInfo clientLibraryInfo;
-
-						path = projectDir + "libraries.txt";
-						if (filesystem::exists(path))
-						{
-							r = LoadClientLibraryInfo(path, options.managerLog, clientLibraryInfo);
-							if (!r.sucessfull) { cout << r.log; return true; }
-							r = LoadClientDybamicLibraries(clientLibraryInfo, clientLibraries, options.managerLog);
-							if (!r.sucessfull) { cout << r.log; return true; }
-						}
-
-						{
-							Library libraryClient;
-							path = clientOutputDir + "Client.dll";
-							r = libraryClient.LoadLibrary(path);
-							if (!r.sucessfull) { cout << r.log; return true; }
-
-							{
-								Library libraryRuntime;
-								if (options.buildRuntime || runtimePathDLL.empty())
-									path = runtimeOutputDir + "BlazeEngineRuntime.dll";
-								else
-									path = runtimePathDLL;
-
-								r = libraryRuntime.LoadLibrary(path);
-								if (!r.sucessfull) { cout << r.log; return true; }
-
-								{
-									void(*RUNTIME_START)(RuntimeInfo) = (void(*)(RuntimeInfo))libraryRuntime.GetFunction("RUNTIME_START", r);
-									if (!r.sucessfull) { cout << r.log; return true; }
-
-									if (options.managerLog) cout << "<BlazeEngineManager> Statring runtime\n\n";
-
-									string oldPath = std::filesystem::current_path().string();
-
-									_chdir(projectDir.c_str());
-
-									RUNTIME_START(runtimeInfo);
-
-									_chdir(oldPath.c_str());
-								}
-							}
-						}
-					}
-
-					TerminateBlaze();
+					if (Result r = LoadClientLibraryInfo(path, options.managerLog, (Configuration)options.configuration, clientLibraryInfo)) return r;					
+					if (Result r = LoadClientDynamicLibraries(clientLibraryInfo, clientLibraries, options.managerLog)) return r;					
 				}
 			}
-		}
-	}
 
-	return false;
+			{
+				string oldPath = std::filesystem::current_path().string();
+				_chdir(projectDir.c_str());
+				InitializeBlaze();
+				Library libraryClient;
+
+				{
+					string path = clientOutputDir + "Client.dll";
+					if (options.managerLog) cout << "<BlazeEngineManager> Loading client library: \"" + path + "\"\n";
+					if (Result r = libraryClient.LoadLibrary(path)) return string("Failed to load client library: \"" + path + "\"\n") + r;
+				}
+
+				{
+					//Library libraryRuntime;
+					//if (options.buildRuntime || runtimeDLLPath.empty())
+					//	path = runtimeOutputDir + "BlazeEngineRuntime.dll";
+					//else
+					//	path = runtimePathDLL;
+					//
+					//r = libraryRuntime.LoadLibrary(path);
+					//if (!r.sucessfull) { cout << r.log; return true; }
+
+					{
+						//void(*RUNTIME_START)(RuntimeInfo) = (void(*)(RuntimeInfo))libraryRuntime.GetFunction("RUNTIME_START", r);
+						//if (!r.sucessfull) { cout << r.log; return true; }
+
+						if (options.managerLog) cout << "<BlazeEngineManager> Statring runtime\n\n";
+
+
+						if (Result r = RunClient(libraryClient))
+							return r;
+						//RUNTIME_START(runtimeInfo);
+
+					}
+				}
+
+				TerminateBlaze();
+				_chdir(oldPath.c_str());
+			}
+		}
+
+	}
+	return Result();
+}
+
+Result RunClient(Library& clientLibrary)
+{	
+	void(*Setup)();
+	if (Result r = clientLibrary.GetFunction("Setup", Setup)) return string("Failed to load client function \"Setup\"") + r;	
+
+	Setup();
+
+	return Result();
 }

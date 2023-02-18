@@ -8,7 +8,7 @@ std::string Replace(std::string s)
 	return s;
 }
 
-Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string additional)
+Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string additional, std::string& result)
 {
 	std::string platform =		((int)settings.platform != -1 ? GetPlatformString(settings.platform) : "");
 	std::string outputType =	((int)settings.outputType != -1 ? GetBuildOutputTypeString(settings.outputType) : "");
@@ -53,7 +53,8 @@ Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string
 
 	command += " " + additional;
 
-	return RunCommand(command);	
+
+	return RunCommand(command, result);	
 }
 
 string GetOutputSubDir(Configuration configuration, Platform platform)

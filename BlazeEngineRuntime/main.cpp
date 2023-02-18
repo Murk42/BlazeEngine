@@ -24,6 +24,7 @@ LibraryView clientLibrary;
 struct RuntimeInfo
 {
 	bool runtimeLog;
+	string clientLibraryName;
 };
 
 #define LOAD_FUNC(x, y, z) x = (decltype(x))y.GetFunction(#x, z); if (!z.sucessfull) { result.log += "Failed to load function \"" #x "\"\n"; return result; }
@@ -37,7 +38,6 @@ Result LoadClientFunctions()
 
 	return Result();
 }
- 
 bool ResolveResult(Result r)
 {
 	if (!r.sucessfull)
@@ -55,7 +55,7 @@ bool ResolveResult(Result r)
 extern "C" __declspec(dllexport) int RUNTIME_START(RuntimeInfo runtimeInfo)
 {
 #elif !defined(_WIN32)
-int main()
+int main(int argc, char* argv[])
 {	
 #else
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
@@ -66,7 +66,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	InitializeBlaze();
 #else
 	RESOLVE(blazeLibrary.Set("BlazeEngine.dll"));
-	RESOLVE(clientLibrary.Set("Client.dll"));
+	RESOLVE(clientLibrary.Set(runtimeInfo.clientLibraryName));
 		
 	RESOLVE(LoadClientFunctions());
 

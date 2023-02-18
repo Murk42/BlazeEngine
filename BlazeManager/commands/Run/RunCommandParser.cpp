@@ -3,63 +3,61 @@
 #include <iostream>
 #include <filesystem>
 
-#define CHECK(x) { if (x) return true; }
+#include "OpenFileGUI.h"
 
 static void PrintHelp()
 {
 	cout << "\n ---- run help ----\n";
 	cout << "run <project path> [switches]\n\n";
-	cout << "All available switches:\n"
+	cout << "Available switches:\n"
 		"\"Debug\" \"Release\", \"noExit\", \"forceExit\", \"buildBlaze\", \"buildClient\",\n"
 		"\"buildRuntime\", \"buildAll\", \"noLog\", \"noManagerLog\", \"noRuntimeLog\", \n"
 		"\"logTimings\" \"guiOpenFile\".\n";
 	cout << "\n";
 }
 
-static bool GetProjectPathFromArgs(const std::vector<string>& args, string& path)
+static Result EvaluateProjectPath(string arg, string& path)
 {
-	if (args[1] == "\"\"")
-		return false;
-
-	if (!StripQuotes(args[1], path))
+	if (arg == "\"\"")
 	{
-		cout << "Invalid project path syntax \"" << args[1] << "\"\n";
-		return true;
+#ifdef _WIN32
+		path = OpenFileGUI();
+		return Result();
+#else
+		return Result("Empty project path passed");
+#endif			
 	}
+
+	if (!StripQuotes(arg, path))
+		return Result("Invalid project path syntax \"" + arg + "\"\n");	
 
 	std::error_code ec;
+
 	if (!filesystem::exists(path, ec))
-	{
-		cout << "Invalid project path. The path does not exist \"" << args[1] << "\"\n";
-
-		if (ec)	cout << ec.category().name() << ": " << ec.message();
-
-		return true;
-	}
+		return Result("Invalid project path. The path does not exist \"" + arg + "\"\n" + ec.category().name() + ": " + ec.message() + "\n");
 
 	if (!filesystem::is_regular_file(path, ec))
-	{
-		cout << "Invalid project path. The path is not refering to a file \"" << args[1] << "\"\n";
+		return Result("Invalid project path. The path is not refering to a file \"" + arg + "\"\n" + ec.category().name() + ": " + ec.message() + "\n");	
 
-		if (ec)	cout << ec.category().name() << ": " << ec.message();
-
-		return true;
-	}
-
-	return false;
+	return Result();
 }
 
-static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& options)
+static Result ParseSwitch(const string& arg, RunCommandOptions& options)
 {		
+	auto symbols = SplitSymbols(arg);
+
+	if (symbols[0] != "-")
+		return Result("Invalid property switch syntax: \"" + arg + "\"\nSwitches have to start with a dash ('-')");
+
 	if (symbols.size() == 2)
 	{	
 		if (symbols[1] == "Debug")
 		{
-			options.configuration = RunCommandConfiguration::Debug;
+			options.configuration = RuntimeConfiguration::Debug;
 		}
 		else if (symbols[1] == "Release")
 		{			
-			options.configuration = RunCommandConfiguration::Release;
+			options.configuration = RuntimeConfiguration::Release;
 		}
 		else if (symbols[1] == "noExit")
 		{
@@ -71,7 +69,7 @@ static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& option
 		}		
 		else if (symbols[1] == "buildBlaze")
 		{
-			options.buildBlaze = true;
+			options.buildEngine = true;
 		}
 		else if (symbols[1] == "buildClient")
 		{
@@ -83,7 +81,7 @@ static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& option
 		}
 		else if (symbols[1] == "buildAll")
 		{
-			options.buildBlaze = options.buildClient = options.buildRuntime = true;
+			options.buildEngine = options.buildClient = options.buildRuntime = true;
 		}
 		else if (symbols[1] == "noLog")
 		{
@@ -102,49 +100,59 @@ static bool ParseSwitch(const vector<string>& symbols, RunCommandOptions& option
 		{
 			options.logTimings = true;
 		}		
+		else		
+			return Result("Unrecognized switch: \"" + symbols[1] + "\"\n", true);		
 	}
-	else
-	{
-		cout << "Invalid property switch syntax\n";
-		return true;
-	}
+	else	
+		return Result("Invalid property switch syntax: \"" + arg + "\"");
 
-	return false;
+	return Result();
 }
 
-static bool ParseSwitches(const vector<string>& args, RunCommandOptions& options)
+static Result ParseSwitches(const vector<string>& args, RunCommandOptions& options, size_t argStartingIndex)
 {
-	size_t argOffset = 0;
+	size_t argOffset = argStartingIndex;
 	while (argOffset != args.size())
 	{
-		string arg = args[argOffset];
-		auto symbols = SplitSymbols(arg);
-
-		if (symbols[0] == "-")
-			CHECK(ParseSwitch(symbols, options));
+		string arg = args[argOffset];		
+		
+		if (Result r = ParseSwitch(arg, options))
+			return r;
 
 		++argOffset;
 	}
 
-	return false;
+	return Result();
 }
 
-bool ParseRunCommand(const vector<string>& args, RunCommandOptions& options)
+Result ParseRunCommand(const vector<string>& args, RunCommandOptions& options)
 {
 	if (args.size() == 2 && args[1] == "help")
 	{
 		PrintHelp();
-		return true;
+		return Result();
 	}
 	else if (args.size() < 2)
 	{
 		cout << "Not enought arguments. Call \"run help\" for help\n";
-		return true;
+		return Result();
 	}
 
-	CHECK(ParseSwitches(args, options));
+	options.buildEngine = false;
+	options.buildClient = false;
+	options.buildRuntime = false;
+	options.configuration = RuntimeConfiguration::Debug;
+	options.exitCondition = RunCommandExitCondition::NoExit;
+	options.logTimings = true;
+	options.managerLog = true;
+	options.projectPath = "";
+	options.runtimeLog = true;
 
-	CHECK(GetProjectPathFromArgs(args, options.projectPath));		
+	if (Result r = EvaluateProjectPath(args[1], options.projectPath))
+		return r;
 
-	return false;
+	if (Result r = ParseSwitches(args, options, 2))
+		return r;
+
+	return Result();
 }

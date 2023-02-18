@@ -5,12 +5,17 @@ using namespace std;
 #include "VisualStudioInfo.h"
 #include "Command.h"
 
-enum class Configuration
+enum class RuntimeConfiguration
 {
-	Debug,
-	Release,
-	FinalBuild_Debug,
-	FinalBuild_Release
+	Debug = 0,
+	Release = 1
+};
+enum class Configuration
+{	
+	Debug = 0,
+	Release = 1,
+	FinalBuild_Debug = 2,
+	FinalBuild_Release = 3
 };
 enum class Platform
 {
@@ -44,6 +49,10 @@ constexpr Platform GetPlatform()
 constexpr Configuration configuration = GetConfiguration();
 constexpr Platform platform = GetPlatform();
 
+constexpr bool IsConfigurationString(std::string s)
+{
+	return s == "Debug" || s == "Release" || s == "FinalBuild_Debug" || s == "FinalBuild_Release";
+}
 constexpr const char* GetConfigurationString(Configuration configuration)
 {
 	switch (configuration)
@@ -90,7 +99,7 @@ struct BuildSettings
 	std::vector<Property> properties;	
 };
 
-Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string additional = "");
+Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string additional, std::string& result);
 
 string GetOutputSubDir(Configuration configuration, Platform platform);
 string GetIntermediateSubDir(Configuration configuration, Platform platform);

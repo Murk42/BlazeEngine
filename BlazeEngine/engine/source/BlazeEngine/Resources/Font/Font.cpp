@@ -352,7 +352,7 @@ namespace Blaze
 
 
 	Font::Font()
-		: ptr(nullptr), pixelsPerUnit(0), baselineDistance(0)
+		: ptr(nullptr), pixelsPerUnit(1), baselineDistance(0)
 	{
 	}
 	Font::~Font()

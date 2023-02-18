@@ -3,6 +3,7 @@
 #include "BlazeEngine/Core/ResultValue.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceTypeRegistry.h"
 #include "BlazeEngine/Application/ResourceSystem/Resource.h"
+#include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
 
 namespace Blaze::ResourceSystem
 {

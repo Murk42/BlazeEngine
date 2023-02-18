@@ -12,7 +12,7 @@ namespace Blaze
     {                         
         Path GetCurrentPath()
         {
-            return Path(StringView(std::filesystem::current_path().u8string().c_str()));
+            return Path(StringView((const char*)std::filesystem::current_path().u8string().c_str()));
         }
         int CreateFile(const Path& path)
         {

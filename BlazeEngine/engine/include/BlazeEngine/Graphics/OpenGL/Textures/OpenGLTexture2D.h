@@ -45,6 +45,6 @@ namespace Blaze::OpenGL
 		Texture2D& operator=(const Texture2D&) = delete;
 		Texture2D& operator=(Texture2D&&) noexcept;
 
-		static constexpr const char* typeName = "Texture2D";
+		RESOURCE(Texture2D);
 	};
 }

@@ -12,6 +12,9 @@
 #include <unordered_map>
 #include <stack>
 
+#include <Windows.h>
+#include <debugapi.h>
+
 namespace Blaze
 {			
 	static File logFile;
@@ -76,7 +79,11 @@ namespace Blaze
 			{
 				RecordLog(log.FormatString());
 
+#ifdef BLAZE_DEBUG				
+				DebugBreak();
+#else
 				exit(1);
+#endif
 			}
 
 			if (log.GetType() == LogType::Fatal)

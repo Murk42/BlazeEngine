@@ -88,22 +88,37 @@ namespace Blaze
 			}
 		}
 
+		constexpr Quat<T> operator+(const Quat<T>& b) const
+		{
+			return Quat<T>(x + b.x, y + b.y, z + b.z, w + b.w);
+		}
 		constexpr Quat<T> operator*(const Quat<T>& b) const
 		{
 			Quat<T> out;
-			out.x = x * b.w + y * b.z - z * b.y + w * b.x;
+			out.x =  x * b.w + y * b.z - z * b.y + w * b.x;
 			out.y = -x * b.z + y * b.w + z * b.x + w * b.y;
-			out.z = x * b.y - y * b.x + z * b.w + w * b.z;
+			out.z =  x * b.y - y * b.x + z * b.w + w * b.z;
 			out.w = -x * b.x - y * b.y - z * b.z + w * b.w;
 			return out;						
 		}
+		constexpr Quat<T> operator*(const T& b) const
+		{
+			return Quat<T>(x * b, y * b, z * b, w * b);
+		}
+		constexpr Quat<T> operator/(const T& b) const
+		{
+			return Quat<T>(x / b, y / b, z / b, w / b);
+		}
 		constexpr Vec3<T> operator*(const Vec3<T>& v) const
 		{
-			Vec3<T> temp = Math::CrossProduct<T>(Vec3f(x, y, z), v) * 2;
-			return v + temp * w + Math::CrossProduct<T>(Vec3f(x, y, z), temp);				
+			Vec3<T> temp = Math::CrossProduct<T>(Vec3<T>(x, y, z), v) * 2;
+			return v + temp * w + Math::CrossProduct<T>(Vec3<T>(x, y, z), temp);				
 		}
 
+		constexpr void operator+= (const Quat<T>& v) { *this = *this + v; }
 		constexpr void operator*= (const Quat<T>& v) { *this = *this * v; }
+		constexpr void operator*= (const T& v) { *this = *this * v; }
+		constexpr void operator/= (const T& v) { *this = *this / v; }
 
 		constexpr bool operator== (const Quat<T>& v) const { return x == v.x && y == v.y && z == v.z && w == v.w; }
 		constexpr bool operator!= (const Quat<T>& v) const { return x != v.x || y != v.y || z != v.z || w != v.w; }

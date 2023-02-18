@@ -6,10 +6,11 @@
 
 extern VisualStudioInfo vsInfo;
 
-Result LoadClientLibraryInfo(const string& path, bool log, ClientLibraryInfo& info)
+Result LoadClientLibraryInfo(const string& path, bool log, Configuration configuration, ClientLibraryInfo& info)
 {
 	std::ifstream file{ path };
 
+	bool started = false;
 	int lineNum = 0;
 	std::string line;
 	while (!file.eof())
@@ -18,56 +19,74 @@ Result LoadClientLibraryInfo(const string& path, bool log, ClientLibraryInfo& in
 
 		std::vector<string> symbols = SplitSymbols(line);
 
-		if (symbols.size() > 0)
+		if (symbols.size() == 0)
+			continue;
+
+		if (IsConfigurationString(symbols[0]))
+			if (GetConfigurationString(configuration) != symbols[0])
+			{
+				if (started)
+					return Result();
+
+				continue;
+			}
+			else
+			{
+				started = true;
+				continue;
+			}
+
+		if (!started)
+			continue;
+
+		if (symbols[0] == "path")
 		{
-			if (symbols[0] == "path")
+			if (symbols.size() > 1)
 			{
-				if (symbols.size() > 1)
-				{
-					string path;
-					if (!StripQuotes(symbols[1], path))
-						return Result("Invalid library.txt file syntax: " + symbols[1]);
+				string path;
+				if (!StripQuotes(symbols[1], path))
+					return Result("Invalid library.txt file syntax: " + symbols[1]);
 
-					info.additionalLibraryDirectories.emplace_back(path);
-				}
-				else
-					return Result("Invalid library file syntax at line " + to_string(lineNum) + ", no additional library path provided");
+				info.additionalLibraryDirectories.emplace_back(path);
 			}
-			else if (symbols[0] == "lib")
-			{
-				if (symbols.size() > 1)
-				{
-					string name;
-					if (!StripQuotes(symbols[1], name))
-						return Result("Invalid library.txt file syntax: " + symbols[1]);
-
-					info.additionalDependencies.emplace_back(name);
-				}
-				else
-					return Result("Invalid library file syntax at line " + to_string(lineNum) + ", no library name provided");
-			}
-			else if (symbols[0] == "dll")
-			{
-				if (symbols.size() > 1)
-				{
-					string dllPath;
-					if (!StripQuotes(symbols[1], dllPath))
-						return Result("Invalid library.txt file syntax: " + symbols[1]);
-
-					info.additionalDynamicLibraries.emplace_back(dllPath);
-				}
-				else
-					return Result("Invalid library file syntax at line " + to_string(lineNum) + ", no dll provided");
-			}
-			else return Result("Invalid library type");
+			else
+				return Result("Invalid library file syntax at line " + to_string(lineNum) + ", no additional library path provided");
 		}
+		else if (symbols[0] == "lib")
+		{
+			if (symbols.size() > 1)
+			{
+				string name;
+				if (!StripQuotes(symbols[1], name))
+					return Result("Invalid library.txt file syntax: " + symbols[1]);
+
+				info.additionalDependencies.emplace_back(name);
+			}
+			else
+				return Result("Invalid library file syntax at line " + to_string(lineNum) + ", no library name provided");
+		}
+		else if (symbols[0] == "dll")
+		{
+			if (symbols.size() > 1)
+			{
+				string dllPath;
+				if (!StripQuotes(symbols[1], dllPath))
+					return Result("Invalid library.txt file syntax: " + symbols[1]);
+
+				info.additionalDynamicLibraries.emplace_back(dllPath);
+			}
+			else
+				return Result("Invalid library file syntax at line " + to_string(lineNum) + ", no dll provided");
+		}
+		else return Result("Invalid library type");
+
 		++lineNum;
 	}
 
 	return Result();
 }
 
-bool BuildBlaze(Configuration configuration, Platform platform, EngineBuildSettings settings)
+Result BuildBlaze(Configuration configuration, Platform platform, EngineBuildSettings settings, std::string& result)
 {
 	BuildSettings blazeBuildSettings{
 		.projectPath = settings.projectPath,
@@ -76,17 +95,10 @@ bool BuildBlaze(Configuration configuration, Platform platform, EngineBuildSetti
 		.platform = platform,
 	};
 
-	Result blazeBuildResult = BuildProject(vsInfo, blazeBuildSettings, "-p:WarningLevel=0");
-	
-	if (!blazeBuildResult.sucessfull)
-	{
-		cout << blazeBuildResult.log;
-		return true;
-	}
-	return false;
+	return BuildProject(vsInfo, blazeBuildSettings, "-p:WarningLevel=0", result);	
 }
 
-bool BuildClient(Configuration configuration, Platform platform, ClientBuildSettings settings)
+Result BuildClient(Configuration configuration, Platform platform, ClientBuildSettings settings, std::string& result)
 {
 	BuildSettings buildSettings{
 		.projectPath = settings.projectPath,
@@ -97,14 +109,11 @@ bool BuildClient(Configuration configuration, Platform platform, ClientBuildSett
 	};
 
 	if (configuration == Configuration::FinalBuild_Debug || configuration == Configuration::FinalBuild_Release)
-	{
-		string engineDirLIB = filesystem::path(settings.enginePathLIB).parent_path().string();
-		string engineNameLIB = filesystem::path(settings.enginePathLIB).filename().string();
-
+	{		
 		buildSettings.outputType = BuildOutputType::StaticLibrary;
 		buildSettings.properties = {
-			{ "BlazeManagerAdditionalLibraryDirectories", { engineDirLIB } },
-			{ "BlazeManagerAdditionalDependencies", { engineNameLIB}}
+			{ "BlazeManagerAdditionalLibraryDirectories", { settings.engineLibraryDir } },
+			{ "BlazeManagerAdditionalDependencies", { "BlazeEngine.lib "}}
 		};
 	}	
 	else
@@ -112,17 +121,10 @@ bool BuildClient(Configuration configuration, Platform platform, ClientBuildSett
 		buildSettings.outputType = BuildOutputType::DynamicLibrary;
 	}
 
-	Result buildResult = BuildProject(vsInfo, buildSettings, "-p:WarningLevel=0");
-
-	if (!buildResult.sucessfull)
-	{
-		cout << buildResult.log;
-		return true;
-	}
-	return false;	
+	return BuildProject(vsInfo, buildSettings, "-p:WarningLevel=0", result);
 }
 
-bool BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSettings settings)
+Result BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSettings settings, std::string& result)
 {	
 	BuildSettings buildSettings{
 			.projectPath = settings.projectPath,
@@ -133,18 +135,10 @@ bool BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSe
 
 	if (configuration == Configuration::FinalBuild_Debug || configuration == Configuration::FinalBuild_Release)
 	{
-		string outputSubDir = GetOutputSubDir(configuration, platform);
-
-		std::vector<std::string> additionalLibraryDirectories = settings.clientLibraryInfo.additionalLibraryDirectories;
-		std::vector<std::string> additionalDependencies = settings.clientLibraryInfo.additionalDependencies;
-
-		additionalLibraryDirectories.push_back(settings.clientOutputDir);		
-		additionalDependencies.push_back("Client.lib");		
-
 		buildSettings.outputType = BuildOutputType::Application;
 		buildSettings.properties = {
-			{ "BlazeManagerAdditionalLibraryDirectories", additionalLibraryDirectories },
-			{ "BlazeManagerAdditionalDependencies", additionalDependencies },
+			{ "BlazeManagerAdditionalLibraryDirectories", { settings.clientLibraryDir } },
+			{ "BlazeManagerAdditionalDependencies", { "Client.lib" } },
 		};
 	}
 	else
@@ -152,12 +146,5 @@ bool BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSe
 		buildSettings.outputType = BuildOutputType::DynamicLibrary;
 	}
 
-	Result runtimeBuildResult = BuildProject(vsInfo, buildSettings, "-p:WarningLevel=0");
-
-	if (!runtimeBuildResult.sucessfull)
-	{
-		cout << runtimeBuildResult.log;
-		return true;
-	}
-	return false;
+	return BuildProject(vsInfo, buildSettings, "-p:WarningLevel=0", result);
 }

@@ -32,16 +32,26 @@ namespace Blaze::ResourceSystem
 		resourceToNameMap = new std::unordered_map<Resource* , String>[typeCount];
 	}
 
-	void ResourceManager::AddResource(StringView name, Resource* resource, size_t typeIndex)
+	Result ResourceManager::AddResource(StringView name, Resource* resource, size_t typeIndex)
 	{
+		if (!registry.IsValidTypeIndex(typeIndex))
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index");
+
 		resources[typeIndex].emplace_back(resource);
 		resourceMap[typeIndex].insert({ name, resource });
 		resourceToNameMap[typeIndex].insert({ resource, name });
+
+		return Result();
 	}
 
-	void ResourceManager::AddResource(Resource* resource, size_t typeIndex)
+	Result ResourceManager::AddResource(Resource* resource, size_t typeIndex)
 	{
+		if (!registry.IsValidTypeIndex(typeIndex))
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index");
+
 		resources[typeIndex].emplace_back(resource);
+
+		return Result();
 	}
 
 	Result ResourceManager::RemoveResource(Resource* resource, size_t typeIndex)

@@ -5,22 +5,17 @@
 #include "BlazeEngine/DataStructures/StringHash.h"
 #include "BlazeEngine/DataStructures/Common.h"
 #include <unordered_map>
+#include "BlazeEngine/Application/ResourceSystem/Resource.h"
 
 namespace Blaze::ResourceSystem
 {
 	struct ResourceTypeData
 	{
-		String name;
+		String typeName;
 
 		size_t size;
 		void(*construct)(void*);
 		void(*destruct)(void*);
-	};
-
-	class BLAZE_API ResourceTypeRegistry
-	{
-		std::vector<ResourceTypeData> types;
-		std::unordered_map<String, uint> nameTable;
 
 		template<typename T>
 		static void Construct(void* ptr)
@@ -33,7 +28,20 @@ namespace Blaze::ResourceSystem
 			((T*)ptr)->~T();
 		}
 
-		Result RegisterType(StringView, size_t, void(*)(void*), void(*)(void*));
+		template<typename T>
+		static ResourceTypeData GetTypeData()
+		{			
+			return {
+				T::typeName,
+				sizeof(T),
+				Construct<T>,
+				Destruct<T>,
+			};
+		}
+	};
+
+	class BLAZE_API ResourceTypeRegistry
+	{		
 	public:
 		ResourceTypeRegistry();
 		ResourceTypeRegistry(const ResourceTypeRegistry&);
@@ -41,11 +49,10 @@ namespace Blaze::ResourceSystem
 
 		template<typename T>
 		Result RegisterType()
-		{
-			static_assert(std::is_base_of_v<Resource, T>);
-
-			return RegisterType(T::typeName, sizeof(T), Construct<T>, Destruct<T>);
+		{			
+			return RegisterType(ResourceTypeData::GetTypeData<T>());
 		}
+		Result RegisterType(ResourceTypeData data);
 
 		void RegisterCoreTypes();
 
@@ -62,5 +69,9 @@ namespace Blaze::ResourceSystem
 		bool IsValidTypeIndex(uint index) const;
 
 		static ResourceTypeRegistry CoreRegistry();
+
+	public:
+		std::vector<ResourceTypeData> types;
+		std::unordered_map<String, uint> nameTable;
 	};
 }

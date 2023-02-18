@@ -3,6 +3,7 @@
 #include "BlazeEngine/Application/UI System/UIManager.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceStorage.h"
+#include "BlazeEngine/Application/UI System/UIElement.h"
 
 namespace Blaze::UI
 {	

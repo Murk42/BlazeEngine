@@ -5,27 +5,27 @@ namespace Blaze
 {
 	String Path::RootName() const
 	{
-		return std::filesystem::path(value.Ptr()).root_name().u8string().c_str();		
+		return (const char*)std::filesystem::path(value.Ptr()).root_name().u8string().c_str();		
 	}
 	String Path::RootDirectory() const
 	{
-		return std::filesystem::path(value.Ptr()).root_directory().u8string().c_str();
+		return (const char*)std::filesystem::path(value.Ptr()).root_directory().u8string().c_str();
 	}
 	String Path::RootPath() const
 	{
-		return std::filesystem::path(value.Ptr()).root_path().u8string().c_str();
+		return (const char*)std::filesystem::path(value.Ptr()).root_path().u8string().c_str();
 	}
 	String Path::FileName() const
 	{
-		return std::filesystem::path(value.Ptr()).filename().u8string().c_str();
+		return (const char*)std::filesystem::path(value.Ptr()).filename().u8string().c_str();
 	}
 	String Path::Stem() const
 	{
-		return std::filesystem::path(value.Ptr()).stem().u8string().c_str();
+		return (const char*)std::filesystem::path(value.Ptr()).stem().u8string().c_str();
 	}
 	String Path::FileExtension() const
 	{
-		return std::filesystem::path(value.Ptr()).extension().u8string().c_str();
+		return (const char*)std::filesystem::path(value.Ptr()).extension().u8string().c_str();
 	}
 	bool Path::IsAbsolute() const
 	{

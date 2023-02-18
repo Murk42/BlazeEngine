@@ -12,7 +12,15 @@ public:
 
 	void FreeLibrary();
 	Result LoadLibrary(std::string path);
-	void* GetFunction(std::string name, Result& result);
+	Result GetFunction(std::string name, void*& ptr);
+	template<typename T>
+	Result GetFunction(std::string name, T& ptr)
+	{
+		void* _ptr;
+		Result r = GetFunction(name, _ptr);
+		ptr = (T)_ptr;
+		return r;
+	}
 
 	Library& operator=(Library&&) noexcept;
 };

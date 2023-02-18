@@ -2,11 +2,9 @@
 #include <string>
 using namespace std;
 
-enum class RunCommandConfiguration
-{
-	Debug,
-	Release
-};
+#include "Result.h"
+#include "Build.h"
+
 enum class RunCommandExitCondition
 {
 	NoExit,
@@ -19,14 +17,14 @@ struct RunCommandOptions
 	bool runtimeLog = true;
 	bool logTimings = false;
 
-	RunCommandConfiguration configuration = RunCommandConfiguration::Debug;
+	RuntimeConfiguration configuration = RuntimeConfiguration::Debug;
 	RunCommandExitCondition exitCondition = RunCommandExitCondition::NoExit;
 	
 	bool buildClient = false;
-	bool buildBlaze = false;
+	bool buildEngine = false;
 	bool buildRuntime = false;
 
 	string projectPath = "";
 };
 
-bool RunCommand(RunCommandOptions options);
+Result RunCommand(RunCommandOptions options);

@@ -8,11 +8,11 @@
 #define WEXITSTATUS
 #endif
 
-Result RunCommand(std::string command)
+Result RunCommand(std::string command, std::string& result)
 {
     int exitcode = 0;
     std::array<char, 128> buffer{};
-    std::string result;
+    result = std::string();
     FILE* pipe = popen((command).c_str(), "r");
     if (pipe == nullptr) {
         throw std::runtime_error("popen() failed!");
@@ -29,5 +29,9 @@ Result RunCommand(std::string command)
     }
 
     exitcode = WEXITSTATUS(pclose(pipe));
-    return Result(result, exitcode == 0);
+
+    if (exitcode != 0)
+        return Result("Failed to run command: \"" + command + "\"");
+
+    return Result();
 }

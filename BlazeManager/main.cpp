@@ -1,39 +1,37 @@
 #include <iostream>
 #include <filesystem>
-#include "VisualStudioInfo.h"
+
+#include "Globals.h"
+
+#include "Result.h"
 #include "Parsing.h"
 #include "commands/Build/BuildCommandParser.h"
 #include "commands/Run/RunCommandParser.h"
 #include "commands/Help/PrintHelp.h"
 
-VisualStudioInfo vsInfo;
-string engineProjectDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngine\\";
-string enginePathDLL;
-string enginePathLIB;
-string runtimeProjectDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngineRuntime\\";
-string runtimePathDLL;
-string runtimePathLIB;
+string OpenFileGUI();
 
 string GetLine()
 {	
 	char ch;
 	string o;
-	while ((ch = cin.get()) != '\n')
-	{		
-		o += ch;
-	}	
+	while ((ch = cin.get()) != '\n')	
+		o += ch;	
 	
 	return o;
 }
 
 bool superDebug = false;
 
-string GuiOpenFile();
+vector<string> EvaluateProgramArguments(int& argc, char* argv[])
+{
+	int startArgument = 1;
 
-int main(int argc, char* argv[])
-{			
 	if (argc > 1 && strcmp(argv[1], "superDebug") == 0)
+	{
 		superDebug = true;
+		startArgument = 2;
+	}
 
 	if (superDebug)
 	{
@@ -48,7 +46,7 @@ int main(int argc, char* argv[])
 	if (!std::filesystem::exists(engineProjectDir)) engineProjectDir.clear();
 	if (!std::filesystem::exists(runtimeProjectDir)) engineProjectDir.clear();
 
-	vsInfo = GetVisualStudioInfo();
+	GetVisualStudioInfo(vsInfo);
 
 	if (superDebug)
 	{
@@ -60,105 +58,124 @@ int main(int argc, char* argv[])
 		cout << "\n";
 	}
 
-	int startArgLowest = 1;
-	if (superDebug)
-		startArgLowest = 2;
+	vector<string> args;
 
-	while (true)
-	{						
-		vector<string> args;
+	if (argc > startArgument)
+	{
+		if (superDebug)
+			cout << "BlazeManager: Parsing command line arguments\n";
+		for (int i = startArgument; i < argc; ++i)
+			args.emplace_back(argv[i]);
+		argc = 1;
+	}	
 
-		if (argc > startArgLowest)
-		{
-			if (superDebug)
-				cout << "BlazeManager: Parsing command line arguments\n";
-			for (int i = startArgLowest; i < argc; ++i)
-				args.emplace_back(argv[i]);
-			argc = 1;
-		}
-		else
-		{
-			if (superDebug)
-				cout << "BlazeManager: Waiting for input\n";
-
-			cout << "->";
-			string input = GetLine();
-
-			if (superDebug)
-				cout << "BlazeManager: Parsing input...";
-
-			args = Split(input);
-		}
-
-		if (args.size() == 0)
-			continue;
-
-		if (args[0] == "build")
-		{
-			if (superDebug)
-				cout << "BlazeManager: Starting build command";
-
-			BuildCommandOptions options;
-			if (ParseBuildCommand(args, options)) continue;
-			if (BuildCommand(options)) continue;
-		}		
-		else if (args[0] == "run")
-		{
-			if (superDebug)
-				cout << "BlazeManager: Starting run command";
-
-			RunCommandOptions options;
-			if (ParseRunCommand(args, options)) continue;
-			bool ret = RunCommand(options);
-			if (options.exitCondition == RunCommandExitCondition::ForceExit)
-				return 0;
-			if (ret)
-				continue;
-		}
-		else if (args[0] == "setRuntimeLIB")
-		{
-			runtimePathLIB = GuiOpenFile();
-		}
-		else if (args[0] == "setRuntimeDLL")
-		{
-			runtimePathDLL = GuiOpenFile();
-		}
-		else if (args[0] == "setRuntimeProject")
-		{
-			runtimeProjectDir = GuiOpenFile();
-		}
-		else if (args[0] == "setEngineLIB")
-		{
-			enginePathLIB = GuiOpenFile();
-		}
-		else if (args[0] == "setEngineDLL")
-		{
-			enginePathDLL = GuiOpenFile();
-		}
-		else if (args[0] == "setEngineProject")
-		{
-			engineProjectDir = GuiOpenFile();
-		}
-		else if (args[0] == "help")
-		{
-			PrintHelp();
-		}
-		else if (args[0] == "vsInfo")
-		{
-			PrintVisualStudioInfo(vsInfo);
-		}
-		else if (args[0] == "exit")
-		{
-			return 0;
-		}
-		else
-		{
-			cout << "Invalid command. Type help for help\n";
-		}
-	}
-	
-	return 0;
+	return args;
 }
 
-//build "C:\Programming\Projects\TemplateProjectlol1\TemplateProjectlol1\TemplateProjectlol1.vcxproj" "C:\Users\Marko\Desktop\temp" "program"
-//final "C:\Programming\Projects\BlazeEngineTest\Client\Client.vcxproj" "C:\Users\Marko\Desktop\temp\" App.exe -p:Configuration=Release -p:Platform=x86
+void ReadCommandFromConsole(vector<string>& args)
+{
+	if (args.empty())
+	{
+		if (superDebug)
+			cout << "BlazeManager: Waiting for input\n";
+
+		cout << "->";
+		string input = GetLine();
+
+		if (superDebug)
+			cout << "BlazeManager: Parsing input...";
+
+		args = Split(input);
+	}
+}
+
+bool ExecuteCommand(vector<string>& args)
+{
+	if (args.size() == 0)
+		return true;
+
+	if (args[0] == "build")
+	{
+		if (superDebug)
+			cout << "BlazeManager: Starting build command";
+
+		BuildCommandOptions options;
+		if (ParseBuildCommand(args, options)) return true;
+		if (BuildCommand(options)) return true;
+	}
+	else if (args[0] == "run")
+	{
+		if (superDebug)
+			cout << "BlazeManager: Starting run command";
+
+		RunCommandOptions options;
+		if (Result r = ParseRunCommand(args, options)) return true;
+		if (Result r = RunCommand(options))
+		{
+			if (options.exitCondition == RunCommandExitCondition::ForceExit)
+				return false;
+			else
+				return true;
+		}
+
+		if (options.exitCondition == RunCommandExitCondition::ForceExit)
+			return false;
+	}
+	else if (args[0] == "setRuntimeLIB")
+	{
+		runtimeLIBPath = OpenFileGUI();
+	}
+	else if (args[0] == "setRuntimeDLL")
+	{
+		runtimeDLLPath = OpenFileGUI();
+	}
+	else if (args[0] == "setRuntimeProject")
+	{
+		runtimeProjectDir = OpenFileGUI();
+	}
+	else if (args[0] == "setEngineLIB")
+	{
+		engineLIBPath = OpenFileGUI();
+	}
+	else if (args[0] == "setEngineDLL")
+	{
+		engineDLLPath = OpenFileGUI();
+	}
+	else if (args[0] == "setEngineProject")
+	{
+		engineProjectDir = OpenFileGUI();
+	}
+	else if (args[0] == "help")
+	{
+		PrintHelp();
+	}
+	else if (args[0] == "vsInfo")
+	{
+		PrintVisualStudioInfo(vsInfo);
+	}
+	else if (args[0] == "exit")
+	{
+		return false;
+	}
+	else
+	{
+		cout << "Invalid command. Type help for help\n";
+	}
+
+	return true;
+}
+
+int main(int argc, char* argv[])
+{				
+	vector<string> args = EvaluateProgramArguments(argc, argv);
+
+	while (true)
+	{			
+		ReadCommandFromConsole(args);
+
+		if (ExecuteCommand(args) == false)
+			return 0;
+
+		args.clear();
+	}
+}

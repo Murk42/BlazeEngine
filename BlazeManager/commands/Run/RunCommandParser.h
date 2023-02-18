@@ -4,5 +4,6 @@
 using namespace std;
 
 #include "RunCommand.h"
+#include "Result.h"
 
-bool ParseRunCommand(const vector<string>& args, RunCommandOptions& options);
+Result ParseRunCommand(const vector<string>& args, RunCommandOptions& options);

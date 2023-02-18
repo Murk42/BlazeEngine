@@ -36,7 +36,7 @@ namespace Blaze
 		Vec2i bitmapSize;
 	};
 
-	class BLAZE_API FontResolution
+	class BLAZE_API FontResolution : public ResourceSystem::Resource
 	{
 		Font* font;
 		Graphics::Core::Texture2D atlas;
@@ -66,6 +66,8 @@ namespace Blaze
 		inline const Font* GetFont() const { return font; }
 		inline uint GetBaselineDistance() const { return baselineDistance; }
 
+		RESOURCE(FontResolution);
+
 		friend class Font;
 	};
 
@@ -91,7 +93,7 @@ namespace Blaze
 		inline const std::vector<FontResolution*>& GetResolutions() const { return resolutions; }		
 		FontResolution* GetClosestResolution(float res) const;
 
-		static constexpr const char* typeName = "Font";
+		RESOURCE(Font)
 
 		friend class FontResolution;
 	};

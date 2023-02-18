@@ -39,17 +39,14 @@ Result Library::LoadLibrary(std::string path)
 	return Result();
 }
 
-void* Library::GetFunction(std::string name, Result& result)
+Result Library::GetFunction(std::string name, void*& ptr)
 {	
-	void* ptr = GetProcAddress((HMODULE)handle, name.c_str());	
+	ptr = GetProcAddress((HMODULE)handle, name.c_str());	
 
-	if (ptr == nullptr)
-	{
-		result = Result("Failed to load library function (error code : " + std::to_string(GetLastError()) + ") with name: " + name + "\n");
-		return nullptr;
-	}
+	if (ptr == nullptr)	
+		return Result("Failed to load library function (error code : " + std::to_string(GetLastError()) + ") with name: " + name + "\n");			
 
-	return ptr;
+	return Result();
 }
 
 Library& Library::operator=(Library&& l) noexcept

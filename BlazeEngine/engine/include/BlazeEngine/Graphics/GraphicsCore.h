@@ -4,9 +4,9 @@
 #include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/Common.h"
 
-#include "BlazeEngine/Graphics/GraphicsLibrary.h"
+#include "BlazeEngine/Graphics/GraphicsLibraryDeclaration.h"
 
-#include "GraphicsEnums.h"
+#include "BlazeEngine/Graphics/GraphicsEnums.h"
 
 namespace Blaze
 {		

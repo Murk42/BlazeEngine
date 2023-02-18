@@ -20,9 +20,9 @@ namespace Blaze::ResourceSystem
 		void SetResourceTypeRegistry(const ResourceTypeRegistry&);
 
 		template<typename T>
-		void AddResource(StringView name, T* resource)
+		Result AddResource(StringView name, T* resource)
 		{
-			AddResource(name, resource, registry.GetResourceTypeIndex<T>());
+			return AddResource(name, resource, registry.GetResourceTypeIndex<T>());
 		}
 		template<typename T>
 		void AddResource(T* resource)
@@ -30,8 +30,8 @@ namespace Blaze::ResourceSystem
 			//This line gives an error for no reason
 			//AddResource(resource, registry.GetTypeIndex<typename T>());
 		}
-		void AddResource(Resource* resource, size_t typeIndex);
-		void AddResource(StringView name, Resource* resource, size_t typeIndex);
+		Result AddResource(Resource* resource, size_t typeIndex);
+		Result AddResource(StringView name, Resource* resource, size_t typeIndex);
 
 		template<typename T>
 		void RemoveResource(T* resource)

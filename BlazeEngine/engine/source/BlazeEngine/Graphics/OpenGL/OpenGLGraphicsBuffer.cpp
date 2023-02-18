@@ -29,12 +29,23 @@ namespace Blaze::OpenGL
 	}
 	void GraphicsBuffer::AllocateStaticStorage(BufferView buffer, GraphicsBufferStaticStorageHint hint)
 	{
-		GLenum _hint = OpenGLBufferStaticStorageHint(hint);
+		GLenum _hint = (GLenum)hint;// OpenGLBufferStaticStorageHint(hint);
 		glNamedBufferStorage(id, buffer.Size(), buffer.Ptr(), _hint);
 	}
 	void GraphicsBuffer::ChangeData(BufferView buffer, size_t offset)
 	{
 		glNamedBufferSubData(id, offset, buffer.Size(), buffer.Ptr());
+	}
+
+	void* GraphicsBuffer::MapBufferRange(size_t offset, size_t size, GraphicsBufferMapAccess access)
+	{
+		GLenum _mapAccess = (GLenum)access;
+		return glMapNamedBufferRange(id, offset, size, _mapAccess);
+	}
+
+	void GraphicsBuffer::FlushBufferRange(size_t offset, size_t size)
+	{
+		glFlushMappedNamedBufferRange(id, offset, size);
 	}
 
 	GraphicsBuffer& GraphicsBuffer::operator=(GraphicsBuffer&& buffer) noexcept
