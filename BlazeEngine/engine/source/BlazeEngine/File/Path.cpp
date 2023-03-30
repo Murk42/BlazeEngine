@@ -1,4 +1,4 @@
-#include "BlazeEngine/File/Path.h"0
+#include "BlazeEngine/File/Path.h"
 #include <filesystem>
 
 namespace Blaze

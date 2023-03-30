@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/File/Path.h"
 
 namespace Blaze
@@ -19,17 +18,17 @@ namespace Blaze
 
 		BLAZE_API Path GetCurrentPath();
 
-		BLAZE_API int CreateFile(const Path& path);
-		BLAZE_API int DeleteFile(const Path& path);
-		BLAZE_API int ResizeFile(const Path& path, size_t newSize);
-		BLAZE_API int FileSize(const Path& path, size_t& size);
+		BLAZE_API Result CreateFile(const Path& path);
+		BLAZE_API Result DeleteFile(const Path& path);
+		BLAZE_API Result ResizeFile(const Path& path, size_t newSize);
+		BLAZE_API Result FileSize(const Path& path, size_t& size);
 
-		BLAZE_API int CreateDirectory(const Path& path);
-		BLAZE_API int DeleteDirectory(const Path& path);
+		BLAZE_API Result CreateDirectory(const Path& path);
+		BLAZE_API Result DeleteDirectory(const Path& path);
 
-		BLAZE_API int Exists(const Path& path);
+		BLAZE_API ResultValue<bool> Exists(const Path& path);
 
-		BLAZE_API int CopyContents(const Path& destination, const Path& source);
-		BLAZE_API int Copy(const Path& destination, const Path& source, CopyFlags flags = CopyFlags::Overwrite | CopyFlags::Recursive);
+		BLAZE_API Result CopyContents(const Path& destination, const Path& source);
+		BLAZE_API Result Copy(const Path& destination, const Path& source, CopyFlags flags = CopyFlags::Overwrite | CopyFlags::Recursive);
 	};
 }

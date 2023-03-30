@@ -1,10 +1,9 @@
 #include "BlazeEngine/Application/ECS/Scene.h"
-#include "BlazeEngine/Memory/MemoryManager.h"
 
 namespace Blaze::ECS
 {
 	Scene::Scene()
-		: entityCount(0), manager(nullptr)
+		: manager(nullptr)
 	{
 	}
 	Scene::~Scene()
@@ -28,15 +27,7 @@ namespace Blaze::ECS
 	}
 	void Scene::Clear()
 	{
-		for (auto bucket : entityBuckets)
-		{			
-			for (size_t offset = 0; offset != entityCount * sizeof(Entity); offset += sizeof(Entity))
-				((Entity*)(bucket->data + offset))->~Entity();
-
-			Memory::Free(bucket);
-		}
-
-		entityCount = 0;
+		entities.Clear();
 	}
 	Entity* Scene::Create(std::initializer_list<uint> componentTypeIndexes)
 	{		
@@ -52,35 +43,9 @@ namespace Blaze::ECS
 			return nullptr;
 		}
 
-		EntityBucket* bucket = nullptr;
-		uint bucketIndex = 0;
-		if (entityBuckets.size() * entityBucketElementCount == entityCount)
-		{
-			bucket = (EntityBucket*)Memory::Allocate(sizeof(EntityBucket) + sizeof(Entity) * entityBucketElementCount);
-			bucketIndex = entityBuckets.size();
-			bucket->flags = 0;
+		Entity* ptr = entities.Allocate();
 
-			entityBuckets.emplace_back(bucket);
-		}
-		else for (auto it : entityBuckets)
-			if (it->flags != std::numeric_limits<decltype(it->flags)>::max())
-			{
-				bucket = it;
-				break;
-			}
-			else
-				++bucketIndex;
-
-		uint index = std::countr_one(bucket->flags);
-		Entity* ptr = (Entity*)(bucket->data + sizeof(Entity) * index);
-		uint16 mask = 1 << index;
-
-		ptr->bucketIndex = bucketIndex;
-
-		new (ptr) Entity();
-		ptr->scene = this;
-
-		bucket->flags ^= mask;
+		ptr->scene = this;		
 
 		ptr->components.Resize(componentTypeIndexes, registry.GetComponentTypeCount());
 
@@ -100,32 +65,14 @@ namespace Blaze::ECS
 		}
 
 		for (auto component : ptr->components)
-			manager->GetSystem(component->typeIndex)->Created(component);
-
-		++entityCount;
+			manager->GetSystem(component->typeIndex)->Created(component);		
 
 		return ptr;
 	}
 	Result Scene::Destroy(Entity* entity)
 	{
 		if (entity == nullptr)
-			return Result();
-		if (entity->bucketIndex >= entityBuckets.size())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Destroying a entity that doesnt belong in this scene");		
-
-		uint bucketIndex = entity->bucketIndex;
-		EntityBucket* header = entityBuckets[bucketIndex];
-
-		uint index = ((byte*)entity - header->data) / entityBucketElementCount;
-		uint16 mask = 1 << index;
-
-		if (index >= entityBucketElementCount)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Destroying a entity that doesnt belong in this scene");
-
-		bool flag = header->flags & mask;
-
-		if (!flag)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Destroying a entity that was already destroyed");
+			return Result();				
 
 		for (auto component : entity->components)
 			manager->GetSystem(component->typeIndex)->Destroyed(component);
@@ -133,17 +80,7 @@ namespace Blaze::ECS
 		for (auto component : entity->components)
 			containers[component->typeIndex].Destroy(component);
 
-		entity->~Entity();
-
-		header->flags ^= mask;
-
-		if (header->flags == 0)
-		{
-			Memory::Free(header);
-			entityBuckets.erase(entityBuckets.begin() + bucketIndex);
-		}
-
-		--entityCount;
+		entities.Clear();
 		return Result();
 	}
 	void Scene::UpdateSystem(uint typeIndex)
@@ -152,7 +89,7 @@ namespace Blaze::ECS
 	}
 	void Scene::Render()
 	{
-		for (int i = 0; i < manager->GetRegistry().GetComponentTypeCount(); ++i)
+		for (uint i = 0; i < manager->GetRegistry().GetComponentTypeCount(); ++i)
 			manager->GetSystem(i)->Render(containers[i]);
 	}
 }

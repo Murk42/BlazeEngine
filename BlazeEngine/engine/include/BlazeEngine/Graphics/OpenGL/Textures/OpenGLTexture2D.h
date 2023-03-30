@@ -2,6 +2,7 @@
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureEnums.h"
 #include "BlazeEngine/Application/ResourceSystem/Resource.h"
+#include "BlazeEngine/File/Path.h"
 
 namespace Blaze::OpenGL
 {	
@@ -27,8 +28,8 @@ namespace Blaze::OpenGL
 
 		void SetSettings(Texture2DSettings settings);		
 
-		bool Load(StringView path, bool emitLogOnFail = true);		
-		bool Load(StringView path, TextureInternalPixelFormat internalFormat, bool emitLogOnFail = true);
+		Result Load(Path path) override;		
+		Result Load(Path path, TextureInternalPixelFormat internalFormat);
 						
 		void Create(Vec2i size, TextureInternalPixelFormat internalFormat);
 		void Create(BitmapView bm);								

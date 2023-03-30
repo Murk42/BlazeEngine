@@ -1,6 +1,7 @@
 #include "BlazeEngine/Utilities/StringParsing.h"
 
-#include <cctype>
+#include <limits>
+#include <charconv>
 
 namespace Blaze::StringParsing
 {
@@ -142,22 +143,144 @@ namespace Blaze::StringParsing
 		return out;
 	}
 
-	bool ConvertTo(const StringView& sv, uint64& value, uint base)
+	template<std::integral T> StringView IntegerTypeName();
+	template<> StringView IntegerTypeName<int64>() { return "int64"; }
+	template<> StringView IntegerTypeName<uint64>() { return "uint64"; }
+	template<> StringView IntegerTypeName<int32>() { return "int32"; }
+	template<> StringView IntegerTypeName<uint32>() { return "uint32"; }
+	template<> StringView IntegerTypeName<int16>() { return "int16"; }
+	template<> StringView IntegerTypeName<uint16>() { return "uint16"; }
+	template<> StringView IntegerTypeName<int8>() { return "int8"; }
+	template<> StringView IntegerTypeName<uint8>() { return "uint8"; }	
+
+	template<std::floating_point T> StringView FloatTypeName();
+	template<> StringView FloatTypeName<float>() { return "float"; }
+	template<> StringView FloatTypeName<double>() { return "double"; }	
+
+	std::chars_format ToStdCharsFormat(FloatStringFormat format)
 	{
-		String t;
-		RemoveSpace(sv, t);
-
-		if (t.Size() == 0) return false;
-
-		char* ptr;
-		uint64 temp = strtoull(t.Ptr(), &ptr, base);
-
-		if (ptr == t.end())
+		switch (format)
 		{
-			value = temp;
-			return true;
+		case Blaze::StringParsing::FloatStringFormat::Scientific: return std::chars_format::scientific;
+		case Blaze::StringParsing::FloatStringFormat::Fixed: return std::chars_format::fixed;
+		case Blaze::StringParsing::FloatStringFormat::Hex: return std::chars_format::hex;
+		case Blaze::StringParsing::FloatStringFormat::Default: return std::chars_format::general;
+		default:
+			throw;
 		}
-
-		return false;
 	}
+
+	template<std::integral T>
+	Result CharsToNumber(const char* str, uint length, T& value, int base, uint* count) 
+	{ 		
+		auto [end, err] = std::from_chars(str, str + length, value, base);
+
+		if (err == std::errc::result_out_of_range)
+		{
+			value = 0;
+			*count = 0;
+			return BLAZE_ERROR_RESULT("Blaze Engine", "The number in the string cannot be stored in a " + IntegerTypeName<T>() + ". The string was" + StringView(str, length));
+		}
+		else if (count != nullptr)
+			*count = end - str;
+
+		return Result();		
+	}	
+	template<std::floating_point T>
+	Result CharsToNumber(const char* str, uint length, T& value, FloatStringFormat format, uint* count)
+	{
+		auto [end, err] = std::from_chars(str, str + length, value, ToStdCharsFormat(format));
+
+		if (err == std::errc::result_out_of_range)
+		{
+			value = 0;
+			*count = 0;
+			return BLAZE_ERROR_RESULT("Blaze Engine", "The number in the string cannot be stored in a " + FloatTypeName<T>() + ". The string was" + StringView(str, length));
+		}
+		else if (count != nullptr)
+			*count = end - str;
+
+		return Result();
+	}	
+
+
+	template<std::integral T>
+	Result NumberToChars(T value, char* str, uint maxCount, int base, uint* count)
+	{
+		auto [end, err] = std::to_chars(str, str + maxCount, value, base);
+		if (err == std::errc::value_too_large)
+		{			
+			*count = 0;
+			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount).value + " characters");
+		}
+		else if (count != nullptr)
+			*count = end - str;
+
+		return Result();
+	}	
+	template<std::floating_point T>
+	Result NumberToChars(T value, char* str, uint maxCount, FloatStringFormat format, uint* count)
+	{
+		auto res = std::to_chars(str, str + maxCount, value, ToStdCharsFormat(format));
+		if (res.ec == std::errc::value_too_large)
+		{			
+			*count = 0;
+			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount).value + " characters");
+		}
+		else if (count != nullptr)
+			*count = res.ptr - str;
+
+		return Result();
+	}		
+
+	Result Convert(const StringView& from, uint64& to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int64&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, uint32& to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int32&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, uint16& to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int16&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, uint8&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int8&   to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, float&  to, FloatStringFormat format, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
+	Result Convert(const StringView& from, double& to, FloatStringFormat format, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
+
+	template<std::integral T>
+	ResultValue<String> _Convert(T value, uint base, uint* count)
+	{
+		char buffer[64];
+
+		uint _count;
+		if (Result r = NumberToChars(value, buffer, 64, base, &_count))
+			return { "", std::move(r) };
+
+		if (count != nullptr)
+			*count = _count;
+
+		return { String(buffer, _count) };
+	}
+	template<std::floating_point T>
+	ResultValue<String> _Convert(T value, FloatStringFormat format, uint* count)
+	{		
+		char buffer[64];
+		
+		uint _count;
+		if (Result r = NumberToChars(value, buffer, 64, format, &_count))				
+			return { "", std::move(r) };
+
+		if (count != nullptr)
+			*count = _count;
+		
+		return { String(buffer, _count) };
+	}
+
+	ResultValue<String> Convert(uint64 from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(int64  from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(uint32 from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(int32  from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(uint16 from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(int16  from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(uint8  from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(int8   from, uint base, uint* count) { return _Convert(from, base, count); }
+	ResultValue<String> Convert(float  from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
+	ResultValue<String> Convert(double from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
 }

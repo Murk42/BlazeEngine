@@ -1,5 +1,4 @@
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/Utilities/Thread.h"
 #include <iostream>
 #include "BlazeEngine/Core/Startup.h"

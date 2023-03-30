@@ -1,6 +1,5 @@
 #include "BlazeEngine/Logging/Logger.h"
 
-#include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Utilities/Time.h"
 #include "BlazeEngine/Logging/LogListener.h"
@@ -73,13 +72,13 @@ namespace Blaze
 				logFile.Write({ string.Ptr(), string.Size() });
 		}
 
-		void AddLog(Log log)
+		void AddLog(const Log& log)
 		{
 			if (log.GetType() == LogType::Fatal)
 			{
 				RecordLog(log.FormatString());
 
-#ifdef BLAZE_DEBUG				
+#ifdef _DEBUG				
 				DebugBreak();
 #else
 				exit(1);

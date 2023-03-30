@@ -1,5 +1,4 @@
 #include "BlazeEngine/Application/ECS/Manager.h"
-#include "BlazeEngine/Memory/MemoryManager.h"
 
 namespace Blaze::ECS
 {
@@ -11,6 +10,10 @@ namespace Blaze::ECS
 			typeData.destructSystem(systems[i]);
 			Memory::Free(systems[i]);
 		}
+	}
+	Manager::Manager()
+		: resourceManager(nullptr)
+	{
 	}
 	Result Manager::SetRegistry(const ComponentTypeRegistry& registry)
 	{

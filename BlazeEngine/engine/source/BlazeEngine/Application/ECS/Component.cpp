@@ -1,94 +1,92 @@
 #include "BlazeEngine/Application/ECS/Component.h"
 #include "BlazeEngine/Application/ECS/Entity.h"
 #include "BlazeEngine/Application/ECS/Scene.h"
-#include "BlazeEngine/Memory/MemoryManager.h"
 #include <bit>
 
 namespace Blaze::ECS
-{
-	ComponentContainer::Iterator::Iterator(const ComponentContainer* cc, uint bucketIndex, uint index)
-		: container(cc), bucketIndex(bucketIndex), index(index)
+{	
+	ComponentContainer::ElementHeader* ComponentContainer::BucketAllocate(BucketHeader* bucket)
 	{
+		uint index = std::countr_one(bucket->flags);
+		FlagType mask = FlagType(1) << index;
 
+		bucket->flags |= mask;
+
+		ElementHeader* element = (ElementHeader*)((byte*)bucket + sizeof(BucketHeader) + index * elementSize);
+		element->bucket = bucket;
+
+		typeData.construct((byte*)element + sizeof(ElementHeader));		
+		return element;
+	}
+	void ComponentContainer::BucketFree(ElementHeader* ptr)
+	{
+		BucketHeader* bucket = ptr->bucket;
+		uint index = ((byte*)ptr - (byte*)bucket - sizeof(BucketHeader)) / elementSize;
+		FlagType mask = FlagType(1) << index;
+
+		if ((bucket->flags & mask) == 0)
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet"));
+
+		bucket->flags ^= mask;		
+		typeData.destruct((byte*)ptr + sizeof(ElementHeader));
+	}
+	void* ComponentContainer::FirstInBucket(BucketHeader* bucket) const
+	{
+		return (byte*)bucket + sizeof(BucketHeader) + std::countr_zero(bucket->flags) * elementSize + sizeof(ElementHeader);
+	}
+	void* ComponentContainer::LastInBucket(BucketHeader* bucket) const
+	{
+		return (byte*)bucket + sizeof(BucketHeader) + (BucketElementCount - 1 - std::countl_zero(bucket->flags)) * elementSize + sizeof(ElementHeader);
 	}
 
-	ComponentContainer::Iterator::Iterator(const Iterator& o)
-		: container(o.container), bucketIndex(o.bucketIndex), index(o.index)
+	void ComponentContainer::Increment(uint& bucketIndex, Component*& component) const
 	{
+		void* ptr = (byte*)component - typeData.baseOffset;
+		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));
+		uint index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
 
-	}
+		FlagType mask = ~((((FlagType)1) << (index + 1)) - 1);
+		index = std::countr_zero(buckets[bucketIndex]->flags & mask);
 
-	ComponentContainer::Iterator ComponentContainer::Iterator::operator++()
-	{
-		auto old = *this;
-		++index;
-		if (index == ComponentContainer::bucketElementCount)
+		if (index == BucketElementCount)
 		{
-			index = 0;
 			++bucketIndex;
+
+			if (bucketIndex == bucketCount)
+				component = nullptr;
+			else
+				component = (Component*)((byte*)FirstInBucket(buckets[bucketIndex]) + typeData.baseOffset);
 		}
-		return old;
+		else
+			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData.baseOffset);
 	}
-	ComponentContainer::Iterator& ComponentContainer::Iterator::operator++(int)
-	{		
-		++index;
-		if (index >= ComponentContainer::bucketElementCount)
-		{
-			index = 0;
-			++bucketIndex;
-		}
-		return *this;
-	}
-	ComponentContainer::Iterator ComponentContainer::Iterator::operator--()
+	void ComponentContainer::Decrement(uint& bucketIndex, Component*& component) const
 	{
-		auto old = *this;
-		--index;
-		if (index >= ComponentContainer::bucketElementCount)
+		void* ptr = (byte*)component - typeData.baseOffset;
+		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));
+		uint index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
+
+		FlagType mask = (((FlagType)1) << index) - 1;
+		index = std::countl_zero(buckets[bucketIndex]->flags & mask);
+
+		if (index > BucketElementCount)
 		{
-			index = ComponentContainer::bucketElementCount - 1;
 			--bucketIndex;
+
+			if (bucketIndex > bucketCount)
+			{
+				bucketIndex = bucketCount;
+				component = nullptr;
+			}
+			else
+				component = (Component*)((byte*)LastInBucket(buckets[bucketIndex]) + typeData.baseOffset);
 		}
-		return old;
-	}
-	ComponentContainer::Iterator& ComponentContainer::Iterator::operator--(int)
-	{		
-		--index;
-		if (index >= ComponentContainer::bucketElementCount)
-		{
-			index = ComponentContainer::bucketElementCount - 1;
-			--bucketIndex;
-		}
-		return *this;
-	}
-
-	bool ComponentContainer::Iterator::operator==(const Iterator& other) const
-	{
-		return container == other.container && bucketIndex == other.bucketIndex && index == other.index;
-	}
-	bool ComponentContainer::Iterator::operator!=(const Iterator& other) const
-	{
-		return container != other.container || bucketIndex != other.bucketIndex || index != other.index;
-	}
-
-	Component* ComponentContainer::Iterator::operator*()
-	{
-		return (Component*)(container->buckets[bucketIndex]->data + container->typeData.size * index);
-	}
-	Component* ComponentContainer::Iterator::operator->()
-	{
-		return (Component*)(container->buckets[bucketIndex]->data + container->typeData.size * index);
-	}
-
-	ComponentContainer::Iterator& ComponentContainer::Iterator::operator=(const Iterator& o)
-	{
-		container = o.container;
-		bucketIndex = o.bucketIndex;
-		index = o.index;
-		return *this;
+		else			
+			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData.baseOffset);
 	}
 
 	ComponentContainer::ComponentContainer()
-		: count(0)
+		: buckets(nullptr), elementCount(0), bucketCount(0), nonFullBucketCount(0)
 	{
 
 	}
@@ -102,104 +100,175 @@ namespace Blaze::ECS
 			return BLAZE_ERROR_RESULT("BlazeEngine", "Cant change component type data");
 
 		this->typeData = typeData;
-
+		elementSize = typeData.size + sizeof(ElementHeader);
 		return Result();
-	}
-	void ComponentContainer::Clear()
-	{
-		for (auto bucket : buckets)
-		{
-			for (size_t offset = 0; offset != count * typeData.size; offset += typeData.size)
-				typeData.destruct(bucket->data + offset);
-
-			Memory::Free(bucket);
-		}
-		count = 0;
 	}
 	Component* ComponentContainer::Create()
 	{
-		BucketHeader* header = nullptr;
-		uint bucketIndex = 0;
-
-		if (count == buckets.size() * bucketElementCount)
+		if (nonFullBucketCount == 0)
 		{
-			header = (BucketHeader*)Memory::Allocate(sizeof(BucketHeader) + typeData.size * bucketElementCount);
-			header->flags = 0;
+			BucketHeader** newBuckets = new BucketHeader*[bucketCount + 1];
+			memcpy(newBuckets + 1, buckets, sizeof(BucketHeader*) * bucketCount);
+			delete[] buckets;
+			buckets = newBuckets;
 
-			bucketIndex = buckets.size();
-			buckets.emplace_back(header);
+			buckets[0] = (BucketHeader*)Memory::Allocate(sizeof(BucketHeader) + elementSize * BucketElementCount);
+			buckets[0]->flags = 0;
+
+			bucketCount++;
+			nonFullBucketCount++;
 		}
-		else for (auto bucket : buckets)
-			if (bucket->flags != std::numeric_limits<decltype(bucket->flags)>::max())
-			{
-				header = bucket;
-				break;
-			}
-			else
-				++bucketIndex;
 
-		uint index = std::countr_one(header->flags);
-		Component* ptr = (Component*)(header->data + typeData.size * index);
-		uint16 mask = 1 << index;
-		ptr->bucketIndex = bucketIndex;
+		elementCount++;
+		ElementHeader* element = BucketAllocate(buckets[0]);
 
-		typeData.construct(ptr);
+		if (buckets[0]->flags == std::numeric_limits<FlagType>::max())
+		{
+			--nonFullBucketCount;
+			std::swap(buckets[0], buckets[nonFullBucketCount]);
+		}
 
-		header->flags ^= mask;
-		++count;
-		return (Component*)ptr;
+		return (Component*)((byte*)element + sizeof(ElementHeader) + typeData.baseOffset);
 	}
-	Result ComponentContainer::Destroy(Component* component)
+	void ComponentContainer::Destroy(Component* component)
 	{
-		if (component == nullptr)
-			return Result();
-		if (component->bucketIndex >= buckets.size())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Destroying a component that doesnt belong in this container");
+		void* ptr = (byte*)component - typeData.baseOffset;
+		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));		
+		BucketHeader* bucket = element->bucket;
+		BucketFree(element);
 
-		uint bucketIndex = component->bucketIndex;
-		BucketHeader* header = buckets[bucketIndex];
-
-		uint index = ((byte*)component - header->data) / bucketElementCount;
-		uint16 mask = 1 << index;
-
-		if (index >= bucketElementCount)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Destroying a component that doesnt belong in this container");
-
-		bool flag = header->flags & mask;
-
-		if (!flag)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Destroying a component that was already destroyed");
-
-		typeData.destruct(component);
-
-		header->flags ^= mask;
-
-		if (header->flags == 0)
+		if (bucket->flags == 0)
 		{
-			Memory::Free(header);
-			buckets.erase(buckets.begin() + bucketIndex);
+			uint i = 0;
+			for (; i < bucketCount; ++i)
+				if (buckets[i] == bucket)
+					break;
+
+			if (i == bucketCount)
+				Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a invalid pointer"));
+
+			--bucketCount;
+			--nonFullBucketCount;
+
+			Memory::Free(buckets[i]);
+			buckets[i] = buckets[nonFullBucketCount];
+			buckets[nonFullBucketCount] = buckets[bucketCount];
+
+			BucketHeader** newBuckets = new BucketHeader * [bucketCount];
+			memcpy(newBuckets, buckets, sizeof(BucketHeader*) * bucketCount);
+			delete[] buckets;
+			buckets = newBuckets;
 		}
 
-		--count;
-		return Result();
+		--elementCount;
+	}
+	void ComponentContainer::Clear()
+	{
+		for (uint i = 0; i < bucketCount; ++i)
+		{				
+			uint index = std::countr_zero(buckets[i]->flags);
+			ElementHeader* first = (ElementHeader*)((byte*)buckets[i] + sizeof(BucketHeader) + index * elementSize);
+			
+			while (true)
+			{
+				FlagType mask = ~((((FlagType)1) << (index + 1)) - 1);
+				index = std::countr_zero(buckets[i]->flags & mask);			
+
+				if (index == BucketElementCount)
+					break;
+
+				typeData.destruct((byte*)first + index * elementSize + sizeof(ElementHeader));				
+
+			}			
+
+			Memory::Free(buckets[i]);
+		}
+		delete[] buckets;
+
+		elementCount = 0;
+		bucketCount = 0;
+		buckets = nullptr;
+		nonFullBucketCount = 0;
 	}
 	ComponentContainer::Iterator ComponentContainer::begin() const
 	{
-		return Iterator(this, 0, 0);
+		if (bucketCount == 0)
+			return end();
+		return Iterator(this, 0, (Component*)((byte*)FirstInBucket(buckets[0]) + typeData.baseOffset));
 	}
 	ComponentContainer::Iterator ComponentContainer::end() const
 	{
-		if (buckets.size() == 0)
-			return begin();
+		return Iterator(this, bucketCount, nullptr);
+	}
 
-		auto& back = buckets.back();
+	ComponentContainer::Iterator::Iterator(const ComponentContainer* cc, uint bucketIndex, Component* ptr)
+		: container(cc), bucketIndex(bucketIndex), ptr(ptr)
+	{
 
-		if (back->flags == std::numeric_limits<decltype(BucketHeader::flags)>::max())
-			return Iterator(this, buckets.size(), 0);
+	}
+	ComponentContainer::Iterator::Iterator()
+		: container(nullptr), bucketIndex(0), ptr(nullptr)
+	{
 
-		uint index = std::countr_one(back->flags);
+	}
+	ComponentContainer::Iterator::Iterator(const Iterator& o)
+		: container(o.container), bucketIndex(o.bucketIndex), ptr(o.ptr)
+	{
 
-		return Iterator(this, buckets.size() - 1, index);
+	}
+
+	ComponentContainer::Iterator& ComponentContainer::Iterator::operator++()
+	{
+		container->Increment(bucketIndex, ptr);
+		return *this;
+	}
+	ComponentContainer::Iterator ComponentContainer::Iterator::operator++(int)
+	{
+		Iterator out = *this;
+		++* this;
+		return out;
+	}
+	ComponentContainer::Iterator& ComponentContainer::Iterator::operator--()
+	{
+		container->Decrement(bucketIndex, ptr);
+		return *this;
+	}
+	ComponentContainer::Iterator ComponentContainer::Iterator::operator--(int)
+	{
+		Iterator out = *this;
+		--* this;
+		return out;
+	}
+
+
+
+	bool ComponentContainer::Iterator::operator==(const Iterator& other) const
+	{
+		return container == other.container && ptr == other.ptr;
+	}
+	bool ComponentContainer::Iterator::operator!=(const Iterator& other) const
+	{
+		return container != other.container || ptr != other.ptr;
+	}
+
+	Component* ComponentContainer::Iterator::operator*()
+	{
+		return ptr;
+	}
+
+	Component* ComponentContainer::Iterator::operator->()
+	{
+		if (ptr == nullptr)
+			throw;
+		return ptr;
+	}
+
+	ComponentContainer::Iterator& ComponentContainer::Iterator::operator=(const Iterator& other)
+	{
+		container = other.container;
+		bucketIndex = other.bucketIndex;
+		ptr = other.ptr;
+		return *this;
 	}
 
 	size_t CountOnes(byte* buffer, size_t endBitIndex)
@@ -261,7 +330,7 @@ namespace Blaze::ECS
 			if (typeIndex >= typeCount)
 			{
 				Clear();
-				return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index: " + String::Convert(typeIndex));
+				return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index: " + StringParsing::Convert(typeIndex).value);
 			}
 
 			size_t stateOffset = typeIndex >> 3;

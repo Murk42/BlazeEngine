@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngine/DataStructures/Matrix.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/Quaternion.h"
 #include "BlazeEngine/DataStructures/Rect.h"
 #include <algorithm>
@@ -11,8 +10,8 @@ namespace Blaze
 	{
 		constexpr long double PI = 3.14159265358979323846264338327950288419716939937510;
 
-		constexpr float Radians(float degrees) { return degrees * PI / 180.0f; }
-		constexpr double Radians(double degrees) { return degrees * PI / 180.0f; }				
+		constexpr float Radians(float degrees) { return degrees * static_cast<float>(PI) / 180.0f; }
+		constexpr double Radians(double degrees) { return degrees * static_cast<double>(PI) / 180.0; }				
 
 		inline float Sin(float radians) { return sin(radians); }
 		inline double Sin(double radians) { return sin(radians); }

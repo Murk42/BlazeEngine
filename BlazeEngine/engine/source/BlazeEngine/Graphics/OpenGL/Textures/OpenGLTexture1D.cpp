@@ -1,7 +1,6 @@
 #pragma once
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture1D.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
-#include "BlazeEngine/Logging/Logger.h"
 
 #include "GL/glew.h"
 #include "IL/il.h"
@@ -42,23 +41,21 @@ namespace Blaze::OpenGL
 		if (settings.mipmaps)
 			glGenerateMipmap(GL_TEXTURE_2D);
 	}		
-	void Texture1D::Create(size_t size, TextureInternalPixelFormat internalFormat)
+	void Texture1D::Create(uint size, TextureInternalPixelFormat internalFormat)
 	{
 		this->size = size;		
 		Graphics::Core::SelectTexture(this);				
-		glTexImage1D(GL_TEXTURE_1D, 0, OpenGLInternalPixelFormat(internalFormat), size, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
+		glTexImage1D(GL_TEXTURE_1D, 0, OpenGLInternalPixelFormat(internalFormat), static_cast<GLsizei>(size), 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}	
 
-	void Texture1D::SetPixels(size_t offset, size_t size, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
+	void Texture1D::SetPixels(uint offset, uint size, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
 	{
 		GLenum _format = OpenGLPixelFormat(format);
 		GLenum _type = OpenGLPixelType(type);
-		
-		uint align;
-		uint str;		
+						
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);		
-		glTextureSubImage1D(id, 0, offset, size, _format, _type, pixels);
+		glTextureSubImage1D(id, 0, static_cast<GLint>(offset), static_cast<GLsizei>(size), _format, _type, pixels);
 	}
 
 	void Texture1D::GenerateMipmaps()

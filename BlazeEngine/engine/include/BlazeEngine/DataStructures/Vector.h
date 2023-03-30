@@ -10,7 +10,7 @@ namespace Blaze
 	}
 
 	template<typename T, size_t S>
-	struct Vector;
+	struct BLAZE_API Vector;
 
 	template<size_t S>
 	using Veci = Vector<int, S>;
@@ -20,7 +20,7 @@ namespace Blaze
 	using Vecd = Vector<double, S>;
 
 	template<typename T>
-	struct Vector<T, 2>
+	struct BLAZE_API Vector<T, 2>
 	{
 		union {
 			struct {
@@ -48,7 +48,7 @@ namespace Blaze
 		}		
 		template<typename T2>
 		constexpr explicit Vector(Vector<T2, 2> v)
-			: x(v.x), y(v.y)
+			: x(static_cast<T>(v.x)), y(static_cast<T>(v.y))
 		{			
 		}
 
@@ -96,7 +96,7 @@ namespace Blaze
 	using Vec2d = Vec2<double>;
 
 	template<typename T>
-	struct Vector<T, 3>
+	struct BLAZE_API Vector<T, 3>
 	{
 		union {
 			struct {
@@ -126,7 +126,7 @@ namespace Blaze
 		}
 		template<typename T2>
 		constexpr explicit Vector(Vector<T2, 3> v)
-			: x(v.x), y(v.y), z(v.z)
+			: x(static_cast<T>(v.x)), y(static_cast<T>(v.y)), z(static_cast<T>(v.z))
 		{
 		}
 		constexpr Vector(Vector<T, 2> v, T z)
@@ -179,7 +179,7 @@ namespace Blaze
 	using Vec3d = Vec3<double>;
 
 	template<typename T>
-	struct Vector<T, 4>
+	struct BLAZE_API Vector<T, 4>
 	{
 		union {
 			struct {
@@ -212,7 +212,7 @@ namespace Blaze
 		}		
 		template<typename T2>
 		constexpr explicit Vector(Vector<T2, 4> v)
-			: x(v.x), y(v.y), z(v.y), w(v.w)
+			: x(static_cast<T>(v.x)), y(static_cast<T>(v.y)), z(static_cast<T>(v.y)), w(static_cast<T>(v.w))
 		{			
 		}	
 		constexpr Vector(Vector<T, 3> v, T w)

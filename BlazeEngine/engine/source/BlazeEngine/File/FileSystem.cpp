@@ -1,6 +1,5 @@
+#pragma once
 #include "BlazeEngine/File/FileSystem.h"
-
-#include "BlazeEngine/Logging/Logger.h"
 
 #include <filesystem>
 #include <fstream>
@@ -14,113 +13,107 @@ namespace Blaze
         {
             return Path(StringView((const char*)std::filesystem::current_path().u8string().c_str()));
         }
-        int CreateFile(const Path& path)
+        Result CreateFile(const Path& path)
         {
             std::ofstream fs(path.GetString().Ptr());
-            if (!fs.is_open())
-            {                
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to create file with path: \"" + path.GetString() + "\".");
-                return BLAZE_ERROR;
-            }
-            return BLAZE_OK;            
+
+            if (!fs.is_open())                      
+                return BLAZE_ERROR_RESULT("Blaze Engine", "Failed to create file with path: \"" + path.GetString() + "\".");                            
+
+            return Result();
         }
-        int CreateDirectory(const Path& path)
+        Result CreateDirectory(const Path& path)
+        {
+            std::error_code ec;            
+            std::filesystem::create_directory(path.GetString().Ptr(), ec);
+            if (ec)
+            {
+                return BLAZE_ERROR_RESULT("Blaze Engine",
+                    "std::filesystem::create_directory failed with path: \"" + path.GetString() + "\". \n" + ec.message().c_str());                
+            }
+            return Result();
+        }
+        Result DeleteFile(const Path& path)
         {
             std::error_code ec;
             std::filesystem::remove(path.GetString().Ptr(), ec);
             if (ec)
             {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to create directory with path: \"" + path.GetString() + "\".");
-                return BLAZE_ERROR;
+                return BLAZE_ERROR_RESULT("Blaze Engine",
+                    "std::filesystem::remove failed with path: \"" + path.GetString() + "\". \n" + ec.message().c_str());                
             }
-            return BLAZE_OK; 
+            return Result();
         }
-        int DeleteFile(const Path& path)
-        {
-            std::error_code ec;
-            std::filesystem::remove(path.GetString().Ptr(), ec);
-            if (ec)
-            {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to delete a fil with path: \"" + path.GetString() + "\".");
-                return BLAZE_ERROR;
-            }
-            return BLAZE_OK;
-        }
-        int ResizeFile(const Path& path, size_t newSize)
+        Result ResizeFile(const Path& path, size_t newSize)
         {
             std::error_code ec;
             std::filesystem::resize_file(path.GetString().Ptr(), newSize, ec);
             if (ec)
             {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to resize a file with path: \"" + path.GetString() + "\".");
-                return BLAZE_ERROR;
+                return BLAZE_ERROR_RESULT("Blaze Engine",
+                    "std::filesystem::resize_file failed with path: \"" + path.GetString() + "\". \n" + ec.message().c_str());                
             }
-            return BLAZE_OK;
+            return Result();
         }
-        int FileSize(const Path& path, size_t& size)
+        Result FileSize(const Path& path, size_t& size)
         {
             std::error_code ec;
             size = std::filesystem::file_size(path.GetString().Ptr(), ec);
             if (ec)
             {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to retrieve size of a file with path: \"" + path.GetString() + "\".");
-                return BLAZE_ERROR;
+                return BLAZE_ERROR_RESULT("Blaze Engine",
+                       "std::filesystem::file_size failed with path: \"" + path.GetString() + "\". \n" + ec.message().c_str());                
             }
-            return BLAZE_OK;
+            return Result();
         }        
 
-        int DeleteDirectory(const Path& path)
+        Result DeleteDirectory(const Path& path)
         {
             std::error_code ec;
             std::filesystem::remove_all(path.GetString().Ptr(), ec);
             if (ec)
             {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to delete a directory with path: \"" + path.GetString() + "\".");
-                return BLAZE_ERROR;
+                return BLAZE_ERROR_RESULT("Blaze Engine",
+                    "std::filesystem::remove_all failed with path: \"" + path.GetString() + "\". \n" + ec.message().c_str());                
             }
-            return BLAZE_OK;
+            return Result();
         }   
 
-        int Exists(const Path& path)
+        ResultValue<bool> Exists(const Path& path)
         {
             std::error_code ec;
-            std::filesystem::exists(path.GetString().Ptr(), ec);
+
+            bool exists = std::filesystem::exists(path.GetString().Ptr(), ec);
+
             if (ec)
             {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Exists failed with path: \"" + path.GetString() + "\".");
-                return BLAZE_ERROR;
+                return { exists, BLAZE_ERROR_RESULT("Blaze Engine", 
+                    "std::filesystem::exists failed with path: \"" + path.GetString() + "\". \n" + ec.message().c_str()) };                
             }
-            return BLAZE_OK;
+            
+            return { exists, Result()};
         }
-        int CopyContents(const Path& dst, const Path& src)
+        Result CopyContents(const Path& dst, const Path& src)
         {
             std::error_code ec;
             std::filesystem::copy_file(src.GetString().Ptr(), dst.GetString().Ptr(), ec);
             if (ec)
             {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to copy contents from \"" + src.GetString() + "\" to \"" + dst.GetString() + "\".");
-                return BLAZE_ERROR;
+                return BLAZE_ERROR_RESULT("Blaze Engine",
+                    "std::filesystem::copy_file failed with destination: \"" + dst.GetString() + "\" and source: \"" + src.GetString() + "\". \n" + ec.message().c_str());
             }
-            return BLAZE_OK;
+            return Result();
         }
-        int Copy(const Path& dst, const Path& src, CopyFlags flags)
+        Result Copy(const Path& dst, const Path& src, CopyFlags flags)
         {
             std::error_code ec;
             std::filesystem::copy(src.GetString().Ptr(), dst.GetString().Ptr(), (std::filesystem::copy_options)flags, ec);
             if (ec)
             {
-                BLAZE_WARNING_LOG(ec.category().name(), ec.message().c_str());
-                BLAZE_WARNING_LOG("Blaze Engine", "Failed to copy \"" + src.GetString() + "\" to \"" + dst.GetString() + "\".");
-                return BLAZE_ERROR;
+                return BLAZE_ERROR_RESULT("Blaze Engine",
+                    "std::filesystem::copy failed with destination: \"" + dst.GetString() + "\" and source: \"" + src.GetString() + "\". \n" + ec.message().c_str());
             }
-            return BLAZE_OK;            
+            return Result();
         }
     }
 }

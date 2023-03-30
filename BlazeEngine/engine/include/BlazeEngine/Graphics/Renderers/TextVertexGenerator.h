@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/DataStructures/StringUTF8.h"
 

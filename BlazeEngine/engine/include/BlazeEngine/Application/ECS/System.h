@@ -1,9 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"
 
 namespace Blaze::ECS

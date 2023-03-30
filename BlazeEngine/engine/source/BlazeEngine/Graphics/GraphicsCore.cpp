@@ -65,6 +65,12 @@ namespace Blaze
 	namespace Graphics::Core
 	{
 
+		template<typename T>
+		inline std::underlying_type_t<T> ToInteger(T value)
+		{
+			return static_cast<std::underlying_type_t<T>>(value);
+		}
+
 		GLenum OpenGLRenderPrimitive(PrimitiveType type)
 		{
 			switch (type)
@@ -78,6 +84,9 @@ namespace Blaze
 			case PrimitiveType::TriangleFan: return GL_TRIANGLE_FAN;
 			case PrimitiveType::Pathes: return GL_PATCHES;
 			}
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", 
+				"Invalid PrimitiveType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLIndexType(IndexType type)
 		{
@@ -87,6 +96,9 @@ namespace Blaze
 			case IndexType::Uint16: return GL_UNSIGNED_SHORT;
 			case IndexType::Uint8: return GL_UNSIGNED_BYTE;		
 			}
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", 
+				"Invalid IndexType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLPolygonMode(PolygonMode mode)
 		{
@@ -96,6 +108,9 @@ namespace Blaze
 			case PolygonMode::Line: return GL_LINE;
 			case PolygonMode::Fill: return GL_FILL;		
 			}
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", 
+				"Invalid PolygonMode. The integer value was: " + StringParsing::Convert(ToInteger(mode)).value));
+			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLImageAccess(ImageAccess access)
 		{
@@ -105,6 +120,9 @@ namespace Blaze
 			case ImageAccess::Write: return GL_WRITE_ONLY;
 			case ImageAccess::ReadWrite: return GL_READ_WRITE;		
 			}
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid ImageAccess enum value. The integer value was: " + StringParsing::Convert(ToInteger(access)).value));
+			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLImageFormat(ImageFormat format)
 		{
@@ -150,8 +168,58 @@ namespace Blaze
 			case ImageFormat::R16_SNORM:		return GL_R16_SNORM;
 			case ImageFormat::R8_SNORM:		return GL_R8_SNORM;			
 			}
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid ImageFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+			return std::numeric_limits<GLenum>::max();
 		}		
 
+		GLenum OpenGLStencilOperationType(StencilOperationType type)
+		{
+			switch (type)
+			{
+			case Blaze::Graphics::Core::StencilOperationType::Keep: return GL_KEEP;
+			case Blaze::Graphics::Core::StencilOperationType::Zero: return GL_ZERO;
+			case Blaze::Graphics::Core::StencilOperationType::Replace: return GL_REPLACE;
+			case Blaze::Graphics::Core::StencilOperationType::Increase: return GL_INCR;
+			case Blaze::Graphics::Core::StencilOperationType::IncreaseWrap: return GL_INCR_WRAP;
+			case Blaze::Graphics::Core::StencilOperationType::Decrease: return GL_DECR;
+			case Blaze::Graphics::Core::StencilOperationType::DecreaseWrap: return GL_DECR_WRAP;
+			case Blaze::Graphics::Core::StencilOperationType::Invert: return GL_INVERT;			
+			}					
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid StencilOperationType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			return std::numeric_limits<GLenum>::max();
+		}
+		GLenum OpenGLStencilComparison(StencilComparison comparison)
+		{
+			switch (comparison)
+			{
+			case Blaze::Graphics::Core::StencilComparison::Never: return GL_NEVER;
+			case Blaze::Graphics::Core::StencilComparison::Less: return GL_LESS;
+			case Blaze::Graphics::Core::StencilComparison::LessEqual: return GL_LEQUAL;
+			case Blaze::Graphics::Core::StencilComparison::Greater: return GL_GREATER;
+			case Blaze::Graphics::Core::StencilComparison::GreaterEqual: return GL_GEQUAL;
+			case Blaze::Graphics::Core::StencilComparison::Equal: return GL_EQUAL;
+			case Blaze::Graphics::Core::StencilComparison::NotEqual: return GL_NOTEQUAL;
+			case Blaze::Graphics::Core::StencilComparison::Always: return GL_ALWAYS;			
+			}
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid StencilComparison enum value. The integer value was: " + StringParsing::Convert(ToInteger(comparison)).value));
+			return std::numeric_limits<GLenum>::max();
+		}
+		GLenum OpenGLScreenBufferType(ScreenBufferType type)
+		{
+			switch (type)
+			{
+			case Blaze::Graphics::Core::ScreenBufferType::Front: return GL_FRONT;
+			case Blaze::Graphics::Core::ScreenBufferType::Back: return GL_BACK;
+			case Blaze::Graphics::Core::ScreenBufferType::BackAndFront: return GL_FRONT_AND_BACK;			
+			}
+			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid ScreenBufferType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			return std::numeric_limits<GLenum>::max();
+		}
+		
 		uint GetVideoDisplayCount()
 		{
 			return SDL_GetNumVideoDisplays();
@@ -221,6 +289,18 @@ namespace Blaze
 		{
 			glActiveTexture(GL_TEXTURE0 + slot);
 		}
+
+		void BindUniformBuffer(const GraphicsBuffer& buffer, uint binding)
+		{
+			glBindBufferBase(GL_UNIFORM_BUFFER, binding, buffer.GetHandle());			
+		}
+
+		void BindUniformBufferRange(const GraphicsBuffer& buffer, uint binding, uint offset, uint size)
+		{
+			glBindBufferRange(GL_UNIFORM_BUFFER, binding, buffer.GetHandle(), offset, size);
+		}
+
+	
 
 		void SelectTexture(Graphics::Core::Texture1D* obj)
 		{
@@ -384,6 +464,7 @@ namespace Blaze
 			viewportPos = pos;
 			viewportSize = size;
 			glViewport(pos.x, pos.y, size.x, size.y);
+
 			engineData->viewportChangedDispatcher.Call({ pos, size });
 			Graphics::Graphics_ViewportChanged({ pos, size });
 		}
@@ -426,7 +507,7 @@ namespace Blaze
 
 		void ClearTarget()
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		}
 		void ClearTargetColor()
 		{
@@ -436,12 +517,17 @@ namespace Blaze
 		{
 			glClear(GL_DEPTH_BUFFER_BIT);
 		}
-		void SwapWindowBuffers()
+		void ClearTargetStencil()
+		{
+			glClear(GL_STENCIL_BUFFER_BIT);
+		}
+		Result SwapWindowBuffers()
 		{
 			if (target == nullptr)
-				BLAZE_WARNING_LOG("Blaze Engine", "No target was selected!");
+				return BLAZE_WARNING_RESULT("Blaze Engine", "No target was selected!");
 			else
 				SDL_GL_SwapWindow((SDL_Window*)target);
+			return Result();
 		}
 
 		void SetTarget(Window& win)
@@ -493,24 +579,34 @@ namespace Blaze
 			else
 				glDisable(GL_DEPTH_TEST);
 		}
-		void EnableScissorTest(bool enable)
-		{
-			if (enable)
-				glEnable(GL_SCISSOR_TEST);
-			else
-				glDisable(GL_SCISSOR_TEST);
-		}		
-		void EnableStencilTest(bool enable)
+		void EnableStencilTest(bool enable) 
 		{
 			if (enable)
 				glEnable(GL_STENCIL_TEST);
 			else
 				glDisable(GL_STENCIL_TEST);
 		}
-		
-		void RenderIndexedPrimitives(PrimitiveType type, IndexType indexType, uint indexCount, uint indexBufferOffset)
+		void EnableScissorTest(bool enable)
 		{
-			glDrawElements(OpenGLRenderPrimitive(type), indexCount, OpenGLIndexType(indexType), (void*)indexBufferOffset);
+			if (enable)
+				glEnable(GL_SCISSOR_TEST);
+			else
+				glDisable(GL_SCISSOR_TEST);
+		}	
+
+		void SetStencilOperation(ScreenBufferType bufferType, StencilOperationType bothFail, StencilOperationType depthFailStencilSucceed, StencilOperationType bothSucceed)
+		{
+			glStencilOpSeparate(OpenGLScreenBufferType(bufferType), OpenGLStencilOperationType(bothFail), OpenGLStencilOperationType(depthFailStencilSucceed), OpenGLStencilOperationType(bothSucceed));
+		}
+
+		void SetStencilFunction(ScreenBufferType bufferType, StencilComparison comparison, int reference, uint mask)
+		{									
+			glStencilFuncSeparate(OpenGLScreenBufferType(bufferType), OpenGLStencilComparison(comparison), reference, mask);
+		}
+		
+		void RenderIndexedPrimitives(PrimitiveType type, IndexType indexType, uint indexCount, uint indexBufferByteOffset)
+		{
+			glDrawElements(OpenGLRenderPrimitive(type), indexCount, OpenGLIndexType(indexType), reinterpret_cast<void*>(static_cast<uintptr_t>(indexBufferByteOffset)));
 		}
 		void RenderPrimitiveArray(PrimitiveType type, uint startIndex, uint primitiveCount)
 		{

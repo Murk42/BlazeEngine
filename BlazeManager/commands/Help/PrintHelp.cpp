@@ -1,4 +1,5 @@
 #include "PrintHelp.h"
+#include <iostream>
 
 void PrintHelp()
 {

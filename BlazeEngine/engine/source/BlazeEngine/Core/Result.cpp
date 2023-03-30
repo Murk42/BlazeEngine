@@ -1,20 +1,15 @@
+#pragma once
 #include "BlazeEngine/Core/Result.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Logging/Logger.h"
 
 namespace Blaze
 {
 	Result::Result()
-		: type(LogType::Info), failed(false)
+		: failed(false)
 	{		
-	}
-	Result::Result(Result& result)
-		: type(result.type), logs(result.logs), failed(result.failed)
-	{
-		result.Clear();
-	}
+	}	
 	Result::Result(Result&& result) noexcept
-		: type(result.type), logs(std::move(result.logs)), failed(result.failed)
+		: logs(std::move(result.logs)), failed(result.failed)
 	{
 		result.Clear();
 	}
@@ -23,17 +18,7 @@ namespace Blaze
 	{		
 		this->failed = failed;
 		AddLog(log);
-	}
-	Result::Result(Result& result, const Log& log, bool failed)
-		: Result(result)
-	{
-		if (failed)
-			this->failed = failed;
-
-		AddLog(log);
-
-		result.Clear();
-	}
+	}	
 	Result::~Result()
 	{
 		for (auto& log : logs)
@@ -46,9 +31,7 @@ namespace Blaze
 	}
 	void Result::AddLog(const Log& log)
 	{
-		logs.emplace_back(log);
-		if (type < log.GetType())
-			this->type = log.GetType();
+		logs.emplace_back(log);		
 	}
 	void Result::SetFailed(bool failed)
 	{
@@ -56,8 +39,7 @@ namespace Blaze
 	}
 	void Result::Clear()
 	{
-		logs.clear();
-		type = LogType::Info;
+		logs.clear();		
 		failed = false;
 	}
 
@@ -70,18 +52,33 @@ namespace Blaze
 	}
 	
 	Result& Result::operator=(Result&& result) noexcept
-	{
-		type = result.type;
+	{		
 		logs = std::move(result.logs);
 		failed = result.failed;				
 
 		result.Clear();
 
 		return *this;
-	}
-	Result& Result::operator+(const Log& log)
+	}	
+	Result Result::operator+(Result&& other)
 	{
-		AddLog(log);
-		return *this;
+		Result out = std::move(*this);
+		out.failed |= other.failed;		
+		out.logs.insert(out.logs.end(), other.logs.begin(), other.logs.end());
+		other.failed = false;
+		
+		return std::move(out);
+	}
+	Result Result::operator+(Result& other)
+	{
+		return *this + std::move(other);
+	}
+	Result& Result::operator+=(Result&& other)
+	{
+		return *this = std::move(*this + std::move(other));
+	}
+	Result& Result::operator+=(Result& other)
+	{
+		return operator+=(std::move(other));
 	}
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/DataStructures/Vector.h"
 
 namespace Blaze
 {

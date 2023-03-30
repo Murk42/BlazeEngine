@@ -1,11 +1,13 @@
 #include "RunCommand.h"
 
 #include <filesystem>
-#include <direct.h>
+#include <iostream>
+using namespace std;
 
 #include "Globals.h"
 #include "DefaultBuilds.h"
 #include "Library.h"
+#include "InstancePath.h"
 
 static Result LoadClientDynamicLibraries(const ClientLibraryInfo& info, std::vector<Library>& libraries, bool log)
 {
@@ -48,6 +50,7 @@ Result RunCommand(RunCommandOptions options)
 	}
 
 	string projectDir = filesystem::path(options.projectPath).parent_path().string() + "\\";
+	string projectName = filesystem::path(options.projectPath).stem().string();
 	string outputSubDir = GetOutputSubDir(configuration, platform);
 	string engineOutputDir = engineProjectDir + outputSubDir;
 
@@ -62,7 +65,7 @@ Result RunCommand(RunCommandOptions options)
 		if (Result r = BuildBlaze(configuration, platform, {
 			.projectPath = engineProjectDir + "BlazeEngine.vcxproj",
 			.outputDir = engineOutputDir
-			}, buildLog)) return buildLog + "\n" + r;
+			}, buildLog)) return buildLog + "\n" + std::move(r);
 
 		cout << buildLog;
 	}
@@ -73,7 +76,7 @@ Result RunCommand(RunCommandOptions options)
 			.projectPath = options.projectPath,
 			.outputDir = clientOutputDir,
 			.engineLibraryDir = engineOutputDir
-			}, buildLog)) return buildLog + "\n" + r;
+			}, buildLog)) return buildLog + "\n" + std::move(r);
 
 		cout << buildLog;
 	}		
@@ -84,14 +87,14 @@ Result RunCommand(RunCommandOptions options)
 			.projectPath = runtimeProjectDir + "BlazeEngineRuntime.vcxproj",
 			.outputDir = runtimeOutputDir,
 			.clientLibraryDir = clientOutputDir,
-			}, buildLog)) return buildLog + "\n" + r;
+			}, buildLog)) return buildLog + "\n" + std::move(r);
 
 		cout << buildLog;
 	}
 	
 	error_code ec;
 	{
-		string path = projectDir + outputSubDir + "Client.dll";
+		string path = projectDir + outputSubDir + projectName + ".dll";
 		bool exists = filesystem::exists(path, ec);
 		if (ec) return Result("Failed to see if client library exists: \"" + path + "\"\n" + (string)ec.category().name() + ": " + ec.message() + "\n");
 
@@ -101,10 +104,10 @@ Result RunCommand(RunCommandOptions options)
 	if (options.managerLog)
 		cout << "<BlazeEngineManager> Loading libraries...\n";
 
-	filesystem::create_directory(projectDir + "assets");
-	filesystem::copy(engineOutputDir + "assets\\default", projectDir + "assets\\default", filesystem::copy_options::overwrite_existing | filesystem::copy_options::recursive, ec);
-
-	if (ec) return Result("Failed to copy default assets\n" + (string)ec.category().name() + ": " + ec.message() + "\n");
+	//filesystem::create_directory(projectDir + "assets");
+	//filesystem::copy(engineOutputDir + "assets\\default", projectDir + "assets\\default", filesystem::copy_options::overwrite_existing | filesystem::copy_options::recursive, ec);
+	//
+	//if (ec) return Result("Failed to copy default assets\n" + (string)ec.category().name() + ": " + ec.message() + "\n");
 			
 	vector<Library> engineLibraries(engineDependencies[(Configuration)options.configuration].size());
 	
@@ -112,7 +115,7 @@ Result RunCommand(RunCommandOptions options)
 	{ 
 		string path = engineOutputDir + engineDependencies[(Configuration)options.configuration][i];
 		if (Result r = engineLibraries[i].LoadLibrary(path))
-			return string("Failed to load engine dependency: \"" + path + "\"\n") + r;
+			return string("Failed to load engine dependency: \"" + path + "\"\n") + std::move(r);
 	}
 			
 
@@ -132,10 +135,10 @@ Result RunCommand(RunCommandOptions options)
 			if (options.managerLog)  cout << "<BlazeEngineManager> Loading engine library: \"" + path + "\"\n";
 
 			if (Result r = engineLibrary.LoadLibrary(path))
-				return string("Failed to load engine library: \"" + path + "\"\n") + r;			
+				return string("Failed to load engine library: \"" + path + "\"\n") + std::move(r);
 			
-			if (Result r = engineLibrary.GetFunction("InitializeBlaze", InitializeBlaze)) return string("Failed to load engine function \"InitializeBlaze\"\n") + r;
-			if (Result r = engineLibrary.GetFunction("TerminateBlaze", TerminateBlaze)) return string("Failed to load engine function \"TerminateBlaze\"\n") + r;			
+			if (Result r = engineLibrary.GetFunction("InitializeBlaze", InitializeBlaze)) return string("Failed to load engine function \"InitializeBlaze\"\n") + std::move(r);
+			if (Result r = engineLibrary.GetFunction("TerminateBlaze", TerminateBlaze)) return string("Failed to load engine function \"TerminateBlaze\"\n") + std::move(r);
 		}
 
 
@@ -158,15 +161,14 @@ Result RunCommand(RunCommandOptions options)
 			}
 
 			{
-				string oldPath = std::filesystem::current_path().string();
-				_chdir(projectDir.c_str());
-				InitializeBlaze();
+				InstancePath instancePath{ projectDir };				
+				InitializeBlaze();				
 				Library libraryClient;
 
 				{
-					string path = clientOutputDir + "Client.dll";
+					string path = clientOutputDir + projectName + ".dll";
 					if (options.managerLog) cout << "<BlazeEngineManager> Loading client library: \"" + path + "\"\n";
-					if (Result r = libraryClient.LoadLibrary(path)) return string("Failed to load client library: \"" + path + "\"\n") + r;
+					if (Result r = libraryClient.LoadLibrary(path)) return string("Failed to load client library: \"" + path + "\"\n") + std::move(r);
 				}
 
 				{
@@ -193,8 +195,7 @@ Result RunCommand(RunCommandOptions options)
 					}
 				}
 
-				TerminateBlaze();
-				_chdir(oldPath.c_str());
+				TerminateBlaze();				
 			}
 		}
 
@@ -205,7 +206,7 @@ Result RunCommand(RunCommandOptions options)
 Result RunClient(Library& clientLibrary)
 {	
 	void(*Setup)();
-	if (Result r = clientLibrary.GetFunction("Setup", Setup)) return string("Failed to load client function \"Setup\"") + r;	
+	if (Result r = clientLibrary.GetFunction("Setup", Setup)) return string("Failed to load client function \"Setup\"\n") + std::move(r);
 
 	Setup();
 

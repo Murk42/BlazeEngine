@@ -1,5 +1,5 @@
+#pragma once
 #include "BlazeEngine/Application/ResourceSystem/ResourceTypeRegistry.h"
-#include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 
 namespace Blaze::ResourceSystem
@@ -44,15 +44,15 @@ namespace Blaze::ResourceSystem
 
 	uint ResourceTypeRegistry::GetResourceTypeCount() const
 	{
-		return types.size();
+		return static_cast<uint>(types.size());
 	}
 
-	const ResourceTypeData& ResourceTypeRegistry::GetResourceTypeData(uint index) const
+	ResourceTypeData ResourceTypeRegistry::GetResourceTypeData(uint index) const
 	{
 		if (index > types.size())
 		{
 			Logger::AddLog(LogType::Error, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-				"Blaze Engine", "Index is out of bounds. Index was: " + String::Convert(index));
+				"Blaze Engine", "Index is out of bounds. Index was: " + StringParsing::Convert(index).value);
 			return { "" };
 		}
 		return types[index];

@@ -1,17 +1,17 @@
 #include "Globals.h"
 
-VisualStudioInfo vsInfo;
+	VisualStudioInfo vsInfo;
 
-string engineProjectDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngine\\";
+string engineProjectDir = "D:\\Programming\\Projects\\BlazeEngine\\BlazeEngine\\";
 string engineDLLPath;
 string engineLIBPath;
 unordered_map<Configuration, vector<string>> engineDependencies{
-	{ Configuration::Debug,					{ "SDL2d.dll", "DevIL.dll", "ILU.dll", "freetyped.dll"} },
-	{ Configuration::Release,				{ "SDL2.dll", "DevIL.dll", "ILU.dll", "freetype.dll"} },
-	{ Configuration::FinalBuild_Debug,		{ "SDL2d.dll", "DevIL.dll", "ILU.dll", "freetyped.dll"} },
-	{ Configuration::FinalBuild_Release,	{ "SDL2.dll", "DevIL.dll", "ILU.dll", "freetype.dll"} },
+	{ Configuration::Debug,					{ "SDL2d.dll", "DevIL.dll", "ILU.dll", "freetyped.dll", "glew32d.dll" }},
+	{ Configuration::Release,				{ "SDL2.dll", "DevIL.dll", "ILU.dll", "freetype.dll", "glew32.dll" } },
+	{ Configuration::DebugStatic,			{ "SDL2d.dll", "DevIL.dll", "ILU.dll", "freetyped.dll", "glew32d.dll" } },
+	{ Configuration::ReleaseStatic,			{ "SDL2.dll", "DevIL.dll", "ILU.dll", "freetype.dll", "glew32.dll" } },
 };
 
-string runtimeProjectDir = "C:\\Programming\\Projects\\BlazeEngine\\BlazeEngineRuntime\\";
+string runtimeProjectDir = "D:\\Programming\\Projects\\BlazeEngine\\BlazeEngineRuntime\\";
 string runtimeDLLPath;
 string runtimeLIBPath;

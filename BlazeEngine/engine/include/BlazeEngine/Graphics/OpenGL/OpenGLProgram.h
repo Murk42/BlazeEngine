@@ -1,10 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/Logging/Logger.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Graphics/OpenGL/OpenGLShader.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/Matrix.h"
 #include <vector>
 
@@ -12,6 +7,8 @@ namespace Blaze
 {
 	namespace OpenGL
 	{
+		class GraphicsBuffer;
+
 		enum class UniformType
 		{
 			Mat4 = 35676,
@@ -55,16 +52,22 @@ namespace Blaze
 			uint GetUniformBlockCount() const;
 			void GetUniformBlockData(uint index, int& location, String& name, uint& size, std::vector<int>& memberLocations) const;
 			void GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset);
+			void BindUniformBlock(int location, uint binding);
 				
 			void SetUniform(int location, const bool& value);
 			void SetUniform(int location, const int& value);
 			void SetUniform(int location, const uint& value);
-			void SetUniform(int location, const float& value);			
+			void SetUniform(int location, const float& value);		
+			void SetUniform(int location, const double& value);
 			void SetUniform(int location, const Vec2i& value);
 			void SetUniform(int location, const Vec2f& value);
+			void SetUniform(int location, const Vec2d& value);
 			void SetUniform(int location, const Vec3i& value);
 			void SetUniform(int location, const Vec3f& value);
+			void SetUniform(int location, const Vec3d& value);
+			void SetUniform(int location, const Vec4i& value);
 			void SetUniform(int location, const Vec4f& value);
+			void SetUniform(int location, const Vec4d& value);
 			void SetUniform(int location, const Mat2f& value);
 			void SetUniform(int location, const Mat3f& value);
 			void SetUniform(int location, const Mat4f& value);

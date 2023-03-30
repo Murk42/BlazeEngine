@@ -1,8 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/StringView.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 
 namespace Blaze
 {	
@@ -46,36 +42,7 @@ namespace Blaze
 		const char& operator[](size_t index) const { return ptr[index]; }		
 
 		String& operator+= (const StringView&);
-		String& operator+= (const char&);
-
-		static String Convert(uint32 value);
-		static String Convert(int32 value);
-		static String Convert(uint64 value);
-		static String Convert(int64 value);
-		static String Convert(float value);
-		static String Convert(double value);		
-		template<typename T>
-		static String Convert(Vec2<T> vec)
-		{
-			return "(" + Convert(vec.x) + ", " + Convert(vec.y) + ")";
-		}
-		template<typename T>
-		static String Convert(Vec3<T> vec)
-		{
-			return "(" + Convert(vec.x) + ", " + Convert(vec.y) + ", " + Convert(vec.z) + ")";
-		}
-		template<typename T>
-		static String Convert(Vec4<T> vec, char seperator = ',')
-		{
-			return "(" + Convert(vec.x) + ", " + Convert(vec.y) + ", " + Convert(vec.z) + ", " + Convert(vec.w) + ")";
-		}
-		
-		static bool ConvertTo(const StringView&, uint32&);
-		static bool ConvertTo(const StringView&, int32&);
-		static bool ConvertTo(const StringView&, uint64&);
-		static bool ConvertTo(const StringView&, int64&);
-		static bool ConvertTo(const StringView&, float&);
-		static bool ConvertTo(const StringView&, double&);
+		String& operator+= (const char&);		
 
 		friend BLAZE_API String operator+(const StringView& left, const StringView& right);
 		friend BLAZE_API String operator+(const StringView& left, const char& right);

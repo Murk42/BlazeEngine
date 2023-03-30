@@ -1,11 +1,6 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/DataStructures/StringHash.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include <unordered_map>
 #include "BlazeEngine/Application/ResourceSystem/Resource.h"
+#include <unordered_map>
 
 namespace Blaze::ResourceSystem
 {
@@ -64,13 +59,13 @@ namespace Blaze::ResourceSystem
 		uint GetResourceTypeIndex(StringView name) const;
 
 		uint GetResourceTypeCount() const;
-		const ResourceTypeData& GetResourceTypeData(uint index) const;
+		ResourceTypeData GetResourceTypeData(uint index) const;
 
 		bool IsValidTypeIndex(uint index) const;
 
 		static ResourceTypeRegistry CoreRegistry();
 
-	public:
+	private:
 		std::vector<ResourceTypeData> types;
 		std::unordered_map<String, uint> nameTable;
 	};

@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/File/Path.h"
 
 namespace Blaze::ResourceSystem
@@ -7,14 +6,14 @@ namespace Blaze::ResourceSystem
 #define RESOURCE(name)								\
 	static constexpr const char* typeName = #name;	
 
-	class Resource
+	class BLAZE_API Resource
 	{
 		String name;
 	protected:
 		Path path;
 	public:
-		virtual void Load(Path path) { }
-		virtual void Save(Path path) { }
+		virtual Result Load(Path path) { return Result(); }
+		virtual Result Save(Path path) { return Result(); }
 
 		String GetName() const { return name; }
 		Path GetPath() const { return path; }

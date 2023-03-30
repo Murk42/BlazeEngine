@@ -1,5 +1,4 @@
 #include "BlazeEngine/Logging/LogListener.h"
-#include "BlazeEngine/Logging/Logger.h"
 
 namespace Blaze
 {

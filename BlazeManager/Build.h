@@ -14,8 +14,8 @@ enum class Configuration
 {	
 	Debug = 0,
 	Release = 1,
-	FinalBuild_Debug = 2,
-	FinalBuild_Release = 3
+	DebugStatic = 2,
+	ReleaseStatic = 3
 };
 enum class Platform
 {
@@ -51,7 +51,7 @@ constexpr Platform platform = GetPlatform();
 
 constexpr bool IsConfigurationString(std::string s)
 {
-	return s == "Debug" || s == "Release" || s == "FinalBuild_Debug" || s == "FinalBuild_Release";
+	return s == "Debug" || s == "Release" || s == "DebugStatic" || s == "ReleaseStatic";
 }
 constexpr const char* GetConfigurationString(Configuration configuration)
 {
@@ -59,8 +59,8 @@ constexpr const char* GetConfigurationString(Configuration configuration)
 	{
 	case Configuration::Debug: return "Debug"; break;
 	case Configuration::Release: return "Release"; break;
-	case Configuration::FinalBuild_Debug: return "FinalBuild_Debug"; break;
-	case Configuration::FinalBuild_Release: return "FinalBuild_Release"; break;
+	case Configuration::DebugStatic: return "DebugStatic"; break;
+	case Configuration::ReleaseStatic: return "ReleaseStatic"; break;
 	}
 }
 constexpr const char* GetPlatformString(Platform platform)
@@ -89,13 +89,7 @@ struct BuildSettings
 		std::vector<std::string> values;		
 	};
 
-	std::string projectPath;
-	std::string outputDir;
-	std::string outputName;
-	std::string intermediateDir;
-	Configuration configuration = (Configuration)-1;
-	Platform platform = (Platform)-1;
-	BuildOutputType outputType = (BuildOutputType)-1;
+	std::string projectPath;	
 	std::vector<Property> properties;	
 };
 

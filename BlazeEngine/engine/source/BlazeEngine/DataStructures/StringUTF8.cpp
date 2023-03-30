@@ -1,7 +1,6 @@
 #include "BlazeEngine/DataStructures/StringUTF8.h"
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
-#include "BlazeEngine/DataStructures/StringView.h"
-#include "BlazeEngine/Memory/MemoryManager.h"
+
 #include <cstring>
 #include <cstdio>
 #include <cctype>
@@ -136,7 +135,7 @@ namespace Blaze
 		s.characterCount = 0;
 	}
 
-	StringUTF8::StringUTF8(const void* buffer, size_t bufferSize)
+	StringUTF8::StringUTF8(const void* buffer, uint bufferSize)
 		: buffer(nullptr), bufferSize(bufferSize + 1), characterCount(0)
 	{
 		if (bufferSize == 0 || buffer == nullptr)
@@ -170,7 +169,7 @@ namespace Blaze
 		}
 	}
 
-	StringUTF8::StringUTF8(const char* ptr, size_t size)
+	StringUTF8::StringUTF8(const char* ptr, uint size)
 		: buffer(nullptr), bufferSize(size + 1), characterCount(size)
 	{
 		if (ptr != nullptr && size != 0)
@@ -251,7 +250,7 @@ namespace Blaze
 		return Iterator((byte*)buffer + bufferSize - 1);
 	}
 
-	StringUTF8 StringUTF8::SubString(size_t start, size_t size) const
+	StringUTF8 StringUTF8::SubString(uint start, uint size) const
 	{
 		auto b = begin();
 		for (uint i = 0; i != start; ++i, ++b);
@@ -261,7 +260,7 @@ namespace Blaze
 		return StringUTF8(b.ptr, (char*)e.ptr - (char*)b.ptr);
 	}
 
-	StringUTF8& StringUTF8::Resize(size_t newCharacterCount, UnicodeChar fill)
+	StringUTF8& StringUTF8::Resize(uint newCharacterCount, UnicodeChar fill)
 	{ 
 		size_t fillSize = fill.UTF8Size();
 		void* old = buffer;
@@ -404,131 +403,7 @@ namespace Blaze
 	bool StringUTF8::operator!=(const StringViewUTF8& s) const
 	{
 		return !(*this == s);
-	}
-
-	extern char buffer[128];
-	bool SpaceTillEnd(const char* begin, const char* end);
-
-	StringUTF8 StringUTF8::Convert(uint32 value)
-	{
-		int size = sprintf_s(Blaze::buffer, 128, "%u", value);
-		return StringUTF8(Blaze::buffer, size);
-	}
-	StringUTF8 StringUTF8::Convert(int32 value)
-	{
-		int size = sprintf_s(Blaze::buffer, 128, "%i", value);
-		return StringUTF8(Blaze::buffer, size);
-	}
-	StringUTF8 StringUTF8::Convert(uint64 value)
-	{
-		int size = sprintf_s(Blaze::buffer, 128, "%llu", value);
-		return StringUTF8(Blaze::buffer, size);
-	}
-	StringUTF8 StringUTF8::Convert(int64 value)
-	{
-		int size = sprintf_s(Blaze::buffer, 128, "%ll", value);
-		return StringUTF8(Blaze::buffer, size);
-	}
-	StringUTF8 StringUTF8::Convert(float value)
-	{
-		int size = sprintf_s(Blaze::buffer, 128, "%f", value);
-		return StringUTF8(Blaze::buffer, size);
-	}
-	StringUTF8 StringUTF8::Convert(double value)
-	{
-		int size = sprintf_s(Blaze::buffer, 128, "%lf", value);
-		return StringUTF8(Blaze::buffer, size);
-	}
-	
-	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, uint32& value)
-	{
-		if (sv.Buffer() == nullptr)
-			return false;
-
-		char* ptr = nullptr;
-		uint32 temp = strtoul((char*)sv.Buffer(), &ptr, 10);		
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
-		{
-			value = temp;
-			return true;
-		}
-		return false;
-	}
-	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, int32& value)
-	{
-		if (sv.Buffer() == nullptr)
-			return false;
-
-		char* ptr = nullptr;
-		int32 temp = strtol((char*)sv.Buffer(), &ptr, 10);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
-		{
-			value = temp;
-			return true;
-		}
-		return false;
-	}
-	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, uint64& value)
-	{
-		if (sv.Buffer() == nullptr)
-			return false;
-
-		char* ptr = nullptr;
-		uint64 temp = strtoull((char*)sv.Buffer(), &ptr, 10);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
-		{
-			value = temp;
-			return true;
-		}
-		return false;
-	}
-	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, int64& value)
-	{
-		if (sv.Buffer() == nullptr)
-			return false;
-
-		char* ptr = nullptr;
-		int64 temp = strtoll((char*)sv.Buffer(), &ptr, 10);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
-		{
-			value = temp;
-			return true;
-		}
-		return false;
-	}
-	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, float& value)
-	{
-		if (sv.Buffer() == nullptr)
-			return false;
-
-		char* ptr = nullptr;
-		float temp = strtof((char*)sv.Buffer(), &ptr);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
-		{
-			value = temp;
-			return true;
-		}
-		return false;
-	}
-	bool StringUTF8::ConvertTo(const StringViewUTF8& sv, double& value)
-	{
-		if (sv.Buffer() == nullptr)
-			return false;
-
-		char* ptr = nullptr;
-		double temp = strtod((char*)sv.Buffer(), &ptr);
-		if (SpaceTillEnd(ptr, (char*)sv.Buffer() + sv.BufferSize()))
-		{
-			value = temp;
-			return true;
-		}
-		return false;
-	}
-
-	StringUTF8 operator "" utf8 (const char* ptr, size_t size)
-	{
-		return StringUTF8(ptr, size);
-	}
+	}	
 
 	StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right)
 	{

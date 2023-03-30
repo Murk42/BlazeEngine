@@ -1,5 +1,5 @@
+#pragma once
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"
-#include "BlazeEngine/Logging/Logger.h"
 
 namespace Blaze::ECS
 {
@@ -34,14 +34,14 @@ namespace Blaze::ECS
 	}
 	uint ComponentTypeRegistry::GetComponentTypeCount() const
 	{
-		return types.size();
+		return static_cast<uint>(types.size());
 	}
 	ComponentTypeData ComponentTypeRegistry::GetComponentTypeData(uint index) const
 	{
 		if (index > types.size())
 		{
 			Logger::AddLog(LogType::Error, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-				"Blaze Engine", "Index is out of bounds. Index was: " + String::Convert(index));
+				"Blaze Engine", "Index is out of bounds. Index was: " + StringParsing::Convert(index).value);
 			return { "" };
 		}
 		return types[index];

@@ -57,9 +57,9 @@ namespace Blaze::OpenGL
 			if (outputs.begin()[i] == -1)
 				values[i] = GL_NONE;
 			else
-				values[i] = GL_COLOR_ATTACHMENT0 + outputs.begin()[i];
+				values[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + outputs.begin()[i]);
 		Graphics::Core::SelectFramebuffer(this);
-		glDrawBuffers(outputs.size(), values.data());
+		glDrawBuffers(static_cast<GLsizei>(outputs.size()), values.data());
 	}
 	Framebuffer& Framebuffer::operator=(Framebuffer&& fb) noexcept
 	{

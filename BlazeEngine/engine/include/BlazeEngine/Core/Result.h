@@ -1,7 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/Logging/Log.h"
 #include <vector>
 
 namespace Blaze
@@ -12,10 +9,8 @@ namespace Blaze
 		Result();
 		Result(const Result&) = delete;
 		Result(Result&&) noexcept;
-
-		Result(Result&);
-		Result(const Log& log, bool failed = true);
-		Result(Result& result, const Log& log, bool failed = true);
+		
+		Result(const Log& log, bool failed = true);		
 
 		~Result();		
 
@@ -32,11 +27,14 @@ namespace Blaze
 
 		Result& operator=(const Result&) = delete;
 		Result& operator=(Result&&) noexcept;
+		
+		Result operator+(Result&&);
+		Result operator+(Result&);
 
-		Result& operator+(const Log&);
+		Result& operator+=(Result&&);
+		Result& operator+=(Result&);
 	private:
-		bool failed;
-		LogType type;
+		bool failed;		
 		std::vector<Log> logs;
 	};
 

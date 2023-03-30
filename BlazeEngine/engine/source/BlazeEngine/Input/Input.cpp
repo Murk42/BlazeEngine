@@ -1,7 +1,6 @@
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Core/Window.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/Core/Startup.h"
 #include "BlazeEngine/Event/EventDispatcher.h"
 #include "BlazeEngine/Event/EventHandler.h"

@@ -1,8 +1,6 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Application/UI System/UIElement.h"
 #include "BlazeEngine/Graphics/Graphics.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/StringUTF8.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/DataStructures/Rect.h"

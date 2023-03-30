@@ -1,9 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/DataStructures/Buffer.h"
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
@@ -29,7 +25,7 @@ namespace Blaze
 		Vec2f uv1;
 		Vec2f uv2;
 
-		float advance;
+		float advance = 0;
 		Vec2f renderOffset;
 		Vec2f size;
 
@@ -97,4 +93,6 @@ namespace Blaze
 
 		friend class FontResolution;
 	};
+
+	
 }

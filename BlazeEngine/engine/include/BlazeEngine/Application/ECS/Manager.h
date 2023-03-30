@@ -1,7 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/Array.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
 #include "ComponentTypeRegistry.h"
@@ -16,6 +13,7 @@ namespace Blaze::ECS
 	public:
 		ResourceSystem::ResourceManager* resourceManager;
 
+		Manager();
 		~Manager();
 
 		Result SetRegistry(const ComponentTypeRegistry& registry);

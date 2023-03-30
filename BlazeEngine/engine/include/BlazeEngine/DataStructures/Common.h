@@ -25,7 +25,14 @@ namespace Blaze
 	using Function = R(*)(T...);	
 }
 
-#define baseoffset(derived, base) (int)(base*)(derived*)(uint8_t*)1 - 1
+#define structptr(s, m, p) ((s*)(((char*)p) - (offsetof(s, m))))
+
+template<class Base, class Derived>
+inline int BaseOffset()
+{
+	return reinterpret_cast<char*>(static_cast<Base*>(reinterpret_cast<Derived*>(0xf0000000))) - reinterpret_cast<char*>(reinterpret_cast<Derived*>(0xf0000000));
+}
+
 #define ENUM_CLASS_BITWISE_OPERATIONS(name) \
 	constexpr name operator|(name left, name right) { return (name)((int)left | (int)right); } \
 	constexpr name operator&(name left, name right) { return (name)((int)left & (int)right); } \

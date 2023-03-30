@@ -7,9 +7,10 @@ namespace Blaze
 {
 	void InitializeEngineData()
 	{
-		engineData = new EngineData;
+		engineData = new EngineData();		
+
 		engineData->scancodemap = {
-		{ Key::Unknown, SDL_Scancode::SDL_SCANCODE_UNKNOWN				},
+		{ Key::Unknown, SDL_Scancode::SDL_SCANCODE_UNKNOWN			},
 		{ Key::A,	SDL_Scancode::SDL_SCANCODE_A					},
 		{ Key::B,	SDL_Scancode::SDL_SCANCODE_B					},
 		{ Key::C,	SDL_Scancode::SDL_SCANCODE_C					},
@@ -284,7 +285,8 @@ namespace Blaze
 		};
 	}
 	void TerminateEngineData()
-	{
+	{		
 		delete engineData;
+		engineData = nullptr;
 	}
 }

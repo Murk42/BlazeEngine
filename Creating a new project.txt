@@ -3,7 +3,7 @@
 1. Copy the "TemplateProject" or just create a new project using the blaze engine TemplateProject as the template.
 2. Select the Debug and Release configurations
 3. In project properties under debugging set the "Command" field to 
-	C:\Programming\Projects\BlazeEngine\BlazeManager\build\bin\$(PlatformTarget)\$(Configuration)\BlazeManager.exe
+	$(BlazeManagerDir)BlazeManager.exe
 4. Set the "Command arguments" field to
-	run "$(ProjectPath)" -noLog -forceExit
+	run "$(ProjectDir)$(ProjectName).vcxproj" -forceExit -noLog
 5. Compile and run the project!

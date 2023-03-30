@@ -1,4 +1,5 @@
 #include "Result.h"
+#include <iostream>
 
 Result::Result()
 	: sucessfull(true)
@@ -8,7 +9,7 @@ Result::Result()
 Result::Result(Result&& r) noexcept
 	: sucessfull(r.sucessfull), log(std::move(r.log))
 {
-
+	r.sucessfull = true;
 }
 Result::Result(std::string l)
 	: log(l), sucessfull(false)
@@ -41,11 +42,13 @@ Result& Result::operator=(const Result& r)
 	return *this;
 }
 
-Result operator+(const std::string& s, const Result& r)
-{
-	return Result(s + r.log, r.sucessfull);
+Result operator+(const std::string& s, Result&& r)
+{	
+	r.log = s + r.log;
+	return std::move(r);
 }
-Result operator+(const Result& r, const std::string& s)
+Result operator+(Result&& r, const std::string& s)
 {
-	return Result(r.log + s, r.sucessfull);
+	r.log = r.log + s;
+	return std::move(r);
 }

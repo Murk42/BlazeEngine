@@ -1,7 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/StringView.h"
-#include "BlazeEngine/DataStructures/StringViewUTF8.h"
 
 namespace Blaze
 {	

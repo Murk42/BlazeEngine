@@ -1,8 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Color.h"
-#include "BlazeEngine/DataStructures/Vector.h"
-#include "BlazeEngine/DataStructures/Common.h"
 
 #include "BlazeEngine/Graphics/GraphicsLibraryDeclaration.h"
 
@@ -14,13 +11,13 @@ namespace Blaze
 
 	struct DisplayMode
 	{
-		DisplayPixelFormat format;
-		Vec2i size;
-		uint refreshRate;
-	};
+		DisplayPixelFormat format = DisplayPixelFormat::RGB24;
+		Vec2i size = Vec2i(1920, 1080);
+		uint refreshRate = 60;
+	};	
 
 	namespace Graphics::Core
-	{		
+	{				
 		BLAZE_API uint GetVideoDisplayCount();
 
 		BLAZE_API uint GetDisplayModeCount(uint videoDisplayIndex);
@@ -38,6 +35,8 @@ namespace Blaze
 		BLAZE_API bool GetClosestDisplayMode(uint displayIndex, DisplayMode target, DisplayMode& closest);
 
 		BLAZE_API void SetActiveTextureSlot(uint slot);
+		BLAZE_API void BindUniformBuffer(const GraphicsBuffer& buffer, uint binding);		
+		BLAZE_API void BindUniformBufferRange(const GraphicsBuffer& buffer, uint binding, uint offset, uint size);
 
 		BLAZE_API void SelectTexture(Graphics::Core::Texture1D*);
 		BLAZE_API Graphics::Core::Texture1D* GetSelectedTexture1D();
@@ -98,20 +97,26 @@ namespace Blaze
 		BLAZE_API void ClearTarget();
 		BLAZE_API void ClearTargetColor();
 		BLAZE_API void ClearTargetDepth();
-		BLAZE_API void SwapWindowBuffers();
+		BLAZE_API void ClearTargetStencil();
+		BLAZE_API Result SwapWindowBuffers();
 
 		BLAZE_API void SetTarget(Window& win);
 		BLAZE_API void SetPolygonMode(PolygonMode mode);
 
 		BLAZE_API void EnableVSync(bool enable);
-		BLAZE_API void EnableWritingToDepthBuffer(bool enable);		
-		BLAZE_API void EnableBlending(bool enable);		
 		BLAZE_API void EnableProgramPointSize(bool enable);
+		BLAZE_API void EnableBlending(bool enable);		
 		BLAZE_API void EnableFaceCulling(bool enable);		
+
 		BLAZE_API void EnableDepthTest(bool enable);
+		BLAZE_API void EnableWritingToDepthBuffer(bool enable);		
+		BLAZE_API void EnableStencilTest(bool enable);
 		BLAZE_API void EnableScissorTest(bool enable);
+
+		BLAZE_API void SetStencilOperation(ScreenBufferType bufferType, StencilOperationType bothFail, StencilOperationType depthFailStencilSucceed, StencilOperationType bothSucceed);
+		BLAZE_API void SetStencilFunction(ScreenBufferType bufferType, StencilComparison comparison, int reference, uint mask);
 		
-		BLAZE_API void RenderIndexedPrimitives(PrimitiveType type, IndexType indexType, uint indexCount, uint indexBufferOffset);
+		BLAZE_API void RenderIndexedPrimitives(PrimitiveType type, IndexType indexType, uint indexCount, uint indexBufferByteOffset);
 		BLAZE_API void RenderPrimitiveArray(PrimitiveType type, uint statIndex, uint primitiveCount);		
 
 		BLAZE_API void DispatchCompute(uint x, uint y, uint z);

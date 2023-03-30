@@ -39,7 +39,7 @@ Result LoadClientLibraryInfo(const string& path, bool log, Configuration configu
 		if (!started)
 			continue;
 
-		if (symbols[0] == "path")
+		if (symbols[0] == "asset")
 		{
 			if (symbols.size() > 1)
 			{
@@ -47,7 +47,7 @@ Result LoadClientLibraryInfo(const string& path, bool log, Configuration configu
 				if (!StripQuotes(symbols[1], path))
 					return Result("Invalid library.txt file syntax: " + symbols[1]);
 
-				info.additionalLibraryDirectories.emplace_back(path);
+				info.assetsPaths.emplace_back(path);
 			}
 			else
 				return Result("Invalid library file syntax at line " + to_string(lineNum) + ", no additional library path provided");
@@ -89,62 +89,50 @@ Result LoadClientLibraryInfo(const string& path, bool log, Configuration configu
 Result BuildBlaze(Configuration configuration, Platform platform, EngineBuildSettings settings, std::string& result)
 {
 	BuildSettings blazeBuildSettings{
-		.projectPath = settings.projectPath,
-		.outputDir = settings.outputDir,		
-		.configuration = configuration,
-		.platform = platform,
+		.projectPath = settings.projectPath,				
+		.properties = {			
+			{ "OutDir", { settings.outputDir } },
+			{ "Platform", { GetPlatformString(platform) } },
+			{ "Configuration", { GetConfigurationString(configuration) } },
+		}
 	};
 
-	return BuildProject(vsInfo, blazeBuildSettings, "-p:WarningLevel=0", result);	
+	return BuildProject(vsInfo, blazeBuildSettings, "", result);	
 }
 
 Result BuildClient(Configuration configuration, Platform platform, ClientBuildSettings settings, std::string& result)
 {
 	BuildSettings buildSettings{
 		.projectPath = settings.projectPath,
-		.outputDir = settings.outputDir,
-		.outputName = "Client",			
-		.configuration = configuration,
-		.platform = ::platform,					
+		.properties = {
+			{ "TargetName", { "Client"} },
+			{ "OutDir", { settings.outputDir } },
+			{ "Platform", { GetPlatformString(platform) } },
+			{ "Configuration", { GetConfigurationString(configuration) } },			
+		}
 	};
 
-	if (configuration == Configuration::FinalBuild_Debug || configuration == Configuration::FinalBuild_Release)
-	{		
-		buildSettings.outputType = BuildOutputType::StaticLibrary;
-		buildSettings.properties = {
-			{ "BlazeManagerAdditionalLibraryDirectories", { settings.engineLibraryDir } },
-			{ "BlazeManagerAdditionalDependencies", { "BlazeEngine.lib "}}
-		};
-	}	
-	else
-	{
-		buildSettings.outputType = BuildOutputType::DynamicLibrary;
-	}
+	if (configuration == Configuration::DebugStatic || configuration == Configuration::ReleaseStatic)
+	{				
+		buildSettings.properties.push_back({ "BlazeManagerAdditionalLibraryDirectories", { settings.engineLibraryDir } });
+		buildSettings.properties.push_back({ "BlazeManagerAdditionalDependencies", { "BlazeEngine.lib "} });
+	}		
 
-	return BuildProject(vsInfo, buildSettings, "-p:WarningLevel=0", result);
+	return BuildProject(vsInfo, buildSettings, "", result);
 }
 
 Result BuildRuntime(Configuration configuration, Platform platform, RuntimeBuildSettings settings, std::string& result)
 {	
 	BuildSettings buildSettings{
 			.projectPath = settings.projectPath,
-			.outputDir = settings.outputDir,
-			.configuration = configuration,
-			.platform = ::platform,
+			.properties = {
+				{ "OutDir", { settings.outputDir } },
+				{ "Platform", { GetPlatformString(platform) } },
+				{ "Configuration", { GetConfigurationString((Configuration)((int)configuration % 2)) } },
+				{ "BlazeManagerAdditionalLibraryDirectories", { settings.clientLibraryDir } },
+				{ "BlazeManagerAdditionalDependencies", { "Client.lib" } },
+			}
 	};
-
-	if (configuration == Configuration::FinalBuild_Debug || configuration == Configuration::FinalBuild_Release)
-	{
-		buildSettings.outputType = BuildOutputType::Application;
-		buildSettings.properties = {
-			{ "BlazeManagerAdditionalLibraryDirectories", { settings.clientLibraryDir } },
-			{ "BlazeManagerAdditionalDependencies", { "Client.lib" } },
-		};
-	}
-	else
-	{
-		buildSettings.outputType = BuildOutputType::DynamicLibrary;
-	}
-
-	return BuildProject(vsInfo, buildSettings, "-p:WarningLevel=0", result);
+			
+	return BuildProject(vsInfo, buildSettings, "", result);
 }

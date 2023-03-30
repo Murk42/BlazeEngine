@@ -54,22 +54,22 @@ namespace Blaze::OpenGL
 		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, uint(settings.mag));
 	}	
 
-	void Texture2DArray::Create(Vec2i size, size_t layers, TextureInternalPixelFormat internalFormat)
+	void Texture2DArray::Create(Vec2i size, uint layers, TextureInternalPixelFormat internalFormat)
 	{
 		this->size = size;
 		this->layers = layers;
 
 		Graphics::Core::SelectTexture(this);
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, layers, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, OpenGLInternalPixelFormat(internalFormat), static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y), static_cast<GLsizei>(layers), 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
 	}
 
-	void Texture2DArray::SetPixels(Vec2i offset, size_t layer, BitmapView bm)
+	void Texture2DArray::SetPixels(Vec2i offset, uint layer, BitmapView bm)
 	{
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
 		GLenum type = OpenGLPixelType(bm.GetPixelType());
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		Graphics::Core::SelectTexture(this);
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, bm.GetSize().x, bm.GetSize().y, 1, format, type, bm.GetPixels());
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, static_cast<GLint>(layer), static_cast<GLsizei>(bm.GetSize().x), static_cast<GLsizei>(bm.GetSize().y), 1, format, type, bm.GetPixels());
 	}
 
 	Texture2DArray& Texture2DArray::operator=(Texture2DArray&& tex) noexcept

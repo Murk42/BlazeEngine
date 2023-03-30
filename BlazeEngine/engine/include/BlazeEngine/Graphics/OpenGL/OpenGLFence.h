@@ -1,6 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/Common.h"
 
 namespace Blaze::OpenGL
 {

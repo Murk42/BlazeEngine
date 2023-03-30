@@ -16,7 +16,7 @@ namespace Blaze::OpenGL
 	class BLAZE_API Texture1D
 	{
 		unsigned id;
-		size_t size;
+		uint size;
 	public:
 		Texture1D();
 		Texture1D(const Texture1D&) = delete;
@@ -28,12 +28,12 @@ namespace Blaze::OpenGL
 		bool Load(StringView path, bool emitLogOnFail = true);		
 		bool Load(StringView path, TextureInternalPixelFormat internalFormat, bool emitLogOnFail = true);
 						
-		void Create(size_t size, TextureInternalPixelFormat internalFormat);			
-		void SetPixels(size_t offset, size_t size, BitmapPixelFormat format, BitmapPixelType type, void* pixels);				
+		void Create(uint size, TextureInternalPixelFormat internalFormat);			
+		void SetPixels(uint offset, uint size, BitmapPixelFormat format, BitmapPixelType type, void* pixels);				
 
 		void GenerateMipmaps();
 
-		size_t GetSize() const { return size; }		
+		uint GetSize() const { return size; }		
 
 		inline unsigned GetHandle() const { return id; }
 

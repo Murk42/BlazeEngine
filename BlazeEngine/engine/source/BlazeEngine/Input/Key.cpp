@@ -1,5 +1,4 @@
 #include "BlazeEngine/Input/Key.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "source/BlazeEngine/Internal/EngineData.h"
 
 #include "SDL/SDL.h"

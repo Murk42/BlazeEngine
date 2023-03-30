@@ -1,6 +1,5 @@
 #include "BlazeEngine/Application/ResourceSystem/ResourceStorage.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
-#include "BlazeEngine/Memory/MemoryManager.h"
 
 namespace Blaze::ResourceSystem
 {
@@ -61,7 +60,7 @@ namespace Blaze::ResourceSystem
 		
 	}
 
-	Resource* ResourceStorage::CreateResource(size_t typeIndex)
+	Resource* ResourceStorage::CreateResource(uint typeIndex)
 	{
 		const auto& registry = manager->GetResourceTypeRegistry();		
 
@@ -77,7 +76,7 @@ namespace Blaze::ResourceSystem
 		return ptr;
 	}
 
-	Resource* ResourceStorage::CreateResource(StringView name, size_t typeIndex)
+	Resource* ResourceStorage::CreateResource(StringView name, uint typeIndex)
 	{
 		const auto& registry = manager->GetResourceTypeRegistry();		
 
@@ -93,7 +92,7 @@ namespace Blaze::ResourceSystem
 		return ptr;
 	}
 
-	Result ResourceStorage::DestroyResource(Resource* resource, size_t typeIndex)
+	Result ResourceStorage::DestroyResource(Resource* resource, uint typeIndex)
 	{		
 		const auto& registry = manager->GetResourceTypeRegistry();
 		ResourceTypeData typeData = registry.GetResourceTypeData(typeIndex);
@@ -115,12 +114,12 @@ namespace Blaze::ResourceSystem
 		return Result();
 	}
 
-	Result ResourceStorage::DestroyResource(StringView name, size_t typeIndex)
+	Result ResourceStorage::DestroyResource(StringView name, uint typeIndex)
 	{
 		return DestroyResource(manager->GetResource(name, typeIndex), typeIndex);
 	}
 
-	const std::list<Resource*>& ResourceStorage::GetResourceList(size_t typeIndex) const
+	const std::list<Resource*>& ResourceStorage::GetResourceList(uint typeIndex) const
 	{
 		return resources[typeIndex];
 	}

@@ -1,7 +1,6 @@
 #pragma once
 #include "BlazeEngine/Application/UI System/UIElement.h"
 #include "BlazeEngine/Application/UI System/UIManager.h"
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Graphics/Graphics.h"
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/DataStructures/Color.h"

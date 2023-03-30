@@ -1,8 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/Buffer.h"
 #include "BlazeEngine/File/Path.h"
 

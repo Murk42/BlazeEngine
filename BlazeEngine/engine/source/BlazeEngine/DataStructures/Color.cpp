@@ -3,7 +3,7 @@
 namespace Blaze
 {
 	ColorRGB::ColorRGB(const ColorRGBf& other)
-		: r(other.r * 255), g(other.g * 255), b(other.b * 255)
+		: r(static_cast<uint8>(other.r * 255)), g(static_cast<uint8>(other.g * 255)), b(static_cast<uint8>(other.b * 255))
 	{
 	}
 	ColorRGB::ColorRGB(const ColorRGBA& other)
@@ -11,7 +11,7 @@ namespace Blaze
 	{
 	}
 	ColorRGB::ColorRGB(const ColorRGBAf& other)
-		: r(other.r * 255), g(other.g * 255), b(other.b * 255)
+		: r(static_cast<uint8>(other.r * 255)), g(static_cast<uint8>(other.g * 255)), b(static_cast<uint8>(other.b * 255))
 	{
 	}
 
@@ -46,15 +46,15 @@ namespace Blaze
 	{
 	}
 	ColorRGBA::ColorRGBA(const ColorRGBf& c)
-		: r(c.r * 255), g(c.g * 255), b(c.b * 255), a(255)
+		: r(static_cast<uint8>(c.r * 255)), g(static_cast<uint8>(c.g * 255)), b(static_cast<uint8>(c.b * 255)), a(255)
 	{
 	}
 	ColorRGBA::ColorRGBA(const ColorRGBf& c, uint8 a)
-		: r(c.r * 255), g(c.g * 255), b(c.b * 255), a(a)
+		: r(static_cast<uint8>(c.r * 255)), g(static_cast<uint8>(c.g * 255)), b(static_cast<uint8>(c.b * 255)), a(a)
 	{
 	}
 	ColorRGBA::ColorRGBA(const ColorRGBAf& c)
-		: r(c.r * 255), g(c.g * 255), b(c.b * 255), a(c.a * 255)
+		: r(static_cast<uint8>(c.r * 255)), g(static_cast<uint8>(c.g * 255)), b(static_cast<uint8>(c.b * 255)), a(static_cast<uint8>(c.a * 255))
 	{
 	}
 	ColorRGBA::ColorRGBA(uint32 hex)

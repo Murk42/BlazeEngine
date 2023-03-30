@@ -9,6 +9,30 @@ namespace Blaze
     {
         static bool firstVertexArray = true;
 
+        template<typename T>
+        inline std::underlying_type_t<T> ToInteger(T value)
+        {
+            return static_cast<std::underlying_type_t<T>>(value);
+        }
+
+        GLenum OpenGLVertexAttributeType(VertexAttributeType type)
+        {
+            switch (type)
+            {
+            case Blaze::OpenGL::VertexAttributeType::Int8: return GL_BYTE;                
+            case Blaze::OpenGL::VertexAttributeType::Uint8: return GL_UNSIGNED_BYTE;                
+            case Blaze::OpenGL::VertexAttributeType::Int16: return GL_SHORT;                
+            case Blaze::OpenGL::VertexAttributeType::Uint16: return GL_UNSIGNED_SHORT;                
+            case Blaze::OpenGL::VertexAttributeType::Int32: return GL_INT;                
+            case Blaze::OpenGL::VertexAttributeType::Uint32: return GL_UNSIGNED_INT;
+            case Blaze::OpenGL::VertexAttributeType::Float: return GL_FLOAT;       
+            case Blaze::OpenGL::VertexAttributeType::Double: return GL_DOUBLE;
+            }
+            Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
+                "Invalid VertexAttributeType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+            return std::numeric_limits<GLenum>::max();
+        }        
+
         VertexArray::VertexArray()
             : id(-1), indexBuffer(nullptr)
         {
@@ -49,18 +73,18 @@ namespace Blaze
             glDisableVertexArrayAttrib(id, index);
         }
 
-        void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, size_t stride, size_t offset)
+        void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset)
         {   
             Graphics::Core::SelectVertexArray(this);
             if (buffer != nullptr)
-                glBindVertexBuffer(index, buffer->GetHandle(), offset, stride);
+                glBindVertexBuffer(index, buffer->GetHandle(), static_cast<GLintptr>(offset), static_cast<GLsizei>(stride));
             else  
                 glBindVertexBuffer(index, 0, offset, stride);
         }
 
-        void VertexArray::SetVertexAttributeFormat(uint index, VertexAttributeType type, size_t count, bool normalised, size_t offset)
+        void VertexArray::SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset)
         {
-            glVertexArrayAttribFormat(id, index, count, (size_t)type, normalised, offset);
+            glVertexArrayAttribFormat(id, index, static_cast<GLint>(count), OpenGLVertexAttributeType(type), normalised, offset);
         }              
 
 

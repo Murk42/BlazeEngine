@@ -1,7 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Graphics/GraphicsCore.h"
 

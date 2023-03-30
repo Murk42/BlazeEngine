@@ -18,7 +18,7 @@ namespace Blaze::OpenGL
 	{
 		unsigned id;		
 		Vec2i size;
-		size_t layers;
+		uint layers;
 	public:
 		Texture2DArray(); 
 		Texture2DArray(const Texture2DArray&) = delete;
@@ -27,8 +27,8 @@ namespace Blaze::OpenGL
 
 		void SetSettings(Texture2DArraySettings settings);		
 
-		void Create(Vec2i size, size_t layers, TextureInternalPixelFormat internalFormat);
-		void SetPixels(Vec2i offset, size_t layer, BitmapView bm);
+		void Create(Vec2i size, uint layers, TextureInternalPixelFormat internalFormat);
+		void SetPixels(Vec2i offset, uint layer, BitmapView bm);
 
 		inline Vec2i GetSize() const { return size; }
 		inline size_t GetDepth() const { return layers; }

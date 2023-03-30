@@ -1,10 +1,12 @@
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
-#include "BlazeEngine/Logging/Logger.h"
 #include "IL/il.h"
 #include "IL/ilu.h"
 
 #include "source/BlazeEngine/Internal/Conversions.h"
 
+#include <codecvt>
+
+extern std::wstring to_wstring(const std::string& s);
 
 namespace Blaze
 {
@@ -31,54 +33,72 @@ namespace Blaze
 		free(pixels);		
 	}
 
-	bool Bitmap::Load(StringView path, bool emitWarning)
+	Result Bitmap::Load(StringView path)
 	{
+		free(pixels);
+
 		ImageGuard imageGuard;
 
-		if (ilLoadImage(path.Ptr()))
+		std::wstring wide = to_wstring((std::string)path.Ptr());
+		if (!ilLoadImage(wide.c_str()))
 		{
-			format = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
-			type = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE));
-			size = Vec2i(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
-			
-			size_t stride = size.x * GetFormatDepth(format);
-			size_t dataSize = stride * size.y;
-			void* input = ilGetData();
-			void* output = malloc(dataSize);
-	
-			size_t inputOffset = dataSize - stride;
-			size_t outputOffset = 0;
-			for (size_t i = 0; i < size.y; ++i)
-			{
-				memcpy((uint8*)output + outputOffset, (uint8*)input + inputOffset, stride);
-				inputOffset -= stride;
-				outputOffset += stride;
-			}		
+			format = BitmapPixelFormat::RGBA;
+			type = BitmapPixelType::Int32;
+			size = Vec2i(0, 0);
+			pixels = nullptr;
 
-			this->pixels = output;
-
-			return true;
+			return BLAZE_ERROR_RESULT("DevIL", "Failed to load image with path \"" + path + "\"");
 		}
 
-		if (emitWarning)
-			BLAZE_WARNING_LOG("DevIL", "Failed to load image with path \"" + path + "\"");
-		return false;
+		format = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
+		type = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE));
+		size = Vec2i(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
+
+		size_t stride = size.x * GetFormatDepth(format);
+		size_t dataSize = stride * size.y;
+		void* input = ilGetData();
+		void* output = malloc(dataSize);
+
+		if (output == nullptr)
+		{
+			format = BitmapPixelFormat::RGBA;
+			type = BitmapPixelType::Int32;
+			size = Vec2i(0, 0);
+			pixels = nullptr;
+			
+			return BLAZE_ERROR_RESULT("Blaze Engine", "malloc failed with " + StringParsing::Convert(dataSize).value + " bytes");
+		}
+
+		size_t inputOffset = dataSize - stride;
+		size_t outputOffset = 0;
+
+		for (size_t i = 0; i < size.y; ++i)
+		{
+			memcpy((uint8*)output + outputOffset, (uint8*)input + inputOffset, stride);
+			inputOffset -= stride;
+			outputOffset += stride;
+		}
+
+		this->pixels = output;
+
+		return Result();
+
 	}
-	bool Bitmap::Save(StringView path, bool emitWarning)
+	Result Bitmap::Save(StringView path)
 	{
 		ImageGuard imageGuard;
 		
 		ilTexImage(size.x, size.y, 1, GetFormatDepth(format), DevILPixelFormat(format), DevILPixelType(type), pixels);
-		if (ilSaveImage(path.Ptr()))
-			return BLAZE_OK;
 
-		if (emitWarning)
-			BLAZE_WARNING_LOG("DevIL", "Failed to save image with path \"" + path + "\"");
+		std::wstring wide = to_wstring((std::string)path.Ptr());
 
-		return BLAZE_ERROR;
+		if (!ilSaveImage(wide.c_str()))
+			return BLAZE_ERROR_RESULT("DevIL", "Failed to save image with path \"" + path + "\"");
+
+		return Result();
 	}
 
-	void Bitmap::Create(Vec2i size, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
+	Result Bitmap::Create(Vec2i size, BitmapPixelFormat format, BitmapPixelType type, const void* pixels)
 	{
 		this->size = size;
 		this->format = format;
@@ -89,8 +109,19 @@ namespace Blaze
 		free(this->pixels);
 		this->pixels = malloc(pixelsSize);
 
+		if (this->pixels == nullptr)
+		{
+			this->format = BitmapPixelFormat::RGBA;
+			this->type = BitmapPixelType::Int32;
+			this->size = Vec2i(0, 0);			
+
+			return BLAZE_ERROR_RESULT("Blaze Engine", "malloc failed with " + StringParsing::Convert(pixelsSize).value + " bytes");
+		}
+
 		if (pixels != nullptr)		
 			memcpy(this->pixels, pixels, pixelsSize);		
+
+		return Result();
 	}	
 		
 	BitmapView::BitmapView()

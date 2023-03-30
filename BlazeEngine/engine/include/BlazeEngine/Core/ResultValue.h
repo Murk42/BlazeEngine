@@ -1,6 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
 
 namespace Blaze
 {
@@ -22,10 +20,12 @@ namespace Blaze
 		operator T() const
 		{
 			return value;
-		}		
-		operator bool() const
+		}				
+
+		const T& Suspend()
 		{
-			return (bool)result;
+			result.Clear();
+			return value;
 		}
 
 		ResultValue& operator=(const ResultValue&) = delete;

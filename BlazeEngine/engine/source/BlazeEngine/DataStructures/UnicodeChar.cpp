@@ -3,20 +3,6 @@
 
 namespace Blaze
 {
-	size_t UTF8Size(const char* ptr)
-	{
-		while ((*ptr & 0b11000000) == 0b10000000)
-			--ptr;
-
-		if ((*ptr & 0b10000000) == 0)
-			return 1;
-		else if ((*ptr & 0b11100000) == 0b11000000)
-			return 2;
-		else if ((*ptr & 0b11110000) == 0b11100000)
-			return 3;
-		else if ((*ptr & 0b11111000) == 0b11110000)
-			return 4;
-	}
 
 	size_t UTF8ToUnicode(const char* ptr, uint32& character)
 	{

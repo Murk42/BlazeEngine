@@ -1,6 +1,7 @@
 #include "Build.h"
 #include <iostream>
 #include <filesystem>
+#include "Parsing.h"
 
 std::string Replace(std::string s)
 {
@@ -9,43 +10,36 @@ std::string Replace(std::string s)
 }
 
 Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string additional, std::string& result)
-{
-	std::string platform =		((int)settings.platform != -1 ? GetPlatformString(settings.platform) : "");
-	std::string outputType =	((int)settings.outputType != -1 ? GetBuildOutputTypeString(settings.outputType) : "");
-	std::string configuration = ((int)settings.configuration != -1 ? GetConfigurationString(settings.configuration) : "");
-	
-	bool any =
-		(int)settings.configuration != -1 ||
-		(int)settings.platform != -1 ||
-		(int)settings.outputType != -1 ||
-		settings.outputName.size() > 0 ||
-		settings.outputDir.size() > 0 ||
-		settings.intermediateDir.size() > 0;
-
-	std::string command =		
+{		
+	std::string command =
 		"cd " + std::filesystem::path(vsInfo.instalationPath).string() + "\\VC\\Auxiliary\\Build && "
 		+ "vcvarsall.bat x64 && "
 		+ "cd " + std::filesystem::path(vsInfo.MSBuildPath).parent_path().string() + " && "
 		+ "MSBuild.exe"
-		+ " \"" + settings.projectPath + "\""
-		+ (any ? " -p:" : "")
-		+ (platform.size() > 0 ? "Platform=" + platform + ";" : "")
-		+ (outputType.size() > 0 ? "ConfigurationType=" + outputType + ";" : "")
-		+ (configuration.size() > 0 ? "Configuration=" + configuration + ";" : "")
-		+ (settings.outputName.size() > 0 ? "TargetName=\"" + Replace(settings.outputName) + "\";" : "")
-		+ (settings.outputDir.size() > 0 ? "OutDir=\"" + Replace(settings.outputDir) + "\";" : "")
-		+ (settings.intermediateDir.size() > 0 ? "IntermediateOutputPath=\"" + Replace(settings.intermediateDir) + "\";" : "");
+		+ " \"" + settings.projectPath + "\"";
+
+	if (settings.properties.size() > 0)
+		command += " -p:";
 
 	for (auto& property : settings.properties)
 	{
 		if (property.values.size() == 0)
 			continue;
 
-		command += property.name + "=\"";
-		for (auto& value : property.values)
-			command += "" + Replace(value) + ";";
+		command += property.name + "=";
 
-		command += "\";";
+		if (property.values.size() == 1 && SplitSymbols(property.values[0]).size() == 1)		
+			command += property.values[0] + ";";		
+		else
+		{
+			command += '"';
+			for (auto& value : property.values)
+				command += "" + Replace(value) + ";";
+
+			if (command.back() == ';')
+				command.pop_back();
+			command += "\";";
+		}
 	}
 
 	if (command.back() == ';')
@@ -59,9 +53,9 @@ Result BuildProject(VisualStudioInfo vsInfo, BuildSettings settings, std::string
 
 string GetOutputSubDir(Configuration configuration, Platform platform)
 {
-	return (string)"build\\bin\\" + GetPlatformString(platform) + "\\" + GetConfigurationString(configuration) + "\\";
+	return (string)"build\\bin\\" + GetConfigurationString(configuration) + "\\" + GetPlatformString(platform) + "\\";
 }
 string GetIntermediateSubDir(Configuration configuration, Platform platform)
 {
-	return (string)"build\\temp\\" + GetPlatformString(platform) + "\\" + GetConfigurationString(configuration) + "\\";
+	return (string)"build\\temp\\" + GetConfigurationString(configuration) + "\\" + GetPlatformString(platform) + "\\";
 }

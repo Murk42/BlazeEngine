@@ -1,9 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/DataStructures/StringHash.h"
 #include <unordered_map>
 
 namespace Blaze::UI

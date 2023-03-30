@@ -1,8 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/Utilities/Time.h"
 
 BLAZE_API Blaze::String FILE_NAME(const char* macro);
 #define BLAZE_FILE_NAME (::FILE_NAME(__FILE__))
@@ -30,13 +26,13 @@ namespace Blaze
 		String filePath;
 		String functionName;
 		uint line;
-
+		 
 		String source;
 		String message;
 	public:
 		Log(LogType type, String&& filePath, String&& functionName, uint line, String&& source, String&& message);
 
-		String FormatString();
+		String FormatString() const;
 
 		inline uint GetThreadID() const { return threadID; }
 		inline const LogType GetType() const { return type; }

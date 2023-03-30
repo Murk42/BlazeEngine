@@ -1,7 +1,5 @@
 #pragma once
-#include "BlazeEngine/DataStructures/String.h"
 #include "BlazeEngine/DataStructures/StringUTF8.h"
-#include "BlazeEngine/DataStructures/StringView.h"
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
 #include <functional>
 

@@ -33,7 +33,9 @@ namespace Blaze
 		//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);		
+
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 		TimePoint otherTimePoint = TimePoint::GetWorldTime();
 		const Vec2i winSize = { 640, 360 };
@@ -58,7 +60,7 @@ namespace Blaze
 		if (glewInit() != GLEW_OK)
 			throw
 			"Failed to initialize the GLEW library!\n"
-			"GLEW error code: " + String::Convert(glGetError());
+			"GLEW error code: " + StringParsing::Convert(glGetError()).value;
 
 		//Enable callback debug
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

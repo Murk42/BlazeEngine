@@ -1,6 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/ResultValue.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceTypeRegistry.h"
 #include "BlazeEngine/Application/ResourceSystem/Resource.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
@@ -30,8 +28,8 @@ namespace Blaze::ResourceSystem
 		{			
 			return (T*)CreateResource(name, manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
 		}
-		Resource* CreateResource(size_t typeIndex);
-		Resource* CreateResource(StringView name, size_t typeIndex);
+		Resource* CreateResource(uint typeIndex);
+		Resource* CreateResource(StringView name, uint typeIndex);
 
 		template<typename T>
 		Result DestroyResource(T* resource)
@@ -43,15 +41,15 @@ namespace Blaze::ResourceSystem
 		{
 			return DestroyResource(name, manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
 		}
-		Result DestroyResource(Resource* resource, size_t typeIndex);
-		Result DestroyResource(StringView name, size_t typeIndex);
+		Result DestroyResource(Resource* resource, uint typeIndex);
+		Result DestroyResource(StringView name, uint typeIndex);
 		
 		template<typename T>
 		const std::list<Resource*>& GetResourceList() const
 		{
 			return GetResourceList(manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
 		}
-		const std::list<Resource*>& GetResourceList(size_t typeIndex) const;
+		const std::list<Resource*>& GetResourceList(uint typeIndex) const;
 		
 		inline ResourceManager* GetResourceManager() const { return manager; }
 	};

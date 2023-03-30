@@ -1,8 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Graphics/OpenGL/OpenGLGraphicsBuffer.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 	
 namespace Blaze
 {
@@ -10,13 +7,14 @@ namespace Blaze
 	{
 		enum class VertexAttributeType
 		{
-			Int8 = 0x1400,
-			Uint8 = 0x1401,
-			Int16 = 0x1402,
-			Uint16 = 0x1403,
-			Int32 = 0x1404,
-			Uint32 = 0x1405,
-			Float = 0x1406
+			Int8,
+			Uint8,
+			Int16,
+			Uint16,
+			Int32,
+			Uint32,
+			Float,
+			Double
 		};			
 		
 		struct VertexAttribute
@@ -55,8 +53,8 @@ namespace Blaze
 			void EnableVertexAttribute(uint index);
 			void DisableVertexAttribute(uint index);			
 
-			void SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, size_t stride, size_t offset);
-			void SetVertexAttributeFormat(uint index, VertexAttributeType type, size_t count, bool normalised, size_t offset);			
+			void SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset);
+			void SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset);			
 
 			inline uint GetHandle() const { return id; }
 

@@ -10,7 +10,7 @@ namespace Blaze
 	{
 	}
 
-	String Log::FormatString()
+	String Log::FormatString() const
 	{
 		String timeStr = TimePoint::GetWorldTime().FormatString("%D %T");
 		String typeStr;
@@ -22,7 +22,7 @@ namespace Blaze
 		case Blaze::LogType::Warning: typeStr = "WARNING"; break;
 		case Blaze::LogType::Fatal: typeStr = "FATAL"; break;
 		}
-		return "[" + timeStr + "] [" + typeStr + "] " + filePath + "(" + functionName + "): " + message + " (line " + String::Convert(line) + ")";
+		return "[" + timeStr + "] [" + typeStr + "] " + filePath + "(" + functionName + "): " + message + " (line " + StringParsing::Convert(line).value + ")";
 	}
 
 	bool Log::operator==(const Log& log)

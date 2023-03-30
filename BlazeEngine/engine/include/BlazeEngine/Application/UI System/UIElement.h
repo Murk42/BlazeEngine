@@ -1,11 +1,8 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Rect.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Application/UI System/UIEvent.h"
 #include "BlazeEngine/Application/UI System/UIManager.h"
 #include "BlazeEngine/DataStructures/Array.h"
-#include "BlazeEngine/DataStructures/String.h"
 #include <bitset>
 
 namespace Blaze

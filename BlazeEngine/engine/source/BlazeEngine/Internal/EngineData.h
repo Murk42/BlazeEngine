@@ -1,15 +1,16 @@
 #pragma once
 #include <BlazeEngine/Event/EventDispatcher.h>
-#include "BlazeEngine/Logging/LogListener.h"
 #include "BlazeEngine/Input/Key.h"
 #include "BlazeEngine/Core/Startup.h"
 #include "SDL/SDL_scancode.h"
 #include <thread>
 #include <map>
+#include <memory>
 
 namespace Blaze
 {
 	class Window;
+	class LogListener;
 }
 
 struct EngineData

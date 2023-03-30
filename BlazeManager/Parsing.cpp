@@ -95,18 +95,18 @@ vector<string> SplitSymbols(string s)
 				begin = i;
 				state = 2;
 			}
-			else if (!IsWordChar(ch))
-				out.emplace_back(move(s.substr(i, 1)));
-			else
+			else if (IsWordChar(ch))
 			{
 				begin = i;
 				state = 1;
 			}
+			else if (!isspace(ch))
+				out.emplace_back(move(s.substr(i, 1)));
 			break;
 		case 1:
-			if (ch == ' ')
+			if (isspace(ch))
 			{
-				out.emplace_back(move(s.substr(begin, i)));
+				out.emplace_back(move(s.substr(begin, i - begin)));
 				state = 0;
 			}
 			else if (!IsWordChar(ch))
@@ -120,7 +120,7 @@ vector<string> SplitSymbols(string s)
 			if (ch == '"')
 			{
 				state = 0;
-				out.emplace_back(move(s.substr(begin, i)));
+				out.emplace_back(move(s.substr(begin, i - begin + 1)));
 			}
 			break;
 		}

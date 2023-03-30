@@ -1,5 +1,5 @@
+#pragma once
 #include "BlazeEngine/File/File.h"
-#include "BlazeEngine/Logging/Logger.h"
 #include <io.h>
 #include <fcntl.h>
 
@@ -25,7 +25,7 @@ namespace Blaze
 
 			if (returned != 0)
 				return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"stdlib", "_sopen_s failed with error: " + String::Convert(returned)), true);
+					"stdlib", "_sopen_s failed with error: " + StringParsing::Convert(returned).value), true);
 
 			return Result();
 		}

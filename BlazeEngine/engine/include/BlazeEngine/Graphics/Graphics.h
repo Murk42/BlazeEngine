@@ -1,6 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/Vector.h"  
 #include "BlazeEngine/DataStructures/Color.h" 
 #include "BlazeEngine/DataStructures/Quaternion.h"
 #include "BlazeEngine/DataStructures/Matrix.h"
@@ -32,7 +30,7 @@ namespace Blaze
 		BLAZE_API void DrawTexture(Vec2f p1, Vec2f p2, Graphics::Core::Texture2D& tex, Vec2f uv1 = Vec2f(0), Vec2f uv2 = Vec2f(1));
 		BLAZE_API void DrawTexture(Vec2f p1, Vec2f p2, Graphics::Core::Texture1D& tex, float uv1 = 0, float uv2 = 1);
 
-		BLAZE_API void Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color);
+		BLAZE_API void Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color);		
 		BLAZE_API void Write(TextRenderCache& data, Vec2f pos, float size, ColorRGBAf color);
 
 		BLAZE_API Point2DRenderer& GetPoint2DRenderer();

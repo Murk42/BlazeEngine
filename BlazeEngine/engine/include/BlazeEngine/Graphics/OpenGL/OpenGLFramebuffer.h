@@ -1,8 +1,6 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture2D.h"
 #include "BlazeEngine/Graphics/OpenGL/OpenGLRenderbuffer.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include <initializer_list>
 
 namespace Blaze::OpenGL

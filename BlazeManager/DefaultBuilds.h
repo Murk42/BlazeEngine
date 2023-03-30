@@ -3,7 +3,7 @@
 
 struct ClientLibraryInfo
 {
-	std::vector<std::string> additionalLibraryDirectories;
+	std::vector<std::string> assetsPaths;
 	std::vector<std::string> additionalDependencies;
 	std::vector<std::string> additionalDynamicLibraries;
 };

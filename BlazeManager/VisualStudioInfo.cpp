@@ -11,12 +11,12 @@ Result GetVisualStudioInfo(VisualStudioInfo& info)
 {	
 	//info.	
 	if (Result r = RunCommand("\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -property installationPath", info.instalationPath))
-		return string("Finding Visual Studio instalation path failed\n") + r;
+		return string("Finding Visual Studio instalation path failed\n") + std::move(r);
 
 	info.instalationPath.pop_back();
 
 	if (Result r = RunCommand("\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -property productPath", info.devenvPath))
-		return string("Finding Visual Studio devenv path failed\n") + r;	
+		return string("Finding Visual Studio devenv path failed\n") + std::move(r);
 	info.devenvPath.pop_back();
 
 	info.MSBuildPath = info.instalationPath + "\\MSBuild\\Current\\Bin\\MSBuild.exe";

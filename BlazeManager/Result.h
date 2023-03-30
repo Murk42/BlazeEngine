@@ -17,5 +17,5 @@ struct Result
 	Result& operator=(const Result& r);
 };
 
-Result operator+(const std::string& s, const Result& r);
-Result operator+(const Result& r, const std::string& s);
+Result operator+(const std::string& s, Result&& r);
+Result operator+(Result&& r, const std::string& s);

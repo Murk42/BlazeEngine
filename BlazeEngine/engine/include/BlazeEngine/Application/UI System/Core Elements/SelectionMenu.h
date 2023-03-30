@@ -1,9 +1,7 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Application/UI System/UIElement.h"
 #include "BlazeEngine/Application/UI System/Core Elements/List.h"
 #include "BlazeEngine/Application/UI System/Core Elements/TextButton.h"
-#include "BlazeEngine/Core/ResultValue.h"
 
 namespace Blaze::UI
 {

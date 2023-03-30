@@ -1,24 +1,23 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/Common.h"
-#include "BlazeEngine/DataStructures/StringHash.h"
 #include <vector>
 #include <unordered_map>
 
 namespace Blaze::ECS
 {
+	class Component;
+
 	struct ComponentTypeData
 	{
 		StringView typeName;
 
-		size_t size;
-		void(*construct)(void*);
-		void(*destruct)(void*);
+		size_t size = 0;
+		ptrdiff_t baseOffset = 0;
+		void(*construct)(void*) = nullptr;
+		void(*destruct)(void*) = nullptr;
 
-		size_t systemSize;
-		void(*constructSystem)(void*);
-		void(*destructSystem)(void*);
+		size_t systemSize = 0;
+		void(*constructSystem)(void*) = nullptr;
+		void(*destructSystem)(void*) = nullptr;
 
 		template<typename T>
 		static void Construct(void* ptr)
@@ -38,7 +37,8 @@ namespace Blaze::ECS
 			return { 
 				T::typeName, 
 				sizeof(T), 
-				Construct<T>, 
+				BaseOffset<Component, T>(),
+				Construct<T>,
 				Destruct<T>,
 				sizeof(S),
 				Construct<S>,

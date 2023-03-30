@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Color.h"
 #include "BlazeEngine/DataStructures/Rect.h"
 #include "BlazeEngine/Graphics/Graphics.h"

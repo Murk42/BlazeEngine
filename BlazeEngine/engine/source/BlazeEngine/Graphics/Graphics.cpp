@@ -36,10 +36,9 @@ namespace Blaze
 			GraphicsBuffer drawTexVB;
 
 			Font defaultFont;
-			FontResolution* defaultFontResolution;
+			FontResolution* defaultFontResolution = nullptr;
 		};
-		static GraphicsData* graphicsData;
-		byte _graphicsData[sizeof(GraphicsData)];
+		static GraphicsData* graphicsData = nullptr;		
 
 		void Graphics_ViewportChanged(Event::ViewportChanged event)
 		{
@@ -50,7 +49,7 @@ namespace Blaze
 
 			if (!graphicsData->userProj3D)
 			{
-				Graphics::Set3DProjectionMatrix(Math::PerspectiveMatrix<float>(90, Graphics::Core::GetViewportRatio(), 0.1, 1000));
+				Graphics::Set3DProjectionMatrix(Math::PerspectiveMatrix<float>(90, Graphics::Core::GetViewportRatio(), 0.1f, 1000.0f));
 				graphicsData->line3DRenderer.SetProjectionMatrix(graphicsData->VP3D);
 			}
 		}
@@ -67,9 +66,8 @@ namespace Blaze
 		TimePoint startTimePoint = TimePoint::GetWorldTime();
 
 		InitializeCoreGraphics();
-
-		new (_graphicsData) GraphicsData();
-		graphicsData = (GraphicsData*)_graphicsData;
+		
+		graphicsData = new GraphicsData();
 
 		graphicsData->line2DRenderer.SetBatchMode(4);
 		graphicsData->line3DRenderer.SetBatchMode(12);
@@ -130,7 +128,7 @@ namespace Blaze
 	}
 	void TerminateGraphics()
 	{
-		Graphics::graphicsData->~GraphicsData();
+		delete Graphics::graphicsData;		
 
 		TerminateCoreGraphics();
 	}
@@ -209,7 +207,7 @@ namespace Blaze
 		void Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color)
 		{
 			graphicsData->textRenderer.Write(text, pos, size, color);
-		}
+		}		
 		void Write(TextRenderCache& data, Vec2f pos, float size, ColorRGBAf color)
 		{
 			graphicsData->textRenderer.Write(data, pos, size, color);
@@ -281,7 +279,7 @@ namespace Blaze
 			//is in range [-1, 1]
 			Vec4f transformed = graphicsData->proj3D * graphicsData->view3D * Vec4f(position, 1.0f);			
 			transformed.xyz /= transformed.w;
-			Vec3f out = Vec3f((transformed.xy + Vec2f(1.0f)) / 2.0f * (Vec2f)Graphics::Core::GetViewportSize(), transformed.z);
+			Vec3f out = Vec3f((transformed.xy + Vec2f(1.0f)) / 2.0f * (Vec2f)Graphics::Core::GetViewportSize(), transformed.w);
 			return out;
 		}
 	}	

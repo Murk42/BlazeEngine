@@ -105,5 +105,34 @@ namespace Blaze
 			R16_SNORM		,
 			R8_SNORM		,			
 		};		
+		enum class StencilOperationType
+		{
+			Keep,
+			Zero,
+			Replace,
+			Increase,
+			IncreaseWrap,
+			Decrease,
+			DecreaseWrap,
+			Invert
+		};		
+		enum class StencilComparison
+		{
+			Never,
+			Less,
+			LessEqual,
+			Greater,
+			GreaterEqual,
+			Equal,
+			NotEqual,
+			Always
+		};
+		enum class ScreenBufferType
+		{
+			Front,
+			Back,
+			BackAndFront,
+		};
+		
 	}
 }

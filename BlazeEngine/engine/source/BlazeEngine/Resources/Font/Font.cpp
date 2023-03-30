@@ -16,7 +16,7 @@ namespace Blaze
 		uint character = 0;		
 
 		Vec2i size;
-		size_t stride = 0;
+		uint stride = 0;
 		uint8* data = nullptr;
 	};	
 
@@ -176,9 +176,11 @@ namespace Blaze
 				FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 				CopyGlypMetrics(data, face->glyph, font->pixelsPerUnit, renderType);
 
-				characterMap.insert({ ch, data });
-
-				++characterCount;
+				if (characterMap.find(ch) == characterMap.end())
+				{
+					characterMap.insert({ ch, data });
+					++characterCount;
+				}
 			}
 
 		return Result();
@@ -186,14 +188,14 @@ namespace Blaze
 		//	return Result();
 		//else
 		//	return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-		//		"Not all characters were loaded. " + String::Convert(notLoadedCount) + " out of " + String::Convert(last - first + 1) + "."));
+		//		"Not all characters were loaded. " + StringParsing::Convert(notLoadedCount) + " out of " + StringParsing::Convert(last - first + 1) + "."));
 	}
 	Result FontResolution::LoadAllCharacters()
 	{
 		FT_Face face = (FT_Face)font->ptr;
 
 		uint glyphIndex;
-		uint character = FT_Get_First_Char(face, &glyphIndex);
+		uint character = FT_Get_First_Char(face, &glyphIndex);		
 
 		while (glyphIndex != 0)
 			if (characterMap.find(character) == characterMap.end())
@@ -232,13 +234,13 @@ namespace Blaze
 
 		bool isMonochrome = renderType == FontResolutionRenderType::Monochrome;		
 		uint bitmapPixelDepth = GetFormatDepth(bitmapPixelFormat);
+		
+		decltype(characterMap)::iterator metricsIT;
 
-		uint i;
-
-		i = 0;
-		for (auto& metricsIT : characterMap)
+		metricsIT = characterMap.begin();			
+		for (uint i = 0; i < characterCount; ++i)
 		{
-			uint character = metricsIT.first;
+			uint character = metricsIT->first;
 			uint glyphIndex = FT_Get_Char_Index(face, character);
 			CharacterBitmap& bitmap = characterBitmaps[i];
 			
@@ -247,7 +249,7 @@ namespace Blaze
 			//if (face->glyph->format != FT_GLYPH_FORMAT_BITMAP)
 			FT_Render_Glyph(face->glyph, (FT_Render_Mode)renderMode);
 
-			if (metricsIT.second.size != Vec2f())
+			if (metricsIT->second.size != Vec2f())
 			{
 				CopyBitmapData(bitmap, face->glyph->bitmap, isMonochrome);
 				bitmap.size.x /= bitmapPixelDepth;
@@ -266,17 +268,18 @@ namespace Blaze
 				rectangles[i].h = 0;
 			}
 
-			++i;
+			++metricsIT;
 		}				
 
 		CreateTexture(atlas, rectangles, internalPixelFormat);		
 
-		Vec2i textureSize = atlas.GetSize();
-		i = 0;
-		for (auto& metricsIT : characterMap)
+		Vec2i textureSize = atlas.GetSize();						
+
+		metricsIT = characterMap.begin();
+		for (uint i = 0; i < characterCount; ++i)
 		{
 			CharacterBitmap& bitmap = characterBitmaps[i];
-			CharacterMetrics& metrics = metricsIT.second;
+			CharacterMetrics& metrics = metricsIT->second;
 
 			if (bitmap.size.x != 0)
 			{
@@ -284,7 +287,7 @@ namespace Blaze
 
 				atlas.SetPixels(offset, bitmap.size, bitmap.stride, bitmapPixelFormat, bitmapPixelType, bitmap.data);
 				
-				metrics.uv1 = Vec2f(offset.x, offset.y) / Vec2f(textureSize);
+				metrics.uv1 = Vec2f(offset) / Vec2f(textureSize);
 				metrics.uv2 = Vec2f(offset.x + bitmap.size.x, offset.y + bitmap.size.y) / Vec2f(textureSize);				
 
 				if (renderType == FontResolutionRenderType::SDF)
@@ -296,9 +299,9 @@ namespace Blaze
 			{
 				metrics.uv1 = { };
 				metrics.uv2 = { };
-			}			
+			}						
 
-			++i;
+			++metricsIT;
 		}	
 		
 		auto metr = characterMap['v'];
@@ -404,8 +407,7 @@ namespace Blaze
 	}
 
 	FontResolution* Font::CreateFontResolution(uint resolution, FontResolutionRenderType renderType)
-	{
-		FT_Error ftError;
+	{		
 		FT_Face face = (FT_Face)ptr;		
 		
 		FontResolution& res = *resolutions.emplace_back(new FontResolution);
@@ -427,7 +429,7 @@ namespace Blaze
 
 		for (auto& fontRes : resolutions)
 		{
-			int currRes = fontRes->GetResolution();
+			uint currRes = fontRes->GetResolution();
 
 			if (currRes == res)
 				return fontRes;

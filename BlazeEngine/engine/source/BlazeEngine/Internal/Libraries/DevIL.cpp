@@ -19,7 +19,7 @@ namespace Blaze
 		if (error != IL_NO_ERROR)
 			throw
 			"Failed to initialize the DevIL library!\n"
-			"DevIL error code: " + String::Convert(error);
+			"DevIL error code: " + StringParsing::Convert(error).value;
 
 		iluInit();
 
@@ -27,7 +27,7 @@ namespace Blaze
 		if (error != IL_NO_ERROR)
 			throw
 			"Failed to initialize the DevIL library!\n"
-			"DevIL error code: " + String::Convert(error);
+			"DevIL error code: " + StringParsing::Convert(error).value;
 
 		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
 		return initInfo;

@@ -1,5 +1,5 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLProgram.h"
-#include "BlazeEngine/DataStructures/String.h"
+#include "BlazeEngine/Graphics/OpenGL/OpenGLGraphicsBuffer.h"
 #include "GL/glew.h"
 #include "BlazeEngine/Logging/LogListener.h"
 
@@ -173,6 +173,11 @@ namespace Blaze
 			type = (UniformType)v2.uniformBlockVariableType;
 			offset = v2.uniformBlockVariableOffset;
 		}
+
+		void ShaderProgram::BindUniformBlock(int location, uint binding)
+		{
+			glUniformBlockBinding(id, location, binding);
+		}
 		
 		void ShaderProgram::SetUniform(int location, const bool& value)
 		{ 						
@@ -189,7 +194,11 @@ namespace Blaze
 		void ShaderProgram::SetUniform(int location, const float& value)
 		{
 			glProgramUniform1f(id, location, value);
-		}		
+		}
+		void ShaderProgram::SetUniform(int location, const double& value)
+		{
+			glProgramUniform1d(id, location, value);
+		}
 		void ShaderProgram::SetUniform(int location, const Vec2i& value)
 		{
 			glProgramUniform2i(id, location, value.x, value.y);
@@ -197,7 +206,11 @@ namespace Blaze
 		void ShaderProgram::SetUniform(int location, const Vec2f& value)
 		{
 			glProgramUniform2f(id, location, value.x, value.y);
-		}		
+		}
+		void ShaderProgram::SetUniform(int location, const Vec2d& value)
+		{
+			glProgramUniform2d(id, location, value.x, value.y);
+		}
 		void ShaderProgram::SetUniform(int location, const Vec3i& value)
 		{
 			glProgramUniform3i(id, location, value.x, value.y, value.z);
@@ -206,10 +219,22 @@ namespace Blaze
 		{
 			glProgramUniform3f(id, location, value.x, value.y, value.z);
 		}
+		void ShaderProgram::SetUniform(int location, const Vec3d& value)
+		{
+			glProgramUniform3d(id, location, value.x, value.y, value.z);
+		}
+		void ShaderProgram::SetUniform(int location, const Vec4i& value)
+		{
+			glProgramUniform4i(id, location, value.x, value.y, value.z, value.w);
+		}
 		void ShaderProgram::SetUniform(int location, const Vec4f& value)
 		{
 			glProgramUniform4f(id, location, value.x, value.y, value.z, value.w);
-		}		
+		}
+		void ShaderProgram::SetUniform(int location, const Vec4d& value)
+		{
+			glProgramUniform4d(id, location, value.x, value.y, value.z, value.w);
+		}
 		void ShaderProgram::SetUniform(int location, const Mat2f& value)
 		{
 			glProgramUniformMatrix2fv(id, location, 1, true, value.arr);

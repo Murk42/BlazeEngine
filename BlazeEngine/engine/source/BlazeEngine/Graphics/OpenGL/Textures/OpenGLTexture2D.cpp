@@ -1,12 +1,15 @@
 #pragma once
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture2D.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
-#include "BlazeEngine/Logging/Logger.h"
 
 #include "GL/glew.h"
 #include "IL/il.h"
 
 #include "BlazeEngine/Graphics/GraphicsCore.h"
+
+#include <codecvt>
+
+extern std::wstring to_wstring(const std::string& s);
 
 namespace Blaze::OpenGL
 {
@@ -95,19 +98,17 @@ namespace Blaze::OpenGL
 		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, 0, format, type, bm.GetPixels());
 	}
 
-	bool Texture2D::Load(StringView path, bool emitLogOnFail)
+	Result Texture2D::Load(Path path)
 	{
 		unsigned bm = ilGenImage();
 		ilBindImage(bm);
-
-		if (!ilLoadImage(path.Ptr()))
+				
+		std::wstring wide = to_wstring((std::string)path.GetString().Ptr());
+		if (!ilLoadImage(wide.c_str()))
 		{
-
-			if (emitLogOnFail)
-				BLAZE_WARNING_LOG("Blaze Engine", "Failed to load image file with DevIL error code: " + String::Convert(ilGetError()));
-
 			ilDeleteImage(bm);
-			return BLAZE_ERROR;
+
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Failed to load image file with DevIL error code: " + StringParsing::Convert(ilGetError()).value);			
 		}
 
 		BitmapPixelFormat bmFormat = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
@@ -117,21 +118,18 @@ namespace Blaze::OpenGL
 		Create(BitmapView(bmSize, bmFormat, bmType, ilGetData()));
 
 		ilDeleteImage(bm);
-		return BLAZE_OK;
+		return Result();
 	}
-	bool Texture2D::Load(StringView path, TextureInternalPixelFormat internalFormat, bool emitLogOnFail)
+	Result Texture2D::Load(Path path, TextureInternalPixelFormat internalFormat)
 	{
 		unsigned bm = ilGenImage();
 		ilBindImage(bm);
 
-		if (!ilLoadImage(path.Ptr()))
-		{
-
-			if (emitLogOnFail)
-				BLAZE_WARNING_LOG("Blaze Engine", "Failed to load image file with DevIL error code: " + String::Convert(ilGetError()));
-
+		std::wstring wide = to_wstring((std::string)path.GetString().Ptr());
+		if (!ilLoadImage(wide.c_str()))
+		{			
 			ilDeleteImage(bm);
-			return BLAZE_ERROR;
+			return BLAZE_WARNING_RESULT("Blaze Engine", "Failed to load image file with DevIL error code: " + StringParsing::Convert(ilGetError()).value);			
 		}
 
 		BitmapPixelFormat bmFormat = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
@@ -141,7 +139,7 @@ namespace Blaze::OpenGL
 		Create(BitmapView(bmSize, bmFormat, bmType, ilGetData()), internalFormat);
 
 		ilDeleteImage(bm);
-		return BLAZE_OK;
+		return Result();
 	}
 
 

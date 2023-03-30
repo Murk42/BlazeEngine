@@ -1,6 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-
 #include "BlazeEngine/Graphics/OpenGL/OpenGLGraphicsBuffer.h"
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureEnums.h"
 

@@ -1,6 +1,5 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLShader.h"
 #include "BlazeEngine/File/File.h"
-#include "BlazeEngine/Logging/Logger.h"
 #include "BlazeEngine/Logging/LogListener.h"
 
 #include "GL/glew.h"
@@ -36,11 +35,8 @@ namespace Blaze
 		Result Shader::Load(const Path& path)
 		{
 			File file;
-			if (Result result = file.Open(path, FileOpenMode::Read))
-			{				
-				return Result(result, Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"Blaze Engine", "Failed to open shader file with path \"" + path.GetString() + "\""), true);
-			}
+			if (Result result = file.Open(path, FileOpenMode::Read))			
+				return result + BLAZE_WARNING_RESULT("Blaze Engine", "Failed to open shader file with path \"" + path.GetString() + "\"");			
 
 			Buffer buffer;
 			buffer.Allocate(file.Size());
@@ -48,11 +44,8 @@ namespace Blaze
 
 			ShaderSource(buffer);
 
-			if (Result result = CompileShader())
-			{				
-				return Result(result, Log(LogType::Info, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"Blaze Engine", GetCompilationLog()));
-			}
+			if (Result result = CompileShader())			
+				return result + BLAZE_INFO_RESULT("Blaze Engine", GetCompilationLog());			
 
 			return Result();
 		}

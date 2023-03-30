@@ -1,8 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
 #include "BlazeEngine/File/Path.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/Buffer.h"
 
 namespace Blaze

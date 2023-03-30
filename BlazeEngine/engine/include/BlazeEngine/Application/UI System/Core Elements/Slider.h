@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Application/UI System/UIElement.h"
 #include "BlazeEngine/Application/UI System/Core Elements/Panel.h"
 #include "BlazeEngine/Application/UI System/Core Elements/Button.h"

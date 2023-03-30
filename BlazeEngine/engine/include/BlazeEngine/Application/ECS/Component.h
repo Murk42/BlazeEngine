@@ -1,7 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "ComponentTypeRegistry.h"
 #include "System.h"
 
@@ -43,30 +40,68 @@ namespace Blaze::ECS
 	class BLAZE_API ComponentContainer
 	{
 		ComponentTypeData typeData;
-		static constexpr size_t bucketElementCount = 16;
+
+		static constexpr size_t BucketElementCount = 32;
+		using FlagType =
+			std::conditional_t<BucketElementCount == 8, uint8,
+			std::conditional_t<BucketElementCount == 16, uint16,
+			std::conditional_t<BucketElementCount == 32, uint32,
+			std::conditional_t<BucketElementCount == 64, uint64,
+			void>>>>;
+
+		struct BucketHeader;
+
+		struct ElementHeader
+		{
+			BucketHeader* bucket;			
+		};
 
 		struct BucketHeader
 		{
-			uint16 flags;
-			byte data[];
+			FlagType flags;			
 		};
-		std::vector<BucketHeader*> buckets;
-		size_t count;
+
+		uint elementSize;
+		uint elementCount;
+		BucketHeader** buckets;
+		uint bucketCount;
+		uint nonFullBucketCount;		
+
+		ElementHeader* BucketAllocate(BucketHeader* bucket);
+		void BucketFree(ElementHeader* ptr);
+		void* FirstInBucket(BucketHeader* bucket) const;
+		void* LastInBucket(BucketHeader* bucket) const;
+
+		void Increment(uint& bucketIndex, Component*& ptr) const;
+		void Decrement(uint& bucketIndex, Component*& ptr) const;
 	public:
+		ComponentContainer();
+		~ComponentContainer();
+
+		Result SetTypeData(const ComponentTypeData&);
+
+		Component* Create();
+		void Destroy(Component*);
+
+		uint Count() const { return elementCount; }
+
+		void Clear();
+
 		class BLAZE_API Iterator
 		{
 			const ComponentContainer* container;
 			uint bucketIndex;
-			uint index;
+			Component* ptr;
 
-			Iterator(const ComponentContainer*, uint, uint);
+			Iterator(const ComponentContainer*, uint, Component*);
 		public:
+			Iterator();
 			Iterator(const Iterator&);
 
-			Iterator operator++();
-			Iterator& operator++(int);
-			Iterator operator--();
-			Iterator& operator--(int);
+			Iterator& operator++();
+			Iterator operator++(int);
+			Iterator& operator--();
+			Iterator operator--(int);
 			
 			bool operator==(const Iterator& other) const;
 			bool operator!=(const Iterator& other) const;
@@ -78,16 +113,6 @@ namespace Blaze::ECS
 
 			friend class ComponentContainer;
 		};
-
-		ComponentContainer();
-		~ComponentContainer();
-
-		Result SetTypeData(const ComponentTypeData&);
-
-		void Clear();
-
-		Component* Create();
-		Result Destroy(Component*);
 
 		Iterator begin() const;
 		Iterator end() const;

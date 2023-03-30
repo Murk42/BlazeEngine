@@ -1,6 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "Component.h"
 
 namespace Blaze::ECS
@@ -9,9 +7,8 @@ namespace Blaze::ECS
 
 	class BLAZE_API Entity
 	{
-		Scene* scene;
-		ComponentGroup components;
-		uint bucketIndex;
+		Scene* scene = nullptr;
+		ComponentGroup components;		
 
 		const ComponentTypeRegistry& GetRegistry() const;
 	public:

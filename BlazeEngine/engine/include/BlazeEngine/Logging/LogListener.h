@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Logging/Log.h"
 #include <vector>
 
 namespace Blaze

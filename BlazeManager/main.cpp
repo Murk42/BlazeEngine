@@ -43,8 +43,16 @@ vector<string> EvaluateProgramArguments(int& argc, char* argv[])
 			cout << argv[i] << (i == argc - 1 ? " }\n" : ", ");
 	}
 
-	if (!std::filesystem::exists(engineProjectDir)) engineProjectDir.clear();
-	if (!std::filesystem::exists(runtimeProjectDir)) engineProjectDir.clear();
+	if (!std::filesystem::exists(engineProjectDir)) 
+	{
+		engineProjectDir.clear(); 
+		cout << "<Blaze Manager> Engine project directory isn't at it's default location";
+	}
+	if (!std::filesystem::exists(runtimeProjectDir))
+	{
+		runtimeProjectDir.clear();
+		cout << "<Blaze Manager> Runtime project directory isn't at it's default location";
+	}
 
 	GetVisualStudioInfo(vsInfo);
 

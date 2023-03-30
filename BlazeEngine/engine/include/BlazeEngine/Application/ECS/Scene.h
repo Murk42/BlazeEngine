@@ -1,8 +1,6 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
-#include "BlazeEngine/Core/Result.h"
-#include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/DataStructures/Array.h"
+#include "BlazeEngine/DataStructures/HybridArray.h"
 #include "Manager.h"
 #include "Component.h"
 #include "Entity.h"
@@ -16,13 +14,15 @@ namespace Blaze::ECS
 		const Manager* manager;
 		Array<ComponentContainer> containers;
 
-		struct EntityBucket
-		{
-			uint64 flags;
-			byte data[];
-		};
-		std::vector<EntityBucket*> entityBuckets;
-		uint entityCount;
+		HybridArray<Entity> entities;
+
+		//struct EntityBucket
+		//{
+		//	uint64 flags;
+		//	byte data[];
+		//};
+		//std::vector<EntityBucket*> entityBuckets;
+		//uint entityCount;
 		template<typename T>
 		inline void SetComponent(T arg, uint index, Component** components)
 		{

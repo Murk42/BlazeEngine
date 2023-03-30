@@ -1,8 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/DataStructures/Color.h"
-#include "BlazeEngine/DataStructures/String.h"
-#include "BlazeEngine/DataStructures/Vector.h"
 
 namespace Blaze
 {		
@@ -38,10 +35,10 @@ namespace Blaze
 		Bitmap();
 		~Bitmap();
 
-		bool Load(StringView path, bool emitWarning = true);
-		bool Save(StringView path, bool emitWarning = true);
+		Result Load(StringView path);
+		Result Save(StringView path);
 		
-		void Create(Vec2i size, BitmapPixelFormat format, BitmapPixelType type, void* pixels);			
+		Result Create(Vec2i size, BitmapPixelFormat format, BitmapPixelType type, const void* pixels);			
 
 		inline BitmapPixelFormat GetPixelFormat() const { return format; }
 		inline BitmapPixelType GetPixelType() const { return type; }		

@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/DataStructures/Common.h"
 #include "BlazeEngine/Input/Key.h"
 #include "BlazeEngine/DataStructures/StringUTF8.h"
 #include <functional>

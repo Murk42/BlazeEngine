@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/EngineCore.h"
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
 
 namespace Blaze
