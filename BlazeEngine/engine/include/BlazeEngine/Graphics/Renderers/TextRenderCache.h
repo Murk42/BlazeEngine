@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngine/Graphics/GraphicsLibrary.h"
+#include <span>
 
 namespace Blaze
 {
@@ -12,15 +13,6 @@ namespace Blaze::Graphics
 
 	class BLAZE_API TextRenderCache
 	{
-		Core::GraphicsBuffer vb;
-		Core::VertexArray va;
-
-		Vec2f bottomLeft;
-		Vec2f topRight;
-
-		FontResolution* fontResolution;
-
-		uint vertexCount;
 	public:
 		struct Vertex
 		{
@@ -28,21 +20,32 @@ namespace Blaze::Graphics
 			Vec2f p2;
 			Vec2f uv1;
 			Vec2f uv2;
+			Vec4f color;
 		};
-
+				
 		TextRenderCache();
 		TextRenderCache(TextRenderCache&&) noexcept;
-		TextRenderCache(StringViewUTF8 text, FontResolution* fontResolution);
+		TextRenderCache(StringViewUTF8 text, float fontHeight, FontResolution* fontResolution, std::span<const ColorRGBAf> colors);
+		~TextRenderCache();
 
-		void GenerateVertices(StringViewUTF8 text, FontResolution* fontResolution);
-		void GenerateVertices(StringViewUTF8 text, FontResolution* fontResolution, BaseTextVertexGenerator& vertexGenerator);		
+		Result GenerateVertices(StringViewUTF8 text, float fontHeight, FontResolution* fontResolution, std::span<const ColorRGBAf> colors);
+		Result GenerateVertices(StringViewUTF8 text, float fontHeight, FontResolution* fontResolution, std::span<const ColorRGBAf> colors, BaseTextVertexGenerator& vertexGenerator);
+
+		void SetColors(std::span<ColorRGBAf> colors);
+		void SetColor(ColorRGBAf color);
 
 		inline Vec2f GetBottomLeft() const { return bottomLeft; }
 		inline Vec2f GetTopRight() const { return topRight; }
 		inline uint GetVertexCount() const { return vertexCount; }
 		inline FontResolution* GetFontResolution() const { return fontResolution; }
 
-		inline Core::VertexArray& GetVertexArray() { return va; }
-		inline const Core::VertexArray& GetVertexArray() const { return va; }
+		inline std::span<const Vertex> GetVertices() const { return { vertices, vertexCount }; }
+	private:		
+		Vec2f bottomLeft;
+		Vec2f topRight;
+
+		Vertex* vertices;
+		FontResolution* fontResolution;
+		uint vertexCount;
 	};
 }

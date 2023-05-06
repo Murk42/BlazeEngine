@@ -11,7 +11,7 @@ namespace Blaze
 
 		ResultValue() = delete;
 		ResultValue(const ResultValue& o) = delete;
-		ResultValue(ResultValue&& o) noexcept : value(std::move(o.value)), result(std::move(o.result)) { }
+		ResultValue(ResultValue&& o) noexcept : value(std::move(o.value)), result(std::move(o.result)) { }		
 		ResultValue(const T& value) : value(value) { }
 		ResultValue(const T& value, Result&& result) : value(value), result(std::move(result)) { }
 		ResultValue(T&& value) : value(std::move(value)) { }

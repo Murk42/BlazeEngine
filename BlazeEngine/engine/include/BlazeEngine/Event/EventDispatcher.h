@@ -1,6 +1,8 @@
 #pragma once
 #include "BlazeEngine/Event/Events.h"
 #include "BlazeEngine/Event/EventHandler.h"
+#include "BlazeEngine/DataStructures/Array.h"
+#include <utility>
 
 namespace Blaze
 {
@@ -10,8 +12,7 @@ namespace Blaze
 	template<typename T>
 	class EventDispatcher
 	{
-		std::vector<EventHandler<T>*> handlers;
-
+		Array<EventHandler<T>*> handlers;		
 	public:
 		~EventDispatcher()
 		{
@@ -19,26 +20,52 @@ namespace Blaze
 				handler->dispatcher = nullptr;
 		}
 		
-		void AddHandler(EventHandler<T>& handler)
+		Result AddHandler(EventHandler<T>& handler)
 		{
-			handler.dispatcher = this;
-			handlers.emplace_back(&handler);
+			handlers.Resize(handlers.Count() + 1);
+			handlers.Last() = &handler;
+			handler.dispatcher = this;			
+
+			return Result();
 		}
-		void RemoveHandler(EventHandler<T>& handler)
+		Result RemoveHandler(EventHandler<T>& handler)
 		{
 			auto it = std::find(handlers.begin(), handlers.end(), &handler);
 			if (it != handlers.end())
 			{
-				(* it)->dispatcher = nullptr;
-				handlers.erase(it);
+				(*it)->dispatcher = nullptr;
+				*it = handlers.Last();
+				handlers.Resize(handlers.Count() - 1);				
 			}
+
+			return Result();
 		}
 
-		void Call(T parameters)
+		Result Call(T event)
 		{
-			for (auto& handler : handlers)
-				handler->AddEvent(parameters);
-			//include EventHandler if compiler throws an error here
+			return ADD_STACK_FRAME(LoggerListener::Listen([&]() {
+
+				for (auto& handler : handlers)
+				{
+					if (handler->listening)
+						handler->OnEvent(event);
+
+					if (handler->supress)
+						break;
+				}
+
+				}));						
+		}
+
+		EventDispatcher& operator+=(EventHandler<T>& handler)
+		{
+			AddHandler(handler);
+			return *this;
+		}
+		EventDispatcher& operator-=(EventHandler<T>& handler)
+		{
+			RemoveHandler(handler);
+			return *this;
 		}
 	};
 

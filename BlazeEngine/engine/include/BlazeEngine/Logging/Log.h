@@ -1,10 +1,5 @@
 #pragma once
 
-BLAZE_API Blaze::String FILE_NAME(const char* macro);
-#define BLAZE_FILE_NAME (::FILE_NAME(__FILE__))
-#define BLAZE_FUNCTION_NAME __FUNCTION__
-#define BLAZE_FILE_LINE __LINE__
-
 namespace Blaze
 {
 	enum class LogType
@@ -18,39 +13,50 @@ namespace Blaze
 
 	class BLAZE_API Log
 	{
-		uint threadID;
+	public:				
+		Log(const Log& log);
+		Log(Log&&) noexcept;		
+		Log(LogType type, Path filePath, uint line, String functionName, String source, String message);
+
+		String ToString() const;
+
+		inline uint GetThreadID() const { return threadID; }		
+		inline LogType GetType() const { return type; }
+
+		const Path& GetFilePath() const;
+		StringView GetFunctionName() const;
+		uint GetLine() const;		
+
+		inline const String& GetSource() const { return source; }
+		inline const String& GetMessage() const { return message; }		
+
+		bool operator==(const Log&);
+		bool operator!=(const Log&);
+
+		Log& operator=(const Log&);
+		Log& operator=(Log&&) noexcept;
+	public:
+		uint threadID;				
 		TimePoint time;
 
 		LogType type;
 
-		String filePath;
+		Path filePath;
 		String functionName;
 		uint line;
 		 
 		String source;
-		String message;
-	public:
-		Log(LogType type, String&& filePath, String&& functionName, uint line, String&& source, String&& message);
-
-		String FormatString() const;
-
-		inline uint GetThreadID() const { return threadID; }
-		inline const LogType GetType() const { return type; }
-
-		inline const String& GetFilePath() const { return filePath; }
-		inline const String& GetFunctionName() const { return functionName; }
-		inline uint GetLine() const { return line; }
-
-		inline const String& GetSource() const { return source; }
-		inline const String& GetMessage() const { return message; }
-
-		bool operator==(const Log&);
-		bool operator!=(const Log&);
+		String message;				
 	};
 }
 
-#define BLAZE_DEBUG_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Debug	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
-#define BLAZE_INFO_LOG(source, message)		::Blaze::Log(::Blaze::LogType::Info		, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
-#define BLAZE_WARNING_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Warning	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
-#define BLAZE_ERROR_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Error	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
-#define BLAZE_FATAL_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Fatal	, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, source, message)
+BLAZE_API Blaze::Path FILE_PATH(const char* macro);
+#define BLAZE_FILE_NAME (::FILE_PATH(__FILE__))
+#define BLAZE_FUNCTION_NAME __FUNCTION__
+#define BLAZE_FILE_LINE ((uint)__LINE__)
+
+#define BLAZE_DEBUG_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Debug	, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, source, message)
+#define BLAZE_INFO_LOG(source, message)		::Blaze::Log(::Blaze::LogType::Info		, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, source, message)
+#define BLAZE_WARNING_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Warning	, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, source, message)
+#define BLAZE_ERROR_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Error	, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, source, message)
+#define BLAZE_FATAL_LOG(source, message)	::Blaze::Log(::Blaze::LogType::Fatal	, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, source, message)

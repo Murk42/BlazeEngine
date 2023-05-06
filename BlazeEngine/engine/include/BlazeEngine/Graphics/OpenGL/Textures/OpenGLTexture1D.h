@@ -23,13 +23,13 @@ namespace Blaze::OpenGL
 		Texture1D(Texture1D&&) noexcept;	
 		~Texture1D();
 
-		void SetSettings(Texture1DSettings settings);		
+		Result SetSettings(Texture1DSettings settings);		
 
 		bool Load(StringView path, bool emitLogOnFail = true);		
 		bool Load(StringView path, TextureInternalPixelFormat internalFormat, bool emitLogOnFail = true);
 						
-		void Create(uint size, TextureInternalPixelFormat internalFormat);			
-		void SetPixels(uint offset, uint size, BitmapPixelFormat format, BitmapPixelType type, void* pixels);				
+		Result Create(uint size, TextureInternalPixelFormat internalFormat);			
+		Result SetPixels(uint offset, uint size, BitmapPixelFormat format, BitmapPixelType type, void* pixels);				
 
 		void GenerateMipmaps();
 

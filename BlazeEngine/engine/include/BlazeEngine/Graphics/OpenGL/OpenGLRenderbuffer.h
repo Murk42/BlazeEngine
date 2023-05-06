@@ -13,7 +13,7 @@ namespace Blaze::OpenGL
 		Renderbuffer(Renderbuffer&&) noexcept;
 		~Renderbuffer();
 
-		void Create(Vec2i size, Blaze::OpenGL::TextureInternalPixelFormat format);
+		Result Create(Vec2i size, Blaze::OpenGL::TextureInternalPixelFormat format);
 
 		inline uint GetHandle() const { return id; }
 		inline Vec2i GetSize() const { return size; }

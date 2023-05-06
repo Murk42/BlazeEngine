@@ -5,9 +5,11 @@ namespace Blaze
 {
 	namespace Logger
 	{		
-		void BLAZE_API AddLog(const Log& log);
-		void BLAZE_API AddLog(LogType type, String&& fileName, String&& functionName, uint line, String&& source, String&& message);		
-		void BLAZE_API SetOutputFile(const Path& path);
-		void BLAZE_API PrintLogsToConsole(bool print);
+		BLAZE_API void ProcessLog(const Log& log);		
+		BLAZE_API void ProcessResult(Result&& result);
+		BLAZE_API void ProcessResultSilent(Result&& result);
+
+		BLAZE_API void SetOutputFile(const Path& path);
+		BLAZE_API void PrintLogsToConsole(bool print);		
 	};
 }

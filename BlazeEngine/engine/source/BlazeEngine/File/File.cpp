@@ -16,7 +16,7 @@ namespace Blaze
 		File::~File()
 		{
 			if (fd != -1 && _close(fd) == -1)
-				Logger::AddLog(BLAZE_ERROR_LOG("stdlib", "Failed to close file"));
+				Logger::ProcessLog(BLAZE_ERROR_LOG("stdlib", "Failed to close file"));
 		}
 
 		Result File::Open(const Path& path, FileOpenMode mode, FileOpenFlags flags, FilePermission perms)
@@ -24,8 +24,7 @@ namespace Blaze
 			errno_t returned = _sopen_s(&fd, path.GetString().Ptr(), (int)mode | (int)flags | _O_BINARY, _SH_DENYNO, (int)perms);
 
 			if (returned != 0)
-				return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"stdlib", "_sopen_s failed with error: " + StringParsing::Convert(returned).value), true);
+				return BLAZE_ERROR_RESULT("stdlib", "_sopen_s failed with error: " + StringParsing::Convert(returned));
 
 			return Result();
 		}
@@ -41,8 +40,7 @@ namespace Blaze
 			{
 				fd = -1;
 
-				return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"stdlib", "_close failed."), true);				
+				return BLAZE_ERROR_RESULT("stdlib", "_close failed.");
 			}
 			fd = -1;
 

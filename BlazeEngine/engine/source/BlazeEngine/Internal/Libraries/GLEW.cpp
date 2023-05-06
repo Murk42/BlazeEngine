@@ -60,7 +60,7 @@ namespace Blaze
 		if (glewInit() != GLEW_OK)
 			throw
 			"Failed to initialize the GLEW library!\n"
-			"GLEW error code: " + StringParsing::Convert(glGetError()).value;
+			"GLEW error code: " + StringParsing::Convert(glGetError());
 
 		//Enable callback debug
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

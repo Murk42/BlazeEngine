@@ -1,4 +1,5 @@
 #pragma once
+#include <utility>
 
 namespace Blaze
 {
@@ -172,7 +173,8 @@ namespace Blaze
 		BucketHeader* last;
 		BucketHeader* firstFull;		
 
-		Element* BucketHeaderAllocate(BucketHeader* bucket)
+		template<typename ... Args>
+		Element* BucketHeaderAllocate(BucketHeader* bucket, Args&& ... args)
 		{			
 			uint index = CountRightOnes(bucket->state, bucketStateBufferSize, 0);
 			FlipBit(bucket->state, index);			
@@ -183,7 +185,7 @@ namespace Blaze
 			bucket->elementCount++;
 
 			Allocator a;
-			std::allocator_traits<Allocator>::construct(a, &element->data);
+			std::allocator_traits<Allocator>::construct(a, &element->data, std::forward<Args>(args)...);
 			return element;
 		}
 		void BucketHeaderFree(Element* ptr)
@@ -192,7 +194,7 @@ namespace Blaze
 			uint index = ptr - bucket->elements;			
 
 			if (GetBit(bucket->state, index) == false)
-				Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet"));
+				Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet"));
 			
 			FlipBit(bucket->state, index);									
 
@@ -424,13 +426,14 @@ namespace Blaze
 			bucketSize = sizeof(BucketHeader) + bucketElementCount * (sizeof(Element)) + bucketStateBufferSize;
 		}
 
-		T* Allocate()
+		template<typename ... Args>
+		T* Allocate(Args&& ... args)
 		{
 			if (firstFull == first)
 				InsertAtBeginningBucketHeader();			
 
 			elementCount++;
-			T* element = &BucketHeaderAllocate(first)->data;
+			T* element = &BucketHeaderAllocate(first, std::forward<Args>(args)...)->data;
 
 			if (first->elementCount == bucketElementCount) 
 				MarkFirstBucketHeaderFull();						

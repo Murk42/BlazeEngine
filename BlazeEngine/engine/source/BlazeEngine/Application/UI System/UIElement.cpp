@@ -18,7 +18,7 @@ namespace Blaze::UI
 #define VIEWPORT_POS_TRIGGER	8
 #define LAYER_TRIGGER			9
 
-#define TRIGGER(x) if (triggers[x]) triggers[x]();
+#define TRIGGER(x) //if (triggers[x]) triggers[x]();
 
 	Result UIElement::TieElement(UIElement* element)
 	{
@@ -56,7 +56,7 @@ namespace Blaze::UI
 	UIElement::UIElement()
 		: updateState(0), layer(), manager(nullptr), scene(nullptr), flags(0b01111), typeIndex(-1), clipRect(0, 0, NAN, NAN),
 		name(), pos(), size(100, 100), anchor(nullptr), localAlignment(Align::Center), anchorAlignment(Align::Center),
-		depth(0.0f), clipElement(nullptr), tiedParent(nullptr), triggers({ })
+		depth(0.0f), clipElement(nullptr), tiedParent(nullptr)
 	{
 		SetProperties({ });
 	}

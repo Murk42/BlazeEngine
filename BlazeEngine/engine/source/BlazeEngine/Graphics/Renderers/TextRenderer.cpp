@@ -1,183 +1,89 @@
 #include "BlazeEngine/Graphics/Renderers/TextRenderer.h"
 #include "BlazeEngine/Graphics/Renderers/TextVertexGenerator.h"
 #include "BlazeEngine/Graphics/Renderers/TextRenderCache.h"
-#include "BlazeEngine/Resources/Font/Font.h"
 
 #include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Math/Math.h"
 
+#include "GL/glew.h"
+
 namespace Blaze::Graphics
 {
-	static const char* vertSource =
-		"#version 450 core					   \n"
-		"									   \n"
-		"layout(location = 0) in vec2 i_pos1;  \n"
-		"layout(location = 1) in vec2 i_pos2;  \n"
-		"layout(location = 2) in vec2 i_uv1;   \n"
-		"layout(location = 3) in vec2 i_uv2;   \n"
-		"									   \n"
-		"out vec2 geom_pos1;				   \n"
-		"out vec2 geom_pos2;				   \n"
-		"out vec2 geom_uv1;					   \n"
-		"out vec2 geom_uv2;					   \n"
-		"									   \n"
-		"void main()						   \n"
-		"{									   \n"
-		"	geom_pos1 = i_pos1;				   \n"
-		"	geom_pos2 = i_pos2;				   \n"
-		"	geom_uv1 = i_uv1;				   \n"
-		"	geom_uv2 = i_uv2;				   \n"
-		"}									   \n";
-
-	static const char* geomSource =
-		"#version 450															  \n"
-		"																		  \n"
-		"layout(points) in;														  \n"
-		"layout(triangle_strip, max_vertices = 4) out;							  \n"
-		"																		  \n"
-		"in vec2 geom_pos1[];													  \n"
-		"in vec2 geom_pos2[];													  \n"
-		"in vec2 geom_uv1[];													  \n"
-		"in vec2 geom_uv2[];													  \n"
-		"																		  \n"
-		"out vec2 frag_uv;														  \n"
-		"																		  \n"
-		"layout(location = 0) uniform mat4 u_proj;								  \n"
-		"layout(location = 1) uniform mat4 u_VP;								  \n"
-		"																		  \n"
-		"void main()															  \n"
-		"{																		  \n"
-		"	gl_Position = u_proj * u_VP * vec4(geom_pos1[0].x, geom_pos1[0].y, 1, 1);	  \n"
-		"	frag_uv = vec2(geom_uv1[0].x, geom_uv1[0].y);						  \n"
-		"	EmitVertex();														  \n"
-		"																		  \n"
-		"	gl_Position = u_proj * u_VP * vec4(geom_pos1[0].x, geom_pos2[0].y, 1, 1);	  \n"
-		"	frag_uv = vec2(geom_uv1[0].x, geom_uv2[0].y);						  \n"
-		"	EmitVertex();														  \n"
-		"																		  \n"
-		"	gl_Position = u_proj * u_VP * vec4(geom_pos2[0].x, geom_pos1[0].y, 1, 1);	  \n"
-		"	frag_uv = vec2(geom_uv2[0].x, geom_uv1[0].y);						  \n"
-		"	EmitVertex();														  \n"
-		"																		  \n"
-		"	gl_Position = u_proj * u_VP * vec4(geom_pos2[0].x, geom_pos2[0].y, 1, 1);	  \n"
-		"	frag_uv = vec2(geom_uv2[0].x, geom_uv2[0].y);						  \n"
-		"	EmitVertex();														  \n"
-		"																		  \n"
-		"	EndPrimitive();														  \n"
-		"}																		  \n";
-	static const char* fragSource[] = {
-		"#version 450										  \n"
-		"													  \n"
-		"in vec2 frag_uv;									  \n"
-		"													  \n"
-		"layout(location = 2) uniform sampler2D u_texture;	  \n"
-		"layout(location = 3) uniform vec4 u_color;			  \n"
-		"													  \n"
-		"void main()										  \n"
-		"{													  \n"
-		"	vec4 color = texture(u_texture, frag_uv);		  \n"
-		"													  \n"
-		"	color = vec4(1, 1, 1, color.r) * u_color;		  \n"
-		"	if (color.a == 0)								  \n"
-		"		discard;									  \n"
-		"													  \n"
-		"	gl_FragColor = color;							  \n"
-		"}													  \n",
-
-
-		"#version 450										  \n"
-		"													  \n"
-		"in vec2 frag_uv;									  \n"
-		"													  \n"
-		"layout(location = 2) uniform sampler2D u_texture;	  \n"
-		"layout(location = 3) uniform vec4 u_color;			  \n"
-		"													  \n"
-		"void main()										  \n"
-		"{													  \n"
-		"	vec4 color = texture(u_texture, frag_uv);		  \n"
-		"														\n"
-		"	if (color.rgb == vec3(0, 0, 0))					  \n"
-		"		discard;									  \n"
-		"	float l = (color.r * color.r + color.g * color.g + color.b * color.b) / 3; \n"
-		"	l = pow(l, 0.5);\n"
-		"	color = vec4(mix(color.rgb, u_color.rgb, l), 1);	   					  \n"		
-		//"	color = vec4(color.rgb, u_color.a);	   					  \n"
-		"													  \n"
-		"	gl_FragColor = color;							  \n"
-		"}													  \n",
-
-
-		"#version 450										  \n"
-		"													  \n"
-		"in vec2 frag_uv;									  \n"
-		"													  \n"
-		"layout(location = 2) uniform sampler2D u_texture;	  \n"
-		"layout(location = 3) uniform vec4 u_color;			  \n"
-		"													  \n"
-		"void main()										  \n"
-		"{													  \n"
-		"	vec4 color = texture(u_texture, frag_uv);		  \n"
-		"													  \n"
-		"	if (color.r < 0.45)								  \n"
-		"		discard;									  \n"
-		"	else if (color.r <= 0.50)						  \n"
-		"		color = vec4(u_color.rgb, (color.r - 0.45) / 0.05 * u_color.a);\n"
-		"	else		\n"
-		"		color = u_color;							\n"
-		//"	if (color.r > 0.5f)\n"
-		//"		color = u_color; \n"
-		//"	else discard; \n"
-		"													  \n"
-		"	gl_FragColor = color;							  \n"
-		"}													  \n"
-	};
-
-	int GetRenderTypeProgramIndex(FontResolutionRenderType type)
-	{
-		switch (type)
-		{
-		case Blaze::FontResolutionRenderType::Monochrome: return 0;
-		case Blaze::FontResolutionRenderType::Antialiased: return 0;
-		case Blaze::FontResolutionRenderType::HorizontalLCD: return 1;
-		case Blaze::FontResolutionRenderType::VerticalLCD: return 1;
-		case Blaze::FontResolutionRenderType::SDF: return 2;
-		default: return -1;
-		}
-	}
-
-	TextShaderProgramSource GetDefaultTextShaderProgramSource_Normal()
-	{
-		return { vertSource, geomSource, fragSource[0] };
-	}
-	TextShaderProgramSource GetDefaultTextShaderProgramSource_LCD()
-	{
-		return { vertSource, geomSource, fragSource[1] };
-	}
-	TextShaderProgramSource GetDefaultTextShaderProgramSource_SDF()
-	{
-		return { vertSource, geomSource, fragSource[2] };
-	}		
-
 	using Vertex = TextRenderCache::Vertex;
+	static constexpr size_t BatchCount = 4;
+	static constexpr size_t BufferVertexCount = 128;
+	static constexpr size_t BufferSize = BufferVertexCount * sizeof(Vertex);
+	static constexpr size_t BatchVertexCount = BufferVertexCount / BatchCount;
+	static constexpr size_t BatchSize = BatchVertexCount * sizeof(Vertex);
 
-	TextRenderer::TextRenderer()
-		: fontResolution(nullptr)
-	{		
+	TextRenderer::TextRenderer()				
+	{
 		va.EnableVertexAttribute(0);
 		va.EnableVertexAttribute(1);
 		va.EnableVertexAttribute(2);
 		va.EnableVertexAttribute(3);
+		va.EnableVertexAttribute(4);
 		va.SetVertexAttributeFormat(0, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 0);
 		va.SetVertexAttributeFormat(1, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 2);
 		va.SetVertexAttributeFormat(2, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 4);
 		va.SetVertexAttributeFormat(3, Core::VertexAttributeType::Float, 2, false, sizeof(float) * 6);
-		va.SetVertexAttributeBuffer(0, &vb, sizeof(Vertex), 0);
-		va.SetVertexAttributeBuffer(1, &vb, sizeof(Vertex), 0);
-		va.SetVertexAttributeBuffer(2, &vb, sizeof(Vertex), 0);
-		va.SetVertexAttributeBuffer(3, &vb, sizeof(Vertex), 0);
+		va.SetVertexAttributeFormat(4, Core::VertexAttributeType::Float, 4, false, sizeof(float) * 8);
+		//va.SetVertexAttributeBuffer(0, &renderer.GetBuffer(), sizeof(Vertex), 0);
+		//va.SetVertexAttributeBuffer(1, &renderer.GetBuffer(), sizeof(Vertex), 0);
+		//va.SetVertexAttributeBuffer(2, &renderer.GetBuffer(), sizeof(Vertex), 0);
+		//va.SetVertexAttributeBuffer(3, &renderer.GetBuffer(), sizeof(Vertex), 0);
+		//va.SetVertexAttributeBuffer(4, &renderer.GetBuffer(), sizeof(Vertex), 0);
+		//
+		//renderer.Allocate(BatchCount, BatchSize);
+		//vb.Allocate(nullptr, BufferSize,
+		//	Graphics::Core::ImmutableGraphicsBufferMapAccess::Write,
+		//	Graphics::Core::ImmutableGraphicsBufferMapType::PersistentCoherent
+		//);
+		//vbMap = vb.MapBufferRange(0, BufferSize,			
+		//	Graphics::Core::ImmutableGraphicsBufferMapOptions::InvalidateRange
+		//);
 	}
 	TextRenderer::~TextRenderer()
 	{
+	}
+
+	bool TextRenderer::GetProgram(TextRenderingMethod method, Graphics::Core::ShaderProgram*& program)
+	{
+		switch (method)
+		{
+		case TextRenderingMethod::Normal:
+			program = &programNormal;
+			return true;
+		case TextRenderingMethod::LCD:
+			program = &programLCD;
+			return true;
+		case TextRenderingMethod::SDF:
+			program = &programSDF;
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	bool FontResolutionRenderTypeToTextRenderingMethod(FontResolutionRenderType renderType, TextRenderer::TextRenderingMethod& method)
+	{
+		switch (renderType)
+		{
+		case Blaze::FontResolutionRenderType::Monochrome:
+			method = TextRenderer::TextRenderingMethod::Normal;
+			return true;
+		case Blaze::FontResolutionRenderType::Antialiased:
+			method = TextRenderer::TextRenderingMethod::Normal;
+			return true;
+		case Blaze::FontResolutionRenderType::HorizontalLCD:
+			method = TextRenderer::TextRenderingMethod::LCD;
+			return true;
+		case Blaze::FontResolutionRenderType::SDF:
+			method = TextRenderer::TextRenderingMethod::SDF;
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	void TextRenderer::SetProjectionMatrix(Mat4f mat)
@@ -185,104 +91,167 @@ namespace Blaze::Graphics
 		proj = mat;
 	}
 
-	void TextRenderer::SetFontResolution(Blaze::FontResolution* resolution)
-	{
-		if (resolution == nullptr)
-		{
-			fontResolution = nullptr;
-
-			if (program.GetState() == Core::ShaderProgramState::Valid)
-				program = std::move(Core::ShaderProgram());
-
-			return;
-		}
-
-		int programIndex = GetRenderTypeProgramIndex(resolution->GetRenderType());
-		if (
-			fontResolution == nullptr ||
-			GetRenderTypeProgramIndex(fontResolution->GetRenderType()) != programIndex
-			)
-		{			
-			Core::VertexShader vert; vert.ShaderSource(vertSource); vert.CompileShader();
-			Core::GeometryShader geom; geom.ShaderSource(geomSource); geom.CompileShader();
-			Core::FragmentShader frag; frag.ShaderSource(fragSource[programIndex]); frag.CompileShader();
-
-			if (program.GetState() == Core::ShaderProgramState::Valid)
-				program = std::move(Core::ShaderProgram());
-
-			program.LinkShaders({ &vert, &geom, &frag });
-		}
-
-		fontResolution = resolution;
-	}	
-
-	Result TextRenderer::Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color)
+	Result TextRenderer::Write(Vec2f pos, StringViewUTF8 text, float fontHeight, FontResolution* fontResolution, std::span<const ColorRGBAf> colors)
 	{
 		DefaultTextVertexGenerator generator;
-		return Write(text, pos, size, color, generator);
-	}
-	Result TextRenderer::Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color, BaseTextVertexGenerator& generator)
+		return Write(pos, text, fontHeight, fontResolution, colors, generator);
+	}	
+	Result TextRenderer::Write(Vec2f pos, StringViewUTF8 text, float fontHeight, FontResolution* fontResolution, std::span<const ColorRGBAf> colors, BaseTextVertexGenerator& generator)
 	{
 		if (fontResolution == nullptr)
-			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-				"No font resolution set"));
-		
-		generator.Setup(text, fontResolution);
-		
-		Vertex* vertices = new Vertex[generator.GetMaxVertexCount()];
-		Vertex* it = vertices;
-		float advance;
-		
-		while (!generator.IsEnd())
-			if (generator.GenerateVertex(it->p1, it->p2, it->uv1, it->uv2, advance))
-				++it;
-		
-		uint vertexCount = it - vertices;
+			return BLAZE_WARNING_RESULT("BlazeEngine", "No font resolution set");
 
-		vb.AllocateDynamicStorage(
-			BufferView(vertices, vertexCount * sizeof(Vertex)),
-			Core::GraphicsBufferDynamicStorageHint::DynamicDraw
-		);
+		TextRenderCache cache;
+		cache.GenerateVertices(text, fontHeight, fontResolution, colors, generator);		
+		Write(pos, cache);
 
-		delete[] vertices;
-		
-		float scale = size / fontResolution->GetResolution();
+		return Result();
+	}	
+	Result TextRenderer::Write(Vec2f pos, TextRenderCache& data)
+	{
+		auto* fontResolution = data.GetFontResolution();
+		TextRenderingMethod method;
 
-		Graphics::Core::SelectProgram(&program);
+		if (!FontResolutionRenderTypeToTextRenderingMethod(fontResolution->GetRenderType(), method))
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Unsuported FontResolutionRenderType. The enum int value was: " + StringParsing::Convert((int)fontResolution->GetRenderType()));
+
+		Graphics::Core::ShaderProgram* program = nullptr;
+
+		if (!GetProgram(method, program))
+			return BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextRenderingMethod enum, int value was: " + StringParsing::Convert((int)method));
+
+		switch (program->GetState())
+		{
+		case Graphics::Core::ShaderProgramState::Invalid:
+			if (Result r = LoadDefaultShaders(method)) return r;
+			break;
+		case Graphics::Core::ShaderProgramState::UnsuccesfullyLinked:
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to write text but the shader program wasn't succesfully linked");
+		case Graphics::Core::ShaderProgramState::SuccesfullyLinked:
+			break;
+		}
+
+		Graphics::Core::SelectProgram(program);
+
 		Graphics::Core::SelectVertexArray(&va);
 		Graphics::Core::SetActiveTextureSlot(0);
 		Graphics::Core::SelectTexture(&fontResolution->GetAtlas());
-		program.SetUniform(0, proj);
-		program.SetUniform(1, Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0)) * Math::ScalingMatrix(Vec3f(scale, scale, 1)));
-		program.SetUniform(2, 0);
-		program.SetUniform(3, (Vec4f)color);
-		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, vertexCount);		
+		program->SetUniform(0, pos);
+		program->SetUniform(1, proj);
+		program->SetUniform(2, 0);
+
+		if (method == TextRenderingMethod::LCD)
+			glBlendFuncSeparate(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+
+		
+		auto vertices = data.GetVertices();
+
+		//renderer.Render(vertices.data(), vertices.size(), [](uint startVertex, uint vertexCount) {			
+		//	Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, startVertex, vertexCount);
+		//	});
+
+		//while (true)
+		//{
+		//	uint vertexCount = std::min<uint>(vertices.size() - offset, BatchVertexCount);
+		//
+		//	vb.WriteData(vertices.data() + offset, vertexCount * sizeof(Vertex));			
+		//
+		//
+		//	vb.NextBatch();			
+		//
+		//	offset += vertexCount;
+		//
+		//	if (offset == vertices.size())
+		//		break;			
+		//}
+
+		if (method == TextRenderingMethod::LCD)
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		return Result();
 	}
-	Result TextRenderer::Write(TextRenderCache& data, Vec2f pos, float size, ColorRGBAf color)
-	{		
-		if (data.GetFontResolution() == nullptr)
-			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-				"No font resolution set"));
+	Result TextRenderer::SetShaders(std::initializer_list<Graphics::Core::Shader*> shaders, TextRenderingMethod methodType)
+	{
+		Graphics::Core::ShaderProgram* program = nullptr;
 
-		if (GetRenderTypeProgramIndex(data.GetFontResolution()->GetRenderType()) !=
-			GetRenderTypeProgramIndex(fontResolution->GetRenderType()))
-			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-				"TextRenderData not compatible with the TextRenderer"));
+		if (!GetProgram(methodType, program))
+			return BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextRenderingMethod enum, int value was: " + StringParsing::Convert((int)methodType));		
 
-		float scale = size / fontResolution->GetResolution();
+		if (program->GetState() != Graphics::Core::ShaderProgramState::Invalid)
+			*program = std::move(Graphics::Core::ShaderProgram());
 
-		Graphics::Core::SelectProgram(&program);
-		Graphics::Core::SelectVertexArray(&data.GetVertexArray());
-		Graphics::Core::SetActiveTextureSlot(0);
-		Graphics::Core::SelectTexture(&data.GetFontResolution()->GetAtlas());
-		program.SetUniform(0, proj);
-		program.SetUniform(1, Math::TranslationMatrix<float>(Vec3f(pos.x, pos.y, 0)) * Math::ScalingMatrix(Vec3f(scale, scale, 1)));
-		program.SetUniform(2, 0);
-		program.SetUniform(3, (Vec4f)color);
-		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, data.GetVertexCount());
+		return program->LinkShaders(shaders);
+	}
+	Result TextRenderer::LoadDefaultShaders(TextRenderingMethod methodType)
+	{
+		const char* fragPath;
+		Graphics::Core::ShaderProgram* program;
+
+		switch (methodType)
+		{
+		case Blaze::Graphics::TextRenderer::TextRenderingMethod::Normal:
+			fragPath = "assets/default/shaders/ui_text_normal.frag";
+			program = &programNormal;
+			break;
+		case Blaze::Graphics::TextRenderer::TextRenderingMethod::SDF:
+			fragPath = "assets/default/shaders/ui_text_sdf.frag";
+			program = &programSDF;
+			break;
+		case Blaze::Graphics::TextRenderer::TextRenderingMethod::LCD:
+			fragPath = "assets/default/shaders/ui_text_lcd.frag";
+			program = &programLCD;
+			break;
+		default:
+			return BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextRenderingMethod enum, int value was: " + StringParsing::Convert((int)methodType));
+		}
+
+		Graphics::Core::VertexShader vert;
+		Graphics::Core::GeometryShader geom;
+		Graphics::Core::FragmentShader frag;
+
+		if (Result r = vert.Load("assets/default/shaders/ui_text.vert")) return r;
+		if (Result r = geom.Load("assets/default/shaders/ui_text.geom")) return r;
+		if (Result r = frag.Load(fragPath)) return r;
+
+		if (program->GetState() != Graphics::Core::ShaderProgramState::Invalid)
+			*program = std::move(Graphics::Core::ShaderProgram());
+		return program->LinkShaders({ &vert, &geom, &frag });
+	}
+	Result TextRenderer::LoadDefaultShaders()
+	{
+		Graphics::Core::VertexShader vert;
+		Graphics::Core::GeometryShader geom;
+		Graphics::Core::FragmentShader fragNormal;
+		Graphics::Core::FragmentShader fragSDF;
+		Graphics::Core::FragmentShader fragLCD;
+		
+		CHECK_RESULT(vert.Load("assets/default/shaders/ui_text.vert"));
+		CHECK_RESULT(geom.Load("assets/default/shaders/ui_text.geom"));
+		CHECK_RESULT(fragNormal.Load("assets/default/shaders/ui_text_norm"));
+		CHECK_RESULT(fragSDF.Load("assets/default/shaders/ui_text_sdf.frag"));
+		CHECK_RESULT(fragLCD.Load("assets/default/shaders/ui_text_lcd.frag"));
+
+		if (fragNormal.GetState() == Graphics::Core::ShaderState::SuccesfullyCompiled)
+		{
+			if (programNormal.GetState() != Graphics::Core::ShaderProgramState::Invalid)
+				programNormal = std::move(Graphics::Core::ShaderProgram());
+			CHECK_RESULT(programNormal.LinkShaders({ &vert, &geom, &fragNormal }));
+		}
+
+		if (fragSDF.GetState() == Graphics::Core::ShaderState::SuccesfullyCompiled)
+		{
+			if (programSDF.GetState() != Graphics::Core::ShaderProgramState::Invalid)
+				programSDF = std::move(Graphics::Core::ShaderProgram());
+			CHECK_RESULT(programSDF.LinkShaders({ &vert, &geom, &fragSDF }));
+		}
+
+		if (fragLCD.GetState() == Graphics::Core::ShaderState::SuccesfullyCompiled)
+		{
+			if (programLCD.GetState() != Graphics::Core::ShaderProgramState::Invalid)
+				programLCD = std::move(Graphics::Core::ShaderProgram());
+			CHECK_RESULT(programLCD.LinkShaders({ &vert, &geom, &fragLCD }));
+		}
 
 		return Result();
-	}	
+	}
 }

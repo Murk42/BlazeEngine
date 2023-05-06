@@ -20,9 +20,10 @@ namespace Blaze
 			Sampler2D = 35678,
 		};
 		enum class ShaderProgramState
-		{
+		{		
 			Invalid,
-			Valid,
+			UnsuccesfullyLinked,
+			SuccesfullyLinked,			
 		};
 
 		class BLAZE_API ShaderProgram
@@ -38,39 +39,37 @@ namespace Blaze
 			ShaderProgram(ShaderProgram&&) noexcept;
 			~ShaderProgram();
 
-			void AttachShader(const Shader& shader);
-			void DetachShader(const Shader& shader);
-			Result LinkProgram();
-			String GetLinkingLog();
+			Result AttachShader(const Shader& shader);
+			Result DetachShader(const Shader& shader);
+			Result LinkProgram();			
 					
 			Result LinkShaders(const std::initializer_list<Shader*>& shaders);
 
 			uint GetUniformCount() const;	
 			int GetUniformLocation(const StringView& name);
-			void GetUniformData(uint index, String& name, uint& size, UniformType& type) const;
+			Result GetUniformData(uint index, String& name, uint& size, UniformType& type) const;
 
 			uint GetUniformBlockCount() const;
-			void GetUniformBlockData(uint index, int& location, String& name, uint& size, std::vector<int>& memberLocations) const;
-			void GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset);
-			void BindUniformBlock(int location, uint binding);
-				
-			void SetUniform(int location, const bool& value);
-			void SetUniform(int location, const int& value);
-			void SetUniform(int location, const uint& value);
-			void SetUniform(int location, const float& value);		
-			void SetUniform(int location, const double& value);
-			void SetUniform(int location, const Vec2i& value);
-			void SetUniform(int location, const Vec2f& value);
-			void SetUniform(int location, const Vec2d& value);
-			void SetUniform(int location, const Vec3i& value);
-			void SetUniform(int location, const Vec3f& value);
-			void SetUniform(int location, const Vec3d& value);
-			void SetUniform(int location, const Vec4i& value);
-			void SetUniform(int location, const Vec4f& value);
-			void SetUniform(int location, const Vec4d& value);
-			void SetUniform(int location, const Mat2f& value);
-			void SetUniform(int location, const Mat3f& value);
-			void SetUniform(int location, const Mat4f& value);
+			Result GetUniformBlockData(uint index, int& location, String& name, uint& size, std::vector<int>& memberLocations) const;
+			Result GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset);
+			Result BindUniformBlock(int location, uint binding);
+							
+			Result SetUniform(int location, const int& value);
+			Result SetUniform(int location, const uint& value);
+			Result SetUniform(int location, const float& value);		
+			Result SetUniform(int location, const double& value);
+			Result SetUniform(int location, const Vec2i& value);
+			Result SetUniform(int location, const Vec2f& value);
+			Result SetUniform(int location, const Vec2d& value);
+			Result SetUniform(int location, const Vec3i& value);
+			Result SetUniform(int location, const Vec3f& value);
+			Result SetUniform(int location, const Vec3d& value);
+			Result SetUniform(int location, const Vec4i& value);
+			Result SetUniform(int location, const Vec4f& value);
+			Result SetUniform(int location, const Vec4d& value);
+			Result SetUniform(int location, const Mat2f& value);
+			Result SetUniform(int location, const Mat3f& value);
+			Result SetUniform(int location, const Mat4f& value);
 
 			uint GetHandle() const { return id; }
 			ShaderProgramState GetState() const { return state; }

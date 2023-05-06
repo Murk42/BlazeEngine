@@ -38,48 +38,48 @@ namespace Blaze
 		BLAZE_API void BindUniformBuffer(const GraphicsBuffer& buffer, uint binding);		
 		BLAZE_API void BindUniformBufferRange(const GraphicsBuffer& buffer, uint binding, uint offset, uint size);
 
-		BLAZE_API void SelectTexture(Graphics::Core::Texture1D*);
+		BLAZE_API Result SelectTexture(Graphics::Core::Texture1D*);
 		BLAZE_API Graphics::Core::Texture1D* GetSelectedTexture1D();
 
-		BLAZE_API void SelectTexture(Graphics::Core::Texture2D*);
+		BLAZE_API Result SelectTexture(Graphics::Core::Texture2D*);
 		BLAZE_API Graphics::Core::Texture2D* GetSelectedTexture2D();
 
-		BLAZE_API void SelectTexture(Graphics::Core::Texture2DArray*);		
+		BLAZE_API Result SelectTexture(Graphics::Core::Texture2DArray*);
 		BLAZE_API Graphics::Core::Texture2DArray* GetSelectedTexture2DArray();
 
-		BLAZE_API void SelectTexture(Graphics::Core::TextureCubemap*);		
+		BLAZE_API Result SelectTexture(Graphics::Core::TextureCubemap*);
 		BLAZE_API Graphics::Core::TextureCubemap* GetSelectedTextureCubemap();
 
-		BLAZE_API void SelectTexture(Graphics::Core::Texture3D*);
+		BLAZE_API Result SelectTexture(Graphics::Core::Texture3D*);
 		BLAZE_API Graphics::Core::Texture3D* GetSelectedTexture3D();
 
-		BLAZE_API void SelectTexture(Graphics::Core::TextureBuffer*);
+		BLAZE_API Result SelectTexture(Graphics::Core::TextureBuffer*);
 		BLAZE_API Graphics::Core::TextureBuffer* GetTextureBuffer();
 
-		BLAZE_API void SelectVertexBuffer(Graphics::Core::GraphicsBuffer* buffer);		
+		BLAZE_API Result SelectVertexBuffer(Graphics::Core::GraphicsBuffer* buffer);
 		BLAZE_API Graphics::Core::GraphicsBuffer* GetSelectedVertexBuffer();
 
-		BLAZE_API void SelectIndexBuffer(Graphics::Core::GraphicsBuffer* buffer);		
+		BLAZE_API Result SelectIndexBuffer(Graphics::Core::GraphicsBuffer* buffer);
 		BLAZE_API Graphics::Core::GraphicsBuffer* GetSelectedIndexBuffer();
 
-		BLAZE_API void SelectUniformBuffer(Graphics::Core::GraphicsBuffer* buffer);		
+		BLAZE_API Result SelectUniformBuffer(Graphics::Core::GraphicsBuffer* buffer);
 		BLAZE_API Graphics::Core::GraphicsBuffer* GetSelectedUniformBuffer();
 
-		BLAZE_API void SelectVertexArray(Graphics::Core::VertexArray* vertexArray);		
+		BLAZE_API Result SelectVertexArray(Graphics::Core::VertexArray* vertexArray);		
 		BLAZE_API Graphics::Core::VertexArray* GetSelectedVertexArray();
 
-		BLAZE_API void SelectProgram(Graphics::Core::ShaderProgram* program);		
+		BLAZE_API Result SelectProgram(Graphics::Core::ShaderProgram* program);		
 		BLAZE_API Graphics::Core::ShaderProgram* GetSelectedProgram();
 
-		BLAZE_API void SelectFramebuffer(Graphics::Core::Framebuffer* framebuffer);
+		BLAZE_API Result SelectFramebuffer(Graphics::Core::Framebuffer* framebuffer);
 		BLAZE_API Graphics::Core::Framebuffer* GetSelectedFramebuffer();
 
-		BLAZE_API void SelectDrawFramebuffer(Graphics::Core::Framebuffer* framebuffer);
+		BLAZE_API Result SelectDrawFramebuffer(Graphics::Core::Framebuffer* framebuffer);
 		BLAZE_API Graphics::Core::Framebuffer* GetDrawSelectedFramebuffer();
-		BLAZE_API void SelectReadFramebuffer(Graphics::Core::Framebuffer* framebuffer);
+		BLAZE_API Result SelectReadFramebuffer(Graphics::Core::Framebuffer* framebuffer);
 		BLAZE_API Graphics::Core::Framebuffer* GetReadSelectedFramebuffer();
 
-		BLAZE_API void SelectRenderbuffer(Graphics::Core::Renderbuffer* renderbuffer);
+		BLAZE_API Result SelectRenderbuffer(Graphics::Core::Renderbuffer* renderbuffer);
 		BLAZE_API Graphics::Core::Renderbuffer* GetSelectedRenderbuffer();
 
 		BLAZE_API void SetClearColor(ColorRGBAf);
@@ -117,7 +117,7 @@ namespace Blaze
 		BLAZE_API void SetStencilFunction(ScreenBufferType bufferType, StencilComparison comparison, int reference, uint mask);
 		
 		BLAZE_API void RenderIndexedPrimitives(PrimitiveType type, IndexType indexType, uint indexCount, uint indexBufferByteOffset);
-		BLAZE_API void RenderPrimitiveArray(PrimitiveType type, uint statIndex, uint primitiveCount);		
+		BLAZE_API void RenderPrimitiveArray(PrimitiveType type, uint statIndex, uint vertexCount);		
 
 		BLAZE_API void DispatchCompute(uint x, uint y, uint z);
 

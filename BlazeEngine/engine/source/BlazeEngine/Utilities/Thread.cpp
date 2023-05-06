@@ -42,7 +42,7 @@ namespace Blaze
 	void Thread::Run(std::function<int()> func)
 	{
 		if (handle != nullptr)
-			Logger::AddLog(Log(LogType::Fatal, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "Blaze Engine", "Thread::Run called on a running thread"));
+			Logger::ProcessLog(Log(LogType::Fatal, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, "Blaze Engine", "Thread::Run called on a running thread"));
 
 		std::function<int()>* ptr = new std::function<int()>(std::move(func));
 
@@ -70,7 +70,7 @@ namespace Blaze
 	Thread& Thread::operator=(Thread&& t) noexcept
 	{
 		if (handle != nullptr)
-			Logger::AddLog(Log(LogType::Fatal, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "Blaze Engine", "Thread::operator= called on a running thread"));
+			Logger::ProcessLog(Log(LogType::Fatal, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, "Blaze Engine", "Thread::operator= called on a running thread"));
 
 		handle = t.handle;
 		t.handle = nullptr;

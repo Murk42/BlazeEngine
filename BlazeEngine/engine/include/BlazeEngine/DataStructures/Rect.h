@@ -36,6 +36,15 @@ namespace Blaze
 		Rect(const T& x, const T& y, const T& w, const T& h) : x(x), y(y), w(w), h(h) { }
 		Rect(const Vec2<T>& pos, const Vec2<T>& size) : pos(pos), size(size) { }		
 
+		bool operator==(const Rect& other)
+		{
+			return pos == other.pos && size == other.size;
+		}
+		bool operator!=(const Rect& other)
+		{
+			return pos != other.pos || size != other.size;
+		}
+
 		Rect& operator=(const Rect& other)
 		{
 			x = other.x; y = other.y; w = other.w; h = other.h;

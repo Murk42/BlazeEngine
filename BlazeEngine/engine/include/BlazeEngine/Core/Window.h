@@ -20,7 +20,7 @@ namespace Blaze
 		Vec2i GetSize() const;
 		String GetTitle() const;
 
-		void SetIcon(BitmapView bitmap);
+		Result SetIcon(BitmapView bitmap);
 		void SetOpacity(float opacity);
 		void SetPos(Vec2i pos);
 		void SetSize(Vec2i size);

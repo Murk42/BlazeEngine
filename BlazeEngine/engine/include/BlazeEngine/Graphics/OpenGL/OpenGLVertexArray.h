@@ -36,25 +36,23 @@ namespace Blaze
 		};
 
 		class BLAZE_API VertexArray
-		{
-			//static constexpr size_t maxVertexAttributes = 8;
+		{			
 			uint id; 			
-			GraphicsBuffer* indexBuffer;
-			//VertexAttribute attributes[maxVertexAttributes];
+			GraphicsBuffer* indexBuffer;			
 		public:
 			VertexArray();
 			VertexArray(const VertexArray&) = delete;
 			VertexArray(VertexArray&&) noexcept;
 			~VertexArray();
 					
-			GraphicsBuffer* GetIndexBuffer() const;			
-			void SetIndexBuffer(GraphicsBuffer& buffer);
+			GraphicsBuffer* GetIndexBuffer() const;			 
+			Result SetIndexBuffer(GraphicsBuffer& buffer);
 
-			void EnableVertexAttribute(uint index);
-			void DisableVertexAttribute(uint index);			
+			Result EnableVertexAttribute(uint index);
+			Result DisableVertexAttribute(uint index);
 
-			void SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset);
-			void SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset);			
+			Result SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset);
+			Result SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset);
 
 			inline uint GetHandle() const { return id; }
 

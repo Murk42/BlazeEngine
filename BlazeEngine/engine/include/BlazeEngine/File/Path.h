@@ -85,5 +85,14 @@ namespace Blaze
 			value = ptr;
 			return *this;
 		}
+		
+		bool operator==(const Path& other) const
+		{
+			return value == other.value;
+		}
+		bool operator!=(const Path& other) const
+		{
+			return value != other.value;
+		}
 	};
 }

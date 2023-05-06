@@ -10,7 +10,7 @@
 namespace Blaze
 {
 	class Window;
-	class LogListener;
+	class LoggerListener;
 }
 
 struct EngineData
@@ -31,9 +31,9 @@ struct EngineData
 	Blaze::EventDispatcher<Blaze::Event::WindowFocusLost	> windowFocusLostDispatcher;
 	Blaze::EventDispatcher<Blaze::Event::WindowClosed		> windowClosedDispatcher;
 	Blaze::EventDispatcher<Blaze::Event::TextInput			> textInputDispatcher;
-	Blaze::EventDispatcher<Blaze::Event::ViewportChanged	> viewportChangedDispatcher;
+	Blaze::EventDispatcher<Blaze::Event::ViewportChanged	> viewportChangedDispatcher;	
 
-	std::vector<Blaze::LogListener*> handlers;
+	std::list<Blaze::LoggerListener*> loggerListeners;
 
 	std::map<Blaze::Key, SDL_Scancode> scancodemap;
 	std::map<SDL_Scancode, Blaze::Key> keymap;
@@ -44,6 +44,11 @@ struct EngineData
 
 	Blaze::Startup::BlazeInitInfo initInfo;
 
+	Blaze::Result OpenGLResult;
+
 	bool finishedInit = false;
 };
 extern EngineData* engineData;
+
+#define FLUSH_OPENGL_RESULT() (ADD_STACK_FRAME((Blaze::Result(std::move(engineData->OpenGLResult)))))
+#define CHECK_OPENGL_RESULT() CHECK_RESULT(engineData->OpenGLResult)

@@ -2,7 +2,6 @@
 #include "BlazeEngine/Memory/MallocAllocator.h"
 #include "BlazeEngine/Memory/MemoryListener.h"
 #include "BlazeEngine/DataStructures/List.h"
-#include "source/BlazeEngine/Internal/EngineData.h"
 using namespace Blaze;
 
 #include <memory>
@@ -91,7 +90,7 @@ namespace Blaze
 
 			if (ptr == nullptr)
 			{
-				Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", "Malloc failed with " + StringParsing::Convert(size + sizeof(AllocationHeader)).value + " bytes"));
+				Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Malloc failed with " + StringParsing::Convert(size + sizeof(AllocationHeader)) + " bytes"));
 				return nullptr;
 			}
 

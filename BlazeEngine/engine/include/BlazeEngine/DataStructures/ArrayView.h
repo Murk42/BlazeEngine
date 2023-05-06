@@ -1,5 +1,4 @@
 #pragma once
-#include "Array.h"
 #include <utility>
 
 namespace Blaze
@@ -33,6 +32,13 @@ namespace Blaze
 		size_t Count() const { return count; }
 		const T* Ptr() const { return ptr; }
 
+		const T& operator[](size_t index) const
+		{
+			if (index >= count)
+				throw;
+			return ptr[index];
+		}
+
 		ArrayView operator=(const ArrayView& arr)
 		{
 			ptr = arr.ptr;
@@ -43,6 +49,9 @@ namespace Blaze
 			ptr = arr.Ptr();
 			count = arr.Count();
 		}
+
+		const T* begin() const { return ptr; }
+		const T* end() const { return ptr + count; }
 	};
 
 	template<typename T, typename A>

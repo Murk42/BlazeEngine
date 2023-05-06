@@ -1,10 +1,11 @@
 #include "Result.h"
+#include "Result.h"
 #include <iostream>
 
 Result::Result()
 	: sucessfull(true)
 {
-
+	 
 }
 Result::Result(Result&& r) noexcept
 	: sucessfull(r.sucessfull), log(std::move(r.log))
@@ -34,6 +35,11 @@ Result::operator bool() const
 	return !sucessfull;
 }
 
+Result& Result::AddStackFrame(StackFrame frame, String report)
+{
+	// TODO: insert return statement here
+}
+
 Result& Result::operator=(const Result& r)
 {
 	log = r.log;
@@ -43,7 +49,7 @@ Result& Result::operator=(const Result& r)
 }
 
 Result operator+(const std::string& s, Result&& r)
-{	
+{
 	r.log = s + r.log;
 	return std::move(r);
 }

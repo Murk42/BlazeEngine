@@ -28,6 +28,7 @@ namespace Blaze::OpenGL
 		TextureSampling min = TextureSampling::Nearest;
 		TextureSampling mag = TextureSampling::Nearest;
 		TextureSampling mip = TextureSampling::Nearest;		
+		bool mipmaps = false;
 	};
 
 	class BLAZE_API TextureCubemap
@@ -40,11 +41,10 @@ namespace Blaze::OpenGL
 		TextureCubemap(TextureCubemap&&) noexcept;
 		~TextureCubemap();
 
-		void SetSettings(TextureCubemapSettings settings);
-		void GenerateMipmaps();
+		Result SetSettings(TextureCubemapSettings settings);		
 
-		void Load(StringView path, CubemapFileType type);
-		void Load(StringView path, CubemapFace face);				
+		Result Load(StringView path, CubemapFileType type);
+		Result Load(StringView path, CubemapFace face);				
 		
 		uint GetSize() const { return size; }
 		inline unsigned GetHandle() const { return id; }

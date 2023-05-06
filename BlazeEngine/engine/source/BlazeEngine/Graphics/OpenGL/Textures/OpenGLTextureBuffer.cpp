@@ -24,9 +24,16 @@ namespace Blaze::OpenGL
 			glDeleteTextures(1, &id);
 	}
 
-	void TextureBuffer::Associate(const GraphicsBuffer& buffer, TextureBufferInternalPixelFormat format)
+	Result TextureBuffer::Associate(const GraphicsBuffer& buffer, TextureBufferInternalPixelFormat format)
 	{
-		glTextureBuffer(id, OpenGLBufferInternalPixelFormat(format), buffer.GetHandle());
+		Result result;
+
+		auto internalPixelFormat = OpenGLBufferInternalPixelFormat(format, result);
+		CHECK_RESULT(result);
+
+		glTextureBuffer(id, internalPixelFormat, buffer.GetHandle());
+
+		return result;
 	}	
 	
 	TextureBuffer& TextureBuffer::operator=(TextureBuffer&& tex) noexcept

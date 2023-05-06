@@ -211,7 +211,7 @@ namespace Blaze::StringParsing
 		if (err == std::errc::value_too_large)
 		{			
 			*count = 0;
-			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount).value + " characters");
+			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
 		}
 		else if (count != nullptr)
 			*count = end - str;
@@ -225,7 +225,7 @@ namespace Blaze::StringParsing
 		if (res.ec == std::errc::value_too_large)
 		{			
 			*count = 0;
-			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount).value + " characters");
+			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
 		}
 		else if (count != nullptr)
 			*count = res.ptr - str;
@@ -245,42 +245,42 @@ namespace Blaze::StringParsing
 	Result Convert(const StringView& from, double& to, FloatStringFormat format, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
 
 	template<std::integral T>
-	ResultValue<String> _Convert(T value, uint base, uint* count)
+	String _Convert(T value, uint base, uint* count)
 	{
 		char buffer[64];
 
 		uint _count;
-		if (Result r = NumberToChars(value, buffer, 64, base, &_count))
-			return { "", std::move(r) };
+		if (Result r = NumberToChars(value, buffer, 64, base, &_count))		
+			return "";		
 
 		if (count != nullptr)
 			*count = _count;
 
-		return { String(buffer, _count) };
+		return String(buffer, _count);
 	}
 	template<std::floating_point T>
-	ResultValue<String> _Convert(T value, FloatStringFormat format, uint* count)
+	String _Convert(T value, FloatStringFormat format, uint* count)
 	{		
 		char buffer[64];
 		
 		uint _count;
 		if (Result r = NumberToChars(value, buffer, 64, format, &_count))				
-			return { "", std::move(r) };
+			return "";
 
 		if (count != nullptr)
 			*count = _count;
 		
-		return { String(buffer, _count) };
+		return String(buffer, _count);
 	}
 
-	ResultValue<String> Convert(uint64 from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(int64  from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(uint32 from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(int32  from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(uint16 from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(int16  from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(uint8  from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(int8   from, uint base, uint* count) { return _Convert(from, base, count); }
-	ResultValue<String> Convert(float  from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
-	ResultValue<String> Convert(double from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
+	String Convert(uint64 from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(int64  from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(uint32 from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(int32  from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(uint16 from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(int16  from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(uint8  from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(int8   from, uint base, uint* count) { return _Convert(from, base, count); }
+	String Convert(float  from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
+	String Convert(double from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
 }

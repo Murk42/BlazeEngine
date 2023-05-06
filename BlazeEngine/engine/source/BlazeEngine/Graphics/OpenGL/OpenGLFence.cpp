@@ -10,30 +10,46 @@ namespace Blaze::OpenGL
 	Fence::~Fence()
 	{
 		if (id != nullptr)
+		{
 			glDeleteSync((GLsync)id);
+			FLUSH_OPENGL_RESULT();
+		}
 	}
-	void Fence::SetFence()
+	Result Fence::SetFence()
 	{
 		if (id != nullptr)
-			glDeleteSync((GLsync)id);			
+		{
+			glDeleteSync((GLsync)id);
+			CHECK_OPENGL_RESULT();
+		}
 
 		id = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		CHECK_OPENGL_RESULT();
+
+		return Result();
 	}
-	void Fence::BlockServer()
+	Result Fence::BlockServer()
 	{	
 		if (id == nullptr)
-			return;
+			return Result();
+
 		glWaitSync((GLsync)id, 0, GL_TIMEOUT_IGNORED);
+		CHECK_OPENGL_RESULT();
+
+		return Result();
 	}
 	FenceReturnState Fence::BlockClient(double timeout)
 	{
 		if (id == nullptr)
 			return FenceReturnState::FenceNotSet;
-		return (FenceReturnState)glClientWaitSync((GLsync)id, GL_SYNC_FLUSH_COMMANDS_BIT, timeout * 1000000000.0);		
+		auto ret = (FenceReturnState)glClientWaitSync((GLsync)id, GL_SYNC_FLUSH_COMMANDS_BIT, timeout * 1000000000.0);		
+		FLUSH_OPENGL_RESULT();
+
+		return ret;
 	}
 	bool Fence::IsSet()
 	{
-		return id == nullptr;
+		return id != nullptr;
 	}
 	bool Fence::IsSignaled()
 	{
@@ -42,6 +58,8 @@ namespace Blaze::OpenGL
 
 		int value;		
 		glGetSynciv((GLsync)id, GL_SYNC_STATUS, 1, 0, &value);
+		FLUSH_OPENGL_RESULT();
+
 		return (value == GL_SIGNALED ? true : false);
 	}
 }

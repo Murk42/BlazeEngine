@@ -38,14 +38,14 @@ namespace Blaze::StringParsing
 	Result BLAZE_API Convert(const StringView& from, float&  to, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
 	Result BLAZE_API Convert(const StringView& from, double& to, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
 
-	ResultValue<String> BLAZE_API Convert(uint64 value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(int64  value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(uint32 value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(int32  value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(uint16 value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(int16  value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(uint8  value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(int8   value, uint base = 10, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(float  value, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
-	ResultValue<String> BLAZE_API Convert(double value, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
+	String BLAZE_API Convert(uint64 value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(int64  value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(uint32 value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(int32  value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(uint16 value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(int16  value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(uint8  value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(int8   value, uint base = 10, uint* count = nullptr);
+	String BLAZE_API Convert(float  value, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
+	String BLAZE_API Convert(double value, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
 }

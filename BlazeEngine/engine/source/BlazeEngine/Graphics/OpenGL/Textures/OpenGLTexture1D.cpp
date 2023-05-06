@@ -27,11 +27,15 @@ namespace Blaze::OpenGL
 			glDeleteTextures(1, &id);
 	}
 
-	void Texture1D::SetSettings(Texture1DSettings settings)
+	Result Texture1D::SetSettings(Texture1DSettings settings)
 	{
-		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps);		
-		GLenum _mag = OpenGLTextureMagSampling(settings.mag);		
-		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap);		
+		Result result;
+		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);
+		CHECK_RESULT(result);
+		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
+		CHECK_RESULT(result);
+		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
+		CHECK_RESULT(result);
 		
 		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);		
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
@@ -40,22 +44,38 @@ namespace Blaze::OpenGL
 		Graphics::Core::SelectTexture(this);
 		if (settings.mipmaps)
 			glGenerateMipmap(GL_TEXTURE_2D);
+
+		return result;
 	}		
-	void Texture1D::Create(uint size, TextureInternalPixelFormat internalFormat)
+	Result Texture1D::Create(uint size, TextureInternalPixelFormat internalFormat)
 	{
+		Result result;
+		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
+		CHECK_RESULT(result);
+		auto format = OpenGLFormatByInternalPixelFormat(internalFormat, result);
+		CHECK_RESULT(result);
+
 		this->size = size;		
 		Graphics::Core::SelectTexture(this);				
-		glTexImage1D(GL_TEXTURE_1D, 0, OpenGLInternalPixelFormat(internalFormat), static_cast<GLsizei>(size), 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
+		glTexImage1D(GL_TEXTURE_1D, 0, internalPixelFormat, static_cast<GLsizei>(size), 0, format, GL_UNSIGNED_BYTE, nullptr);
+
+		return result;
 	}	
 
-	void Texture1D::SetPixels(uint offset, uint size, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
+	Result Texture1D::SetPixels(uint offset, uint size, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
 	{
-		GLenum _format = OpenGLPixelFormat(format);
-		GLenum _type = OpenGLPixelType(type);
+		Result result;
+
+		GLenum _format = OpenGLPixelFormat(format, result);
+		CHECK_RESULT(result);
+		GLenum _type = OpenGLPixelType(type, result);
+		CHECK_RESULT(result);
 						
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);		
 		glTextureSubImage1D(id, 0, static_cast<GLint>(offset), static_cast<GLsizei>(size), _format, _type, pixels);
+
+		return result;
 	}
 
 	void Texture1D::GenerateMipmaps()

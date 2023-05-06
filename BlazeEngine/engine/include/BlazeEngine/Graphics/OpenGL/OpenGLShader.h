@@ -16,9 +16,17 @@ namespace Blaze
 			ComputeShader = 37305,
 		};
 
+		enum class ShaderState
+		{
+			Invalid,
+			UnsuccesfullyCompiled,
+			SuccesfullyCompiled,
+		};
+
 		class BLAZE_API Shader
 		{
 			uint id;
+			ShaderState state;
 		public:
 			Shader(ShaderType type);
 			Shader(const Shader&) = delete;
@@ -27,11 +35,12 @@ namespace Blaze
 			~Shader();
 			
 			Result Load(const Path& path);
-
-			void ShaderSource(BufferView source);
-			void ShaderSource(StringView source);
+			
+			Result ShaderSource(StringView source);
 			Result CompileShader();
 			String GetCompilationLog();			
+
+			inline ShaderState GetState() const { return state; }
 
 			Shader& operator=(const Shader&) = delete;
 			Shader& operator=(Shader&&) noexcept;

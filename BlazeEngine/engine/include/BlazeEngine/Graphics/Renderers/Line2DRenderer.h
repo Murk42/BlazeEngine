@@ -9,7 +9,7 @@ namespace Blaze
 		{
 			Core::ShaderProgram program;
 			Core::VertexArray va;
-			Core::GraphicsBuffer vb;
+			Core::MutableDrawGraphicsBuffer vb;
 			void* cache;
 			uint batchSize;
 			uint batchOffset;

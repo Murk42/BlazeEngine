@@ -224,7 +224,7 @@ namespace Blaze::Graphics
 		cache = new Vertex[batchSize];
 		this->batchSize = batchSize;
 
-		vb.AllocateDynamicStorage(BufferView(nullptr, batchSize * sizeof(Vertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+		vb.Allocate(nullptr, batchSize * sizeof(Vertex), Graphics::Core::MutableGraphicsBufferUseFrequency::Dynamic);
 	}
 	void Line3DRenderer::SetImmediateMode()
 	{
@@ -232,7 +232,7 @@ namespace Blaze::Graphics
 		cache = nullptr;
 		this->batchSize = 0;
 
-		//vb.AllocateDynamicStorage(BufferView(nullptr, sizeof(Vertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+		vb.Allocate(nullptr, sizeof(Vertex), Graphics::Core::MutableGraphicsBufferUseFrequency::Dynamic);
 	}
 	void Line3DRenderer::Draw(Vec3f pos1, Vec3f pos2, ColorRGBAf color, float width)
 	{
@@ -257,7 +257,7 @@ namespace Blaze::Graphics
 		}
 		else
 		{			
-			vb.AllocateDynamicStorage(BufferView(&vertex, sizeof(Vertex)), Graphics::Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+			vb.WriteData(&vertex, sizeof(Vertex), 0);
 			Graphics::Core::SelectVertexArray(&va);
 			Graphics::Core::SelectProgram(&program);			
 			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, 1);
@@ -267,7 +267,7 @@ namespace Blaze::Graphics
 	{
 		if (batchOffset > 0)
 		{
-			vb.ChangeData(BufferView(cache, sizeof(Vertex) * batchOffset), 0);
+			vb.WriteData(cache, sizeof(Vertex) * batchOffset, 0);
 			Graphics::Core::SelectVertexArray(&va);
 			Graphics::Core::SelectProgram(&program);
 			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, batchOffset);

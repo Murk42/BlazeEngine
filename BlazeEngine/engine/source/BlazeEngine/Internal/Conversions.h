@@ -10,34 +10,45 @@
 
 namespace Blaze
 {
-	unsigned GetFormatDepth(BitmapPixelFormat format);
-	unsigned PixelTypeSize(BitmapPixelType type);
+	unsigned GetFormatDepth(BitmapPixelFormat format, Result& result);
+	unsigned PixelTypeSize(BitmapPixelType type, Result& result);
 
-	ILenum DevILPixelFormat(BitmapPixelFormat format);
-	GLenum OpenGLPixelFormat(BitmapPixelFormat format);
-	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format);
-	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format);
-	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format);
-	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format);
-	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format);
-	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format);
+	ILenum DevILPixelFormat(BitmapPixelFormat format, Result& result);
+	GLenum OpenGLPixelFormat(BitmapPixelFormat format, Result& result);
+	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format, Result& result);
+	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format, Result& result);
+	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format, Result& result);
+	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result);
+	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result);
+	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format, Result& result);
 
-	ILenum DevILPixelType(BitmapPixelType type);
-	GLenum OpenGLPixelType(BitmapPixelType type);
-	BitmapPixelType DevILToBlazePixelType(ILenum type);
-	BitmapPixelType OpenGLToBlazePixelType(GLenum type);
+	ILenum DevILPixelType(BitmapPixelType type, Result& result);
+	GLenum OpenGLPixelType(BitmapPixelType type, Result& result);
+	BitmapPixelType DevILToBlazePixelType(ILenum type, Result& result);
+	BitmapPixelType OpenGLToBlazePixelType(GLenum type, Result& result);
 
-	GLenum OpenGLTextureMinSampling(Graphics::Core::TextureSampling min, Graphics::Core::TextureSampling mip, bool mipmaps);
-	GLenum OpenGLTextureMagSampling(Graphics::Core::TextureSampling sampling);
-	GLenum OpenGLTextureWrapping(Graphics::Core::TextureWrapping wrapping);
+	GLenum OpenGLTextureMinSampling(Graphics::Core::TextureSampling min, Graphics::Core::TextureSampling mip, bool mipmaps, Result& result);
+	GLenum OpenGLTextureMagSampling(Graphics::Core::TextureSampling sampling, Result& result);
+	GLenum OpenGLTextureWrapping(Graphics::Core::TextureWrapping wrapping, Result& result);
 
-	Graphics::Core::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapPixelFormat format);
+	Graphics::Core::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapPixelFormat format, Result& result);
 
-	GLenum OpenGLFramebufferAttachment(Graphics::Core::FramebufferAttachment attachment);
+	GLenum OpenGLVertexAttributeType(Graphics::Core::VertexAttributeType type, Result& result);
 
-	GLenum OpenGLBufferDynamicStorageHint(Graphics::Core::GraphicsBufferDynamicStorageHint hint);
-	GLenum OpenGLBufferStaticStorageHint(Graphics::Core::GraphicsBufferStaticStorageHint hint);
+	GLenum OpenGLFramebufferAttachment(Graphics::Core::FramebufferAttachment attachment, Result& result);
+		
+	GLenum OpenGLBufferMappingAccess(Graphics::Core::ImmutableGraphicsBufferMapAccess mapping, Result& result);	
+	GLenum OpenGLBufferMappingType(Graphics::Core::ImmutableGraphicsBufferMapType type, Result& result);
+	GLenum OpenGLBufferMappingOptions(Graphics::Core::ImmutableGraphicsBufferMapOptions options, Result& result);
 
-	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format);
-	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format);
+	enum class MutableGraphicsBufferUseType
+	{
+		Draw, Read, Copy
+	};
+	GLenum OpenGLMutableBufferUsage(Graphics::Core::MutableGraphicsBufferUseFrequency frequency, MutableGraphicsBufferUseType use, Result& result);
+	//GLenum OpenGLBufferDynamicStorageHint(Graphics::Core::GraphicsBufferDynamicStorageHint hint, Result& result);
+	//GLenum OpenGLBufferStaticStorageHint(Graphics::Core::GraphicsBufferStaticStorageHint hint, Result& result);
+
+	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format, Result& result);
+	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format, Result& result);
 }

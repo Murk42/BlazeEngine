@@ -11,35 +11,42 @@ namespace Blaze
 	class EventHandler
 	{
 		bool supress = false;
-		List<T> events;
+		bool listening = true;		
 		EventDispatcher<T>* dispatcher = nullptr;
 	public:
 		EventHandler()
 		{
 		}
-		~EventHandler()
+		EventHandler(bool supress, bool listening)
+			: supress(supress), listening(listening)
 		{
 
 		}
+		~EventHandler()
+		{
+			if (dispatcher != nullptr)
+				dispatcher->RemoveHandler(*this);
+		}
 
-		void SupressEvents()
+		void StartSupressingEvents()
 		{
 			supress = true;
 		}
-		void ProcessSupressedEvents()
+		void StopSupressingEvents()
 		{
-			for (auto& event : events)
-				OnEvent(event);
-			events.Clear();
+			supress = false;
 		}
+		void StartListeningForEvents()
+		{
+			listening = true;
+		}
+		void StopListeningForEvents()
+		{
+			listening = false;
+		}				
 
-		void AddEvent(T event)
-		{
-			if (supress)
-				events.AddBack(event);
-			else
-				OnEvent(event);
-		}
+		bool IsSupressing() const { return supress; };
+		bool IsListening() const { return listening; }
 
 		virtual void OnEvent(T event) = 0;
 

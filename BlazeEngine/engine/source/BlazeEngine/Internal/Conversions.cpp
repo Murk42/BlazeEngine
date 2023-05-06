@@ -5,6 +5,23 @@ std::wstring to_wstring(const std::string& s)
 	return std::wstring(s.begin(), s.end());
 }
 
+template<typename T>
+constexpr bool BitRemap(T in, GLenum& out, std::initializer_list<T> values, std::initializer_list<GLenum> enums)
+{
+	out = 0;
+
+	for (unsigned i = 0; i < values.size(); ++i)
+	{
+		if ((bool)(in & values.begin()[i]))
+		{
+			out |= enums.begin()[i];
+			in ^= values.begin()[i];
+		}
+	}
+
+	return !(bool)in;	
+}
+
 namespace Blaze
 {
 	template<typename T>
@@ -12,7 +29,7 @@ namespace Blaze
 	{
 		return static_cast<std::underlying_type_t<T>>(value);
 	}
-	unsigned GetFormatDepth(BitmapPixelFormat format)
+	unsigned GetFormatDepth(BitmapPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
@@ -23,12 +40,11 @@ namespace Blaze
 		case Blaze::BitmapPixelFormat::BGR:	return 3;
 		case Blaze::BitmapPixelFormat::BGRA: return 4;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<unsigned>::max();
 	}
 
-	unsigned PixelTypeSize(BitmapPixelType type)
+	unsigned PixelTypeSize(BitmapPixelType type, Result& result)
 	{
 		switch (type)
 		{
@@ -41,12 +57,11 @@ namespace Blaze
 		case Blaze::BitmapPixelType::Float:	return sizeof(float);
 		case Blaze::BitmapPixelType::Double: return sizeof(double);		
 		}		
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<unsigned>::max();
 	}
 
-	ILenum DevILPixelFormat(BitmapPixelFormat format)
+	ILenum DevILPixelFormat(BitmapPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
@@ -57,11 +72,10 @@ namespace Blaze
 		case BitmapPixelFormat::BGR: return IL_BGR;
 		case BitmapPixelFormat::BGRA: return IL_BGRA;		
 		}		
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<ILenum>::max();
 	}
-	GLenum OpenGLPixelFormat(BitmapPixelFormat format)
+	GLenum OpenGLPixelFormat(BitmapPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
@@ -72,11 +86,10 @@ namespace Blaze
 		case BitmapPixelFormat::BGR: return GL_BGR;
 		case BitmapPixelFormat::BGRA: return GL_BGRA;		
 		}		
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format)
+	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
@@ -87,11 +100,10 @@ namespace Blaze
 		case BitmapPixelFormat::BGR: return SDL_PIXELFORMAT_BGR24;
 		case BitmapPixelFormat::BGRA: return SDL_PIXELFORMAT_BGRA32;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<SDL_PixelFormatEnum>::max();
 	}
-	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format)
+	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format, Result& result)
 	{
 		switch (format)
 		{
@@ -102,11 +114,10 @@ namespace Blaze
 		case IL_BGR: return BitmapPixelFormat::BGR;
 		case IL_BGRA: return BitmapPixelFormat::BGRA;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Unsupported/Invalid DevIL pixel format enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid DevIL pixel format enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(format)));
 		return std::numeric_limits<BitmapPixelFormat>::max();
 	}
-	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format)
+	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format, Result& result)
 	{
 		switch (format)
 		{
@@ -117,12 +128,11 @@ namespace Blaze
 		case GL_BGR: return BitmapPixelFormat::BGR;
 		case GL_BGRA: return BitmapPixelFormat::BGRA;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Unsupported/Invalid OpenGL pixel format enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid OpenGL pixel format enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(format)));
 		return std::numeric_limits<BitmapPixelFormat>::max();
 	}
 
-	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format)
+	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
@@ -178,11 +188,10 @@ namespace Blaze
 		case Blaze::OpenGL::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
 		case Blaze::OpenGL::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_RGB;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid TextureInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format)
+	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
@@ -238,11 +247,10 @@ namespace Blaze
 		case Blaze::OpenGL::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
 		case Blaze::OpenGL::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_R11F_G11F_B10F;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid TextureInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format)
+	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format, Result& result)
 	{
 		switch (format)
 		{			
@@ -280,12 +288,11 @@ namespace Blaze
 			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16UI	: return GL_RGBA16UI;
 			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32UI: return GL_RGBA32UI; 			
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid TextureBufferInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureBufferInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
 
-	ILenum DevILPixelType(BitmapPixelType type)
+	ILenum DevILPixelType(BitmapPixelType type, Result& result)
 	{
 		switch (type)
 		{
@@ -299,11 +306,10 @@ namespace Blaze
 		case Blaze::BitmapPixelType::Double: return IL_DOUBLE;		
 		}
 
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<ILenum>::max();
 	}
-	GLenum OpenGLPixelType(BitmapPixelType type)
+	GLenum OpenGLPixelType(BitmapPixelType type, Result& result)
 	{
 		switch (type)
 		{
@@ -317,11 +323,10 @@ namespace Blaze
 		case Blaze::BitmapPixelType::Double: return GL_DOUBLE;		
 		}
 
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	BitmapPixelType DevILToBlazePixelType(ILenum type)
+	BitmapPixelType DevILToBlazePixelType(ILenum type, Result& result)
 	{
 		switch (type)
 		{
@@ -335,11 +340,10 @@ namespace Blaze
 		case IL_DOUBLE: return Blaze::BitmapPixelType::Double;		
 		}
 
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Unsupported/Invalid DevIL pixel type enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(type)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid DevIL pixel type enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(type)));
 		return std::numeric_limits<BitmapPixelType>::max();
 	}
-	BitmapPixelType OpenGLToBlazePixelType(GLenum type)
+	BitmapPixelType OpenGLToBlazePixelType(GLenum type, Result& result)
 	{
 		switch (type)
 		{
@@ -352,11 +356,10 @@ namespace Blaze
 		case GL_FLOAT: return Blaze::BitmapPixelType::Float;
 		case GL_DOUBLE: return Blaze::BitmapPixelType::Double;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Unsupported/Invalid OpenGL pixel type enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(type)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid OpenGL pixel type enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(type)));
 		return std::numeric_limits<BitmapPixelType>::max();
 	}
-	GLenum OpenGLTextureMinSampling(Graphics::Core::TextureSampling min, Graphics::Core::TextureSampling mip, bool mipmaps)
+	GLenum OpenGLTextureMinSampling(Graphics::Core::TextureSampling min, Graphics::Core::TextureSampling mip, bool mipmaps, Result& result)
 	{
 		if (mipmaps)
 		{
@@ -367,8 +370,7 @@ namespace Blaze
 					return GL_LINEAR_MIPMAP_NEAREST;
 				else
 				{
-					Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-						"Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(min)).value));
+					result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(min)));
 					return std::numeric_limits<GLenum>::max();
 				}
 			else if (mip == Graphics::Core::TextureSampling::Linear)
@@ -378,14 +380,12 @@ namespace Blaze
 					return GL_LINEAR_MIPMAP_LINEAR;		
 				else
 				{
-					Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-						"Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(min)).value));
+					result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(min)));
 					return std::numeric_limits<GLenum>::max();
 				}
 			else
 			{
-			 	Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-					"Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(mip)).value));
+			 	result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(mip)));
 				return std::numeric_limits<GLenum>::max();
 			}
 		}
@@ -396,23 +396,21 @@ namespace Blaze
 				return GL_LINEAR;
 			else
 			{
-				Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-					"Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(min)).value));
+				result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(min)));
 				return std::numeric_limits<GLenum>::max();
 			}
 	}
-	GLenum OpenGLTextureMagSampling(Graphics::Core::TextureSampling sampling)
+	GLenum OpenGLTextureMagSampling(Graphics::Core::TextureSampling sampling, Result& result)
 	{
 		switch (sampling)
 		{
 		case Blaze::OpenGL::TextureSampling::Nearest: return GL_NEAREST;
 		case Blaze::OpenGL::TextureSampling::Linear: return GL_LINEAR;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(sampling)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(sampling)));
 		return std::numeric_limits<GLenum>::max();
 	}	
-	GLenum OpenGLTextureWrapping(Graphics::Core::TextureWrapping wrapping)
+	GLenum OpenGLTextureWrapping(Graphics::Core::TextureWrapping wrapping, Result& result)
 	{
 		switch (wrapping)
 		{
@@ -421,11 +419,10 @@ namespace Blaze
 		case Blaze::OpenGL::TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;			
 		case Blaze::OpenGL::TextureWrapping::Repeat: return GL_REPEAT;					
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid TextureWrapping enum value. The integer value was: " + StringParsing::Convert(ToInteger(wrapping)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureWrapping enum value. The integer value was: " + StringParsing::Convert(ToInteger(wrapping)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	Graphics::Core::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapPixelFormat format)
+	Graphics::Core::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapPixelFormat format, Result& result)
 	{		
 		switch (format)
 		{
@@ -436,11 +433,26 @@ namespace Blaze
 		case BitmapPixelFormat::BGR: return Graphics::Core::TextureInternalPixelFormat::RGB32F;
 		case BitmapPixelFormat::BGRA: return Graphics::Core::TextureInternalPixelFormat::RGBA32F;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<Graphics::Core::TextureInternalPixelFormat>::max();
 	}
-	GLenum OpenGLFramebufferAttachment(Graphics::Core::FramebufferAttachment attachment)
+	GLenum OpenGLVertexAttributeType(Graphics::Core::VertexAttributeType type, Result& result)
+	{		
+		switch (type)
+		{
+		case Blaze::OpenGL::VertexAttributeType::Int8: return GL_BYTE;
+		case Blaze::OpenGL::VertexAttributeType::Uint8: return GL_UNSIGNED_BYTE;
+		case Blaze::OpenGL::VertexAttributeType::Int16: return GL_SHORT;
+		case Blaze::OpenGL::VertexAttributeType::Uint16: return GL_UNSIGNED_SHORT;
+		case Blaze::OpenGL::VertexAttributeType::Int32: return GL_INT;
+		case Blaze::OpenGL::VertexAttributeType::Uint32: return GL_UNSIGNED_INT;
+		case Blaze::OpenGL::VertexAttributeType::Float: return GL_FLOAT;
+		case Blaze::OpenGL::VertexAttributeType::Double: return GL_DOUBLE;
+		}
+		result += BLAZE_FATAL_LOG("Blaze Engine", "Invalid VertexAttributeType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		return std::numeric_limits<GLenum>::max();		
+	}
+	GLenum OpenGLFramebufferAttachment(Graphics::Core::FramebufferAttachment attachment, Result& result)
 	{
 		switch (attachment)
 		{
@@ -448,46 +460,96 @@ namespace Blaze
 		case Blaze::OpenGL::FramebufferAttachment::Stencil:	return GL_STENCIL_ATTACHMENT;
 		case Blaze::OpenGL::FramebufferAttachment::Depth: return GL_DEPTH_ATTACHMENT;		
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid FramebufferAttachment enum value. The integer value was: " + StringParsing::Convert(ToInteger(attachment)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid FramebufferAttachment enum value. The integer value was: " + StringParsing::Convert(ToInteger(attachment)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	GLenum OpenGLBufferDynamicStorageHint(Graphics::Core::GraphicsBufferDynamicStorageHint hint)
+		
+	GLenum OpenGLBufferMappingAccess(Graphics::Core::ImmutableGraphicsBufferMapAccess mapping, Result& result)
 	{
-		switch (hint)
+		GLenum out;
+
+		if (!BitRemap(mapping, out, {
+				Graphics::Core::ImmutableGraphicsBufferMapAccess::Read,
+				Graphics::Core::ImmutableGraphicsBufferMapAccess::Write
+			}, {
+				GL_MAP_READ_BIT,
+				GL_MAP_WRITE_BIT
+			}))
 		{
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::StreamDraw: return GL_STREAM_DRAW;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::StreamRead: return GL_STREAM_READ;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::StreamCopy: return GL_STREAM_COPY;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::StaticDraw: return GL_STATIC_DRAW;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::StaticRead: return GL_STATIC_READ;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::StaticCopy: return GL_STATIC_COPY;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::DynamicDraw: return GL_DYNAMIC_DRAW;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::DynamicRead: return GL_DYNAMIC_READ;
-		case Blaze::OpenGL::GraphicsBufferDynamicStorageHint::DynamicCopy: return GL_DYNAMIC_COPY;				
+			result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid ImmutableGraphicsBufferMapAccess enum value. The integer value was: " + StringParsing::Convert(ToInteger(mapping)));
+			return std::numeric_limits<GLenum>::max();
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid GraphicsBufferDynamicStorageHint enum value. The integer value was: " + StringParsing::Convert(ToInteger(hint)).value));
-		return std::numeric_limits<GLenum>::max();
+
+		return out;
+	}	
+	GLenum OpenGLBufferMappingType(Graphics::Core::ImmutableGraphicsBufferMapType type, Result& result)
+	{
+		GLenum out;
+
+		if (!BitRemap(type, out, {
+				Graphics::Core::ImmutableGraphicsBufferMapType::PersistentCoherent,
+				Graphics::Core::ImmutableGraphicsBufferMapType::PersistentUncoherent
+			}, {
+				GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
+				GL_MAP_PERSISTENT_BIT
+			}))
+		{
+			result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid ImmutableGraphicsBufferMapType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+			return std::numeric_limits<GLenum>::max();
+		}
+
+		return out;
 	}
-	GLenum OpenGLBufferStaticStorageHint(Graphics::Core::GraphicsBufferStaticStorageHint hint)
+	GLenum OpenGLBufferMappingOptions(Graphics::Core::ImmutableGraphicsBufferMapOptions options, Result& result)
 	{
-		switch (hint)
+		GLenum out;
+
+		if (!BitRemap(options, out, {
+				Graphics::Core::ImmutableGraphicsBufferMapOptions::ExplicitFlush,
+				Graphics::Core::ImmutableGraphicsBufferMapOptions::InvalidateBuffer,
+				Graphics::Core::ImmutableGraphicsBufferMapOptions::InvalidateRange,
+				Graphics::Core::ImmutableGraphicsBufferMapOptions::Unsynchronized,				
+			}, {
+				GL_MAP_FLUSH_EXPLICIT_BIT,
+				GL_MAP_INVALIDATE_BUFFER_BIT,
+				GL_MAP_INVALIDATE_RANGE_BIT,
+				GL_MAP_UNSYNCHRONIZED_BIT				
+			}))
 		{
-		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::StaticStorage: return 0;
-		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::DynamicStorage: return GL_DYNAMIC_STORAGE_BIT;			
-		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::MapRead: return GL_MAP_READ_BIT;			
-		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::MapWrite: return GL_MAP_WRITE_BIT;
-		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::MapPersistant: return GL_MAP_PERSISTENT_BIT;
-		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::MapCoherent: return GL_MAP_COHERENT_BIT;
-		case Blaze::OpenGL::GraphicsBufferStaticStorageHint::ClientStorage: return GL_CLIENT_STORAGE_BIT;				
+			result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid ImmutableGraphicsBufferMapOptions enum value. The integer value was: " + StringParsing::Convert(ToInteger(options)));
+			return std::numeric_limits<GLenum>::max();
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid GraphicsBufferStaticStorageHint enum value. The integer value was: " + StringParsing::Convert(ToInteger(hint)).value));
+
+		return out;
+	}
+	GLenum OpenGLMutableBufferUsage(Graphics::Core::MutableGraphicsBufferUseFrequency frequency, MutableGraphicsBufferUseType use, Result& result)
+	{
+		switch (frequency)
+		{
+		case Blaze::OpenGL::MutableGraphicsBufferUseFrequency::Static:	switch (use) {
+			case Blaze::MutableGraphicsBufferUseType::Draw: return GL_STATIC_DRAW;				
+			case Blaze::MutableGraphicsBufferUseType::Read: return GL_STATIC_READ;				
+			case Blaze::MutableGraphicsBufferUseType::Copy: return GL_STATIC_COPY; }
+		case Blaze::OpenGL::MutableGraphicsBufferUseFrequency::Dynamic:	switch (use) {
+			case Blaze::MutableGraphicsBufferUseType::Draw: return GL_DYNAMIC_DRAW;				
+			case Blaze::MutableGraphicsBufferUseType::Read: return GL_DYNAMIC_READ;				
+			case Blaze::MutableGraphicsBufferUseType::Copy: return GL_DYNAMIC_COPY; }
+		case Blaze::OpenGL::MutableGraphicsBufferUseFrequency::Stream:	switch (use) {
+			case Blaze::MutableGraphicsBufferUseType::Draw: return GL_STREAM_DRAW;				
+			case Blaze::MutableGraphicsBufferUseType::Read: return GL_STREAM_READ;				
+			case Blaze::MutableGraphicsBufferUseType::Copy: return GL_STREAM_COPY; }
+		default:
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid MutableGraphicsBufferUseFrequency enum value. The integer value was: " + StringParsing::Convert(ToInteger(frequency)));
+			return std::numeric_limits<GLenum>::max();
+			break;
+		}		
+
+		return BLAZE_ERROR_RESULT("Blaze Engine", "Engine error. Invalid MutableGraphicsBufferUseType enum value. The integer value was: " + StringParsing::Convert(ToInteger(use)));
 		return std::numeric_limits<GLenum>::max();
 	}
 
-	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format)
+
+	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format, Result& result)
 	{
 		switch (format)
 		{
@@ -517,11 +579,10 @@ namespace Blaze
 		case SDL_PIXELFORMAT_BGRA8888:		return Blaze::DisplayPixelFormat::BGRA8888;
 		case SDL_PIXELFORMAT_ARGB2101010:	return Blaze::DisplayPixelFormat::ARGB2101010;
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Unsupported/Invalid SDL pixel format enum value. The integer value was: " + StringParsing::Convert(format).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid SDL pixel format enum value. The integer value was: " + StringParsing::Convert(format));
 		return std::numeric_limits<DisplayPixelFormat>::max();
 	}
-	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format)
+	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
@@ -551,8 +612,7 @@ namespace Blaze
 		case Blaze::DisplayPixelFormat::BGRA8888:		return SDL_PIXELFORMAT_BGRA8888;
 		case Blaze::DisplayPixelFormat::ARGB2101010:	return SDL_PIXELFORMAT_ARGB2101010;
 		}
-		Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-			"Invalid DisplayPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid DisplayPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<SDL_PixelFormatEnum>::max();
 	}
 }

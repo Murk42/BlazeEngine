@@ -55,7 +55,7 @@ namespace Blaze::UI
 		const auto& registry = manager->GetElementTypeRegistry();
 
 		if (!registry.IsValidTypeIndex(typeIndex))
-			return { nullptr, BLAZE_WARNING_RESULT("BlazeEngine", "Invalid type index. Index was: " + String::Convert(typeIndex)) };
+			return { nullptr, BLAZE_WARNING_RESULT("BlazeEngine", "Invalid type index. Index was: " + StringParsing::Convert(typeIndex).value) };
 
 		const auto& typeData = registry.GetElementTypeData(typeIndex);		
 						
@@ -132,6 +132,11 @@ namespace Blaze::UI
 
 		return Result();
 	}		
+
+	//UIElement* UIScene::GetElementBase(StringView name) const
+	//{
+	//	return nameToElementMap.at(name);
+	//}
 
 	UIScene::EventFunction UIScene::GetEventFunction(StringView name) const
 	{

@@ -132,7 +132,7 @@ namespace Blaze::Graphics
 		cache = new PointVertex[batchSize];
 		this->batchSize = batchSize;
 
-		vb.AllocateDynamicStorage(BufferView(nullptr, batchSize * sizeof(PointVertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+		vb.Allocate(nullptr, batchSize * sizeof(PointVertex), Graphics::Core::MutableGraphicsBufferUseFrequency::Dynamic);
 	}
 	void Point2DRenderer::SetImmediateMode()
 	{
@@ -140,7 +140,7 @@ namespace Blaze::Graphics
 		cache = nullptr;
 		this->batchSize = 0;
 
-		vb.AllocateDynamicStorage(BufferView(nullptr, sizeof(PointVertex)), Core::GraphicsBufferDynamicStorageHint::DynamicDraw);
+		vb.Allocate(nullptr, sizeof(PointVertex), Graphics::Core::MutableGraphicsBufferUseFrequency::Dynamic);
 	}
 	void Point2DRenderer::Draw(Vec2f pos, ColorRGBAf color, float radius)
 	{
@@ -160,7 +160,7 @@ namespace Blaze::Graphics
 		}
 		else
 		{
-			vb.ChangeData(BufferView(&vertex, sizeof(PointVertex)), 0);
+			vb.WriteData(&vertex, sizeof(PointVertex), 0);
 			Graphics::Core::SelectVertexArray(&va);
 			Graphics::Core::SelectProgram(&program);
 			Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, 1);
@@ -168,7 +168,7 @@ namespace Blaze::Graphics
 	}
 	void Point2DRenderer::Flush()
 	{
-		vb.ChangeData(BufferView(cache, sizeof(PointVertex) * batchSize), 0);
+		vb.WriteData(cache, sizeof(PointVertex) * batchSize, 0);
 		Graphics::Core::SelectVertexArray(&va);
 		Graphics::Core::SelectProgram(&program);
 		Graphics::Core::RenderPrimitiveArray(Graphics::Core::PrimitiveType::Points, 0, 1);

@@ -26,16 +26,16 @@ namespace Blaze::OpenGL
 		Texture2D(Texture2D&&) noexcept;	
 		~Texture2D();
 
-		void SetSettings(Texture2DSettings settings);		
+		Result SetSettings(Texture2DSettings settings);		
 
 		Result Load(Path path) override;		
 		Result Load(Path path, TextureInternalPixelFormat internalFormat);
 						
-		void Create(Vec2i size, TextureInternalPixelFormat internalFormat);
-		void Create(BitmapView bm);								
-		void Create(BitmapView bm, TextureInternalPixelFormat internalFormat);
-		void SetPixels(Vec2i offset, BitmapView bm);
-		void SetPixels(Vec2i offset, Vec2i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels);				
+		Result Create(Vec2i size, TextureInternalPixelFormat internalFormat);
+		Result Create(BitmapView bm);								
+		Result Create(BitmapView bm, TextureInternalPixelFormat internalFormat);
+		Result SetPixels(Vec2i offset, BitmapView bm);
+		Result SetPixels(Vec2i offset, Vec2i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels);				
 
 		void GenerateMipmaps();
 

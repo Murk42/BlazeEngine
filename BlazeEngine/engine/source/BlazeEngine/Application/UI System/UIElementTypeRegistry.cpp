@@ -87,7 +87,7 @@ namespace Blaze
 			if (index > types.size())
 			{				
 				Logger::AddLog(LogType::Error, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"Blaze Engine", "Index is out of bounds. Index was: " + String::Convert(index));					
+					"Blaze Engine", "Index is out of bounds. Index was: " + StringParsing::Convert(index).value);					
 				return { "" };
 			}
 			return types[index];

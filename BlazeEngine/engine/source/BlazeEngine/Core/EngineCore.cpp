@@ -3,7 +3,6 @@
 #include "BlazeEngine/Graphics/Graphics.h"
 #include "BlazeEngine/Utilities/Time.h"
 #include "source/BlazeEngine/Internal/Libraries.h"
-#include "source/BlazeEngine/Internal/EngineData.h"
 
 namespace Blaze
 {

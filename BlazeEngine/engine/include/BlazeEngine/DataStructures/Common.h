@@ -30,7 +30,7 @@ namespace Blaze
 template<class Base, class Derived>
 inline int BaseOffset()
 {
-	return reinterpret_cast<char*>(static_cast<Base*>(reinterpret_cast<Derived*>(0xf0000000))) - reinterpret_cast<char*>(reinterpret_cast<Derived*>(0xf0000000));
+	return reinterpret_cast<char*>(static_cast<Base*>(reinterpret_cast<Derived*>(0xf0000000Ui64))) - reinterpret_cast<char*>(reinterpret_cast<Derived*>(0xf0000000Ui64));
 }
 
 #define ENUM_CLASS_BITWISE_OPERATIONS(name) \

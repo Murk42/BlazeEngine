@@ -24,10 +24,10 @@ namespace Blaze::OpenGL
 		Texture3D(Texture3D&&) noexcept;
 		~Texture3D();
 
-		void SetSettings(Texture3DSettings settings);				
+		Result SetSettings(Texture3DSettings settings);				
 						
-		void Create(Vec3i size, TextureInternalPixelFormat internalFormat);				
-		void SetPixels(Vec3i offset, Vec3i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels);						
+		Result Create(Vec3i size, TextureInternalPixelFormat internalFormat);				
+		Result SetPixels(Vec3i offset, Vec3i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels);						
 
 		Vec3i GetSize() const { return size; }				
 

@@ -215,7 +215,7 @@ namespace Blaze
 	}
 
 	Result FontResolution::CreateAtlas()
-	{		
+	{				
 		FT_Face face = (FT_Face)font->ptr;
 		CharacterBitmap* characterBitmaps = new CharacterBitmap[characterCount];		
 		std::vector<rect_type> rectangles(characterCount);	
@@ -232,8 +232,12 @@ namespace Blaze
 		uint32 renderMode;
 		SelectRenderMode(renderMode, renderType);
 
+
 		bool isMonochrome = renderType == FontResolutionRenderType::Monochrome;		
-		uint bitmapPixelDepth = GetFormatDepth(bitmapPixelFormat);
+
+		Result result;
+		uint bitmapPixelDepth = GetFormatDepth(bitmapPixelFormat, result);
+		CHECK_RESULT(result);
 		
 		decltype(characterMap)::iterator metricsIT;
 
@@ -386,15 +390,13 @@ namespace Blaze
 			ftError = FT_New_Face(GetFreeTypeLibrary(), path.Ptr(), 0, &face);
 
 			if (ftError != 0)
-				return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-					"BlazeEngine", "Failed to open font file!"));
+				return BLAZE_WARNING_RESULT("BlazeEngine", "Failed to open font file!");
 			ptr = face;
 		}
 
 		if (!(face->face_flags & FT_FACE_FLAG_SCALABLE))
 		{
-			return Result(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-				"BlazeEngine", "Font file not supported, it's not a scalable font!"));			
+			return BLAZE_WARNING_RESULT("BlazeEngine", "Font file not supported, it's not a scalable font!");
 		}
 
 		FT_Select_Charmap(face, FT_ENCODING_UNICODE);

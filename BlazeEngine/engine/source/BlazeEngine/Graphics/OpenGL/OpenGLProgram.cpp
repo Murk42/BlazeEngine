@@ -1,7 +1,7 @@
 #include "BlazeEngine/Graphics/OpenGL/OpenGLProgram.h"
 #include "BlazeEngine/Graphics/OpenGL/OpenGLGraphicsBuffer.h"
 #include "GL/glew.h"
-#include "BlazeEngine/Logging/LogListener.h"
+
 
 namespace Blaze
 {
@@ -11,10 +11,11 @@ namespace Blaze
 			: id(-1), state(ShaderProgramState::Invalid), maxUniformBlockNameLenght(0), maxUniformNameLenght(0)
 		{
 			id = glCreateProgram();
+			FLUSH_OPENGL_RESULT();
 		}
 		ShaderProgram::ShaderProgram(ShaderProgram&& p) noexcept
-			: state(p.state), maxUniformBlockNameLenght(p.maxUniformBlockNameLenght), maxUniformNameLenght(p.maxUniformNameLenght)
-		{			
+			: id(p.id), state(p.state), maxUniformBlockNameLenght(p.maxUniformBlockNameLenght), maxUniformNameLenght(p.maxUniformNameLenght)
+		{
 			p.id = -1;
 			p.state = ShaderProgramState::Invalid;
 			p.maxUniformBlockNameLenght = 0;
@@ -23,115 +24,140 @@ namespace Blaze
 		ShaderProgram::~ShaderProgram()
 		{
 			if (id != -1)
+			{
 				glDeleteProgram(id);
+				FLUSH_OPENGL_RESULT();
+			}
 		}
 
-		void ShaderProgram::AttachShader(const Shader& shader)
+		Result ShaderProgram::AttachShader(const Shader& shader)
 		{
 			glAttachShader(id, shader.id);
+			CHECK_OPENGL_RESULT();
+
+			return Result();
 		}
 
-		void ShaderProgram::DetachShader(const Shader& shader)
+		Result ShaderProgram::DetachShader(const Shader& shader)
 		{
 			glDetachShader(id, shader.id);
+			CHECK_OPENGL_RESULT();
+
+			return Result();
 		}
 
 		Result ShaderProgram::LinkProgram()
 		{
-			LogListener listener;
-			listener.SupressLogs(true);
-			listener.StartListening();
+			if (state == ShaderProgramState::SuccesfullyLinked)
+				Logger::ProcessLog(BLAZE_WARNING_LOG("Blaze Engine", "Relinking a shader program. This might cause driver errors. Recreate the shader program before linking again"));
 
-			if (state == ShaderProgramState::Valid)
-				Logger::AddLog(BLAZE_WARNING_LOG("Blaze Engine", "Relinking a shader program. This might cause driver errors. Recreate the shader program before linking again"));
+			state = ShaderProgramState::UnsuccesfullyLinked;
 
 			glLinkProgram(id);
+			CHECK_OPENGL_RESULT();			
 
 			int linkStatus = 0;
 			glGetProgramiv(id, GL_LINK_STATUS, &linkStatus);
-			listener.StopListening();
-
-			Result result;
-			result.AddLogs(listener.GetLogs());
+			CHECK_OPENGL_RESULT();			
 
 			if (linkStatus == GL_FALSE)
 			{
 				int lenght = 0;
 				glGetProgramiv(id, GL_INFO_LOG_LENGTH, &lenght);
+				CHECK_OPENGL_RESULT();				
 
 				String message(lenght);
 
 				glGetProgramInfoLog(id, lenght, &lenght, message.Ptr());
-
-				result.AddLog(BLAZE_INFO_LOG("OpenGL", std::move(message)));
-				result.SetFailed(true);
+				CHECK_OPENGL_RESULT();				
 
 				state = ShaderProgramState::Invalid;
-				return result;
+
+				return BLAZE_INFO_RESULT("OpenGL", std::move(message));
 			}
 
 			int lenght;
 			glGetProgramiv(id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &lenght);
+			CHECK_OPENGL_RESULT();
+			
 			maxUniformNameLenght = lenght;
 			glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_MAX_NAME_LENGTH, &lenght);
+			CHECK_OPENGL_RESULT();
+			
 			maxUniformBlockNameLenght = lenght;
 
-			state = ShaderProgramState::Valid;
+			state = ShaderProgramState::SuccesfullyLinked;
 
-			return result;
-		}		
+			return Result();
+		}
 
 		Result ShaderProgram::LinkShaders(const std::initializer_list<Shader*>& shaders)
 		{
 			for (auto& s : shaders)
-				AttachShader(*s);			
+				CHECK_RESULT(AttachShader(*s));			
 
-			if (Result result = LinkProgram())
-				return result;
+			CHECK_RESULT(LinkProgram());				
 
 			for (auto& s : shaders)
-				DetachShader(*s);
+				CHECK_RESULT(DetachShader(*s));
 
 			return Result();
 		}
 
 		uint ShaderProgram::GetUniformCount() const
 		{
-			int count;
-			glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);
+			int count = 0;			
+			glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);				
+			FLUSH_OPENGL_RESULT();
+
 			return count;
 		}		
 
 		int ShaderProgram::GetUniformLocation(const StringView& name)
 		{
-			return glGetUniformLocation(id, name.Ptr());
+			int location = glGetUniformLocation(id, name.Ptr());
+			if (FLUSH_OPENGL_RESULT())
+				return -1;
+
+			return location;
 		}
 
-		void ShaderProgram::GetUniformData(uint index, String& name, uint& uniformSize, UniformType& uniformType) const
+		Result ShaderProgram::GetUniformData(uint index, String& name, uint& uniformSize, UniformType& uniformType) const
 		{
 			char* ptr = new char[maxUniformNameLenght];
 			int lenght;
 			int size;
 			uint type;
+
 			glGetActiveUniform(id, index, maxUniformNameLenght, &lenght, &size, &type, ptr);
+			FLUSH_OPENGL_RESULT();
+
 			name = std::move(String(ptr, maxUniformNameLenght));
 			delete[] ptr;
 			uniformSize = size;
-			uniformType = (UniformType)type;				
+			uniformType = (UniformType)type;
+
+			return Result();
 		}
 
 		uint ShaderProgram::GetUniformBlockCount() const
 		{		
-			int uniformBlockCount;
-			glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformBlockCount);
+			int uniformBlockCount;			
+
+			glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformBlockCount);				
+			FLUSH_OPENGL_RESULT();
+				
 			return uniformBlockCount;
 		}
 
-		void ShaderProgram::GetUniformBlockData(uint index, int& location, String& name, uint& uniformBlockSize, std::vector<int>& memberIndicies) const
+		Result ShaderProgram::GetUniformBlockData(uint index, int& location, String& name, uint& uniformBlockSize, std::vector<int>& memberIndicies) const
 		{
 			char* ptr = new char[maxUniformBlockNameLenght];
 			int lenght;
+
 			glGetActiveUniformBlockName(id, index, maxUniformBlockNameLenght, &lenght, ptr);
+			CHECK_OPENGL_RESULT();
+			
 			name = std::move(String(ptr, lenght));
 			delete[] ptr;
 			//location = glGetProgramResourceIndex(id, GL_UNIFORM_BLOCK, ptr);
@@ -145,13 +171,18 @@ namespace Blaze
 			} v1;
 
 			glGetProgramResourceiv(id, GL_UNIFORM_BLOCK, index, 2, props1, 2, &lenght, (int*)&v1);
+			CHECK_OPENGL_RESULT();
+			
 			memberIndicies.resize(v1.uniformBlockVariableCount);
 			glGetProgramResourceiv(id, GL_UNIFORM_BLOCK, index, 1, props2, v1.uniformBlockVariableCount, &lenght, memberIndicies.data());
+			CHECK_OPENGL_RESULT();
+			
 
 			uniformBlockSize = v1.uniformBlockSize;
+			return Result();
 		}
 
-		void ShaderProgram::GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset)
+		Result ShaderProgram::GetUniformBlockMemberData(int location, String& name, uint& size, UniformType& type, uint& offset)
 		{
 			constexpr const unsigned props1[]{ GL_NAME_LENGTH, GL_OFFSET, GL_TYPE, GL_ARRAY_SIZE };
 
@@ -164,94 +195,99 @@ namespace Blaze
 			int lenght;
 
 			glGetProgramResourceiv(id, GL_UNIFORM, location, 4, props1, 4, &lenght, (int*)&v2);
-			char* ptr = new char[v2.uniformBlockVariableNameLenght];
-			glGetActiveUniformName(id, location, v2.uniformBlockVariableNameLenght, &lenght, ptr);
+			CHECK_OPENGL_RESULT();
 			
+			char* ptr = new char[v2.uniformBlockVariableNameLenght];
+
+			glGetActiveUniformName(id, location, v2.uniformBlockVariableNameLenght, &lenght, ptr);
+			CHECK_OPENGL_RESULT();			
+
 			name = std::move(String(ptr, v2.uniformBlockVariableNameLenght));
 			delete[] ptr;
 			size = v2.uniformBlockVariableSize;
 			type = (UniformType)v2.uniformBlockVariableType;
 			offset = v2.uniformBlockVariableOffset;
+			return Result();
 		}
 
-		void ShaderProgram::BindUniformBlock(int location, uint binding)
+		Result ShaderProgram::BindUniformBlock(int location, uint binding)
 		{
-			glUniformBlockBinding(id, location, binding);
+			glUniformBlockBinding(id, location, binding); CHECK_OPENGL_RESULT(); return Result();
 		}
 		
-		void ShaderProgram::SetUniform(int location, const bool& value)
-		{ 						
-		}
-		
-		void ShaderProgram::SetUniform(int location, const int& value)
+		Result ShaderProgram::SetUniform(int location, const int& value)
 		{
-			glProgramUniform1i(id, location, value);
+			glProgramUniform1i(id, location, value); CHECK_OPENGL_RESULT(); return Result();
 		}		
-		void ShaderProgram::SetUniform(int location, const uint& value)
+		Result ShaderProgram::SetUniform(int location, const uint& value)
 		{
-			glProgramUniform1ui(id, location, value);
+			glProgramUniform1ui(id, location, value); CHECK_OPENGL_RESULT(); return Result();
 		}		
-		void ShaderProgram::SetUniform(int location, const float& value)
+		Result ShaderProgram::SetUniform(int location, const float& value)
 		{
-			glProgramUniform1f(id, location, value);
+			glProgramUniform1f(id, location, value); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const double& value)
+		Result ShaderProgram::SetUniform(int location, const double& value)
 		{
-			glProgramUniform1d(id, location, value);
+			glProgramUniform1d(id, location, value); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Vec2i& value)
+		Result ShaderProgram::SetUniform(int location, const Vec2i& value)
 		{
-			glProgramUniform2i(id, location, value.x, value.y);
+			glProgramUniform2i(id, location, value.x, value.y); CHECK_OPENGL_RESULT(); return Result();
 		}		
-		void ShaderProgram::SetUniform(int location, const Vec2f& value)
+		Result ShaderProgram::SetUniform(int location, const Vec2f& value)
 		{
-			glProgramUniform2f(id, location, value.x, value.y);
+			glProgramUniform2f(id, location, value.x, value.y); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Vec2d& value)
+		Result ShaderProgram::SetUniform(int location, const Vec2d& value)
 		{
-			glProgramUniform2d(id, location, value.x, value.y);
+			glProgramUniform2d(id, location, value.x, value.y); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Vec3i& value)
+		Result ShaderProgram::SetUniform(int location, const Vec3i& value)
 		{
-			glProgramUniform3i(id, location, value.x, value.y, value.z);
+			glProgramUniform3i(id, location, value.x, value.y, value.z); CHECK_OPENGL_RESULT(); return Result();
 		}		
-		void ShaderProgram::SetUniform(int location, const Vec3f& value)
+		Result ShaderProgram::SetUniform(int location, const Vec3f& value)
 		{
-			glProgramUniform3f(id, location, value.x, value.y, value.z);
+			glProgramUniform3f(id, location, value.x, value.y, value.z); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Vec3d& value)
+		Result ShaderProgram::SetUniform(int location, const Vec3d& value)
 		{
-			glProgramUniform3d(id, location, value.x, value.y, value.z);
+			glProgramUniform3d(id, location, value.x, value.y, value.z); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Vec4i& value)
+		Result ShaderProgram::SetUniform(int location, const Vec4i& value)
 		{
-			glProgramUniform4i(id, location, value.x, value.y, value.z, value.w);
+			glProgramUniform4i(id, location, value.x, value.y, value.z, value.w); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Vec4f& value)
+		Result ShaderProgram::SetUniform(int location, const Vec4f& value)
 		{
-			glProgramUniform4f(id, location, value.x, value.y, value.z, value.w);
+			glProgramUniform4f(id, location, value.x, value.y, value.z, value.w); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Vec4d& value)
+		Result ShaderProgram::SetUniform(int location, const Vec4d& value)
 		{
-			glProgramUniform4d(id, location, value.x, value.y, value.z, value.w);
+			glProgramUniform4d(id, location, value.x, value.y, value.z, value.w); CHECK_OPENGL_RESULT(); return Result();
 		}
-		void ShaderProgram::SetUniform(int location, const Mat2f& value)
+		Result ShaderProgram::SetUniform(int location, const Mat2f& value)
 		{
-			glProgramUniformMatrix2fv(id, location, 1, true, value.arr);
+			glProgramUniformMatrix2fv(id, location, 1, true, value.arr); CHECK_OPENGL_RESULT(); return Result();
 		}		
-		void ShaderProgram::SetUniform(int location, const Mat3f& value)
+		Result ShaderProgram::SetUniform(int location, const Mat3f& value)
 		{
-			glProgramUniformMatrix3fv(id, location, 1, true, value.arr);
+			glProgramUniformMatrix3fv(id, location, 1, true, value.arr); CHECK_OPENGL_RESULT(); return Result();
 		}		
-		void ShaderProgram::SetUniform(int location, const Mat4f& value)
+		Result ShaderProgram::SetUniform(int location, const Mat4f& value)
 		{
-			glProgramUniformMatrix4fv(id, location, 1, true, value.arr);
+			glProgramUniformMatrix4fv(id, location, 1, true, value.arr); CHECK_OPENGL_RESULT(); return Result();
 		}
 				
 		ShaderProgram& ShaderProgram::operator=(ShaderProgram&& p) noexcept
 		{
 			if (id != -1)
+			{
 				glDeleteProgram(id);
+				if (FLUSH_OPENGL_RESULT())
+					return *this;
+			}
 
 			id = p.id;
 			p.id = -1;

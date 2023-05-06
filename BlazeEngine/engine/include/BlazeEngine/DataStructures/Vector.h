@@ -23,10 +23,10 @@ namespace Blaze
 	struct BLAZE_API Vector<T, 2>
 	{
 		union {
+			std::array<T, 2> arr;
 			struct {
 				T x, y;
 			};
-			T arr[2];
 		};
 
 		constexpr Vector()
@@ -35,11 +35,11 @@ namespace Blaze
 
 		}		
 		constexpr Vector(const Vector<T, 2>& v)
-			: x(v.x), y(v.y)
+			: arr(v.arr)
 		{
 		}
 		constexpr Vector(T x, T y)
-			: x(x), y(y)
+			: arr({ x, y })
 		{
 		}
 		constexpr explicit Vector(T v) 
@@ -50,7 +50,7 @@ namespace Blaze
 		constexpr explicit Vector(Vector<T2, 2> v)
 			: x(static_cast<T>(v.x)), y(static_cast<T>(v.y))
 		{			
-		}
+		} 
 
 		constexpr Vector operator-() const { return Vector(-x, -y); }
 
@@ -88,7 +88,7 @@ namespace Blaze
 		}
 	};
 
-	template<typename T>
+	template<typename T> 
 	using Vec2 = Vector<T, 2>;
 	using Vec2i = Vec2<int>;
 	using Vec2u = Vec2<unsigned>;
@@ -102,16 +102,17 @@ namespace Blaze
 			struct {
 				T x, y, z;
 			};
-			T arr[3];
 			struct {
 				Vec2<T> xy;
 			};
+			T arr[3]{ 0, 0, 0 };
 		};
 
 		constexpr Vector()
 			: x(), y(), z()
 		{
 		}
+
 		constexpr Vector(const Vector<T, 3>& v)
 			: x(v.x), y(v.y), z(v.z)
 		{
@@ -185,13 +186,13 @@ namespace Blaze
 			struct {
 				T x, y, z, w;
 			};
-			T arr[4];
 			struct {
 				Vec2<T> xy;
 			};
 			struct {
 				Vec3<T> xyz;
 			};
+			T arr[4]{ 0, 0, 0, 0 };
 		};
 
 		constexpr Vector()

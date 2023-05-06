@@ -1,8 +1,7 @@
 #pragma once
 #include <type_traits>
-#include <cstring>
-#include <memory>
 #include <utility>
+#include <memory>
 
 namespace Blaze
 {
@@ -53,7 +52,7 @@ namespace Blaze
 			count = arr.count;
 			CopyConstruct(ptr, arr.ptr, count);
 		}
-		Array(Array&& arr)
+		Array(Array&& arr) noexcept
 		{
 			ptr = arr.ptr;
 			count = arr.count;
@@ -77,7 +76,8 @@ namespace Blaze
 			Clear();
 		}
 
-		void Resize(uint newCount)
+		template<typename ... Args>
+		void Resize(uint newCount, Args&& ... args)
 		{
 			if (newCount == 0)
 			{
@@ -94,7 +94,7 @@ namespace Blaze
 			MoveConstruct(ptr, old, smaller);
 
 			for (uint i = smaller; i < newCount; ++i)
-				new (ptr + i) T();
+				new (ptr + i) T(std::forward<Args>(args)...);
 
 			for (int i = 0; i < count; ++i)
 				old[i].~T();
@@ -103,6 +103,70 @@ namespace Blaze
 
 			count = newCount;
 		}
+		template<typename ... Args>
+		T& Add(Args&& ... args)
+		{
+			uint oldCount = count;
+			Resize(oldCount + 1, std::forward<Args>(args)...);
+			return ptr[oldCount];
+		}
+
+		void Append(const Array& other)
+		{
+			Allocator a;
+			size_t newCount = count + other.count;
+
+			if (newCount == 0)
+			{
+				a.deallocate(ptr, count);
+				ptr = nullptr;
+				count = 0;
+			}
+
+			T* old = ptr;
+			ptr = a.allocate(newCount);
+			
+			MoveConstruct(ptr, old, count);
+
+			CopyConstruct(ptr + count, other.ptr, other.count);
+
+			for (int i = 0; i < count; ++i)
+				old[i].~T();
+
+			a.deallocate(old, count);
+
+			count = newCount;
+		}
+		void Append(Array&& other)
+		{
+			Allocator a;
+			size_t newCount = count + other.count;
+
+			if (newCount == 0)
+			{
+				a.deallocate(ptr, count);
+				ptr = nullptr;
+				count = 0;
+				return;
+			}
+
+			T* old = ptr;
+			ptr = a.allocate(newCount);
+
+			MoveConstruct(ptr, old, count);
+
+			MoveConstruct(ptr + count, other.ptr, other.count);
+
+			for (int i = 0; i < count; ++i)
+				old[i].~T();			
+
+			a.deallocate(old, count);
+
+			count = newCount;
+
+			other.Clear();
+		}
+		
 		void Clear()
 		{
 			Allocator a;

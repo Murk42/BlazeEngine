@@ -14,7 +14,7 @@ namespace Blaze::OpenGL
 		TextureBuffer(TextureBuffer&&) noexcept;
 		~TextureBuffer();
 
-		void Associate(const GraphicsBuffer& buffer, TextureBufferInternalPixelFormat format);
+		Result Associate(const GraphicsBuffer& buffer, TextureBufferInternalPixelFormat format);
 		
 		inline unsigned GetHandle() const { return id; }
 

@@ -29,14 +29,14 @@ namespace Blaze
 			Line2DRenderer line2DRenderer;
 			Line3DRenderer line3DRenderer;
 			Point2DRenderer point2DRenderer;
-			TextRenderer textRenderer;
+			//TextRenderer textRenderer;
+			//FrameRenderer frameRenderer;
 
 			ShaderProgram drawTexShaderProgram;
 			VertexArray drawTexVA;
-			GraphicsBuffer drawTexVB;
+			ImmutableDynamicGraphicsBuffer drawTexVB;
 
-			Font defaultFont;
-			FontResolution* defaultFontResolution = nullptr;
+			Font defaultFont;			
 		};
 		static GraphicsData* graphicsData = nullptr;		
 
@@ -45,7 +45,7 @@ namespace Blaze
 			graphicsData->proj2D = Math::OrthographicMatrix<float>(0, event.size.x, 0, event.size.y, -1, 1);
 			graphicsData->line2DRenderer.SetProjectionMatrix(graphicsData->proj2D);
 			graphicsData->point2DRenderer.SetProjectionMatrix(graphicsData->proj2D);
-			graphicsData->textRenderer.SetProjectionMatrix(graphicsData->proj2D);
+			//graphicsData->textRenderer.SetProjectionMatrix(graphicsData->proj2D);
 
 			if (!graphicsData->userProj3D)
 			{
@@ -77,10 +77,31 @@ namespace Blaze
 		graphicsData->view3D = Mat4f::Identity();		
 
 		graphicsData->defaultFont.Load("assets/default/fonts/Consola.ttf");		
-		graphicsData->defaultFontResolution = graphicsData->defaultFont.CreateFontResolution(32, FontResolutionRenderType::SDF);
-		graphicsData->defaultFontResolution->LoadCharacters(0, 127);
-		graphicsData->defaultFontResolution->CreateAtlas();
-		graphicsData->textRenderer.SetFontResolution(graphicsData->defaultFontResolution);
+		{
+			FontResolution* fontRes = graphicsData->defaultFont.CreateFontResolution(8, FontResolutionRenderType::HorizontalLCD);
+			fontRes->LoadCharacters(0, 127);
+			fontRes->CreateAtlas();
+		}
+		{
+			FontResolution* fontRes = graphicsData->defaultFont.CreateFontResolution(12, FontResolutionRenderType::Antialiased);
+			fontRes->LoadCharacters(0, 127);
+			fontRes->CreateAtlas();
+		}
+		{
+			FontResolution* fontRes = graphicsData->defaultFont.CreateFontResolution(16, FontResolutionRenderType::Antialiased);
+			fontRes->LoadCharacters(0, 127);
+			fontRes->CreateAtlas();
+		}
+		{
+			FontResolution* fontRes = graphicsData->defaultFont.CreateFontResolution(24, FontResolutionRenderType::Antialiased);
+			fontRes->LoadCharacters(0, 127);
+			fontRes->CreateAtlas();
+		}
+		{
+			FontResolution* fontRes = graphicsData->defaultFont.CreateFontResolution(32, FontResolutionRenderType::SDF);
+			fontRes->LoadCharacters(0, 127);
+			fontRes->CreateAtlas();
+		}
 
 		{
 			const char* vSource =
@@ -121,6 +142,8 @@ namespace Blaze
 			graphicsData->drawTexVA.SetVertexAttributeFormat(1, VertexAttributeType::Float, 2, false, 3 * sizeof(float));
 			graphicsData->drawTexVA.SetVertexAttributeBuffer(0, &graphicsData->drawTexVB, 5 * sizeof(float), 0);
 			graphicsData->drawTexVA.SetVertexAttributeBuffer(1, &graphicsData->drawTexVB, 5 * sizeof(float), 0);
+
+			graphicsData->drawTexVB.Allocate(nullptr, sizeof(float) * 5);
 		}
 
 		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
@@ -179,6 +202,12 @@ namespace Blaze
 			r.Draw(Vec3f(pos2.x, pos2.y, pos1.z), Vec3f(pos2.x, pos2.y, pos2.z), color, width);
 			r.Flush();
 		}		
+		Result DrawFrame(Vec2f pos, Vec2f size, ColorRGBAf fillColor, ColorRGBAf borderColor, float borderWidth, float cornerRadius)
+		{
+			//graphicsData->frameRenderer.SetProjectionMatrix(graphicsData->proj2D);
+			//CHECK_RESULT(graphicsData->frameRenderer.Render(pos, size, fillColor, borderColor, borderWidth, cornerRadius));			
+			return Result();
+		}
 		void DrawTexture(Vec2f p1, Vec2f p2, Graphics::Core::Texture2D& tex, Vec2f uv1, Vec2f uv2)
 		{
 			struct Vertex {
@@ -190,7 +219,7 @@ namespace Blaze
 				{ { p2.x, p1.y, 0.0f }, { uv2.x, uv1.y } },
 				{ { p2.x, p2.y, 0.0f }, { uv2.x, uv2.y } },
 			};
-			graphicsData->drawTexVB.AllocateDynamicStorage({ vertices, sizeof(vertices) }, GraphicsBufferDynamicStorageHint::DynamicDraw);
+			graphicsData->drawTexVB.WriteData(vertices, sizeof(vertices), 0);
 			Graphics::Core::SelectVertexArray(&graphicsData->drawTexVA);
 			Graphics::Core::SelectProgram(&graphicsData->drawTexShaderProgram);
 			graphicsData->drawTexShaderProgram.SetUniform(0, graphicsData->proj2D);
@@ -204,13 +233,21 @@ namespace Blaze
 		{
 			return void();
 		}
-		void Write(const StringViewUTF8& text, Vec2f pos, float size, ColorRGBAf color)
+		Result Write(Vec2f pos, StringViewUTF8 text, float fontHeight, std::span<const ColorRGBAf> colors)
+		{			
+			FontResolution* fontResolution = graphicsData->defaultFont.GetClosestResolution(fontHeight);
+			return ADD_STACK_FRAME(Write(pos, text, fontHeight, colors, fontResolution));
+		}
+		Result Write(Vec2f pos, StringViewUTF8 text, float fontHeight, std::initializer_list<ColorRGBAf> colors)
 		{
-			graphicsData->textRenderer.Write(text, pos, size, color);
-		}		
-		void Write(TextRenderCache& data, Vec2f pos, float size, ColorRGBAf color)
+			auto span = std::span<const ColorRGBAf>(colors.begin(), colors.end());
+			return ADD_STACK_FRAME(Write(pos, text, fontHeight, span));
+		}
+		Result Write(Vec2f pos, StringViewUTF8 text, float fontHeight, std::span<const ColorRGBAf> colors, FontResolution* fontResolution)
 		{
-			graphicsData->textRenderer.Write(data, pos, size, color);
+			//graphicsData->textRenderer.SetProjectionMatrix(graphicsData->proj2D);
+			//return ADD_STACK_FRAME(graphicsData->textRenderer.Write(pos, text, fontHeight, fontResolution, colors));
+			return Result();
 		}		
 
 		Point2DRenderer& GetPoint2DRenderer()
@@ -227,17 +264,13 @@ namespace Blaze
 		}
 		TextRenderer& GetTextRenderer()
 		{
-			return graphicsData->textRenderer;
+			return *(TextRenderer*)nullptr;
+			//return graphicsData->textRenderer;
 		}
 
 		Font& GetDefaultFont()
 		{
 			return graphicsData->defaultFont;
-		}
-
-		FontResolution* GetDefaultFontResolution()
-		{
-			return graphicsData->defaultFontResolution;
 		}
 
 		void Set3DViewMatrix(const Mat4f& mat)
@@ -281,6 +314,6 @@ namespace Blaze
 			transformed.xyz /= transformed.w;
 			Vec3f out = Vec3f((transformed.xy + Vec2f(1.0f)) / 2.0f * (Vec2f)Graphics::Core::GetViewportSize(), transformed.w);
 			return out;
-		}
+		}		
 	}	
 }

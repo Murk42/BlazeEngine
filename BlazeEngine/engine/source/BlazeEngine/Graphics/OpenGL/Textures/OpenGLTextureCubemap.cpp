@@ -24,38 +24,41 @@ namespace Blaze::OpenGL
 			glDeleteTextures(1, &id);
 	}
 
-	void TextureCubemap::SetSettings(TextureCubemapSettings settings)
+	Result TextureCubemap::SetSettings(TextureCubemapSettings settings)
 	{
-		unsigned _min;
-		if (settings.mip == TextureSampling::Nearest)
-			if (settings.min == TextureSampling::Nearest)
-				_min = GL_NEAREST_MIPMAP_NEAREST;
-			else
-				_min = GL_NEAREST_MIPMAP_LINEAR;
-		else
-			if (settings.min == TextureSampling::Nearest)
-				_min = GL_LINEAR_MIPMAP_NEAREST;
-			else
-				_min = GL_LINEAR_MIPMAP_LINEAR;
+		Result result;
 
-		glTextureParameteri(id, GL_TEXTURE_WRAP_S, (uint)settings.xWrap);
-		glTextureParameteri(id, GL_TEXTURE_WRAP_T, (uint)settings.yWrap);		
+		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);
+		CHECK_RESULT(result);
+		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
+		CHECK_RESULT(result);
+		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
+		CHECK_RESULT(result);
+		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
+		CHECK_RESULT(result);
+
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);		
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
-		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, uint(settings.mag));
-	}
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);
 
-	void TextureCubemap::GenerateMipmaps()
-	{
-		glGenerateTextureMipmap(id);
-	}
+		if (settings.mipmaps)
+			glGenerateTextureMipmap(id);
 
-	void TextureCubemap::Load(StringView path, CubemapFileType fileType)
+		return Result();
+	}	
+
+	Result TextureCubemap::Load(StringView path, CubemapFileType fileType)
 	{
+
 		Bitmap bm;
-		bm.Load(path);
+		CHECK_RESULT(bm.Load(path));		
 
-		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
-		GLenum type = OpenGLPixelType(bm.GetPixelType());
+		Result result;
+		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
+		CHECK_RESULT(result);
+		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
+		CHECK_RESULT(result);
 		
 		Graphics::Core::SelectTexture(this);		
 
@@ -166,19 +169,27 @@ namespace Blaze::OpenGL
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+
+		return result;
 	}
-	void TextureCubemap::Load(StringView path, CubemapFace face)
+	Result TextureCubemap::Load(StringView path, CubemapFace face)
 	{
+
 		Bitmap bm;
-		bm.Load(path);
+		CHECK_RESULT(bm.Load(path));
 		
 		size = bm.GetSize().x;
 
-		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
-		GLenum type = OpenGLPixelType(bm.GetPixelType());
+		Result result;
+		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
+		CHECK_RESULT(result);
+		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
+		CHECK_RESULT(result);
 
 		Graphics::Core::SelectTexture(this);
 		glTexImage2D((GLenum)face, 0, format, size, size, 0, format, type, bm.GetPixels());
+
+		return result;
 	}		
 
 	TextureCubemap& TextureCubemap::operator=(TextureCubemap&& tex) noexcept

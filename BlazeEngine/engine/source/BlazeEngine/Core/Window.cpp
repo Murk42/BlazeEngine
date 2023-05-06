@@ -1,6 +1,5 @@
 #include "BlazeEngine/Core/Window.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
-#include "source/BlazeEngine/Internal/EngineData.h"
 
 #include <SDL/SDL.h>
 
@@ -79,19 +78,20 @@ namespace Blaze
 		return SDL_GetWindowTitle((SDL_Window*)ptr);
 	}
 
-	void Window::SetIcon(BitmapView bitmap)
+	Result Window::SetIcon(BitmapView bitmap)
 	{
-		if (bitmap.GetPixelType() != BitmapPixelType::Uint8 || bitmap.GetPixelFormat() != BitmapPixelFormat::RGBA)
-		{
-			BLAZE_INFO_LOG("Blaze Engine", "Unsuported bitmap type");
-			return;
-		}
+		Result result;
+
+		if (bitmap.GetPixelType() != BitmapPixelType::Uint8 || bitmap.GetPixelFormat() != BitmapPixelFormat::RGBA)		
+			return BLAZE_WARNING_LOG("Blaze Engine", "Unsuported bitmap type");					
 
 		SDL_Surface* surface;
 		surface = SDL_CreateRGBSurfaceWithFormat(0, bitmap.GetSize().x, bitmap.GetSize().y, 32, SDL_PIXELFORMAT_RGBA32);
 
+
 		SDL_LockSurface(surface);
-		size_t stride = bitmap.GetSize().x * GetFormatDepth(bitmap.GetPixelFormat());
+		size_t stride = bitmap.GetSize().x * GetFormatDepth(bitmap.GetPixelFormat(), result);
+		CHECK_RESULT(result);
 		uint8* dst = (uint8*)surface->pixels;
 		uint8* src = (uint8*)bitmap.GetPixels() + stride * (bitmap.GetSize().y - 1);		
 		for (size_t y = 0; y < surface->h; ++y)
@@ -104,6 +104,8 @@ namespace Blaze
 
 		SDL_SetWindowIcon((SDL_Window*)ptr, surface);		
 		SDL_FreeSurface(surface);
+
+		return Result();
 	}
 	void Window::SetOpacity(float opacity)
 	{		
@@ -195,15 +197,19 @@ namespace Blaze
 		SDL_GetWindowDisplayMode((SDL_Window*)ptr, &mode);
 		DisplayMode out;
 
-		out.format = BlazeDisplayPixelFormat(mode.format);
+		Result result;
+		out.format = BlazeDisplayPixelFormat(mode.format, result);
 		out.refreshRate = mode.refresh_rate;
 		out.size = Vec2i(mode.w, mode.h);
+
 		return out;
 	}
 	void Window::SetWindowDisplayMode(DisplayMode mode)
 	{
+		Result result;
+
 		SDL_DisplayMode out;
-		out.format = SDLDisplayPixelFormat(mode.format);
+		out.format = SDLDisplayPixelFormat(mode.format, result);
 		out.w = mode.size.x;
 		out.h = mode.size.y;
 		out.refresh_rate = mode.refreshRate;

@@ -23,57 +23,88 @@ namespace Blaze::OpenGL
 			glDeleteTextures(1, &id);
 	}
 
-	void Texture3D::SetSettings(Texture3DSettings settings)
+	Result Texture3D::SetSettings(Texture3DSettings settings)
 	{
-		unsigned _min;
-		if (settings.mipmaps)
-		{
-			glGenerateTextureMipmap(id);
+		Result result;
 
-			if (settings.mip == TextureSampling::Nearest)
-				if (settings.min == TextureSampling::Nearest)
-					_min = GL_NEAREST_MIPMAP_NEAREST;
-				else
-					_min = GL_LINEAR_MIPMAP_NEAREST;
-			else
-				if (settings.min == TextureSampling::Nearest)
-					_min = GL_NEAREST_MIPMAP_LINEAR;
-				else
-					_min = GL_LINEAR_MIPMAP_LINEAR;
-		}
-		else
-			if (settings.min == TextureSampling::Nearest)
-				_min = GL_NEAREST;
-			else
-				_min = GL_LINEAR;
+		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);
+		CHECK_RESULT(result);
+		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
+		CHECK_RESULT(result);
+		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
+		CHECK_RESULT(result);
+		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
+		CHECK_RESULT(result);
+		//unsigned _min;
+		//if (settings.mipmaps)
+		//{
+		//	glGenerateTextureMipmap(id);
+		//
+		//	if (settings.mip == TextureSampling::Nearest)
+		//		if (settings.min == TextureSampling::Nearest)
+		//			_min = GL_NEAREST_MIPMAP_NEAREST;
+		//		else
+		//			_min = GL_LINEAR_MIPMAP_NEAREST;
+		//	else
+		//		if (settings.min == TextureSampling::Nearest)
+		//			_min = GL_NEAREST_MIPMAP_LINEAR;
+		//		else
+		//			_min = GL_LINEAR_MIPMAP_LINEAR;
+		//}
+		//else
+		//	if (settings.min == TextureSampling::Nearest)
+		//		_min = GL_NEAREST;
+		//	else
+		//		_min = GL_LINEAR;
 
-		glTextureParameteri(id, GL_TEXTURE_WRAP_S, (uint)settings.xWrap);
-		glTextureParameteri(id, GL_TEXTURE_WRAP_T, (uint)settings.yWrap);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
-		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, uint(settings.mag));
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);
+
+		return result;
 	}
 
-	void Texture3D::Create(Vec3i size, TextureInternalPixelFormat internalFormat)
+	Result Texture3D::Create(Vec3i size, TextureInternalPixelFormat internalFormat)
 	{
+		Result result;
+		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
+		CHECK_RESULT(result);
+		auto format = OpenGLFormatByInternalPixelFormat(internalFormat, result);
+		CHECK_RESULT(result);
+
 		this->size = size;		
 
 		Graphics::Core::SelectTexture(this);
-		glTexImage3D(GL_TEXTURE_3D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, size.z, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
+		glTexImage3D(GL_TEXTURE_3D, 0, internalPixelFormat, size.x, size.y, size.z, 0, format, GL_UNSIGNED_BYTE, nullptr);
+
+		return Result();
 	}
 
 	void CalculateAlignmentAndStride(uint width, uint byteStride, uint pixelSize, uint& align, uint& pixelStride);
 
-	void Texture3D::SetPixels(Vec3i offset, Vec3i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
+	Result Texture3D::SetPixels(Vec3i offset, Vec3i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
 	{
-		GLenum _format = OpenGLPixelFormat(format);
-		GLenum _type = OpenGLPixelType(type);
+		Result result;
+
+		GLenum _format = OpenGLPixelFormat(format, result);
+		CHECK_RESULT(result);
+		GLenum _type = OpenGLPixelType(type, result);
+		CHECK_RESULT(result);
+
+		auto pixelTypeSize = PixelTypeSize(type, result);
+		CHECK_RESULT(result);
+		auto formatDepth = GetFormatDepth(format, result);
+		CHECK_RESULT(result);
 
 		uint align;
 		uint str;
-		CalculateAlignmentAndStride(size.x, stride, PixelTypeSize(type) * GetFormatDepth(format), align, str);
+		CalculateAlignmentAndStride(size.x, stride, pixelTypeSize * formatDepth, align, str);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, align);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, str);
 		glTextureSubImage3D(id, 0, offset.x, offset.y, offset.z, size.x, size.y, size.z, _format, _type, pixels);
+
+		return result;
 	}
 
 	Texture3D& Texture3D::operator=(Texture3D&& tex) noexcept

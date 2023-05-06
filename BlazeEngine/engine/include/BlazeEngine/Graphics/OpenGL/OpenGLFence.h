@@ -18,9 +18,9 @@ namespace Blaze::OpenGL
 		Fence();
 		~Fence();
 
-		void SetFence();
+		Result SetFence();
 
-		void BlockServer();
+		Result BlockServer();
 		//The timeout is in seconds
 		FenceReturnState BlockClient(double timeout);
 

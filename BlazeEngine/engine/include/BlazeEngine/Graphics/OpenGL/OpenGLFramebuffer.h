@@ -21,13 +21,13 @@ namespace Blaze::OpenGL
 		Framebuffer(Framebuffer&&) noexcept;
 		~Framebuffer();
 
-		void SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer);
-		void SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture);
-		void SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer);
-		void SetAttachment(FramebufferAttachment attachment, Texture2D& texture);
+		Result SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer);
+		Result SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture);
+		Result SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer);
+		Result SetAttachment(FramebufferAttachment attachment, Texture2D& texture);
 		bool IsComplete() const;
 
-		void SetBufferOutputs(const std::initializer_list<int>& outputs);
+		Result SetBufferOutputs(const std::initializer_list<int>& outputs);
 
 		inline unsigned GetHandle() const { return id; }
 

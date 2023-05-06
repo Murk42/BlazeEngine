@@ -7,7 +7,6 @@
 #include "BlazeEngine/Event/EventHandler.h"
 #include "BlazeEngine/Core/Startup.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
-#include "source/BlazeEngine/Internal/EngineData.h"
 
 #include "SDL/SDL.h"
 #include "GL/glew.h"
@@ -84,8 +83,8 @@ namespace Blaze
 			case PrimitiveType::TriangleFan: return GL_TRIANGLE_FAN;
 			case PrimitiveType::Pathes: return GL_PATCHES;
 			}
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", 
-				"Invalid PrimitiveType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", 
+				"Invalid PrimitiveType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type))));
 			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLIndexType(IndexType type)
@@ -96,8 +95,8 @@ namespace Blaze
 			case IndexType::Uint16: return GL_UNSIGNED_SHORT;
 			case IndexType::Uint8: return GL_UNSIGNED_BYTE;		
 			}
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", 
-				"Invalid IndexType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", 
+				"Invalid IndexType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type))));
 			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLPolygonMode(PolygonMode mode)
@@ -108,8 +107,8 @@ namespace Blaze
 			case PolygonMode::Line: return GL_LINE;
 			case PolygonMode::Fill: return GL_FILL;		
 			}
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", 
-				"Invalid PolygonMode. The integer value was: " + StringParsing::Convert(ToInteger(mode)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", 
+				"Invalid PolygonMode. The integer value was: " + StringParsing::Convert(ToInteger(mode))));
 			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLImageAccess(ImageAccess access)
@@ -120,8 +119,8 @@ namespace Blaze
 			case ImageAccess::Write: return GL_WRITE_ONLY;
 			case ImageAccess::ReadWrite: return GL_READ_WRITE;		
 			}
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-				"Invalid ImageAccess enum value. The integer value was: " + StringParsing::Convert(ToInteger(access)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid ImageAccess enum value. The integer value was: " + StringParsing::Convert(ToInteger(access))));
 			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLImageFormat(ImageFormat format)
@@ -168,8 +167,8 @@ namespace Blaze
 			case ImageFormat::R16_SNORM:		return GL_R16_SNORM;
 			case ImageFormat::R8_SNORM:		return GL_R8_SNORM;			
 			}
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-				"Invalid ImageFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid ImageFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format))));
 			return std::numeric_limits<GLenum>::max();
 		}		
 
@@ -186,8 +185,8 @@ namespace Blaze
 			case Blaze::Graphics::Core::StencilOperationType::DecreaseWrap: return GL_DECR_WRAP;
 			case Blaze::Graphics::Core::StencilOperationType::Invert: return GL_INVERT;			
 			}					
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-				"Invalid StencilOperationType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine",
+				"Invalid StencilOperationType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type))));
 			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLStencilComparison(StencilComparison comparison)
@@ -203,8 +202,7 @@ namespace Blaze
 			case Blaze::Graphics::Core::StencilComparison::NotEqual: return GL_NOTEQUAL;
 			case Blaze::Graphics::Core::StencilComparison::Always: return GL_ALWAYS;			
 			}
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-				"Invalid StencilComparison enum value. The integer value was: " + StringParsing::Convert(ToInteger(comparison)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Invalid StencilComparison enum value. The integer value was: " + StringParsing::Convert(ToInteger(comparison))));
 			return std::numeric_limits<GLenum>::max();
 		}
 		GLenum OpenGLScreenBufferType(ScreenBufferType type)
@@ -215,8 +213,7 @@ namespace Blaze
 			case Blaze::Graphics::Core::ScreenBufferType::Back: return GL_BACK;
 			case Blaze::Graphics::Core::ScreenBufferType::BackAndFront: return GL_FRONT_AND_BACK;			
 			}
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine",
-				"Invalid ScreenBufferType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)).value));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Invalid ScreenBufferType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type))));
 			return std::numeric_limits<GLenum>::max();
 		}
 		
@@ -231,11 +228,13 @@ namespace Blaze
 
 		DisplayMode GetDisplayMode(uint videoDisplayIndex, uint displayModeIndex)
 		{
+			Result result;
+
 			SDL_DisplayMode mode;
 			SDL_GetDisplayMode(videoDisplayIndex, displayModeIndex, &mode);
 			DisplayMode out;
 
-			out.format = BlazeDisplayPixelFormat(mode.format);
+			out.format = BlazeDisplayPixelFormat(mode.format, result);
 			out.refreshRate = mode.refresh_rate;
 			out.size = Vec2i(mode.w, mode.h);
 			return out;
@@ -243,11 +242,13 @@ namespace Blaze
 
 		DisplayMode GetCurrentDisplayMode(uint videoDisplayIndex)
 		{
+			Result result;
+
 			SDL_DisplayMode mode;
 			SDL_GetCurrentDisplayMode(videoDisplayIndex, &mode);
 			DisplayMode out;
 
-			out.format = BlazeDisplayPixelFormat(mode.format);
+			out.format = BlazeDisplayPixelFormat(mode.format, result);
 			out.refreshRate = mode.refresh_rate;
 			out.size = Vec2i(mode.w, mode.h);
 			return out;
@@ -255,11 +256,13 @@ namespace Blaze
 
 		DisplayMode GetDesktopDisplayMode(uint videoDisplayIndex)
 		{
+			Result result;
+
 			SDL_DisplayMode mode;
 			SDL_GetDesktopDisplayMode(videoDisplayIndex, &mode);
 			DisplayMode out;
 
-			out.format = BlazeDisplayPixelFormat(mode.format);
+			out.format = BlazeDisplayPixelFormat(mode.format, result);
 			out.refreshRate = mode.refresh_rate;
 			out.size = Vec2i(mode.w, mode.h);
 			return out;
@@ -267,8 +270,10 @@ namespace Blaze
 
 		bool GetClosestDisplayMode(uint displayIndex, DisplayMode mode, DisplayMode& out)
 		{
+			Result result;
+
 			SDL_DisplayMode x;
-			x.format = SDLDisplayPixelFormat(mode.format);
+			x.format = SDLDisplayPixelFormat(mode.format, result);
 			x.w = mode.size.x;
 			x.h = mode.size.y;
 			x.refresh_rate = mode.refreshRate;
@@ -279,7 +284,7 @@ namespace Blaze
 			if (SDL_GetClosestDisplayMode(displayIndex, &x, &closest) == NULL)
 				return false;
 
-			out.format = BlazeDisplayPixelFormat(closest.format);
+			out.format = BlazeDisplayPixelFormat(closest.format, result);
 			out.refreshRate = closest.refresh_rate;
 			out.size = Vec2i(closest.w, closest.h);
 			return true;			
@@ -302,151 +307,207 @@ namespace Blaze
 
 	
 
-		void SelectTexture(Graphics::Core::Texture1D* obj)
+		Result SelectTexture(Graphics::Core::Texture1D* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindTexture(GL_TEXTURE_1D, obj == nullptr ? 0 : obj->GetHandle());
 			selectedTexture1D = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::Texture1D* GetSelectedTexture1D()
 		{
 			return selectedTexture1D;
 		}
 
-		void SelectTexture(Graphics::Core::Texture2D* obj)
+		Result SelectTexture(Graphics::Core::Texture2D* obj)
 		{			
+			LoggerListener listener{ true, true };
+
 			glBindTexture(GL_TEXTURE_2D, obj == nullptr ? 0 : obj->GetHandle());
 			selectedTexture2D = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}		
 		Graphics::Core::Texture2D* GetSelectedTexture2D()
 		{
 			return selectedTexture2D;
 		}
 
-		void SelectTexture(Graphics::Core::Texture2DArray* obj)
+		Result SelectTexture(Graphics::Core::Texture2DArray* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindTexture(GL_TEXTURE_2D_ARRAY, obj == nullptr ? 0 : obj->GetHandle());
 			selectedTexture2DArray = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}		
 		Graphics::Core::Texture2DArray* GetSelectedTexture2DArray()
 		{			
 			return selectedTexture2DArray;
 		}
 
-		void SelectTexture(Graphics::Core::TextureCubemap* obj)
+		Result SelectTexture(Graphics::Core::TextureCubemap* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindTexture(GL_TEXTURE_CUBE_MAP, obj == nullptr ? 0 : obj->GetHandle());
 			selectedTextureCubemap = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::TextureCubemap* GetSelectedTextureCubemap()
 		{
 			return selectedTextureCubemap;
 		}
 
-		void SelectTexture(Graphics::Core::Texture3D* obj)
+		Result SelectTexture(Graphics::Core::Texture3D* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindTexture(GL_TEXTURE_3D, obj == nullptr ? 0 : obj->GetHandle());
 			selectedTexture3D = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::Texture3D* GetSelectedTexture3D()
 		{
 			return selectedTexture3D;
 		}
 
-		void SelectTexture(Graphics::Core::TextureBuffer* obj)
+		Result SelectTexture(Graphics::Core::TextureBuffer* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindTexture(GL_TEXTURE_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
 			selectedTextureBuffer = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::TextureBuffer* GetTextureBuffer()
 		{
 			return selectedTextureBuffer;
 		}
 
-		void SelectVertexBuffer(Graphics::Core::GraphicsBuffer* obj)
+		Result SelectVertexBuffer(Graphics::Core::GraphicsBuffer* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindBuffer(GL_ARRAY_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
 			selectedArrayBuffer = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}		
 		Graphics::Core::GraphicsBuffer* GetSelectedVertexBuffer()
 		{
 			return selectedArrayBuffer;
 		}
 
-		void SelectIndexBuffer(Graphics::Core::GraphicsBuffer* obj)
+		Result SelectIndexBuffer(Graphics::Core::GraphicsBuffer* obj)
 		{			
-			selectedVertexArray->SetIndexBuffer(*obj);
+			return ADD_STACK_FRAME(selectedVertexArray->SetIndexBuffer(*obj));
 		}		
 		Graphics::Core::GraphicsBuffer* GetSelectedIndexBuffer()
 		{
 			return selectedVertexArray->GetIndexBuffer();
 		}
 
-		void SelectUniformBuffer(Graphics::Core::GraphicsBuffer* obj)
+		Result SelectUniformBuffer(Graphics::Core::GraphicsBuffer* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindBuffer(GL_UNIFORM_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
 			selectedUniformBuffer = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::GraphicsBuffer* GetSelectedUniformBuffer()
 		{
 			return selectedUniformBuffer;
 		}
 
-		void SelectVertexArray(Graphics::Core::VertexArray* obj)
+		Result SelectVertexArray(Graphics::Core::VertexArray* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindVertexArray(obj == nullptr ? 0 : obj->GetHandle());
 			selectedVertexArray = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}		
 		Graphics::Core::VertexArray* GetSelectedVertexArray()
 		{
 			return selectedVertexArray;
 		}
 
-		void SelectProgram(Graphics::Core::ShaderProgram* obj)
+		Result SelectProgram(Graphics::Core::ShaderProgram* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glUseProgram(obj == nullptr ? 0 : obj->GetHandle());
 			selectedProgram = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::ShaderProgram* GetSelectedProgram()
 		{
 			return selectedProgram;
 		}
 
-		void SelectFramebuffer(Graphics::Core::Framebuffer* obj)
+		Result SelectFramebuffer(Graphics::Core::Framebuffer* obj)
 		{ 
+			LoggerListener listener{ true, true };
+
 			glBindFramebuffer(GL_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
 			selectedFramebuffer = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::Framebuffer* GetSelectedFramebuffer()
 		{
 			return selectedFramebuffer;;
 		}
-
-		void SelectDrawFramebuffer(Graphics::Core::Framebuffer* obj)
+		 
+		Result SelectDrawFramebuffer(Graphics::Core::Framebuffer* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
 			selectedDrawFramebuffer = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 
-		BLAZE_API Graphics::Core::Framebuffer* GetDrawSelectedFramebuffer()
+		Graphics::Core::Framebuffer* GetDrawSelectedFramebuffer()
 		{
 			return selectedDrawFramebuffer;
 		}
 
-		BLAZE_API void SelectReadFramebuffer(Graphics::Core::Framebuffer* obj)
+		Result SelectReadFramebuffer(Graphics::Core::Framebuffer* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
 			selectedReadFramebuffer = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 
-		BLAZE_API Graphics::Core::Framebuffer* GetReadSelectedFramebuffer()
+		Graphics::Core::Framebuffer* GetReadSelectedFramebuffer()
 		{
 			return selectedReadFramebuffer;
 		}
 
-		void SelectRenderbuffer(Graphics::Core::Renderbuffer* obj)
+		Result SelectRenderbuffer(Graphics::Core::Renderbuffer* obj)
 		{
+			LoggerListener listener{ true, true };
+
 			glBindRenderbuffer(GL_RENDERBUFFER, obj == nullptr ? 0 : obj->GetHandle());
 			selectedRenderbuffer = obj;
+
+			return ADD_STACK_FRAME(listener.ToResult());
 		}
 		Graphics::Core::Renderbuffer* GetSelectedRenderbuffer()
 		{
@@ -608,9 +669,9 @@ namespace Blaze
 		{
 			glDrawElements(OpenGLRenderPrimitive(type), indexCount, OpenGLIndexType(indexType), reinterpret_cast<void*>(static_cast<uintptr_t>(indexBufferByteOffset)));
 		}
-		void RenderPrimitiveArray(PrimitiveType type, uint startIndex, uint primitiveCount)
+		void RenderPrimitiveArray(PrimitiveType type, uint startIndex, uint vertexCount)
 		{
-			glDrawArrays(OpenGLRenderPrimitive(type), startIndex, primitiveCount);
+			glDrawArrays(OpenGLRenderPrimitive(type), startIndex, vertexCount);
 		}										
 
 		void DispatchCompute(uint x, uint y, uint z)

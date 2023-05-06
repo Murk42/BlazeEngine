@@ -5,38 +5,81 @@ namespace Blaze::ECS
 {
 	class Component;
 	class ComponentContainer;
-	class Manager;
+	class Scene;
 
 	class BLAZE_API System
 	{
-		uint typeIndex;
-		Manager* manager;
-
-		const ComponentTypeRegistry& GetRegistry() const;
+		const ComponentTypeData& typeData;
+		Scene* scene;
 	public:
+		System();		
+
 		virtual void Created(Component*);
 		virtual void Destroyed(Component*);
 
 		virtual void Update(const ComponentContainer&);
-		virtual void Render(const ComponentContainer&);
+		virtual void Update(Component* component);		
 
-		virtual bool SetProperty(Component*, StringView name, StringView value);		
-
-		inline Manager* GetManager() const { return manager; }
-		inline uint GetTypeIndex() const { return typeIndex; }
+		inline Scene* GetScene() const { return scene; }
+		inline const ComponentTypeData& GetTypeData() const { return typeData; }
 
 		template<typename T>
 		T::System* Cast()
 		{
-			if (typeIndex != GetRegistry().GetComponentTypeIndex<T>())
+			if (typeData->GetTypeName().Ptr() != T::typeName)
 			{
-				Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", "Invalid component cast"));
+				Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Invalid component cast"));
 				return nullptr;
 			}
 
 			return (typename T::System*)this;
 		}
 
-		friend class Manager;
+		friend class Scene;
 	};
 }
+
+/*
+Ordered rendering
+
+A, B, B', C, C, B', A, A', C, B
+
+o = 0
+iteration:
+ x = value of first next ' with value >o
+ if none
+  resolve from o to x
+ else 
+  iteration
+
+0 A1, A7, A8'
+0 B2, B3', B6', B10
+0 C4, C5, C9
+
+8
+
+2 A1, A7, A8'
+0 B2, B3', B6', B10
+0 C4, C5, C9
+
+8
+3
+
+2 A1, A7, A8'
+0 B2, B3', B6', B10
+0 C4, C5, C9
+
+8
+
+2 A7, A8'
+1 B6', B10
+3 C5, C9
+
+8
+6
+
+2 A7, A8'
+1 B6', B10
+3 C5, C9
+
+*/

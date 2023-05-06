@@ -13,105 +13,105 @@ namespace Blaze
 		class UIManager;
 		class UIScene;
 
+		
 		template<typename T>
 		struct UIElementProperty
-		{
-			T value;
-			bool edited;
-		
-			UIElementProperty()
-				: edited(false), value()
 			{
-				if constexpr (std::is_pointer_v<T>)
-					value = nullptr;
-				if constexpr (std::is_floating_point_v<T> || std::is_integral_v<T>)
-					value = 0;
-			}
-			UIElementProperty(const T& v)
-			{
-				value = v;
-				edited = true;
-			}
-			UIElementProperty(T&& v) noexcept
-			{
-				value = std::move(v);
-				edited = true;
-			}
-			UIElementProperty(const UIElementProperty& p)
-			{
-				if (p.edited)
-				{
-					value = p.value;
-					edited = true;
-				}
-				else
-					edited = false;
-			}
-			UIElementProperty(UIElementProperty&& p) noexcept
-			{
-				value = std::move(p.value);
-				edited = p.edited;
-			}
+				T value;
+				bool edited;
 
-			UIElementProperty& operator=(const T& v)
-			{
-				value = v;
-				edited = true;
-				return *this;
-			}
-			UIElementProperty& operator=(T&& v)
-			{
-				value = std::move(v);
-				edited = true;
-				return *this;
-			}
-			UIElementProperty& operator=(const UIElementProperty& p)
-			{
-				if (p.edited)
+				UIElementProperty()
+					: edited(false), value()
 				{
-					value = p.value;
+					if constexpr (std::is_pointer_v<T>)
+						value = nullptr;
+					if constexpr (std::is_floating_point_v<T> || std::is_integral_v<T>)
+						value = 0;
+				}
+				UIElementProperty(const T& v)
+				{
+					value = v;
 					edited = true;
 				}
-				return *this;
-			}
-			UIElementProperty& operator=(UIElementProperty&& p) noexcept
-			{
-				if (p.edited)
+				UIElementProperty(T&& v) noexcept
+				{
+					value = std::move(v);
+					edited = true;
+				}
+				UIElementProperty(const UIElementProperty& p)
+				{
+					if (p.edited)
+					{
+						value = p.value;
+						edited = true;
+					}
+					else
+						edited = false;
+				}
+				UIElementProperty(UIElementProperty&& p) noexcept
 				{
 					value = std::move(p.value);
-					edited = true;
+					edited = p.edited;
 				}
-				return *this;
-			}
 
-			operator T&()
-			{
-				return value;
-			}
-			operator const T&() const
-			{
-				return value;
-			}
-		};
+				UIElementProperty& operator=(const T& v)
+				{
+					value = v;
+					edited = true;
+					return *this;
+				}
+				UIElementProperty& operator=(T&& v)
+				{
+					value = std::move(v);
+					edited = true;
+					return *this;
+				}
+				UIElementProperty& operator=(const UIElementProperty& p)
+				{
+					if (p.edited)
+					{
+						value = p.value;
+						edited = true;
+					}
+					return *this;
+				}
+				UIElementProperty& operator=(UIElementProperty&& p) noexcept
+				{
+					if (p.edited)
+					{
+						value = std::move(p.value);
+						edited = true;
+					}
+					return *this;
+				}
 
+				operator T& ()
+				{
+					return value;
+				}
+				operator const T& () const
+				{
+					return value;
+				}
+			};
+		
 		struct UIElementProperties
-		{
-			UIElementProperty<String> name;
-			UIElementProperty<Vec2f> pos;
-			UIElementProperty<Vec2f> size;
-			UIElementProperty<UIElement*> anchor;
-			UIElementProperty<Align> localAlign;
-			UIElementProperty<Align> anchorAlign;
-			UIElementProperty<bool> active;
-			UIElementProperty<bool> solid;
-			UIElementProperty<float> depth;
-			UIElementProperty<UIElement*> clipElement;
-		};
+			{
+				UIElementProperty<String> name;
+				UIElementProperty<Vec2f> pos;
+				UIElementProperty<Vec2f> size;
+				UIElementProperty<UIElement*> anchor;
+				UIElementProperty<Align> localAlign;
+				UIElementProperty<Align> anchorAlign;
+				UIElementProperty<bool> active;
+				UIElementProperty<bool> solid;
+				UIElementProperty<float> depth;
+				UIElementProperty<UIElement*> clipElement;
+			};		
 
-		using TriggerFunction = std::function<void()>;
 
 		class BLAZE_API UIElement
-		{
+		{			
 			uint typeIndex;
 			UIManager* manager;
 			StringView layer;
@@ -137,7 +137,7 @@ namespace Blaze
 			Array<UIElement*> tiedElements;
 			UIElement* tiedParent;
 
-			std::array<std::function<void()>, 10> triggers;
+			//std::array<std::function<void()>, 10> triggers;
 		protected:
 			virtual void AttachedToManager() { }
 			virtual void DetachedFromManager() { }
@@ -152,42 +152,42 @@ namespace Blaze
 
 			virtual Result ChangeLayer(StringView newLayer);
 			inline StringView GetLayerName() const { return layer; }
-			void SetLayerTrigger(const TriggerFunction& function);
+			//void SetLayerTrigger(const TriggerFunction& function);
 
 			virtual void SetName(String name);
 			inline String GetName() const { return name; }
-			void SetNameTrigger(const TriggerFunction& function);
+			//void SetNameTrigger(const TriggerFunction& function);
 
 			virtual void SetPos(Vec2f pos);
 			inline Vec2f GetPos() const { return pos; }
-			void SetPosTrigger(const TriggerFunction& function);
+			//void SetPosTrigger(const TriggerFunction& function);
 
 			virtual void SetSize(Vec2f size);
 			inline Vec2f GetSize() const { return size; }
-			void SetSizeTrigger(const TriggerFunction& function);
+			//void SetSizeTrigger(const TriggerFunction& function);
 
 			virtual void SetAnchor(UIElement* anchor);
 			inline UIElement* GetAnchor() const { return anchor; }
-			void SetAnchorTrigger(const TriggerFunction& function);
+			//void SetAnchorTrigger(const TriggerFunction& function);
 
 			virtual void SetLocalAlignment(Align align);
 			inline Align GetLocalAlignment() const { return localAlignment; }
-			void SetLocalAlignmentTrigger(const TriggerFunction& function);
+			//void SetLocalAlignmentTrigger(const TriggerFunction& function);
 
 			virtual void SetAnchorAlignment(Align align);
 			inline Align GetAnchorAlignment() const { return anchorAlignment; }
-			void SetAnchorAlignmentTrigger(const TriggerFunction& function);
+			//void SetAnchorAlignmentTrigger(const TriggerFunction& function);
 
 			virtual void SetActiveFlag(bool active);
 			bool IsActive() const;
-			void SetActiveFlagTrigger(const TriggerFunction& function);
+			//void SetActiveFlagTrigger(const TriggerFunction& function);
 
 			virtual void SetSolidFlag(bool solid);
 			bool IsSolid() const;
-			void SetSolidFlagTrigger(const TriggerFunction& function);
+			//void SetSolidFlagTrigger(const TriggerFunction& function);
 
 			inline Vec2f GetViewportPos() const { return viewportPos;}
-			void SetViewportPosTrigger(const TriggerFunction& function);
+			//void SetViewportPosTrigger(const TriggerFunction& function);
 
 			virtual void SetClipElement(UIElement* clipElement);
 			inline UIElement* GetClipElement() const { return clipElement; }

@@ -6,32 +6,34 @@ namespace Blaze::ECS
 {
 	class Entity;
 
-#define COMPONENT(name, systemName)						\
-	static constexpr const char* typeName = #name;		\
-	using System = systemName;
+#define COMPONENT(name, systemName)											\
+	const Blaze::ECS::ComponentTypeData& GetTypeData() const override { return GetEntity()->GetScene()->GetRegistry().GetComponentTypeData(#name); } \
+	static constexpr const char* typeName = #name;							\
+	using System = systemName;																						
 
 	class BLAZE_API Component
-	{
-		uint bucketIndex;
-		uint typeIndex;
+	{		
+		uint bucketIndex;		
 		Entity* entity;
 
-		const ComponentTypeRegistry& GetRegistry() const;
 	public:
-		inline uint GetTypeIndex() const { return typeIndex; }
-		inline Entity* GetEntity() const { return entity; }
+		Component();
+
+		virtual const ComponentTypeData& GetTypeData() const = 0;
+		inline Entity* GetEntity() const { return entity; }		
 
 		template<typename T>
 		T* Cast()
 		{
-			if (typeIndex != GetRegistry().GetComponentTypeIndex<T>())
+			if (GetTypeData().GetTypeName() != T::typeName)
 			{				
-				Logger::AddLog(BLAZE_ERROR_LOG("Blaze Engine", "Invalid component cast"));
+				Logger::ProcessLog(BLAZE_ERROR_LOG("Blaze Engine", "Invalid component cast"));
 				return nullptr;
 			}
 		
 			return (T*)this;
 		}
+
 
 		friend class ComponentContainer;
 		friend class Scene;
@@ -39,7 +41,7 @@ namespace Blaze::ECS
 
 	class BLAZE_API ComponentContainer
 	{
-		ComponentTypeData typeData;
+		const ComponentTypeData* typeData;
 
 		static constexpr size_t BucketElementCount = 32;
 		using FlagType =
@@ -68,6 +70,7 @@ namespace Blaze::ECS
 		uint nonFullBucketCount;		
 
 		ElementHeader* BucketAllocate(BucketHeader* bucket);
+		ElementHeader* BucketAllocateNoConstruct(BucketHeader* bucket);
 		void BucketFree(ElementHeader* ptr);
 		void* FirstInBucket(BucketHeader* bucket) const;
 		void* LastInBucket(BucketHeader* bucket) const;
@@ -81,6 +84,7 @@ namespace Blaze::ECS
 		Result SetTypeData(const ComponentTypeData&);
 
 		Component* Create();
+		Component* Allocate();
 		void Destroy(Component*);
 
 		uint Count() const { return elementCount; }
@@ -118,38 +122,5 @@ namespace Blaze::ECS
 		Iterator end() const;
 
 		friend class Iterator;
-	};
-
-	class BLAZE_API ComponentGroup
-	{
-		size_t stateSize;
-		size_t count;
-		void* data;
-	public:
-		ComponentGroup();
-		~ComponentGroup();
-
-		Result Resize(std::initializer_list<uint> typeIndicies, size_t typeCount);
-		void Clear();
-
-		Result SetComponent(Component* component);
-
-		size_t Count() const;
-
-		template<typename T>
-		bool HasComponent() const 
-		{
-			return HasComponent(T::typeIndex);
-		}
-		bool HasComponent(uint typeIndex) const;
-		template<typename T>
-		T* GetComponent() const
-		{
-			return GetComponent(T::typeIndex);
-		}
-		Component* GetComponent(uint typeIndex) const;
-
-		Component** begin() const;
-		Component** end() const;
-	};
+	};	
 }

@@ -50,11 +50,18 @@ namespace Blaze
 			return BLAZE_ERROR_RESULT("DevIL", "Failed to load image with path \"" + path + "\"");
 		}
 
-		format = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
-		type = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE));
+		Result result;
+
+		format = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT), result);
+		CHECK_RESULT(result)
+		type = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE), result);
+		CHECK_RESULT(result)
+
 		size = Vec2i(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
-		size_t stride = size.x * GetFormatDepth(format);
+		size_t stride = size.x * GetFormatDepth(format, result);
+		CHECK_RESULT(result)
+
 		size_t dataSize = stride * size.y;
 		void* input = ilGetData();
 		void* output = malloc(dataSize);
@@ -66,7 +73,7 @@ namespace Blaze
 			size = Vec2i(0, 0);
 			pixels = nullptr;
 			
-			return BLAZE_ERROR_RESULT("Blaze Engine", "malloc failed with " + StringParsing::Convert(dataSize).value + " bytes");
+			return BLAZE_ERROR_RESULT("Blaze Engine", "malloc failed with " + StringParsing::Convert(dataSize) + " bytes");
 		}
 
 		size_t inputOffset = dataSize - stride;
@@ -88,14 +95,23 @@ namespace Blaze
 	{
 		ImageGuard imageGuard;
 		
-		ilTexImage(size.x, size.y, 1, GetFormatDepth(format), DevILPixelFormat(format), DevILPixelType(type), pixels);
+		Result result;
+
+		auto formatDepth = GetFormatDepth(format, result);
+		CHECK_RESULT(result);
+		auto pixelFormat = DevILPixelFormat(format, result);
+		CHECK_RESULT(result);
+		auto pixelType = DevILPixelType(type, result);
+		CHECK_RESULT(result);
+
+		ilTexImage(size.x, size.y, 1, formatDepth, pixelFormat, pixelType, pixels);
 
 		std::wstring wide = to_wstring((std::string)path.Ptr());
 
 		if (!ilSaveImage(wide.c_str()))
-			return BLAZE_ERROR_RESULT("DevIL", "Failed to save image with path \"" + path + "\"");
+			result += BLAZE_ERROR_LOG("DevIL", "Failed to save image with path \"" + path + "\"");
 
-		return Result();
+		return result;
 	}
 
 	Result Bitmap::Create(Vec2i size, BitmapPixelFormat format, BitmapPixelType type, const void* pixels)
@@ -104,7 +120,13 @@ namespace Blaze
 		this->format = format;
 		this->type = type;		 
 
-		size_t stride = size.x * PixelTypeSize(type) * GetFormatDepth(format);
+		Result result;
+		auto pixelTypeSize = PixelTypeSize(type, result);
+		CHECK_RESULT(result)
+		auto formatDepth = GetFormatDepth(format, result);
+		CHECK_RESULT(result)
+
+		size_t stride = size.x * pixelTypeSize * formatDepth;
 		size_t pixelsSize = size.y * stride;
 		free(this->pixels);
 		this->pixels = malloc(pixelsSize);
@@ -115,13 +137,13 @@ namespace Blaze
 			this->type = BitmapPixelType::Int32;
 			this->size = Vec2i(0, 0);			
 
-			return BLAZE_ERROR_RESULT("Blaze Engine", "malloc failed with " + StringParsing::Convert(pixelsSize).value + " bytes");
+			return BLAZE_ERROR_LOG("Blaze Engine", "malloc failed with " + StringParsing::Convert(pixelsSize) + " bytes");
 		}
 
 		if (pixels != nullptr)		
 			memcpy(this->pixels, pixels, pixelsSize);		
 
-		return Result();
+		return result;
 	}	
 		
 	BitmapView::BitmapView()

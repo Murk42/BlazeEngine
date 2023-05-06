@@ -18,14 +18,17 @@ namespace Blaze
 			va.EnableVertexAttribute(1);
 			va.EnableVertexAttribute(2);
 			va.EnableVertexAttribute(3);
+			va.EnableVertexAttribute(4);
 			va.SetVertexAttributeFormat(0, Graphics::Core::VertexAttributeType::Float, 2, false, sizeof(float) * 0);
 			va.SetVertexAttributeFormat(1, Graphics::Core::VertexAttributeType::Float, 2, false, sizeof(float) * 2);
 			va.SetVertexAttributeFormat(2, Graphics::Core::VertexAttributeType::Float, 2, false, sizeof(float) * 4);
 			va.SetVertexAttributeFormat(3, Graphics::Core::VertexAttributeType::Float, 2, false, sizeof(float) * 6);
+			va.SetVertexAttributeFormat(4, Graphics::Core::VertexAttributeType::Float, 4, false, sizeof(float) * 8);
 			va.SetVertexAttributeBuffer(0, &vb, sizeof(Vertex), 0);
 			va.SetVertexAttributeBuffer(1, &vb, sizeof(Vertex), 0);
 			va.SetVertexAttributeBuffer(2, &vb, sizeof(Vertex), 0);
 			va.SetVertexAttributeBuffer(3, &vb, sizeof(Vertex), 0);
+			va.SetVertexAttributeBuffer(4, &vb, sizeof(Vertex), 0);
 		}
 
 		Text::~Text()
@@ -146,9 +149,7 @@ namespace Blaze
 			if (text.fontResolution == nullptr)
 			{
 				Logger::AddLog(Log(LogType::Warning, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE, "BlazeEngine",
-					"Text has its font resolution set to nullptr"));
-				Graphics::GetPoint2DRenderer().SetImmediateMode();
-				Graphics::DrawPoint2D(text.GetViewportPos() + text.GetSize() / 2, 0xff0000ff, 10);
+					"Text has its font resolution set to nullptr"));				
 				return;
 			}
 

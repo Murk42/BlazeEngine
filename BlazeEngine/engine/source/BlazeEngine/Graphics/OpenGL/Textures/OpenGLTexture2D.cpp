@@ -58,12 +58,18 @@ namespace Blaze::OpenGL
 			glDeleteTextures(1, &id);
 	}
 
-	void Texture2D::SetSettings(Texture2DSettings settings)
+	Result Texture2D::SetSettings(Texture2DSettings settings)
 	{
-		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps);		
-		GLenum _mag = OpenGLTextureMagSampling(settings.mag);		
-		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap);
-		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap);
+		Result result;
+
+		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);		
+		CHECK_RESULT(result);		
+		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);		
+		CHECK_RESULT(result);
+		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
+		CHECK_RESULT(result);
+		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
+		CHECK_RESULT(result);
 		
 		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
 		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);
@@ -73,33 +79,60 @@ namespace Blaze::OpenGL
 		Graphics::Core::SelectTexture(this);
 		if (settings.mipmaps)
 			glGenerateMipmap(GL_TEXTURE_2D);
+
+		return result;
 	}		
-	void Texture2D::Create(Vec2i size, TextureInternalPixelFormat internalFormat)
+	Result Texture2D::Create(Vec2i size, TextureInternalPixelFormat internalFormat)
 	{
+		Result result;
+
+		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
+		CHECK_RESULT(result);
+		auto format = OpenGLFormatByInternalPixelFormat(internalFormat, result);
+		CHECK_RESULT(result);
+
 		this->size = size;		
 		Graphics::Core::SelectTexture(this);				
-		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, 0, OpenGLFormatByInternalPixelFormat(internalFormat), GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalPixelFormat, size.x, size.y, 0, format, GL_UNSIGNED_BYTE, nullptr);
+
+		return Result();
 	}
-	void Texture2D::Create(BitmapView bm)
-	{
-		Create(bm, MapInternalTexturePixelFormat(bm.GetPixelFormat()));
+	Result Texture2D::Create(BitmapView bm)
+	{	
+		Result result;
+		auto internalFormat = MapInternalTexturePixelFormat(bm.GetPixelFormat(), result);
+		CHECK_RESULT(result);
+
+		Create(bm, internalFormat);
+
+		return result;
 	}
-	void Texture2D::Create(BitmapView bm, TextureInternalPixelFormat internalFormat)
+	Result Texture2D::Create(BitmapView bm, TextureInternalPixelFormat internalFormat)
 	{
+		Result result;
+
 		size = bm.GetSize();
 
 		Graphics::Core::SelectTexture(this);
 
-		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
-		GLenum type = OpenGLPixelType(bm.GetPixelType());
+		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
+		CHECK_RESULT(result);
+		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
+		CHECK_RESULT(result);
+		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
+		CHECK_RESULT(result);
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLInternalPixelFormat(internalFormat), size.x, size.y, 0, format, type, bm.GetPixels());
+		glTexImage2D(GL_TEXTURE_2D, 0, internalPixelFormat, size.x, size.y, 0, format, type, bm.GetPixels());
+
+		return result;
 	}
 
 	Result Texture2D::Load(Path path)
 	{
+		Result result;
+
 		unsigned bm = ilGenImage();
 		ilBindImage(bm);
 				
@@ -108,20 +141,25 @@ namespace Blaze::OpenGL
 		{
 			ilDeleteImage(bm);
 
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Failed to load image file with DevIL error code: " + StringParsing::Convert(ilGetError()).value);			
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Failed to load image file with DevIL error code: " + StringParsing::Convert(ilGetError()));			
 		}
 
-		BitmapPixelFormat bmFormat = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
-		BitmapPixelType bmType = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE));
+		BitmapPixelFormat bmFormat = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT), result);
+		CHECK_RESULT(result);
+		BitmapPixelType bmType = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE), result);
+		CHECK_RESULT(result);
 		Vec2i bmSize = Vec2i(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
-		Create(BitmapView(bmSize, bmFormat, bmType, ilGetData()));
+		result = Create(BitmapView(bmSize, bmFormat, bmType, ilGetData()));
 
 		ilDeleteImage(bm);
-		return Result();
+		
+		return result;
 	}
 	Result Texture2D::Load(Path path, TextureInternalPixelFormat internalFormat)
 	{
+		Result result;
+
 		unsigned bm = ilGenImage();
 		ilBindImage(bm);
 
@@ -129,43 +167,61 @@ namespace Blaze::OpenGL
 		if (!ilLoadImage(wide.c_str()))
 		{			
 			ilDeleteImage(bm);
-			return BLAZE_WARNING_RESULT("Blaze Engine", "Failed to load image file with DevIL error code: " + StringParsing::Convert(ilGetError()).value);			
+			return BLAZE_WARNING_RESULT("Blaze Engine", "Failed to load image file with DevIL error code: " + StringParsing::Convert(ilGetError()));			
 		}
 
-		BitmapPixelFormat bmFormat = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
-		BitmapPixelType bmType = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE));
+		BitmapPixelFormat bmFormat = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT), result);
+		CHECK_RESULT(result);
+		BitmapPixelType bmType = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE), result);
+		CHECK_RESULT(result);
 		Vec2i bmSize = Vec2i(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
-		Create(BitmapView(bmSize, bmFormat, bmType, ilGetData()), internalFormat);
+		result = Create(BitmapView(bmSize, bmFormat, bmType, ilGetData()), internalFormat);
 
 		ilDeleteImage(bm);
-		return Result();
+
+		return result;
 	}
 
 
-	void Texture2D::SetPixels(Vec2i offset, BitmapView bm)
-	{
+	Result Texture2D::SetPixels(Vec2i offset, BitmapView bm)
+	{		
 		Graphics::Core::SelectTexture(this);
 
-		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat());
-		GLenum type = OpenGLPixelType(bm.GetPixelType());
+		Result result;
+		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
+		CHECK_RESULT(result);
+		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
+		CHECK_RESULT(result);
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, bm.GetSize().x, bm.GetSize().y, format, type, bm.GetPixels());
+
+		return result;
 	}
 
-	void Texture2D::SetPixels(Vec2i offset, Vec2i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
+	Result Texture2D::SetPixels(Vec2i offset, Vec2i size, uint stride, BitmapPixelFormat format, BitmapPixelType type, void* pixels)
 	{
-		GLenum _format = OpenGLPixelFormat(format);
-		GLenum _type = OpenGLPixelType(type);
+		Result result;
+		GLenum _format = OpenGLPixelFormat(format, result);
+		CHECK_RESULT(result);
+		GLenum _type = OpenGLPixelType(type, result);
+		CHECK_RESULT(result);
+
+		auto pixelTypeSize = PixelTypeSize(type, result);
+		CHECK_RESULT(result);
+		auto formatDepth = GetFormatDepth(format, result);
+		CHECK_RESULT(result);
 		
 		uint align;
 		uint str;
-		CalculateAlignmentAndStride(size.x, stride, PixelTypeSize(type) * GetFormatDepth(format), align, str);
+		CalculateAlignmentAndStride(size.x, stride, pixelTypeSize * formatDepth, align, str);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, align);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, str);		
 		glTextureSubImage2D(id, 0, offset.x, offset.y, size.x, size.y, _format, _type, pixels);
+
+		return result;
 	}
 
 	void Texture2D::GenerateMipmaps()

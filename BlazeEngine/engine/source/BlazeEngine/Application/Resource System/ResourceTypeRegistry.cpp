@@ -20,7 +20,7 @@ namespace Blaze::ResourceSystem
 
 	Result ResourceTypeRegistry::RegisterType(ResourceTypeData data)
 	{		
-		if (nameTable.try_emplace(data.typeName, types.size()).second)
+		if (nameTable.try_emplace(data.typeName, (uint)types.size()).second)
 			types.emplace_back(std::move(data));
 		
 		return Result();
@@ -48,11 +48,10 @@ namespace Blaze::ResourceSystem
 	}
 
 	ResourceTypeData ResourceTypeRegistry::GetResourceTypeData(uint index) const
-	{
+	{		
 		if (index > types.size())
 		{
-			Logger::AddLog(LogType::Error, BLAZE_FILE_NAME, BLAZE_FUNCTION_NAME, BLAZE_FILE_LINE,
-				"Blaze Engine", "Index is out of bounds. Index was: " + StringParsing::Convert(index).value);
+			Logger::ProcessLog(BLAZE_ERROR_LOG("Blaze Engine", "Index is out of bounds. Index was: " + StringParsing::Convert(index)));
 			return { "" };
 		}
 		return types[index];

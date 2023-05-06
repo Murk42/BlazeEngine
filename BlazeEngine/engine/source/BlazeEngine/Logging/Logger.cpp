@@ -2,9 +2,8 @@
 
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Utilities/Time.h"
-#include "BlazeEngine/Logging/LogListener.h"
+
 #include "BlazeEngine/File/File.h"
-#include "source/BlazeEngine/Internal/EngineData.h"
 
 #include "GL/glew.h"
 #include <mutex>
@@ -15,19 +14,19 @@
 #include <debugapi.h>
 
 namespace Blaze
-{			
+{				
 	static File logFile;
-	static bool printToConsole = true;
+	static bool printToConsole = true;	
 
-	void AddLogListener(LogListener* listener)
+	void AddLoggerListener(LoggerListener* listener)
 	{
-		engineData->handlers.emplace(engineData->handlers.begin(), listener);
+		engineData->loggerListeners.emplace_front(listener);
 	}
 	
-	void RemoveLogListener(LogListener* listener)
-	{
-		auto it = std::find(engineData->handlers.begin(), engineData->handlers.end(), listener);
-		engineData->handlers.erase(it);
+	void RemoveLoggerListener(LoggerListener* listener)
+	{		
+		auto it = std::find(engineData->loggerListeners.begin(), engineData->loggerListeners.end(), listener);
+		engineData->loggerListeners.erase(it);
 	}
 
 	namespace Logger
@@ -57,12 +56,12 @@ namespace Blaze
 				logType = LogType::Warning;
 				break;
 			}
-		
-			AddLog(logType, BLAZE_FILE_NAME, __FUNCTION__, __LINE__, "OpenGL", message);
+					
+			engineData->OpenGLResult = Result(Log(logType, BLAZE_FILE_NAME, __LINE__, __FUNCTION__, "OpenGL API", message));			
 		}
 
-		void RecordLog(String string)
-		{
+		static void ProcessString(String string)
+		{			
 			if (printToConsole)
 				Console::WriteLine(string);
 
@@ -70,13 +69,13 @@ namespace Blaze
 
 			if (logFile.IsOpen())
 				logFile.Write({ string.Ptr(), string.Size() });
-		}
+		}		
 
-		void AddLog(const Log& log)
+		void ProcessLog(const Log& log)
 		{
 			if (log.GetType() == LogType::Fatal)
-			{
-				RecordLog(log.FormatString());
+			{				
+				ProcessString(log.ToString());
 
 #ifdef _DEBUG				
 				DebugBreak();
@@ -84,32 +83,52 @@ namespace Blaze
 				exit(1);
 #endif
 			}
-
-			if (log.GetType() == LogType::Fatal)
-				throw log.FormatString();
-
-			bool supress = false;
-			for (auto& listener : engineData->handlers)
-			{
-				listener->AddLog(log);
-
-				if (listener->DoesSupress())
+			else
+			{				
+				bool supress = false;
+				for (auto& listener : engineData->loggerListeners)
 				{
-					supress = true;
-					break;
+					listener->Add(log);
+
+					if (listener->IsSupressing())
+					{
+						supress = true;
+						break;
+					}
 				}
+
+				if (supress)
+					return;
+				
+				ProcessString(log.ToString());
+			}
+		}
+
+		void ProcessResult(Result&& result)
+		{			
+			for (auto& listener : engineData->loggerListeners)
+			{
+				listener->Add(std::move(result));
+
+				if (result.IsEmpty())
+					break;
 			}
 
-			if (supress)
-				return;
-
-			RecordLog(log.FormatString());
+			if (!result.IsEmpty())
+			{
+				String out = result.ToString();
+				ProcessString(out);
+				result.Clear();
+			}
 		}
 
-		void AddLog(LogType type, String&& fileName, String&& functionName, uint line, String&& source, String&& message)
-		{	
-			AddLog(Log(type, std::move(fileName), std::move(functionName), line, std::move(source), std::move(message)));
+		void ProcessResultSilent(Result&& result)
+		{
+			String out = result.ToString();
+			ProcessString(out);
+			result.Clear();
 		}
+		
 		void SetOutputFile(const Path& path)
 		{
 			if (logFile.IsOpen())
@@ -120,6 +139,6 @@ namespace Blaze
 		void PrintLogsToConsole(bool print)
 		{
 			printToConsole = print;
-		}
+		}		
 	}
 }

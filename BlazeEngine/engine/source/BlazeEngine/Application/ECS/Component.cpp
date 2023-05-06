@@ -3,8 +3,32 @@
 #include "BlazeEngine/Application/ECS/Scene.h"
 #include <bit>
 
+#include "ComponentConstructData.h"
+
 namespace Blaze::ECS
-{	
+{			
+	ComponentConstructData componentConstructData;	
+
+	Component::Component() : 
+		entity(componentConstructData.entity), 		
+		bucketIndex(-1)
+	{	
+		if (componentConstructData.state == 1)
+		{
+			componentConstructData.state = 2;
+		}
+		else if (componentConstructData.state == 0)
+		{			
+			Logger::ProcessLog(BLAZE_WARNING_LOG("Blaze Engine",
+				"Creating a component outside of a scene. It may not function properly. Or there was an internal engine error."));
+		}
+		else
+		{
+			Logger::ProcessLog(BLAZE_WARNING_LOG("Blaze Engine",
+				"Internal engine error. componentsConstructData.state was changed inappropriately"));
+		}		
+	}
+
 	ComponentContainer::ElementHeader* ComponentContainer::BucketAllocate(BucketHeader* bucket)
 	{
 		uint index = std::countr_one(bucket->flags);
@@ -14,8 +38,20 @@ namespace Blaze::ECS
 
 		ElementHeader* element = (ElementHeader*)((byte*)bucket + sizeof(BucketHeader) + index * elementSize);
 		element->bucket = bucket;
+		
+		typeData->ConstructDirect((byte*)element + sizeof(ElementHeader));
+		return element;
+	}
+	ComponentContainer::ElementHeader* ComponentContainer::BucketAllocateNoConstruct(BucketHeader* bucket)
+	{
+		uint index = std::countr_one(bucket->flags);
+		FlagType mask = FlagType(1) << index;
 
-		typeData.construct((byte*)element + sizeof(ElementHeader));		
+		bucket->flags |= mask;
+
+		ElementHeader* element = (ElementHeader*)((byte*)bucket + sizeof(BucketHeader) + index * elementSize);
+		element->bucket = bucket;
+
 		return element;
 	}
 	void ComponentContainer::BucketFree(ElementHeader* ptr)
@@ -25,10 +61,10 @@ namespace Blaze::ECS
 		FlagType mask = FlagType(1) << index;
 
 		if ((bucket->flags & mask) == 0)
-			Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet"));
+			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet"));
 
 		bucket->flags ^= mask;		
-		typeData.destruct((byte*)ptr + sizeof(ElementHeader));
+		typeData->DestructDirect((byte*)ptr + sizeof(ElementHeader));
 	}
 	void* ComponentContainer::FirstInBucket(BucketHeader* bucket) const
 	{
@@ -41,7 +77,7 @@ namespace Blaze::ECS
 
 	void ComponentContainer::Increment(uint& bucketIndex, Component*& component) const
 	{
-		void* ptr = (byte*)component - typeData.baseOffset;
+		void* ptr = (byte*)component - typeData->BaseOffset();
 		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));
 		uint index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
 
@@ -55,14 +91,14 @@ namespace Blaze::ECS
 			if (bucketIndex == bucketCount)
 				component = nullptr;
 			else
-				component = (Component*)((byte*)FirstInBucket(buckets[bucketIndex]) + typeData.baseOffset);
+				component = (Component*)((byte*)FirstInBucket(buckets[bucketIndex]) + typeData->BaseOffset());
 		}
 		else
-			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData.baseOffset);
+			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData->BaseOffset());
 	}
 	void ComponentContainer::Decrement(uint& bucketIndex, Component*& component) const
 	{
-		void* ptr = (byte*)component - typeData.baseOffset;
+		void* ptr = (byte*)component - typeData->BaseOffset();
 		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));
 		uint index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
 
@@ -79,14 +115,14 @@ namespace Blaze::ECS
 				component = nullptr;
 			}
 			else
-				component = (Component*)((byte*)LastInBucket(buckets[bucketIndex]) + typeData.baseOffset);
+				component = (Component*)((byte*)LastInBucket(buckets[bucketIndex]) + typeData->BaseOffset());
 		}
 		else			
-			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData.baseOffset);
+			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData->BaseOffset());
 	}
 
 	ComponentContainer::ComponentContainer()
-		: buckets(nullptr), elementCount(0), bucketCount(0), nonFullBucketCount(0)
+		: buckets(nullptr), elementCount(0), bucketCount(0), nonFullBucketCount(0), elementSize(0)
 	{
 
 	}
@@ -96,11 +132,11 @@ namespace Blaze::ECS
 	}
 	Result ComponentContainer::SetTypeData(const ComponentTypeData& typeData)
 	{
-		if (this->typeData.typeName.Size() != 0)
-			return BLAZE_ERROR_RESULT("BlazeEngine", "Cant change component type data");
+		if (typeData.IsNone())
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to set type data to none");
 
-		this->typeData = typeData;
-		elementSize = typeData.size + sizeof(ElementHeader);
+		this->typeData = &typeData;
+		elementSize = typeData.Size() + sizeof(ElementHeader);
 		return Result();
 	}
 	Component* ComponentContainer::Create()
@@ -128,11 +164,38 @@ namespace Blaze::ECS
 			std::swap(buckets[0], buckets[nonFullBucketCount]);
 		}
 
-		return (Component*)((byte*)element + sizeof(ElementHeader) + typeData.baseOffset);
+		return (Component*)((byte*)element + sizeof(ElementHeader) + typeData->BaseOffset());
+	}
+	Component* ComponentContainer::Allocate()
+	{
+		if (nonFullBucketCount == 0)
+		{
+			BucketHeader** newBuckets = new BucketHeader * [bucketCount + 1];
+			memcpy(newBuckets + 1, buckets, sizeof(BucketHeader*) * bucketCount);
+			delete[] buckets;
+			buckets = newBuckets;
+
+			buckets[0] = (BucketHeader*)Memory::Allocate(sizeof(BucketHeader) + elementSize * BucketElementCount);
+			buckets[0]->flags = 0;
+
+			bucketCount++;
+			nonFullBucketCount++;
+		}
+
+		elementCount++;
+		ElementHeader* element = BucketAllocateNoConstruct(buckets[0]);
+
+		if (buckets[0]->flags == std::numeric_limits<FlagType>::max())
+		{
+			--nonFullBucketCount;
+			std::swap(buckets[0], buckets[nonFullBucketCount]);
+		}
+
+		return (Component*)((byte*)element + sizeof(ElementHeader) + typeData->BaseOffset());
 	}
 	void ComponentContainer::Destroy(Component* component)
 	{
-		void* ptr = (byte*)component - typeData.baseOffset;
+		void* ptr = (byte*)component - typeData->BaseOffset();
 		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));		
 		BucketHeader* bucket = element->bucket;
 		BucketFree(element);
@@ -145,7 +208,7 @@ namespace Blaze::ECS
 					break;
 
 			if (i == bucketCount)
-				Logger::AddLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a invalid pointer"));
+				Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a invalid pointer"));
 
 			--bucketCount;
 			--nonFullBucketCount;
@@ -177,7 +240,7 @@ namespace Blaze::ECS
 				if (index == BucketElementCount)
 					break;
 
-				typeData.destruct((byte*)first + index * elementSize + sizeof(ElementHeader));				
+				typeData->DestructDirect((byte*)first + index * elementSize + sizeof(ElementHeader));				
 
 			}			
 
@@ -194,7 +257,7 @@ namespace Blaze::ECS
 	{
 		if (bucketCount == 0)
 			return end();
-		return Iterator(this, 0, (Component*)((byte*)FirstInBucket(buckets[0]) + typeData.baseOffset));
+		return Iterator(this, 0, (Component*)((byte*)FirstInBucket(buckets[0]) + typeData->BaseOffset()));
 	}
 	ComponentContainer::Iterator ComponentContainer::end() const
 	{
@@ -306,96 +369,96 @@ namespace Blaze::ECS
 		return index;
 	}
 
-	ComponentGroup::ComponentGroup()
-		: data(nullptr), stateSize(0), count(0)
-	{
-	}
-	ComponentGroup::~ComponentGroup()
-	{
-		Clear();
-	}
-
-	Result ComponentGroup::Resize(std::initializer_list<uint> typeIndicies, size_t typeCount)
-	{
-		this->count = typeIndicies.size();
-		this->stateSize = ((typeCount + 7) >> 3);
-
-		size_t size = stateSize + sizeof(Component*) * count;
-
-		data = Memory::Allocate(size);
-
-		memset(data, 0, size);
-		for (auto typeIndex : typeIndicies)
-		{
-			if (typeIndex >= typeCount)
-			{
-				Clear();
-				return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index: " + StringParsing::Convert(typeIndex).value);
-			}
-
-			size_t stateOffset = typeIndex >> 3;
-			char stateMask = 1 << (typeIndex & 7);
-			*((char*)data + stateOffset) |= stateMask;
-		}
-
-		return Result();
-	}
-	void ComponentGroup::Clear()
-	{
-		Memory::Free(data);
-		data = nullptr;
-		stateSize = 0;
-	}
-
-	Result ComponentGroup::SetComponent(Component* component)
-	{
-		if (component == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Component is nullptr");
-
-		if (data == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "ComponentGroup is empty, cant set components");
-
-		size_t typeIndex = component->GetTypeIndex();
-		size_t index = CountOnes((byte*)data, typeIndex);
-
-		((Component**)((char*)data + stateSize))[index] = component;
-
-		return Result();
-	}
-
-	size_t ComponentGroup::Count() const
-	{
-		return count;
-	}
-
-	bool ComponentGroup::HasComponent(uint typeIndex) const
-	{
-		size_t stateOffset = typeIndex >> 3;
-		unsigned char stateMask = 1 << (typeIndex & 7);
-
-		return (bool)(*((char*)data + stateOffset) & stateMask);
-	}
-	Component* ComponentGroup::GetComponent(uint typeIndex) const
-	{
-		if (HasComponent(typeIndex))
-		{
-			size_t index = CountOnes((byte*)data, typeIndex);
-			return ((Component**)((char*)data + stateSize))[index];
-		}
-		else
-			return nullptr;
-	}
-
-	Component** ComponentGroup::begin() const
-	{
-		return ((Component**)((char*)data + stateSize));
-	}
-	Component** ComponentGroup::end() const
-	{
-		return ((Component**)((char*)data + stateSize)) + count;
-	}
-	const ComponentTypeRegistry& Component::GetRegistry() const
-	{
-		return entity->GetScene()->GetManager()->GetRegistry();
-	}
+	//ComponentGroup::ComponentGroup()
+	//	: data(nullptr), stateSize(0), count(0)
+	//{
+	//}
+	//ComponentGroup::~ComponentGroup()
+	//{
+	//	Clear();
+	//}
+	//
+	//Result ComponentGroup::SetupTypes(std::initializer_list<ComponentTypeData*> componentsTypeData, const ComponentTypeRegistry* registry)
+	//{
+	//	this->count = componentsTypeData.size();
+	//	this->stateSize = ((registry->GetAllTypesData().size() + 7) >> 3);
+	//
+	//	size_t size = stateSize + sizeof(Component*) * count;
+	//
+	//	data = Memory::Allocate(size);
+	//
+	//	memset(data, 0, size);
+	//	for (auto typeIndex : typeIndicies)
+	//	{
+	//		if (typeIndex >= typeCount)
+	//		{
+	//			Clear();
+	//			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index: " + StringParsing::Convert(typeIndex).value);
+	//		}
+	//
+	//		size_t stateOffset = typeIndex >> 3;
+	//		char stateMask = 1 << (typeIndex & 7);
+	//		*((char*)data + stateOffset) |= stateMask;
+	//	}
+	//
+	//	return Result();
+	//}
+	//void ComponentGroup::Clear()
+	//{
+	//	Memory::Free(data);
+	//	data = nullptr;
+	//	stateSize = 0;
+	//}
+	//
+	//Result ComponentGroup::SetComponent(Component* component)
+	//{
+	//	if (component == nullptr)
+	//		return BLAZE_ERROR_RESULT("Blaze Engine", "Component is nullptr");
+	//
+	//	if (data == nullptr)
+	//		return BLAZE_ERROR_RESULT("Blaze Engine", "ComponentGroup is empty, cant set components");
+	//
+	//	auto typeIndex = component->GetTypeData()->Index();
+	//	size_t index = CountOnes((byte*)data, typeIndex);
+	//
+	//	((Component**)((char*)data + stateSize))[index] = component;
+	//
+	//	return Result();
+	//}
+	//
+	//size_t ComponentGroup::Count() const
+	//{
+	//	return count;
+	//}
+	//
+	//bool ComponentGroup::HasComponent(uint typeIndex) const
+	//{
+	//	size_t stateOffset = typeIndex >> 3;
+	//	unsigned char stateMask = 1 << (typeIndex & 7);
+	//
+	//	return (bool)(*((char*)data + stateOffset) & stateMask);
+	//}
+	//Component* ComponentGroup::GetComponent(uint typeIndex) const
+	//{
+	//	if (HasComponent(typeIndex))
+	//	{
+	//		size_t index = CountOnes((byte*)data, typeIndex);
+	//		return ((Component**)((char*)data + stateSize))[index];
+	//	}
+	//	else
+	//		return nullptr;
+	//}
+	//
+	//Component** ComponentGroup::begin() const
+	//{
+	//	return ((Component**)((char*)data + stateSize));
+	//}
+	//Component** ComponentGroup::end() const
+	//{
+	//	return ((Component**)((char*)data + stateSize)) + count;
+	//}
+	//const ComponentTypeRegistry& Component::GetRegistry() const
+	//{
+	//	return entity->GetScene()->GetManager()->GetRegistry();
+	//}
 }

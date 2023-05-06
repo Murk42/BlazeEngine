@@ -7,8 +7,6 @@ in vec4 frag_borderColor;
 in float frag_radius;
 in float frag_borderWidth;
 
-layout(location = 1) uniform vec4 u_clipRect;
-
 vec4 StepLerp(float x, float lower, float upper, vec4 a, vec4 b)
 {	
 	return mix(a, b, min(max(x - lower,0) / (upper - lower), 1));
@@ -59,12 +57,7 @@ void main()
 		if (dist > -frag_borderWidth / 2)		
 			color = StepLerp(dist, -outterAntialiasing / 2, outterAntialiasing / 2, frag_borderColor, vec4(frag_borderColor.rgb, 0));				
 		else	
-			color = StepLerp(dist, -borderWidth - innerAntialiasing, -borderWidth, frag_fillColor, frag_borderColor);							
-
-	if (color.a == 0 ||
-		(frag_pos.x < u_clipRect.x || frag_pos.x > u_clipRect.x + u_clipRect.z) && !isnan(u_clipRect.z) ||
-		(frag_pos.y < u_clipRect.y || frag_pos.y > u_clipRect.y + u_clipRect.w) && !isnan(u_clipRect.w))
-		discard;
+			color = StepLerp(dist, -borderWidth - innerAntialiasing, -borderWidth, frag_fillColor, frag_borderColor);								
 			
 	gl_FragColor = color;
 }
