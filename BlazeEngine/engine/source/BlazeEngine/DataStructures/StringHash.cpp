@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngine/DataStructures/StringHash.h"
-#include <string>
 
 namespace std
 {

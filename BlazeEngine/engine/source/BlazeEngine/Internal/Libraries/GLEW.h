@@ -1,8 +1,7 @@
 #pragma once
-#include "BlazeEngine/Core/Startup.h"
 
 namespace Blaze
 {
-	Startup::BlazeLibrariesInitInfo::GLEWInitInfo InitializeGLEW();
+	TimingResult InitializeGLEW();
 	void TerminateGLEW();
 }

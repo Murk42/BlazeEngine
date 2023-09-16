@@ -14,14 +14,15 @@ namespace Blaze::ResourceSystem
 	}
 
 	ResourceTypeRegistry::~ResourceTypeRegistry()
-	{
-		nameTable.clear();
+	{		
 	}
 
 	Result ResourceTypeRegistry::RegisterType(ResourceTypeData data)
 	{		
-		if (nameTable.try_emplace(data.typeName, (uint)types.size()).second)
-			types.emplace_back(std::move(data));
+		auto [it, inserted] = nameTable.Insert(data.typeName, (uint)types.Count());
+
+		if (it.IsNull())
+			types.AddBack(std::move(data));
 		
 		return Result();
 	}
@@ -29,29 +30,29 @@ namespace Blaze::ResourceSystem
 	void ResourceTypeRegistry::RegisterCoreTypes()
 	{
 		RegisterType<Font>();
-		RegisterType<Graphics::Core::Texture2D>();
-		RegisterType<FontResolution>();
+		//RegisterType<GraphicsLibrary::Texture2D>();		
 	}
 
 	uint ResourceTypeRegistry::GetResourceTypeIndex(StringView name) const
 	{
-		auto it = nameTable.find((String)name);
-		if (it == nameTable.end())
+		auto it = nameTable.Find(name);
+
+		if (it.IsNull())
 			return -1;
 		else
-			return it->second;
+			return it->value;
 	}
 
 	uint ResourceTypeRegistry::GetResourceTypeCount() const
 	{
-		return static_cast<uint>(types.size());
+		return static_cast<uint>(types.Count());
 	}
 
 	ResourceTypeData ResourceTypeRegistry::GetResourceTypeData(uint index) const
 	{		
-		if (index > types.size())
+		if (index > types.Count())
 		{
-			Logger::ProcessLog(BLAZE_ERROR_LOG("Blaze Engine", "Index is out of bounds. Index was: " + StringParsing::Convert(index)));
+			Debug::Logger::LogError("Blaze Engine", "Index is out of bounds. Index was: " + StringParsing::Convert(index));
 			return { "" };
 		}
 		return types[index];
@@ -59,7 +60,7 @@ namespace Blaze::ResourceSystem
 
 	bool ResourceTypeRegistry::IsValidTypeIndex(uint index) const
 	{
-		return index < types.size();
+		return index < types.Count();
 	}
 
 	ResourceTypeRegistry ResourceTypeRegistry::CoreRegistry()

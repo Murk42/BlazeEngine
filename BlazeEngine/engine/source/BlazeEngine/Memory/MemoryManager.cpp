@@ -2,11 +2,8 @@
 #include "BlazeEngine/Memory/MallocAllocator.h"
 #include "BlazeEngine/Memory/MemoryListener.h"
 #include "BlazeEngine/DataStructures/List.h"
+#include "BlazeEngine/DataStructures/HybridArray.h"
 using namespace Blaze;
-
-#include <memory>
-#include <cstdio>
-#include <filesystem>
 
 #include "BlazeEngine/File/File.h"
 
@@ -14,62 +11,94 @@ struct AllocationHeader
 {
 	size_t size;
 };
+struct MemoryAllocation
+{
+	void* ptr;
+	size_t size;
+	char location[128];
+};
 
-static File file;
-static bool logMemory = false;
-static size_t allocCount = 0;
-static size_t freeCount = 0;
-static size_t memoryLeft;
-static List<MemoryListener*, MallocAllocator<ListNode<MemoryListener*>>> listeners;
+static constexpr bool logAllocationsToFile = false;
+static constexpr bool trackAllocations = false;
+
+static std::mutex file_mutex;
+static File memoryFile;
+
+static std::mutex listeners_mutex;
+static List<MemoryListener*, MallocAllocator> listeners;
 static bool activeListeners;
 
-void* operator new(size_t size)
-{
-	return Memory::Allocate(size);
-}
-void operator delete(void* ptr) {
-	Memory::Free(ptr);
-}
+static std::mutex allocation_mutex;
+static DualList<MemoryAllocation, MallocAllocator> memoryAllocations;
+static Map<void*, decltype(memoryAllocations)::Iterator, Hash<void*>, MallocAllocator> allocationMap;
+
 
 namespace Blaze
 {	
 	void SaveMemoryLog()
-	{
-		logMemory = false;
-		file.Close();
-	}
-	void InitializeMemory()
-	{
-		if (!std::filesystem::exists("logs"))
-			std::filesystem::create_directories("logs");
-		if (file.Open("logs/memory.txt", FileOpenMode::Write, FileOpenFlags::Create | FileOpenFlags::Truncate))
-			exit(1);
-		logMemory = true;
+	{		
+		if (logAllocationsToFile)
+		{
+			std::lock_guard<std::mutex> lk { file_mutex};
 
+			char buffer[128];
+			uint messageSize = 0;
+
+			messageSize = sprintf_s(buffer, 128, "%u unfreed allocations\n\n", (uint)memoryAllocations.Count());
+			memoryFile.Write(buffer, messageSize);
+
+			for (auto& allocation : memoryAllocations)
+			{
+				messageSize = sprintf_s(buffer, 128, "(%p) %u bytes \n%s\n", allocation.ptr, (uint)allocation.size, allocation.location);
+				memoryFile.Write(buffer, messageSize);
+			}
+
+
+			memoryFile.Close();
+		}
+	}
+
+	TimingResult InitializeMemory()
+	{
+		Timing timing{ "Memory manager" };
+
+		if (logAllocationsToFile)
+		{
+			if (!std::filesystem::exists("logs"))
+				std::filesystem::create_directories("logs");
+			if (memoryFile.Open("logs/memory.txt", FileAccessPermission::Write))
+				exit(1);
+		}
 		
 		atexit(SaveMemoryLog);
-		activeListeners = true;
+		activeListeners = true;		
+
+		return timing.GetTimingResult();
 	}	
 	void TerminateMemory()
 	{
 		activeListeners = true;
 	}
-	
+		
 	namespace Memory
 	{
 		void AddListener(MemoryListener* listener)
 		{
+			std::lock_guard<std::mutex> lk { listeners_mutex };
 			listeners.AddBack(listener);
 		}
 		void RemoveListener(MemoryListener* listener)
-		{
-			if (*listeners.begin() == listener)
-				listeners.PopFirst();
+		{			
+			std::lock_guard<std::mutex> lk { listeners_mutex };
+			if (listeners.First() == listener)
+				listeners.EraseFirst();
 			else
 			{
-				auto it = listeners.begin();
+				auto it = listeners.FirstIterator();
 				auto next = ++it;
-				while (next != listeners.end() && *next != listener)
+				auto end = listeners.BehindIterator();
+
+				while (next != end && *next != listener)
 				{
 					it = next;
 					++next;
@@ -80,65 +109,103 @@ namespace Blaze
 		}
 		void ChangeListener(MemoryListener* old, MemoryListener* ptr)
 		{
-			//auto it = std::find(listeners.begin(), listeners.end(), old);
-			//*it = ptr;
+			std::lock_guard<std::mutex> lk { listeners_mutex };
+			auto it = std::find(listeners.FirstIterator(), listeners.BehindIterator(), old);
+			*it = ptr;
 		}
 
-		void* Allocate(size_t size)
+		template<size_t size>
+		void GetLocation(char(&arr)[size])
 		{
+			Debug::Callstack callstack(1, 5);
+			uint sizeLeft = size - 1;
+			auto it = callstack.begin();
+
+			char* ptr = arr;
+			while (it != callstack.end())
+			{
+				String fileName = it->FilePath().FileName();
+				String fileLine = StringParsing::Convert(it->FileLine());
+				
+				uint sizeNeeded = fileName.Size() + fileLine.Size() + 2;
+
+				if (sizeNeeded > sizeLeft)
+					break;
+
+				memcpy(ptr, fileName.Ptr(), fileName.Size());
+				ptr += fileName.Size();
+
+				ptr[0] = ' ';
+				ptr += 1;
+				
+				memcpy(ptr, fileLine.Ptr(), fileLine.Size());
+				ptr += fileLine.Size();
+
+				ptr[0] = '\n';
+				ptr += 1;
+
+				sizeLeft -= sizeNeeded;
+				++it;
+			}
+
+			*ptr = '\0';
+		}
+
+		void* Allocate(uint size)
+		{			
 			void* ptr = malloc(size + sizeof(AllocationHeader));
 
 			if (ptr == nullptr)
 			{
-				Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Malloc failed with " + StringParsing::Convert(size + sizeof(AllocationHeader)) + " bytes"));
+				Debug::Logger::LogError("Blaze Engine", "Malloc failed with " + StringParsing::Convert(size + sizeof(AllocationHeader)) + " bytes");
 				return nullptr;
 			}
 
 			AllocationHeader* header = (AllocationHeader*)ptr;
-			header->size = size;
-			
-			memoryLeft += size;
-
+			header->size = size;					
 
 			if (activeListeners)
 			{
 				MemoryEvent event{ MemoryEventType::Allocation, ptr, size };
 				for (auto& l : listeners)
 					l->AddMemoryEvent(event);
-			}
+			}			
 
-			if (logMemory)
+			void* outPtr = (char*)ptr + sizeof(AllocationHeader);
+
+			if (trackAllocations)
 			{
-				if (engineData != nullptr && engineData->finishedInit)
-				{
-					char buffer[128];
-					uint messageSize = sprintf_s(buffer, 128, "CA %5u %p %5u %7u\n", static_cast<uint>(allocCount), ptr, static_cast<uint>(size), static_cast<uint>(memoryLeft));
-					file.Write({ buffer, messageSize });
-				}
-				else
-				{
-					char buffer[128];
-					uint messageSize = sprintf_s(buffer, 128, "EA %5u %p %5u %7u\n", static_cast<uint>(allocCount), ptr, static_cast<uint>(size), static_cast<uint>(memoryLeft));
-					file.Write({ buffer, messageSize });										
-				}
+				std::lock_guard<std::mutex> lk { allocation_mutex };
 
-				//file.Close();
-				//file.Open("memory.txt", FileOpenMode::Write, FileOpenFlags::Create | FileOpenFlags::Truncate);
+				auto it = memoryAllocations.AddBack();
+				it->size = size;
+				it->ptr = ptr;
+				GetLocation(it->location);
+
+				allocationMap.Insert(outPtr, it);
 			}
 
-			allocCount++;
-			
-			return (char*)ptr + sizeof(AllocationHeader);
+			return outPtr;
 		}		
 		void Free(void* ptr)
-		{
+		{			
 			if (ptr == nullptr)
 				return;
-			
-			ptr = (char*)ptr - sizeof(AllocationHeader);
-			AllocationHeader* header = (AllocationHeader*)ptr;
 
-			memoryLeft -= header->size;
+			if (trackAllocations)
+			{
+				std::lock_guard<std::mutex> lk { allocation_mutex };
+
+				auto allocationIt = allocationMap.Find(ptr);
+				if (!allocationIt.IsNull())
+				{
+					memoryAllocations.Erase(allocationIt->value);					
+					allocationMap.Erase(allocationIt);
+				}
+			}
+
+			ptr = (char*)ptr - sizeof(AllocationHeader);
+			AllocationHeader* header = (AllocationHeader*)ptr;						
 
 			if (activeListeners)
 			{
@@ -146,28 +213,13 @@ namespace Blaze
 				for (auto& l : listeners)
 					l->AddMemoryEvent(event);
 			}
-
-			if (logMemory)
-			{
-				if (engineData != nullptr && engineData->finishedInit)
-				{
-					char buffer[128];
-					uint messageSize = sprintf_s(buffer, 128, "CF %5u %p %5u %7u\n", static_cast<uint>(freeCount), ptr, static_cast<uint>(header->size), static_cast<uint>(memoryLeft));
-					file.Write({ buffer, messageSize });
-				}
-				else
-				{
-					char buffer[128];
-					uint messageSize = sprintf_s(buffer, 128, "EF %5u %p %5u %7u\n", static_cast<uint>(freeCount), ptr, static_cast<uint>(header->size), static_cast<uint>(memoryLeft));
-					file.Write({ buffer, messageSize });
-				}
-				//file.Close();
-				//file.Open("memory.txt", FileOpenMode::Write, FileOpenFlags::Create | FileOpenFlags::Truncate);
-			}
-			
-			freeCount++;
 			
 			free(ptr);
+		}
+		BLAZE_API void* Reallocate(uint size, void* old)
+		{
+			Free(old);
+			return Allocate(size);
 		}
 	}
 }

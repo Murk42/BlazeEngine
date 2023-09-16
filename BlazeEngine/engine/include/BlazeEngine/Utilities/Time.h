@@ -40,6 +40,9 @@
 */
 namespace Blaze
 {		
+	template class BLAZE_API std::chrono::system_clock::time_point::duration;
+	template class BLAZE_API std::chrono::system_clock::time_point;
+
 	class BLAZE_API TimePoint
 	{		
 		std::chrono::system_clock::time_point value;

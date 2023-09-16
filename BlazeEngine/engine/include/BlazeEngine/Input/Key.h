@@ -2,7 +2,7 @@
 
 namespace Blaze
 {
-	enum class Key
+	enum class Key : uint8
 	{
 		Unknown,
 		A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
@@ -28,17 +28,12 @@ namespace Blaze
 
 		LCtrl, LShift, LAlt, RCtrl, RShift, RAlt,
 
-		KeyCount
-	};
-
-	enum class MouseKey
-	{
-		MouseLeft, 
-		MouseMiddle, 
+		MouseLeft,
+		MouseMiddle,
 		MouseRight,
+
 		KeyCount
 	};
 
-	String BLAZE_API GetKeyName(Key key);
-	String BLAZE_API GetKeyName(MouseKey key);
+	String BLAZE_API GetKeyName(Key key);	
 }

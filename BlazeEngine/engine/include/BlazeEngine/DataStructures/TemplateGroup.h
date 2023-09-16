@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngine/DataStructures/Template.h"
-#include <type_traits>
 
 namespace Blaze
 {
@@ -81,6 +80,16 @@ namespace Blaze
 		{
 			static constexpr bool value = C<T1>::value && _AppliesToAll<C, T...>::template value;
 		};
+
+		template<typename T>
+		struct _Join
+		{
+		};
+		template<typename ... Ts2>
+		struct _Join<TemplateGroup<Ts2...>>
+		{
+			using type = TemplateGroup<T1, T..., Ts2...>;
+		};
 	public:
 		using First = T1;
 		using Next = TemplateGroup<T...>;
@@ -90,6 +99,8 @@ namespace Blaze
 		using TypeAtIndex = typename _TypeAtIndex<index, T1, T...>::template type;
 		template<typename ... O>
 		using Add = TemplateGroup<T1, T..., O...>;
+		template<typename T>
+		using Join = _Join<T>::type;
 		template<typename S>
 		static constexpr size_t IndexOfType = _IndexOfType<0, S, T1, T...>::index;
 		template<typename S>
@@ -111,6 +122,15 @@ namespace Blaze
 		static constexpr bool value = true;
 	};
 	
-	template<typename T>
-	constexpr bool IsTemplateGroup = _IsTemplateGroup<T>::value;
+	template<typename T, typename ... Ts>
+	constexpr bool IsAnyOf = (std::is_same_v<T, Ts> || ...);
+
+	template<template<typename...> class, typename...>
+	struct _IsInstantiationOf : public std::false_type {};
+
+	template<template<typename...> class C, typename... T>
+	struct _IsInstantiationOf<C, C<T...>> : public std::true_type {};
+
+	template<template<typename...> class U, typename... T>
+	constexpr bool IsInstantiationOf = _IsInstantiationOf<U, T...>::template value;
 }

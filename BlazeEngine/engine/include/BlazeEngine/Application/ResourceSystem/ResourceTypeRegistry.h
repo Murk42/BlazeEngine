@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngine/Application/ResourceSystem/Resource.h"
-#include <unordered_map>
 
 namespace Blaze::ResourceSystem
 {
@@ -33,7 +32,7 @@ namespace Blaze::ResourceSystem
 				Destruct<T>,
 			};
 		}
-	};
+	};		
 
 	class BLAZE_API ResourceTypeRegistry
 	{		
@@ -66,7 +65,7 @@ namespace Blaze::ResourceSystem
 		static ResourceTypeRegistry CoreRegistry();
 
 	private:
-		std::vector<ResourceTypeData> types;
-		std::unordered_map<String, uint> nameTable;
+		Array<ResourceTypeData> types;
+		Map<String, uint> nameTable;
 	};
 }

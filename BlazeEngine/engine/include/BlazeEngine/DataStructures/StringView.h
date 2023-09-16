@@ -9,26 +9,131 @@ namespace Blaze
 		const char* ptr;
 		size_t size;
 	public:
-		StringView();
-		StringView(const StringView&);
+		constexpr StringView();
+		constexpr StringView(const StringView&);
 		
-		StringView(const char*);
-		StringView(const char*, size_t count);
-		StringView(const char* begin, const char* end);
-		StringView(const String&);		
+		constexpr StringView(const char*);
+		constexpr StringView(const char*, size_t count);
+		constexpr StringView(const char* begin, const char* end);
+		inline StringView(const String&);		
 
-		inline const char* Ptr() const { return ptr; }
-		inline size_t Size() const { return size; }	
+		constexpr const char* Ptr() const { return ptr; }
+		constexpr size_t Size() const { return size; }	
 
-		size_t Count(char ch) const;
+		constexpr size_t Count(char ch) const;
+		inline uint32 Hash() const;
 
-		StringView SubString(size_t start, size_t count);
+		constexpr StringView SubString(size_t start, size_t count);
 
-		StringView& operator= (const StringView&);						
+		constexpr StringView& operator= (const StringView&);						
 
-		bool operator==(const StringView& s) const;				
-		bool operator!=(const StringView& s) const;		
+		constexpr bool operator==(const StringView& s) const;				
+		constexpr bool operator!=(const StringView& s) const;		
 		
 		inline const char& operator[](int index) const { return ptr[index]; }
 	};
+
+	constexpr StringView::StringView()
+		: ptr(nullptr), size(0)
+	{
+	}
+	constexpr StringView::StringView(const StringView& sv)
+		: ptr(sv.ptr), size(sv.size)
+	{
+	}
+	constexpr StringView::StringView(const char* ptr)
+		: ptr(nullptr), size(0)
+	{
+		if (ptr == nullptr)
+			return;
+				
+		while (ptr[size] != '\0')		
+			++size;		
+
+		if (size == 0)
+			this->ptr = nullptr; //When ptr is "" its not nullptr
+		else
+			this->ptr = ptr;
+	}
+	constexpr StringView::StringView(const char* ptr, size_t size)
+		: size(size)
+	{
+		if (size == 0)
+			this->ptr = nullptr;
+		else
+			this->ptr = ptr;
+	}
+	constexpr StringView::StringView(const char* begin, const char* end)
+		: size(end - begin)
+	{
+		if (size == 0)
+			this->ptr = nullptr; //When ptr is "" its not nullptr
+		else
+			this->ptr = begin;
+	}
+	inline StringView::StringView(const String& string)
+		: ptr(string.Ptr()), size(string.Size())
+	{
+	}
+	constexpr size_t StringView::Count(char ch) const
+	{
+		size_t count = 0;
+		const char* ptr = this->ptr;
+		const char* endPtr = this->ptr + this->size;
+		while (ptr != endPtr)
+			count += (*(ptr++) == ch);
+		return count;
+	}
+	inline uint32 StringView::Hash() const
+	{		
+		return std::hash<std::string_view>()(std::string_view(ptr, size));		
+	}
+	constexpr StringView StringView::SubString(size_t start, size_t count)
+	{
+		return StringView(ptr + start, count);
+	}
+	constexpr StringView& StringView::operator=(const StringView& sv)
+	{
+		ptr = sv.ptr;
+		size = sv.size;
+		return *this;
+	}
+	constexpr bool StringView::operator==(const StringView& s) const
+	{
+		if (size != s.size)
+			return false;
+
+		const char* end1 = ptr + size;
+		const char* ptr1 = ptr;
+		const char* ptr2 = s.ptr;
+
+		while (ptr1 != end1)
+		{
+			if (*ptr1 != *ptr2)
+				return false;
+
+			++ptr1;
+			++ptr2;
+		}
+		return true;
+	}
+	constexpr bool StringView::operator!=(const StringView& s) const
+	{
+		if (size != s.size)
+			return true;
+
+		const char* end1 = ptr + size;
+		const char* ptr1 = ptr;
+		const char* ptr2 = s.ptr;
+
+		while (ptr1 != end1)
+		{
+			if (*ptr1 != *ptr2)
+				return true;
+
+			++ptr1;
+			++ptr2;
+		}
+		return false;
+	}
 }

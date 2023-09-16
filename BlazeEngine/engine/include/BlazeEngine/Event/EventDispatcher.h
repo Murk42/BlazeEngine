@@ -1,8 +1,5 @@
 #pragma once
-#include "BlazeEngine/Event/Events.h"
 #include "BlazeEngine/Event/EventHandler.h"
-#include "BlazeEngine/DataStructures/Array.h"
-#include <utility>
 
 namespace Blaze
 {
@@ -12,67 +9,75 @@ namespace Blaze
 	template<typename T>
 	class EventDispatcher
 	{
-		Array<EventHandler<T>*> handlers;		
 	public:
-		~EventDispatcher()
-		{
-			for (auto& handler : handlers)
-				handler->dispatcher = nullptr;
-		}
+		~EventDispatcher();
 		
-		Result AddHandler(EventHandler<T>& handler)
-		{
-			handlers.Resize(handlers.Count() + 1);
-			handlers.Last() = &handler;
-			handler.dispatcher = this;			
-
-			return Result();
-		}
-		Result RemoveHandler(EventHandler<T>& handler)
-		{
-			auto it = std::find(handlers.begin(), handlers.end(), &handler);
-			if (it != handlers.end())
-			{
-				(*it)->dispatcher = nullptr;
-				*it = handlers.Last();
-				handlers.Resize(handlers.Count() - 1);				
-			}
-
-			return Result();
-		}
-
-		Result Call(T event)
-		{
-			return ADD_STACK_FRAME(LoggerListener::Listen([&]() {
-
-				for (auto& handler : handlers)
-				{
-					if (handler->listening)
-						handler->OnEvent(event);
-
-					if (handler->supress)
-						break;
-				}
-
-				}));						
-		}
-
-		EventDispatcher& operator+=(EventHandler<T>& handler)
-		{
-			AddHandler(handler);
-			return *this;
-		}
-		EventDispatcher& operator-=(EventHandler<T>& handler)
-		{
-			RemoveHandler(handler);
-			return *this;
-		}
+		Result AddHandler(EventHandler<T>& handler);
+		Result RemoveHandler(EventHandler<T>& handler);
+		
+		virtual Result Call(T event); 				
+	private:
+		std::mutex mutex;
+		Array<EventHandler<T>*> handlers;		
 	};
 
-	//template<typename T>
-	//EventHandler<T>::~EventHandler()
-	//{
-	//	//if (dispatcher)
-	//	//	dispatcher->RemoveHandler(*this);
-	//}		
+	template<typename T>
+	inline EventDispatcher<T>::~EventDispatcher()
+	{
+		for (auto& handler : handlers)
+		{
+			handler->DispatcherDestroyed();
+			handler->dispatcher = nullptr;
+		}
+	}
+
+	template<typename T>
+	inline Result EventDispatcher<T>::AddHandler(EventHandler<T>& handler)
+	{
+		std::lock_guard<std::mutex> lk { mutex };
+
+		if (handler.dispatcher != this && handler.dispatcher != nullptr)
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to add a evnet handler to a dispatcher but it is already subsribed to a dispatcher");
+
+		handlers.Resize(handlers.Count() + 1);
+		handlers.Last() = &handler;
+		handler.dispatcher = this;
+
+		return Result();
+	}
+
+	template<typename T>
+	inline Result EventDispatcher<T>::RemoveHandler(EventHandler<T>& handler)
+	{
+		std::lock_guard<std::mutex> lk { mutex };
+
+		auto it = std::find(begin(handlers), end(handlers), &handler);
+		if (!it.IsNull())
+		{
+			(*it)->dispatcher = nullptr;
+			*it = handlers.Last();
+			handlers.Resize(handlers.Count() - 1);
+		}
+
+		return Result();
+	}
+
+	template<typename T>
+	inline Result EventDispatcher<T>::Call(T event)
+	{
+		std::lock_guard<std::mutex> lk { mutex };
+
+		Debug::LoggerListener listener;
+
+		for (auto& handler : handlers)
+		{
+			if (handler->listening)
+				handler->OnEvent(event);
+
+			if (handler->supress)
+				break;
+		}
+
+		return listener.GetResult();
+	}	
 }

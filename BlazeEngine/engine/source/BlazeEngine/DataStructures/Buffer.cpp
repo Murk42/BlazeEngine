@@ -1,6 +1,4 @@
 #include "BlazeEngine/DataStructures/Buffer.h"
-#include <cstring>
-#include <memory>
 
 namespace Blaze
 {

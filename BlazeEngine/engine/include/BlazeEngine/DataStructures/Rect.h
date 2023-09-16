@@ -26,15 +26,15 @@ namespace Blaze
 			};
 			struct {
 				T x, y, w, h;
-			};
+			};			
 		};
 
 		Rect() : pos(), size() { }
-		Rect(const Rect& r) : pos(r.pos), size(r.size) { }
-		template<typename T2>
-		Rect(const Rect<T2>& r) : pos(r.pos), size(r.size) { }
+		Rect(const Rect& r) : x(r.x), y(r.y), w(r.w), h(r.h) { }
 		Rect(const T& x, const T& y, const T& w, const T& h) : x(x), y(y), w(w), h(h) { }
-		Rect(const Vec2<T>& pos, const Vec2<T>& size) : pos(pos), size(size) { }		
+		Rect(const Vec2<T>& pos, const Vec2<T>& size) : x(pos.x), y(pos.y), w(size.x), h(size.y) { }
+		template<typename T2>
+		explicit Rect(const Rect<T2>& r) : x(r.x), y(r.y), w(r.w), h(r.h) { }
 
 		bool operator==(const Rect& other)
 		{

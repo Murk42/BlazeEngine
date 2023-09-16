@@ -12,16 +12,23 @@ namespace Blaze
 		return freeTypeLibrary;
 	}
 
-	Startup::BlazeLibrariesInitInfo::FreeTypeInitInfo InitializeFreeType()
+	Timing InitializeCoreFreeType()
 	{
-		Startup::BlazeLibrariesInitInfo::FreeTypeInitInfo initInfo;
-		TimePoint startTimePoint = TimePoint::GetWorldTime();
+		Timing timing{ "FreeType initialization" };
 
 		if (FT_Init_FreeType(&freeTypeLibrary) != 0)
 			throw String("Failed to initialize the FreeType libary");
 
-		initInfo.initTime = TimePoint::GetWorldTime() - startTimePoint;
-		return initInfo;
+		return timing;
+	}
+
+	TimingResult InitializeFreeType()
+	{
+		Timing timing{ "FreeType" };
+		
+		timing.AddNode(InitializeCoreFreeType());
+
+		return timing;
 	}
 	void TerminateFreeType()
 	{

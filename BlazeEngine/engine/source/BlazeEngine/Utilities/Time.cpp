@@ -1,5 +1,4 @@
 #include "BlazeEngine/Utilities/Time.h"
-#include <chrono>
 
 namespace Blaze
 {

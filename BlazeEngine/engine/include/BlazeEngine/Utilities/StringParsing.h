@@ -1,21 +1,20 @@
 #pragma once
-#include "BlazeEngine/DataStructures/Array.h"
 
 namespace Blaze::StringParsing
 {
-	bool BLAZE_API SplitAtFirst(StringView value, String& first, String& second, char ch);
+	BLAZE_API bool SplitAtFirst(StringView value, String& first, String& second, char ch);
+	
+	BLAZE_API bool GetAfterFirst(StringView value, String& out, char ch);
+	BLAZE_API bool GetBeforeFirst(StringView value, String& out, char ch);
+	
+	BLAZE_API bool GetAfterLast(StringView value, String& out, char ch);
+	BLAZE_API bool GetBeforeLast(StringView value, String& out, char ch);
+	
+	BLAZE_API bool RemoveQuotes(StringView value, String& out);
+	BLAZE_API bool RemoveBrackets(StringView value, String& out, char right = '(', char left = ')');
+	BLAZE_API void RemoveSpace(StringView value, String& out);
 
-	bool BLAZE_API GetAfterFirst(StringView value, String& out, char ch);
-	bool BLAZE_API GetBeforeFirst(StringView value, String& out, char ch);
-
-	bool BLAZE_API GetAfterLast(StringView value, String& out, char ch);
-	bool BLAZE_API GetBeforeLast(StringView value, String& out, char ch);
-
-	bool BLAZE_API RemoveQuotes(StringView value, String& out);
-	bool BLAZE_API RemoveBrackets(StringView value, String& out, char right = '(', char left = ')');
-	void BLAZE_API RemoveSpace(StringView value, String& out);
-
-	Array<String> BLAZE_API Split(StringView value, char ch);
+	BLAZE_API Array<String> Split(StringView value, char ch);
 
 	enum class FloatStringFormat
 	{
@@ -26,6 +25,11 @@ namespace Blaze::StringParsing
 	};
 
 	ENUM_CLASS_BITWISE_OPERATIONS(FloatStringFormat)
+
+	inline String Convert(const String& value) { return value; }
+	inline String Convert(String&& value) { return value; }
+	inline String Convert(const StringView& value) { return value; }
+	inline String Convert(const char* ptr) { return ptr; }	
 
 	Result BLAZE_API Convert(const StringView& from, uint64& to, uint base = 10, uint* count = nullptr);
 	Result BLAZE_API Convert(const StringView& from, int64&  to, uint base = 10, uint* count = nullptr);
@@ -48,4 +52,30 @@ namespace Blaze::StringParsing
 	String BLAZE_API Convert(int8   value, uint base = 10, uint* count = nullptr);
 	String BLAZE_API Convert(float  value, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
 	String BLAZE_API Convert(double value, FloatStringFormat format = FloatStringFormat::Default, uint* count = nullptr);
+
+	template<typename T>
+	concept IsConvertibleToString = requires (T x) {
+		(String)StringParsing::Convert(x);
+	} || requires (T x) {
+		String(x);
+	};
+
+	template<typename T>
+	concept IsConvertibleToStringUTF8 = requires (T x) {
+		(StringUTF8)StringParsing::Convert(x);
+	} || requires (T x) {
+		StringUTF8(x);
+	};
+
+	template<typename ... T> requires (IsConvertibleToString<T> && ...)
+	String Merge(T ... values)
+	{
+		return (((String)Convert(std::forward<T>(values))) + ...);
+	}
+
+	template<typename ... T> requires (IsConvertibleToStringUTF8<T> && ...)
+	StringUTF8 MergeUTF8(T ... values)
+	{
+		return (((StringUTF8)Convert(values)) + ...);
+	}
 }

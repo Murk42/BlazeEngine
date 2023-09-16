@@ -1,39 +1,97 @@
 #pragma once
 #include "ComponentTypeRegistry.h"
 #include "System.h"
+#include "BlazeEngine/DataStructures/Constexpr.h"
 
 namespace Blaze::ECS
-{
-	class Entity;
+{			
+	template<Constexpr::FixedString ... Tags>
+	struct TagGroup
+	{
+		static constexpr uint Size = 0;
+		static constexpr std::array<StringView, 0> tags;
+
+		template<Constexpr::FixedString ... NewTags>
+		using Concat = TagGroup<NewTags...>;
+		template<typename G>
+		using Combine = G;
+	};			
+	template<Constexpr::FixedString Tag, Constexpr::FixedString Tag2, Constexpr::FixedString ... Tags>
+	struct TagGroup<Tag, Tag2, Tags...>
+	{
+		static constexpr uint Size = 2 + sizeof...(Tags);
+
+		template<Constexpr::FixedString ... NewTags>
+		using Concat = TagGroup<Tag, Tag2, Tags..., NewTags...>;
+		template<typename G>
+		using Combine = typename G::template Concat<Tag, Tag2, Tags...>;
+		using Next = TagGroup<Tag2, Tags...>;
+
+		static constexpr StringView tag = Tag;
+		static constexpr std::array<StringView, Size> tags = Constexpr::ConcatArray(std::array<StringView, 1>({ Tag }), Next::tags);
+	};
+	template<Constexpr::FixedString Tag>
+	struct TagGroup<Tag>
+	{	
+		static constexpr uint Size = 1;
+
+		template<Constexpr::FixedString ... NewTags>
+		using Concat = TagGroup<Tag, NewTags...>;
+		template<typename G>
+		using Combine = typename G::template Concat<Tag>;
+
+		using Next = TagGroup<>;
+
+		static constexpr StringView tag = Tag;
+		static constexpr std::array<StringView, 1> tags{ tag };
+	};
+
+	template<typename T>
+	concept HasValidTypeTags = requires {
+		typename T::TypeTags;
+	};
+	template<typename T>
+	concept DerivesComponent = requires {
+		std::derived_from<T, Component>;
+	};
+
+	class Entity;	
 
 #define COMPONENT(name, systemName)											\
-	const Blaze::ECS::ComponentTypeData& GetTypeData() const override { return GetEntity()->GetScene()->GetRegistry().GetComponentTypeData(#name); } \
-	static constexpr const char* typeName = #name;							\
-	using System = systemName;																						
+	static constexpr StringView typeName = #name;							\
+	using System = systemName;												\
+	static_assert(::Blaze::ECS::HasValidTypeTags<name>, "The component must have a valid \"TypeTags\" typename for it to be a valid component. Maybe multiple base classes have the typename already defined, use \"COMPONENT_SET_TYPE_TAGS\" or \"COMPONENT_COMBINE_TYPE_TAGS\" in that case");\
+
+#define COMPONENT_ADD_TYPE_TAGS(...) using TypeTags = TypeTags::Concat<__VA_ARGS__>;
 
 	class BLAZE_API Component
-	{		
-		uint bucketIndex;		
+	{				
 		Entity* entity;
-
+		System* system;
 	public:
-		Component();
-
-		virtual const ComponentTypeData& GetTypeData() const = 0;
+		Component();	
+		Component(const Component&) = delete;
+		
+		bool GetTypeData(const ComponentTypeData*& typeData) const;
+		inline System* GetSystem() const { return system; }
 		inline Entity* GetEntity() const { return entity; }		
 
 		template<typename T>
-		T* Cast()
+		inline T* Cast()
 		{
-			if (GetTypeData().GetTypeName() != T::typeName)
-			{				
-				Logger::ProcessLog(BLAZE_ERROR_LOG("Blaze Engine", "Invalid component cast"));
-				return nullptr;
-			}
-		
-			return (T*)this;
+			const ComponentTypeData* typeData;
+			if (!GetTypeData(typeData))
+				Debug::Logger::LogError("Blaze Engine", "Component has to type data");
+
+			if (typeData->GetTypeName() != T::typeName)				
+				Debug::Logger::LogError("Blaze Engine", "Invalid component cast");								
+
+			return (T*)this;					
 		}
 
+		Component& operator=(const Component&) = delete;
+
+		using TypeTags = TagGroup<>;
 
 		friend class ComponentContainer;
 		friend class Scene;
@@ -55,28 +113,45 @@ namespace Blaze::ECS
 
 		struct ElementHeader
 		{
-			BucketHeader* bucket;			
+			BucketHeader* bucket;
 		};
 
 		struct BucketHeader
-		{
-			FlagType flags;			
+		{		
+			FlagType flags;
+		
+			uint MarkNew();
+			void Unmark(uint index);
+
+			bool IsFull();			
+			bool IsEmpty();
 		};
 
+		//Important for bucket storage
 		uint elementSize;
-		uint elementCount;
 		BucketHeader** buckets;
 		uint bucketCount;
-		uint nonFullBucketCount;		
 
-		ElementHeader* BucketAllocate(BucketHeader* bucket);
-		ElementHeader* BucketAllocateNoConstruct(BucketHeader* bucket);
-		void BucketFree(ElementHeader* ptr);
+		//Important for bucket manipulation
+		uint nonFullBucketCount;			
+
+		//Important for client
+		uint elementCount;
+
+		void GetComponentLocation(Component*, BucketHeader*&, uint&);
+		Component* GetComponentFromLocation(BucketHeader*, uint index, ElementHeader*& element);		
+
 		void* FirstInBucket(BucketHeader* bucket) const;
 		void* LastInBucket(BucketHeader* bucket) const;
 
 		void Increment(uint& bucketIndex, Component*& ptr) const;
 		void Decrement(uint& bucketIndex, Component*& ptr) const;
+
+		BucketHeader* AllocateBucket();
+		void FreeBucket(BucketHeader* bucket);
+
+		void RemoveBucket(BucketHeader* bucket);
+		void AddBucket(BucketHeader* bucket);
 	public:
 		ComponentContainer();
 		~ComponentContainer();
@@ -86,6 +161,7 @@ namespace Blaze::ECS
 		Component* Create();
 		Component* Allocate();
 		void Destroy(Component*);
+		void Free(Component*);
 
 		uint Count() const { return elementCount; }
 

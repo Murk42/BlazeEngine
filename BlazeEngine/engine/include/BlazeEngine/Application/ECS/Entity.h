@@ -1,7 +1,6 @@
 #pragma once
 #include "Component.h"
 #include "ComponentTypeRegistry.h"
-#include <span>
 
 namespace Blaze::ECS
 {
@@ -9,44 +8,60 @@ namespace Blaze::ECS
 
 	class BLAZE_API Entity
 	{
-		Scene* scene;				
-
-		size_t componentCount;
-		Component** components;
-		void* data;
-
-		void SetupComponents(std::initializer_list<const ComponentTypeData*> components);
-		void SetComponent(uint index, Component* component);
-
-		const ComponentTypeRegistry* GetRegistry() const;
-	public:				
+	public:
 		Entity();
 		~Entity();
 
-		template<typename T>
+		template<typename C> requires IsComponent<C>
 		bool HasComponent() const;
-		bool HasComponent(const ComponentTypeData&) const;
+		bool HasComponent(const ComponentTypeData&) const;		
 
-		template<typename Component>
-		Component* GetComponent() const;
-		Component* GetComponent(const ComponentTypeData&) const;
+		template<typename C> requires IsComponent<C>
+		C* GetComponent() const;
+		Component* GetComponent(const ComponentTypeData&) const;		
+		Component* GetComponent(uint index) const;
+		const ComponentTypeData* GetComponentTypeData(uint index);
 				
-		std::span<Component*, std::dynamic_extent> GetComponents() const;
+		uint GetComponentCount() const { return componentCount; }
 
 		Scene* GetScene() const { return scene; }
 
-		friend class Scene;
+		friend class Scene;		
+	private:				
+		Scene* scene;				
+		uint componentCount;		
+		uint arrayIndex;
+
+		const ComponentTypeRegistry* GetRegistry() const;
 	};
 
-	template<typename T>
+	template<typename C> requires IsComponent<C>
 	bool Entity::HasComponent() const
 	{
-		return HasComponent(GetRegistry()->GetComponentTypeData<T>());
+		auto registry = GetRegistry();		
+		return HasComponent(registry->GetComponentTypeData<C>());
 	}
 
-	template<typename T>
-	T* Entity::GetComponent() const
+	template<typename C> requires IsComponent<C>
+	C* Entity::GetComponent() const
 	{
-		return GetComponent(GetRegistry()->GetComponentTypeData<T>())->Cast<T>();
+		auto registry = GetRegistry();		
+		const ComponentTypeData* typeData;
+
+		if (registry->GetComponentTypeData<C>(typeData))
+			return (C*)GetComponent(*typeData);		
+		{
+			Debug::Logger::LogError("Blaze Engine", "Registry doesnt contain this component type");
+			return nullptr;
+		}
 	}
 }
+
+/*
+	0 1 2 3 4 5 6 7 8 9 10     900
+	A B C D E F G H I J K  ...  Z
+	.   . .         .   .       . 6
+	. .   .   . . .               6
+	    . .                     . 3
+	.   .   .     .   .           5	
+*/

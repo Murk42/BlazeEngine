@@ -1,7 +1,6 @@
 #pragma once
 #include "BlazeEngine/Input/Key.h"
-
-#include <functional>
+#include "BlazeEngine/Input/InputEvents.h"
 
 namespace Blaze
 {	
@@ -9,35 +8,41 @@ namespace Blaze
 
 	namespace Input
 	{
-		struct KeyState
+		struct InputEventSystem
 		{
-			//"down" is true the same frame "pressed" is true, but is false as soon "released" is true
-			bool down;
-			//True only one frame when the button was pressed
-			bool pressed;
-			//True only one frame when the button was released
-			bool released;
-			uint combo;
-			double time;
-
-			constexpr operator bool() const { return pressed; }
+			EventDispatcher<Events::KeyPressed            > keyPressedDispatcher;
+			EventDispatcher<Events::KeyReleased           > keyReleasedDispatcher;
+			EventDispatcher<Events::MouseMotion           > mouseMotionDispatcher;
+			EventDispatcher<Events::MouseScroll           > mouseScrollDispatcher;
+			EventDispatcher<Events::TextInput             > textInputDispatcher;
+			EventDispatcher<Events::WindowResizedEvent    > windowResizedDispatcher;
+			EventDispatcher<Events::WindowMovedEvent      > windowMovedDispatcher;
+			EventDispatcher<Events::WindowMinimizedEvent  > windowMinimizedDispatcher;
+			EventDispatcher<Events::WindowMaximizedEvent  > windowMaximizedDispatcher;
+			EventDispatcher<Events::WindowFocusGainedEvent> windowFocusGainedDispatcher;
+			EventDispatcher<Events::WindowFocusLostEvent  > windowFocusLostDispatcher;
+			EventDispatcher<Events::WindowCloseEvent      > windowCloseDispatcher;
+			EventDispatcher<Events::WindowMouseEnterEvent > windowMouseEnterDispatcher;
+			EventDispatcher<Events::WindowMouseLeaveEvent > windowMouseLeaveDispatcher;
 		};
 
-		BLAZE_API void Update();
+		BLAZE_API InputEventSystem& GetInputEventSystem();
 
-		BLAZE_API KeyState GetKeyState(Key key);
-		BLAZE_API KeyState GetKeyState(MouseKey key);
+		BLAZE_API void Update();		
 
-		BLAZE_API int GetMouseScroll();
-		BLAZE_API Vec2i GetMousePos();		
-		BLAZE_API Vec2i GetMouseMovement();
-		BLAZE_API Window* GetFocusedWindow();
-		BLAZE_API double GetDoubleClickInterval();
+		struct KeyState
+		{
+			bool pressed;
+			bool down;
+			bool released;
+			bool up;
+			uint combo;
+			double time;
+		};
 
-		BLAZE_API void ShowCursor(bool show);
-		BLAZE_API void LockCursor(bool lock);
-
-		BLAZE_API void SetDoubleClickInterval(double interval);
-		BLAZE_API void SetMousePos(Vec2i);
+		inline Vec2i GetMousePos() { return Vec2i(); }
+		inline int GetMouseScroll() { return 0; }
+		inline Vec2i GetMouseMovement() { return Vec2i(); }
+		inline KeyState GetKeyState(Key key) { return { }; }
 	}
 }

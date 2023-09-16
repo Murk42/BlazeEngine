@@ -1,200 +1,175 @@
 #include "BlazeEngine/Core/Window.h"
 #include "source/BlazeEngine/Internal/Conversions.h"
+#include "source/BlazeEngine/Internal/WindowCreation.h"
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 namespace Blaze
-{				
-	void* GetOpenGLInitWindow();	
-	static bool firstWindowCreated = false;
-
-	const std::vector<Window*>& GetAllWindows()
+{	
+	WindowHandle RequestWindowCreation(WindowCreationData data)
 	{
-		return engineData->allWindows;
+		return windowCreationQueue.Request(data);
+	}
+	void RequestWindowDestruction(WindowHandle window)
+	{
+		windowDestructionQueue.Request({ window });
 	}
 
-	bool WasFirstWindowCreated()
+	WindowHandle CreateWindowHandle(StringView title, Vec2i pos, Vec2i size, WindowHandleGraphicsaAPI graphicsAPI)
 	{
-		return firstWindowCreated;
+		return RequestWindowCreation({ title, pos, size, graphicsAPI });
 	}
-
-	void* CreateWindow(StringView title, Vec2i size)
+	void DestroyWindowHandle(WindowHandle handle)
 	{
-		if (!firstWindowCreated)
-		{
-			void* ptr = GetOpenGLInitWindow();
-			SDL_SetWindowTitle((SDL_Window*)ptr, title.Ptr());
-			SDL_SetWindowSize((SDL_Window*)ptr, size.x, size.y);									
-			firstWindowCreated = true;
-			return ptr;
-		}
-		else
-			return SDL_CreateWindow(title.Ptr(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size.x, size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+		return RequestWindowDestruction(handle);
 	}
-
-	Window::Window()
+	
+	Window::Window(WindowHandle handle)
+		: windowHandle(handle)
 	{
-		engineData->allWindows.emplace_back(this);
-		ptr = CreateWindow("Blaze Engine Application", { 640, 360 });
-	}
-	Window::Window(StringView title)
-	{
-		engineData->allWindows.emplace_back(this);
-		ptr = CreateWindow(title, { 640, 360 });
-	}
-	Window::Window(StringView title, Vec2i size)
-	{
-		engineData->allWindows.emplace_back(this);
-		ptr = CreateWindow(title, size);
-	}
-
+		SDL_SetWindowData((SDL_Window*)windowHandle, "Blaze", this);
+	}		
 	Window::~Window()
-	{
-		auto i = std::find(engineData->allWindows.begin(), engineData->allWindows.end(), this);
-
-		if (i != engineData->allWindows.end())
-			engineData->allWindows.erase(i);
-
-		SDL_DestroyWindow((SDL_Window*)ptr);
+	{		
+		SDL_SetWindowData((SDL_Window*)windowHandle, "Blaze", nullptr);		
 	}
 
 	Vec2i Window::GetPos() const
 	{
 		Vec2i pos;
-		SDL_GetWindowPosition((SDL_Window*)ptr, &pos.x, & pos.y);
+		SDL_GetWindowPosition((SDL_Window*)windowHandle, &pos.x, &pos.y);
 		SDL_Rect rect;
-		SDL_GetDisplayBounds(0, &rect);		
+		SDL_GetDisplayBounds(0, &rect);
 		pos.y = rect.h - pos.y - GetSize().y;
 		return pos;
 	}
 	Vec2i Window::GetSize() const
 	{
 		Vec2i size;
-		SDL_GetWindowSize((SDL_Window*)ptr, &size.x, &size.y);
+		SDL_GetWindowSize((SDL_Window*)windowHandle, &size.x, &size.y);
 		return size;
 	}
 	String Window::GetTitle() const
 	{
-		return SDL_GetWindowTitle((SDL_Window*)ptr);
+		return SDL_GetWindowTitle((SDL_Window*)windowHandle);
 	}
 
 	Result Window::SetIcon(BitmapView bitmap)
 	{
-		Result result;
 
-		if (bitmap.GetPixelType() != BitmapPixelType::Uint8 || bitmap.GetPixelFormat() != BitmapPixelFormat::RGBA)		
-			return BLAZE_WARNING_LOG("Blaze Engine", "Unsuported bitmap type");					
+		if (bitmap.GetPixelType() != BitmapColorComponentType::Uint8 || bitmap.GetPixelFormat() != BitmapColorFormat::RGBA)
+			return BLAZE_WARNING_LOG("Blaze Engine", "Unsuported bitmap type");
 
 		SDL_Surface* surface;
 		surface = SDL_CreateRGBSurfaceWithFormat(0, bitmap.GetSize().x, bitmap.GetSize().y, 32, SDL_PIXELFORMAT_RGBA32);
 
 
 		SDL_LockSurface(surface);
-		size_t stride = bitmap.GetSize().x * GetFormatDepth(bitmap.GetPixelFormat(), result);
-		CHECK_RESULT(result);
+		size_t stride = bitmap.GetSize().x * BitmapColorFormatComponentCount(bitmap.GetPixelFormat());
+
 		uint8* dst = (uint8*)surface->pixels;
-		uint8* src = (uint8*)bitmap.GetPixels() + stride * (bitmap.GetSize().y - 1);		
+		uint8* src = (uint8*)bitmap.GetPixels() + stride * (bitmap.GetSize().y - 1);
 		for (size_t y = 0; y < surface->h; ++y)
 		{
 			memcpy(dst, src, stride);
 			dst += surface->pitch;
 			src -= stride;
-		}		
+		}
 		SDL_UnlockSurface(surface);
 
-		SDL_SetWindowIcon((SDL_Window*)ptr, surface);		
+		SDL_SetWindowIcon((SDL_Window*)windowHandle, surface);
 		SDL_FreeSurface(surface);
 
 		return Result();
 	}
 	void Window::SetOpacity(float opacity)
-	{		
-		SDL_SetWindowOpacity((SDL_Window*)ptr, opacity);
+	{
+		SDL_SetWindowOpacity((SDL_Window*)windowHandle, opacity);
 	}
 	void Window::SetPos(Vec2i s)
 	{
 		s.y = GetSize().y - s.y;
-		SDL_SetWindowPosition((SDL_Window*)ptr, s.x, s.y);
+		SDL_SetWindowPosition((SDL_Window*)windowHandle, s.x, s.y);
 	}
 	void Window::SetSize(Vec2i s)
 	{
-		SDL_SetWindowSize((SDL_Window*)ptr, s.x, s.y);
+		SDL_SetWindowSize((SDL_Window*)windowHandle, s.x, s.y);
 	}
 	void Window::SetTitle(StringView title)
 	{
-		SDL_SetWindowTitle((SDL_Window*)ptr, title.Ptr());
+		SDL_SetWindowTitle((SDL_Window*)windowHandle, title.Ptr());
 	}
 	void Window::SetMinimumSize(Vec2i size)
 	{
-		SDL_SetWindowMinimumSize((SDL_Window*)ptr, size.x, size.y);
+		SDL_SetWindowMinimumSize((SDL_Window*)windowHandle, size.x, size.y);
 	}
 	void Window::SetMaximumSize(Vec2i size)
 	{
-		SDL_SetWindowMaximumSize((SDL_Window*)ptr, size.x, size.y);
+		SDL_SetWindowMaximumSize((SDL_Window*)windowHandle, size.x, size.y);
 	}
 
 	void Window::Minimize()
 	{
-		SDL_MinimizeWindow((SDL_Window*)ptr);
+		SDL_MinimizeWindow((SDL_Window*)windowHandle);
 	}
 	void Window::Maximize()
 	{
-		SDL_MaximizeWindow((SDL_Window*)ptr);
+		SDL_MaximizeWindow((SDL_Window*)windowHandle);
 	}
 
 	void Window::Raise()
 	{
-		SDL_RaiseWindow((SDL_Window*)ptr);
+		SDL_RaiseWindow((SDL_Window*)windowHandle);
 	}
 
 	void Window::ShowWindow(bool show)
 	{
 		if (show)
-			SDL_ShowWindow((SDL_Window*)ptr);
+			SDL_ShowWindow((SDL_Window*)windowHandle);
 		else
-			SDL_HideWindow((SDL_Window*)ptr);
+			SDL_HideWindow((SDL_Window*)windowHandle);
 	}
 
-
-	void Window::SetFullscreen(bool fullscreen)
+	void Window::SetWindowFullscreenMode(bool fullscreen)
 	{
 		if (fullscreen)
-			SDL_SetWindowFullscreen((SDL_Window*)ptr, SDL_WINDOW_FULLSCREEN);
+			SDL_SetWindowFullscreen((SDL_Window*)windowHandle, SDL_WINDOW_FULLSCREEN);
 		else
-			SDL_SetWindowFullscreen((SDL_Window*)ptr, 0);
-	}
-	void Window::SetBorderless(bool lockMouseInside)
-	{
-		SDL_SetWindowFullscreen((SDL_Window*)ptr, 0);
-		SDL_SetWindowBordered((SDL_Window*)ptr, SDL_FALSE);
-		SDL_SetWindowGrab((SDL_Window*)ptr, (SDL_bool)lockMouseInside);
-	}
-	void Window::SetWindowed(bool resizable, bool lockMouseInside)
-	{
-		SDL_SetWindowFullscreen((SDL_Window*)ptr, 0);		
-		SDL_SetWindowBordered((SDL_Window*)ptr, SDL_TRUE);
-		SDL_SetWindowResizable((SDL_Window*)ptr, (SDL_bool)resizable);
-		SDL_SetWindowGrab((SDL_Window*)ptr, (SDL_bool)lockMouseInside);
+			SDL_SetWindowFullscreen((SDL_Window*)windowHandle, 0);		
 	}
 
-	bool Window::IsFullscreen() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_FULLSCREEN_DESKTOP; }
-	bool Window::IsBorderless() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_BORDERLESS; }
-	bool Window::IsWindowed() { return !(SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_BORDERLESS); }
-	bool Window::IsResizable() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_RESIZABLE; }
-	bool Window::IsMouseLockedInside() { return SDL_GetWindowGrab((SDL_Window*)ptr); }
-	bool Window::IsMinmized() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_MINIMIZED; }
-	bool Window::IsMaximized() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_MAXIMIZED; }
-	bool Window::IsShown() { return SDL_GetWindowFlags((SDL_Window*)ptr) & SDL_WINDOW_SHOWN; }
+	void Window::SetWindowBorderFlag(bool hasBorder)
+	{
+		SDL_SetWindowBordered((SDL_Window*)windowHandle, SDL_FALSE);
+	}
+
+	void Window::SetWindowResizableFlag(bool resizable)
+	{
+		SDL_SetWindowResizable((SDL_Window*)windowHandle, (SDL_bool)resizable);
+	}
+
+	void Window::SetLockMouseFlag(bool lockMouse)
+	{
+		SDL_SetWindowGrab((SDL_Window*)windowHandle, (SDL_bool)lockMouse);
+	}	
+
+	bool Window::IsFullscreen() { return SDL_GetWindowFlags((SDL_Window*)windowHandle) & SDL_WINDOW_FULLSCREEN_DESKTOP; }
+	bool Window::IsBorderless() { return SDL_GetWindowFlags((SDL_Window*)windowHandle) & SDL_WINDOW_BORDERLESS; }	
+	bool Window::IsResizable() { return SDL_GetWindowFlags((SDL_Window*)windowHandle) & SDL_WINDOW_RESIZABLE; }
+	bool Window::IsMouseLocked() { return SDL_GetWindowGrab((SDL_Window*)windowHandle); }
+	bool Window::IsMinmized() { return SDL_GetWindowFlags((SDL_Window*)windowHandle) & SDL_WINDOW_MINIMIZED; }
+	bool Window::IsMaximized() { return SDL_GetWindowFlags((SDL_Window*)windowHandle) & SDL_WINDOW_MAXIMIZED; }
+	bool Window::IsShown() { return SDL_GetWindowFlags((SDL_Window*)windowHandle) & SDL_WINDOW_SHOWN; }
 
 	uint Window::GetWindowVideoDisplayIndex()
 	{
-		return SDL_GetWindowDisplayIndex((SDL_Window*)ptr);
+		return SDL_GetWindowDisplayIndex((SDL_Window*)windowHandle);
 	}
 
 	DisplayMode Window::GetWindowDisplayMode()
 	{
 		SDL_DisplayMode mode;
-		SDL_GetWindowDisplayMode((SDL_Window*)ptr, &mode);
+		SDL_GetWindowDisplayMode((SDL_Window*)windowHandle, &mode);
 		DisplayMode out;
 
 		Result result;
@@ -214,6 +189,6 @@ namespace Blaze
 		out.h = mode.size.y;
 		out.refresh_rate = mode.refreshRate;
 		out.driverdata = nullptr;
-		SDL_SetWindowDisplayMode((SDL_Window*)ptr, &out);
-	}
+		SDL_SetWindowDisplayMode((SDL_Window*)windowHandle, &out);
+	}			
 }

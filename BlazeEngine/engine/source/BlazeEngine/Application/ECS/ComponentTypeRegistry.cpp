@@ -3,14 +3,16 @@
 
 namespace Blaze::ECS
 {
-	ComponentTypeData emptyComponentTypeData;
+	//ComponentTypeData emptyComponentTypeData;
 	 
-	ComponentTypeData::ComponentTypeData(ComponentTypeRegistry* registry, const char* name, uint index,
+	ComponentTypeData::ComponentTypeData(ComponentTypeRegistry* registry, StringView name, uint index,
 		size_t size, ptrdiff_t baseOffset, Constructor constructoror, Destructor destructoror,
-		size_t systemSize, ptrdiff_t systemBaseOffset, SystemConstructor systemConstructor, SystemDestructor systemDestructor)
+		size_t systemSize, ptrdiff_t systemBaseOffset, SystemConstructor systemConstructor, SystemDestructor systemDestructor,
+		Set<StringView> typeTags)
 		: registry(registry), typeName(name), index(index),
 		size(size), baseOffset(baseOffset), constructor(constructoror), destructor(destructoror),
-		systemSize(systemSize), systemBaseOffset(systemBaseOffset), systemConstructor(systemConstructor), systemDestructor(systemDestructor)	
+		systemSize(systemSize), systemBaseOffset(systemBaseOffset), systemConstructor(systemConstructor), systemDestructor(systemDestructor),
+		typeTags(std::move(typeTags))
 	{
 
 	}
@@ -18,14 +20,16 @@ namespace Blaze::ECS
 	ComponentTypeData::ComponentTypeData()		
 		: registry(0), typeName(0), index(0),
 		size(0), baseOffset(0), constructor(0), destructor(0),
-		systemSize(0), systemBaseOffset(0), systemConstructor(0), systemDestructor(0)
+		systemSize(0), systemBaseOffset(0), systemConstructor(0), systemDestructor(0), 
+		typeTags()
 	{
 	}
 
 	ComponentTypeData::ComponentTypeData(ComponentTypeData&& typeData) noexcept
 		: registry(typeData.registry), typeName(typeData.typeName), index(typeData.index),
 		size(typeData.size), baseOffset(typeData.baseOffset), constructor(typeData.constructor), destructor(typeData.destructor),
-		systemSize(typeData.systemSize), systemBaseOffset(typeData.systemBaseOffset), systemConstructor(typeData.systemConstructor), systemDestructor(typeData.systemConstructor)
+		systemSize(typeData.systemSize), systemBaseOffset(typeData.systemBaseOffset), systemConstructor(typeData.systemConstructor), systemDestructor(typeData.systemConstructor),
+		typeTags(std::move(typeData.typeTags))
 	{
 		typeData.registry = nullptr;
 		typeData.typeName = "";
@@ -37,7 +41,7 @@ namespace Blaze::ECS
 		typeData.systemSize = 0;
 		typeData.systemBaseOffset = 0;
 		typeData.systemConstructor = nullptr;
-		typeData.systemDestructor = nullptr;
+		typeData.systemDestructor = nullptr;		
 	}
 
 	ComponentTypeData& ComponentTypeData::operator=(ComponentTypeData&& o) noexcept
@@ -52,6 +56,7 @@ namespace Blaze::ECS
 		systemSize = o.systemSize;
 		systemConstructor = o.systemConstructor;
 		systemDestructor = o.systemDestructor;
+		typeTags = std::move(o.typeTags);
 		o.registry = nullptr;
 		o.typeName = "";
 		o.index = 0;
@@ -61,7 +66,7 @@ namespace Blaze::ECS
 		o.destructor = nullptr;
 		o.systemSize = 0;
 		o.systemConstructor = nullptr;
-		o.systemDestructor = nullptr;
+		o.systemDestructor = nullptr;		
 
 		return *this;
 	}
@@ -76,17 +81,18 @@ namespace Blaze::ECS
 		return this != &other && GetTypeName() != other.GetTypeName();
 	}
 
-	Result ComponentTypeRegistry::RegisterType(const char* name,
+	Result ComponentTypeRegistry::RegisterType(StringView name,
 		size_t size, ptrdiff_t baseOffset, ComponentTypeData::Constructor constructor, ComponentTypeData::Destructor destructor,
-		size_t systemSize, ptrdiff_t systemBaseOffset, ComponentTypeData::SystemConstructor systemConstructor, ComponentTypeData::SystemDestructor systemDestructor)
+		size_t systemSize, ptrdiff_t systemBaseOffset, ComponentTypeData::SystemConstructor systemConstructor, ComponentTypeData::SystemDestructor systemDestructor,
+		Array<StringView> typeTags)
 	{
-		auto res = nameTable.try_emplace(StringView(name), 0);
+		auto [it, inserted] = nameTable.Insert(StringView(name), 0);
 
-		if (!res.second)
+		if (!inserted)
 			return BLAZE_WARNING_RESULT("Blaze Engine", "Trying to register a type but there is a type with the same name already registered");		
 
-		ComponentTypeData typeData = ComponentTypeData(this, name, typeCount, size, baseOffset, constructor, destructor, systemSize, systemBaseOffset, systemConstructor, systemDestructor);
-		res.first->second = typeCount;
+		ComponentTypeData typeData = ComponentTypeData(this, name, typeCount, size, baseOffset, constructor, destructor, systemSize, systemBaseOffset, systemConstructor, systemDestructor, ArrayView<StringView>(typeTags));
+		it->value = typeCount;
 
 		auto* oldTypes = types;
 
@@ -108,9 +114,9 @@ namespace Blaze::ECS
 	{
 	}
 	ComponentTypeRegistry::ComponentTypeRegistry(const ComponentTypeRegistry& other)
-		: typeCount(other.typeCount)
+		: typeCount(other.typeCount), nameTable(other.nameTable)
 	{
-		types = (ComponentTypeData*)Memory::Allocate(typeCount * sizeof(ComponentTypeData));
+		types = (ComponentTypeData*)Memory::Allocate(typeCount * sizeof(ComponentTypeData));			
 		
 		for (uint i = 0; i < typeCount; ++i)
 		{
@@ -118,10 +124,10 @@ namespace Blaze::ECS
 			new (types + i) ComponentTypeData(
 				this, o.typeName, i, 
 				o.size, o.baseOffset, o.constructor, o.destructor, 
-				o.systemSize, o.systemBaseOffset, o.systemConstructor, o.systemDestructor
+				o.systemSize, o.systemBaseOffset, o.systemConstructor, o.systemDestructor,
+				o.typeTags
 			);
 
-			nameTable.insert({ o.typeName, i });
 		}
 	}
 	ComponentTypeRegistry::ComponentTypeRegistry(ComponentTypeRegistry&& other) noexcept		
@@ -137,19 +143,34 @@ namespace Blaze::ECS
 	{
 		Memory::Free(types);
 	}
-	const ComponentTypeData& ComponentTypeRegistry::GetComponentTypeData(StringView name) const
+	bool ComponentTypeRegistry::GetComponentTypeData(StringView name, const ComponentTypeData*& typeData) const
 	{
-		auto it = nameTable.find((String)name);
-		if (it == nameTable.end())
-			return emptyComponentTypeData;
+		auto it = nameTable.Find((String)name);
+
+		if (it.IsNull())
+		{
+			typeData = nullptr;
+			return false;
+		}
 		else
-			return types[it->second];
+		{
+			typeData = &types[it->value];
+			return true;
+		}
 	}	
+
+	bool ComponentTypeRegistry::HasComponentTypeData(StringView name) const
+	{
+		auto it = nameTable.Find((String)name);
+
+		return !it.IsNull();			
+	}
+
 	ComponentTypeRegistry& ComponentTypeRegistry::operator=(const ComponentTypeRegistry& other)
 	{
 		Memory::Free(types);
 		typeCount = other.typeCount;
-		nameTable.clear();
+		nameTable = other.nameTable;		
 
 		types = (ComponentTypeData*)Memory::Allocate(typeCount * sizeof(ComponentTypeData));
 
@@ -159,11 +180,11 @@ namespace Blaze::ECS
 			new (types + i) ComponentTypeData(
 				this, o.typeName, i,
 				o.size, o.baseOffset, o.constructor, o.destructor,
-				o.systemSize, o.systemBaseOffset, o.systemConstructor, o.systemDestructor
-			);
-
-			nameTable.insert({ o.typeName, i });
+				o.systemSize, o.systemBaseOffset, o.systemConstructor, o.systemDestructor,
+				o.typeTags
+			);			
 		}
+
 		return *this;
 	}
 	ComponentTypeRegistry& ComponentTypeRegistry::operator=(ComponentTypeRegistry&& r) noexcept
@@ -180,10 +201,10 @@ namespace Blaze::ECS
 		r.types = nullptr;
 		r.typeCount = 0;		 
 		return *this;
-	}
+	}	
 
-	std::span<const ComponentTypeData> ComponentTypeRegistry::GetAllTypesData() const
+	ArrayView<ComponentTypeData> ComponentTypeRegistry::GetAllTypesData() const
 	{
-		return { types, types + typeCount };
+		return { types, typeCount };
 	}
 }

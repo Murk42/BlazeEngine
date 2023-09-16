@@ -1,12 +1,13 @@
-#include "BlazeEngine/Utilities/Thread.h"
+#include "BlazeEngine/Threading/Thread.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include <Windows.h>
+#include "source/BlazeEngine/Internal/Windows/WindowsPlatform.h"
 #else
 #error Not supported
 #endif
 
-static DWORD WINAPI ThreadProc(
+static DWORD WINAPI std_ThreadProc(
 	_In_ LPVOID lpParameter
 )
 {
@@ -14,6 +15,13 @@ static DWORD WINAPI ThreadProc(
 	int ret = func->operator()();
 	delete func;
 	return ret;
+}
+static DWORD WINAPI static_ThreadProc(
+	_In_ LPVOID lpParameter
+)
+{
+	int(*func)() = (int(*)())lpParameter;
+	return func();
 }
 
 namespace Blaze
@@ -39,39 +47,59 @@ namespace Blaze
 #endif
 	}
 
-	void Thread::Run(std::function<int()> func)
+	Result Thread::Run(std::function<int()> func)
 	{
-		if (handle != nullptr)
-			Logger::ProcessLog(Log(LogType::Fatal, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, "Blaze Engine", "Thread::Run called on a running thread"));
+#ifdef BLAZE_PLATFORM_WINDOWS
+		if (IsRunning())		
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Thread::Run called on a running thread");
 
 		std::function<int()>* ptr = new std::function<int()>(std::move(func));
 
-#ifdef BLAZE_PLATFORM_WINDOWS
-		handle = CreateThread(NULL, 0, ThreadProc, ptr, 0, NULL);
+		handle = CreateThread(NULL, 0, std_ThreadProc, ptr, 0, NULL);
 #endif
+		return Result();
 	}
 
-	void Thread::WaitToFinish()
+	Result Thread::Run(int(*func)())
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
+		if (IsRunning())
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Thread::Run called on a running thread");		
+
+		handle = CreateThread(NULL, 0, static_ThreadProc, func, 0, NULL);
+#endif
+		return Result();
+	}
+
+	void Thread::WaitToFinish() const
+	{
+#ifdef BLAZE_PLATFORM_WINDOWS		
 		WaitForSingleObject(handle, INFINITE); // wait infinitely
 #endif
 	}
 
-	void Thread::Terminate()
+	bool Thread::IsRunning() const
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
-		TerminateThread(handle, 0);
-#endif
-		handle = nullptr;
-	}
+		if (handle == NULL)
+			return false;
 
+		DWORD result = WaitForSingleObject(handle, 0);
+
+		if (result == WAIT_OBJECT_0)
+			return false;			
+		else if (result == WAIT_TIMEOUT) 		
+			return true;			
+		else
+		{
+			Debug::Logger::LogError("WinAPI", "WaitForSingleObject failed with error \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			return false;
+		}
+#endif
+	}	
 
 	Thread& Thread::operator=(Thread&& t) noexcept
-	{
-		if (handle != nullptr)
-			Logger::ProcessLog(Log(LogType::Fatal, BLAZE_FILE_NAME, BLAZE_FILE_LINE, BLAZE_FUNCTION_NAME, "Blaze Engine", "Thread::operator= called on a running thread"));
-
+	{		
 		handle = t.handle;
 		t.handle = nullptr;
 		return *this;

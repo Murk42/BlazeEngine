@@ -1,0 +1,112 @@
+#pragma once
+#include "BlazeEngine/DataStructures/StringViewUTF8.h"
+#include "BlazeEngine/DataStructures/Buffer.h"
+#include "BlazeEngine/DataStructures/Rect.h"
+#include "BlazeEngine/DataStructures/VirtualMap.h"
+#include "BlazeEngine/Resources/Bitmap/Bitmap.h"
+#include "BlazeEngine/Application/ResourceSystem/Resource.h"
+#include "BlazeEngine/File/Stream/Stream.h"
+
+namespace Blaze
+{
+	class Font;
+
+	enum class FontResolutionRenderType
+	{
+		Monochrome,
+		Antialiased,
+		HorizontalLCD,
+		VerticalLCD,
+		SDF,
+		MSDF,		
+	};
+
+	struct CharacterMetrics
+	{
+		float horizontalAdvance;
+		float verticalAdvance;
+		Vec2f offset;
+		Vec2f size;				
+	};	
+
+	class BLAZE_API FontResolution
+	{
+	public:		
+		mutable VirtualMap<String> dataMap;				
+
+		FontResolution();
+
+		bool GetCharacterMetrics(UnicodeChar ch, CharacterMetrics& metrics) const;
+
+		Vec2f GetKerning(UnicodeChar left, UnicodeChar right) const;
+
+		using CreateTextureCallback = std::function<void(Vec2i, BitmapColorFormat, BitmapColorComponentType)>;
+		using CopyPixelsCallback = std::function<void(Vec2i, BitmapView, UnicodeChar)>;
+		Result CreateAtlas(const CreateTextureCallback& createTexture, const CopyPixelsCallback& copyPixels, FontResolutionRenderType renderType) const;
+
+		inline const Font* GetFont() const { return font; }
+		inline uint GetFontHeight() const { return fontHeight; }
+		inline uint GetBaselineDistance() const { return baselineDistance; }		
+
+		friend class Font;		
+	private:
+		Font* font;		
+		Map<UnicodeChar, CharacterMetrics> characterMetrics;
+
+		uint fontHeight;
+		uint baselineDistance;		
+	};
+
+	class BLAZE_API CharacterSet
+	{
+	public:
+		struct CharacterSpan
+		{
+			UnicodeChar first;
+			UnicodeChar last;
+		};
+		
+		Array<CharacterSpan> spans;
+
+		CharacterSet();
+		CharacterSet(CharacterSPan)
+		CharacterSet(Array<CharacterSpan> spans);
+	}; 
+
+	class BLAZE_API Font : public ResourceSystem::Resource
+	{
+	public:		
+		Font();
+		Font(Path path);
+		~Font();
+
+		/// <summary>					Load a font file. </summary>
+		/// <param name='path'>			- Path to the file </param>
+		/// <param name='characters'>	- All characters to be loaded. If empty loads all characters from the file </param>		
+		Result Load(Path path);
+		Result Load(ReadStream& readStream);
+
+		void Clear();
+		
+		const FontResolution* CreateFontResolution(uint fontHeight, const CharacterSet& characterSet);
+
+		inline auto& GetResolutions() const { return resolutions; }
+		const FontResolution* GetFontResolutionWithNextBiggerFontHieght(uint fontHeight) const;
+
+		RESOURCE(Font)
+
+		friend class FontResolution;
+	private:
+		void* ptr;
+		void* memory;
+
+		List<FontResolution> resolutions;
+
+		uint pixelsPerUnit; //How many pixels fit in one font unit
+		float baselineDistance;
+
+		Result LoadCharacters(FontResolution* fontResolution, UnicodeChar first, UnicodeChar last);
+	};
+
+	
+}

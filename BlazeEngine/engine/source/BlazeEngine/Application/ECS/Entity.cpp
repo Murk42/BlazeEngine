@@ -1,8 +1,11 @@
 #include "BlazeEngine/Application/ECS/Entity.h"
 #include "BlazeEngine/Application/ECS/Scene.h"
 
+#include "EntityCreationData.h"
+
 namespace Blaze::ECS
-{	
+{		
+	/*
 	static inline size_t CountOnesUntil(uint8* buffer, size_t size, size_t endBitIndex)
 	{
 		if (endBitIndex == 0)
@@ -62,53 +65,92 @@ namespace Blaze::ECS
 
 		return (bool)(byte & mask);
 	}
+	*/	
 
-	void Entity::SetupComponents(std::initializer_list<const ComponentTypeData*> componentsTypeData)
+	const ComponentTypeData** FindEntityComponentData(Entity* entity, const ComponentTypeData& typeData)
 	{
-		auto allComponentsTypeData = scene->GetRegistry().GetAllTypesData();
-		auto typeCount = allComponentsTypeData.size();
-		componentCount = componentsTypeData.size();
-		size_t stateSize = (typeCount + 7) / 8;
-		data = Memory::Allocate(stateSize + sizeof(Component*) * componentCount);
-		components = (Component**)((byte*)data + stateSize);
+		auto first = GetEntityComponentsTypeData(entity);
+		auto last = first + entity->GetComponentCount();		
 
-		memset(data, 0, stateSize);
+		auto ptr = first;
+		while (ptr != last)
+			if (**ptr == typeData)
+				break;
+			else
+				++ptr;
 
-		for (auto typeData : componentsTypeData)
-		{
-			FlipBit((uint8*)data, typeData->Index());
-		}
-	}
-	void Entity::SetComponent(uint index, Component* component)
+		if (ptr == last)
+			return nullptr;
+
+		return ptr;
+	}	
+	Component* FindEntityComponent(const Entity* entity, const ComponentTypeData& typeData)
 	{
-		components[index] = component;
+		auto first = GetEntityComponentsTypeData(entity);
+		auto last = first + entity->GetComponentCount();
+
+		auto ptr = first;
+		while (ptr != last)
+			if (**ptr == typeData)
+				break;
+			else
+				++ptr;
+
+		if (ptr == last)
+			return nullptr;
+
+		auto components = GetEntityComponents(entity);
+		uint index = ptr - first;
+
+		return components[index];
 	}
+			
 	Entity::Entity()
-		: scene(nullptr), componentCount(0), components(nullptr), data(nullptr)
+		: scene(nullptr), componentCount(0)
 	{
+		scene = currentEntityCreationData->scene;
+		componentCount = currentEntityCreationData->typesData.Count();
 	}
 	Entity::~Entity()
-	{
-		Memory::Free(data);
+	{		
 	}
-	const ComponentTypeRegistry* Entity::GetRegistry() const
-	{
-		return &scene->GetRegistry();
-	}
+
 	bool Entity::HasComponent(const ComponentTypeData& typeData) const
-	{
-		return GetBit((uint8*)data, typeData.Index());		
+	{		
+		auto ptr = FindEntityComponent(this, typeData);		
+		return ptr != nullptr;
 	}
 	Component* Entity::GetComponent(const ComponentTypeData& typeData) const
 	{
-		if (!HasComponent(typeData))
+		auto ptr = FindEntityComponent(this, typeData);
+
+		if (ptr == nullptr)
 			return nullptr;
 
-		uint index = CountOnesUntil((uint8*)data, (uint8*)components - (uint8*)data, typeData.Index());
-		return components[index];
+		return ptr;		
 	}
-	std::span<Component*, std::dynamic_extent> Entity::GetComponents() const
+	Component* Entity::GetComponent(uint index) const
 	{
-		return std::span<Component*, std::dynamic_extent>(components, components + componentCount);
+		if (index > componentCount)
+		{			
+			Debug::Logger::LogError("Blaze Engine", StringParsing::Merge("Component index out of range. Index value was: " , index));
+			return nullptr;
+		}
+
+		return GetEntityComponents(this)[index];
+	}		
+	const ComponentTypeData* Entity::GetComponentTypeData(uint index)
+	{
+		if (index > componentCount)
+		{
+			Debug::Logger::LogError("Blaze Engine", StringParsing::Merge("Component index out of range. Index value was: ", index));
+			return nullptr;
+		}
+
+		return GetEntityComponentsTypeData(this)[index];
+	}
+	const ComponentTypeRegistry* Entity::GetRegistry() const
+	{		
+		return &scene->GetRegistry();
 	}
 }

@@ -1,40 +1,34 @@
 #include "BlazeEngine/Application/ECS/System.h"
 
-#include "SystemConstructData.h"
+#include "SystemCreationData.h"
 
 namespace Blaze::ECS
 {	
-	SystemConstructData systemConstructData;
+	SystemCreationData systemCreationData;
 
 	System::System() :
-		scene(systemConstructData.scene),
-		typeData(*systemConstructData.typeData)		
-	{
-		if (systemConstructData.state == 1)
-		{
-			systemConstructData.state = 2;
-		}
-		else if (systemConstructData.state == 0)
-		{			
-			Logger::ProcessLog(BLAZE_WARNING_LOG("Blaze Engine",
-				"Creating a system outside of a manager. It may not function properly. Or there was an internal engine error."));
-		}
-		else
-		{
-			Logger::ProcessLog(BLAZE_WARNING_LOG("Blaze Engine",
-				"Internal engine error. systemConstructData.state was changed inappropriately"));
-		}
+		scene(systemCreationData.scene),
+		typeData(systemCreationData.typeData)
+	{		
 	}
 	void System::Created(Component*)
 	{
 	}
 	void System::Destroyed(Component*)
 	{
-	}
-	void System::Update(const ComponentContainer&)
+	}		
+	bool System::GetTypeData(const ComponentTypeData*& typeData) const
 	{
+		if (this->typeData == nullptr)
+		{
+			typeData = nullptr;
+			return false;
+		}
+		else
+		{
+			typeData = this->typeData;
+			return true;
+		}
 	}
-	void System::Update(Component* component)
-	{
-	}	
+
 }

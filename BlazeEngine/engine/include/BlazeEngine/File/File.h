@@ -1,48 +1,70 @@
 #pragma once
 #include "BlazeEngine/File/Path.h"
-#include "BlazeEngine/DataStructures/Buffer.h"
+#include "BlazeEngine/File/Stream/FileStream.h"
 
 namespace Blaze
 {
-	enum class FileOpenMode
+	enum class FileAccessPermission
 	{
-		Read = 0,
-		Write = 1,
-		ReadWrite = 2
-	};
-	enum class FileOpenFlags
+		Read,
+		Write,
+		ReadWrite
+	};			
+	enum class FileOpenOptions
 	{
-		None = 0,
-		Append = 8,
-		Create = 256,
-		Truncate = 512,
-		Excel = 1024
-	};
-	enum class FilePermission
-	{
-		Read = 256,
-		Write = 128,
-		ReadWrite = 384
+		CreateAlways,		//Truncates if the file exists or creates one if it doesnt
+		CreateNew,			//Truncates new file, fails if file exists
+		OpenAlways,			//Appends if the file exists or creates one if it doesnt
+		OpenExisting,		//Appends existing file, fails if it doesn't exist
+		TruncateExisting,   //Truncates existing file, fails if it doesn't exist
 	};
 
-	ENUM_CLASS_BITWISE_OPERATIONS(FileOpenFlags)
-	
-	class BLAZE_API File
+	enum class FileLifetimeOption
 	{
-		int fd;
+		Normal, //Normal file
+		ShortLived, //If possible, the file wont be flushed to disk
+		Temporary, //The file is deleted when the last file descriptor is closed		
+	};
+	enum class FileUsageHint
+	{
+		Normal,
+		RandomAccess,
+		Sequential,
+	};		
+ 
+	struct FileOpenParameters
+	{
+		FileOpenOptions openOption = FileOpenOptions::OpenExisting;
+		bool createSubdirectories = true;
+
+		FileLifetimeOption locationHint = FileLifetimeOption::Normal;
+		FileUsageHint usageHint = FileUsageHint::Normal;
+	};
+
+	/*					EXISTS !EXIST TRUNCATES
+	                      0       0       0     Impossible
+	OPEN_EXISTING         1       0       0
+	                      0       1       0     Same as CREATE_NEW
+	OPEN_ALWAYS           1       1       0
+	                      0       0       1     Impossible
+	TRUNCATE_EXISTING     1       0       1 
+	CREATE_NEW            0       1       1 
+	CREATE_ALWAYS         1       1       1
+	
+	*/
+	
+#pragma warning( push )
+#pragma warning( disable : 4250)
+	class BLAZE_API File : public FileStream
+	{		
 	public:
 		File();
-		File(const Path& path, FileOpenMode mode, FileOpenFlags flags = FileOpenFlags::None, FilePermission perms = FilePermission::ReadWrite);
+		File(const Path& path, FileAccessPermission mode);
+		File(const Path& path, FileAccessPermission mode, FileOpenParameters parameters);
 		~File();
-
-		Result Open(const Path& path, FileOpenMode mode, FileOpenFlags flags = FileOpenFlags::None, FilePermission perms = FilePermission::ReadWrite);
-		int Open(const char* path, FileOpenMode mode, FileOpenFlags flags = FileOpenFlags::None, FilePermission perms = FilePermission::ReadWrite);
-		Result Close();
-		size_t Size();
-		//Puts the buffer size amount of bytes from the file into the buffer without allocating or freeing it.
-		size_t Read(Buffer& buffer);
-		size_t Read(void* ptr, size_t readAmount);		
-		size_t Write(BufferView buffer);
-		bool IsOpen() const;
+		
+		Result Open(const Path& path, FileAccessPermission mode);
+		Result Open(const Path& path, FileAccessPermission mode, FileOpenParameters parameters);
 	};
+#pragma warning( pop ) 
 }

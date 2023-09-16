@@ -25,8 +25,11 @@ namespace Blaze
 		inline size_t Size() const { return size; }		
 		
 		String SubString(size_t start, size_t size) const;
-		void Clear();	
+		void Clear();
 		String& Resize(size_t newSize, char fill = ' ');
+
+		inline bool Empty() const { return size == 0; }
+		uint32 Hash() const;
 
 		char* begin();
 		char* end();
@@ -41,17 +44,29 @@ namespace Blaze
 		char& operator[](size_t index) { return ptr[index]; }
 		const char& operator[](size_t index) const { return ptr[index]; }		
 
+		String& operator+= (const String&);
 		String& operator+= (const StringView&);
+		String& operator+= (const char*);
 		String& operator+= (const char&);		
 
-		friend BLAZE_API String operator+(const StringView& left, const StringView& right);
-		friend BLAZE_API String operator+(const StringView& left, const char& right);
-		friend BLAZE_API String operator+(const char& left, const StringView& right);
+		friend BLAZE_API String operator+(const StringView& left, const StringView& right);		
 	}; 
 
 	BLAZE_API String operator+(const StringView& left, const StringView& right);
+
+	BLAZE_API String operator+(const StringView& left, const String& right);
 	BLAZE_API String operator+(const StringView& left, const char* right);
-	BLAZE_API String operator+(const char* left, const StringView& right);
 	BLAZE_API String operator+(const StringView& left, const char& right);
+
+	BLAZE_API String operator+(const String& left, const StringView& right);	
+	BLAZE_API String operator+(const char* left, const StringView& right);
 	BLAZE_API String operator+(const char& left, const StringView& right);
+
+	BLAZE_API String operator+(const String& left, const String& right);
+
+	BLAZE_API String operator+(const String& left, const char* right);
+	BLAZE_API String operator+(const String& left, const char& right);
+
+	BLAZE_API String operator+(const char* left, const String& right);
+	BLAZE_API String operator+(const char& left, const String& right);
 }

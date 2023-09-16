@@ -1,7 +1,5 @@
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
 #include "BlazeEngine/DataStructures/StringUTF8.h"
-#include <cstring>
-#include <cstdint>
 
 namespace Blaze
 {
@@ -10,16 +8,16 @@ namespace Blaze
 	{
 	}
 	StringViewUTF8::Iterator::Iterator(const Iterator& i)
-		: ptr(i.ptr)
+		: ptr(i.ptr), value(i.value)
 	{
 	}
-	StringViewUTF8::Iterator::Iterator(const void* ptr)
-		: ptr(ptr)
+	StringViewUTF8::Iterator::Iterator(const void* ptr, uint size)
+		: ptr(ptr), value(ptr, size)
 	{
 	}
 	UnicodeChar StringViewUTF8::Iterator::ToUnicode() const
 	{
-		return UnicodeChar((const char*)ptr);
+		return value;
 	}
 	StringViewUTF8::Iterator StringViewUTF8::Iterator::operator++()
 	{
@@ -104,6 +102,7 @@ namespace Blaze
 	StringViewUTF8::Iterator& StringViewUTF8::Iterator::operator=(const Iterator& i)
 	{
 		ptr = i.ptr;
+		value = i.value;
 		return *this;
 	}
 
@@ -140,11 +139,11 @@ namespace Blaze
 
 	StringViewUTF8::Iterator StringViewUTF8::begin() const
 	{
-		return Iterator(buffer);
+		return Iterator(buffer, bufferSize - 1);
 	}
 	StringViewUTF8::Iterator StringViewUTF8::end() const
 	{
-		return Iterator((byte*)buffer + bufferSize - 1);
+		return Iterator((byte*)buffer + bufferSize - 1, 0);
 	}
 	StringViewUTF8& StringViewUTF8::operator=(const StringViewUTF8& s)
 	{

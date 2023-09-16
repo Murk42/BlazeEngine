@@ -5,8 +5,9 @@ EngineData* engineData = nullptr;
 
 namespace Blaze
 {
-	void InitializeEngineData()
+	TimingResult InitializeEngineData()
 	{
+		Timing timing{ "Engine core data" };
 		engineData = new EngineData();		
 
 		engineData->scancodemap = {
@@ -283,10 +284,19 @@ namespace Blaze
 					{ SDL_Scancode::SDL_SCANCODE_RSHIFT,			Key::RShift			},
 					{ SDL_Scancode::SDL_SCANCODE_RALT,				Key::RAlt			}
 		};
+
+		return timing.GetTimingResult();
 	}
 	void TerminateEngineData()
 	{		
 		delete engineData;
 		engineData = nullptr;
 	}
+}
+
+bool FlushOpenGLResult()
+{
+	bool wasFull = ::engineData->OpenGLResult.operator bool();
+	::engineData->OpenGLResult = ::Blaze::Result();
+	return wasFull;
 }

@@ -1,6 +1,6 @@
 #include "BlazeEngine/Input/Key.h"
 
-#include "SDL/SDL.h"
+#include "SDL2/SDL.h"
 
 #include <map>
 
@@ -9,28 +9,34 @@ namespace Blaze
 {	
 	SDL_Scancode GetScancodeFromKey(Key key)
 	{
-		return engineData->scancodemap.at(key);
+		auto it = engineData->scancodemap.Find(key);
+
+		if (it.IsNull())
+			return SDL_SCANCODE_UNKNOWN;
+		
+		return it->value;
 	}
 	Key GetKeyFromScancode(SDL_Scancode code)
 	{
-		auto it = engineData->keymap.find(code);
-		if (it != engineData->keymap.end())
-			return it->second;
-		return Key::Unknown;
+		auto it = engineData->keymap.Find(code);
+
+		if (it.IsNull())
+			return Key::Unknown;
+
+		return it->value;
 	}
 
 	String GetKeyName(Key key)
-	{		
-		return SDL_GetScancodeName(GetScancodeFromKey(key));		
-	}
-	String GetKeyName(MouseKey key)
-	{
-		switch (key)
-		{
-		case Blaze::MouseKey::MouseLeft: return "Mouse left button";
-		case Blaze::MouseKey::MouseMiddle: return "Mouse middle button";			
-		case Blaze::MouseKey::MouseRight: return "Mouse right button";			
-		default: return "Invalid key";
-		}
+	{	
+		if (key < Key::MouseLeft)
+			return SDL_GetScancodeName(GetScancodeFromKey(key));		
+		else
+			switch (key)
+			{
+			case Key::MouseLeft: return "Mouse left button";
+			case Key::MouseMiddle: return "Mouse middle button";
+			case Key::MouseRight: return "Mouse right button";
+			default: return "Invalid key";
+			}
 	}	
 }

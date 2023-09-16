@@ -1,70 +1,79 @@
 #include "BlazeEngine/Application/ECS/Component.h"
 #include "BlazeEngine/Application/ECS/Entity.h"
 #include "BlazeEngine/Application/ECS/Scene.h"
-#include <bit>
 
-#include "ComponentConstructData.h"
+#include "EntityCreationData.h"
 
 namespace Blaze::ECS
-{			
-	ComponentConstructData componentConstructData;	
+{				
+	//extern ComponentTypeData emptyComponenTypeData;
 
-	Component::Component() : 
-		entity(componentConstructData.entity), 		
-		bucketIndex(-1)
-	{	
-		if (componentConstructData.state == 1)
+	Component::Component()
+		: entity(nullptr), system(nullptr)
+	{
+		if (currentEntityCreationData->scene != nullptr)
 		{
-			componentConstructData.state = 2;
+			entity = currentEntityCreationData->currentEntity;
+			system = currentEntityCreationData->systems[(*currentEntityCreationData->currentTypeData)->Index()];			
+			++currentEntityCreationData->currentTypeData;
 		}
-		else if (componentConstructData.state == 0)
-		{			
-			Logger::ProcessLog(BLAZE_WARNING_LOG("Blaze Engine",
-				"Creating a component outside of a scene. It may not function properly. Or there was an internal engine error."));
-		}
-		else
-		{
-			Logger::ProcessLog(BLAZE_WARNING_LOG("Blaze Engine",
-				"Internal engine error. componentsConstructData.state was changed inappropriately"));
-		}		
 	}
 
-	ComponentContainer::ElementHeader* ComponentContainer::BucketAllocate(BucketHeader* bucket)
+	bool Component::GetTypeData(const ComponentTypeData*& typeData) const
 	{
-		uint index = std::countr_one(bucket->flags);
+		if (system == nullptr)
+			return false;
+
+		return system->GetTypeData(typeData);		
+	}	
+
+	uint ComponentContainer::BucketHeader::MarkNew()
+	{
+		uint index = std::countr_one(flags);
 		FlagType mask = FlagType(1) << index;
 
-		bucket->flags |= mask;
+		flags |= mask;
 
-		ElementHeader* element = (ElementHeader*)((byte*)bucket + sizeof(BucketHeader) + index * elementSize);
-		element->bucket = bucket;
-		
-		typeData->ConstructDirect((byte*)element + sizeof(ElementHeader));
-		return element;
+		return index;		
+	}	
+	void ComponentContainer::BucketHeader::Unmark(uint index)
+	{
+		FlagType mask = FlagType(1) << index;
+
+		if ((flags & mask) == 0)
+			Debug::Logger::LogError("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet");
+
+		flags ^= mask;
 	}
-	ComponentContainer::ElementHeader* ComponentContainer::BucketAllocateNoConstruct(BucketHeader* bucket)
+
+	bool ComponentContainer::BucketHeader::IsFull()
 	{
-		uint index = std::countr_one(bucket->flags);
-		FlagType mask = FlagType(1) << index;
-
-		bucket->flags |= mask;
-
-		ElementHeader* element = (ElementHeader*)((byte*)bucket + sizeof(BucketHeader) + index * elementSize);
-		element->bucket = bucket;
-
-		return element;
+		return flags == std::numeric_limits<FlagType>::max();
 	}
-	void ComponentContainer::BucketFree(ElementHeader* ptr)
+
+	bool ComponentContainer::BucketHeader::IsEmpty()
 	{
-		BucketHeader* bucket = ptr->bucket;
-		uint index = ((byte*)ptr - (byte*)bucket - sizeof(BucketHeader)) / elementSize;
-		FlagType mask = FlagType(1) << index;
+		return flags == 0;
+	}
 
-		if ((bucket->flags & mask) == 0)
-			Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet"));
+	void ComponentContainer::GetComponentLocation(Component* component, BucketHeader*& bucket, uint& index)
+	{
+		void* rawComponent = (byte*)component - typeData->BaseOffset();
+		ElementHeader* element = (ElementHeader*)((byte*)rawComponent - sizeof(ElementHeader));
+		bucket = element->bucket;
 
-		bucket->flags ^= mask;		
-		typeData->DestructDirect((byte*)ptr + sizeof(ElementHeader));
+		uint byteOffset = (byte*)element - (byte*)bucket - sizeof(BucketHeader);
+
+		if (byteOffset % elementSize != 0)
+			Debug::Logger::LogError("Blaze Engine", "Invalid component pointer");
+
+		index = byteOffset / elementSize;
+	}
+	Component* ComponentContainer::GetComponentFromLocation(BucketHeader* bucket, uint index, ElementHeader*& element)
+	{
+		element = (ElementHeader*)((byte*)bucket + sizeof(BucketHeader) + index * elementSize);
+		void* rawComponent = (byte*)element + sizeof(ElementHeader);
+		return (Component*)((byte*)rawComponent + typeData->BaseOffset());
 	}
 	void* ComponentContainer::FirstInBucket(BucketHeader* bucket) const
 	{
@@ -83,6 +92,8 @@ namespace Blaze::ECS
 
 		FlagType mask = ~((((FlagType)1) << (index + 1)) - 1);
 		index = std::countr_zero(buckets[bucketIndex]->flags & mask);
+		if ((buckets[bucketIndex]->flags & mask) == std::numeric_limits<FlagType>::max())
+			index = BucketElementCount;
 
 		if (index == BucketElementCount)
 		{
@@ -121,8 +132,54 @@ namespace Blaze::ECS
 			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData->BaseOffset());
 	}
 
+	ComponentContainer::BucketHeader* ComponentContainer::AllocateBucket()
+	{
+		return (BucketHeader*)Memory::Allocate(sizeof(BucketHeader) + elementSize * BucketElementCount);
+	}
+
+	void ComponentContainer::FreeBucket(BucketHeader* bucket)
+	{
+		Memory::Free(bucket);
+	}
+
+
+	void ComponentContainer::RemoveBucket(BucketHeader* bucket)
+	{
+		uint i = 0;
+		for (; i < bucketCount; ++i)
+			if (buckets[i] == bucket)
+				break;
+
+		if (i == bucketCount)
+			Debug::Logger::LogError("Blaze Engine", "Trying to free a invalid pointer");
+
+		--bucketCount;
+		--nonFullBucketCount;
+
+		buckets[i] = buckets[nonFullBucketCount];
+		buckets[nonFullBucketCount] = buckets[bucketCount];
+
+		BucketHeader** newBuckets = new BucketHeader * [bucketCount];
+		memcpy(newBuckets, buckets, sizeof(BucketHeader*) * bucketCount);
+		delete[] buckets;
+		buckets = newBuckets;
+	}
+	void ComponentContainer::AddBucket(BucketHeader* bucket)
+	{
+		BucketHeader** newBuckets = new BucketHeader * [bucketCount + 1];
+		memcpy(newBuckets + 1, buckets, sizeof(BucketHeader*) * bucketCount);
+		delete[] buckets;
+		buckets = newBuckets;
+
+		buckets[0] = bucket;
+		buckets[0]->flags = 0;
+
+		bucketCount++;
+		nonFullBucketCount++;
+	}
+
 	ComponentContainer::ComponentContainer()
-		: buckets(nullptr), elementCount(0), bucketCount(0), nonFullBucketCount(0), elementSize(0)
+		: buckets(nullptr), elementCount(0), bucketCount(0), nonFullBucketCount(0), elementSize(0), typeData(nullptr)
 	{
 
 	}
@@ -141,111 +198,69 @@ namespace Blaze::ECS
 	}
 	Component* ComponentContainer::Create()
 	{
-		if (nonFullBucketCount == 0)
-		{
-			BucketHeader** newBuckets = new BucketHeader*[bucketCount + 1];
-			memcpy(newBuckets + 1, buckets, sizeof(BucketHeader*) * bucketCount);
-			delete[] buckets;
-			buckets = newBuckets;
+		Component* component = Allocate();
 
-			buckets[0] = (BucketHeader*)Memory::Allocate(sizeof(BucketHeader) + elementSize * BucketElementCount);
-			buckets[0]->flags = 0;
+		typeData->Construct(component);
 
-			bucketCount++;
-			nonFullBucketCount++;
-		}
-
-		elementCount++;
-		ElementHeader* element = BucketAllocate(buckets[0]);
-
-		if (buckets[0]->flags == std::numeric_limits<FlagType>::max())
-		{
-			--nonFullBucketCount;
-			std::swap(buckets[0], buckets[nonFullBucketCount]);
-		}
-
-		return (Component*)((byte*)element + sizeof(ElementHeader) + typeData->BaseOffset());
+		return component;
 	}
 	Component* ComponentContainer::Allocate()
 	{
+		BucketHeader* bucket;
 		if (nonFullBucketCount == 0)
 		{
-			BucketHeader** newBuckets = new BucketHeader * [bucketCount + 1];
-			memcpy(newBuckets + 1, buckets, sizeof(BucketHeader*) * bucketCount);
-			delete[] buckets;
-			buckets = newBuckets;
-
-			buckets[0] = (BucketHeader*)Memory::Allocate(sizeof(BucketHeader) + elementSize * BucketElementCount);
-			buckets[0]->flags = 0;
-
-			bucketCount++;
-			nonFullBucketCount++;
+			bucket = AllocateBucket();
+			AddBucket(bucket);
 		}
+		else
+			bucket = buckets[0];
 
-		elementCount++;
-		ElementHeader* element = BucketAllocateNoConstruct(buckets[0]);
+		uint index = bucket->MarkNew();		
 
-		if (buckets[0]->flags == std::numeric_limits<FlagType>::max())
+		if (bucket->IsFull())
 		{
 			--nonFullBucketCount;
 			std::swap(buckets[0], buckets[nonFullBucketCount]);
 		}
+		elementCount++;
 
-		return (Component*)((byte*)element + sizeof(ElementHeader) + typeData->BaseOffset());
+		ElementHeader* element;
+		Component* component = GetComponentFromLocation(bucket, index, element);
+		element->bucket = bucket;
+
+		return component;
 	}
 	void ComponentContainer::Destroy(Component* component)
+	{		
+		typeData->Destruct(component);
+
+		Free(component);		
+	}
+	void ComponentContainer::Free(Component* component)
 	{
-		void* ptr = (byte*)component - typeData->BaseOffset();
-		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));		
-		BucketHeader* bucket = element->bucket;
-		BucketFree(element);
+		uint index;
+		BucketHeader* bucket;
 
-		if (bucket->flags == 0)
+		GetComponentLocation(component, bucket, index);
+
+		bucket->Unmark(index);		
+		
+		--elementCount;		
+
+		if (bucket->IsEmpty())
 		{
-			uint i = 0;
-			for (; i < bucketCount; ++i)
-				if (buckets[i] == bucket)
-					break;
-
-			if (i == bucketCount)
-				Logger::ProcessLog(BLAZE_FATAL_LOG("Blaze Engine", "Trying to free a invalid pointer"));
-
-			--bucketCount;
-			--nonFullBucketCount;
-
-			Memory::Free(buckets[i]);
-			buckets[i] = buckets[nonFullBucketCount];
-			buckets[nonFullBucketCount] = buckets[bucketCount];
-
-			BucketHeader** newBuckets = new BucketHeader * [bucketCount];
-			memcpy(newBuckets, buckets, sizeof(BucketHeader*) * bucketCount);
-			delete[] buckets;
-			buckets = newBuckets;
+			RemoveBucket(bucket);
+			FreeBucket(bucket);
 		}
-
-		--elementCount;
 	}
 	void ComponentContainer::Clear()
 	{
+		for (auto el : *this)		
+			typeData->Destruct(el);
+
 		for (uint i = 0; i < bucketCount; ++i)
-		{				
-			uint index = std::countr_zero(buckets[i]->flags);
-			ElementHeader* first = (ElementHeader*)((byte*)buckets[i] + sizeof(BucketHeader) + index * elementSize);
-			
-			while (true)
-			{
-				FlagType mask = ~((((FlagType)1) << (index + 1)) - 1);
-				index = std::countr_zero(buckets[i]->flags & mask);			
-
-				if (index == BucketElementCount)
-					break;
-
-				typeData->DestructDirect((byte*)first + index * elementSize + sizeof(ElementHeader));				
-
-			}			
-
-			Memory::Free(buckets[i]);
-		}
+			FreeBucket(buckets[i]);
+				
 		delete[] buckets;
 
 		elementCount = 0;

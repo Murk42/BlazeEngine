@@ -1,8 +1,4 @@
 #include "BlazeEngine/DataStructures/String.h"
-#include <cstring>
-#include <cstdio>
-#include <cctype>
-#include <memory>
 
 namespace Blaze
 {
@@ -87,14 +83,24 @@ namespace Blaze
 	String& String::Resize(size_t newSize, char fill)
 	{
 		char* old = ptr;
-		ptr = new char[newSize + 1];
-		memcpy(ptr, old, size);
+		ptr = new char[newSize + 1];		
+
 		if (newSize > size)
+		{
+			memcpy(ptr, old, size);
 			std::fill_n(ptr + size, newSize - size, fill);
+		}
+		else
+			memcpy(ptr, old, newSize);
+
 		size = newSize;
 		delete[] old;
 		ptr[size] = '\0';
 		return *this;		
+	}
+	uint32 String::Hash() const
+	{
+		return std::hash<std::string_view>()(std::string_view(ptr, size));		
 	}
 	char* String::begin()
 	{
@@ -160,13 +166,22 @@ namespace Blaze
 		return !(*this == s);
 	}
 
-	String& String::operator+=(const StringView& string)
+	String& String::operator+=(const String& other)
 	{
-		return *this = *this + string;		
+		return *this = *this + StringView(other);
 	}
-	String& String::operator+=(const char& ch)
+
+	String& String::operator+=(const StringView& other)
 	{
-		return *this = *this + ch;
+		return *this = *this + other;		
+	}
+	String& String::operator+=(const char* other)
+	{
+		return *this = *this + StringView(other);
+	}
+	String& String::operator+=(const char& other)
+	{
+		return *this = *this + StringView(other);
 	}	
 
 	String operator+(const StringView& left, const StringView& right)
@@ -184,47 +199,54 @@ namespace Blaze
 		out.size = size;
 		return out;
 	}
+
+	String operator+(const StringView& left, const String& right)
+	{
+		return operator+(left, StringView(right));
+	}
 	String operator+(const StringView& left, const char* right)
 	{
-		return left + StringView(right);
-	}
-	String operator+(const char* left, const StringView& right)
-	{
-		return StringView(left) + right;
+		return operator+(left, StringView(right));
 	}
 	String operator+(const StringView& left, const char& right)
 	{
-		if (left.Ptr() == nullptr)
-			return String(&right, 1);
+		return operator+(left, StringView(&right, 1));
+	}
 
-		size_t size = left.Size() + 1;
-		char* ptr = new char[size + 1];
-
-		memcpy(ptr, left.Ptr(), left.Size());
-		ptr[size - 1] = right;
-		ptr[size] = '\0';
-
-		String out;
-		out.ptr = ptr;
-		out.size = size;
-		return out;
+	String operator+(const String& left, const StringView& right)
+	{
+		return operator+(StringView(left), right);
+	}
+	String operator+(const char* left, const StringView& right)
+	{
+		return operator+(StringView(left), right);
 	}
 	String operator+(const char& left, const StringView& right)
 	{
-		if (right.Ptr() == nullptr)
-			return String(&left , 1);
+		return operator+(StringView(&left, 1), right);		
+	}
 
-		size_t size = 1 + right.Size();
-		char* ptr = new char[size + 1];
+	String operator+(const String& left, const String& right)
+	{
+		return operator+(StringView(left), StringView(right));
+	}
 
-		ptr[0] = left;
-		memcpy(ptr + 1, right.Ptr(), right.Size());
-		ptr[size] = '\0';
+	String operator+(const String& left, const char* right)
+	{
+		return operator+(StringView(left), StringView(right));
+	}
+	String operator+(const String& left, const char& right)
+	{
+		return operator+(StringView(left), right);
+	}
 
-		String out;
-		out.ptr = ptr;
-		out.size = size;
-		return out;
+	String operator+(const char* left, const String& right)
+	{
+		return operator+(StringView(left), StringView(right));
+	}
+	String operator+(const char& left, const String& right)
+	{
+		return operator+(left, StringView(right));
 	}
 
 }

@@ -1,15 +1,13 @@
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Utilities/Thread.h"
+#include "BlazeEngine/Threading/Thread.h"
 #include <iostream>
-#include "BlazeEngine/Core/Startup.h"
 
 namespace Blaze
 {    
-    Startup::ConsoleInitInfo InitializeConsole()
+    TimingResult InitializeConsole()
     {        
-        Startup::ConsoleInitInfo initInfo;
-        initInfo.initTime = 0;
-        return initInfo;
+        Timing timing{ "Console" };
+        return timing.GetTimingResult();
     }
     void TerminateConsole()
     {                

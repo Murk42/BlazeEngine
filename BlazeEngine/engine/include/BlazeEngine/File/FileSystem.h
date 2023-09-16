@@ -17,8 +17,7 @@ namespace Blaze
 		ENUM_CLASS_BITWISE_OPERATIONS(CopyFlags)		
 
 		BLAZE_API Path GetCurrentPath();
-
-		BLAZE_API Result CreateFile(const Path& path);
+		
 		BLAZE_API Result DeleteFile(const Path& path);
 		BLAZE_API Result ResizeFile(const Path& path, size_t newSize);
 		BLAZE_API Result FileSize(const Path& path, size_t& size);

@@ -1,11 +1,6 @@
 #include "Conversions.h"
 
-std::wstring to_wstring(const std::string& s)
-{
-	return std::wstring(s.begin(), s.end());
-}
-
-template<typename T>
+/*template<typename T>
 constexpr bool BitRemap(T in, GLenum& out, std::initializer_list<T> values, std::initializer_list<GLenum> enums)
 {
 	out = 0;
@@ -20,363 +15,373 @@ constexpr bool BitRemap(T in, GLenum& out, std::initializer_list<T> values, std:
 	}
 
 	return !(bool)in;	
-}
+}*/
 
 namespace Blaze
 {
+	
 	template<typename T>
 	inline std::underlying_type_t<T> ToInteger(T value)
 	{
 		return static_cast<std::underlying_type_t<T>>(value);
 	}
-	unsigned GetFormatDepth(BitmapPixelFormat format, Result& result)
+	unsigned BitmapColorFormatComponentCount(BitmapColorFormat format)
 	{
 		switch (format)
 		{
-		case Blaze::BitmapPixelFormat::Red: return 1;
-		case Blaze::BitmapPixelFormat::RG: return 2;
-		case Blaze::BitmapPixelFormat::RGB:	return 3;
-		case Blaze::BitmapPixelFormat::RGBA: return 4;
-		case Blaze::BitmapPixelFormat::BGR:	return 3;
-		case Blaze::BitmapPixelFormat::BGRA: return 4;		
-		}
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
-		return std::numeric_limits<unsigned>::max();
+		case Blaze::BitmapColorFormat::Red: return 1;
+		case Blaze::BitmapColorFormat::RG: return 2;
+		case Blaze::BitmapColorFormat::RGB:	return 3;
+		case Blaze::BitmapColorFormat::RGBA: return 4;
+		case Blaze::BitmapColorFormat::BGR:	return 3;
+		case Blaze::BitmapColorFormat::BGRA: return 4;		
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Invalid BitmapColorFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+			return 4;
+		}		
 	}
 
-	unsigned PixelTypeSize(BitmapPixelType type, Result& result)
+	unsigned BitmapColorComponentTypeSize(BitmapColorComponentType type)
 	{
 		switch (type)
 		{
-		case Blaze::BitmapPixelType::Int8: return sizeof(int8);
-		case Blaze::BitmapPixelType::Uint8: return sizeof(uint8);			
-		case Blaze::BitmapPixelType::Int16:	return sizeof(int);
-		case Blaze::BitmapPixelType::Uint16: return sizeof(uint16);
-		case Blaze::BitmapPixelType::Int32:	return sizeof(int32);
-		case Blaze::BitmapPixelType::Uint32: return sizeof(uint32);
-		case Blaze::BitmapPixelType::Float:	return sizeof(float);
-		case Blaze::BitmapPixelType::Double: return sizeof(double);		
-		}		
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
-		return std::numeric_limits<unsigned>::max();
+		case Blaze::BitmapColorComponentType::Int8: return sizeof(int8);
+		case Blaze::BitmapColorComponentType::Uint8: return sizeof(uint8);			
+		case Blaze::BitmapColorComponentType::Int16:	return sizeof(int);
+		case Blaze::BitmapColorComponentType::Uint16: return sizeof(uint16);
+		case Blaze::BitmapColorComponentType::Int32:	return sizeof(int32);
+		case Blaze::BitmapColorComponentType::Uint32: return sizeof(uint32);
+		case Blaze::BitmapColorComponentType::Float:	return sizeof(float);
+		case Blaze::BitmapColorComponentType::Double: return sizeof(double);		
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Invalid BitmapColorComponentType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+			return sizeof(uint8);
+		}				
 	}
 
-	ILenum DevILPixelFormat(BitmapPixelFormat format, Result& result)
+	/*
+	ILenum DevILColorFormat(BitmapColorFormat format)
 	{
 		switch (format)
 		{
-		case BitmapPixelFormat::Red: return IL_LUMINANCE;
-		case BitmapPixelFormat::RG:	return IL_LUMINANCE_ALPHA;
-		case BitmapPixelFormat::RGB: return IL_RGB;
-		case BitmapPixelFormat::RGBA: return IL_RGBA;
-		case BitmapPixelFormat::BGR: return IL_BGR;
-		case BitmapPixelFormat::BGRA: return IL_BGRA;		
+		case BitmapColorFormat::Red: return IL_LUMINANCE;
+		case BitmapColorFormat::RG:	return IL_LUMINANCE_ALPHA;
+		case BitmapColorFormat::RGB: return IL_RGB;
+		case BitmapColorFormat::RGBA: return IL_RGBA;
+		case BitmapColorFormat::BGR: return IL_BGR;
+		case BitmapColorFormat::BGRA: return IL_BGRA;	
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Invalid BitmapColorFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+			return IL_RGBA;
 		}		
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
-		return std::numeric_limits<ILenum>::max();
 	}
-	GLenum OpenGLPixelFormat(BitmapPixelFormat format, Result& result)
+	GLenum OpenGLPixelFormat(BitmapColorFormat format, Result& result)
 	{
 		switch (format)
 		{
-		case BitmapPixelFormat::Red: return GL_RED;
-		case BitmapPixelFormat::RG:	return GL_RG;
-		case BitmapPixelFormat::RGB: return GL_RGB;
-		case BitmapPixelFormat::RGBA: return GL_RGBA;
-		case BitmapPixelFormat::BGR: return GL_BGR;
-		case BitmapPixelFormat::BGRA: return GL_BGRA;		
+		case BitmapColorFormat::Red: return GL_RED;
+		case BitmapColorFormat::RG:	return GL_RG;
+		case BitmapColorFormat::RGB: return GL_RGB;
+		case BitmapColorFormat::RGBA: return GL_RGBA;
+		case BitmapColorFormat::BGR: return GL_BGR;
+		case BitmapColorFormat::BGRA: return GL_BGRA;		
 		}		
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapColorFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format, Result& result)
+	SDL_PixelFormatEnum SDLPixelFormat(BitmapColorFormat format, Result& result)
 	{
 		switch (format)
 		{
-		case BitmapPixelFormat::Red: throw;
-		case BitmapPixelFormat::RG:	throw;
-		case BitmapPixelFormat::RGB: return SDL_PIXELFORMAT_RGB24;
-		case BitmapPixelFormat::RGBA: return SDL_PIXELFORMAT_RGBA32;
-		case BitmapPixelFormat::BGR: return SDL_PIXELFORMAT_BGR24;
-		case BitmapPixelFormat::BGRA: return SDL_PIXELFORMAT_BGRA32;		
+		case BitmapColorFormat::Red: throw;
+		case BitmapColorFormat::RG:	throw;
+		case BitmapColorFormat::RGB: return SDL_PIXELFORMAT_RGB24;
+		case BitmapColorFormat::RGBA: return SDL_PIXELFORMAT_RGBA32;
+		case BitmapColorFormat::BGR: return SDL_PIXELFORMAT_BGR24;
+		case BitmapColorFormat::BGRA: return SDL_PIXELFORMAT_BGRA32;		
 		}
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapColorFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<SDL_PixelFormatEnum>::max();
 	}
-	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format, Result& result)
+	BitmapColorFormat DevILToBlazePixelFormat(ILenum format)
 	{
 		switch (format)
 		{
-		case IL_LUMINANCE: return BitmapPixelFormat::Red;
-		case IL_LUMINANCE_ALPHA: return BitmapPixelFormat::RG;
-		case IL_RGB: return BitmapPixelFormat::RGB;
-		case IL_RGBA: return BitmapPixelFormat::RGBA;
-		case IL_BGR: return BitmapPixelFormat::BGR;
-		case IL_BGRA: return BitmapPixelFormat::BGRA;		
+		case IL_LUMINANCE: return BitmapColorFormat::Red;
+		case IL_LUMINANCE_ALPHA: return BitmapColorFormat::RG;
+		case IL_RGB: return BitmapColorFormat::RGB;
+		case IL_RGBA: return BitmapColorFormat::RGBA;
+		case IL_BGR: return BitmapColorFormat::BGR;
+		case IL_BGRA: return BitmapColorFormat::BGRA;		
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Unsupported/Invalid DevIL pixel format enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(format)));		
+			return BitmapColorFormat::RGBA;
 		}
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid DevIL pixel format enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(format)));
-		return std::numeric_limits<BitmapPixelFormat>::max();
 	}
-	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format, Result& result)
+	BitmapColorFormat OepnGLToBlazePixelFormat(GLenum format, Result& result)
 	{
 		switch (format)
 		{
-		case GL_LUMINANCE: return BitmapPixelFormat::Red;
-		case GL_LUMINANCE_ALPHA: return BitmapPixelFormat::RG;
-		case GL_RGB: return BitmapPixelFormat::RGB;
-		case GL_RGBA: return BitmapPixelFormat::RGBA;
-		case GL_BGR: return BitmapPixelFormat::BGR;
-		case GL_BGRA: return BitmapPixelFormat::BGRA;		
+		case GL_LUMINANCE: return BitmapColorFormat::Red;
+		case GL_LUMINANCE_ALPHA: return BitmapColorFormat::RG;
+		case GL_RGB: return BitmapColorFormat::RGB;
+		case GL_RGBA: return BitmapColorFormat::RGBA;
+		case GL_BGR: return BitmapColorFormat::BGR;
+		case GL_BGRA: return BitmapColorFormat::BGRA;		
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid OpenGL pixel format enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(format)));
-		return std::numeric_limits<BitmapPixelFormat>::max();
+		return std::numeric_limits<BitmapColorFormat>::max();
 	}
 
-	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result)
+	
+	GLenum OpenGLFormatByInternalPixelFormat(GraphicsLibrary::TextureInternalPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA:				 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG:				     return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R:				     return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8:				 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG8:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R8:					 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16:				 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16F:			 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16F:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16F:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16F:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32F:			 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32F:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG32F:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R32F:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8I:				 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8I:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG8I:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R8I:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16I:			 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16I:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16I:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16I:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32I:			 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32I:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG32I:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R32I:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8UI:			 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8UI:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG8UI:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R8UI:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16UI:			 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16UI:			 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16UI:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16UI:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32UI:			 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32UI:			 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG32UI:				 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R32UI:				 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH_STENCIL;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH_STENCIL;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_RGB;		
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA:				 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG:				     return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R:				     return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA8:				 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB8:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG8:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R8:					 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16:				 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16F:			 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16F:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16F:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16F:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA32F:			 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB32F:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG32F:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R32F:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA8I:				 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB8I:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG8I:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R8I:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16I:			 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16I:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16I:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16I:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA32I:			 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB32I:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG32I:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R32I:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA8UI:			 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB8UI:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG8UI:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R8UI:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16UI:			 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16UI:			 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16UI:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16UI:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA32UI:			 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB32UI:			 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG32UI:				 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R32UI:				 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH_STENCIL;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH_STENCIL;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_RGB;		
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result)
+	GLenum OpenGLInternalPixelFormat(GraphicsLibrary::TextureInternalPixelFormat format, Result& result)
 	{
 		switch (format)
 		{
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA:				 return GL_RGBA;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB:				 return GL_RGB;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG:					 return GL_RG;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R:					 return GL_RED;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8:				 return GL_RGBA8;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8:				 return GL_RGB8;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG8:				 return GL_RG8;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R8:					 return GL_R8;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16:				 return GL_RGBA16;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16:				 return GL_RGB16;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16:				 return GL_RG16;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16:				 return GL_R16;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16F:			 return GL_RGBA16F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16F:				 return GL_RGB16F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16F:				 return GL_RG16F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16F:				 return GL_R16F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32F:			 return GL_RGBA32F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32F:				 return GL_RGB32F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG32F:				 return GL_RG32F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R32F:				 return GL_R32F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8I:				 return GL_RGBA8I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8I:				 return GL_RGB8I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG8I:				 return GL_RG8I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R8I:				 return GL_R8I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16I:			 return GL_RGBA16I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16I:				 return GL_RGB16I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16I:				 return GL_RG16I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16I:				 return GL_R16I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32I:			 return GL_RGBA32I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32I:				 return GL_RGB32I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG32I:				 return GL_RG32I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R32I:				 return GL_R32I;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8UI:			 return GL_RGBA8UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8UI:				 return GL_RGB8UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG8UI:				 return GL_RG8UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R8UI:				 return GL_R8UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16UI:			 return GL_RGBA16UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16UI:			 return GL_RGB16UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG16UI:				 return GL_RG16UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R16UI:				 return GL_R16UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32UI:			 return GL_RGBA32UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32UI:			 return GL_RGB32UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::RG32UI:				 return GL_RG32UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R32UI:				 return GL_R32UI;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT16;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT24;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT32F;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH24_STENCIL8;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH32F_STENCIL8;
-		case Blaze::OpenGL::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
-		case Blaze::OpenGL::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_R11F_G11F_B10F;		
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA:				 return GL_RGBA;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB:				 return GL_RGB;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG:					 return GL_RG;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R:					 return GL_RED;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA8:				 return GL_RGBA8;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB8:				 return GL_RGB8;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG8:				 return GL_RG8;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R8:					 return GL_R8;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16:				 return GL_RGBA16;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16:				 return GL_RGB16;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16:				 return GL_RG16;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16:				 return GL_R16;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16F:			 return GL_RGBA16F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16F:				 return GL_RGB16F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16F:				 return GL_RG16F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16F:				 return GL_R16F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA32F:			 return GL_RGBA32F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB32F:				 return GL_RGB32F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG32F:				 return GL_RG32F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R32F:				 return GL_R32F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA8I:				 return GL_RGBA8I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB8I:				 return GL_RGB8I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG8I:				 return GL_RG8I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R8I:				 return GL_R8I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16I:			 return GL_RGBA16I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16I:				 return GL_RGB16I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16I:				 return GL_RG16I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16I:				 return GL_R16I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA32I:			 return GL_RGBA32I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB32I:				 return GL_RGB32I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG32I:				 return GL_RG32I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R32I:				 return GL_R32I;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA8UI:			 return GL_RGBA8UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB8UI:				 return GL_RGB8UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG8UI:				 return GL_RG8UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R8UI:				 return GL_R8UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA16UI:			 return GL_RGBA16UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB16UI:			 return GL_RGB16UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG16UI:				 return GL_RG16UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R16UI:				 return GL_R16UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGBA32UI:			 return GL_RGBA32UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RGB32UI:			 return GL_RGB32UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::RG32UI:				 return GL_RG32UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R32UI:				 return GL_R32UI;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT16;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT24;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT32F;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH24_STENCIL8;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH32F_STENCIL8;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
+		case Blaze::GraphicsLibrary::TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_R11F_G11F_B10F;		
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format, Result& result)
+	GLenum OpenGLBufferInternalPixelFormat(GraphicsLibrary::TextureBufferInternalPixelFormat format, Result& result)
 	{
 		switch (format)
 		{			
-			case Graphics::Core::TextureBufferInternalPixelFormat::R8		: return GL_R8		;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R16		: return GL_R16		;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R16F		: return GL_R16F	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R32F		: return GL_R32F	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R8I		: return GL_R8I		;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R16I		: return GL_R16I	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R32I		: return GL_R32I	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R8UI		: return GL_R8UI	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R16UI	: return GL_R16UI	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::R32UI	: return GL_R32UI	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG8		: return GL_RG8		;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG16		: return GL_RG16	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG16F	: return GL_RG16F	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG32F	: return GL_RG32F	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG8I		: return GL_RG8I	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG16I	: return GL_RG16I	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG32I	: return GL_RG32I	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG8UI	: return GL_RG8UI	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG16UI	: return GL_RG16UI	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RG32UI	: return GL_RG32UI	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGB32F	: return GL_RGB32F	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGB32I	: return GL_RGB32I	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGB32UI	: return GL_RGB32UI ;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA8	: return GL_RGBA8	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16	: return GL_RGBA16	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16F	: return GL_RGBA16F ;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32F	: return GL_RGBA32F ;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA8I	: return GL_RGBA8I	;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16I	: return GL_RGBA16I ;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32I	: return GL_RGBA32I ;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA8UI	: return GL_RGBA8UI ;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA16UI	: return GL_RGBA16UI;
-			case Graphics::Core::TextureBufferInternalPixelFormat::RGBA32UI: return GL_RGBA32UI; 			
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R8		: return GL_R8		;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R16		: return GL_R16		;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R16F		: return GL_R16F	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R32F		: return GL_R32F	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R8I		: return GL_R8I		;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R16I		: return GL_R16I	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R32I		: return GL_R32I	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R8UI		: return GL_R8UI	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R16UI	: return GL_R16UI	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::R32UI	: return GL_R32UI	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG8		: return GL_RG8		;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG16		: return GL_RG16	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG16F	: return GL_RG16F	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG32F	: return GL_RG32F	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG8I		: return GL_RG8I	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG16I	: return GL_RG16I	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG32I	: return GL_RG32I	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG8UI	: return GL_RG8UI	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG16UI	: return GL_RG16UI	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RG32UI	: return GL_RG32UI	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGB32F	: return GL_RGB32F	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGB32I	: return GL_RGB32I	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGB32UI	: return GL_RGB32UI ;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA8	: return GL_RGBA8	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA16	: return GL_RGBA16	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA16F	: return GL_RGBA16F ;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA32F	: return GL_RGBA32F ;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA8I	: return GL_RGBA8I	;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA16I	: return GL_RGBA16I ;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA32I	: return GL_RGBA32I ;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA8UI	: return GL_RGBA8UI ;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA16UI	: return GL_RGBA16UI;
+			case GraphicsLibrary::TextureBufferInternalPixelFormat::RGBA32UI: return GL_RGBA32UI; 			
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureBufferInternalPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
-
-	ILenum DevILPixelType(BitmapPixelType type, Result& result)
+	
+	ILenum DevILColorComponentType(BitmapColorComponentType type)
 	{
 		switch (type)
 		{
-		case Blaze::BitmapPixelType::Int8: return IL_BYTE;
-		case Blaze::BitmapPixelType::Uint8:	return IL_UNSIGNED_BYTE;
-		case Blaze::BitmapPixelType::Int16:	return IL_SHORT;
-		case Blaze::BitmapPixelType::Uint16: return IL_UNSIGNED_SHORT;
-		case Blaze::BitmapPixelType::Int32:	return IL_INT;
-		case Blaze::BitmapPixelType::Uint32: return IL_UNSIGNED_INT;
-		case Blaze::BitmapPixelType::Float:	return IL_FLOAT;
-		case Blaze::BitmapPixelType::Double: return IL_DOUBLE;		
+		case Blaze::BitmapColorComponentType::Int8: return IL_BYTE;
+		case Blaze::BitmapColorComponentType::Uint8:	return IL_UNSIGNED_BYTE;
+		case Blaze::BitmapColorComponentType::Int16:	return IL_SHORT;
+		case Blaze::BitmapColorComponentType::Uint16: return IL_UNSIGNED_SHORT;
+		case Blaze::BitmapColorComponentType::Int32:	return IL_INT;
+		case Blaze::BitmapColorComponentType::Uint32: return IL_UNSIGNED_INT;
+		case Blaze::BitmapColorComponentType::Float:	return IL_FLOAT;
+		case Blaze::BitmapColorComponentType::Double: return IL_DOUBLE;		
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Invalid BitmapColorComponentType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+			return IL_UNSIGNED_BYTE;
 		}
-
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
-		return std::numeric_limits<ILenum>::max();
 	}
-	GLenum OpenGLPixelType(BitmapPixelType type, Result& result)
+	
+	GLenum OpenGLPixelType(BitmapColorComponentType type, Result& result)
 	{
 		switch (type)
 		{
-		case Blaze::BitmapPixelType::Int8: return GL_BYTE;
-		case Blaze::BitmapPixelType::Uint8:	return GL_UNSIGNED_BYTE;
-		case Blaze::BitmapPixelType::Int16:	return GL_SHORT;
-		case Blaze::BitmapPixelType::Uint16: return GL_UNSIGNED_SHORT;
-		case Blaze::BitmapPixelType::Int32:	return GL_INT;
-		case Blaze::BitmapPixelType::Uint32: return GL_UNSIGNED_INT;
-		case Blaze::BitmapPixelType::Float:	return GL_FLOAT;
-		case Blaze::BitmapPixelType::Double: return GL_DOUBLE;		
+		case Blaze::BitmapColorComponentType::Int8: return GL_BYTE;
+		case Blaze::BitmapColorComponentType::Uint8:	return GL_UNSIGNED_BYTE;
+		case Blaze::BitmapColorComponentType::Int16:	return GL_SHORT;
+		case Blaze::BitmapColorComponentType::Uint16: return GL_UNSIGNED_SHORT;
+		case Blaze::BitmapColorComponentType::Int32:	return GL_INT;
+		case Blaze::BitmapColorComponentType::Uint32: return GL_UNSIGNED_INT;
+		case Blaze::BitmapColorComponentType::Float:	return GL_FLOAT;
+		case Blaze::BitmapColorComponentType::Double: return GL_DOUBLE;		
 		}
 
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapColorComponentType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	BitmapPixelType DevILToBlazePixelType(ILenum type, Result& result)
+	
+	BitmapColorComponentType DevILToBlazePixelType(ILenum type)
 	{
 		switch (type)
 		{
-		case IL_BYTE: return Blaze::BitmapPixelType::Int8;
-		case IL_UNSIGNED_BYTE: return Blaze::BitmapPixelType::Uint8;
-		case IL_SHORT: return Blaze::BitmapPixelType::Int16;
-		case IL_UNSIGNED_SHORT: return Blaze::BitmapPixelType::Uint16;
-		case IL_INT: return Blaze::BitmapPixelType::Int32;
-		case IL_UNSIGNED_INT: return Blaze::BitmapPixelType::Uint32;
-		case IL_FLOAT: return Blaze::BitmapPixelType::Float;
-		case IL_DOUBLE: return Blaze::BitmapPixelType::Double;		
+		case IL_BYTE: return Blaze::BitmapColorComponentType::Int8;
+		case IL_UNSIGNED_BYTE: return Blaze::BitmapColorComponentType::Uint8;
+		case IL_SHORT: return Blaze::BitmapColorComponentType::Int16;
+		case IL_UNSIGNED_SHORT: return Blaze::BitmapColorComponentType::Uint16;
+		case IL_INT: return Blaze::BitmapColorComponentType::Int32;
+		case IL_UNSIGNED_INT: return Blaze::BitmapColorComponentType::Uint32;
+		case IL_FLOAT: return Blaze::BitmapColorComponentType::Float;
+		case IL_DOUBLE: return Blaze::BitmapColorComponentType::Double;		
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Unsupported/Invalid DevIL pixel type enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(type)));
+			return BitmapColorComponentType::Uint8;
 		}
-
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid DevIL pixel type enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(type)));
-		return std::numeric_limits<BitmapPixelType>::max();
 	}
-	BitmapPixelType OpenGLToBlazePixelType(GLenum type, Result& result)
+	
+	BitmapColorComponentType OpenGLToBlazePixelType(GLenum type, Result& result)
 	{
 		switch (type)
 		{
-		case GL_BYTE: return Blaze::BitmapPixelType::Int8;
-		case GL_UNSIGNED_BYTE: return Blaze::BitmapPixelType::Uint8;
-		case GL_SHORT: return Blaze::BitmapPixelType::Int16;
-		case GL_UNSIGNED_SHORT: return Blaze::BitmapPixelType::Uint16;
-		case GL_INT: return Blaze::BitmapPixelType::Int32;
-		case GL_UNSIGNED_INT: return Blaze::BitmapPixelType::Uint32;
-		case GL_FLOAT: return Blaze::BitmapPixelType::Float;
-		case GL_DOUBLE: return Blaze::BitmapPixelType::Double;		
+		case GL_BYTE: return Blaze::BitmapColorComponentType::Int8;
+		case GL_UNSIGNED_BYTE: return Blaze::BitmapColorComponentType::Uint8;
+		case GL_SHORT: return Blaze::BitmapColorComponentType::Int16;
+		case GL_UNSIGNED_SHORT: return Blaze::BitmapColorComponentType::Uint16;
+		case GL_INT: return Blaze::BitmapColorComponentType::Int32;
+		case GL_UNSIGNED_INT: return Blaze::BitmapColorComponentType::Uint32;
+		case GL_FLOAT: return Blaze::BitmapColorComponentType::Float;
+		case GL_DOUBLE: return Blaze::BitmapColorComponentType::Double;		
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid OpenGL pixel type enum value. The integer value was: " + StringParsing::Convert(static_cast<uint>(type)));
-		return std::numeric_limits<BitmapPixelType>::max();
+		return std::numeric_limits<BitmapColorComponentType>::max();
 	}
-	GLenum OpenGLTextureMinSampling(Graphics::Core::TextureSampling min, Graphics::Core::TextureSampling mip, bool mipmaps, Result& result)
+	GLenum OpenGLTextureMinSampling(GraphicsLibrary::TextureSampling min, GraphicsLibrary::TextureSampling mip, bool mipmaps, Result& result)
 	{
 		if (mipmaps)
 		{
-			if (mip == Graphics::Core::TextureSampling::Nearest)
-				if (min == Graphics::Core::TextureSampling::Nearest)
+			if (mip == GraphicsLibrary::TextureSampling::Nearest)
+				if (min == GraphicsLibrary::TextureSampling::Nearest)
 					return GL_NEAREST_MIPMAP_NEAREST;
-				else if (min == Graphics::Core::TextureSampling::Linear)
+				else if (min == GraphicsLibrary::TextureSampling::Linear)
 					return GL_LINEAR_MIPMAP_NEAREST;
 				else
 				{
 					result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(min)));
 					return std::numeric_limits<GLenum>::max();
 				}
-			else if (mip == Graphics::Core::TextureSampling::Linear)
-				if (min == Graphics::Core::TextureSampling::Nearest)
+			else if (mip == GraphicsLibrary::TextureSampling::Linear)
+				if (min == GraphicsLibrary::TextureSampling::Nearest)
 					return GL_NEAREST_MIPMAP_LINEAR;
-				else if (min == Graphics::Core::TextureSampling::Linear)
+				else if (min == GraphicsLibrary::TextureSampling::Linear)
 					return GL_LINEAR_MIPMAP_LINEAR;		
 				else
 				{
@@ -390,9 +395,9 @@ namespace Blaze
 			}
 		}
 		else
-			if (min == Graphics::Core::TextureSampling::Nearest)
+			if (min == GraphicsLibrary::TextureSampling::Nearest)
 				return GL_NEAREST;
-			else if (min == Graphics::Core::TextureSampling::Linear)
+			else if (min == GraphicsLibrary::TextureSampling::Linear)
 				return GL_LINEAR;
 			else
 			{
@@ -400,77 +405,140 @@ namespace Blaze
 				return std::numeric_limits<GLenum>::max();
 			}
 	}
-	GLenum OpenGLTextureMagSampling(Graphics::Core::TextureSampling sampling, Result& result)
+	GLenum OpenGLTextureMagSampling(GraphicsLibrary::TextureSampling sampling, Result& result)
 	{
 		switch (sampling)
 		{
-		case Blaze::OpenGL::TextureSampling::Nearest: return GL_NEAREST;
-		case Blaze::OpenGL::TextureSampling::Linear: return GL_LINEAR;		
+		case Blaze::GraphicsLibrary::TextureSampling::Nearest: return GL_NEAREST;
+		case Blaze::GraphicsLibrary::TextureSampling::Linear: return GL_LINEAR;		
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureSampling enum value. The integer value was: " + StringParsing::Convert(ToInteger(sampling)));
 		return std::numeric_limits<GLenum>::max();
 	}	
-	GLenum OpenGLTextureWrapping(Graphics::Core::TextureWrapping wrapping, Result& result)
+	GLenum OpenGLTextureWrapping(GraphicsLibrary::TextureWrapping wrapping, Result& result)
 	{
 		switch (wrapping)
 		{
-		case Blaze::OpenGL::TextureWrapping::ClampToBorder: return GL_CLAMP_TO_BORDER;			
-		case Blaze::OpenGL::TextureWrapping::ClampToEdge: return GL_CLAMP_TO_EDGE;			
-		case Blaze::OpenGL::TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;			
-		case Blaze::OpenGL::TextureWrapping::Repeat: return GL_REPEAT;					
+		case Blaze::GraphicsLibrary::TextureWrapping::ClampToBorder: return GL_CLAMP_TO_BORDER;			
+		case Blaze::GraphicsLibrary::TextureWrapping::ClampToEdge: return GL_CLAMP_TO_EDGE;			
+		case Blaze::GraphicsLibrary::TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;			
+		case Blaze::GraphicsLibrary::TextureWrapping::Repeat: return GL_REPEAT;					
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid TextureWrapping enum value. The integer value was: " + StringParsing::Convert(ToInteger(wrapping)));
 		return std::numeric_limits<GLenum>::max();
 	}
-	Graphics::Core::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapPixelFormat format, Result& result)
+	GraphicsLibrary::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapColorFormat format, Result& result)
 	{		
 		switch (format)
 		{
-		case BitmapPixelFormat::Red: return Graphics::Core::TextureInternalPixelFormat::R32F;
-		case BitmapPixelFormat::RG: return Graphics::Core::TextureInternalPixelFormat::RG32F;
-		case BitmapPixelFormat::RGB: return Graphics::Core::TextureInternalPixelFormat::RGB32F;
-		case BitmapPixelFormat::RGBA: return Graphics::Core::TextureInternalPixelFormat::RGBA32F;
-		case BitmapPixelFormat::BGR: return Graphics::Core::TextureInternalPixelFormat::RGB32F;
-		case BitmapPixelFormat::BGRA: return Graphics::Core::TextureInternalPixelFormat::RGBA32F;		
+		case BitmapColorFormat::Red: return GraphicsLibrary::TextureInternalPixelFormat::R32F;
+		case BitmapColorFormat::RG: return GraphicsLibrary::TextureInternalPixelFormat::RG32F;
+		case BitmapColorFormat::RGB: return GraphicsLibrary::TextureInternalPixelFormat::RGB32F;
+		case BitmapColorFormat::RGBA: return GraphicsLibrary::TextureInternalPixelFormat::RGBA32F;
+		case BitmapColorFormat::BGR: return GraphicsLibrary::TextureInternalPixelFormat::RGB32F;
+		case BitmapColorFormat::BGRA: return GraphicsLibrary::TextureInternalPixelFormat::RGBA32F;		
 		}
-		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
-		return std::numeric_limits<Graphics::Core::TextureInternalPixelFormat>::max();
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid BitmapColorFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+		return std::numeric_limits<GraphicsLibrary::TextureInternalPixelFormat>::max();
 	}
-	GLenum OpenGLVertexAttributeType(Graphics::Core::VertexAttributeType type, Result& result)
+	BitmapColorFormat MapInternalTexturePixelFormat(GraphicsLibrary::TextureInternalPixelFormat format, Result& result)
+	{
+		switch (format)
+		{
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA: return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB:  return BitmapColorFormat::RGB;			
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG:   return BitmapColorFormat::RG;			
+		case Blaze::OpenGL::TextureInternalPixelFormat::R:    return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8:  return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG8:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R8:		return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16:	return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16F:return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16F:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16F:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16F:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32F:return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32F:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG32F:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R32F:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8I:	return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8I:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG8I:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R8I:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16I:return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16I:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16I:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16I:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32I:return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32I:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG32I:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R32I:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA8UI:return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB8UI:	return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG8UI:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R8UI:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA16UI:return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB16UI:return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG16UI:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R16UI:	 return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGBA32UI:return BitmapColorFormat::RGBA;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RGB32UI:return BitmapColorFormat::RGB;
+		case Blaze::OpenGL::TextureInternalPixelFormat::RG32UI:	return BitmapColorFormat::RG;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R32UI:	return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth16:			
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24:		
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32F:			
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth24Stencil8:			
+		case Blaze::OpenGL::TextureInternalPixelFormat::Depth32FStencil8:			
+		case Blaze::OpenGL::TextureInternalPixelFormat::Stencil8: 
+			Debug::Logger::LogError("Blaze Engine", "Unsupported TextueInternalPixelFormat enum value");
+			return BitmapColorFormat::Red;
+		case Blaze::OpenGL::TextureInternalPixelFormat::R11F_G11F_B10F:	return BitmapColorFormat::RGB;
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Invalid TextueInternalPixelFormat enum value");
+			return BitmapColorFormat::Red;
+			break;
+		}
+	}
+	GLenum OpenGLVertexAttributeType(GraphicsLibrary::VertexAttributeType type, Result& result)
 	{		
 		switch (type)
 		{
-		case Blaze::OpenGL::VertexAttributeType::Int8: return GL_BYTE;
-		case Blaze::OpenGL::VertexAttributeType::Uint8: return GL_UNSIGNED_BYTE;
-		case Blaze::OpenGL::VertexAttributeType::Int16: return GL_SHORT;
-		case Blaze::OpenGL::VertexAttributeType::Uint16: return GL_UNSIGNED_SHORT;
-		case Blaze::OpenGL::VertexAttributeType::Int32: return GL_INT;
-		case Blaze::OpenGL::VertexAttributeType::Uint32: return GL_UNSIGNED_INT;
-		case Blaze::OpenGL::VertexAttributeType::Float: return GL_FLOAT;
-		case Blaze::OpenGL::VertexAttributeType::Double: return GL_DOUBLE;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Int8: return GL_BYTE;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Uint8: return GL_UNSIGNED_BYTE;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Int16: return GL_SHORT;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Uint16: return GL_UNSIGNED_SHORT;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Int32: return GL_INT;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Uint32: return GL_UNSIGNED_INT;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Float: return GL_FLOAT;
+		case Blaze::GraphicsLibrary::VertexAttributeType::Double: return GL_DOUBLE;
 		}
 		result += BLAZE_FATAL_LOG("Blaze Engine", "Invalid VertexAttributeType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<GLenum>::max();		
 	}
-	GLenum OpenGLFramebufferAttachment(Graphics::Core::FramebufferAttachment attachment, Result& result)
+	GLenum OpenGLFramebufferAttachment(GraphicsLibrary::FramebufferAttachment attachment, Result& result)
 	{
 		switch (attachment)
 		{
-		case Blaze::OpenGL::FramebufferAttachment::DepthStencil: return GL_DEPTH_STENCIL_ATTACHMENT;
-		case Blaze::OpenGL::FramebufferAttachment::Stencil:	return GL_STENCIL_ATTACHMENT;
-		case Blaze::OpenGL::FramebufferAttachment::Depth: return GL_DEPTH_ATTACHMENT;		
+		case Blaze::GraphicsLibrary::FramebufferAttachment::DepthStencil: return GL_DEPTH_STENCIL_ATTACHMENT;
+		case Blaze::GraphicsLibrary::FramebufferAttachment::Stencil:	return GL_STENCIL_ATTACHMENT;
+		case Blaze::GraphicsLibrary::FramebufferAttachment::Depth: return GL_DEPTH_ATTACHMENT;		
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid FramebufferAttachment enum value. The integer value was: " + StringParsing::Convert(ToInteger(attachment)));
 		return std::numeric_limits<GLenum>::max();
 	}
 		
-	GLenum OpenGLBufferMappingAccess(Graphics::Core::ImmutableGraphicsBufferMapAccess mapping, Result& result)
+	GLenum OpenGLBufferMappingAccess(GraphicsLibrary::ImmutableGraphicsBufferMapAccess mapping, Result& result)
 	{
 		GLenum out;
 
 		if (!BitRemap(mapping, out, {
-				Graphics::Core::ImmutableGraphicsBufferMapAccess::Read,
-				Graphics::Core::ImmutableGraphicsBufferMapAccess::Write
+				GraphicsLibrary::ImmutableGraphicsBufferMapAccess::Read,
+				GraphicsLibrary::ImmutableGraphicsBufferMapAccess::Write
 			}, {
 				GL_MAP_READ_BIT,
 				GL_MAP_WRITE_BIT
@@ -482,13 +550,13 @@ namespace Blaze
 
 		return out;
 	}	
-	GLenum OpenGLBufferMappingType(Graphics::Core::ImmutableGraphicsBufferMapType type, Result& result)
+	GLenum OpenGLBufferMappingType(GraphicsLibrary::ImmutableGraphicsBufferMapType type, Result& result)
 	{
 		GLenum out;
 
 		if (!BitRemap(type, out, {
-				Graphics::Core::ImmutableGraphicsBufferMapType::PersistentCoherent,
-				Graphics::Core::ImmutableGraphicsBufferMapType::PersistentUncoherent
+				GraphicsLibrary::ImmutableGraphicsBufferMapType::PersistentCoherent,
+				GraphicsLibrary::ImmutableGraphicsBufferMapType::PersistentUncoherent
 			}, {
 				GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
 				GL_MAP_PERSISTENT_BIT
@@ -500,15 +568,15 @@ namespace Blaze
 
 		return out;
 	}
-	GLenum OpenGLBufferMappingOptions(Graphics::Core::ImmutableGraphicsBufferMapOptions options, Result& result)
+	GLenum OpenGLBufferMappingOptions(GraphicsLibrary::ImmutableGraphicsBufferMapOptions options, Result& result)
 	{
 		GLenum out;
 
 		if (!BitRemap(options, out, {
-				Graphics::Core::ImmutableGraphicsBufferMapOptions::ExplicitFlush,
-				Graphics::Core::ImmutableGraphicsBufferMapOptions::InvalidateBuffer,
-				Graphics::Core::ImmutableGraphicsBufferMapOptions::InvalidateRange,
-				Graphics::Core::ImmutableGraphicsBufferMapOptions::Unsynchronized,				
+				GraphicsLibrary::ImmutableGraphicsBufferMapOptions::ExplicitFlush,
+				GraphicsLibrary::ImmutableGraphicsBufferMapOptions::InvalidateBuffer,
+				GraphicsLibrary::ImmutableGraphicsBufferMapOptions::InvalidateRange,
+				GraphicsLibrary::ImmutableGraphicsBufferMapOptions::Unsynchronized,				
 			}, {
 				GL_MAP_FLUSH_EXPLICIT_BIT,
 				GL_MAP_INVALIDATE_BUFFER_BIT,
@@ -522,19 +590,19 @@ namespace Blaze
 
 		return out;
 	}
-	GLenum OpenGLMutableBufferUsage(Graphics::Core::MutableGraphicsBufferUseFrequency frequency, MutableGraphicsBufferUseType use, Result& result)
+	GLenum OpenGLMutableBufferUsage(GraphicsLibrary::MutableGraphicsBufferUseFrequency frequency, MutableGraphicsBufferUseType use, Result& result)
 	{
 		switch (frequency)
 		{
-		case Blaze::OpenGL::MutableGraphicsBufferUseFrequency::Static:	switch (use) {
+		case Blaze::GraphicsLibrary::MutableGraphicsBufferUseFrequency::Static:	switch (use) {
 			case Blaze::MutableGraphicsBufferUseType::Draw: return GL_STATIC_DRAW;				
 			case Blaze::MutableGraphicsBufferUseType::Read: return GL_STATIC_READ;				
 			case Blaze::MutableGraphicsBufferUseType::Copy: return GL_STATIC_COPY; }
-		case Blaze::OpenGL::MutableGraphicsBufferUseFrequency::Dynamic:	switch (use) {
+		case Blaze::GraphicsLibrary::MutableGraphicsBufferUseFrequency::Dynamic:	switch (use) {
 			case Blaze::MutableGraphicsBufferUseType::Draw: return GL_DYNAMIC_DRAW;				
 			case Blaze::MutableGraphicsBufferUseType::Read: return GL_DYNAMIC_READ;				
 			case Blaze::MutableGraphicsBufferUseType::Copy: return GL_DYNAMIC_COPY; }
-		case Blaze::OpenGL::MutableGraphicsBufferUseFrequency::Stream:	switch (use) {
+		case Blaze::GraphicsLibrary::MutableGraphicsBufferUseFrequency::Stream:	switch (use) {
 			case Blaze::MutableGraphicsBufferUseType::Draw: return GL_STREAM_DRAW;				
 			case Blaze::MutableGraphicsBufferUseType::Read: return GL_STREAM_READ;				
 			case Blaze::MutableGraphicsBufferUseType::Copy: return GL_STREAM_COPY; }
@@ -547,7 +615,7 @@ namespace Blaze
 		return BLAZE_ERROR_RESULT("Blaze Engine", "Engine error. Invalid MutableGraphicsBufferUseType enum value. The integer value was: " + StringParsing::Convert(ToInteger(use)));
 		return std::numeric_limits<GLenum>::max();
 	}
-
+	*/
 
 	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format, Result& result)
 	{
@@ -581,7 +649,8 @@ namespace Blaze
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Unsupported/Invalid SDL pixel format enum value. The integer value was: " + StringParsing::Convert(format));
 		return std::numeric_limits<DisplayPixelFormat>::max();
-	}
+	}	
+	
 	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format, Result& result)
 	{
 		switch (format)
@@ -614,7 +683,7 @@ namespace Blaze
 		}
 		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid DisplayPixelFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<SDL_PixelFormatEnum>::max();
-	}
+	}	
 }
 
 /*

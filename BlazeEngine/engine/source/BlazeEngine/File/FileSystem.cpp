@@ -1,10 +1,6 @@
 #pragma once
 #include "BlazeEngine/File/FileSystem.h"
 
-#include <filesystem>
-#include <fstream>
-#include <system_error>
-
 namespace Blaze
 {
     namespace FileSystem
@@ -12,15 +8,6 @@ namespace Blaze
         Path GetCurrentPath()
         {
             return Path(StringView((const char*)std::filesystem::current_path().u8string().c_str()));
-        }
-        Result CreateFile(const Path& path)
-        {
-            std::ofstream fs(path.GetString().Ptr());
-
-            if (!fs.is_open())                      
-                return BLAZE_ERROR_RESULT("Blaze Engine", "Failed to create file with path: \"" + path.GetString() + "\".");                            
-
-            return Result();
         }
         Result CreateDirectory(const Path& path)
         {

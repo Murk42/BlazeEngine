@@ -5,6 +5,6 @@ namespace Blaze
 {
 	namespace Threading
 	{
-		uint GetThreadID(std::thread::id id);
+		uint GetCurrentThreadID();		
 	}
 }

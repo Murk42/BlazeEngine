@@ -15,8 +15,10 @@ namespace Blaze
 	public:
 		class BLAZE_API Iterator
 		{
-			void* ptr;
-			Iterator(void*);
+			const void* ptr;
+			UnicodeChar value;
+
+			Iterator(const void* value, uint size);
 		public:
 			Iterator();
 			Iterator(const Iterator&);
@@ -74,6 +76,9 @@ namespace Blaze
 
 		bool operator==(const StringViewUTF8& s) const;
 		bool operator!=(const StringViewUTF8& s) const;		
+
+		StringUTF8& operator+= (const StringViewUTF8&);
+		StringUTF8& operator+= (const char&);
 		
 		friend BLAZE_API StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right);				
 	};	

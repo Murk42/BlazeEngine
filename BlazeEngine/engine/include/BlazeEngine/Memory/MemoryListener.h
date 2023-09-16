@@ -19,7 +19,7 @@ namespace Blaze
 	class BLAZE_API MemoryListener
 	{
 	public:
-		using ContainerType = List<MemoryEvent, MallocAllocator<ListNode<MemoryEvent>>>;
+		using ContainerType = List<MemoryEvent, MallocAllocator>;
 	private:
 		bool listening;
 		ContainerType events;

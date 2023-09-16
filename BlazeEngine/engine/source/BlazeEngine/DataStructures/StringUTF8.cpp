@@ -1,28 +1,23 @@
 #include "BlazeEngine/DataStructures/StringUTF8.h"
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
 
-#include <cstring>
-#include <cstdio>
-#include <cctype>
-#include <memory>
-
 namespace Blaze
 {
 	StringUTF8::Iterator::Iterator()
 		: ptr(nullptr)
 	{
 	}
-	StringUTF8::Iterator::Iterator(void* ptr)
-		: ptr(ptr)
+	StringUTF8::Iterator::Iterator(const void* ptr, uint size)
+		: ptr(ptr), value(ptr, size)
 	{
 	}
 	StringUTF8::Iterator::Iterator(const Iterator& i)
-		: ptr(i.ptr)
+		: ptr(i.ptr), value(i.value)
 	{
 	}
 	UnicodeChar StringUTF8::Iterator::ToUnicode() const
 	{		
- 		return UnicodeChar((const char*)ptr);
+ 		return value;
 	}
 	const void* StringUTF8::Iterator::Ptr() const
 	{
@@ -107,6 +102,7 @@ namespace Blaze
 	StringUTF8::Iterator& StringUTF8::Iterator::operator=(const Iterator& i)
 	{
 		ptr = i.ptr;
+		value = i.value;
 		return *this;
 	}
 
@@ -241,13 +237,13 @@ namespace Blaze
 
 	StringUTF8::Iterator StringUTF8::begin() const
 	{
-		return Iterator(buffer);
+		return Iterator(buffer, bufferSize - 1);
 	}
 	StringUTF8::Iterator StringUTF8::end() const
 	{
 		if (buffer == nullptr)
-			return Iterator(nullptr);
-		return Iterator((byte*)buffer + bufferSize - 1);
+			return Iterator(nullptr, 0);
+		return Iterator((byte*)buffer + bufferSize - 1, 0);
 	}
 
 	StringUTF8 StringUTF8::SubString(uint start, uint size) const
@@ -289,10 +285,17 @@ namespace Blaze
 		else
 		{
 			size_t newBufferSize = (bufferSize == 0 ? 1 : bufferSize) + fillSize * (newCharacterCount - charCount);
-			buffer = Memory::Allocate(newBufferSize);
+			buffer = Memory::Allocate(newBufferSize);			
+
 			memcpy(buffer, old, newBufferSize - 1);
+
+			uint bufferOffset = 0;
 			for (int i = 0; i < newCharacterCount - charCount; ++i)
-				fill.ToUTF8((char*)buffer + bufferSize - 1 + i * fillSize);
+			{				
+				fill.ToUTF8((char*)buffer + bufferSize - 1 + bufferOffset, newBufferSize - bufferSize + 1 - bufferOffset);
+				bufferOffset += fillSize;
+			}
+
 			Memory::Free(old);
 			bufferSize = newBufferSize;
 			characterCount = newCharacterCount;
@@ -304,6 +307,8 @@ namespace Blaze
 
 	StringUTF8& StringUTF8::operator=(const StringViewUTF8& s)
 	{
+		Memory::Free(buffer);
+
 		if (s.Buffer() != nullptr)
 		{
 			bufferSize = s.BufferSize();
@@ -322,6 +327,8 @@ namespace Blaze
 
 	StringUTF8& StringUTF8::operator=(const StringUTF8& s)
 	{ 
+		Memory::Free(buffer);
+
 		if (s.Buffer() != nullptr)
 		{
 			bufferSize = s.BufferSize();
@@ -403,7 +410,17 @@ namespace Blaze
 	bool StringUTF8::operator!=(const StringViewUTF8& s) const
 	{
 		return !(*this == s);
-	}	
+	}
+	StringUTF8& StringUTF8::operator+=(const StringViewUTF8& other)
+	{
+		return *this = *this + other;		
+	}
+
+	StringUTF8& StringUTF8::operator+=(const char& ch)
+	{
+		return *this = *this + StringViewUTF8(&ch, 1);
+	}
+
 
 	StringUTF8 operator+(const StringViewUTF8& left, const StringViewUTF8& right)
 	{

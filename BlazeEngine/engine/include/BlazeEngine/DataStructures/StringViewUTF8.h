@@ -16,7 +16,8 @@ namespace Blaze
 		class BLAZE_API Iterator
 		{
 			const void* ptr;
-			Iterator(const void* ptr);
+			UnicodeChar value;
+			Iterator(const void* ptr, uint size);
 		public:
 			Iterator();
 			Iterator(const Iterator&);
@@ -46,8 +47,8 @@ namespace Blaze
 		StringViewUTF8(const char* ptr);
 		StringViewUTF8(const char* ptr, size_t size);		
 		StringViewUTF8(const StringUTF8&);
-		explicit StringViewUTF8(const StringView&);		
-		explicit StringViewUTF8(const String&);
+		StringViewUTF8(const StringView&);		
+		StringViewUTF8(const String&);
 
 		const void* Buffer() const { return buffer; }
 		size_t BufferSize() const { return bufferSize; }

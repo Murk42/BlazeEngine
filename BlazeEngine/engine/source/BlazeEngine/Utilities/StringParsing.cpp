@@ -1,8 +1,5 @@
 #include "BlazeEngine/Utilities/StringParsing.h"
 
-#include <limits>
-#include <charconv>
-
 namespace Blaze::StringParsing
 {
 	bool SplitAtFirst(StringView _value, String& first, String& second, char ch)
@@ -244,6 +241,7 @@ namespace Blaze::StringParsing
 	Result Convert(const StringView& from, float&  to, FloatStringFormat format, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
 	Result Convert(const StringView& from, double& to, FloatStringFormat format, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
 
+
 	template<std::integral T>
 	String _Convert(T value, uint base, uint* count)
 	{
@@ -272,7 +270,7 @@ namespace Blaze::StringParsing
 		
 		return String(buffer, _count);
 	}
-
+	
 	String Convert(uint64 from, uint base, uint* count) { return _Convert(from, base, count); }
 	String Convert(int64  from, uint base, uint* count) { return _Convert(from, base, count); }
 	String Convert(uint32 from, uint base, uint* count) { return _Convert(from, base, count); }

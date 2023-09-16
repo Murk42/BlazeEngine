@@ -71,7 +71,7 @@ namespace Blaze
 		explicit ColorRGBAf(const ColorRGBA& c);
 		ColorRGBAf(uint hex);
 		
-		explicit operator Vec4f() const;
+		operator Vec4f() const;
 
 		inline bool operator==(const ColorRGBAf& other) const { return other.r == r && other.g == g && other.b == b && other.a == a; }
 		inline bool operator!=(const ColorRGBAf& other) const { return other.r != r || other.g != g || other.b != b || other.a != a; }

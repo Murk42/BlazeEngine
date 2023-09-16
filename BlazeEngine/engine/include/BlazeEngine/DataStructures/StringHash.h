@@ -1,7 +1,4 @@
 #pragma once
-#include "BlazeEngine/DataStructures/StringUTF8.h"
-#include "BlazeEngine/DataStructures/StringViewUTF8.h"
-#include <functional>
 
 namespace std
 {

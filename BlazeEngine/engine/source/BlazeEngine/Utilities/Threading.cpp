@@ -1,7 +1,4 @@
 #include "BlazeEngine/Utilities/Threading.h"
-#include <mutex>
-#include <unordered_map>
-
 
 namespace Blaze
 {
@@ -13,12 +10,14 @@ namespace Blaze
 		{
 			std::lock_guard<std::mutex> lk(threadIDMapMutex);
 
-			auto it = engineData->threadIDMap.find(id);
+			//auto it = engineData->threadIDMap.Find(id);
+			auto [it, inserted] = engineData->threadIDMap.Insert(id, engineData->threadIDMap.Count());
 
-			if (it == engineData->threadIDMap.end())
-				return (engineData->threadIDMap[id] = engineData->threadIDMap.size());
-
-			return engineData->threadIDMap[id];
+			return it->value;				
+		}
+		uint GetCurrentThreadID()
+		{
+			return GetThreadID(std::this_thread::get_id());
 		}
 	}
 }

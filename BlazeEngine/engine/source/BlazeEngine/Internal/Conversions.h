@@ -1,53 +1,41 @@
 #pragma once
-#include "BlazeEngine/Resources/Bitmap/Bitmap.h"
-#include "BlazeEngine/Graphics/GraphicsLibrary.h"
-#include "BlazeEngine/Graphics/GraphicsEnums.h"
+#include "BlazeEngine/Core/Window.h"
 
-#include <IL/il.h>
-#include <GL/glew.h>
-
-#include <SDL/SDL.h>
+#include <SDL2/SDL_pixels.h>
 
 namespace Blaze
-{
-	unsigned GetFormatDepth(BitmapPixelFormat format, Result& result);
-	unsigned PixelTypeSize(BitmapPixelType type, Result& result);
+{	
+	//SDL_PixelFormatEnum SDLPixelFormat(BitmapColorFormat format, Result& result);	
+	//BitmapColorFormat OepnGLToBlazePixelFormat(GLenum format, Result& result);
+	//GLenum OpenGLFormatByInternalPixelFormat(GraphicsLibrary::TextureInternalPixelFormat format, Result& result);
+	//GLenum OpenGLInternalPixelFormat(GraphicsLibrary::TextureInternalPixelFormat format, Result& result);
+	//GLenum OpenGLBufferInternalPixelFormat(GraphicsLibrary::TextureBufferInternalPixelFormat format, Result& result);
+	
+	//GLenum OpenGLPixelType(BitmapColorComponentType type, Result& result);	
+	//BitmapColorComponentType OpenGLToBlazePixelType(GLenum type, Result& result);
 
-	ILenum DevILPixelFormat(BitmapPixelFormat format, Result& result);
-	GLenum OpenGLPixelFormat(BitmapPixelFormat format, Result& result);
-	SDL_PixelFormatEnum SDLPixelFormat(BitmapPixelFormat format, Result& result);
-	BitmapPixelFormat DevILToBlazePixelFormat(ILenum format, Result& result);
-	BitmapPixelFormat OepnGLToBlazePixelFormat(GLenum format, Result& result);
-	GLenum OpenGLFormatByInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result);
-	GLenum OpenGLInternalPixelFormat(Graphics::Core::TextureInternalPixelFormat format, Result& result);
-	GLenum OpenGLBufferInternalPixelFormat(Graphics::Core::TextureBufferInternalPixelFormat format, Result& result);
+	//GLenum OpenGLTextureMinSampling(GraphicsLibrary::TextureSampling min, GraphicsLibrary::TextureSampling mip, bool mipmaps, Result& result);
+	//GLenum OpenGLTextureMagSampling(GraphicsLibrary::TextureSampling sampling, Result& result);
+	//GLenum OpenGLTextureWrapping(GraphicsLibrary::TextureWrapping wrapping, Result& result);
 
-	ILenum DevILPixelType(BitmapPixelType type, Result& result);
-	GLenum OpenGLPixelType(BitmapPixelType type, Result& result);
-	BitmapPixelType DevILToBlazePixelType(ILenum type, Result& result);
-	BitmapPixelType OpenGLToBlazePixelType(GLenum type, Result& result);
+	//GraphicsLibrary::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapColorFormat format, Result& result);
+	//BitmapColorFormat MapInternalTexturePixelFormat(GraphicsLibrary::TextureInternalPixelFormat format, Result& result);
 
-	GLenum OpenGLTextureMinSampling(Graphics::Core::TextureSampling min, Graphics::Core::TextureSampling mip, bool mipmaps, Result& result);
-	GLenum OpenGLTextureMagSampling(Graphics::Core::TextureSampling sampling, Result& result);
-	GLenum OpenGLTextureWrapping(Graphics::Core::TextureWrapping wrapping, Result& result);
+	//GLenum OpenGLVertexAttributeType(GraphicsLibrary::VertexAttributeType type, Result& result);
 
-	Graphics::Core::TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapPixelFormat format, Result& result);
-
-	GLenum OpenGLVertexAttributeType(Graphics::Core::VertexAttributeType type, Result& result);
-
-	GLenum OpenGLFramebufferAttachment(Graphics::Core::FramebufferAttachment attachment, Result& result);
+	//GLenum OpenGLFramebufferAttachment(GraphicsLibrary::FramebufferAttachment attachment, Result& result);
 		
-	GLenum OpenGLBufferMappingAccess(Graphics::Core::ImmutableGraphicsBufferMapAccess mapping, Result& result);	
-	GLenum OpenGLBufferMappingType(Graphics::Core::ImmutableGraphicsBufferMapType type, Result& result);
-	GLenum OpenGLBufferMappingOptions(Graphics::Core::ImmutableGraphicsBufferMapOptions options, Result& result);
+	//GLenum OpenGLBufferMappingAccess(GraphicsLibrary::ImmutableGraphicsBufferMapAccess mapping, Result& result);	
+	//GLenum OpenGLBufferMappingType(GraphicsLibrary::ImmutableGraphicsBufferMapType type, Result& result);
+	//GLenum OpenGLBufferMappingOptions(GraphicsLibrary::ImmutableGraphicsBufferMapOptions options, Result& result);
 
-	enum class MutableGraphicsBufferUseType
-	{
-		Draw, Read, Copy
-	};
-	GLenum OpenGLMutableBufferUsage(Graphics::Core::MutableGraphicsBufferUseFrequency frequency, MutableGraphicsBufferUseType use, Result& result);
-	//GLenum OpenGLBufferDynamicStorageHint(Graphics::Core::GraphicsBufferDynamicStorageHint hint, Result& result);
-	//GLenum OpenGLBufferStaticStorageHint(Graphics::Core::GraphicsBufferStaticStorageHint hint, Result& result);
+	//enum class MutableGraphicsBufferUseType
+	//{
+	//	Draw, Read, Copy
+	//};
+	//GLenum OpenGLMutableBufferUsage(GraphicsLibrary::MutableGraphicsBufferUseFrequency frequency, MutableGraphicsBufferUseType use, Result& result);
+	//GLenum OpenGLBufferDynamicStorageHint(GraphicsLibrary::GraphicsBufferDynamicStorageHint hint, Result& result);
+	//GLenum OpenGLBufferStaticStorageHint(GraphicsLibrary::GraphicsBufferStaticStorageHint hint, Result& result);
 
 	DisplayPixelFormat BlazeDisplayPixelFormat(uint32 format, Result& result);
 	SDL_PixelFormatEnum SDLDisplayPixelFormat(DisplayPixelFormat format, Result& result);
