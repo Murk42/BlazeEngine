@@ -1,8 +1,9 @@
+#include "pch.h"
 #include "BlazeEngine/File/Stream/FileStream.h"
 
 
 #ifdef BLAZE_PLATFORM_WINDOWS
-#include "source/BlazeEngine/Internal/Windows/WindowsPlatform.h"
+#include "BlazeEngine/Internal/Windows/WindowsPlatform.h"
 #else
 #pragma error
 #endif

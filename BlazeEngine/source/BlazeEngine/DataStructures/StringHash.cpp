@@ -1,4 +1,4 @@
-#pragma once
+#include "pch.h"
 #include "BlazeEngine/DataStructures/StringHash.h"
 
 namespace std

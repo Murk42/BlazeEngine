@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Application/UI/Components/MouseTriggerComponent.h"
 #include "BlazeEngine/Application/UI/Components/UITransformComponent.h"
 #include "BlazeEngine/Input/Input.h"

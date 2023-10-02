@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Utilities/Threading.h"
 
 namespace Blaze

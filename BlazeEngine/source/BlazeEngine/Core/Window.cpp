@@ -1,6 +1,7 @@
+#include "pch.h"
 #include "BlazeEngine/Core/Window.h"
-#include "source/BlazeEngine/Internal/Conversions.h"
-#include "source/BlazeEngine/Internal/WindowCreation.h"
+#include "BlazeEngine/Internal/Conversions.h"
+#include "BlazeEngine/Internal/WindowCreation.h"
 
 #include <SDL2/SDL.h>
 

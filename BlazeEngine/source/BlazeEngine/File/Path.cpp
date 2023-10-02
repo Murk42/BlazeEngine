@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/File/Path.h"
 
 namespace Blaze

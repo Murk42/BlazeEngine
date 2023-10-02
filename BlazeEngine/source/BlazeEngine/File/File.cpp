@@ -1,8 +1,8 @@
-#pragma once
+#include "pch.h"
 #include "BlazeEngine/File/File.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
-#include "source/BlazeEngine/Internal/Windows/WindowsPlatform.h"
+#include "BlazeEngine/Internal/Windows/WindowsPlatform.h"
 #else
 #error
 #endif

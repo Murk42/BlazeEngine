@@ -1,4 +1,4 @@
-#pragma once
+#include "pch.h"
 #include "BlazeEngine/File/FileSystem.h"
 
 namespace Blaze

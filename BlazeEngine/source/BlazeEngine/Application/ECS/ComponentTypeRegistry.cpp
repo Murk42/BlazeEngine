@@ -1,4 +1,4 @@
-#pragma once
+#include "pch.h"
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"
 
 namespace Blaze::ECS

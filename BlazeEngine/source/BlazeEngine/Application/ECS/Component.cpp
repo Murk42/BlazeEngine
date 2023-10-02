@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Application/ECS/Component.h"
 #include "BlazeEngine/Application/ECS/Entity.h"
 #include "BlazeEngine/Application/ECS/Scene.h"

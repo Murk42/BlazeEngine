@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Math/Random.h"
 
 namespace Blaze::Random

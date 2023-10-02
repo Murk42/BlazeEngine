@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Application/UI/Components/LabelComponent.h"
 #include "BlazeEngine/Application/UI/Components/UITransformComponent.h"
 #include "BlazeEngine/Resources/Font/Font.h"

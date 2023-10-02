@@ -2,7 +2,7 @@
 #include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Core/Window.h"
 
-#include "source/BlazeEngine/Graphics/Shaders.h"
+#include "BlazeEngine/Graphics/Shaders.h"
 #include "BlazeEngine/Graphics/Utility/TextVertexGenerator.h"
 
 #include "BlazeEngine/Resources/Font/Font.h"

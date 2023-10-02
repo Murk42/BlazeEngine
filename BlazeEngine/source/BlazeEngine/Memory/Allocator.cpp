@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Memory/Allocator.h"
 
 namespace Blaze

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Debug/Callstack.h"
 #define BOOST_STACKTRACE_USE_WINDBG_CACHED
 #include <boost/stacktrace.hpp>

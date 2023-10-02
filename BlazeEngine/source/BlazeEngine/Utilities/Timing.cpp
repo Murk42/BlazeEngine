@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Utilities/Timing.h"
 
 namespace Blaze

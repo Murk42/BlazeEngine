@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Debug/Log.h"
 #include "BlazeEngine/Utilities/Threading.h"
 

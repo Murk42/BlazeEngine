@@ -3,7 +3,7 @@
 
 #include "BlazeEngine/Core/Window.h"
 
-#include "source/BlazeEngine/Internal/Conversions.h"
+#include "BlazeEngine/Internal/Conversions.h"
 
 #include "SDL/SDL.h"
 #include "GL/glew.h"

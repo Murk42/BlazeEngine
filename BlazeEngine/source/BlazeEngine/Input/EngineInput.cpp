@@ -1,7 +1,8 @@
+#include "pch.h"
 #include "BlazeEngine/Input/InputEvents.h"
 #include "BlazeEngine/Input/Input.h"
-#include "source/BlazeEngine/Input/ClientEventStack.h"
-#include "source/BlazeEngine/Internal/WindowCreation.h"
+#include "BlazeEngine/Input/ClientEventStack.h"
+#include "BlazeEngine/Internal/WindowCreation.h"
 
 #include "SDL2/SDL.h"
 

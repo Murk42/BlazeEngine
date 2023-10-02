@@ -1,6 +1,6 @@
 #pragma once
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureCubemap.h"
-#include "source/BlazeEngine/Internal/Conversions.h"
+#include "BlazeEngine/Internal/Conversions.h"
 
 #include <GL/glew.h>
 

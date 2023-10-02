@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Memory/MemoryManager.h"
 #include "BlazeEngine/Memory/MallocAllocator.h"
 #include "BlazeEngine/Memory/MemoryListener.h"

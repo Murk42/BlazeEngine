@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceStorage.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
 

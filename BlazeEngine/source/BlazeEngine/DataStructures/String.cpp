@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/DataStructures/String.h"
 
 namespace Blaze

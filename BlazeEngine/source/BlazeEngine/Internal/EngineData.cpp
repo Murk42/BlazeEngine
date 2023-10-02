@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "EngineData.h"
-using namespace Blaze;
 
 EngineData* engineData = nullptr;
 

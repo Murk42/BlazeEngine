@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Input/Key.h"
 
 #include "SDL2/SDL.h"

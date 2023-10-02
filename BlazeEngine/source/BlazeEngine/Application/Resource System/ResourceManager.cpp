@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceManager.h"
 
 namespace Blaze::ResourceSystem

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Application/UI/Components/FrameComponent.h"
 #include "BlazeEngine/Application/UI/Components/UITransformComponent.h"
 

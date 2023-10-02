@@ -1,4 +1,5 @@
-#include "source/BlazeEngine/Internal/Libraries/SDL.h"
+#include "pch.h"
+#include "BlazeEngine/Internal/Libraries/SDL.h"
 #include "BlazeEngine/Utilities/Time.h"
 
 #include "SDL2/SDL.h"

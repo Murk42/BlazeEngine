@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Debug/LoggerListener.h"
 
 namespace Blaze::Debug

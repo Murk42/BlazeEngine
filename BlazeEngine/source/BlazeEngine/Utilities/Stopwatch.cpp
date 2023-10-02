@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Utilities/Stopwatch.h"
 
 namespace Blaze

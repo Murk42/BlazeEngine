@@ -1,6 +1,7 @@
-#include "source/BlazeEngine/Internal/Libraries/SDL.h"
-#include "source/BlazeEngine/Internal/Libraries/GLEW.h"
-#include "source/BlazeEngine/Internal/Libraries/FreeType.h"
+#include "pch.h"
+#include "BlazeEngine/Internal/Libraries/SDL.h"
+#include "BlazeEngine/Internal/Libraries/GLEW.h"
+#include "BlazeEngine/Internal/Libraries/FreeType.h"
 
 #include "BlazeEngine/Utilities/Time.h"
 

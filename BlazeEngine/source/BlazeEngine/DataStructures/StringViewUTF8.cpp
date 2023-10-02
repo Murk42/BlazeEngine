@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/DataStructures/StringViewUTF8.h"
 #include "BlazeEngine/DataStructures/StringUTF8.h"
 

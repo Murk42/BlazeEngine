@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Debug/Breakpoint.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS

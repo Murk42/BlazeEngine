@@ -1,8 +1,9 @@
+#include "pch.h"
 #include "BlazeEngine/Threading/Thread.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include <Windows.h>
-#include "source/BlazeEngine/Internal/Windows/WindowsPlatform.h"
+#include "BlazeEngine/Internal/Windows/WindowsPlatform.h"
 #else
 #error Not supported
 #endif

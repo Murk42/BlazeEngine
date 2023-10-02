@@ -1,4 +1,4 @@
-#pragma once
+#include "pch.h"
 #include "BlazeEngine/Application/ResourceSystem/ResourceTypeRegistry.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 

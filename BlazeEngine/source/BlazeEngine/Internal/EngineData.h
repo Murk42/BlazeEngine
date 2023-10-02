@@ -2,7 +2,7 @@
 #include "BlazeEngine/Event/EventDispatcher.h"
 #include "BlazeEngine/Input/Key.h"
 #include "BlazeEngine/Utilities/Timing.h"
-#include "SDL2/SDL_scancode.h"
+#include <SDL2/SDL_scancode.h>
 
 namespace Blaze
 {

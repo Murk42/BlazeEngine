@@ -1,5 +1,5 @@
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTexture3D.h"
-#include "source/BlazeEngine/Internal/Conversions.h"
+#include "BlazeEngine/Internal/Conversions.h"
 
 #include <GL/glew.h>
 

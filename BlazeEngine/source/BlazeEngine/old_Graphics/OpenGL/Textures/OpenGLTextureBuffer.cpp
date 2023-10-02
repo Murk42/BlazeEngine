@@ -1,7 +1,7 @@
 #include "BlazeEngine/Graphics/OpenGL/Textures/OpenGLTextureBuffer.h"
 
 #include "GL/glew.h"
-#include "source/BlazeEngine/Internal/Conversions.h"
+#include "BlazeEngine/Internal/Conversions.h"
 #include "BlazeEngine/Graphics/GraphicsCore.h"
 
 namespace Blaze::OpenGL

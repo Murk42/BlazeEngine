@@ -1,4 +1,5 @@
-#include "source/BlazeEngine/Internal/Libraries/FreeType.h"
+#include "pch.h"
+#include "BlazeEngine/Internal/Libraries/FreeType.h"
 #include "BlazeEngine/Utilities/Time.h"
 
 #include "freetype/freetype.h"
