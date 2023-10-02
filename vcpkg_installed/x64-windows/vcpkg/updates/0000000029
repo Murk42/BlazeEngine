@@ -1,9 +1,0 @@
-Package: boost-container-hash
-Version: 1.82.0
-Port-Version: 2
-Depends: boost-config, boost-describe, boost-mp11, boost-type-traits, boost-vcpkg-helpers
-Architecture: x64-windows
-Multi-Arch: same
-Abi: 796e5d310dfec13f1d6e3d632ca86a1008beef4588c663057ab95ab4ac65bac7
-Description: Boost container_hash module
-Status: install ok installed
