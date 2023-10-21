@@ -19,12 +19,12 @@ namespace Blaze
 		Result Close();
 		Result Flush();
 
-		bool MovePosition(int64 offset) override;
-		bool SetPosition(uint64 offset) override;
-		bool SetPositionFromEnd(int64 offset) override;
-		uint64 GetPosition() const override;
+		bool MovePosition(intMem offset) override;
+		bool SetPosition(uintMem offset) override;
+		bool SetPositionFromEnd(intMem offset) override;
+		uintMem GetPosition() const override;
 
-		uint64 GetSize() const override;
+		uintMem GetSize() const override;
 
 		inline void* GetHandle() const { return file; }
 
@@ -40,7 +40,7 @@ namespace Blaze
 		FileWriteStream(void* file);
 		~FileWriteStream();
 
-		uint64 Write(const void* ptr, uint64 byteCount) override;
+		uintMem Write(const void* ptr, uintMem byteCount) override;
 	};
 
 	class BLAZE_API FileReadStream : virtual public FileStreamBase, virtual public ReadStream
@@ -50,7 +50,7 @@ namespace Blaze
 		FileReadStream(void* file);
 		~FileReadStream();
 
-		uint64 Read(void* ptr, uint64 byteCount) override;
+		uintMem Read(void* ptr, uintMem byteCount) override;
 	};
 
 	class BLAZE_API FileStream : public FileReadStream, public FileWriteStream

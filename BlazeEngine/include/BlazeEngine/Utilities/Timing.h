@@ -5,7 +5,7 @@ namespace Blaze
 {
 	struct TimingResult
 	{
-		std::unordered_map<String, TimingResult> nodes;
+		Map<String, TimingResult> nodes;
 		String name;
 		double time;
 	};
@@ -30,7 +30,7 @@ namespace Blaze
 
 		operator TimingResult() const;
 	private:
-		std::unordered_map<String, TimingResult> nodes;
+		Map<String, TimingResult> nodes;
 
 		String name;				
 		TimePoint timePoint;

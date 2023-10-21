@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BlazeEngine/Graphics/Graphics.h"
 #include "BlazeEngine/Graphics/GraphicsCore.h"
 #include "BlazeEngine/Core/Window.h"

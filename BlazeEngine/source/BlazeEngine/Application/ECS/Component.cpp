@@ -28,16 +28,16 @@ namespace Blaze::ECS
 		return system->GetTypeData(typeData);		
 	}	
 
-	uint ComponentContainer::BucketHeader::MarkNew()
+	uintMem ComponentContainer::BucketHeader::MarkNew()
 	{
-		uint index = std::countr_one(flags);
+		uintMem index = std::countr_one(flags);
 		FlagType mask = FlagType(1) << index;
 
 		flags |= mask;
 
 		return index;		
 	}	
-	void ComponentContainer::BucketHeader::Unmark(uint index)
+	void ComponentContainer::BucketHeader::Unmark(uintMem index)
 	{
 		FlagType mask = FlagType(1) << index;
 
@@ -57,20 +57,20 @@ namespace Blaze::ECS
 		return flags == 0;
 	}
 
-	void ComponentContainer::GetComponentLocation(Component* component, BucketHeader*& bucket, uint& index)
+	void ComponentContainer::GetComponentLocation(Component* component, BucketHeader*& bucket, uintMem& index)
 	{
 		void* rawComponent = (byte*)component - typeData->BaseOffset();
 		ElementHeader* element = (ElementHeader*)((byte*)rawComponent - sizeof(ElementHeader));
 		bucket = element->bucket;
 
-		uint byteOffset = (byte*)element - (byte*)bucket - sizeof(BucketHeader);
+		uintMem byteOffset = (byte*)element - (byte*)bucket - sizeof(BucketHeader);
 
 		if (byteOffset % elementSize != 0)
 			Debug::Logger::LogError("Blaze Engine", "Invalid component pointer");
 
 		index = byteOffset / elementSize;
 	}
-	Component* ComponentContainer::GetComponentFromLocation(BucketHeader* bucket, uint index, ElementHeader*& element)
+	Component* ComponentContainer::GetComponentFromLocation(BucketHeader* bucket, uintMem index, ElementHeader*& element)
 	{
 		element = (ElementHeader*)((byte*)bucket + sizeof(BucketHeader) + index * elementSize);
 		void* rawComponent = (byte*)element + sizeof(ElementHeader);
@@ -85,11 +85,11 @@ namespace Blaze::ECS
 		return (byte*)bucket + sizeof(BucketHeader) + (BucketElementCount - 1 - std::countl_zero(bucket->flags)) * elementSize + sizeof(ElementHeader);
 	}
 
-	void ComponentContainer::Increment(uint& bucketIndex, Component*& component) const
+	void ComponentContainer::Increment(uintMem& bucketIndex, Component*& component) const
 	{
 		void* ptr = (byte*)component - typeData->BaseOffset();
 		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));
-		uint index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
+		uintMem index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
 
 		FlagType mask = ~((((FlagType)1) << (index + 1)) - 1);
 		index = std::countr_zero(buckets[bucketIndex]->flags & mask);
@@ -108,11 +108,11 @@ namespace Blaze::ECS
 		else
 			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData->BaseOffset());
 	}
-	void ComponentContainer::Decrement(uint& bucketIndex, Component*& component) const
+	void ComponentContainer::Decrement(uintMem& bucketIndex, Component*& component) const
 	{
 		void* ptr = (byte*)component - typeData->BaseOffset();
 		ElementHeader* element = (ElementHeader*)((byte*)component - sizeof(ElementHeader));
-		uint index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
+		uintMem index = ((byte*)ptr - (byte*)buckets[bucketIndex] - sizeof(BucketHeader)) / elementSize;
 
 		FlagType mask = (((FlagType)1) << index) - 1;
 		index = std::countl_zero(buckets[bucketIndex]->flags & mask);
@@ -146,7 +146,7 @@ namespace Blaze::ECS
 
 	void ComponentContainer::RemoveBucket(BucketHeader* bucket)
 	{
-		uint i = 0;
+		uintMem i = 0;
 		for (; i < bucketCount; ++i)
 			if (buckets[i] == bucket)
 				break;
@@ -216,7 +216,7 @@ namespace Blaze::ECS
 		else
 			bucket = buckets[0];
 
-		uint index = bucket->MarkNew();		
+		uintMem index = bucket->MarkNew();
 
 		if (bucket->IsFull())
 		{
@@ -239,7 +239,7 @@ namespace Blaze::ECS
 	}
 	void ComponentContainer::Free(Component* component)
 	{
-		uint index;
+		uintMem index;
 		BucketHeader* bucket;
 
 		GetComponentLocation(component, bucket, index);
@@ -259,7 +259,7 @@ namespace Blaze::ECS
 		for (auto el : *this)		
 			typeData->Destruct(el);
 
-		for (uint i = 0; i < bucketCount; ++i)
+		for (uintMem i = 0; i < bucketCount; ++i)
 			FreeBucket(buckets[i]);
 				
 		delete[] buckets;
@@ -280,7 +280,7 @@ namespace Blaze::ECS
 		return Iterator(this, bucketCount, nullptr);
 	}
 
-	ComponentContainer::Iterator::Iterator(const ComponentContainer* cc, uint bucketIndex, Component* ptr)
+	ComponentContainer::Iterator::Iterator(const ComponentContainer* cc, uintMem bucketIndex, Component* ptr)
 		: container(cc), bucketIndex(bucketIndex), ptr(ptr)
 	{
 

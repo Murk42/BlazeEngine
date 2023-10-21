@@ -19,18 +19,18 @@ namespace Blaze::ECS
 		template<typename C> requires IsComponent<C>
 		C* GetComponent() const;
 		Component* GetComponent(const ComponentTypeData&) const;		
-		Component* GetComponent(uint index) const;
-		const ComponentTypeData* GetComponentTypeData(uint index);
+		Component* GetComponent(uintMem index) const;
+		const ComponentTypeData* GetComponentTypeData(uintMem index);
 				
-		uint GetComponentCount() const { return componentCount; }
+		uintMem GetComponentCount() const { return componentCount; }
 
 		Scene* GetScene() const { return scene; }
 
 		friend class Scene;		
 	private:				
 		Scene* scene;				
-		uint componentCount;		
-		uint arrayIndex;
+		uintMem componentCount;
+		uintMem arrayIndex;
 
 		const ComponentTypeRegistry* GetRegistry() const;
 	};

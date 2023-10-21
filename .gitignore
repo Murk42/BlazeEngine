@@ -1,16 +1,6 @@
 #Build files
 build/
 install/
+temp/
+
 .vs/
-*.lib
-*.dll
-
-#Project files
-*.sln
-*.user
-*.vcxproj
-*.filters
-
-*.hint
-*.props
-

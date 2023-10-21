@@ -14,4 +14,5 @@ namespace Blaze
 
 		void operator= (const Stopwatch&);
 	};
+
 }

@@ -47,12 +47,12 @@ namespace Blaze
 	{
 	}
 
-	UnicodeChar::UnicodeChar(uint value)
+	UnicodeChar::UnicodeChar(uint32 value)
 		: value(value)
 	{
 	}
 	
-	UnicodeChar::UnicodeChar(const void* ptr, uint size)
+	UnicodeChar::UnicodeChar(const void* ptr, uintMem size)
 	{
 		if (ptr == nullptr || size == 0)
 			value = 0;
@@ -74,7 +74,7 @@ namespace Blaze
 		return -1;
 	}
 
-	bool UnicodeChar::ToUTF8(void* buffer, uint size)
+	bool UnicodeChar::ToUTF8(void* buffer, uintMem size)
 	{
 		if ((value >> 6) == 0)
 		{

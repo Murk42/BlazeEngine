@@ -117,7 +117,7 @@ namespace Blaze
 
 		void Clear();
 		bool Empty() const;
-		uint Count() const;
+		uintMem Count() const;
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddBefore(const Iterator& it, Args&& ... args);

@@ -22,14 +22,11 @@ struct EngineData
 
 	Blaze::Map<std::thread::id, Blaze::uint> threadIDMap;
 
-	Blaze::TimingResult blazeInitTimings;
-
-	Blaze::Result OpenGLResult;
+	Blaze::TimingResult blazeInitTimings;	
 
 	bool finishedInit = false;
 };
+
+class BLAZE_API std::thread::id;
+
 extern EngineData* engineData;
-
-bool FlushOpenGLResult();
-
-#define CHECK_OPENGL_RESULT() if(::engineData->OpenGLResult) return std::move(::engineData->OpenGLResult);

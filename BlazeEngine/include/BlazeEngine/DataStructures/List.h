@@ -112,7 +112,7 @@ namespace Blaze
 
 		void Clear();
 		bool Empty() const;		
-		uint Count() const;
+		uintMem Count() const;
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddAfter(const Iterator& it, Args&& ... args);
@@ -181,7 +181,7 @@ namespace Blaze
 		{		
 			Node* next;
 			ValueType value;
-			uint iteratorCount;
+			uintMem iteratorCount;
 
 			template<typename ... Args> requires ::std::constructible_from<T, Args...>
 			Node(Node* next, Args&& ... args);

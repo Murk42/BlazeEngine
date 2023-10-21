@@ -42,6 +42,10 @@
 #define BLAZE_INVALID_ITERATOR_CHECK
 #endif
 
+#ifndef BLAZE_SDL_WINDOW_DEFAULT
+#define BLAZE_SDL_WINDOW_DEFAULT
+#endif
+
 #define BLAZE_OK 1
 #define BLAZE_YES 1
 #define BLAZE_NO 0

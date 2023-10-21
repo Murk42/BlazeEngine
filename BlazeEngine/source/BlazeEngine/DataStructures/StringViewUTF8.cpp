@@ -12,7 +12,7 @@ namespace Blaze
 		: ptr(i.ptr), value(i.value)
 	{
 	}
-	StringViewUTF8::Iterator::Iterator(const void* ptr, uint size)
+	StringViewUTF8::Iterator::Iterator(const void* ptr, uintMem size)
 		: ptr(ptr), value(ptr, size)
 	{
 	}

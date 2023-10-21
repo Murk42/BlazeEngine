@@ -10,15 +10,15 @@ namespace Blaze
 	class BLAZE_API StringUTF8
 	{
 		void* buffer;	
-		uint bufferSize;
-		uint characterCount;		
+		uintMem bufferSize;
+		uintMem characterCount;		
 	public:
 		class BLAZE_API Iterator
 		{
 			const void* ptr;
 			UnicodeChar value;
 
-			Iterator(const void* value, uint size);
+			Iterator(const void* value, uintMem size);
 		public:
 			Iterator();
 			Iterator(const Iterator&);
@@ -47,9 +47,9 @@ namespace Blaze
 		StringUTF8(const StringUTF8& s);
 		StringUTF8(StringUTF8&& s) noexcept;
 				
-		StringUTF8(const void* buffer, uint bufferSize);
+		StringUTF8(const void* buffer, uintMem bufferSize);
 		StringUTF8(const char* ptr);
-		StringUTF8(const char* ptr, uint size);
+		StringUTF8(const char* ptr, uintMem size);
 		StringUTF8(const StringViewUTF8&);
 		explicit StringUTF8(const StringView&);		
 		explicit StringUTF8(const String&);
@@ -59,14 +59,14 @@ namespace Blaze
 		void Clear();
 		
 		const void* Buffer() const { return buffer; }
-		uint BufferSize() const { return bufferSize; }
-		uint CharacterCount() const { return characterCount; }
+		uintMem BufferSize() const { return bufferSize; }
+		uintMem CharacterCount() const { return characterCount; }
 		
 		Iterator begin() const;		
 		Iterator end() const;
 
-		StringUTF8 SubString(uint start, uint size) const;
-		StringUTF8& Resize(uint newCharacterCount, UnicodeChar fill);
+		StringUTF8 SubString(uintMem start, uintMem size) const;
+		StringUTF8& Resize(uintMem newCharacterCount, UnicodeChar fill);
 
 		StringUTF8& operator= (const StringViewUTF8& s);
 		StringUTF8& operator= (const StringUTF8& s);

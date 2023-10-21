@@ -9,12 +9,12 @@ namespace Blaze
 	public:
 		UnicodeChar();
 		UnicodeChar(const UnicodeChar&);
-		UnicodeChar(uint value);		
-		UnicodeChar(const void* ptr, uint size);		
+		UnicodeChar(uint32 value);		
+		UnicodeChar(const void* ptr, uintMem size);
 
 		inline uint32 Value() const { return value; }
 		size_t UTF8Size();
-		bool ToUTF8(void* buffer, uint size);
+		bool ToUTF8(void* buffer, uintMem size);
 
 		uint32 Hash() const;
 

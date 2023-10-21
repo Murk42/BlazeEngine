@@ -71,7 +71,7 @@ namespace Blaze::Random
         return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
     }
     
-    void SetSeed(int64 seed)
+    void SetSeed(uint seed)
     {
         srand(seed);
     }
@@ -84,7 +84,7 @@ namespace Blaze::Random
     float Float(float min, float max)
     {
         return ((float)rand()) * (max - min) / (float)RAND_MAX + min;
-    }
+    }    
 
     float Simplex(float x) {
         float n0, n1;
@@ -354,9 +354,9 @@ namespace Blaze::Random
         static const double G3 = 1.0f / 6.0f;
 
         double s = (v.x + v.y + v.z) * F3;
-        int i = fastfloor_double(v.x + s);
-        int j = fastfloor_double(v.y + s);
-        int k = fastfloor_double(v.z + s);
+        int64 i = fastfloor_double(v.x + s);
+        int64 j = fastfloor_double(v.y + s);
+        int64 k = fastfloor_double(v.z + s);
         double t = (i + j + k) * G3;
         double X0 = i - t;
         double Y0 = j - t;
@@ -442,7 +442,7 @@ namespace Blaze::Random
 
     Blaze::ColorRGB ColorRGB()
     {
-        return Blaze::ColorRGB(Float(0, 255), Float(0, 255), Float(0, 255));
+        return Blaze::ColorRGB(static_cast<uint8>(rand()), static_cast<uint8>(rand()), static_cast<uint8>(rand()));
     }
     Blaze::ColorRGBf ColorRGBf()
     {
@@ -450,7 +450,7 @@ namespace Blaze::Random
     }
     Blaze::ColorRGBA ColorRGBA()
     {
-        return Blaze::ColorRGBA(Float(0, 255), Float(0, 255), Float(0, 255), 255);
+        return Blaze::ColorRGBA(static_cast<uint8>(rand()), static_cast<uint8>(rand()), static_cast<uint8>(rand()), 255);
     }
     Blaze::ColorRGBAf ColorRGBAf()
     {

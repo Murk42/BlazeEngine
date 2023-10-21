@@ -4,7 +4,7 @@
 
 namespace Blaze
 {
-	class Window;	
+	class WindowBase;	
 
 	namespace Input::Events
 	{
@@ -13,15 +13,15 @@ namespace Blaze
 		struct MouseMotion            { Vec2i pos; Vec2i delta;           };
 		struct MouseScroll            { int value;                        };		
 		struct TextInput              { StringUTF8 input;                 };		
-		struct WindowResizedEvent     { Window* window; Vec2i size;       };
-		struct WindowMovedEvent       { Window* window; Vec2i pos;        };
-		struct WindowMinimizedEvent   { Window* window;                   };
-		struct WindowMaximizedEvent   { Window* window;                   };
-		struct WindowFocusGainedEvent { Window* window;                   };
-		struct WindowFocusLostEvent   { Window* window;                   };
-		struct WindowCloseEvent       { Window* window;                   };
-		struct WindowMouseEnterEvent  { Window* window;	                  };
-		struct WindowMouseLeaveEvent  { Window* window;	                  };
+		struct WindowResizedEvent     { WindowBase* window; Vec2i size;       };
+		struct WindowMovedEvent       { WindowBase* window; Vec2i pos;        };
+		struct WindowMinimizedEvent   { WindowBase* window;                   };
+		struct WindowMaximizedEvent   { WindowBase* window;                   };
+		struct WindowFocusGainedEvent { WindowBase* window;                   };
+		struct WindowFocusLostEvent   { WindowBase* window;                   };
+		struct WindowCloseEvent       { WindowBase* window;                   };
+		struct WindowMouseEnterEvent  { WindowBase* window;	                  };
+		struct WindowMouseLeaveEvent  { WindowBase* window;	                  };
 
 		enum class InputEventType
 		{

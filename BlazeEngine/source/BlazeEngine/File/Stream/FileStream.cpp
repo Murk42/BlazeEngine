@@ -69,7 +69,7 @@ namespace Blaze
 #pragma error
 #endif
 	}
-	bool FileStreamBase::MovePosition(int64 offset)
+	bool FileStreamBase::MovePosition(intMem offset)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
@@ -90,7 +90,7 @@ namespace Blaze
 #pragma error
 #endif
 	}
-	bool FileStreamBase::SetPosition(uint64 offset)
+	bool FileStreamBase::SetPosition(uintMem offset)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
@@ -111,7 +111,7 @@ namespace Blaze
 #pragma error
 #endif
 	}
-	bool FileStreamBase::SetPositionFromEnd(int64 offset)
+	bool FileStreamBase::SetPositionFromEnd(intMem offset)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
@@ -132,7 +132,7 @@ namespace Blaze
 #pragma error
 #endif
 	}
-	uint64 FileStreamBase::GetPosition() const
+	uintMem FileStreamBase::GetPosition() const
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
@@ -146,12 +146,12 @@ namespace Blaze
 		if (result == 0)
 			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
 
-		return (uint64)position.QuadPart;
+		return (uintMem)position.QuadPart;
 #else
 #pragma error
 #endif
 	}
-	uint64 FileStreamBase::GetSize() const
+	uintMem FileStreamBase::GetSize() const
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
@@ -183,12 +183,12 @@ namespace Blaze
 	FileWriteStream::~FileWriteStream()
 	{
 	}
-	uint64 FileWriteStream::Write(const void* ptr, uint64 byteCount)
+	uintMem FileWriteStream::Write(const void* ptr, uintMem byteCount)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		OVERLAPPED overlapped;
 		DWORD bytesWritten;
-		BOOL result = WriteFile(GetHandle(), ptr, byteCount, &bytesWritten, NULL);
+		BOOL result = WriteFile(GetHandle(), ptr, static_cast<DWORD>(byteCount), &bytesWritten, &overlapped);
 
 		if (result == 0)
 			Debug::Logger::LogError("Windows API", "WriteFile failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
@@ -209,12 +209,12 @@ namespace Blaze
 	FileReadStream::~FileReadStream()
 	{
 	}
-	uint64 FileReadStream::Read(void* ptr, uint64 byteCount)
+	uintMem FileReadStream::Read(void* ptr, uintMem byteCount)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		OVERLAPPED overlapped;
 		DWORD bytesRead;
-		BOOL result = ReadFile(GetHandle(), ptr, byteCount, &bytesRead, NULL);
+		BOOL result = ReadFile(GetHandle(), ptr, static_cast<DWORD>(byteCount), &bytesRead, &overlapped);
 
 		if (result == 0)
 			Debug::Logger::LogError("Windows API", "ReadFile failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");

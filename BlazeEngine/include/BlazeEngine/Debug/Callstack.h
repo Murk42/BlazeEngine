@@ -11,7 +11,7 @@ namespace Blaze::Debug
 		inline bool IsEmpty() const { return address == nullptr; }
 
 		inline Path FilePath() const { return file; }
-		inline uint FileLine() const { return line; }
+		inline uintMem FileLine() const { return line; }
 		inline const void* Address() const { return address; }
 		inline String LocationName() const { return locationName; }
 
@@ -21,7 +21,7 @@ namespace Blaze::Debug
 		StackFrame& operator=(const StackFrame&) = default;		
 	private:
 		Path file;
-		uint line;
+		uintMem line;
 		const void* address;
 		String locationName;	
 
@@ -38,7 +38,7 @@ namespace Blaze::Debug
 
 		void Clear();
 
-		uint Count() const;
+		uintMem Count() const;
 
 		const StackFrame* begin() const;
 		const StackFrame* end() const;
@@ -52,7 +52,7 @@ namespace Blaze::Debug
 		Callstack& operator=(Callstack&&) noexcept;
 	private:
 		StackFrame* frames;
-		uint frameCount;
+		uintMem frameCount;
 		uint skips;
 
 		//Wont free previous contents

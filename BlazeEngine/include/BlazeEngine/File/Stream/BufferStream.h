@@ -3,41 +3,43 @@
 
 namespace Blaze
 {
+#pragma warning( push )
+#pragma warning( disable : 4250)	
 	class BLAZE_API BufferStreamBase : virtual public StreamBase
 	{
 	public:
 		BufferStreamBase();
-		BufferStreamBase(uint64 size);
-		BufferStreamBase(void* buffer, uint64 size);
+		BufferStreamBase(uintMem size);
+		BufferStreamBase(void* buffer, uintMem size);
 		BufferStreamBase(const FileStreamBase&) = delete;
 		~BufferStreamBase();
 
-		Result SetBuffer(void* buffer, uint64 size);
+		Result SetBuffer(void* buffer, uintMem size);
 		Result Clear();
 
-		bool MovePosition(int64 offset) override;
-		bool SetPosition(uint64 offset) override;
-		uint64 GetPosition() const override;
+		bool MovePosition(intMem offset) override;
+		bool SetPosition(uintMem offset) override;
+		uintMem GetPosition() const override;
 
-		uint64 GetSize() const override;
+		uintMem GetSize() const override;
 		const void* GetBuffer() const;
 
 		FileStreamBase& operator=(const FileStreamBase&) = delete;
 	protected:
 		void* buffer;
-		uint64 size;
-		uint64 position;
+		uintMem size;
+		uintMem position;
 	};
 
 	class BLAZE_API BufferWriteStream : virtual public BufferStreamBase, virtual public WriteStream
 	{
 	public:
 		BufferWriteStream();
-		BufferWriteStream(uint64 size);
-		BufferWriteStream(void* buffer, uint64 size);
+		BufferWriteStream(uintMem size);
+		BufferWriteStream(void* buffer, uintMem size);
 		~BufferWriteStream();
 
-		uint64 Write(const void* ptr, uint64 byteCount) override;
+		uintMem Write(const void* ptr, uintMem byteCount) override;
 
 		using BufferStreamBase::GetBuffer;
 	};
@@ -46,15 +48,16 @@ namespace Blaze
 	{
 	public:
 		BufferReadStream();
-		BufferReadStream(uint64 size);
-		BufferReadStream(void* buffer, uint64 size);
+		BufferReadStream(uintMem size);
+		BufferReadStream(void* buffer, uintMem size);
 		~BufferReadStream();
 
-		uint64 Read(void* ptr, uint64 byteCount) override;
+		uintMem Read(void* ptr, uintMem byteCount) override;
 	};
 
 	class BufferStream : public BufferReadStream, public BufferWriteStream
 	{
 
 	};
+#pragma warning( pop ) 
 }

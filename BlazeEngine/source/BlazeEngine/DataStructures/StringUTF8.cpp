@@ -8,7 +8,7 @@ namespace Blaze
 		: ptr(nullptr)
 	{
 	}
-	StringUTF8::Iterator::Iterator(const void* ptr, uint size)
+	StringUTF8::Iterator::Iterator(const void* ptr, uintMem size)
 		: ptr(ptr), value(ptr, size)
 	{
 	}
@@ -132,7 +132,7 @@ namespace Blaze
 		s.characterCount = 0;
 	}
 
-	StringUTF8::StringUTF8(const void* buffer, uint bufferSize)
+	StringUTF8::StringUTF8(const void* buffer, uintMem bufferSize)
 		: buffer(nullptr), bufferSize(bufferSize + 1), characterCount(0)
 	{
 		if (bufferSize == 0 || buffer == nullptr)
@@ -166,7 +166,7 @@ namespace Blaze
 		}
 	}
 
-	StringUTF8::StringUTF8(const char* ptr, uint size)
+	StringUTF8::StringUTF8(const char* ptr, uintMem size)
 		: buffer(nullptr), bufferSize(size + 1), characterCount(size)
 	{
 		if (ptr != nullptr && size != 0)
@@ -247,17 +247,17 @@ namespace Blaze
 		return Iterator((byte*)buffer + bufferSize - 1, 0);
 	}
 
-	StringUTF8 StringUTF8::SubString(uint start, uint size) const
+	StringUTF8 StringUTF8::SubString(uintMem start, uintMem size) const
 	{
 		auto b = begin();
-		for (uint i = 0; i != start; ++i, ++b);
+		for (uintMem i = 0; i != start; ++i, ++b);
 		auto e = b;
-		for (uint i = 0; i != size; ++i, ++e);
+		for (uintMem i = 0; i != size; ++i, ++e);
 
 		return StringUTF8(b.ptr, (char*)e.ptr - (char*)b.ptr);
 	}
 
-	StringUTF8& StringUTF8::Resize(uint newCharacterCount, UnicodeChar fill)
+	StringUTF8& StringUTF8::Resize(uintMem newCharacterCount, UnicodeChar fill)
 	{ 
 		size_t fillSize = fill.UTF8Size();
 		void* old = buffer;
@@ -290,7 +290,7 @@ namespace Blaze
 
 			memcpy(buffer, old, newBufferSize - 1);
 
-			uint bufferOffset = 0;
+			uintMem bufferOffset = 0;
 			for (int i = 0; i < newCharacterCount - charCount; ++i)
 			{				
 				fill.ToUTF8((char*)buffer + bufferSize - 1 + bufferOffset, newBufferSize - bufferSize + 1 - bufferOffset);

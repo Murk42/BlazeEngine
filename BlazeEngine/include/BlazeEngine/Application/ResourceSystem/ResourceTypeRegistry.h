@@ -8,7 +8,7 @@ namespace Blaze::ResourceSystem
 		String typeName;
 
 		size_t size;
-		void(*construct)(void*);
+		void(*construct)(void*); 
 		void(*destruct)(void*);
 
 		template<typename T>
@@ -51,21 +51,21 @@ namespace Blaze::ResourceSystem
 		void RegisterCoreTypes();
 
 		template<class T>
-		uint GetResourceTypeIndex() const
+		uintMem GetResourceTypeIndex() const
 		{
 			return GetResourceTypeIndex(T::typeName);
 		}
-		uint GetResourceTypeIndex(StringView name) const;
+		uintMem GetResourceTypeIndex(StringView name) const;
 
-		uint GetResourceTypeCount() const;
-		ResourceTypeData GetResourceTypeData(uint index) const;
+		uintMem GetResourceTypeCount() const;
+		ResourceTypeData GetResourceTypeData(uintMem index) const;
 
-		bool IsValidTypeIndex(uint index) const;
+		bool IsValidTypeIndex(uintMem index) const;
 
 		static ResourceTypeRegistry CoreRegistry();
 
 	private:
 		Array<ResourceTypeData> types;
-		Map<String, uint> nameTable;
+		Map<String, uintMem> nameTable;
 	};
 }

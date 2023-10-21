@@ -7,12 +7,12 @@ namespace Blaze
 		: buffer(nullptr), size(0), position(0)
 	{
 	}
-	BufferStreamBase::BufferStreamBase(uint64 size)
+	BufferStreamBase::BufferStreamBase(uintMem size)
 		: size(size), position(0)
 	{
 		buffer = malloc(size);		
 	}
-	BufferStreamBase::BufferStreamBase(void* buffer, uint64 size)
+	BufferStreamBase::BufferStreamBase(void* buffer, uintMem size)
 		: buffer(buffer), size(size), position(0)
 	{
 	}
@@ -20,7 +20,7 @@ namespace Blaze
 	{
 		Clear();
 	}
-	Result BufferStreamBase::SetBuffer(void* buffer, uint64 size)
+	Result BufferStreamBase::SetBuffer(void* buffer, uintMem size)
 	{
 		CHECK_RESULT(Clear());
 		this->buffer = buffer;
@@ -37,18 +37,18 @@ namespace Blaze
 
 		return Result();
 	}
-	bool BufferStreamBase::MovePosition(int64 offset)
+	bool BufferStreamBase::MovePosition(intMem offset)
 	{
-		uint64 newPos = position + offset;
+		uintMem newPos = position + offset;
 
-		if (offset >= size || newPos >= size)
+		if (std::cmp_greater_equal(offset, size) || newPos >= size)
 			return false;
 		
 		position = newPos;
 
 		return true;
 	}
-	bool BufferStreamBase::SetPosition(uint64 offset)
+	bool BufferStreamBase::SetPosition(uintMem offset)
 	{
 		if (offset >= size)
 			return false;
@@ -57,11 +57,11 @@ namespace Blaze
 
 		return true;
 	}
-	uint64 BufferStreamBase::GetPosition() const
+	uintMem BufferStreamBase::GetPosition() const
 	{
 		return position;
 	}
-	uint64 BufferStreamBase::GetSize() const
+	uintMem BufferStreamBase::GetSize() const
 	{
 		return size;
 	}
@@ -73,12 +73,12 @@ namespace Blaze
 	BufferWriteStream::BufferWriteStream()
 	{
 	}
-	BufferWriteStream::BufferWriteStream(uint64 size)
+	BufferWriteStream::BufferWriteStream(uintMem size)
 		: BufferStreamBase(size)
 	{
 
 	}
-	BufferWriteStream::BufferWriteStream(void* buffer, uint64 size)
+	BufferWriteStream::BufferWriteStream(void* buffer, uintMem size)
 		: BufferStreamBase(buffer, size)
 	{
 
@@ -86,10 +86,10 @@ namespace Blaze
 	BufferWriteStream::~BufferWriteStream()
 	{
 	}
-	uint64 BufferWriteStream::Write(const void* ptr, uint64 byteCount)
+	uintMem BufferWriteStream::Write(const void* ptr, uintMem byteCount)
 	{
-		uint64 newSize = size;
-		uint leftBytes = newSize - position;
+		uintMem newSize = size;
+		uintMem leftBytes = newSize - position;
 
 		while (leftBytes < byteCount)
 		{
@@ -115,12 +115,12 @@ namespace Blaze
 	BufferReadStream::BufferReadStream()
 	{
 	}
-	BufferReadStream::BufferReadStream(uint64 size)
+	BufferReadStream::BufferReadStream(uintMem size)
 		: BufferStreamBase(size)
 	{
 
 	}
-	BufferReadStream::BufferReadStream(void* buffer, uint64 size)
+	BufferReadStream::BufferReadStream(void* buffer, uintMem size)
 		: BufferStreamBase(buffer, size)
 	{
 
@@ -128,10 +128,10 @@ namespace Blaze
 	BufferReadStream::~BufferReadStream()
 	{
 	}
-	uint64 BufferReadStream::Read(void* ptr, uint64 byteCount)
+	uintMem BufferReadStream::Read(void* ptr, uintMem byteCount)
 	{
-		uint position = GetPosition();
-		uint leftBytes = GetSize() - position;
+		uintMem position = GetPosition();
+		uintMem leftBytes = GetSize() - position;
 
 		if (leftBytes < byteCount)
 			byteCount = leftBytes;

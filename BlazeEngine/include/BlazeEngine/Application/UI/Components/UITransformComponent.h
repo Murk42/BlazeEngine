@@ -62,7 +62,7 @@ namespace Blaze::UI::Components
 		inline float GetFinalRotation() const { return finalRotation; }
 		inline float GetFinalScale() const { return finalScale; }
 
-		inline const std::list<UITransformComponent*>& GetChildren() const { return children; }
+		inline const DualList<UITransformComponent*>& GetChildren() const { return children; }
 
 		void SetAnchor(UITransformComponent* anchor);
 		UITransformComponent* GetAnchor() const { return anchor; }						
@@ -89,7 +89,7 @@ namespace Blaze::UI::Components
 		
 		UITransformComponent* anchor;						
 		
-		std::list<UITransformComponent*> children;
-		std::list<UITransformComponent*>::iterator childIterator;
+		DualList<UITransformComponent*> children;
+		DualList<UITransformComponent*>::Iterator childIterator;
 	};
 }

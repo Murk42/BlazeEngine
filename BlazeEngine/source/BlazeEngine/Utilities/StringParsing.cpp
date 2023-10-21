@@ -169,7 +169,7 @@ namespace Blaze::StringParsing
 	}
 
 	template<std::integral T>
-	Result CharsToNumber(const char* str, uint length, T& value, int base, uint* count) 
+	Result CharsToNumber(const char* str, uintMem length, T& value, int base, uintMem* count)
 	{ 		
 		auto [end, err] = std::from_chars(str, str + length, value, base);
 
@@ -185,7 +185,7 @@ namespace Blaze::StringParsing
 		return Result();		
 	}	
 	template<std::floating_point T>
-	Result CharsToNumber(const char* str, uint length, T& value, FloatStringFormat format, uint* count)
+	Result CharsToNumber(const char* str, uintMem length, T& value, FloatStringFormat format, uintMem* count)
 	{
 		auto [end, err] = std::from_chars(str, str + length, value, ToStdCharsFormat(format));
 
@@ -203,7 +203,7 @@ namespace Blaze::StringParsing
 
 
 	template<std::integral T>
-	Result NumberToChars(T value, char* str, uint maxCount, int base, uint* count)
+	Result NumberToChars(T value, char* str, uintMem maxCount, int base, uintMem* count)
 	{
 		auto [end, err] = std::to_chars(str, str + maxCount, value, base);
 		if (err == std::errc::value_too_large)
@@ -217,7 +217,7 @@ namespace Blaze::StringParsing
 		return Result();
 	}	
 	template<std::floating_point T>
-	Result NumberToChars(T value, char* str, uint maxCount, FloatStringFormat format, uint* count)
+	Result NumberToChars(T value, char* str, uintMem maxCount, FloatStringFormat format, uintMem* count)
 	{
 		auto res = std::to_chars(str, str + maxCount, value, ToStdCharsFormat(format));
 		if (res.ec == std::errc::value_too_large)
@@ -231,24 +231,24 @@ namespace Blaze::StringParsing
 		return Result();
 	}		
 
-	Result Convert(const StringView& from, uint64& to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, int64&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, uint32& to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, int32&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, uint16& to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, int16&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, uint8&  to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, int8&   to, uint base, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
-	Result Convert(const StringView& from, float&  to, FloatStringFormat format, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
-	Result Convert(const StringView& from, double& to, FloatStringFormat format, uint* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
+	Result Convert(const StringView& from, uint64& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int64&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, uint32& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int32&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, uint16& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int16&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, uint8&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, int8&   to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, base, count); }
+	Result Convert(const StringView& from, float&  to, FloatStringFormat format, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
+	Result Convert(const StringView& from, double& to, FloatStringFormat format, uintMem* count) { return CharsToNumber(from.Ptr(), from.Size(), to, format, count); }
 
 
 	template<std::integral T>
-	String _Convert(T value, uint base, uint* count)
+	String _Convert(T value, uint base, uintMem* count)
 	{
 		char buffer[64];
 
-		uint _count;
+		uintMem _count;
 		if (Result r = NumberToChars(value, buffer, 64, base, &_count))		
 			return "";		
 
@@ -258,11 +258,11 @@ namespace Blaze::StringParsing
 		return String(buffer, _count);
 	}
 	template<std::floating_point T>
-	String _Convert(T value, FloatStringFormat format, uint* count)
+	String _Convert(T value, FloatStringFormat format, uintMem* count)
 	{		
 		char buffer[64];
 		
-		uint _count;
+		uintMem _count;
 		if (Result r = NumberToChars(value, buffer, 64, format, &_count))				
 			return "";
 
@@ -272,14 +272,14 @@ namespace Blaze::StringParsing
 		return String(buffer, _count);
 	}
 	
-	String Convert(uint64 from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(int64  from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(uint32 from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(int32  from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(uint16 from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(int16  from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(uint8  from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(int8   from, uint base, uint* count) { return _Convert(from, base, count); }
-	String Convert(float  from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
-	String Convert(double from, FloatStringFormat format, uint* count) { return _Convert(from, format, count); }
+	String Convert(uint64 from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(int64  from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(uint32 from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(int32  from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(uint16 from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(int16  from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(uint8  from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(int8   from, uint base, uintMem* count) { return _Convert(from, base, count); }
+	String Convert(float  from, FloatStringFormat format, uintMem* count) { return _Convert(from, format, count); }
+	String Convert(double from, FloatStringFormat format, uintMem* count) { return _Convert(from, format, count); }
 }

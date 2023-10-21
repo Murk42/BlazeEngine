@@ -33,7 +33,7 @@ namespace Blaze::ResourceSystem
 		//RegisterType<GraphicsLibrary::Texture2D>();		
 	}
 
-	uint ResourceTypeRegistry::GetResourceTypeIndex(StringView name) const
+	uintMem ResourceTypeRegistry::GetResourceTypeIndex(StringView name) const
 	{
 		auto it = nameTable.Find(name);
 
@@ -43,12 +43,12 @@ namespace Blaze::ResourceSystem
 			return it->value;
 	}
 
-	uint ResourceTypeRegistry::GetResourceTypeCount() const
+	uintMem ResourceTypeRegistry::GetResourceTypeCount() const
 	{
 		return static_cast<uint>(types.Count());
 	}
 
-	ResourceTypeData ResourceTypeRegistry::GetResourceTypeData(uint index) const
+	ResourceTypeData ResourceTypeRegistry::GetResourceTypeData(uintMem index) const
 	{		
 		if (index > types.Count())
 		{
@@ -58,7 +58,7 @@ namespace Blaze::ResourceSystem
 		return types[index];
 	}
 
-	bool ResourceTypeRegistry::IsValidTypeIndex(uint index) const
+	bool ResourceTypeRegistry::IsValidTypeIndex(uintMem index) const
 	{
 		return index < types.Count();
 	}

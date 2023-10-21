@@ -36,7 +36,7 @@ namespace Blaze
 		template<typename T> requires (!BlazeHashable<T>) && STDHashable<T>
 		constexpr static uint32 ComputeSpecific(const T& value)
 		{
-			return std::hash<T>{ }(value);
+			return static_cast<uint32>(std::hash<T>{ }(value));
 		}
 
 		template<typename T> requires BlazeHashable<T> && STDHashable<T>

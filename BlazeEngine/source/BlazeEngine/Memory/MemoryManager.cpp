@@ -43,7 +43,7 @@ namespace Blaze
 			std::lock_guard<std::mutex> lk { file_mutex};
 
 			char buffer[128];
-			uint messageSize = 0;
+			uintMem messageSize = 0;
 
 			messageSize = sprintf_s(buffer, 128, "%u unfreed allocations\n\n", (uint)memoryAllocations.Count());
 			memoryFile.Write(buffer, messageSize);
@@ -119,7 +119,7 @@ namespace Blaze
 		void GetLocation(char(&arr)[size])
 		{
 			Debug::Callstack callstack(1, 5);
-			uint sizeLeft = size - 1;
+			uintMem sizeLeft = size - 1;
 			auto it = callstack.begin();
 
 			char* ptr = arr;
@@ -128,7 +128,7 @@ namespace Blaze
 				String fileName = it->FilePath().FileName();
 				String fileLine = StringParsing::Convert(it->FileLine());
 				
-				uint sizeNeeded = fileName.Size() + fileLine.Size() + 2;
+				uintMem sizeNeeded = fileName.Size() + fileLine.Size() + 2;
 
 				if (sizeNeeded > sizeLeft)
 					break;
@@ -152,7 +152,7 @@ namespace Blaze
 			*ptr = '\0';
 		}
 
-		void* Allocate(uint size)
+		void* Allocate(uintMem size)
 		{			
 			void* ptr = malloc(size + sizeof(AllocationHeader));
 
@@ -217,7 +217,7 @@ namespace Blaze
 			
 			free(ptr);
 		}
-		BLAZE_API void* Reallocate(uint size, void* old)
+		BLAZE_API void* Reallocate(uintMem size, void* old)
 		{
 			Free(old);
 			return Allocate(size);

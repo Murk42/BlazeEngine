@@ -7,20 +7,40 @@ namespace Blaze
 	class EventHandler;
 
 	template<typename T>
-	class EventDispatcher
+	class BLAZE_API EventDispatcher
 	{
 	public:
+		EventDispatcher();
+		EventDispatcher(const EventDispatcher& other) = delete;
+		EventDispatcher(EventDispatcher&& other) noexcept;
 		~EventDispatcher();
 		
 		Result AddHandler(EventHandler<T>& handler);
 		Result RemoveHandler(EventHandler<T>& handler);
 		
 		virtual Result Call(T event); 				
+
+		EventDispatcher& operator=(const EventDispatcher& other) = delete;
+		EventDispatcher& operator=(EventDispatcher&& other) noexcept;
 	private:
 		std::mutex mutex;
 		Array<EventHandler<T>*> handlers;		
 	};
 
+	class BLAZE_API std::mutex;
+
+	template<typename T>
+	inline EventDispatcher<T>::EventDispatcher()
+	{
+
+	}
+	template<typename T>
+	inline EventDispatcher<T>::EventDispatcher(EventDispatcher&& other) noexcept
+		: handlers(std::move(other.handlers))
+	{		
+		for (EventHandler<T>*& handler : handlers)					
+			handler->dispatcher = this;		
+	}
 	template<typename T>
 	inline EventDispatcher<T>::~EventDispatcher()
 	{
@@ -80,4 +100,14 @@ namespace Blaze
 
 		return listener.GetResult();
 	}	
+
+	template<typename T>
+	inline EventDispatcher<T>& EventDispatcher<T>::operator=(EventDispatcher&& other) noexcept
+	{
+		handlers = std::move(other.handlers);
+		for (EventHandler<T>*& handler : handlers)		
+			handler->dispatcher = this;
+		
+		return *this;
+	}
 }

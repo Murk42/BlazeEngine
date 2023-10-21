@@ -165,7 +165,7 @@ namespace Blaze
 		bool Erase(const Key& key);
 		bool Erase(const Iterator& iterator);
 
-		uint Count() const;
+		uintMem Count() const;
 
 		/*
 			Returns an iterator pointing to the first element in the map. If the map is empty returns a null map iterator.
@@ -206,15 +206,15 @@ namespace Blaze
 	private:		
 		struct Node
 		{
-			uint hash;
+			uintMem hash;
 			Node* next;
 			Node* prev;
 			MapPairType pair;
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-			uint iteratorCount;
+			uintMem iteratorCount;
 #endif
 
-			Node(Node* prev, Node* next, uint hash, Key&& key, Value&& value);
+			Node(Node* prev, Node* next, uintMem hash, Key&& key, Value&& value);
 		};
 		struct Bucket
 		{
@@ -222,44 +222,44 @@ namespace Blaze
 			Node* tail;
 		};
 
-		uint bucketCount;
+		uintMem bucketCount;
 		Bucket* buckets;
-		uint count;
+		uintMem count;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
 
 		//Wont free previous contents
 		void CopyUnsafe(const Map& other);
 
-		static uint Hash(const Key& key);
+		static uintMem Hash(const Key& key);
 
-		Bucket* GetBucketFromHash(uint hash) const;
+		Bucket* GetBucketFromHash(uintMem hash) const;
 
 		//Wont check if hashMod is smaller than bucketCount
-		Bucket* GetBucketFromHashModUnsafe(uint hashMod) const;
+		Bucket* GetBucketFromHashModUnsafe(uintMem hashMod) const;
 
-		Iterator FindWithHint(const Key& key, uint hash);
-		ConstIterator FindWithHint(const Key& key, uint hash) const;
+		Iterator FindWithHint(const Key& key, uintMem hash);
+		ConstIterator FindWithHint(const Key& key, uintMem hash) const;
 
 		//Wont check if bucket is nullptr
 		Iterator FindWithHintUnsafe(const Key& key, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Key& key, Bucket* bucket) const;		
 
-		InsertResult InsertWithHint(const Key& key, const Value& value, uint hash);
+		InsertResult InsertWithHint(const Key& key, const Value& value, uintMem hash);
 
 		//Wont check if bucket is nullptr
-		InsertResult InsertWithHintUnsafe(const Key& key, const Value& value, Bucket* bucket, uint hash);
+		InsertResult InsertWithHintUnsafe(const Key& key, const Value& value, Bucket* bucket, uintMem hash);
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, Node* node);
 
 		Result CheckForRehash();
-		Result Rehash(uint newBucketCount);
+		Result Rehash(uintMem newBucketCount);
 
 		//Doesn't deallocate previous memory
 		void AllocateEmptyUnsafe();
 
 		//Wont check if bucket or bucketArray is nullptr or bucketArraySize is 0
-		static Result RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uint bucketArraySize);
+		static Result RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
 
 		//Wont check if bucket or node is nullptr
 		static void RemoveNodeFromSpotUnsafe(Node* node, Bucket* bucket);

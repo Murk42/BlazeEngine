@@ -67,7 +67,7 @@ namespace Blaze::Debug
 		skips = 0;
 	}
 
-	uint Callstack::Count() const 
+	uintMem Callstack::Count() const
 	{ 
 		if (frameCount < skips)
 			return 0;
@@ -97,7 +97,7 @@ namespace Blaze::Debug
 	}
 	bool Callstack::operator==(const Callstack& other) const
 	{
-		uint minSize = std::min(frameCount, other.frameCount);
+		uintMem minSize = std::min(frameCount, other.frameCount);
 
 		for (uint i = 0; i < minSize; ++i)
 			if (frames[i] != other.frames[i])

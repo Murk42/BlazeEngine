@@ -18,22 +18,22 @@ namespace Blaze
 
 		constexpr ArrayView();
 		constexpr ArrayView(const ArrayView&);
-		constexpr ArrayView(const T* ptr, uint count);				
-		template<size_t S>
+		constexpr ArrayView(const T* ptr, uintMem count);
+		template<uintMem S>
 		constexpr ArrayView(const T (&arr)[S]);		
 
 		constexpr void Clear();
 		constexpr bool Empty() const;
-		constexpr uint Count() const;
+		constexpr uintMem Count() const;
 
-		constexpr const T& operator[](size_t index) const;
+		constexpr const T& operator[](uintMem index) const;
 
 		constexpr const T* Ptr() const;				
 		
 		const T& First() const;		
 		const T& Last() const;
 		
-		Iterator GetIterator(uint index) const;
+		Iterator GetIterator(uintMem index) const;
 
 		/*
 			Returns an iterator pointing to the first element in the array. If the array is empty returns a null array iterator.
@@ -60,10 +60,10 @@ namespace Blaze
 		friend class ArrayIterator;
 	private:
 		const T* ptr;
-		size_t count;
+		uintMem count;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		uint iteratorCount;
+		uint32 iteratorCount;
 #endif
 	};		
 
@@ -78,12 +78,12 @@ namespace Blaze
 	{
 	}
 	template<typename T>
-	inline constexpr ArrayView<T>::ArrayView(const T* ptr, uint count)
+	inline constexpr ArrayView<T>::ArrayView(const T* ptr, uintMem count)
 		: ptr(ptr), count(count)
 	{
 	}
 	template<typename T>
-	template<size_t S>
+	template<uintMem S>
 	inline constexpr ArrayView<T>::ArrayView(const T(&arr)[S])
 		: ptr(arr), count(S)
 	{
@@ -100,12 +100,12 @@ namespace Blaze
 		return count == 0;
 	}
 	template<typename T>
-	inline constexpr uint ArrayView<T>::Count() const 
+	inline constexpr uintMem ArrayView<T>::Count() const
 	{
 		return count; 
 	}
 	template<typename T>
-	inline constexpr const T& ArrayView<T>::operator[](size_t index) const
+	inline constexpr const T& ArrayView<T>::operator[](uintMem index) const
 	{
 		if (index >= count)
 			throw;
@@ -137,7 +137,7 @@ namespace Blaze
 		return ptr[count - 1];
 	}
 	template<typename T>
-	inline ArrayView<T>::Iterator ArrayView<T>::GetIterator(uint index) const
+	inline ArrayView<T>::Iterator ArrayView<T>::GetIterator(uintMem index) const
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)

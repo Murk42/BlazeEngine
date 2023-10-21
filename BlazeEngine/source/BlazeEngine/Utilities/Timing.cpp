@@ -43,6 +43,6 @@ namespace Blaze
 	}
 	void Timing::AddNode(TimingResult info)
 	{		
-		nodes.try_emplace(info.name, std::move(info));
+		nodes.Insert(info.name, std::move(info));
 	}
 }

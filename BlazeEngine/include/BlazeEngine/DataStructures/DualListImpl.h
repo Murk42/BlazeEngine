@@ -189,7 +189,7 @@ namespace Blaze
 		return count == 0;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline uint DualList<T, Allocator>::Count() const
+	inline uintMem DualList<T, Allocator>::Count() const
 	{
 		return count;
 	}

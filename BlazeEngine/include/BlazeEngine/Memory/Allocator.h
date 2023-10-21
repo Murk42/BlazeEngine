@@ -20,29 +20,29 @@ namespace Blaze
 		static void Destroy(T* ptr);
 	};
 
+	class BLAZE_API DefaultAllocator : public AllocatorBase
+	{			
+	};			
+
+	template<typename T>
+	concept IsAllocator = std::derived_from<T, AllocatorBase>;
+
+	template<typename T>
+	concept AllocatorType = IsAllocator<T>;		
+
 	template<typename T>
 	concept IsStaticAllocator = !requires(const T & allocator, uint bytes, void* pointer)
 	{
 		{ allocator.Allocate(bytes) } -> std::same_as<void*>;
 		{ allocator.Free(pointer) };
-	} && std::derived_from<T, AllocatorBase>;
+	} && IsAllocator<T>;
 
 	template<typename T>
 	concept IsDynamicAllocator = requires(const T & allocator, uint bytes, void* pointer)
 	{
 		{ allocator.Allocate(bytes) } -> std::same_as<void*>;
 		{ allocator.Free(pointer) };
-	} && std::derived_from<T, AllocatorBase>;
-
-	template<typename T>
-	concept IsAllocator = IsStaticAllocator<T> || IsDynamicAllocator<T>;	
-
-	template<typename T>
-	concept AllocatorType = IsAllocator<T>;		
-
-	class BLAZE_API DefaultAllocator : public AllocatorBase
-	{			
-	};		
+	} && IsAllocator<T>;	
 		
 	template<typename T, typename ... Args> requires std::constructible_from<T, Args...>
 	inline T* AllocatorBase::Create(Args&& ... args)

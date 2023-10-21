@@ -247,7 +247,7 @@ namespace Blaze
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	inline bool  VirtualMap<Key, ValueBase, Hasher, Allocator>::Contains(const Key& key) const
 	{
-		uint hash = Hash(key);
+		uintMem hash = Hash(key);
 		auto* bucket = GetBucketFromHash(hash);
 
 		if (bucket == nullptr) //Not a error. If we were calling Contains on an empty set it shouldn't return an error
@@ -309,7 +309,7 @@ namespace Blaze
 		return true;
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline uint VirtualMap<Key, ValueBase, Hasher, Allocator>::Count() const
+	inline uintMem VirtualMap<Key, ValueBase, Hasher, Allocator>::Count() const
 	{
 		return count;
 	}
@@ -319,7 +319,7 @@ namespace Blaze
 		if (bucketCount == 0)
 			return Iterator();
 
-		for (uint i = 0; i < bucketCount; ++i)
+		for (uintMem i = 0; i < bucketCount; ++i)
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].head, this);
 	}
@@ -329,7 +329,7 @@ namespace Blaze
 		if (bucketCount == 0)
 			return ConstIterator();
 
-		for (uint i = 0; i < bucketCount; ++i)
+		for (uintMem i = 0; i < bucketCount; ++i)
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].head, this);
 	}
@@ -339,7 +339,7 @@ namespace Blaze
 		if (bucketCount == 0)
 			return Iterator();
 
-		for (uint i = bucketCount - 1; i >= 0; --i)
+		for (uintMem i = bucketCount - 1; i >= 0; --i)
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].tail, this);
 	}
@@ -349,7 +349,7 @@ namespace Blaze
 		if (bucketCount == 0)
 			return ConstIterator();
 
-		for (uint i = bucketCount - 1; i >= 0; --i)
+		for (uintMem i = bucketCount - 1; i >= 0; --i)
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].tail, this);
 	}
@@ -387,7 +387,7 @@ namespace Blaze
 		return *this;
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::NodeHeader::NodeHeader(NodeHeader* prev, NodeHeader* next, uint hash, Key&& key)
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::NodeHeader::NodeHeader(NodeHeader* prev, NodeHeader* next, uintMem hash, Key&& key)
 		: prev(prev), next(next), hash(hash), key(std::move(key))
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		, iteratorCount(0)
@@ -400,7 +400,7 @@ namespace Blaze
 	}	
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	template<typename Value> requires InsertabloToVirtualMap<Value, ValueBase>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Node<Value>::Node(NodeHeader* prev, NodeHeader* next, uint hash, Key&& key, Value&& value)
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Node<Value>::Node(NodeHeader* prev, NodeHeader* next, uintMem hash, Key&& key, Value&& value)
 		: NodeHeader(prev, next, hash, std::move(key)), value(std::move(value))
 	{
 	}
@@ -410,12 +410,12 @@ namespace Blaze
 	{
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline uint VirtualMap<Key, ValueBase, Hasher, Allocator>::Hash(const Key& key)
+	inline uintMem VirtualMap<Key, ValueBase, Hasher, Allocator>::Hash(const Key& key)
 	{
 		return Hasher::Compute(key);
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Bucket* VirtualMap<Key, ValueBase, Hasher, Allocator>::GetBucketFromHash(uint hash) const
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Bucket* VirtualMap<Key, ValueBase, Hasher, Allocator>::GetBucketFromHash(uintMem hash) const
 	{
 		if (bucketCount == 0)
 			return nullptr;
@@ -423,12 +423,12 @@ namespace Blaze
 		return GetBucketFromHashModUnsafe(hash % bucketCount);
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Bucket* VirtualMap<Key, ValueBase, Hasher, Allocator>::GetBucketFromHashModUnsafe(uint hashMod) const
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Bucket* VirtualMap<Key, ValueBase, Hasher, Allocator>::GetBucketFromHashModUnsafe(uintMem hashMod) const
 	{
 		return &buckets[hashMod];
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Iterator VirtualMap<Key, ValueBase, Hasher, Allocator>::FindWithHint(const Key& key, uint hash)
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Iterator VirtualMap<Key, ValueBase, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash)
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -438,7 +438,7 @@ namespace Blaze
 		return FindWithHintUnsafe(key, bucket);
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::ConstIterator VirtualMap<Key, ValueBase, Hasher, Allocator>::FindWithHint(const Key& key, uint hash) const
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::ConstIterator VirtualMap<Key, ValueBase, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash) const
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -485,7 +485,7 @@ namespace Blaze
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	template<typename _Key, typename Value> requires InsertabloToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertResult VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertWithHint(_Key&& key, Value&& value, uint hash)
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertResult VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertWithHint(_Key&& key, Value&& value, uintMem hash)
 	{
 		if (count == 0)
 			AllocateEmptyUnsafe();
@@ -502,7 +502,7 @@ namespace Blaze
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	template<typename _Key, typename Value> requires InsertabloToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key>
-	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertResult VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertWithHintUnsafe(_Key&& key, Value&& value, Bucket* bucket, uint hash)
+	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertResult VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertWithHintUnsafe(_Key&& key, Value&& value, Bucket* bucket, uintMem hash)
 	{
 		if (bucket->head == nullptr)
 		{
@@ -569,7 +569,7 @@ namespace Blaze
 			if (bucketCount == 8)
 				return Result();
 
-			uint newBucketCount = (bucketCount + 1) / 2;
+			uintMem newBucketCount = (bucketCount + 1) / 2;
 
 			if (newBucketCount < 8)
 				newBucketCount = 8;
@@ -580,7 +580,7 @@ namespace Blaze
 		return Result();
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline Result VirtualMap<Key, ValueBase, Hasher, Allocator>::Rehash(uint newBucketCount)
+	inline Result VirtualMap<Key, ValueBase, Hasher, Allocator>::Rehash(uintMem newBucketCount)
 	{
 		Bucket* old = buckets;
 		buckets = (Bucket*)Memory::Allocate(sizeof(Bucket) * newBucketCount);
@@ -607,7 +607,7 @@ namespace Blaze
 		count = 0;
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline Result VirtualMap<Key, ValueBase, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uint bucketArraySize)
+	inline Result VirtualMap<Key, ValueBase, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
 	{
 		NodeHeader* node = bucket->head;
 
@@ -615,7 +615,7 @@ namespace Blaze
 		{
 			NodeHeader* next = node->next;
 
-			uint newHashMod = node->hash % bucketArraySize;
+			uintMem newHashMod = node->hash % bucketArraySize;
 			Bucket* newBucket = &bucketArray[newHashMod];
 
 			MoveNodeToBeginingUnsafe(node, newBucket);

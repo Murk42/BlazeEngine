@@ -101,7 +101,7 @@ namespace Blaze::ECS
 			return nullptr;
 
 		auto components = GetEntityComponents(entity);
-		uint index = ptr - first;
+		uintMem index = ptr - first;
 
 		return components[index];
 	}
@@ -130,7 +130,7 @@ namespace Blaze::ECS
 
 		return ptr;		
 	}
-	Component* Entity::GetComponent(uint index) const
+	Component* Entity::GetComponent(uintMem index) const
 	{
 		if (index > componentCount)
 		{			
@@ -140,7 +140,7 @@ namespace Blaze::ECS
 
 		return GetEntityComponents(this)[index];
 	}		
-	const ComponentTypeData* Entity::GetComponentTypeData(uint index)
+	const ComponentTypeData* Entity::GetComponentTypeData(uintMem index)
 	{
 		if (index > componentCount)
 		{

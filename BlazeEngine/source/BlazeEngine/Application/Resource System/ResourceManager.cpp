@@ -9,18 +9,14 @@ namespace Blaze::ResourceSystem
 	}
 
 	ResourceManager::~ResourceManager()
-	{
-		for (size_t i = 0; i < typeCount; ++i)
-			resourceMap[i].clear();
+	{		
 		delete[] resources;
 		delete[] resourceMap;
 		delete[] resourceToNameMap;
 	}
 
 	void ResourceManager::SetResourceTypeRegistry(const ResourceTypeRegistry& registry)
-	{
-		for (size_t i = 0; i < typeCount; ++i)
-			resourceMap[i].clear();
+	{		
 		delete[] resources;
 		delete[] resourceMap;
 		delete[] resourceToNameMap;
@@ -28,101 +24,109 @@ namespace Blaze::ResourceSystem
 		this->registry = registry;
 		typeCount = registry.GetResourceTypeCount();
 
-		resources = new std::vector<Resource*>[typeCount];
-		resourceMap = new std::unordered_map<String, Resource*>[typeCount];
-		resourceToNameMap = new std::unordered_map<Resource* , String>[typeCount];
+		resources = new Array<Resource*>[typeCount];
+		resourceMap = new Map<String, Resource*>[typeCount];
+		resourceToNameMap = new Map<Resource* , String>[typeCount];
 	}
 
-	Result ResourceManager::AddResource(StringView name, Resource* resource, size_t typeIndex)
+	Result ResourceManager::AddResource(StringView name, Resource* resource, uintMem typeIndex)
 	{
 		if (!registry.IsValidTypeIndex(typeIndex))
 			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index");
 
-		resources[typeIndex].emplace_back(resource);
-		resourceMap[typeIndex].insert({ name, resource });
-		resourceToNameMap[typeIndex].insert({ resource, name });
+		resources[typeIndex].AddBack(resource);
+		resourceMap[typeIndex].Insert(name, resource);
+		resourceToNameMap[typeIndex].Insert(resource, name);
 
 		return Result();
 	}
 
-	Result ResourceManager::AddResource(Resource* resource, size_t typeIndex)
+	Result ResourceManager::AddResource(Resource* resource, uintMem typeIndex)
 	{
 		if (!registry.IsValidTypeIndex(typeIndex))
 			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index");
 
-		resources[typeIndex].emplace_back(resource);
+		resources[typeIndex].AddBack(resource);
 
 		return Result();
 	}
 
-	Result ResourceManager::RemoveResource(Resource* resource, size_t typeIndex)
+	Result ResourceManager::RemoveResource(Resource* resource, uintMem typeIndex)
 	{
-		{
-			auto& map = resourceMap[typeIndex];
-			auto it = map.find(resourceToNameMap[typeIndex][resource]);
-			if (it != map.end())
-				map.erase(it);			
-		}
-		{
-			auto& map = resourceToNameMap[typeIndex];
-			auto it = map.find(resource);
-			if (it != map.end())
-				map.erase(it);
-		}
-		{
-			auto& list = resources[typeIndex];
-			auto it = list.begin();
-			for (; it != list.end(); ++it)
-				if (*it == resource)
-					break;
-
-			if (it != list.end())
-				list.erase(it);
-		}
+		resourceToNameMap->Erase(resource);
+		resourceMap[typeIndex].Erase(resource->GetName());				
+				
+		auto& arr = resources[typeIndex];
+		auto it = arr.FirstIterator();
+		for (; it != arr.LastIterator(); ++it)
+			if (*it == resource)
+			{
+				arr.EraseAt(it);
+				break;
+			}					
 
 		return Result();
 	}
 
-	Result ResourceManager::RemoveResource(StringView name, size_t typeIndex)
+	Result ResourceManager::RemoveResource(StringView name, uintMem typeIndex)
 	{
-		RemoveResource(resourceMap[typeIndex][name], typeIndex);
+		Resource* resource;
+		auto it = resourceMap[typeIndex].Find(name);
+
+		if (!it.IsNull())
+		{
+			resourceMap[typeIndex].Erase(it);
+			resourceToNameMap->Erase(it->value);
+			resource = it->value;
+		}
+		else
+			return Result();
+
+		auto& arr = resources[typeIndex];
+		for (auto it = arr.FirstIterator(); it != arr.LastIterator(); ++it)
+			if (*it == resource)
+			{
+				arr.EraseAt(it);
+				break;
+			}
+
 		return Result();
 	}
 
-	Resource* ResourceManager::GetResource(StringView name, size_t typeIndex)
+	Resource* ResourceManager::GetResource(StringView name, uintMem typeIndex)
 	{		
 		auto& map = resourceMap[typeIndex];
-		auto it = map.find(name);
-		if (it == map.end())
+		auto it = map.Find(name);
+		if (it.IsNull())
 			return nullptr;
 		return
-			it->second;
+			it->value;
 	}
 
-	Resource* ResourceManager::GetResource(uint index, size_t typeIndex)
+	Resource* ResourceManager::GetResource(uintMem index, size_t typeIndex)
 	{
 		return resources[typeIndex][index];
 	}
 
-	String ResourceManager::GetResourceName(Resource* resource, uint typeIndex)
+	String ResourceManager::GetResourceName(Resource* resource, uintMem typeIndex)
 	{
 		auto& map = resourceToNameMap[typeIndex];
-		auto it = map.find(resource);
-		if (it != map.end())
-			return it->second;
-		else
+		auto it = map.Find(resource);
+		if (it.IsNull())
 			return "";
+		else
+			return it->value;
 	}
 
-	bool ResourceManager::HasResource(StringView name, size_t typeIndex)
+	bool ResourceManager::HasResource(StringView name, uintMem typeIndex)
 	{
-		auto it = resourceMap[typeIndex].find(name);
-		return it != resourceMap[typeIndex].end();
+		auto it = resourceMap[typeIndex].Find(name);
+		return !it.IsNull();
 	}
 
-	uint ResourceManager::GetResourceCount(size_t typeIndex)
+	uintMem ResourceManager::GetResourceCount(uintMem typeIndex)
 	{ 
-		return resources[typeIndex].size();
+		return resources[typeIndex].Count();
 	}
 
 }

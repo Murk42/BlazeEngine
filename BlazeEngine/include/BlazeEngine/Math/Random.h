@@ -3,9 +3,9 @@
 
 namespace Blaze::Random
 {
-    BLAZE_API void SetSeed(int64 seed);
+    BLAZE_API void SetSeed(uint seed);
     BLAZE_API float Float();
-    BLAZE_API float Float(float min, float max);
+    BLAZE_API float Float(float min, float max);   
     BLAZE_API Blaze::ColorRGB ColorRGB();
     BLAZE_API Blaze::ColorRGBf ColorRGBf();
     BLAZE_API Blaze::ColorRGBA ColorRGBA();

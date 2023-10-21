@@ -136,12 +136,12 @@ namespace Blaze
 		Array(Array&& arr) noexcept;
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Array(uint count, const Args& ... args);
-		template<typename F> requires std::invocable<F, T*, uint>
-		Array(const F& constructFunction, uint count);
-		template<uint S>
+		Array(uintMem count, const Args& ... args);
+		template<typename F> requires std::invocable<F, T*, uintMem>
+		Array(const F& constructFunction, uintMem count);
+		template<uintMem S>
 		Array(const T (&arr)[S]) requires std::is_copy_constructible_v<T>;
-		Array(const T* ptr, uint count) requires std::is_copy_constructible_v<T>;
+		Array(const T* ptr, uintMem count) requires std::is_copy_constructible_v<T>;
 		Array(const std::initializer_list<T>& arr) requires std::is_copy_constructible_v<T>;
 		Array(const ArrayView<std::remove_const_t<T>>& arr) requires std::is_copy_constructible_v<T>;
 
@@ -149,31 +149,31 @@ namespace Blaze
 
 		void Clear();
 		bool Empty() const;
-		uint Count() const;
+		uintMem Count() const;
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddBack(Args&& ... args);				
 		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator AddAt(uint index, Args&& ... args);		
+		Iterator AddAt(uintMem index, Args&& ... args);
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddAt(Iterator it, Args&& ... args);
 		
 		void EraseLast();		
-		void EraseAt(uint index);		
+		void EraseAt(uintMem index);
 		void EraseAt(Iterator it);
 		
 		void Append(const Array& other);
 		void Append(Array&& other);
 		
 		template<typename ... Args> requires std::constructible_from<T, Args...>
-		void Resize(uint newCount, const Args& ... args);		
-		template<typename F> requires std::invocable<F, T*, uint>
-		void ResizeWithFunction(uint newCount, const F& constructFunction);
+		void Resize(uintMem newCount, const Args& ... args);
+		template<typename F> requires std::invocable<F, T*, uintMem>
+		void ResizeWithFunction(uintMem newCount, const F& constructFunction);
 
-		void Truncate(uint newCount);
+		void Truncate(uintMem newCount);
 	
-		T& operator[](uint i);		
-		const T& operator[](uint i) const;
+		T& operator[](uintMem i);
+		const T& operator[](uintMem i) const;
 		
 		T* Ptr();
 		const T* Ptr() const;		
@@ -183,8 +183,8 @@ namespace Blaze
 		T& Last();
 		const T& Last() const;
 
-		Iterator GetIterator(uint index);
-		ConstIterator GetIterator(uint index) const;
+		Iterator GetIterator(uintMem index);
+		ConstIterator GetIterator(uintMem index) const;
 
 		/*
 			Returns an iterator pointing to the first element in the array. If the array is empty returns a null array iterator.
@@ -229,12 +229,12 @@ namespace Blaze
 		friend class ArrayIterator;
 	private:
 		T* ptr;
-		uint count;		
-		uint reserved;
+		uintMem count;
+		uintMem reserved;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		uint iteratorCount;
+		uint32 iteratorCount;
 #endif
 
 		/*
@@ -249,7 +249,7 @@ namespace Blaze
 			count - number of elements to copy
 
 		*/
-		void CopyUnsafe(const T* src, uint count);
+		void CopyUnsafe(const T* src, uintMem count);
 
 		/*
 		
@@ -265,7 +265,7 @@ namespace Blaze
 			A pointer to a new buffer if the old one needs to be changed. Nullptr otherwise.
 
 		*/
-		T* ReallocateUnsafe(uint newCount);
+		T* ReallocateUnsafe(uintMem newCount);
 		
 	};
 

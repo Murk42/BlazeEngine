@@ -12,7 +12,7 @@ namespace Blaze
 			std::lock_guard<std::mutex> lk(threadIDMapMutex);
 
 			//auto it = engineData->threadIDMap.Find(id);
-			auto [it, inserted] = engineData->threadIDMap.Insert(id, engineData->threadIDMap.Count());
+			auto [it, inserted] = engineData->threadIDMap.Insert(id, (uint)engineData->threadIDMap.Count());
 
 			return it->value;				
 		}

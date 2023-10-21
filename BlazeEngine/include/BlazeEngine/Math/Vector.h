@@ -41,7 +41,7 @@ namespace Blaze
 		{			
 		} 
 
-		constexpr Vector operator-() const { return Vector(-x, -y); }
+		constexpr Vector operator-() const requires std::is_signed_v<T> { return Vector(-x, -y); }
 
 		constexpr Vector operator+(const Vector<T, 2>& b) const { return Vector(x + b.x, y + b.y); }
 		constexpr Vector operator-(const Vector<T, 2>& b) const { return Vector(x - b.x, y - b.y); }
@@ -60,7 +60,7 @@ namespace Blaze
 		constexpr bool operator== (const Vector<T, 2>& v) const { return x == v.x && y == v.y; }
 		constexpr bool operator!= (const Vector<T, 2>& v) const { return x != v.x || y != v.y; }		
 
-		constexpr T& operator[](uint index)
+		constexpr T& operator[](uintMem index)
 		{
 			switch (index)
 			{
@@ -69,7 +69,7 @@ namespace Blaze
 			default: throw; return x;
 			}
 		}
-		constexpr const T& operator[](uint index) const
+		constexpr const T& operator[](uintMem index) const
 		{
 			switch (index)
 			{
@@ -79,15 +79,16 @@ namespace Blaze
 			}
 		}
 
-		constexpr T Lenght() const { return Math::Sqrt(x * x + y * y); }
 		constexpr T SqrLenght() const { return x * x + y * y; }
-		constexpr void Normalise()
+		constexpr T Lenght() const requires std::is_floating_point_v<T> { return Math::Sqrt(SqrLenght()); }
+		constexpr float Lenght() const requires std::is_integral_v<T> { return Math::Sqrt((float)SqrLenght()); }
+		constexpr void Normalise() requires std::is_floating_point_v<T>
 		{
 			const T lenght = Lenght();
 			x /= lenght;
 			y /= lenght;
 		}
-		constexpr Vector Normalised() const 
+		constexpr Vector Normalised() const requires std::is_floating_point_v<T>
 		{
 			const T lenght = Lenght();
 			return Vector(x / lenght, y / lenght);
@@ -108,7 +109,7 @@ namespace Blaze
 	using Vec2i = Vec2<int>;
 	using Vec2u = Vec2<unsigned>;
 	using Vec2f = Vec2<float>;
-	using Vec2d = Vec2<double>;
+	using Vec2d = Vec2<double>;	
 
 	template<typename T>
 	struct Vector<T, 3>
@@ -142,7 +143,7 @@ namespace Blaze
 		{
 		}
 
-		constexpr Vector operator-() const { return Vector(-x, -y, -z); }
+		constexpr Vector operator-() const requires std::is_signed_v<T> { return Vector(-x, -y, -z); }
 
 		constexpr Vector operator+(const Vector<T, 3>& b) const { return Vector(x + b.x, y + b.y, z + b.z); }
 		constexpr Vector operator-(const Vector<T, 3>& b) const { return Vector(x - b.x, y - b.y, z - b.z); }
@@ -163,7 +164,7 @@ namespace Blaze
 				
 		constexpr Vector& operator=(const Vector<T, 3>& v) { x = v.x; y = v.y; z = v.z; return *this; }
 
-		constexpr T& operator[](uint index)
+		constexpr T& operator[](uintMem index)
 		{
 			switch (index)
 			{
@@ -173,7 +174,7 @@ namespace Blaze
 			default: throw; return x;
 			}
 		}
-		constexpr const T& operator[](uint index) const
+		constexpr const T& operator[](uintMem index) const
 		{
 			switch (index)
 			{
@@ -184,16 +185,17 @@ namespace Blaze
 			}
 		}
 
-		constexpr T Lenght() const { return Math::Sqrt(x * x + y * y + z * z); }
 		constexpr T SqrLenght() const { return x * x + y * y + z * z; }
-		constexpr void Normalise()
+		constexpr T Lenght() const requires std::is_floating_point_v<T> { return Math::Sqrt(SqrLenght()); }
+		constexpr float Lenght() const requires std::is_integral_v<T> { return Math::Sqrt((float)SqrLenght()); }
+		constexpr void Normalise() requires std::is_floating_point_v<T>
 		{
 			const T lenght = Lenght();
 			x /= lenght;
 			y /= lenght;
 			z /= lenght;
 		}
-		constexpr Vector Normalised() const
+		constexpr Vector Normalised() const requires std::is_floating_point_v<T>
 		{
 			const T lenght = Lenght();
 			return Vector(x / lenght, y / lenght, z / lenght);
@@ -215,7 +217,7 @@ namespace Blaze
 		{
 			return a.DotProduct(b);
 		}		
-		static constexpr T CrossProduct(const Vector& a, const Vector& b)
+		static constexpr Vector CrossProduct(const Vector& a, const Vector& b)
 		{
 			return a.CrossProduct(b);
 		}
@@ -271,7 +273,7 @@ namespace Blaze
 		{
 		}
 
-		constexpr Vector operator-() const { return Vector(-x, -y, -z, -w); }
+		constexpr Vector operator-() const requires std::is_signed_v<T> { return Vector(-x, -y, -z, -w); }
 
 		constexpr Vector operator+(const Vector<T, 4>& b) const { return Vector(x + b.x, y + b.y, z + b.z, w + b.w); }
 		constexpr Vector operator-(const Vector<T, 4>& b) const { return Vector(x - b.x, y - b.y, z - b.z, w - b.w); }
@@ -292,7 +294,7 @@ namespace Blaze
 		
 		constexpr Vector<T, 4>& operator=(const Vector<T, 4>& v) { x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
 
-		constexpr T& operator[](uint index)
+		constexpr T& operator[](uintMem index)
 		{
 			switch (index)
 			{
@@ -303,7 +305,7 @@ namespace Blaze
 			default: throw; return x;
 			}
 		}
-		constexpr const T& operator[](uint index) const
+		constexpr const T& operator[](uintMem index) const
 		{
 			switch (index)
 			{
@@ -315,9 +317,10 @@ namespace Blaze
 			}
 		}
 
-		constexpr T Lenght() const { return Math::Sqrt<T>(x * x + y * y + z * z + w * w); }
 		constexpr T SqrLenght() const { return x * x + y * y + z * z + w * w; }
-		constexpr void Normalise()
+		constexpr T Lenght() const requires std::is_floating_point_v<T> { return Math::Sqrt(SqrLenght()); }
+		constexpr float Lenght() const requires std::is_integral_v<T> { return Math::Sqrt((float)SqrLenght()); }
+		constexpr void Normalise() requires std::is_floating_point_v<T>
 		{
 			const T lenght = Lenght();
 			x /= lenght;
@@ -325,7 +328,7 @@ namespace Blaze
 			z /= lenght;
 			w /= lenght;
 		}
-		constexpr Vector Normalised() const 
+		constexpr Vector Normalised() const requires std::is_floating_point_v<T>
 		{
 			const T lenght = Lenght();
 			return Vector(x / lenght, y / lenght, z / lenght, w / lenght);
@@ -357,5 +360,18 @@ namespace Blaze
 	using Vec4i = Vec4<int>;
 	using Vec4u = Vec4<unsigned>;
 	using Vec4f = Vec4<float>;
-	using Vec4d = Vec4<double>;
+	using Vec4d = Vec4<double>;	
+	
+	template struct BLAZE_API Vector<int, 2>;
+	template struct BLAZE_API Vector<unsigned, 2>;
+	template struct BLAZE_API Vector<float, 2>;
+	template struct BLAZE_API Vector<double, 2>;
+	template struct BLAZE_API Vector<int, 3>;
+	template struct BLAZE_API Vector<unsigned, 3>;
+	template struct BLAZE_API Vector<float, 3>;
+	template struct BLAZE_API Vector<double, 3>;
+	template struct BLAZE_API Vector<int, 4>;
+	template struct BLAZE_API Vector<unsigned, 4>;
+	template struct BLAZE_API Vector<float, 4>;
+	template struct BLAZE_API Vector<double, 4>;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/Window.h"
+#include "BlazeEngine/Core/WindowSDL.h"
 
 #include <SDL2/SDL_pixels.h>
 

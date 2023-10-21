@@ -273,7 +273,7 @@ namespace Blaze
 	template<typename Value, typename Hasher, AllocatorType Allocator>
 	inline bool Set<Value, Hasher, Allocator>::Contains(const Value& value) const
 	{
-		uint hash = Hash(value);
+		uintMem hash = Hash(value);
 		auto* bucket = GetBucketFromHash(hash);
 
 		if (bucket == nullptr) //Not a error. If we were calling Contains on an empty set it shouldn't return an error
@@ -334,19 +334,18 @@ namespace Blaze
 		return true;
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline uint Set<Value, Hasher, Allocator>::Count() const
+	inline uintMem Set<Value, Hasher, Allocator>::Count() const
 	{
 		return count;
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FirstIterator()
 	{
-		if (bucketCount == 0)
-			return Iterator();
-		
-		for (uint i = 0; i < bucketCount; ++i)
+		for (uintMem i = 0; i < bucketCount; ++i)
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].head, this);
+
+		return Iterator();
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FirstIterator() const
@@ -354,7 +353,7 @@ namespace Blaze
 		if (bucketCount == 0)
 			return ConstIterator();
 
-		for (uint i = 0; i < bucketCount; ++i)
+		for (uintMem i = 0; i < bucketCount; ++i)
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].head, this);		
 	}
@@ -364,7 +363,7 @@ namespace Blaze
 		if (bucketCount == 0)
 			return Iterator();
 
-		for (uint i = bucketCount - 1; i >= 0; --i)
+		for (uintMem i = bucketCount - 1; i >= 0; --i)
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].tail, this);
 	}
@@ -374,7 +373,7 @@ namespace Blaze
 		if (bucketCount == 0)
 			return ConstIterator();
 
-		for (uint i = bucketCount - 1; i >= 0; --i)
+		for (uintMem i = bucketCount - 1; i >= 0; --i)
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].tail, this);
 	}
@@ -435,7 +434,7 @@ namespace Blaze
 		return *this;
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uint hash, Value&& value)
+	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, Value&& value)
 		: prev(prev), next(next), hash(hash), value(std::move(value))
 	{
 	}
@@ -481,12 +480,12 @@ namespace Blaze
 		}
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline uint Set<Value, Hasher, Allocator>::Hash(const Value& value)
+	inline uintMem Set<Value, Hasher, Allocator>::Hash(const Value& value)
 	{
 		return Hasher::Compute(value);
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHash(uint hash) const
+	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHash(uintMem hash) const
 	{
 		if (bucketCount == 0)
 			return nullptr;
@@ -494,12 +493,12 @@ namespace Blaze
 		return GetBucketFromHashModUnsafe(hash % bucketCount);
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uint hashMod) const
+	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uintMem hashMod) const
 	{
 		return &buckets[hashMod];
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uint hash)
+	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uintMem hash)
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -509,7 +508,7 @@ namespace Blaze
 		return FindWithHintUnsafe(value, bucket);
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uint hash) const
+	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uintMem hash) const
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -555,7 +554,7 @@ namespace Blaze
 		return ConstIterator(node, this);
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(const Value& value, uint hash)
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(const Value& value, uintMem hash)
 	{
 		if (count == 0)
 			AllocateEmptyUnsafe();
@@ -572,7 +571,7 @@ namespace Blaze
 		return InsertWithHintUnsafe(value, bucket, hash);
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(const Value& value, Bucket* bucket, uint hash)
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(const Value& value, Bucket* bucket, uintMem hash)
 	{
 		if (bucket->head == nullptr)
 		{
@@ -639,7 +638,7 @@ namespace Blaze
 			if (bucketCount == 8)
 				return Result();
 
-			uint newBucketCount = (bucketCount + 1) / 2;
+			uintMem newBucketCount = (bucketCount + 1) / 2;
 
 			if (newBucketCount < 8)
 				newBucketCount = 8;
@@ -650,7 +649,7 @@ namespace Blaze
 		return Result();
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Result Set<Value, Hasher, Allocator>::Rehash(uint newBucketCount)
+	inline Result Set<Value, Hasher, Allocator>::Rehash(uintMem newBucketCount)
 	{
 		Bucket* old = buckets;
 		buckets = (Bucket*)Memory::Allocate(sizeof(Bucket) * newBucketCount);
@@ -677,7 +676,7 @@ namespace Blaze
 		count = 0;
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator>
-	inline Result Set<Value, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uint bucketArraySize)
+	inline Result Set<Value, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
 	{
 		Node* node = bucket->head;
 
@@ -685,7 +684,7 @@ namespace Blaze
 		{
 			Node* next = node->next;
 
-			uint newHashMod = node->hash % bucketArraySize;
+			uintMem newHashMod = node->hash % bucketArraySize;
 			Bucket* newBucket = &bucketArray[newHashMod];
 
 			MoveNodeToBeginingUnsafe(node, newBucket);

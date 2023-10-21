@@ -3,33 +3,33 @@
 
 namespace Blaze
 {
-	ReadSubStream::ReadSubStream(ReadStream& stream, uint offset, uint size)
+	ReadSubStream::ReadSubStream(ReadStream& stream, uintMem offset, uintMem size)
 		: parentStream(&stream), offset(offset), size(size)
 	{
 	}
-	bool ReadSubStream::MovePosition(int64 offset)
+	bool ReadSubStream::MovePosition(intMem offset)
 	{
 		return parentStream->MovePosition(offset);
 	}
-	bool ReadSubStream::SetPosition(uint64 offset)
+	bool ReadSubStream::SetPosition(uintMem offset)
 	{
 		return parentStream->SetPosition(offset + this->offset);
 	}
-	bool ReadSubStream::SetPositionFromEnd(int64 offset)
+	bool ReadSubStream::SetPositionFromEnd(intMem offset)
 	{
 		return parentStream->SetPosition(this->offset + this->size + offset);
 	}
-	uint64 ReadSubStream::GetPosition() const
+	uintMem ReadSubStream::GetPosition() const
 	{
 		return parentStream->GetPosition() - offset;
 	}
-	uint64 ReadSubStream::GetSize() const
+	uintMem ReadSubStream::GetSize() const
 	{
 		return size;
 	}
-	uint64 ReadSubStream::Read(void* ptr, uint64 byteCount)
+	uintMem ReadSubStream::Read(void* ptr, uintMem byteCount)
 	{
-		uint64 position = parentStream->GetPosition();
+		uintMem position = parentStream->GetPosition();
 
 		if (position > offset + size || position < offset)
 			return 0;

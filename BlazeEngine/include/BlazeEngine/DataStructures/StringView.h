@@ -7,30 +7,30 @@ namespace Blaze
 	class BLAZE_API StringView
 	{
 		const char* ptr;
-		size_t size;
+		uintMem size;
 	public:
 		constexpr StringView();
 		constexpr StringView(const StringView&);
 		
 		constexpr StringView(const char*);
-		constexpr StringView(const char*, size_t count);
+		constexpr StringView(const char*, uintMem count);
 		constexpr StringView(const char* begin, const char* end);
 		inline StringView(const String&);		
 
 		constexpr const char* Ptr() const { return ptr; }
-		constexpr size_t Size() const { return size; }	
+		constexpr uintMem Size() const { return size; }
 
-		constexpr size_t Count(char ch) const;
+		constexpr uintMem Count(char ch) const;
 		inline uint32 Hash() const;
 
-		constexpr StringView SubString(size_t start, size_t count);
+		constexpr StringView SubString(uintMem start, uintMem count);
 
 		constexpr StringView& operator= (const StringView&);						
 
 		constexpr bool operator==(const StringView& s) const;				
 		constexpr bool operator!=(const StringView& s) const;		
 		
-		inline const char& operator[](int index) const { return ptr[index]; }
+		inline const char& operator[](uintMem index) const { return ptr[index]; }
 	};
 
 	constexpr StringView::StringView()
@@ -55,7 +55,7 @@ namespace Blaze
 		else
 			this->ptr = ptr;
 	}
-	constexpr StringView::StringView(const char* ptr, size_t size)
+	constexpr StringView::StringView(const char* ptr, uintMem size)
 		: size(size)
 	{
 		if (size == 0)
@@ -75,7 +75,7 @@ namespace Blaze
 		: ptr(string.Ptr()), size(string.Size())
 	{
 	}
-	constexpr size_t StringView::Count(char ch) const
+	constexpr uintMem StringView::Count(char ch) const
 	{
 		size_t count = 0;
 		const char* ptr = this->ptr;
@@ -86,9 +86,9 @@ namespace Blaze
 	}
 	inline uint32 StringView::Hash() const
 	{		
-		return std::hash<std::string_view>()(std::string_view(ptr, size));		
+		return (uint32)std::hash<std::string_view>()(std::string_view(ptr, size));		
 	}
-	constexpr StringView StringView::SubString(size_t start, size_t count)
+	constexpr StringView StringView::SubString(uintMem start, uintMem count)
 	{
 		return StringView(ptr + start, count);
 	}

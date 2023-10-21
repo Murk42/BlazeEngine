@@ -56,7 +56,7 @@ namespace Blaze::ECS
 
 		auto types = registry.GetAllTypesData();
 
-		for (uint i = 0; i < types.Count(); ++i)
+		for (uintMem i = 0; i < types.Count(); ++i)
 		{
 			void* systemRaw = (uint8*)systems[i] - types[i].SystemBaseOffset();
 			types[i].DestructSystemDirect(systemRaw);
@@ -71,7 +71,7 @@ namespace Blaze::ECS
 		auto* entity = CreateEntity(typesData);
 		AllocateComponents();
 
-		for (uint i = 0; i < typesData.Count(); ++i)
+		for (uintMem i = 0; i < typesData.Count(); ++i)
 		{			
 			Component* component = GetCurrentComponent();
 
@@ -93,12 +93,12 @@ namespace Blaze::ECS
 
 		auto componentsTypeData = GetEntityComponentsTypeData(entity);
 		auto components = GetEntityComponents(entity);
-		uint componentCount = entity->GetComponentCount();
+		uintMem componentCount = entity->GetComponentCount();
 
-		for (uint i = 0; i < componentCount; ++i)
+		for (uintMem i = 0; i < componentCount; ++i)
 			systems[componentsTypeData[i]->Index()]->Destroyed(components[i]);
 
-		for (uint i = 0; i < componentCount; ++i)
+		for (uintMem i = 0; i < componentCount; ++i)
 			containers[componentsTypeData[i]->Index()].Destroy(components[i]);
 
 		entities.Last()->arrayIndex = entity->arrayIndex;
@@ -116,7 +116,7 @@ namespace Blaze::ECS
 		return UpdateSystem(typeData.Index());
 	}
 
-	Result Scene::UpdateSystem(uint index)
+	Result Scene::UpdateSystem(uintMem index)
 	{
 		auto* system = systems[index];
 
@@ -137,7 +137,7 @@ namespace Blaze::ECS
 	{
 		return GetSystem(typeData.Index());
 	}	
-	System* Scene::GetSystem(uint index)
+	System* Scene::GetSystem(uintMem index)
 	{
 		return systems[index];
 	}
@@ -168,7 +168,7 @@ namespace Blaze::ECS
 
 		auto componentData = GetEntityComponentsTypeData(entity);
 
-		for (uint i = 0; i < typesData.Count(); ++i)
+		for (uintMem i = 0; i < typesData.Count(); ++i)
 		{			
 			componentData[i] = typesData[i];
 		}
@@ -180,7 +180,7 @@ namespace Blaze::ECS
 		auto typesData = currentEntityCreationData->typesData;
 		auto components = GetEntityComponents(currentEntityCreationData->currentEntity);
 
-		for (uint i = 0; i < typesData.Count(); ++i)		
+		for (uintMem i = 0; i < typesData.Count(); ++i)
 			components[i] = containers[typesData[i]->Index()].Allocate();		
 	}
 	Component* Scene::GetCurrentComponent()
@@ -196,8 +196,8 @@ namespace Blaze::ECS
 		auto componentsTypeData = GetEntityComponentsTypeData(currentEntityCreationData->currentEntity);
 		auto components = GetEntityComponents(currentEntityCreationData->currentEntity);
 
-		uint componentCount = entity->componentCount;
-		for (uint i = 0; i < componentCount; ++i)				
+		uintMem componentCount = entity->componentCount;
+		for (uintMem i = 0; i < componentCount; ++i)
 			systems[componentsTypeData[i]->Index()]->Created(components[i]);
 		
 		entityCreationData.EraseFirst();		

@@ -22,7 +22,7 @@ namespace Blaze::Windows
 		LPSTR errorString;
 		auto res = FormatMessageA(
 			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, 
-			NULL, error, 0, (LPTSTR)&errorString, 0, NULL
+			NULL, error, 0, (LPSTR)&errorString, 0, NULL
 			);		
 
 		if (res == 0)

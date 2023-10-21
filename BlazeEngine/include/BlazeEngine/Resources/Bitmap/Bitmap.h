@@ -13,7 +13,7 @@ namespace Blaze
 		BGR,
 		BGRA	
 	};
-	BLAZE_API uint BitmapColorFormatComponentCount(BitmapColorFormat format);	
+	BLAZE_API uint BitmapColorFormatComponentCount(BitmapColorFormat format);
 
 	enum class BitmapColorComponentType
 	{
@@ -26,7 +26,7 @@ namespace Blaze
 		Float,
 		Double
 	};
-	BLAZE_API uint BitmapColorComponentTypeSize(BitmapColorComponentType type);
+	BLAZE_API uintMem BitmapColorComponentTypeSize(BitmapColorComponentType type);
 
 	enum class BitmapSaveType
 	{
@@ -43,20 +43,20 @@ namespace Blaze
 	{
 	public:
 		BitmapRef();
-		BitmapRef(Vec2i size, BitmapColorFormat format, BitmapColorComponentType type, uint stride, void* pixels);		
+		BitmapRef(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, uintMem stride, void* pixels);
 		BitmapRef(const BitmapRef& other);
 
-		inline uint GetStride() const { return stride; }
+		inline uintMem GetStride() const { return stride; }
 		inline void* GetPixels() const { return pixels; }
-		inline Vec2i GetSize() const { return size; }
+		inline Vec2u GetSize() const { return size; }
 		inline BitmapColorFormat GetPixelFormat() const { return format; }
 		inline BitmapColorComponentType GetPixelType() const { return type; }
 		
 		BitmapRef& operator=(const BitmapRef& other);
 	protected:
 		void* pixels;
-		uint stride;
-		Vec2i size;
+		uintMem stride;
+		Vec2u size;
 		BitmapColorFormat format;
 		BitmapColorComponentType type;
 	};
@@ -76,7 +76,7 @@ namespace Blaze
 		Result Serialize(WriteStream& stream) const;
 		Result Deserialize(ReadStream& stream);
 		
-		Result Create(Vec2i size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, bool flipVertically = false);			 
+		Result Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, bool flipVertically = false);			 
 
 		void Clear();		
 
@@ -88,14 +88,14 @@ namespace Blaze
 	{
 	public:
 		BitmapView();
-		BitmapView(Vec2i size, BitmapColorFormat format, BitmapColorComponentType type, uint stride, const void* pixels);
+		BitmapView(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, uintMem stride, const void* pixels);
 		BitmapView(const Bitmap& other);
 		BitmapView(const BitmapRef& other);
 		BitmapView(const BitmapView& other);
 
-		inline uint GetStride() const { return stride; }
+		inline uintMem GetStride() const { return stride; }
 		inline const void* GetPixels() const { return pixels; }
-		inline Vec2i GetSize() const { return size; }
+		inline Vec2u GetSize() const { return size; }
 		inline BitmapColorFormat GetPixelFormat() const { return format; }
 		inline BitmapColorComponentType GetPixelType() const { return type; }
 
@@ -104,8 +104,8 @@ namespace Blaze
 		BitmapView& operator=(const BitmapView& other);
 	private:
 		const void* pixels;
-		uint stride;
-		Vec2i size;
+		uintMem stride;
+		Vec2u size;
 		BitmapColorFormat format;
 		BitmapColorComponentType type;
 	};	

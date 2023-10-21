@@ -46,7 +46,7 @@ namespace Blaze::UI::Components
 		for (auto child : children)
 		{
 			child->anchor = nullptr;
-			child->childIterator = std::list<UITransformComponent*>::iterator();
+			child->childIterator = DualList<UITransformComponent*>::Iterator();
 		}		
 	}
 	Vec2f UITransformComponent::ToLocalCoordinates(Vec2f point) const
@@ -70,14 +70,14 @@ namespace Blaze::UI::Components
 			return;
 
 		if (this->anchor != nullptr)		
-			this->anchor->children.erase(childIterator);		
+			this->anchor->children.Erase(childIterator);		
 
 		this->anchor = anchor;
 
 		if (anchor != nullptr)
 		{
-			anchor->children.push_front(this);
-			childIterator = anchor->children.begin();
+			anchor->children.AddFront(this);
+			childIterator = anchor->children.FirstIterator();
 		}		
 	}	
 

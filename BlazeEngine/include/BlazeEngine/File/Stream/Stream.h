@@ -2,33 +2,36 @@
 
 namespace Blaze
 {
+#pragma warning( push )
+#pragma warning( disable : 4250)	
 	class StreamBase
 	{
 	public:
-		virtual bool MovePosition(int64 offset) = 0;
-		virtual bool SetPosition(uint64 offset) = 0;
-		virtual bool SetPositionFromEnd(int64 offset) = 0;
-		virtual uint64 GetPosition() const = 0;
+		virtual bool MovePosition(intMem offset) = 0;
+		virtual bool SetPosition(uintMem offset) = 0;
+		virtual bool SetPositionFromEnd(intMem offset) = 0;
+		virtual uintMem GetPosition() const = 0;
 
-		virtual uint64 GetSize() const = 0;
+		virtual uintMem GetSize() const = 0;
 	};
 
 	class WriteStream : virtual public StreamBase
 	{
 	public:
-		virtual uint64 Write(const void* ptr, uint64 byteCount) = 0;
+		virtual uintMem Write(const void* ptr, uintMem byteCount) = 0;
 	};
 
 	class ReadStream : virtual public StreamBase
 	{
 	public:
-		virtual uint64 Read(void* ptr, uint64 byteCount) = 0;
+		virtual uintMem Read(void* ptr, uintMem byteCount) = 0;
 	};	
 
 	class Stream : public ReadStream, public WriteStream
 	{
 	public:				
 	};
+#pragma warning( pop ) 
 
 	template<typename T>
 	concept Serializable = requires(const T & a, WriteStream & stream) {

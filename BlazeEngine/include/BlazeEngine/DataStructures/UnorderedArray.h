@@ -33,10 +33,10 @@ namespace Blaze
 		UnorderedArray(UnorderedArray&& arr) noexcept;
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
-		UnorderedArray(uint count, const Args& ... args);
-		template<uint S>
+		UnorderedArray(uintMem count, const Args& ... args);
+		template<uintMem S>
 		UnorderedArray(const T(&arr)[S]);
-		UnorderedArray(const T* ptr, uint count);
+		UnorderedArray(const T* ptr, uintMem count);
 		UnorderedArray(const std::initializer_list<T>& arr);
 		UnorderedArray(const ArrayView<std::remove_const_t<T>>& arr);
 		UnorderedArray(const ArrayView<const std::remove_const_t<T>>& arr);
@@ -45,22 +45,22 @@ namespace Blaze
 
 		void Clear();
 		bool Empty() const;
-		uint Count() const;
+		uintMem Count() const;
 		
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator Add(Args&& ... args);
 		
-		void EraseAt(uint index);
+		void EraseAt(uintMem index);
 		void EraseAt(Iterator it);
 
 		void Append(const UnorderedArray& other);
 		void Append(UnorderedArray&& other);
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
-		void Resize(uint newCount, const Args& ... args);
+		void Resize(uintMem newCount, const Args& ... args);
 
-		T& operator[](uint i);
-		const T& operator[](uint i) const;
+		T& operator[](uintMem i);
+		const T& operator[](uintMem i) const;
 
 		T* Ptr();
 		const T* Ptr() const;
@@ -70,8 +70,8 @@ namespace Blaze
 		T& Last();
 		const T& Last() const;
 
-		Iterator GetIterator(uint index);
-		ConstIterator GetIterator(uint index) const;
+		Iterator GetIterator(uintMem index);
+		ConstIterator GetIterator(uintMem index) const;
 
 		/*
 			Returns an iterator pointing to the first element in the unordered array. If the unordered array is empty returns a null unordered array iterator.
@@ -118,12 +118,12 @@ namespace Blaze
 		friend class ArrayIterator;
 	private:
 		T* ptr;
-		uint count;
-		uint reserved;
+		uintMem count;
+		uintMem reserved;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		uint iteratorCount;
+		uintMem iteratorCount;
 #endif
 
 		/*
@@ -138,7 +138,7 @@ namespace Blaze
 			count - number of elements to copy
 
 		*/
-		void CopyUnsafe(const T* src, uint count);
+		void CopyUnsafe(const T* src, uintMem count);
 
 		/*
 
@@ -154,7 +154,7 @@ namespace Blaze
 			A pointer to a new buffer if the old one needs to be changed. Nullptr otherwise.
 
 		*/
-		T* ReallocateUnsafe(uint newCount);
+		T* ReallocateUnsafe(uintMem newCount);
 	};
 
 }

@@ -8,7 +8,7 @@ namespace Blaze::ECS
 	template<Constexpr::FixedString ... Tags>
 	struct TagGroup
 	{
-		static constexpr uint Size = 0;
+		static constexpr uintMem Size = 0;
 		static constexpr std::array<StringView, 0> tags;
 
 		template<Constexpr::FixedString ... NewTags>
@@ -19,7 +19,7 @@ namespace Blaze::ECS
 	template<Constexpr::FixedString Tag, Constexpr::FixedString Tag2, Constexpr::FixedString ... Tags>
 	struct TagGroup<Tag, Tag2, Tags...>
 	{
-		static constexpr uint Size = 2 + sizeof...(Tags);
+		static constexpr uintMem Size = 2 + sizeof...(Tags);
 
 		template<Constexpr::FixedString ... NewTags>
 		using Concat = TagGroup<Tag, Tag2, Tags..., NewTags...>;
@@ -33,7 +33,7 @@ namespace Blaze::ECS
 	template<Constexpr::FixedString Tag>
 	struct TagGroup<Tag>
 	{	
-		static constexpr uint Size = 1;
+		static constexpr uintMem Size = 1;
 
 		template<Constexpr::FixedString ... NewTags>
 		using Concat = TagGroup<Tag, NewTags...>;
@@ -120,32 +120,32 @@ namespace Blaze::ECS
 		{		
 			FlagType flags;
 		
-			uint MarkNew();
-			void Unmark(uint index);
+			uintMem MarkNew();
+			void Unmark(uintMem index);
 
 			bool IsFull();			
 			bool IsEmpty();
 		};
 
 		//Important for bucket storage
-		uint elementSize;
+		uintMem elementSize;
 		BucketHeader** buckets;
-		uint bucketCount;
+		uintMem bucketCount;
 
 		//Important for bucket manipulation
-		uint nonFullBucketCount;			
+		uintMem nonFullBucketCount;
 
 		//Important for client
-		uint elementCount;
+		uintMem elementCount;
 
-		void GetComponentLocation(Component*, BucketHeader*&, uint&);
-		Component* GetComponentFromLocation(BucketHeader*, uint index, ElementHeader*& element);		
+		void GetComponentLocation(Component*, BucketHeader*&, uintMem&);
+		Component* GetComponentFromLocation(BucketHeader*, uintMem index, ElementHeader*& element);
 
 		void* FirstInBucket(BucketHeader* bucket) const;
 		void* LastInBucket(BucketHeader* bucket) const;
 
-		void Increment(uint& bucketIndex, Component*& ptr) const;
-		void Decrement(uint& bucketIndex, Component*& ptr) const;
+		void Increment(uintMem& bucketIndex, Component*& ptr) const;
+		void Decrement(uintMem& bucketIndex, Component*& ptr) const;
 
 		BucketHeader* AllocateBucket();
 		void FreeBucket(BucketHeader* bucket);
@@ -163,17 +163,17 @@ namespace Blaze::ECS
 		void Destroy(Component*);
 		void Free(Component*);
 
-		uint Count() const { return elementCount; }
+		uintMem Count() const { return elementCount; }
 
 		void Clear();
 
 		class BLAZE_API Iterator
 		{
 			const ComponentContainer* container;
-			uint bucketIndex;
+			uintMem bucketIndex;
 			Component* ptr;
 
-			Iterator(const ComponentContainer*, uint, Component*);
+			Iterator(const ComponentContainer*, uintMem, Component*);
 		public:
 			Iterator();
 			Iterator(const Iterator&);

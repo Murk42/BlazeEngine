@@ -25,7 +25,7 @@ namespace Blaze
 			auto glyph = face->glyph;
 			FT_Render_Glyph(glyph, FT_RENDER_MODE_MONO);
 
-			Vec2i size = Vec2i(glyph->bitmap.width, glyph->bitmap.rows);
+			Vec2u size = Vec2u(glyph->bitmap.width, glyph->bitmap.rows);
 
 			Bitmap bitmap;
 			bitmap.Create(size, BitmapColorFormat::Red, BitmapColorComponentType::Uint8, nullptr);
@@ -59,7 +59,7 @@ namespace Blaze
 			auto glyph = face->glyph;
 			FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
 
-			Vec2i size = Vec2i(glyph->bitmap.width, glyph->bitmap.rows);
+			Vec2u size = Vec2u(glyph->bitmap.width, glyph->bitmap.rows);
 
 			Bitmap bitmap;
 			bitmap.Create(size, BitmapColorFormat::Red, BitmapColorComponentType::Uint8, nullptr);
@@ -92,7 +92,7 @@ namespace Blaze
 			auto glyph = face->glyph;
 			FT_Render_Glyph(glyph, FT_RENDER_MODE_LCD);
 
-			Vec2i size = Vec2i(glyph->bitmap.width / 3, glyph->bitmap.rows);
+			Vec2u size = Vec2u(glyph->bitmap.width / 3, glyph->bitmap.rows);
 
 			Bitmap bitmap;
 			bitmap.Create(size, BitmapColorFormat::RGB, BitmapColorComponentType::Uint8, nullptr);
@@ -125,7 +125,7 @@ namespace Blaze
 			auto glyph = face->glyph;
 			FT_Render_Glyph(glyph, FT_RENDER_MODE_LCD_V);
 
-			Vec2i size = Vec2i(glyph->bitmap.width, glyph->bitmap.rows / 3);
+			Vec2u size = Vec2u(glyph->bitmap.width, glyph->bitmap.rows / 3);
 
 			Bitmap bitmap;
 			bitmap.Create(size, BitmapColorFormat::RGB, BitmapColorComponentType::Uint8, nullptr);
@@ -158,7 +158,7 @@ namespace Blaze
 			auto glyph = face->glyph;
 			FT_Render_Glyph(glyph, FT_RENDER_MODE_SDF);
 
-			Vec2i size = Vec2i(glyph->bitmap.width, glyph->bitmap.rows);
+			Vec2u size = Vec2u(glyph->bitmap.width, glyph->bitmap.rows);
 
 			Bitmap bitmap;
 			bitmap.Create(size, BitmapColorFormat::Red, BitmapColorComponentType::Uint8, nullptr);
@@ -354,9 +354,9 @@ namespace Blaze
 		auto glyphAtlasRectIt = glyphAtlasRects.begin();
 		for (auto& bitmap : glyphsData)
 		{
-			Vec2i size = bitmap.bitmap.GetSize() + Vec2i(glyphBitmapExtraPadding * 2);
-			glyphAtlasRectIt->w = size.x;
-			glyphAtlasRectIt->h = size.y;
+			Vec2u size = bitmap.bitmap.GetSize() + Vec2u(glyphBitmapExtraPadding * 2);
+			glyphAtlasRectIt->w = (int)size.x;
+			glyphAtlasRectIt->h = (int)size.y;
 			++glyphAtlasRectIt;
 		}
 
@@ -393,7 +393,7 @@ namespace Blaze
 
 		FT_Set_Pixel_Sizes(face, 0, fontHeight);
 				
-		baselineDistance = std::round(baselineDistance * fontHeight);		
+		baselineDistance = baselineDistance * fontHeight;		
 		nonEmptyCount = 0;
 
 		for (auto& span : characterSet.spans)
@@ -409,10 +409,10 @@ namespace Blaze
 				FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 				FT_GlyphSlot glyph = face->glyph;
 
-				data.size = Vec2f(glyph->metrics.width, glyph->metrics.height) / 64.0f;
+				data.size = Vec2f((float)glyph->metrics.width, (float)glyph->metrics.height) / 64.0f;
 				data.horizontalAdvance = float(glyph->metrics.horiAdvance) / 64.0f;
 				data.verticalAdvance = float(glyph->metrics.vertAdvance) / 64.0f;
-				data.offset = Vec2f(glyph->metrics.horiBearingX, glyph->metrics.horiBearingY - glyph->metrics.height) / 64.0f;
+				data.offset = Vec2f((float)glyph->metrics.horiBearingX, (float)(glyph->metrics.horiBearingY - glyph->metrics.height)) / 64.0f;
 
 				if (data.size.x != 0 && data.size.y != 0)
 					++nonEmptyCount;
@@ -514,11 +514,11 @@ namespace Blaze
 				ptr = nullptr;
 			}
 
-			uint64 memorySize = readStream.GetSize();
+			uintMem memorySize = readStream.GetSize();
 			memory = Memory::Allocate(memorySize);
 			readStream.Read(memory, memorySize);
 
-			ftError = FT_New_Memory_Face(GetFreeTypeLibrary(), (const FT_Byte*)memory, memorySize, 0, &(FT_Face&)ptr);				
+			ftError = FT_New_Memory_Face(GetFreeTypeLibrary(), (const FT_Byte*)memory, (FT_Long)memorySize, 0, &(FT_Face&)ptr);				
 
 			if (ftError != 0)
 			{
@@ -569,6 +569,6 @@ namespace Blaze
 		FT_Get_Kerning(face, l, r, FT_KERNING_UNSCALED, &vec);
 		vec.x *= fontResolution.GetFontHeight() / pixelsPerUnit;
 		vec.y *= fontResolution.GetFontHeight() / pixelsPerUnit;
-		return Vec2f(vec.x, vec.y);
+		return Vec2f((float)vec.x, (float)vec.y);
 	}
 }

@@ -101,7 +101,7 @@ namespace Blaze
 	}
 	uint32 String::Hash() const
 	{
-		return std::hash<std::string_view>()(std::string_view(ptr, size));		
+		return (uint32)std::hash<std::string_view>()(std::string_view(ptr, size));		
 	}
 	char* String::begin()
 	{

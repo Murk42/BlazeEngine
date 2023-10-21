@@ -23,17 +23,17 @@ namespace Blaze::ECS
 		template<typename C> requires IsComponent<C>
 		Result UpdateSystem();
 		Result UpdateSystem(const ComponentTypeData&);
-		Result UpdateSystem(uint index);
+		Result UpdateSystem(uintMem index);
 		
 		template<typename C> requires IsComponent<C>
 		typename C::template System* GetSystem();
 		System* GetSystem(const ComponentTypeData&);
-		System* GetSystem(uint index);
+		System* GetSystem(uintMem index);
 
 		template<typename C> requires IsComponent<C>
 		const ComponentContainer& GetComponents();
 		const ComponentContainer& GetComponents(const ComponentTypeData&);
-		const ComponentContainer& GetComponents(uint index);
+		const ComponentContainer& GetComponents(uintMem index);
 
 		ArrayView<Entity*> GetEntities() const;
 		
@@ -43,7 +43,7 @@ namespace Blaze::ECS
 		template<typename ... Cs> requires (IsComponent<Cs> && ...)
 		friend class CustomEntity;
 	private:
-		static constexpr uint entityBucketElementCount = 64;
+		static constexpr uintMem entityBucketElementCount = 64;
 
 		ComponentTypeRegistry registry;
 		Array<System*> systems;		
@@ -123,9 +123,7 @@ namespace Blaze::ECS
 	template<typename ... C> requires (IsComponent<C> && ...)
 	inline void Scene::SetTypesData(const ComponentTypeData* (&ptr)[sizeof...(C)])
 	{
-		uint i = 0;
+		uintMem i = 0;
 		(SetTypeData<C>(ptr[i++]), ...);
 	}
 }
-
-template class BLAZE_API std::vector<Blaze::ECS::Entity*>;

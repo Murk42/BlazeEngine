@@ -26,7 +26,7 @@ namespace Blaze
 	{
 		return static_cast<std::underlying_type_t<T>>(value);
 	}
-	unsigned BitmapColorFormatComponentCount(BitmapColorFormat format)
+	uint BitmapColorFormatComponentCount(BitmapColorFormat format)
 	{
 		switch (format)
 		{
@@ -42,7 +42,7 @@ namespace Blaze
 		}		
 	}
 
-	unsigned BitmapColorComponentTypeSize(BitmapColorComponentType type)
+	uintMem BitmapColorComponentTypeSize(BitmapColorComponentType type)
 	{
 		switch (type)
 		{

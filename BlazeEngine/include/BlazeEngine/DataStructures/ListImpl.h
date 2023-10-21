@@ -162,7 +162,7 @@ namespace Blaze
 		return count == 0;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline uint List<T, Allocator>::Count() const
+	inline uintMem List<T, Allocator>::Count() const
 	{
 		return count;
 	}
@@ -175,7 +175,7 @@ namespace Blaze
 			Debug::Logger::LogFatal("Blaze Engine", "Iterator is null");
 #endif		
 
-		Node* prev = &*it;		
+		Node* prev = it.node;		
 		Node* next = prev->next;		
 		Node* node = (Node*)allocator.Allocate(sizeof(Node));
 		prev->next = node;

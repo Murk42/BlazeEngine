@@ -20,7 +20,7 @@ namespace Blaze
 		Vec2f size;
 	};
 
-	class FontGlyphRenderer
+	class BLAZE_API FontGlyphRenderer
 	{
 	public:
 		using CopyBitmapCallback = std::function<void(UnicodeChar, BitmapView)>;

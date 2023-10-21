@@ -24,19 +24,19 @@ namespace Blaze
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ... Args> requires std::constructible_from<T, Args...>
-	inline UnorderedArray<T, Allocator>::UnorderedArray(uint count, const Args& ... args)
+	inline UnorderedArray<T, Allocator>::UnorderedArray(uintMem count, const Args& ... args)
 		: ptr(nullptr), count(count), reserved(count)
 	{
 		Resize(count, std::move(args)...);
 	}
 	template<typename T, AllocatorType Allocator>
-	template<uint S>
+	template<uintMem S>
 	inline UnorderedArray<T, Allocator>::UnorderedArray(const T(&arr)[S])
 	{
 		CopyUnsafe(arr, S);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline UnorderedArray<T, Allocator>::UnorderedArray(const T* ptr, uint count)
+	inline UnorderedArray<T, Allocator>::UnorderedArray(const T* ptr, uintMem count)
 	{
 		CopyUnsafe(ptr, count);
 	}
@@ -78,7 +78,7 @@ namespace Blaze
 		return count == 0;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline uint UnorderedArray<T, Allocator>::Count() const
+	inline uintMem UnorderedArray<T, Allocator>::Count() const
 	{
 		return count;
 	}	
@@ -93,7 +93,7 @@ namespace Blaze
 
 		if (auto newPtr = ReallocateUnsafe(count + 1))
 		{
-			for (uint i = 0; i < count; ++i)
+			for (uintMem i = 0; i < count; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i]));			
 
 			std::construct_at(newPtr + count, std::forward<Args>(args)...);
@@ -114,7 +114,7 @@ namespace Blaze
 #endif
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void UnorderedArray<T, Allocator>::EraseAt(uint index)
+	inline void UnorderedArray<T, Allocator>::EraseAt(uintMem index)
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
@@ -128,10 +128,10 @@ namespace Blaze
 
 		if (auto newPtr = ReallocateUnsafe(count - 1))
 		{
-			for (uint i = 0; i < index; ++i)
+			for (uintMem i = 0; i < index; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i]));
 
-			for (uint i = index; i < count - 1; ++i)
+			for (uintMem i = index; i < count - 1; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i + 1]));
 
 			std::destroy_n(ptr, count);
@@ -165,7 +165,7 @@ namespace Blaze
 
 		if (auto newPtr = ReallocateUnsafe(other.count + other.count))
 		{
-			for (uint i = 0; i < count; ++i)
+			for (uintMem i = 0; i < count; ++i)
 				std::construct_at(newPtr[i], std::move(ptr[i]));
 
 			std::destroy_n(ptr, count);
@@ -173,7 +173,7 @@ namespace Blaze
 			ptr = newPtr;
 		}
 
-		for (uint i = count; i < count + other.count; ++i)
+		for (uintMem i = count; i < count + other.count; ++i)
 			std::construct_at(ptr + i, other.ptr[i]);
 
 		count += other.count;
@@ -188,7 +188,7 @@ namespace Blaze
 
 		if (auto newPtr = ReallocateUnsafe(other.count + other.count))
 		{
-			for (uint i = 0; i < count; ++i)
+			for (uintMem i = 0; i < count; ++i)
 				std::construct_at(newPtr[i], std::move(ptr[i]));
 
 			std::destroy_n(ptr, count);
@@ -196,7 +196,7 @@ namespace Blaze
 			ptr = newPtr;
 		}
 
-		for (uint i = count; i < count + other.count; ++i)
+		for (uintMem i = count; i < count + other.count; ++i)
 			std::construct_at(ptr + i, std::move(other.ptr[i]));
 
 		std::destroy_n(other.ptr, other.count);
@@ -210,7 +210,7 @@ namespace Blaze
 	}	
 	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline void UnorderedArray<T, Allocator>::Resize(uint newCount, const Args & ...args)
+	inline void UnorderedArray<T, Allocator>::Resize(uintMem newCount, const Args & ...args)
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
@@ -222,7 +222,7 @@ namespace Blaze
 		{
 			if (newPtr != nullptr)
 			{
-				for (uint i = 0; i < newCount; ++i)
+				for (uintMem i = 0; i < newCount; ++i)
 					std::construct_at(newPtr + i, std::move(ptr[i]));
 
 				std::destroy_n(ptr, count);
@@ -237,7 +237,7 @@ namespace Blaze
 		{
 			if (newPtr != nullptr)
 			{
-				for (uint i = 0; i < count; ++i)
+				for (uintMem i = 0; i < count; ++i)
 					std::construct_at(newPtr + i, std::move(ptr[i]));
 
 				std::destroy_n(ptr, count);
@@ -245,18 +245,18 @@ namespace Blaze
 				allocator.Free(ptr);
 				ptr = newPtr;
 
-				for (uint i = count; i < newCount; ++i)
+				for (uintMem i = count; i < newCount; ++i)
 					std::construct_at(newPtr + i, std::forward<Args>(args)...);
 			}
 			else
-				for (uint i = count; i < newCount; ++i)
+				for (uintMem i = count; i < newCount; ++i)
 					std::construct_at(newPtr + i, std::forward<Args>(args)...);
 		}
 
 		count = newCount;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline T& UnorderedArray<T, Allocator>::operator[](uint i)
+	inline T& UnorderedArray<T, Allocator>::operator[](uintMem i)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (i >= count)
@@ -265,7 +265,7 @@ namespace Blaze
 		return ptr[i];
 	}
 	template<typename T, AllocatorType Allocator>
-	inline const T& UnorderedArray<T, Allocator>::operator[](uint i) const
+	inline const T& UnorderedArray<T, Allocator>::operator[](uintMem i) const
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (i >= count)
@@ -321,7 +321,7 @@ namespace Blaze
 		return ptr[count - 1];
 	}
 	template<typename T, AllocatorType Allocator>
-	inline UnorderedArray<T, Allocator>::Iterator UnorderedArray<T, Allocator>::GetIterator(uint index)
+	inline UnorderedArray<T, Allocator>::Iterator UnorderedArray<T, Allocator>::GetIterator(uintMem index)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
@@ -330,7 +330,7 @@ namespace Blaze
 		return Iterator(ptr + index);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline UnorderedArray<T, Allocator>::ConstIterator UnorderedArray<T, Allocator>::GetIterator(uint index) const
+	inline UnorderedArray<T, Allocator>::ConstIterator UnorderedArray<T, Allocator>::GetIterator(uintMem index) const
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
@@ -461,7 +461,7 @@ namespace Blaze
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void UnorderedArray<T, Allocator>::CopyUnsafe(const T* src, uint count)
+	inline void UnorderedArray<T, Allocator>::CopyUnsafe(const T* src, uintMem count)
 	{
 		if (auto newPtr = ReallocateUnsafe(count))
 		{
@@ -470,14 +470,14 @@ namespace Blaze
 			ptr = newPtr;
 		}
 
-		for (uint i = 0; i < count; ++i)
+		for (uintMem i = 0; i < count; ++i)
 			std::construct_at(ptr + i, src[i]);
 
 		this->count = count;
 	}
 
 	template<typename T, AllocatorType Allocator>
-	inline T* UnorderedArray<T, Allocator>::ReallocateUnsafe(uint newCount)
+	inline T* UnorderedArray<T, Allocator>::ReallocateUnsafe(uintMem newCount)
 	{
 		if (reserved == 0)
 		{

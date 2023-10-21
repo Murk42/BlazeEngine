@@ -51,6 +51,6 @@ namespace Blaze
 		}
 
 		size.x = cursor + charactersData.Last().size.x;
-		size.y = fontResolution.GetFontHeight();
+		size.y = (float)fontResolution.GetFontHeight();
 	}
 }

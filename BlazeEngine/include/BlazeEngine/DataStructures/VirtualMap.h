@@ -151,7 +151,7 @@ namespace Blaze
 		bool Erase(const Key& key);
 		bool Erase(const Iterator& iterator);
 
-		uint Count() const;
+		uintMem Count() const;
 
 		/*
 			Returns an iterator pointing to the first element in the map. If the map is empty returns a null map iterator.
@@ -191,16 +191,16 @@ namespace Blaze
 	private:
 		struct NodeHeader
 		{
-			uint hash;
+			uintMem hash;
 			NodeHeader* next;
 			NodeHeader* prev;
 			ValueBase* valueBase;
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-			uint iteratorCount;
+			uintMem iteratorCount;
 #endif			
 			Key key;
 
-			NodeHeader(NodeHeader* prev, NodeHeader* next, uint hash, Key&& key);
+			NodeHeader(NodeHeader* prev, NodeHeader* next, uintMem hash, Key&& key);
 			virtual ~NodeHeader();
 		};
 		template<typename Value> requires InsertabloToVirtualMap<Value, ValueBase>
@@ -208,7 +208,7 @@ namespace Blaze
 		{
 			Value value;
 
-			Node(NodeHeader* prev, NodeHeader* next, uint hash, Key&& key, Value&& value);
+			Node(NodeHeader* prev, NodeHeader* next, uintMem hash, Key&& key, Value&& value);
 			~Node() override;
 		};
 		struct Bucket
@@ -217,43 +217,43 @@ namespace Blaze
 			NodeHeader* tail;
 		};
 
-		uint bucketCount;
+		uintMem bucketCount;
 		Bucket* buckets;
-		uint count;
+		uintMem count;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;		
 
-		static uint Hash(const Key& key);
+		static uintMem Hash(const Key& key);
 
-		Bucket* GetBucketFromHash(uint hash) const;
+		Bucket* GetBucketFromHash(uintMem hash) const;
 
 		//Wont check if hashMod is smaller than bucketCount
-		Bucket* GetBucketFromHashModUnsafe(uint hashMod) const;
+		Bucket* GetBucketFromHashModUnsafe(uintMem hashMod) const;
 
-		Iterator FindWithHint(const Key& key, uint hash);
-		ConstIterator FindWithHint(const Key& key, uint hash) const;
+		Iterator FindWithHint(const Key& key, uintMem hash);
+		ConstIterator FindWithHint(const Key& key, uintMem hash) const;
 
 		//Wont check if bucket is nullptr
 		Iterator FindWithHintUnsafe(const Key& key, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Key& key, Bucket* bucket) const;
 
 		template<typename _Key, typename Value> requires InsertabloToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key>
-		InsertResult InsertWithHint(_Key&& key, Value&& value, uint hash);
+		InsertResult InsertWithHint(_Key&& key, Value&& value, uintMem hash);
 
 		//Wont check if bucket is nullptr
 		template<typename _Key, typename Value> requires InsertabloToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key>
-		InsertResult InsertWithHintUnsafe(_Key&& key, Value&& value, Bucket* bucket, uint hash);
+		InsertResult InsertWithHintUnsafe(_Key&& key, Value&& value, Bucket* bucket, uintMem hash);
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, NodeHeader* node);
 
 		Result CheckForRehash();
-		Result Rehash(uint newBucketCount);
+		Result Rehash(uintMem newBucketCount);
 
 		//Doesn't deallocate previous memory
 		void AllocateEmptyUnsafe();
 
 		//Wont check if bucket or bucketArray is nullptr or bucketArraySize is 0
-		static Result RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uint bucketArraySize);
+		static Result RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
 
 		//Wont check if bucket or node is nullptr
 		static void RemoveNodeFromSpotUnsafe(NodeHeader* node, Bucket* bucket);

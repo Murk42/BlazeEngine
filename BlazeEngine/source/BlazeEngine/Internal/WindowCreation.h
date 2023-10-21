@@ -1,7 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/Window.h"
-#include <future>
-#include <queue>
+#include "BlazeEngine/Core/WindowSDL.h"
 
 namespace Blaze
 {			
@@ -12,17 +10,17 @@ namespace Blaze
 		
 		Request request;
 		Result result;
-
-		std::atomic_flag activeFlag;		
-	public:
+						
+		std::atomic_uint8_t activeFlag;				
+	public:		
 		Result Request(const Request& request)
-		{
+		{			
 			std::lock_guard<std::mutex> waiting_LG { waitingMutex };			
 							
 			this->request = request;
 
-			activeFlag.test_and_set();							
-			activeFlag.wait(true);			
+			activeFlag = 1;
+			activeFlag.wait(1);										
 
 			return std::move(result);
 		}
@@ -30,13 +28,13 @@ namespace Blaze
 		template<typename F>
 		void CheckRequests(const F& func)
 		{
-			if (!activeFlag.test())
+			if (activeFlag.load() == 0)
 				return;
 			
 			result = func(request);
 
-			activeFlag.clear();
-			activeFlag.notify_one();
+			activeFlag = 0;
+			activeFlag.notify_one();						
 		}
 	};
 
@@ -68,19 +66,19 @@ namespace Blaze
 
 
 
-	struct WindowCreationData
+	struct WindowSDLCreationData
 	{		
 		String name;
 		Vec2i pos;
 		Vec2i size;
 		WindowHandleGraphicsaAPI graphicsAPI;		
 	};
-	struct WindowDestructionData
+	struct WindowSDLDestructionData
 	{
-		WindowHandle handle;
+		WindowSDL::WindowSDLHandle handle;
 	};
 	
-	extern ThreadRequestHandler<WindowCreationData, WindowHandle> windowCreationQueue;
-	extern ThreadRequestHandler<WindowDestructionData, void> windowDestructionQueue;
+	extern ThreadRequestHandler<WindowSDLCreationData, WindowSDL::WindowSDLHandle> windowSDLCreationQueue;
+	extern ThreadRequestHandler<WindowSDLDestructionData, void> windowSDLDestructionQueue;
 	
 }

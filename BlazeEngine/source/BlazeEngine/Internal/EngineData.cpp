@@ -293,10 +293,3 @@ namespace Blaze
 		engineData = nullptr;
 	}
 }
-
-bool FlushOpenGLResult()
-{
-	bool wasFull = ::engineData->OpenGLResult.operator bool();
-	::engineData->OpenGLResult = ::Blaze::Result();
-	return wasFull;
-}

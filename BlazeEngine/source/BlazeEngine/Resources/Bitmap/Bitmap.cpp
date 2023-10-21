@@ -10,6 +10,7 @@ namespace Blaze
 
 	}
 	BitmapRef::BitmapRef(const BitmapRef& other)
+		: pixels(other.pixels), format(other.format), type(other.type), size(other.size), stride(other.stride)
 	{
 
 	}
@@ -21,9 +22,9 @@ namespace Blaze
 	Bitmap::Bitmap(const Bitmap& other)		
 	{
 		uint componentCount = BitmapColorFormatComponentCount(other.format);
-		uint componentSize = BitmapColorComponentTypeSize(other.type);
-		uint pixelSize = componentCount * componentSize;
-		uint bitmapSize = other.stride * other.size.y;
+		uintMem componentSize = BitmapColorComponentTypeSize(other.type);
+		uintMem pixelSize = componentCount * componentSize;
+		uintMem bitmapSize = other.stride * other.size.y;
 
 		pixels = Memory::Allocate(bitmapSize);
 		memcpy(pixels, other.pixels, bitmapSize);
@@ -37,7 +38,7 @@ namespace Blaze
 		: BitmapRef(other)
 	{
 		other.pixels = nullptr;
-		other.size = Vec2i();
+		other.size = Vec2u();
 		other.stride = 0;
 	}
 	Bitmap::~Bitmap()
@@ -49,7 +50,7 @@ namespace Blaze
 	{
 		Memory::Free(pixels);
 		pixels = nullptr;
-		size = Vec2i();
+		size = Vec2u();
 		stride = 0;
 	}
 
@@ -68,7 +69,7 @@ namespace Blaze
 		//
 		//auto format = DevILToBlazePixelFormat(ilGetInteger(IL_IMAGE_FORMAT));
 		//auto type = DevILToBlazePixelType(ilGetInteger(IL_IMAGE_TYPE));		
-		//auto size = Vec2i(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
+		//auto size = Vec2u(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
 		Create(size, format, type, pixels, flipVertically);
 
@@ -156,7 +157,7 @@ namespace Blaze
 		return Result();
 	}	
 
-	Result Bitmap::Create(Vec2i size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, bool flipVertically)
+	Result Bitmap::Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, bool flipVertically)
 	{
 		//Clear();
 		//
@@ -199,9 +200,9 @@ namespace Blaze
 		Clear();
 
 		uint componentCount = BitmapColorFormatComponentCount(format);
-		uint componentSize = BitmapColorComponentTypeSize(type);
-		uint pixelSize = componentCount * componentSize;
-		uint bitmapSize = pixelSize * other.size.x * other.size.y;
+		uintMem componentSize = BitmapColorComponentTypeSize(type);
+		uintMem pixelSize = componentCount * componentSize;
+		uintMem bitmapSize = pixelSize * other.size.x * other.size.y;
 
 		pixels = Memory::Allocate(bitmapSize);
 		memcpy(pixels, other.pixels, bitmapSize);
@@ -222,7 +223,7 @@ namespace Blaze
 		size = other.size;
 
 		other.pixels = nullptr;
-		other.size = Vec2i();
+		other.size = Vec2u();
 
 		return *this;
 	}
@@ -232,7 +233,7 @@ namespace Blaze
 		: pixels(nullptr), size(0, 0), format(BitmapColorFormat::RGBA), type(BitmapColorComponentType::Uint32)
 	{
 	}
-	BitmapView::BitmapView(Vec2i size, BitmapColorFormat format, BitmapColorComponentType type, uint stride, const void* pixels)
+	BitmapView::BitmapView(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, uintMem stride, const void* pixels)
 		: pixels(pixels), size(size), format(format), type(type), stride(stride)
 	{
 

@@ -3,9 +3,7 @@
 #include "BlazeEngine/Input/InputEvents.h"
 
 namespace Blaze
-{	
-	class Window; 	
-
+{		
 	namespace Input
 	{
 		struct InputEventSystem

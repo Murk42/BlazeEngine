@@ -4,7 +4,7 @@
 
 namespace Blaze
 {
-	template<typename T, size_t Sx, size_t Sy>
+	template<typename T, uintMem Sx, uintMem Sy>
 	struct Matrix
 	{
 		std::array<std::array<T, Sx>, Sy> arr;
@@ -19,28 +19,28 @@ namespace Blaze
 		}		
 		constexpr Matrix(T* ptr)
 		{
-			for (size_t i = 0; i != Sx * Sy; ++i)
+			for (uintMem i = 0; i != Sx * Sy; ++i)
 				arr[i] = ptr[i];
 		}
 
 		constexpr Matrix<T, Sy, Sx> Transposed() const
 		{
 			Matrix<T, Sy, Sx> mat = *this;			
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sy; ++j)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sy; ++j)
 					mat.arr[j][i] = arr[i][j];
 
 			return mat;
 		}
 
-		template<size_t Sx2>
+		template<uintMem Sx2>
 		constexpr Matrix<T, Sx2, Sy> operator* (const Matrix<T, Sx2, Sx>& m) const
 		{
 			Matrix<T, Sx2, Sy> out = Matrix<T, Sx2, Sy>(0.0f);
 			
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t k = 0; k < Sx; ++k)				
-					for (size_t j = 0; j < Sx2; ++j)					
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem k = 0; k < Sx; ++k)				
+					for (uintMem j = 0; j < Sx2; ++j)					
 						out.arr[i][j] += arr[i][k] * m.arr[k][j];
 
 			return out;
@@ -49,8 +49,8 @@ namespace Blaze
 		{
 			Matrix mat = *this;
 
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
 					mat.arr[i][j] *= v;
 
 			return mat;
@@ -59,8 +59,8 @@ namespace Blaze
 		{
 			Vector<T, Sy> out;
 
-			for (size_t i = 0; i != Sy; ++i)
-				for (size_t j = 0; j != Sx; ++j)
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != Sx; ++j)
 					out.arr[i] += v.arr[j] * arr[i][j];
 
 			return out;
@@ -68,8 +68,8 @@ namespace Blaze
 
 		constexpr Matrix& operator*= (const T& v)
 		{
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
 					arr[i][j] *= v;
 
 			return *this;
@@ -78,13 +78,13 @@ namespace Blaze
 		{
 			Matrix res;
 			
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t k = 0; k < Sx; ++k)
-					for (size_t j = 0; j < Sx; ++j)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem k = 0; k < Sx; ++k)
+					for (uintMem j = 0; j < Sx; ++j)
 						res.arr[i][j] += arr[i][k] * m.arr[k][j];
 
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
 					arr[i][j] = res.arr[i][j];			
 
 			return *this;
@@ -99,21 +99,21 @@ namespace Blaze
 			return memcmp(arr, m.arr, sizeof(T) * Sx * Sy) != 0; 
 		}
 
-		constexpr std::array<T, Sy>& operator[](size_t index)
+		constexpr std::array<T, Sy>& operator[](uintMem index)
 		{
 			return arr[index];
 		}
-		constexpr const std::array<T, Sy>& operator[](size_t index) const
+		constexpr const std::array<T, Sy>& operator[](uintMem index) const
 		{
 			return arr[index];
 		}
 	};
 
-	template<typename T, size_t S>
+	template<typename T, uintMem S>
 	struct Matrix<T, S, S>
 	{
-		static constexpr size_t Sx = S;
-		static constexpr size_t Sy = S;
+		static constexpr uintMem Sx = S;
+		static constexpr uintMem Sy = S;
 		std::array<std::array<T, Sy>, Sx> arr;
 
 		constexpr Matrix()
@@ -126,14 +126,15 @@ namespace Blaze
 		}
 		constexpr Matrix(T* ptr)
 		{
-			for (size_t i = 0; i != Sx * Sy; ++i)
-				arr[i] = ptr[i];
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != Sx; ++j)
+					arr[i][j] = ptr[j + i * Sx];
 		}
 
 		constexpr void Transpose()
 		{
-			for (size_t i = 1; i < Sy; ++i)
-				for (size_t j = 0; j < i; ++j)
+			for (uintMem i = 1; i < Sy; ++i)
+				for (uintMem j = 0; j < i; ++j)
 					std::swap(this->arr[i][j], this->arr[j][i]);
 		}
 		constexpr Matrix<T, Sx, Sy> Transposed() const
@@ -143,14 +144,14 @@ namespace Blaze
 			return mat;
 		}
 
-		template<size_t S2>
+		template<uintMem S2>
 		constexpr Matrix<T, S2, Sy> operator* (const Matrix<T, S2, Sy>& m) const
 		{
 			Matrix<T, S2, Sy> out;
 		
-			for (size_t i = 0; i != Sy; ++i)
-				for (size_t j = 0; j != S2; ++j)
-					for (size_t k = 0; k != Sx; ++k)
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != S2; ++j)
+					for (uintMem k = 0; k != Sx; ++k)
 						out.arr[i][j] += arr[i][k] * m.arr[k][j];
 
 			return out;
@@ -159,18 +160,17 @@ namespace Blaze
 		{
 			Matrix mat = *this;
 			
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
-				mat.arr[i] *= v;
-
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
+					mat.arr[i][j] *= v;
 			return mat;
 		}
 		constexpr Vector<T, Sy> operator* (const Vector<T, Sy>& v) const
 		{
 			Vector<T, Sy> out;
 
-			for (size_t i = 0; i != Sy; ++i)
-				for (size_t j = 0; j != Sx; ++j)
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != Sx; ++j)
 					out[i] += v[j] * arr[i][j];
 
 			return out;
@@ -178,8 +178,8 @@ namespace Blaze
 
 		constexpr Matrix& operator*= (const T& v)
 		{
-			for (size_t i = 0; i != Sy; ++i)
-				for (size_t j = 0; j != Sx; ++j)
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != Sx; ++j)
 					arr[i][j] *= v;
 
 			return *this;
@@ -188,13 +188,13 @@ namespace Blaze
 		{
 			Matrix<T, S, S> res;			
 			
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
-					for (size_t k = 0; k < Sx; ++k)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
+					for (uintMem k = 0; k < Sx; ++k)
 						res.arr[i][j] += arr[i][k] * m.arr[k][j];
 
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
 					arr[i][j] = res.arr[i][j];
 
 			return *this;
@@ -209,11 +209,11 @@ namespace Blaze
 			return memcmp(&arr, &m.arr, sizeof(T) * Sx * Sy) != 0; 
 		}		
 
-		constexpr std::array<T, Sy>& operator[](size_t index)
+		constexpr std::array<T, Sy>& operator[](uintMem index)
 		{
 			return arr[index];
 		}
-		constexpr const std::array<T, Sy>& operator[](size_t index) const
+		constexpr const std::array<T, Sy>& operator[](uintMem index) const
 		{
 			return arr[index];
 		}
@@ -232,28 +232,29 @@ namespace Blaze
 	template<typename T>
 	struct Matrix<T, 4, 4>
 	{
-		static constexpr size_t Sx = 4;
-		static constexpr size_t Sy = 4;
-		std::array<std::array<T, Sy>, Sx> arr;
+		static constexpr uintMem Sx = 4;
+		static constexpr uintMem Sy = 4;
+		T arr[Sy][Sx];
 
 		constexpr Matrix()
-			: arr({ })
+			: arr()
 		{
 		}
 		constexpr Matrix(const std::array<T, Sx* Sy>& values)
 		{
-			memcpy(&arr, &values, sizeof(T) * Sx * Sy);
+			memcpy(arr, &values, sizeof(T) * Sx * Sy);
 		}
 		constexpr Matrix(T* ptr)
 		{
-			for (size_t i = 0; i != Sx * Sy; ++i)
-				arr[i] = ptr[i];
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != Sx; ++j)
+					arr[i][j] = ptr[j + i * Sx];
 		}
 
 		constexpr void Transpose()
 		{
-			for (size_t i = 1; i < Sy; ++i)
-				for (size_t j = 0; j < i; ++j)
+			for (uintMem i = 1; i < Sy; ++i)
+				for (uintMem j = 0; j < i; ++j)
 					std::swap(this->arr[i][j], this->arr[j][i]);
 		}
 		constexpr Matrix<T, Sx, Sy> Transposed() const
@@ -368,14 +369,14 @@ namespace Blaze
 				});			
 		}
 
-		template<size_t S2>
+		template<uintMem S2>
 		constexpr Matrix<T, S2, Sy> operator* (const Matrix<T, S2, Sy>& m) const
 		{
 			Matrix<T, S2, Sy> out;
 
-			for (size_t i = 0; i != Sy; ++i)
-				for (size_t j = 0; j != S2; ++j)
-					for (size_t k = 0; k != Sx; ++k)
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != S2; ++j)
+					for (uintMem k = 0; k != Sx; ++k)
 						out.arr[i][j] += arr[i][k] * m.arr[k][j];
 
 			return out;
@@ -384,9 +385,9 @@ namespace Blaze
 		{
 			Matrix mat = *this;
 
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
-					mat.arr[i] *= v;
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
+					mat.arr[i][j] *= v;
 
 			return mat;
 		}
@@ -394,8 +395,8 @@ namespace Blaze
 		{
 			Vector<T, Sy> out;
 
-			for (size_t i = 0; i != Sy; ++i)
-				for (size_t j = 0; j != Sx; ++j)
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != Sx; ++j)
 					out[i] += v[j] * arr[i][j];
 
 			return out;
@@ -403,8 +404,8 @@ namespace Blaze
 
 		constexpr Matrix& operator*= (const T& v)
 		{
-			for (size_t i = 0; i != Sy; ++i)
-				for (size_t j = 0; j != Sx; ++j)
+			for (uintMem i = 0; i != Sy; ++i)
+				for (uintMem j = 0; j != Sx; ++j)
 					arr[i][j] *= v;
 
 			return *this;
@@ -413,13 +414,13 @@ namespace Blaze
 		{
 			Matrix<T, Sx, Sy> res;
 
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
-					for (size_t k = 0; k < Sx; ++k)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
+					for (uintMem k = 0; k < Sx; ++k)
 						res.arr[i][j] += arr[i][k] * m.arr[k][j];
 
-			for (size_t i = 0; i < Sy; ++i)
-				for (size_t j = 0; j < Sx; ++j)
+			for (uintMem i = 0; i < Sy; ++i)
+				for (uintMem j = 0; j < Sx; ++j)
 					arr[i][j] = res.arr[i][j];
 
 			return *this;
@@ -432,16 +433,7 @@ namespace Blaze
 		constexpr bool operator!= (const Matrix<T, Sx, Sy>& m) const
 		{
 			return memcmp(&arr, &m.arr, sizeof(T) * Sx * Sy) != 0;
-		}
-
-		constexpr std::array<T, Sy>& operator[](size_t index)
-		{
-			return arr[index];
-		}
-		constexpr const std::array<T, Sy>& operator[](size_t index) const
-		{
-			return arr[index];
-		}
+		}		
 
 		static constexpr Matrix<T, Sx, Sy> Identity()
 		{
@@ -461,11 +453,17 @@ namespace Blaze
 	template<typename T>
 	using Mat4 = Matrix<T, 4, 4>;
 
-	using Mat2f = Mat2<float>;
-	using Mat2d = Mat2<double>;
-	using Mat3f = Mat3<float>;
-	using Mat3d = Mat3<double>;
-	using Mat4f = Mat4<float>;
-	using Mat4d = Mat4<double>;
-	
+	using Mat2f = Matrix<float, 2, 2>;
+	using Mat2d = Matrix<double, 2, 2>;
+	using Mat3f = Matrix<float, 3, 3>;
+	using Mat3d = Matrix<double, 3, 3>;
+	using Mat4f = Matrix<float, 4, 4>;
+	using Mat4d = Matrix<double, 4, 4>;
+
+	template struct BLAZE_API Matrix<float, 2, 2>;
+	template struct BLAZE_API Matrix<double, 2, 2>;
+	template struct BLAZE_API Matrix<float, 3, 3>;
+	template struct BLAZE_API Matrix<double, 3, 3>;
+	template struct BLAZE_API Matrix<float, 4, 4>;
+	template struct BLAZE_API Matrix<double, 4, 4>;
 }
