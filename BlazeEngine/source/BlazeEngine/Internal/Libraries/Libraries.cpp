@@ -3,9 +3,6 @@
 #include "BlazeEngine/Internal/Libraries/GLEW.h"
 #include "BlazeEngine/Internal/Libraries/FreeType.h"
 
-#include "BlazeEngine/Utilities/Time.h"
-
-
 namespace Blaze
 {	
 	TimingResult InitializeLibraries()
@@ -14,13 +11,13 @@ namespace Blaze
 		
 		timing.AddNode(InitializeSDL());
 		//timing.AddNode(InitializeGLEW());
-		//timing.AddNode(InitializeFreeType());
+		timing.AddNode(InitializeFreeType());
 		
 		return timing.GetTimingResult();
 	}
 	void TerminateLibraries()
 	{
-		//TerminateFreeType();
+		TerminateFreeType();
 		//TerminateGLEW();
 		TerminateSDL();
 	}

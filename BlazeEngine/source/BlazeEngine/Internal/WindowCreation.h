@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/WindowSDL.h"
+#include "BlazeEngine/Window/WindowSDL.h"
 
 namespace Blaze
 {			
@@ -70,7 +70,7 @@ namespace Blaze
 	{		
 		String name;
 		Vec2i pos;
-		Vec2i size;
+		Vec2u size;
 		WindowHandleGraphicsaAPI graphicsAPI;		
 	};
 	struct WindowSDLDestructionData

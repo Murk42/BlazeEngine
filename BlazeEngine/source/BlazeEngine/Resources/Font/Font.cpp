@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "BlazeEngine/Resources/Font/Font.h"
-#include "BlazeEngine/Console/Console.h"
 
 #include "freetype/freetype.h"
 
@@ -14,12 +13,171 @@ namespace Blaze
 {
 	FT_Library GetFreeTypeLibrary();			
 
+	CharacterSetIterator::CharacterSetIterator()
+		: characterSet(nullptr), spanIndex(0), characterIndex(0)
+	{
+	}
+	CharacterSetIterator::CharacterSetIterator(const CharacterSetIterator& other)
+		: characterSet(other.characterSet), spanIndex(other.spanIndex), characterIndex(other.characterIndex)
+	{
+	}
+	CharacterSetIterator::~CharacterSetIterator()
+	{
+	}
+	bool CharacterSetIterator::IsNull() const
+	{
+		return characterSet == nullptr;
+	}
+	CharacterSetIterator& CharacterSetIterator::operator++()
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (characterSet == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+#endif
+		
+		++characterIndex;
+
+		auto span = characterSet->spans[spanIndex];
+
+		if (characterIndex == span.last.Value() - span.first.Value())
+		{
+			++spanIndex;
+			characterIndex = 0;
+
+			if (spanIndex == characterSet->spans.Count())
+			{
+				spanIndex = 0;
+				characterSet = nullptr;
+			}
+		}
+
+		return *this;
+	}
+	CharacterSetIterator CharacterSetIterator::operator++(int)
+	{
+		CharacterSetIterator copy;
+		++copy;
+		return copy;
+	}
+	CharacterSetIterator& CharacterSetIterator::operator--()
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (characterSet == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+#endif
+
+
+		if (characterIndex == 0)		
+			if (spanIndex == 0)
+			{
+				spanIndex = 0;
+				characterSet = nullptr;
+			}
+			else
+			{
+				--spanIndex;
+				auto span = characterSet->spans[spanIndex];
+				characterIndex = span.last.Value() - span.first.Value();
+			}					
+		else
+			--characterIndex;
+
+		return *this;
+	}
+	CharacterSetIterator CharacterSetIterator::operator--(int)
+	{
+		CharacterSetIterator copy = *this;
+		--copy;
+		return copy;
+	}
+	UnicodeChar CharacterSetIterator::operator*() const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (characterSet == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+#endif
+		return UnicodeChar(characterSet->spans[spanIndex].first.Value() + characterIndex);
+	}	
+	bool CharacterSetIterator::operator==(CharacterSetIterator& other) const
+	{
+		return characterSet == other.characterSet && spanIndex == other.spanIndex && characterIndex == other.characterIndex;
+	}
+	bool CharacterSetIterator::operator!=(CharacterSetIterator& other) const
+	{
+		return characterSet != other.characterSet || spanIndex != other.spanIndex || characterIndex != other.characterIndex;
+	}
+	CharacterSetIterator& CharacterSetIterator::operator=(const CharacterSetIterator& other)
+	{
+		characterSet = other.characterSet;
+		spanIndex = other.spanIndex;
+		characterIndex = other.characterIndex;
+
+		return *this;
+	}
+	CharacterSetIterator::CharacterSetIterator(const CharacterSet* characterSet, uintMem spanIndex, uintMem characterIndex)
+		: characterSet(characterSet), spanIndex(spanIndex), characterIndex(characterIndex)
+	{
+	}
+
+	CharacterSet::CharacterSet()
+		: count(0)
+	{
+
+	}
+	CharacterSet::CharacterSet(CharacterSet&& other) noexcept
+		: spans(std::move(other.spans)), count(other.count)
+	{
+		other.count = 0;
+	}
+	CharacterSet::CharacterSet(Array<CharacterSpan> spans)
+		: spans(std::move(spans)), count(0)
+	{
+		for (auto& span : spans)
+			count += span.last.Value() - span.first.Value();
+	}
+	CharacterSet CharacterSet::ASCIICharacterSet()
+	{
+		CharacterSet cs;
+		cs.spans.AddBack(CharacterSpan({ .first = 0, .last = 127 }));
+		cs.count = 128;
+		return cs;
+	}
+	uintMem CharacterSet::Count() const
+	{
+		return count;
+	}
+	CharacterSetIterator CharacterSet::FirstIterator() const
+	{
+		return CharacterSetIterator(this, 0, 0);
+	}
+	CharacterSetIterator CharacterSet::BehindIterator() const
+	{
+		return CharacterSetIterator(nullptr, 0, 0);
+	}
+	CharacterSet& CharacterSet::operator=(CharacterSet&& other) noexcept
+	{
+		spans = std::move(other.spans);
+		count = other.count;
+
+		other.count = 0;
+		return *this;
+	}
+
+	CharacterSetIterator begin(const CharacterSet& characterSet)
+	{
+		return characterSet.FirstIterator();
+	}
+	CharacterSetIterator end(const CharacterSet& characterSet)
+	{
+		return characterSet.BehindIterator();
+	}
+
 	namespace FontGlyphRenderers
 	{		
-		Bitmap MonochromeFontGlyphRenderer::Render(const Font& font, uint fontHeight, UnicodeChar character)
+		Bitmap MonochromeFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
-			FT_Set_Pixel_Sizes(face, 0, fontHeight);
+			FT_Set_Pixel_Sizes(face, 0, pixelFontHeight);
 			uint glyphIndex = FT_Get_Char_Index(face, character.Value());
 			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			auto glyph = face->glyph;
@@ -50,10 +208,10 @@ namespace Blaze
 			return bitmap;
 		}
 		
-		Bitmap AntialiasedFontGlyphRenderer::Render(const Font& font, uint fontHeight, UnicodeChar character)
+		Bitmap AntialiasedFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
-			FT_Set_Pixel_Sizes(face, 0, fontHeight);
+			FT_Set_Pixel_Sizes(face, 0, pixelFontHeight);
 			uint glyphIndex = FT_Get_Char_Index(face, character.Value());
 			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			auto glyph = face->glyph;
@@ -83,10 +241,10 @@ namespace Blaze
 			return bitmap;
 		}
 		
-		Bitmap HorizontalLCDFontGlyphRenderer::Render(const Font& font, uint fontHeight, UnicodeChar character)
+		Bitmap HorizontalLCDFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
-			FT_Set_Pixel_Sizes(face, 0, fontHeight);
+			FT_Set_Pixel_Sizes(face, 0, pixelFontHeight);
 			uint glyphIndex = FT_Get_Char_Index(face, character.Value());
 			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			auto glyph = face->glyph;
@@ -116,10 +274,10 @@ namespace Blaze
 			return bitmap;
 		}
 		
-		Bitmap VerticalLCDFontGlyphRenderer::Render(const Font& font, uint fontHeight, UnicodeChar character)
+		Bitmap VerticalLCDFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
-			FT_Set_Pixel_Sizes(face, 0, fontHeight);
+			FT_Set_Pixel_Sizes(face, 0, pixelFontHeight);
 			uint glyphIndex = FT_Get_Char_Index(face, character.Value());
 			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			auto glyph = face->glyph;
@@ -149,10 +307,10 @@ namespace Blaze
 			return bitmap;
 		}
 		
-		Bitmap SDFFontGlyphRenderer::Render(const Font& font, uint fontHeight, UnicodeChar character)
+		Bitmap SDFFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
-			FT_Set_Pixel_Sizes(face, 0, fontHeight);
+			FT_Set_Pixel_Sizes(face, 0, pixelFontHeight);
 			uint glyphIndex = FT_Get_Char_Index(face, character.Value());
 			FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 			auto glyph = face->glyph;
@@ -278,7 +436,7 @@ namespace Blaze
 			FT_Face face;
 			bool ownership;
 		};
-		Bitmap MSDFFontGlyphRenderer::Render(const Font& font, uint fontHeight, UnicodeChar character)
+		Bitmap MSDFFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FontHandleRec fontHandleRec;
 			fontHandleRec.face = (FT_Face)font.GetHandle();
@@ -302,7 +460,7 @@ namespace Blaze
 			for (uint y = 0; y < size.y; ++y)
 				for (uint x = 0; x < size.x; ++x)
 				{
-					*dstIt = Vec4<uint8>((*(Vec4f*)tempBitmap(x, y) + Vec4f((float)fontHeight / 8 / 2)) * (255.0f / fontHeight * 8));
+					*dstIt = Vec4<uint8>((*(Vec4f*)tempBitmap(x, y) + Vec4f((float)pixelFontHeight / 8 / 2)) * (255.0f / pixelFontHeight * 8));
 					++dstIt;
 				}
 
@@ -320,41 +478,109 @@ namespace Blaze
 		*/
 	}
 
-	FontGlyphBitmaps::FontGlyphBitmaps()
+	Vec2i FontMetrics::GetGlyphKerning(UnicodeChar left, UnicodeChar right) const
 	{
-	}
-	FontGlyphBitmaps::FontGlyphBitmaps(const Font& font, const FontResolution& fontResolution, FontGlyphRenderer& fontGlyphRenderer)
-	{		
-		glyphsData.Resize(fontResolution.GetNoneEmptyGlyphCount());
+		FT_Face face = (FT_Face)font->ptr;
 
-		uint index = 0;
-		for (auto& glyphData : fontResolution.GetGlyphsData())
-			if (glyphData.value.size.x != 0 && glyphData.value.size.y != 0)
-			{
-				glyphsData[index].character = glyphData.key;
-				glyphsData[index].bitmap = fontGlyphRenderer.Render(font, fontResolution.GetFontHeight(), glyphData.key);
-				++index;
-			}
-	}
-	FontGlyphBitmaps::FontGlyphBitmaps(FontGlyphBitmaps&& other) noexcept
-		: glyphsData(std::move(other.glyphsData))
-	{
+		if (pixelFontHeight != 0)
+			FT_Set_Pixel_Sizes(face, pixelFontHeight, pixelFontHeight);
 
+		uint l = FT_Get_Char_Index(face, left.Value());
+		uint r = FT_Get_Char_Index(face, right.Value());
+		FT_Vector vec;
+		
+		if (pixelFontHeight != 0)
+			FT_Get_Kerning(face, l, r, FT_KERNING_DEFAULT, &vec);		
+		else
+			FT_Get_Kerning(face, l, r, FT_KERNING_UNSCALED, &vec);
+
+		return Vec2i(vec.x, vec.y);		
 	}
-	FontGlyphBitmaps::~FontGlyphBitmaps()
+	bool FontMetrics::GetGlyphMetrics(UnicodeChar character, FontGlyphMetrics& data) const
 	{
-		Clear();
+		FT_Face face = (FT_Face)font->ptr;
+
+		if (face == nullptr)
+		{
+			Debug::Logger::LogWarning("Blaze Engine", "Trying to get a glyph metrics from a font object that wasn't loaded from anywhere");
+			return false;
+		}
+
+		auto it = glyphMetrics.Find(character);
+		if (!it.IsNull())
+		{
+			data = it->value;
+			return true;
+		}
+
+		if (pixelFontHeight != 0)
+			FT_Set_Pixel_Sizes(face, pixelFontHeight, pixelFontHeight);
+
+		uint glyphIndex = FT_Get_Char_Index(face, character.Value());
+
+		if (glyphIndex == 0)
+			return false;
+
+		if (pixelFontHeight != 0)
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP);
+		else
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_SCALE);
+
+		FT_GlyphSlot glyph = face->glyph;
+
+		data.size = Vec2u(glyph->metrics.width, glyph->metrics.height);
+		data.horizontalAdvance = glyph->metrics.horiAdvance;
+		data.verticalAdvance = glyph->metrics.vertAdvance;
+		data.offset = Vec2i(glyph->metrics.horiBearingX, glyph->metrics.horiBearingY - glyph->metrics.height);
+
+		glyphMetrics.Insert(character, data);
+
+		return true;
 	}
-	void FontGlyphBitmaps::CreateAtlas(const CreateAtlasCallback& createAtlas, const CopyBitmapCallback& copyBitmap)
+	inline uint FontMetrics::GetPixelFontHeight() const
 	{
-			constexpr int glyphBitmapExtraPadding = 1;
-						
-		std::vector<rect_type> glyphAtlasRects { glyphsData.Count() };
+		if (pixelFontHeight == 0)
+			return font->GetFontUnitScale();
+		return pixelFontHeight;		
+	}
+
+	Map<UnicodeChar, Bitmap> FontMetrics::GetGlyphBitmaps(const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer) const
+	{
+		FT_Face face = (FT_Face)font->ptr;
+		if (face == nullptr)
+		{
+			Debug::Logger::LogWarning("Blaze Engine", "Trying to get a glyph bitmaps from a font object that wasn't loaded from anywhere");
+			return { };
+		}
+
+		Map<UnicodeChar, Bitmap> bitmaps;
+
+		for (auto character : characterSet)
+			bitmaps.Insert(character, glyphRenderer.Render(*font, pixelFontHeight, character));
+
+		return bitmaps;
+	}
+	void FontMetrics::CreateAtlas(const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer, const CreateAtlasCallback& createAtlasCallback, const CopyBitmapCallback& copyBitmapCallback) const
+	{
+		FT_Face face = (FT_Face)font->ptr;
+		if (face == nullptr)
+		{
+			Debug::Logger::LogWarning("Blaze Engine", "Trying to create a atlas from a font object that wasn't loaded from anywhere");
+			return;
+		}
+
+		constexpr int glyphBitmapExtraPadding = 1;
+
+		std::vector<rect_type> glyphAtlasRects{ characterSet.Count() };
+
+		Array<Bitmap> bitmaps;
+		bitmaps.ReserveExactly(characterSet.Count());
 
 		auto glyphAtlasRectIt = glyphAtlasRects.begin();
-		for (auto& bitmap : glyphsData)
+		for (auto character : characterSet)
 		{
-			Vec2u size = bitmap.bitmap.GetSize() + Vec2u(glyphBitmapExtraPadding * 2);
+			Bitmap& bitmap = *bitmaps.AddBack(glyphRenderer.Render(*font, pixelFontHeight, character));			
+			Vec2u size = bitmap.GetSize() + Vec2u(glyphBitmapExtraPadding * 2);
 			glyphAtlasRectIt->w = (int)size.x;
 			glyphAtlasRectIt->h = (int)size.y;
 			++glyphAtlasRectIt;
@@ -362,129 +588,36 @@ namespace Blaze
 
 		const auto result_size = PackRects(glyphAtlasRects);
 
-		createAtlas(Vec2i(result_size.w, result_size.h));
+		createAtlasCallback(Vec2u(result_size.w, result_size.h));
 
-		for (uint i = 0; i < glyphsData.Count(); ++i)
+		uintMem i = 0;
+		for (auto character : characterSet)
 		{
-			Vec2i offset = Vec2i(glyphAtlasRects[i].x, glyphAtlasRects[i].y) + Vec2i(glyphBitmapExtraPadding);
+			Bitmap& bitmap = bitmaps[i];
+			Vec2u offset = Vec2u(glyphAtlasRects[i].x, glyphAtlasRects[i].y) + Vec2u(glyphBitmapExtraPadding);
 
-			copyBitmap(glyphsData[i].character, offset, glyphsData[i].bitmap);
-		}		
+			copyBitmapCallback(character, offset, bitmap);
+
+			++i;
+		}
 	}
-	void FontGlyphBitmaps::Clear()
+	FontMetrics::FontMetrics(Font* font, uint pixelFontHeight)
+		: font(font), pixelFontHeight(pixelFontHeight)
 	{
-		glyphsData.Clear();
-	}
-	FontGlyphBitmaps& FontGlyphBitmaps::operator=(FontGlyphBitmaps&& other) noexcept
-	{
-		glyphsData = std::move(other.glyphsData);
-
-		return *this;
-	}
-
-	FontResolution::FontResolution()
-		: fontHeight(0), baselineDistance(0), nonEmptyCount(0)
-	{
-	}
-	FontResolution::FontResolution(const Font& font, uint fontHeight, const CharacterSet& characterSet)
-		: fontHeight(fontHeight), baselineDistance(0), nonEmptyCount(0)
-	{
-		FT_Face face = (FT_Face)font.GetHandle();
-
-		FT_Set_Pixel_Sizes(face, 0, fontHeight);
-				
-		baselineDistance = baselineDistance * fontHeight;		
-		nonEmptyCount = 0;
-
-		for (auto& span : characterSet.spans)
-			for (UnicodeChar character = span.first; character != span.last; ++character)
-			{
-				uint glyphIndex = FT_Get_Char_Index(face, character.Value());
-
-				if (glyphIndex == 0)
-					continue;
-
-				FontResolutionGlyphData data;
-
-				FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
-				FT_GlyphSlot glyph = face->glyph;
-
-				data.size = Vec2f((float)glyph->metrics.width, (float)glyph->metrics.height) / 64.0f;
-				data.horizontalAdvance = float(glyph->metrics.horiAdvance) / 64.0f;
-				data.verticalAdvance = float(glyph->metrics.vertAdvance) / 64.0f;
-				data.offset = Vec2f((float)glyph->metrics.horiBearingX, (float)(glyph->metrics.horiBearingY - glyph->metrics.height)) / 64.0f;
-
-				if (data.size.x != 0 && data.size.y != 0)
-					++nonEmptyCount;
-
-				glyphsData.Insert(character, data);
-			}
-	}
-	FontResolution::FontResolution(FontResolution&& other) noexcept
-		: glyphsData(std::move(other.glyphsData))
-	{
-		fontHeight = other.fontHeight;
-		baselineDistance = other.baselineDistance;
-		nonEmptyCount = other.nonEmptyCount;
-
-		other.fontHeight = 0;
-		other.baselineDistance = 0;
-		other.nonEmptyCount = 0;
-	}
-	FontResolution::~FontResolution()
-	{
-		Clear();
-	}
-	bool FontResolution::GetGlyphData(UnicodeChar character, FontResolutionGlyphData& metrics) const
-	{
-		auto it = glyphsData.Find(character);
-
-		if (it.IsNull())
-			return false;
-
-		metrics = it->value;
-		return true;
-	}		
-	void FontResolution::Clear()
-	{
-		fontHeight = 0;
-		baselineDistance = 0;
-		nonEmptyCount = 0;
-		glyphsData.Clear();
-	}
-
-	CharacterSet::CharacterSet()
-	{
-
-	}
-	CharacterSet::CharacterSet(CharacterSet&& other) noexcept
-		: spans(std::move(other.spans))
-	{
-
-	}
-	CharacterSet::CharacterSet(Array<CharacterSpan> spans)
-		: spans(std::move(spans))
-	{
-
-	}
-	CharacterSet CharacterSet::ASCIICharacterSet()
-	{
-		CharacterSet cs;
-		cs.spans.AddBack(CharacterSpan({ .first = 0, .last = 128 }));
-		return cs;
-	}
-	CharacterSet& CharacterSet::operator=(CharacterSet&& other) noexcept
-	{
-		spans = std::move(other.spans);
-		return *this;
 	}
 
 	Font::Font()
-		: memory(nullptr), ptr(nullptr), pixelsPerUnit(1), baselineDistance(0)
+		: memory(nullptr), ptr(nullptr)
 	{
 	}
+	Font::Font(Font&& other) noexcept
+		: ptr(other.ptr), memory(other.memory), metrics(std::move(other.metrics))
+	{
+		other.ptr = nullptr;
+		other.memory = nullptr;				
+	}
 	Font::Font(Path path)
-		: ptr(nullptr), pixelsPerUnit(1), baselineDistance(0)
+		: ptr(nullptr), memory(nullptr)
 	{
 		Load(std::move(path));
 	}
@@ -538,17 +671,26 @@ namespace Blaze
 		}
 
 		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-		bool kern = FT_HAS_KERNING(face);
-
-		pixelsPerUnit = face->units_per_EM;
-		baselineDistance = (float)face->height / pixelsPerUnit;
+		bool kern = FT_HAS_KERNING(face);		
 
 		return Result();
+	}	
+	FontMetrics& Font::GetUnscalledMetrics() const
+	{ 
+		return metrics.Insert(0, (Font*)this, 0).iterator->value;
+	}
+	FontMetrics& Font::GetMetrics(uint pixelFontHeight) const
+	{
+		return metrics.Insert(pixelFontHeight, (Font*)this, pixelFontHeight).iterator->value;
+	}
+	uint Font::GetFontUnitScale() const
+	{
+		if (ptr == nullptr)
+			return 0;
+		return ((FT_Face)ptr)->units_per_EM;
 	}
 	void Font::Clear()
-	{		
-		resolutions.Clear();
-
+	{						
 		if (ptr != nullptr)
 		{
 			FT_Done_Face((FT_Face)ptr);
@@ -559,16 +701,15 @@ namespace Blaze
 		{
 			Memory::Free(memory);
 		}
-	}
-	Vec2f Font::GetKerning(const FontResolution& fontResolution, UnicodeChar left, UnicodeChar right) const
-	{	
-		FT_Face face = (FT_Face)ptr;
-		uint l = FT_Get_Char_Index(face, left.Value());
-		uint r = FT_Get_Char_Index(face, right.Value());
-		FT_Vector vec;
-		FT_Get_Kerning(face, l, r, FT_KERNING_UNSCALED, &vec);
-		vec.x *= fontResolution.GetFontHeight() / pixelsPerUnit;
-		vec.y *= fontResolution.GetFontHeight() / pixelsPerUnit;
-		return Vec2f((float)vec.x, (float)vec.y);
-	}
+	}	
+	Font& Font::operator=(Font&& other) noexcept
+	{
+		ptr = other.ptr;
+		memory = other.memory;				
+		metrics = std::move(other.metrics);
+
+		other.ptr = nullptr;
+		other.memory = nullptr;		
+		return *this;
+	}			
 }

@@ -175,13 +175,15 @@ namespace Blaze::ECS
 
 		return entity;
 	}
-	void Scene::AllocateComponents()
+	ECS::Component** Scene::AllocateComponents()
 	{		
 		auto typesData = currentEntityCreationData->typesData;
 		auto components = GetEntityComponents(currentEntityCreationData->currentEntity);
 
 		for (uintMem i = 0; i < typesData.Count(); ++i)
 			components[i] = containers[typesData[i]->Index()].Allocate();		
+
+		return components;
 	}
 	Component* Scene::GetCurrentComponent()
 	{

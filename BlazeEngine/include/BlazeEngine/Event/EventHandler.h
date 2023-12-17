@@ -10,16 +10,16 @@ namespace Blaze
 	{
 	public:
 		EventHandler();
-		EventHandler(bool supress, bool listening);
+		EventHandler(bool suppress, bool listening);
 		EventHandler(EventHandler&&) noexcept;
 		~EventHandler();
 
-		void StartSupressingEvents();
-		void StopSupressingEvents();
+		void StartsuppressingEvents();
+		void StopsuppressingEvents();
 		void StartListeningForEvents();
 		void StopListeningForEvents();
 
-		inline bool IsSupressing() const { return supress; };
+		inline bool Issuppressing() const { return suppress; };
 		inline bool IsListening() const { return listening; }
 		inline EventDispatcher<T>* GetDispatcher() const { return dispatcher; }
 
@@ -35,26 +35,26 @@ namespace Blaze
 		template <typename T>
 		friend class EventDispatcher;
 	private:
-		bool supress;
+		bool suppress;
 		bool listening;
 		EventDispatcher<T>* dispatcher;
 	};	
 
 	template<typename T>
 	inline EventHandler<T>::EventHandler()
-		: supress(false), listening(true), dispatcher(nullptr)
+		: suppress(false), listening(true), dispatcher(nullptr)
 	{
 	}
 	template<typename T>
-	inline EventHandler<T>::EventHandler(bool supress, bool listening)
-		: supress(supress), listening(listening), dispatcher(nullptr)
+	inline EventHandler<T>::EventHandler(bool suppress, bool listening)
+		: suppress(suppress), listening(listening), dispatcher(nullptr)
 	{
 
 	}
 	template<typename T>
 	inline EventHandler<T>::EventHandler(EventHandler&& other) noexcept 		
 	{
-		supress = other.supress;
+		suppress = other.suppress;
 		listening = other.listening;
 		dispatcher = other.dispatcher;
 
@@ -64,7 +64,7 @@ namespace Blaze
 			dispatcher->AddHandler(*this);
 		}
 
-		other.supress = false;
+		other.suppress = false;
 		other.listening = true;
 		other.dispatcher = nullptr;
 	}
@@ -75,14 +75,14 @@ namespace Blaze
 			dispatcher->RemoveHandler(*this);
 	}
 	template<typename T>
-	inline void EventHandler<T>::StartSupressingEvents()
+	inline void EventHandler<T>::StartsuppressingEvents()
 	{
-		supress = true;
+		suppress = true;
 	}
 	template<typename T>
-	inline void EventHandler<T>::StopSupressingEvents()
+	inline void EventHandler<T>::StopsuppressingEvents()
 	{
-		supress = false;
+		suppress = false;
 	}
 	template<typename T>
 	inline void EventHandler<T>::StartListeningForEvents()
@@ -115,7 +115,7 @@ namespace Blaze
 		if (dispatcher != nullptr)
 			dispatcher->RemoveHandler(other);
 
-		supress = other.supress;
+		suppress = other.suppress;
 		listening = other.listening;
 		dispatcher = other.dispatcher;
 
@@ -125,7 +125,7 @@ namespace Blaze
 			dispatcher->AddHandler(*this);
 		}
 
-		other.supress = false;
+		other.suppress = false;
 		other.listening = true;
 		other.dispatcher = nullptr;
 

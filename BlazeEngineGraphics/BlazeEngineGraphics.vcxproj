@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\BlazeEngineGraphics\Dynamic\Core\GraphicsContext.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLCommon.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLContext.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLConversions.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLFence.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLFramebuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLGraphicsBuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLProgram.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLRenderbuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLShader.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLVertexArray.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture1D.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2D.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2DArray.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture3D.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureBuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureCubemap.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\Framebuffer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\GraphicsContext_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\RenderWindowFramebuffer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\RenderWindow_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\Semaphore_OpenGL.cpp" />
+    <ClCompile Include="source\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\Vulkan\Line2DRenderer_Vulkan.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\Framebuffer_Vulkan.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\GraphicsContext_Vulkan.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\RenderWindowFramebuffer_Vulkan.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\RenderWindow_Vulkan.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\Semaphore_Vulkan.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\Swapchain_Vulkan.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\VulkanInstance.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\BlazeEngineGraphics\BlazeEngineGraphics.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\BlazeEngineGraphicsDefines.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Dynamic\Core\GraphicsContext.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLCommon.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLContext.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLConversions.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLEnums.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLFence.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLFramebuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLGraphicsBuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLProgram.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLRenderbuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLShader.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLVertexArray.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture1D.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2D.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2DArray.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture3D.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureBuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureCubemap.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureEnums.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\Framebuffer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\GraphicsContext_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\RenderWindowFramebuffer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\RenderWindow_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\Semaphore_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\Vulkan\Line2DRenderer_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\Framebuffer_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\GraphicsContext_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\RenderWindowFramebuffer_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\RenderWindow_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\Semaphore_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\Swapchain_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\VulkanInstance.h" />
+    <ClInclude Include="source\pch.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{db841779-0bf1-42bb-95cb-c0de158a1988}</ProjectGuid>
+    <RootNamespace>BlazeEngineGraphics</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <TargetName>BlazeEngineGraphics-static-x64-debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <TargetName>BlazeEngineGraphics-static-x64-release</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <TargetName>BlazeEngineGraphics-static-x64-debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <TargetName>BlazeEngineGraphics-static-x64-release</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;$(SolutionDir)external\include\;D:\Programming\Libraries\glew\include\;$(VULKAN_SDK)\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;$(SolutionDir)external\include\;D:\Programming\Libraries\glew\include\;$(VULKAN_SDK)\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;$(SolutionDir)external\include\;D:\Programming\Libraries\glew\include\;$(VULKAN_SDK)\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;$(SolutionDir)external\include\;D:\Programming\Libraries\glew\include\;$(VULKAN_SDK)\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

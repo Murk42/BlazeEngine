@@ -1,16 +1,13 @@
 #include "pch.h"
 #include "BlazeEngine/Input/Key.h"
-
+#include "BlazeEngine/Internal/GlobalData.h"
 #include "SDL2/SDL.h"
-
-#include <map>
-
 
 namespace Blaze
 {	
 	SDL_Scancode GetScancodeFromKey(Key key)
 	{
-		auto it = engineData->scancodemap.Find(key);
+		auto it = globalData->scancodemap.Find(key);
 
 		if (it.IsNull())
 			return SDL_SCANCODE_UNKNOWN;
@@ -19,7 +16,7 @@ namespace Blaze
 	}
 	Key GetKeyFromScancode(SDL_Scancode code)
 	{
-		auto it = engineData->keymap.Find(code);
+		auto it = globalData->keymap.Find(code);
 
 		if (it.IsNull())
 			return Key::Unknown;

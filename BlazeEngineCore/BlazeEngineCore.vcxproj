@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{d3af4e35-1d93-4a5f-b070-a0a6dd18a31b}</ProjectGuid>
+    <RootNamespace>BlazeEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>BlazeEngineCore</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <TargetName>BlazeEngineCore-static-x64-debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <TargetName>BlazeEngineCore-static-x64-release</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\Buffer.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\Color.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\String.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\StringHash.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\StringUTF8.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\StringView.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\StringViewUTF8.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\DataStructures\UnicodeChar.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Debug\Breakpoint.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Debug\Callstack.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Debug\Log.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Debug\Logger.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Debug\LoggerListener.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Debug\Result.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\File\File.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\File\FileSystem.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\File\Path.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\File\Stream\BufferStream.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\File\Stream\FileStream.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\File\Stream\SubStream.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Internal\GlobalData.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Internal\Windows\WindowsPlatform.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Math\Random.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Memory\Allocator.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Memory\MallocAllocator.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Memory\MemoryListener.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Memory\MemoryManager.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Memory\VirtualAllocator.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Utilities\Stopwatch.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Utilities\StringParsing.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Utilities\Thread.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Utilities\Time.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Utilities\Timing.cpp" />
+    <ClCompile Include="source\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\BlazeEngineCore\BlazeEngineCore.h" />
+    <ClInclude Include="include\BlazeEngineCore\BlazeEngineCoreDefines.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Array.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayView.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Buffer.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Color.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Constexpr.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\DualList.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\DualListImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Handle.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\HandleImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Hash.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\HybridArray.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\List.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\ListImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Map.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\MapImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Rect.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Set.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\SetImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\String.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\StringHash.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\StringUTF8.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\StringView.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewUTF8.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Template.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\TemplateGroup.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Tuple.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\UnicodeChar.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\UnorderedArray.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\UnorderedArrayImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\VirtualList.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\VirtualListImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\VirtualMap.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\VirtualMapImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\Debug\Breakpoint.h" />
+    <ClInclude Include="include\BlazeEngineCore\Debug\Callstack.h" />
+    <ClInclude Include="include\BlazeEngineCore\Debug\Log.h" />
+    <ClInclude Include="include\BlazeEngineCore\Debug\Logger.h" />
+    <ClInclude Include="include\BlazeEngineCore\Debug\LoggerListener.h" />
+    <ClInclude Include="include\BlazeEngineCore\Debug\Result.h" />
+    <ClInclude Include="include\BlazeEngineCore\Debug\ResultValue.h" />
+    <ClInclude Include="include\BlazeEngineCore\File\File.h" />
+    <ClInclude Include="include\BlazeEngineCore\File\FileSystem.h" />
+    <ClInclude Include="include\BlazeEngineCore\File\Path.h" />
+    <ClInclude Include="include\BlazeEngineCore\File\Stream\BufferStream.h" />
+    <ClInclude Include="include\BlazeEngineCore\File\Stream\FileStream.h" />
+    <ClInclude Include="include\BlazeEngineCore\File\Stream\Stream.h" />
+    <ClInclude Include="include\BlazeEngineCore\File\Stream\SubStream.h" />
+    <ClInclude Include="include\BlazeEngineCore\Math\Math.h" />
+    <ClInclude Include="include\BlazeEngineCore\Math\Matrix.h" />
+    <ClInclude Include="include\BlazeEngineCore\Math\Quaternion.h" />
+    <ClInclude Include="include\BlazeEngineCore\Math\Random.h" />
+    <ClInclude Include="include\BlazeEngineCore\Math\Shapes.h" />
+    <ClInclude Include="include\BlazeEngineCore\Math\Vector.h" />
+    <ClInclude Include="include\BlazeEngineCore\Memory\Allocator.h" />
+    <ClInclude Include="include\BlazeEngineCore\Memory\Creator.h" />
+    <ClInclude Include="include\BlazeEngineCore\Memory\MallocAllocator.h" />
+    <ClInclude Include="include\BlazeEngineCore\Memory\MemoryListener.h" />
+    <ClInclude Include="include\BlazeEngineCore\Memory\MemoryManager.h" />
+    <ClInclude Include="include\BlazeEngineCore\Memory\VirtualAllocator.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Graphics.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsCore.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsEnums.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsLibrary.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsLibraryType.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLFence.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLFramebuffer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLGraphicsBuffer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLProgram.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLRenderbuffer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLShader.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture1D.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture2D.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture2DArray.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture3D.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTextureBuffer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTextureCubemap.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTextureEnums.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Circle2DRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\FrameRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\ImageRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Line2DRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Line3DRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Point2DRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\TextRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Transform.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Utility\BatchStreamRenderer.h" />
+    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Utility\TextVertexGenerator.h" />
+    <ClInclude Include="include\BlazeEngineCore\Threading\Thread.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\Stopwatch.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\StringParsing.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\Time.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\Timing.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ECS\Component.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ECS\ComponentTypeRegistry.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ECS\Entity.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ECS\EntityReference.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ECS\EntityView.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ECS\Scene.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ECS\System.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\Resource.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceManager.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceStorage.h" />
+    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceTypeRegistry.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\Bases\UIPosOverrideComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\Bases\UISizeOverrideComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\FrameComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\ImageComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\LabelComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\MouseTriggerComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\UIElementComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\Components\UITransformComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\UIComponent.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\UIEntityView.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\UIScene.h" />
+    <ClInclude Include="include\BlazeEngine\Application\UI\UISystem.h" />
+    <ClInclude Include="include\BlazeEngine\BlazeEngine.h" />
+    <ClInclude Include="include\BlazeEngine\BlazeEnginePrecompiledHeaders.h" />
+    <ClInclude Include="include\BlazeEngine\Console\Console.h" />
+    <ClInclude Include="include\BlazeEngine\Core\EngineCore.h" />
+    <ClInclude Include="include\BlazeEngine\Core\Setup.h" />
+    <ClInclude Include="include\BlazeEngine\Core\Window.h" />
+    <ClInclude Include="include\BlazeEngine\Core\WindowBase.h" />
+    <ClInclude Include="include\BlazeEngine\Core\WindowSDL.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Array.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\ArrayImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\ArrayView.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Buffer.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Color.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Common.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Constexpr.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\DualList.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\DualListImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Handle.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\HandleImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Hash.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\HybridArray.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\List.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\ListImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Map.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\MapImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Rect.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Set.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\SetImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\String.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\StringHash.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\StringUTF8.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\StringView.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\StringViewUTF8.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Template.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\TemplateGroup.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\Tuple.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\UnicodeChar.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\UnorderedArray.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\UnorderedArrayImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\VirtualList.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\VirtualListImpl.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\VirtualMap.h" />
+    <ClInclude Include="include\BlazeEngine\DataStructures\VirtualMapImpl.h" />
+    <ClInclude Include="include\BlazeEngine\Debug\Breakpoint.h" />
+    <ClInclude Include="include\BlazeEngine\Debug\Callstack.h" />
+    <ClInclude Include="include\BlazeEngine\Debug\Log.h" />
+    <ClInclude Include="include\BlazeEngine\Debug\Logger.h" />
+    <ClInclude Include="include\BlazeEngine\Debug\LoggerListener.h" />
+    <ClInclude Include="include\BlazeEngine\Debug\Result.h" />
+    <ClInclude Include="include\BlazeEngine\Debug\ResultValue.h" />
+    <ClInclude Include="include\BlazeEngine\EngineCore.h" />
+    <ClInclude Include="include\BlazeEngine\Event\EventDispatcher.h" />
+    <ClInclude Include="include\BlazeEngine\Event\EventHandler.h" />
+    <ClInclude Include="include\BlazeEngine\Event\LambdaEventHandler.h" />
+    <ClInclude Include="include\BlazeEngine\Event\QueueEventDispatcher.h" />
+    <ClInclude Include="include\BlazeEngine\File\File.h" />
+    <ClInclude Include="include\BlazeEngine\File\FileSystem.h" />
+    <ClInclude Include="include\BlazeEngine\File\Path.h" />
+    <ClInclude Include="include\BlazeEngine\File\Stream\BufferStream.h" />
+    <ClInclude Include="include\BlazeEngine\File\Stream\FileStream.h" />
+    <ClInclude Include="include\BlazeEngine\File\Stream\Stream.h" />
+    <ClInclude Include="include\BlazeEngine\File\Stream\SubStream.h" />
+    <ClInclude Include="include\BlazeEngine\Input\Input.h" />
+    <ClInclude Include="include\BlazeEngine\Input\InputEvents.h" />
+    <ClInclude Include="include\BlazeEngine\Input\Key.h" />
+    <ClInclude Include="include\BlazeEngine\Math\Math.h" />
+    <ClInclude Include="include\BlazeEngine\Math\Matrix.h" />
+    <ClInclude Include="include\BlazeEngine\Math\Quaternion.h" />
+    <ClInclude Include="include\BlazeEngine\Math\Random.h" />
+    <ClInclude Include="include\BlazeEngine\Math\Shapes.h" />
+    <ClInclude Include="include\BlazeEngine\Math\Vector.h" />
+    <ClInclude Include="include\BlazeEngine\Memory\Allocator.h" />
+    <ClInclude Include="include\BlazeEngine\Memory\MallocAllocator.h" />
+    <ClInclude Include="include\BlazeEngine\Memory\MemoryListener.h" />
+    <ClInclude Include="include\BlazeEngine\Memory\MemoryManager.h" />
+    <ClInclude Include="include\BlazeEngine\Memory\VirtualAllocator.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Graphics.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsCore.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsEnums.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsLibrary.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsLibraryType.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLFence.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLFramebuffer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLGraphicsBuffer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLProgram.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLRenderbuffer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLShader.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture1D.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture2D.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture2DArray.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture3D.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTextureBuffer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTextureCubemap.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTextureEnums.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Circle2DRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\FrameRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\ImageRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Line2DRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Line3DRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Point2DRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\TextRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Transform.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Utility\BatchStreamRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\old_Graphics\Utility\TextVertexGenerator.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h" />
+    <ClInclude Include="include\BlazeEngine\Setup.h" />
+    <ClInclude Include="include\BlazeEngine\Threading\Thread.h" />
+    <ClInclude Include="include\BlazeEngine\Utilities\Stopwatch.h" />
+    <ClInclude Include="include\BlazeEngine\Utilities\StringParsing.h" />
+    <ClInclude Include="include\BlazeEngine\Utilities\TextLayouter.h" />
+    <ClInclude Include="include\BlazeEngine\Utilities\Threading.h" />
+    <ClInclude Include="include\BlazeEngine\Utilities\Time.h" />
+    <ClInclude Include="include\BlazeEngine\Utilities\Timing.h" />
+    <ClInclude Include="source\BlazeEngineCore\Application\ECS\EntityCreationData.h" />
+    <ClInclude Include="source\BlazeEngineCore\Application\ECS\SystemCreationData.h" />
+    <ClInclude Include="source\BlazeEngineCore\Application\UI\Components\UIElmenetCreationData.h" />
+    <ClInclude Include="source\BlazeEngineCore\Input\ClientEventStack.h" />
+    <ClInclude Include="source\BlazeEngineCore\Internal\GlobalData.h" />
+    <ClInclude Include="source\BlazeEngineCore\Internal\Windows\WindowsPlatform.h" />
+    <ClInclude Include="source\BlazeEngineCore\Resources\Bitmap\SailClasses.h" />
+    <ClInclude Include="source\BlazeEngineCore\Resources\Font\rectpack2D.h" />
+    <ClInclude Include="source\pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\default\fragmentDiffuse.glsl" />
+    <None Include="assets\default\shaders\circle2d\circle2d.frag" />
+    <None Include="assets\default\shaders\circle2d\circle2d.geom" />
+    <None Include="assets\default\shaders\circle2d\circle2d.vert" />
+    <None Include="assets\default\shaders\frame\frame.frag" />
+    <None Include="assets\default\shaders\frame\frame.geom" />
+    <None Include="assets\default\shaders\frame\frame.vert" />
+    <None Include="assets\default\shaders\image\image.frag" />
+    <None Include="assets\default\shaders\image\image.geom" />
+    <None Include="assets\default\shaders\image\image.vert" />
+    <None Include="assets\default\shaders\line2d\line2d.frag" />
+    <None Include="assets\default\shaders\line2d\line2d.geom" />
+    <None Include="assets\default\shaders\line2d\line2d.vert" />
+    <None Include="assets\default\shaders\line3d\line3d.frag" />
+    <None Include="assets\default\shaders\line3d\line3d.geom" />
+    <None Include="assets\default\shaders\line3d\line3d.vert" />
+    <None Include="assets\default\shaders\point2d\point2d.frag" />
+    <None Include="assets\default\shaders\point2d\point2d.geom" />
+    <None Include="assets\default\shaders\point2d\point2d.vert" />
+    <None Include="assets\default\shaders\text\text.geom" />
+    <None Include="assets\default\shaders\text\text.vert" />
+    <None Include="assets\default\shaders\text\text_lcd.frag" />
+    <None Include="assets\default\shaders\text\text_normal.frag" />
+    <None Include="assets\default\shaders\text\text_sdf.frag" />
+    <None Include="assets\default\vertexDiffuse.glsl" />
+    <None Include="scripts\CopyDependencies.bat" />
+    <None Include="scripts\InstallBlazeEngine.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\default\cubemap\cubemap_column.png" />
+    <Image Include="assets\default\cubemap\cubemap_horizontal_cross.png" />
+    <Image Include="assets\default\cubemap\cubemap_row.png" />
+    <Image Include="assets\default\cubemap\cubemap_vertical_cross.png" />
+    <Image Include="assets\default\default.png" />
+    <Image Include="assets\default\logo.ico" />
+    <Image Include="assets\default\logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="assets\default\fonts\Consola.ttf" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

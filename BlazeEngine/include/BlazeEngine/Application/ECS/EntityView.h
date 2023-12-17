@@ -1,36 +1,37 @@
 #pragma once
 #include "BlazeEngine/Application/ECS/Entity.h"
-#include "BlazeEngine/DataStructures/TemplateGroup.h"
 
 namespace Blaze::ECS
 {
 	template<typename ... Cs> requires (IsComponent<Cs> && ...)
 	class EntityView
 	{		
+		Tuple<Cs*...> components;
 		Entity* entity;
 	public:
 		EntityView()
-			: entity(nullptr)
-		{
-		}		
-		EntityView(Entity* entity)
-			: entity(entity)
+			: entity(nullptr), components(((Cs*)nullptr, ...))
 		{
 		}
+		EntityView(Entity* entity, const Tuple<Cs*...>& components)
+			: entity(entity), components(components)
+		{
+		}			
 
 		Entity* GetEntity() const 
 		{ 
 			return entity; 
 		}
 
-		template<uint I> requires (I < sizeof...(Cs))
-		auto GetComponent()
+		template<typename C> requires (TemplateGroup<Cs...>::template HasType<C>)
+		C* GetComponent()
 		{
-			using R = decltype((typename TemplateGroup<Cs...>::template TypeAtIndex<I>*)entity->GetComponent(I));
-			if (entity == nullptr)
-				return (R)nullptr;
-
-			return (typename TemplateGroup<Cs...>::template TypeAtIndex<I>*)entity->GetComponent(I);
+			return components.GetValueByType<C*>();
+		}
+		template<uintMem I> requires (I < sizeof...(Cs))
+		auto* GetComponent()
+		{
+			return components.GetValueByIndex<I>();			
 		}
 	};
 }

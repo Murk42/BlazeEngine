@@ -3,7 +3,6 @@
 #include "BlazeEngine/Application/UI/Components/UIElementComponent.h"
 #include "BlazeEngine/Application/UI/Components/Bases/UIPosOverrideComponent.h"
 #include "BlazeEngine/Application/UI/Components/Bases/UISizeOverrideComponent.h"
-#include "BlazeEngine/Math/Math.h"
 
 namespace Blaze::UI::Components
 {	

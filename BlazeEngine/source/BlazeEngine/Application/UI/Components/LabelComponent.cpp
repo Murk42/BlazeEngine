@@ -2,7 +2,6 @@
 #include "BlazeEngine/Application/UI/Components/LabelComponent.h"
 #include "BlazeEngine/Application/UI/Components/UITransformComponent.h"
 #include "BlazeEngine/Resources/Font/Font.h"
-#include "BlazeEngine/Math/Math.h"
 
 #define TRANSFORM_DIRTY 1Ui8
 #define RENDER_DIRTY 2Ui8

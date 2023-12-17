@@ -8,7 +8,7 @@ namespace Blaze
 	{							
 		EventStack<2048> clientEventStack;
 
-		InputEventSystem inputEventSystem;
+		InputEventSystem inputEventSystem;		
 		
 		InputEventSystem& GetInputEventSystem()
 		{

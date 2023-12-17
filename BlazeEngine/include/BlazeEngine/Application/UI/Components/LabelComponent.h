@@ -1,10 +1,9 @@
 #pragma once
 #include "BlazeEngine/Application/UI/UIComponent.h"
 #include "BlazeEngine/Application/UI/UISystem.h"
-#include "BlazeEngine/DataStructures/Color.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Event/LambdaEventHandler.h"
-#include "BlazeEngine/Utilities/TextLayouter.h"
+#include "BlazeEngine/Resources/Font/TextLayouter.h"
 
 namespace Blaze::UI::Components
 {
@@ -31,15 +30,13 @@ namespace Blaze::UI::Components
 		Label(StringViewUTF8 text, ArrayView<ColorRGBAf> colors, LabelSizeControl sizeControl, FontResolution* fontResolution);
 		~Label();
 
-		void SetText(StringViewUTF8 text);				
-		void SetFontResolution(FontResolution* fontResolution);
+		void SetText(StringViewUTF8 text);					
 		void SetColors(ArrayView<ColorRGBAf> colors);
 		void SetColor(ColorRGBAf color);		
 		void SetSizeControl(LabelSizeControl control);
 		
-		void Setup(StringViewUTF8 text, ArrayView<ColorRGBAf> colors, LabelSizeControl sizeControl, FontResolution* fontResolution);
-
-		inline FontResolution* GetFontResolution() const { return fontResolution; }		
+		void Setup(StringViewUTF8 text, ArrayView<ColorRGBAf> colors, LabelSizeControl sizeControl);
+		
 		inline StringUTF8 GetText() const { return text; }		
 		inline LabelSizeControl GetSizeControl() const { return sizeControl; }		
 		inline const TextLayouterBase& GetTextLayouter() const { return textLayouter; }

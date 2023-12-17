@@ -1,11 +1,7 @@
 #include "pch.h"
 #include "BlazeEngine/Internal/Libraries/SDL.h"
-#include "BlazeEngine/Utilities/Time.h"
 
 #include "SDL2/SDL.h"
-//#include "BlazeEngine/Graphics/GraphicsLibraryType.h"
-
-#include "BlazeEngine/Console/Console.h"
 
 namespace Blaze
 {

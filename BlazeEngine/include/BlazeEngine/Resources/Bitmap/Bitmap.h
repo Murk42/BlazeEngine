@@ -1,6 +1,4 @@
 #pragma once
-#include "BlazeEngine/DataStructures/Color.h"
-#include "BlazeEngine/File/Stream/BufferStream.h"
 
 namespace Blaze
 {			
@@ -26,18 +24,9 @@ namespace Blaze
 		Float,
 		Double
 	};
-	BLAZE_API uintMem BitmapColorComponentTypeSize(BitmapColorComponentType type);
+	BLAZE_API uintMem BitmapColorComponentTypeSize(BitmapColorComponentType type);	
 
-	enum class BitmapSaveType
-	{
-		BMP = 0x0420,
-		CHEAD = 0x042F,
-		JPG = 0x0425,
-		PNM = 0x042B,
-		PSD = 0x0439,
-		SGI = 0x042C,
-		TGA = 0x042D,
-	};
+	class BitmapView;
 
 	class BLAZE_API BitmapRef
 	{
@@ -49,8 +38,13 @@ namespace Blaze
 		inline uintMem GetStride() const { return stride; }
 		inline void* GetPixels() const { return pixels; }
 		inline Vec2u GetSize() const { return size; }
+		inline uintMem GetPixelSize() const { return BitmapColorFormatComponentCount(format) * BitmapColorComponentTypeSize(type); }
+		inline uintMem GetByteWidth() const { return GetPixelSize() * size.x; }
+		inline uintMem GetPadding() const { return stride - GetByteWidth(); }
 		inline BitmapColorFormat GetPixelFormat() const { return format; }
 		inline BitmapColorComponentType GetPixelType() const { return type; }
+
+		BitmapRef GetSubBitmap(Vec2u size, Vec2u offset);
 		
 		BitmapRef& operator=(const BitmapRef& other);
 	protected:
@@ -67,16 +61,16 @@ namespace Blaze
 		Bitmap();
 		Bitmap(const Bitmap&);
 		Bitmap(Bitmap&&) noexcept;
+		Bitmap(const BitmapView& bitmapView, uintMem newStride);
 		~Bitmap();		
 
-		Result Load(Path path, bool flipVertically = false);		
-		Result Save(Path path);
-		Result Save(Path path, BitmapSaveType type);		
+		Result Load(Path path, bool flipVertically = false);				
+		Result Save(Path path);		
 
 		Result Serialize(WriteStream& stream) const;
 		Result Deserialize(ReadStream& stream);
-		
-		Result Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, bool flipVertically = false);			 
+				
+		Result Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, uintMem stride = 0, bool flipVertically = false);		
 
 		void Clear();		
 
@@ -96,8 +90,13 @@ namespace Blaze
 		inline uintMem GetStride() const { return stride; }
 		inline const void* GetPixels() const { return pixels; }
 		inline Vec2u GetSize() const { return size; }
+		inline uintMem GetPixelSize() const { return BitmapColorFormatComponentCount(format) * BitmapColorComponentTypeSize(type); }
+		inline uintMem GetByteWidth() const { return GetPixelSize() * size.x; }
+		inline uintMem GetPadding() const { return stride - GetByteWidth(); }
 		inline BitmapColorFormat GetPixelFormat() const { return format; }
-		inline BitmapColorComponentType GetPixelType() const { return type; }
+		inline BitmapColorComponentType GetPixelType() const { return type; }		
+
+		BitmapView GetSubBitmap(Vec2u size, Vec2u offset);
 
 		BitmapView& operator=(const Bitmap& other);
 		BitmapView& operator=(const BitmapRef& other);

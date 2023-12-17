@@ -4,10 +4,16 @@ namespace Blaze
 {	
 	namespace Console
 	{								
-		void BLAZE_API Write(char text);
-		void BLAZE_API Write(StringView text);
-		void BLAZE_API WriteLine(StringView text);		
+		BLAZE_API void Write(char text);
+		BLAZE_API void Write(StringView text);
+		BLAZE_API void WriteLine(StringView text);
 
-		String BLAZE_API Read();
+		BLAZE_API String Read();
+	}
+
+	namespace Debug::Logger
+	{
+		BLAZE_API void AddOutputToConsole();
+		BLAZE_API void RemoveOutputFromConsole();
 	}
 }

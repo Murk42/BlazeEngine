@@ -1,7 +1,6 @@
 #pragma once
 #include "ComponentTypeRegistry.h"
 #include "System.h"
-#include "BlazeEngine/DataStructures/Constexpr.h"
 
 namespace Blaze::ECS
 {			
@@ -59,8 +58,7 @@ namespace Blaze::ECS
 
 #define COMPONENT(name, systemName)											\
 	static constexpr StringView typeName = #name;							\
-	using System = systemName;												\
-	static_assert(::Blaze::ECS::HasValidTypeTags<name>, "The component must have a valid \"TypeTags\" typename for it to be a valid component. Maybe multiple base classes have the typename already defined, use \"COMPONENT_SET_TYPE_TAGS\" or \"COMPONENT_COMBINE_TYPE_TAGS\" in that case");\
+	using System = systemName;													
 
 #define COMPONENT_ADD_TYPE_TAGS(...) using TypeTags = TypeTags::Concat<__VA_ARGS__>;
 

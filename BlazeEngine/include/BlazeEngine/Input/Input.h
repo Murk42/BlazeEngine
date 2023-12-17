@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Input/Key.h"
 #include "BlazeEngine/Input/InputEvents.h"
+#include "BlazeEngine/Event/EventDispatcher.h"
 
 namespace Blaze
 {		

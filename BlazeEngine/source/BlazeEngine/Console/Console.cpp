@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Threading/Thread.h"
+#include "BlazeEngine/Internal/GlobalData.h"
 #include <iostream>
 
 namespace Blaze
@@ -8,17 +8,19 @@ namespace Blaze
     TimingResult InitializeConsole()
     {        
         Timing timing{ "Console" };
+        Debug::Logger::AddOutputToConsole();
         return timing.GetTimingResult();
     }
     void TerminateConsole()
-    {                
+    {   
+        Debug::Logger::RemoveOutputFromConsole();
     }
 
     namespace Console
     {        
         void Write(StringView text)
         {            
-            std::cout.write(text.Ptr(), text.Size());
+            std::cout.write(text.Ptr(), text.Count());
         }
         void Write(char text)
         {   
@@ -37,4 +39,16 @@ namespace Blaze
             return String(input.c_str(), input.size());
         }
     }
+    namespace Debug::Logger
+    {
+        void AddOutputToConsole()
+        {
+            AddOutputStream(globalData->consoleOutputStream);
+        }
+        void RemoveOutputFromConsole()
+        {
+            RemoveOutputStream(globalData->consoleOutputStream);            
+        }
+    }
 }
+

@@ -5,8 +5,6 @@
 #include "BlazeEngine/Application/UI/Components/Bases/UISizeOverrideComponent.h"
 #include "BlazeEngine/Application/UI/Components/Bases/UIPosOverrideComponent.h"
 
-#include "BlazeEngine/Math/Math.h"
-#include "BlazeEngine/Math/Shapes.h"
 #include "BlazeEngine/Input/Input.h"
 
 #include "Components/UIElmenetCreationData.h"
@@ -79,7 +77,7 @@ namespace Blaze::UI
 		//auto previousLayerIt = layers.LastIterator();
 		//auto layerIt = layers.AddBack();		
 
-		auto [it, inserted] = layerNames.Insert(name, { });
+		auto [it, inserted] = layerNames.Insert(name);
 
 		if (!inserted)		
 			return BLAZE_WARNING_RESULT("BlazeEngine", "Trying to create a already existing layer");		
@@ -98,7 +96,7 @@ namespace Blaze::UI
 		if (relativeMapIt.IsNull())
 			return BLAZE_WARNING_RESULT("BlazeEngine", "Trying to create a layer relative to a non existing layer");
 
-		auto [it, inserted] = layerNames.Insert(name, { });
+		auto [it, inserted] = layerNames.Insert(name);
 
 		if (!inserted)		
 			return BLAZE_WARNING_RESULT("BlazeEngine", "Trying to create a already existing layer");
@@ -117,7 +115,7 @@ namespace Blaze::UI
 		if (relativeMapIt.IsNull())
 			return BLAZE_WARNING_RESULT("BlazeEngine", "Trying to create a layer relative to a non existing layer");
 
-		auto [it, inserted] = layerNames.Insert(name, { });
+		auto [it, inserted] = layerNames.Insert(name);
 
 		if (!inserted)
 			return BLAZE_WARNING_RESULT("BlazeEngine", "Trying to create a already existing layer");
@@ -448,7 +446,7 @@ namespace Blaze::UI
 	Result UIScene::PrepareElementCreation(StringView name, StringView layerName)
 	{
 		Components::UIElementComponent** nameToElementItPtr = nullptr;
-		if (name.Size() != 0)
+		if (name.Count() != 0)
 		{
 			auto [nameToElementIt, inserted] = nameToElementMap.Insert(name, nullptr);
 

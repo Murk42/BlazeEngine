@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
@@ -13,11 +21,24 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{d3af4e35-1d93-4a5f-b070-a0a6dd18a31b}</ProjectGuid>
+    <ProjectGuid>{b87fcc17-b1a8-413b-aa96-651462fcb46b}</ProjectGuid>
     <RootNamespace>BlazeEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -36,6 +57,12 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -43,48 +70,58 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <TargetName>BlazeEngine-static-x64-debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
+    <TargetName>BlazeEngine-static-x64-release</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
     <TargetName>BlazeEngine-static-x64-debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
     <TargetName>BlazeEngine-static-x64-release</TargetName>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(ProjectDir)\scripts\InstallBlazeEngine.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2d.lib;freetyped.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -96,87 +133,63 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(ProjectDir)\scripts\InstallBlazeEngine.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="source\BlazeEngine\Application\ECS\Component.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\ECS\ComponentTypeRegistry.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\ECS\Entity.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\ECS\EntityCreationData.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\ECS\Scene.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\ECS\System.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceManager.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceStorage.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceTypeRegistry.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\Bases\UIComponent.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\FrameComponent.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\ImageComponent.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\LabelComponent.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\MouseTriggerComponent.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\UIElementComponent.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\UIElementCreationData.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\Components\UITransformComponent.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\UIScene.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\UI\UISystem.cpp" />
-    <ClCompile Include="source\BlazeEngine\Console\Console.cpp" />
-    <ClCompile Include="source\BlazeEngine\Core\Setup.cpp" />
-    <ClCompile Include="source\BlazeEngine\Core\WindowBase.cpp" />
-    <ClCompile Include="source\BlazeEngine\Core\WindowSDL.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\Buffer.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\Color.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\String.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\StringHash.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\StringUTF8.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\StringView.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\StringViewUTF8.cpp" />
-    <ClCompile Include="source\BlazeEngine\DataStructures\UnicodeChar.cpp" />
-    <ClCompile Include="source\BlazeEngine\Debug\Breakpoint.cpp" />
-    <ClCompile Include="source\BlazeEngine\Debug\Callstack.cpp" />
-    <ClCompile Include="source\BlazeEngine\Debug\Log.cpp" />
-    <ClCompile Include="source\BlazeEngine\Debug\Logger.cpp" />
-    <ClCompile Include="source\BlazeEngine\Debug\LoggerListener.cpp" />
-    <ClCompile Include="source\BlazeEngine\Debug\Result.cpp" />
-    <ClCompile Include="source\BlazeEngine\File\File.cpp" />
-    <ClCompile Include="source\BlazeEngine\File\FileSystem.cpp" />
-    <ClCompile Include="source\BlazeEngine\File\Path.cpp" />
-    <ClCompile Include="source\BlazeEngine\File\Stream\BufferStream.cpp" />
-    <ClCompile Include="source\BlazeEngine\File\Stream\FileStream.cpp" />
-    <ClCompile Include="source\BlazeEngine\File\Stream\SubStream.cpp" />
-    <ClCompile Include="source\BlazeEngine\Input\EngineInput.cpp" />
-    <ClCompile Include="source\BlazeEngine\Input\Input.cpp" />
-    <ClCompile Include="source\BlazeEngine\Input\Key.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Conversions.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\EngineData.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\FreeType.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\GLEW.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\Libraries.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDL.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Windows\WindowsPlatform.cpp" />
-    <ClCompile Include="source\BlazeEngine\Math\Random.cpp" />
-    <ClCompile Include="source\BlazeEngine\Memory\Allocator.cpp" />
-    <ClCompile Include="source\BlazeEngine\Memory\MallocAllocator.cpp" />
-    <ClCompile Include="source\BlazeEngine\Memory\MemoryListener.cpp" />
-    <ClCompile Include="source\BlazeEngine\Memory\MemoryManager.cpp" />
-    <ClCompile Include="source\BlazeEngine\Memory\VirtualAllocator.cpp" />
-    <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp" />
-    <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp" />
-    <ClCompile Include="source\BlazeEngine\Utilities\Stopwatch.cpp" />
-    <ClCompile Include="source\BlazeEngine\Utilities\StringParsing.cpp" />
-    <ClCompile Include="source\BlazeEngine\Utilities\TextLayouter.cpp" />
-    <ClCompile Include="source\BlazeEngine\Utilities\Thread.cpp" />
-    <ClCompile Include="source\BlazeEngine\Utilities\Threading.cpp" />
-    <ClCompile Include="source\BlazeEngine\Utilities\Time.cpp" />
-    <ClCompile Include="source\BlazeEngine\Utilities\Timing.cpp" />
-    <ClCompile Include="source\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
-  </ItemGroup>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\BlazeEngine\Application\ECS\Component.h" />
     <ClInclude Include="include\BlazeEngine\Application\ECS\ComponentTypeRegistry.h" />
@@ -189,183 +202,69 @@
     <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceManager.h" />
     <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceStorage.h" />
     <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceTypeRegistry.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\Bases\UIPosOverrideComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\Bases\UISizeOverrideComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\FrameComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\ImageComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\LabelComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\MouseTriggerComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\UIElementComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\Components\UITransformComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\UIComponent.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\UIEntityView.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\UIScene.h" />
-    <ClInclude Include="include\BlazeEngine\Application\UI\UISystem.h" />
     <ClInclude Include="include\BlazeEngine\BlazeEngine.h" />
-    <ClInclude Include="include\BlazeEngine\BlazeEnginePrecompiledHeaders.h" />
+    <ClInclude Include="include\BlazeEngine\BlazeEngineDefines.h" />
     <ClInclude Include="include\BlazeEngine\Console\Console.h" />
-    <ClInclude Include="include\BlazeEngine\Core\EngineCore.h" />
-    <ClInclude Include="include\BlazeEngine\Core\Setup.h" />
-    <ClInclude Include="include\BlazeEngine\Core\Window.h" />
-    <ClInclude Include="include\BlazeEngine\Core\WindowBase.h" />
-    <ClInclude Include="include\BlazeEngine\Core\WindowSDL.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Array.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\ArrayImpl.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\ArrayView.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Buffer.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Color.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Common.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Constexpr.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\DualList.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\DualListImpl.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Handle.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\HandleImpl.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Hash.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\HybridArray.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\List.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\ListImpl.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Map.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\MapImpl.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Rect.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Set.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\SetImpl.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\String.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\StringHash.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\StringUTF8.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\StringView.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\StringViewUTF8.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Template.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\TemplateGroup.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\Tuple.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\UnicodeChar.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\UnorderedArray.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\UnorderedArrayImpl.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\VirtualMap.h" />
-    <ClInclude Include="include\BlazeEngine\DataStructures\VirtualMapImpl.h" />
-    <ClInclude Include="include\BlazeEngine\Debug\Breakpoint.h" />
-    <ClInclude Include="include\BlazeEngine\Debug\Callstack.h" />
-    <ClInclude Include="include\BlazeEngine\Debug\Log.h" />
-    <ClInclude Include="include\BlazeEngine\Debug\Logger.h" />
-    <ClInclude Include="include\BlazeEngine\Debug\LoggerListener.h" />
-    <ClInclude Include="include\BlazeEngine\Debug\Result.h" />
-    <ClInclude Include="include\BlazeEngine\Debug\ResultValue.h" />
+    <ClInclude Include="include\BlazeEngine\EntryPoint\EntryPoint.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Font\TextLayouter.h" />
+    <ClInclude Include="include\BlazeEngine\Window\Window.h" />
+    <ClInclude Include="include\BlazeEngine\Window\WindowBase.h" />
+    <ClInclude Include="include\BlazeEngine\Window\WindowSDL.h" />
     <ClInclude Include="include\BlazeEngine\Event\EventDispatcher.h" />
     <ClInclude Include="include\BlazeEngine\Event\EventHandler.h" />
     <ClInclude Include="include\BlazeEngine\Event\LambdaEventHandler.h" />
     <ClInclude Include="include\BlazeEngine\Event\QueueEventDispatcher.h" />
-    <ClInclude Include="include\BlazeEngine\File\File.h" />
-    <ClInclude Include="include\BlazeEngine\File\FileSystem.h" />
-    <ClInclude Include="include\BlazeEngine\File\Path.h" />
-    <ClInclude Include="include\BlazeEngine\File\Stream\BufferStream.h" />
-    <ClInclude Include="include\BlazeEngine\File\Stream\FileStream.h" />
-    <ClInclude Include="include\BlazeEngine\File\Stream\Stream.h" />
-    <ClInclude Include="include\BlazeEngine\File\Stream\SubStream.h" />
     <ClInclude Include="include\BlazeEngine\Input\Input.h" />
     <ClInclude Include="include\BlazeEngine\Input\InputEvents.h" />
     <ClInclude Include="include\BlazeEngine\Input\Key.h" />
-    <ClInclude Include="include\BlazeEngine\Math\Math.h" />
-    <ClInclude Include="include\BlazeEngine\Math\Matrix.h" />
-    <ClInclude Include="include\BlazeEngine\Math\Quaternion.h" />
-    <ClInclude Include="include\BlazeEngine\Math\Random.h" />
-    <ClInclude Include="include\BlazeEngine\Math\Shapes.h" />
-    <ClInclude Include="include\BlazeEngine\Math\Vector.h" />
-    <ClInclude Include="include\BlazeEngine\Memory\Allocator.h" />
-    <ClInclude Include="include\BlazeEngine\Memory\MallocAllocator.h" />
-    <ClInclude Include="include\BlazeEngine\Memory\MemoryListener.h" />
-    <ClInclude Include="include\BlazeEngine\Memory\MemoryManager.h" />
-    <ClInclude Include="include\BlazeEngine\Memory\VirtualAllocator.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Graphics.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsCore.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsEnums.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsLibrary.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\GraphicsLibraryType.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLFence.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLFramebuffer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLGraphicsBuffer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLProgram.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLRenderbuffer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLShader.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\OpenGLVertexArray.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture1D.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture2D.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture2DArray.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTexture3D.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTextureBuffer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTextureCubemap.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\OpenGL\Textures\OpenGLTextureEnums.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Circle2DRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\FrameRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\ImageRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Line2DRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Line3DRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\Point2DRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Renderers\TextRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Transform.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Utility\BatchStreamRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\old_Graphics\Utility\TextVertexGenerator.h" />
-    <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h" />
-    <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h" />
-    <ClInclude Include="include\BlazeEngine\Threading\Thread.h" />
-    <ClInclude Include="include\BlazeEngine\Utilities\Stopwatch.h" />
-    <ClInclude Include="include\BlazeEngine\Utilities\StringParsing.h" />
-    <ClInclude Include="include\BlazeEngine\Utilities\TextLayouter.h" />
-    <ClInclude Include="include\BlazeEngine\Utilities\Threading.h" />
-    <ClInclude Include="include\BlazeEngine\Utilities\Time.h" />
-    <ClInclude Include="include\BlazeEngine\Utilities\Timing.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\EntityCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\SystemCreationData.h" />
-    <ClInclude Include="source\BlazeEngine\Application\UI\Components\UIElmenetCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Input\ClientEventStack.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Conversions.h" />
-    <ClInclude Include="source\BlazeEngine\Internal\EngineData.h" />
+    <ClInclude Include="source\BlazeEngine\Internal\GlobalData.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\FreeType.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\GLEW.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDL.h" />
     <ClInclude Include="source\BlazeEngine\Internal\WindowCreation.h" />
-    <ClInclude Include="source\BlazeEngine\Internal\Windows\WindowsPlatform.h" />
+    <ClInclude Include="source\BlazeEngine\Resources\Bitmap\SailClasses.h" />
     <ClInclude Include="source\BlazeEngine\Resources\Font\rectpack2D.h" />
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\default\fragmentDiffuse.glsl" />
-    <None Include="assets\default\shaders\circle2d\circle2d.frag" />
-    <None Include="assets\default\shaders\circle2d\circle2d.geom" />
-    <None Include="assets\default\shaders\circle2d\circle2d.vert" />
-    <None Include="assets\default\shaders\frame\frame.frag" />
-    <None Include="assets\default\shaders\frame\frame.geom" />
-    <None Include="assets\default\shaders\frame\frame.vert" />
-    <None Include="assets\default\shaders\image\image.frag" />
-    <None Include="assets\default\shaders\image\image.geom" />
-    <None Include="assets\default\shaders\image\image.vert" />
-    <None Include="assets\default\shaders\line2d\line2d.frag" />
-    <None Include="assets\default\shaders\line2d\line2d.geom" />
-    <None Include="assets\default\shaders\line2d\line2d.vert" />
-    <None Include="assets\default\shaders\line3d\line3d.frag" />
-    <None Include="assets\default\shaders\line3d\line3d.geom" />
-    <None Include="assets\default\shaders\line3d\line3d.vert" />
-    <None Include="assets\default\shaders\point2d\point2d.frag" />
-    <None Include="assets\default\shaders\point2d\point2d.geom" />
-    <None Include="assets\default\shaders\point2d\point2d.vert" />
-    <None Include="assets\default\shaders\text\text.geom" />
-    <None Include="assets\default\shaders\text\text.vert" />
-    <None Include="assets\default\shaders\text\text_lcd.frag" />
-    <None Include="assets\default\shaders\text\text_normal.frag" />
-    <None Include="assets\default\shaders\text\text_sdf.frag" />
-    <None Include="assets\default\vertexDiffuse.glsl" />
-    <None Include="scripts\CopyDependencies.bat" />
-    <None Include="scripts\InstallBlazeEngine.bat" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="assets\default\cubemap\cubemap_column.png" />
-    <Image Include="assets\default\cubemap\cubemap_horizontal_cross.png" />
-    <Image Include="assets\default\cubemap\cubemap_row.png" />
-    <Image Include="assets\default\cubemap\cubemap_vertical_cross.png" />
-    <Image Include="assets\default\default.png" />
-    <Image Include="assets\default\logo.ico" />
-    <Image Include="assets\default\logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="assets\default\fonts\Consola.ttf" />
+    <ClCompile Include="source\BlazeEngine\Application\ECS\Component.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\ECS\ComponentTypeRegistry.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\ECS\Entity.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\ECS\EntityCreationData.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\ECS\Scene.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\ECS\System.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceManager.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceStorage.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceTypeRegistry.cpp" />
+    <ClCompile Include="source\BlazeEngine\EntryPoint\EntryPoint.cpp" />
+    <ClCompile Include="source\BlazeEngine\Input\EngineInput.cpp" />
+    <ClCompile Include="source\BlazeEngine\Input\Input.cpp" />
+    <ClCompile Include="source\BlazeEngine\Input\Key.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\Conversions.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\GlobalData.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\FreeType.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\GLEW.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\Libraries.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDL.cpp" />
+    <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp" />
+    <ClCompile Include="source\BlazeEngine\Resources\Bitmap\SailClasses.cpp" />
+    <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp" />
+    <ClCompile Include="source\BlazeEngine\Resources\Font\TextLayouter.cpp" />
+    <ClCompile Include="source\BlazeEngine\Window\WindowBase.cpp" />
+    <ClCompile Include="source\BlazeEngine\Window\WindowSDL.cpp" />
+    <ClCompile Include="source\BlazeEngine\Console\Console.cpp" />
+    <ClCompile Include="source\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

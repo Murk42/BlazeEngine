@@ -15,202 +15,121 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Graphics3\API\API.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics3\API\API_dynamic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics3\OpenGL\API_OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\vk_mem_alloc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics4\Dynamic\RenderPipeline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics4\OpenGL\RenderPipeline_OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics4\Dynamic\PresentRenderStage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics4\OpenGL\PresentRenderStage_OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics4\API.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics3\Vulkan\API_Vulkan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics3\Vulkan\VulkanInstance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics4\Dynamic\TextRenderStage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics4\OpenGL\TextRenderStage_OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\Textures\OpenGLTexture1D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\Textures\OpenGLTexture2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\Textures\OpenGLTexture2DArray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\Textures\OpenGLTexture3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\Textures\OpenGLTextureBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\Textures\OpenGLTextureCubemap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\Textures\OpenGLTextureEnums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLFence.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLFramebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLGraphicsBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLProgram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLRenderbuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLVertexArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLCommon.h">
+    <ClInclude Include="source\LocalString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLContext.h">
+    <ClInclude Include="old\Graphics4\API.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLEnums.h">
+    <ClInclude Include="source\Graphics5\Vulkan\API_Vulkan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\OpenGLWrapper\OpenGLConversions.h">
+    <ClInclude Include="source\Graphics5\Vulkan\VulkanInstance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Graphics4\Dynamic\ClearRenderStage.h">
+    <ClInclude Include="source\UI\NodeRenderTask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Graphics4\OpenGL\ClearRenderStage_OpenGL.h">
+    <ClInclude Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Graphics\OpenGL\RenderSystem_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\UINodeComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\UINodeRenderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\UISceneRenderTask.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\Graphics\OpenGL\UIImageRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\UINode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Resources\ResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Graphics\OpenGL\Renderers\TexturedRectRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Graphics\OpenGL\Renderers\PanelRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Graphics\OpenGL\Renderers\TextRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Graphics\OpenGL\Pipelines\UIRenderPipeline_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Graphics3\API\API_dynamic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics3\OpenGL\API_OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics4\Dynamic\RenderPipeline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics4\Dynamic\PresentRenderStage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics4\OpenGL\PresentRenderStage_OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics3\Vulkan\API_Vulkan.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics3\Vulkan\RenderWindow_Vulkan.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics3\Vulkan\VulkanInstance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics4\OpenGL\RenderPipeline_OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics4\Dynamic\TextRenderStage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Graphics4\OpenGL\TextRenderStage_OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLVertexArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLRenderbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLGraphicsBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLFramebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLFence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\Textures\OpenGLTextureCubemap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\Textures\OpenGLTextureBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\Textures\OpenGLTexture3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\Textures\OpenGLTexture2DArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\Textures\OpenGLTexture2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\Textures\OpenGLTexture1D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLCommon.cpp">
+    <ClCompile Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLContext.cpp">
+    <ClCompile Include="source\Graphics\OpenGL\RenderSystem_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\OpenGLWrapper\OpenGLConversions.cpp">
+    <ClCompile Include="source\UI\UINodeComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Graphics4\Dynamic\ClearRenderStage.cpp">
+    <ClCompile Include="source\UI\Graphics\OpenGL\UIImageRenderer_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Graphics4\OpenGL\ClearRenderStage_OpenGL.cpp">
+    <ClCompile Include="source\UI\UINode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Resources\ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\OpenGL\Renderers\TexturedRectRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\OpenGL\Renderers\PanelRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\OpenGL\Renderers\TextRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Graphics\OpenGL\Pipelines\UIRenderPipeline_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\OpenGL\line2d.frag" />
+    <None Include="assets\shaders\OpenGL\line2d.vert" />
+    <None Include="assets\shaders\OpenGL\text.frag" />
+    <None Include="assets\shaders\OpenGL\text.vert" />
+    <None Include="assets\shaders\Vulkan\line2d.frag" />
+    <None Include="assets\shaders\Vulkan\line2d.vert" />
+    <None Include="assets\shaders\Vulkan\compileShaders.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="assets\shaders\OpenGL\texturedRect.frag" />
+    <None Include="assets\shaders\OpenGL\texturedRect.vert" />
+    <None Include="assets\shaders\OpenGL\panel.frag" />
+    <None Include="assets\shaders\OpenGL\panel.vert" />
   </ItemGroup>
 </Project>

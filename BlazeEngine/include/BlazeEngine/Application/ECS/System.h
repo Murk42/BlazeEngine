@@ -37,10 +37,5 @@ namespace Blaze::ECS
 		}
 
 		friend class Scene;
-	};
-
-	template<typename T>
-	concept IsSystem = requires {
-		std::derived_from<T, System>;
-	};
+	};	
 }

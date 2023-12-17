@@ -1,8 +1,6 @@
 #pragma once
 #include "BlazeEngine/Application/UI/UIComponent.h"
 #include "BlazeEngine/Application/UI/UISystem.h"
-#include "BlazeEngine/DataStructures/Color.h"
-#include "BlazeEngine/DataStructures/Rect.h"
 
 namespace Blaze::UI::Components
 {

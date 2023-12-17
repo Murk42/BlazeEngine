@@ -1,35 +1,63 @@
-#include "pch.h"
-#include "Graphics3/API/API.h"
-#include "Graphics4/API.h"
+#include "pch.h" 
+
+//#if defined(GRAPHICS_OPENGL)
+#include "Graphics/OpenGL/RenderSystem_OpenGL.h"
+//using RenderSystem = RenderSystem_OpenGL;
+//#elif defined(GRAPHICS_VULKAN)
+//#include "Graphics/Vulkan/RenderSystem_Vulkan.h"
+//using RenderSystem = RenderSystem_Vulkan;
+//#endif
+
+#include "MainScreen.h"
+
 
 CLIENT_API void Setup()
 {		
-	auto openGLImplementation = Graphics3::RegisterImplementation({ Graphics3::ImplementationAPI::OpenGL, "OpenGL" });
+	Debug::Logger::AddOutputFile("Log.txt");
 
-	Graphics3::GraphicsContext gc { openGLImplementation };
-	Graphics3::RenderWindow rw { gc, "Marko", Vec2i(INT_MAX), Vec2i(640, 480) };
+	Font font{ "assets/fonts/Consola.ttf" };			
 
-	Graphics4::RenderPipeline rp{ gc };	
-	auto clearRenderStage = rp.AddRenderStage(Graphics4::ClearRenderStage(rw));
-	auto textRenderStage = rp.AddRenderStage(Graphics4::TextRenderStage(gc));
-	auto presentRenderStage = rp.AddRenderStage(Graphics4::PresentRenderStage(rw));			
+	Resource::ResourceManager resourceManager;
+	RenderSystem_OpenGL renderSystem{ resourceManager };
+
+	WindowBase& window = renderSystem.GetWindow();
+	window.ShowWindow(true);
+
+	MainScreen mainScreen{ resourceManager };
+
+	mainScreen.SetTransform(UI2::NodeTransform({
+			.pos = { 0.0f, 0.0f},
+			.parentPivot = { 0.0f, 0.0f},
+			.pivot = { 0.0f, 0.0f},
+			.size = (Vec2f)window.GetSize(),
+			.scale = { 1.0f, 1.0f },
+			.rotation = 0.0f,
+		}));
+
+	renderSystem.SetActiveScreen(&mainScreen);
 
 	bool exit = false;
-	LambdaEventHandler<Input::Events::WindowCloseEvent> keyPressed{ [&](auto event) {		
+	LambdaEventHandler<Input::Events::WindowCloseEvent> keyPressed{ [&](auto event) {
 		exit = true;
 	} };
-	rw.GetWindow()->closeEventDispatcher.AddHandler(keyPressed);	
+	LambdaEventHandler<Input::Events::WindowResizedEvent> windowResized{ [&](Input::Events::WindowResizedEvent event) {
+		mainScreen.SetTransform(UI2::NodeTransform({
+			.pos = {0.0f, 0.0f},
+			.parentPivot = { 0.0f, 0.0f},
+			.pivot = { 0.0f, 0.0f},
+			.size = (Vec2f)event.size,
+			.scale = { 1.0f, 1.0f },
+			.rotation = 0.0f,
+		}));
+	} };
 
-	rw.GetWindow()->ShowWindow(true);
-
-	Graphics3::Semaphore ss{ gc };
+	window.closeEventDispatcher.AddHandler(keyPressed);
+	window.resizedEventDispatcher.AddHandler(windowResized);
 
 	while (!exit)
 	{
-		Input::Update();		
-		
-		auto& fb = rw.AcquireNextFramebuffer(ss);		
-				
-		rp.PerformPipeline(fb, {});		
+		Input::Update();
+		mainScreen.CalculateAllTransforms();
+		renderSystem.Frame();
 	}
 }

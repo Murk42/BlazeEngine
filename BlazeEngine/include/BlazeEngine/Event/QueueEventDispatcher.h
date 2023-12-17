@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngine/Event/EventDispatcher.h"
-#include "BlazeEngine/DataStructures/HybridArray.h"
 
 namespace Blaze
 {

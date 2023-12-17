@@ -1,7 +1,6 @@
 #pragma once
 #include "BlazeEngine/Application/ECS/Component.h"
 #include "BlazeEngine/Event/EventDispatcher.h"
-#include "BlazeEngine/Math/Matrix.h"
 
 namespace Blaze::UI
 {

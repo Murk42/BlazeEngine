@@ -28,9 +28,7 @@ namespace Blaze::ResourceSystem
 	}
 
 	void ResourceTypeRegistry::RegisterCoreTypes()
-	{
-		RegisterType<Font>();
-		//RegisterType<GraphicsLibrary::Texture2D>();		
+	{		
 	}
 
 	uintMem ResourceTypeRegistry::GetResourceTypeIndex(StringView name) const

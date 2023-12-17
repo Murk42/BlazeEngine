@@ -1,24 +1,86 @@
 #pragma once
-#include "BlazeEngine/DataStructures/StringViewUTF8.h"
-#include "BlazeEngine/DataStructures/Buffer.h"
-#include "BlazeEngine/DataStructures/Rect.h"
-#include "BlazeEngine/DataStructures/VirtualMap.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Application/ResourceSystem/Resource.h"
-#include "BlazeEngine/File/Stream/Stream.h"
 
 namespace Blaze
-{
+{		
+	class CharacterSet;
 	class Font;
-	class FontResolution;
 
-	struct FontResolutionGlyphData
+	//Glyph metric data expressed in EMs (relative unit)
+	//Multiple each number by the point size of the font to get its final point size (absolute unit)
+	//Each point is equal to 0.352778mm so use the display parameters to find the wanted pixel size.
+	struct FontGlyphMetrics
 	{
-		float horizontalAdvance;
-		float verticalAdvance;
-		Vec2f offset;
-		Vec2f size;
+		uint horizontalAdvance;
+		uint verticalAdvance;
+		Vec2i offset;
+		Vec2u size;
+	};	
+
+	struct CharacterSpan
+	{
+		UnicodeChar first;
+		UnicodeChar last;
 	};
+
+
+	class BLAZE_API CharacterSetIterator
+	{
+	public:
+		CharacterSetIterator();
+		CharacterSetIterator(const CharacterSetIterator& other);
+		~CharacterSetIterator();
+
+		bool IsNull() const;
+
+		CharacterSetIterator& operator++();
+		CharacterSetIterator operator++(int);
+		CharacterSetIterator& operator--();
+		CharacterSetIterator operator--(int);
+
+		UnicodeChar operator*() const;		
+
+		bool operator==(CharacterSetIterator&) const;
+		bool operator!=(CharacterSetIterator&) const;
+
+		CharacterSetIterator& operator=(const CharacterSetIterator& other);
+	private:
+		CharacterSetIterator(const CharacterSet* characterSet, uintMem spanIndex, uintMem characterIndex);
+
+		const CharacterSet* characterSet;
+		uintMem spanIndex;
+		uintMem characterIndex;
+
+		friend class CharacterSet;
+	};	
+
+	class BLAZE_API CharacterSet
+	{
+	public:		
+		using Iterator = CharacterSetIterator;
+
+		CharacterSet();
+		CharacterSet(CharacterSet&& other) noexcept;
+		CharacterSet(Array<CharacterSpan> spans);
+
+		static CharacterSet ASCIICharacterSet();
+
+		uintMem Count() const;
+
+		CharacterSetIterator FirstIterator() const;
+		CharacterSetIterator BehindIterator() const;
+
+		CharacterSet& operator=(CharacterSet&& other) noexcept;
+	private:
+		Array<CharacterSpan> spans;
+		uintMem count;
+
+		friend class CharacterSetIterator;
+	};	
+
+	CharacterSetIterator begin(const CharacterSet& characterSet);
+	CharacterSetIterator end(const CharacterSet& characterSet);
 
 	class BLAZE_API FontGlyphRenderer
 	{
@@ -27,7 +89,7 @@ namespace Blaze
 
 		virtual ~FontGlyphRenderer() { }
 
-		virtual Bitmap Render(const Font& font, uint fontHeight, UnicodeChar character) = 0;
+		virtual Bitmap Render(const Font& font, uint fontPixelHeight, UnicodeChar character) = 0;
 	};
 
 	namespace FontGlyphRenderers
@@ -71,118 +133,62 @@ namespace Blaze
 		*/
 	}
 
-	class BLAZE_API CharacterSet
+	class BLAZE_API FontMetrics
 	{
 	public:
-		struct CharacterSpan
-		{
-			UnicodeChar first;
-			UnicodeChar last;
-		};
+		using CreateAtlasCallback = std::function<void(Vec2u)>;
+		using CopyBitmapCallback = std::function<void(UnicodeChar, Vec2u, BitmapView)>;
 
-		Array<CharacterSpan> spans;
+		Vec2i GetGlyphKerning(UnicodeChar left, UnicodeChar right) const;
+		bool GetGlyphMetrics(UnicodeChar character, FontGlyphMetrics& data) const;
 
-		CharacterSet();
-		CharacterSet(CharacterSet&& other) noexcept;
-		CharacterSet(Array<CharacterSpan> spans);
+		inline uint GetPixelFontHeight() const;
+		inline Font* GetFont() const { return font; }
 
-		static CharacterSet ASCIICharacterSet();
+		Map<UnicodeChar, Bitmap> GetGlyphBitmaps(const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer) const;
+		void CreateAtlas(const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer, const CreateAtlasCallback& createAtlasCallback, const CopyBitmapCallback& copyBitmapCallback) const;
 
-		CharacterSet& operator=(CharacterSet&& other) noexcept;
-	};
-
-	class BLAZE_API FontGlyphBitmaps
-	{
-	public:
-		using CreateAtlasCallback = std::function<void(Vec2i)>;
-		using CopyBitmapCallback = std::function<void(UnicodeChar, Vec2i, BitmapView)>;
-
-		struct GlyphData
-		{
-			Bitmap bitmap;
-			UnicodeChar character;
-		};
-
-		FontGlyphBitmaps();
-		FontGlyphBitmaps(const Font& font, const FontResolution& fontResolution, FontGlyphRenderer& fontGlyphRenderer);
-		FontGlyphBitmaps(FontGlyphBitmaps&& other) noexcept;
-		~FontGlyphBitmaps();
-
-		void CreateAtlas(const CreateAtlasCallback& createAtlas, const CopyBitmapCallback& copyBitmap);
-
-		void Clear();
-
-		inline ArrayView<GlyphData> GetGlyphsData() { return glyphsData; }
-
-		FontGlyphBitmaps& operator=(FontGlyphBitmaps&& other) noexcept;
+		FontMetrics(Font* font, uint pixelFontHeight);
 	private:
+		
+		uint pixelFontHeight;
+		mutable Map<UnicodeChar, FontGlyphMetrics> glyphMetrics;
+		Font* font;
 
-		Array<GlyphData> glyphsData;
-
-		friend class FontResolution;
+		friend class Font;
 	};
 
-	class BLAZE_API FontResolution
+	class BLAZE_API Font
 	{
 	public:		
 		mutable VirtualMap<String> dataMap;
-
-		FontResolution();
-		FontResolution(const Font& font, uint fontHeight, const CharacterSet& characterSet);
-		FontResolution(FontResolution&& other) noexcept;
-		~FontResolution();
-
-		bool GetGlyphData(UnicodeChar ch, FontResolutionGlyphData& data) const;
-
-		void Clear();
-		
-		inline uint GetFontHeight() const { return fontHeight; }
-		inline uint GetBaselineDistance() const { return baselineDistance; }
-		inline uint GetNoneEmptyGlyphCount() const { return nonEmptyCount; }
-		inline const Map<UnicodeChar, FontResolutionGlyphData>& GetGlyphsData() const { return glyphsData; }
-
-		FontResolution& operator=(FontResolution && other) noexcept;		
-	private:		
-		Map<UnicodeChar, FontResolutionGlyphData> glyphsData;
-		uint nonEmptyCount;
-
-		uint fontHeight;
-		uint baselineDistance;
-	};
-
-	class BLAZE_API Font : public ResourceSystem::Resource
-	{
-	public:
-		using CreateAtlasCallback = std::function<void(Vec2i)>;
-		using CopyBitmapCallback = std::function<void(UnicodeChar, Vec2i, BitmapView)>;
 
 		Font();
 		Font(Font&& other) noexcept;		
 		Font(Path path);
 		~Font();
 
-		/// <summary>					Load a font file. </summary>
-		/// <param name='path'>			- Path to the file </param>
-		/// <param name='characters'>	- All characters to be loaded. If empty loads all characters from the file </param>		
-		Result Load(Path path);
-		Result Load(ReadStream& readStream);
-		Vec2f GetKerning(const FontResolution& fontResolution, UnicodeChar left, UnicodeChar right) const;
-
 		void Clear();		
 
-		inline void* GetHandle() const { return ptr; }
+		Result Load(Path path);
+		Result Load(ReadStream& readStream);
+		
+		//The metrics are in font units
+		FontMetrics& GetUnscalledMetrics() const;
+		FontMetrics& GetMetrics(uint pixelFontHeight) const;		
 
-		Font& operator=(Font&& other) noexcept;
+		//How maany font units fit in one EM
+		inline uint GetFontUnitScale() const;
+		inline void* GetHandle() const { return ptr; }		
+		//inline float GetBaselineDistance() const;
 
-		friend class FontResolution;
-		RESOURCE(Font)
+		Font& operator=(Font&& other) noexcept;		
 	private:
 		void* ptr;
 		void* memory;
-
-		List<FontResolution> resolutions;
-
-		uint pixelsPerUnit; //How many pixels fit in one font unit
-		float baselineDistance;		
+		
+		mutable Map<uint, FontMetrics> metrics;		
+		
+		friend class FontMetrics;
 	};
 }	

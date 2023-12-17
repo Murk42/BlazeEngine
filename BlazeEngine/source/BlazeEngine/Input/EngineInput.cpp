@@ -3,6 +3,7 @@
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Input/ClientEventStack.h"
 #include "BlazeEngine/Internal/WindowCreation.h"
+//#include "BlazeEngine/Logger.h"
 
 #include "SDL2/SDL.h"
 
@@ -36,7 +37,7 @@ namespace Blaze
 			{				
 				Input::Events::WindowResizedEvent _event;
 				_event.window = window;
-				_event.size = Vec2i(event->window.data1, event->window.data2);
+				_event.size = Vec2u(event->window.data1, event->window.data2);
 				Input::clientEventStack.Add(_event, &Input::inputEventSystem.windowResizedDispatcher);
 				Input::clientEventStack.Add(_event, &window->resizedEventDispatcher);				
 			}
@@ -59,7 +60,7 @@ namespace Blaze
 	namespace Input
 	{						
 		void HandleEvents()
-		{			
+		{						
 			windowSDLCreationQueue.CheckRequests([&](const WindowSDLCreationData& data) {
 				uint32 flags = 0;
 				 
@@ -83,7 +84,7 @@ namespace Blaze
 					pos.x = SDL_WINDOWPOS_CENTERED;
 				if (pos.y == INT_MAX)
 					pos.y = SDL_WINDOWPOS_CENTERED;
-
+				
 				SDL_Window* SDLWindow = SDL_CreateWindow(data.name.Ptr(), pos.x, pos.y, data.size.x, data.size.y, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | flags);
 
 				if (SDLWindow == nullptr)
@@ -111,8 +112,9 @@ namespace Blaze
 				}
 				case SDL_MOUSEMOTION: {
 					Events::MouseMotion  _event;
-					_event.delta = { event.motion.xrel, event.motion.yrel };
+					_event.delta = { event.motion.xrel, -event.motion.yrel };
 					_event.pos = { event.motion.x, event.motion.y };
+					clientEventStack.Add(_event, &inputEventSystem.mouseMotionDispatcher);
 					break;
 				}
 				case SDL_MOUSEBUTTONDOWN: {
@@ -170,10 +172,9 @@ namespace Blaze
 							_event.window = window;
 							_event.pos = Vec2i(event.window.data1, event.window.data2);
 							clientEventStack.Add(_event, &inputEventSystem.windowMovedDispatcher);
+
 							if (window != nullptr)
 								clientEventStack.Add(_event, &_event.window->movedEventDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowMovedEvent)");
 							break;
 						}
 						case SDL_WINDOWEVENT_MINIMIZED: {
@@ -181,10 +182,9 @@ namespace Blaze
 							WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event.window.windowID));
 							_event.window = window;
 							clientEventStack.Add(_event, &inputEventSystem.windowMinimizedDispatcher);
+
 							if (window != nullptr)
-								clientEventStack.Add(_event, &_event.window->minimizedEventDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowMinimizedEvent)");
+								clientEventStack.Add(_event, &_event.window->minimizedEventDispatcher);							
 							break;
 						}
 						case SDL_WINDOWEVENT_MAXIMIZED: {
@@ -192,10 +192,9 @@ namespace Blaze
 							WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event.window.windowID));
 							_event.window = window;
 							clientEventStack.Add(_event, &inputEventSystem.windowMaximizedDispatcher);
+
 							if (window != nullptr)
-								clientEventStack.Add(_event, &_event.window->maximizedEventDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowMaximizedEvent)");
+								clientEventStack.Add(_event, &_event.window->maximizedEventDispatcher);							
 							break;
 						}
 						case SDL_WINDOWEVENT_SIZE_CHANGED: {
@@ -221,8 +220,7 @@ namespace Blaze
 							clientEventStack.Add(_event, &inputEventSystem.windowFocusGainedDispatcher);
 							if (window != nullptr)
 								clientEventStack.Add(_event, &_event.window->focusGainedEventDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowFocusGainedEvent)");
+
 							break;
 						}
 						case SDL_WINDOWEVENT_FOCUS_LOST: {
@@ -230,10 +228,9 @@ namespace Blaze
 							WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event.window.windowID));
 							_event.window = window;
 							clientEventStack.Add(_event, &inputEventSystem.windowFocusLostDispatcher);
+
 							if (window != nullptr)
-								clientEventStack.Add(_event, &_event.window->focusLostEventDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowFocusLostEvent)");
+								clientEventStack.Add(_event, &_event.window->focusLostEventDispatcher);							
 							break;
 						}
 						case SDL_WINDOWEVENT_CLOSE: {
@@ -241,10 +238,9 @@ namespace Blaze
 							WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event.window.windowID));
 							_event.window = window;
 							clientEventStack.Add(_event, &inputEventSystem.windowCloseDispatcher);
+
 							if (window != nullptr)
-								clientEventStack.Add(_event, &_event.window->closeEventDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowCloseEvent)");
+								clientEventStack.Add(_event, &_event.window->closeEventDispatcher);							
 							break;
 						}
 						case SDL_WINDOWEVENT_ENTER: {
@@ -252,10 +248,9 @@ namespace Blaze
 							WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event.window.windowID));
 							_event.window = window;
 							clientEventStack.Add(_event, &inputEventSystem.windowMouseEnterDispatcher);
+
 							if (window != nullptr)
-								clientEventStack.Add(_event, &_event.window->mouseEnterDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowMouseEnterEvent)");
+								clientEventStack.Add(_event, &_event.window->mouseEnterDispatcher);							
 							break;
 						}
 						case SDL_WINDOWEVENT_LEAVE: {
@@ -263,10 +258,9 @@ namespace Blaze
 							WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event.window.windowID));
 							_event.window = window;
 							clientEventStack.Add(_event, &inputEventSystem.windowMouseLeaveDispatcher);
+
 							if (window != nullptr)
 								clientEventStack.Add(_event, &_event.window->mouseLeaveDispatcher);
-							else
-								Debug::Logger::LogWarning("Blaze Engine", "Missed window event (WindowMouseLeaveEvent)");
 							break;
 						}
 						}

@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/File/Path.h"
 
 namespace Blaze::ResourceSystem
 {

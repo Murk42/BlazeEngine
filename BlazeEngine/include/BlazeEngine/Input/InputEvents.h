@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngine/Input/Key.h"
-#include "BlazeEngine/DataStructures/StringUTF8.h"
 
 namespace Blaze
 {
@@ -13,7 +12,7 @@ namespace Blaze
 		struct MouseMotion            { Vec2i pos; Vec2i delta;           };
 		struct MouseScroll            { int value;                        };		
 		struct TextInput              { StringUTF8 input;                 };		
-		struct WindowResizedEvent     { WindowBase* window; Vec2i size;       };
+		struct WindowResizedEvent     { WindowBase* window; Vec2u size;       };
 		struct WindowMovedEvent       { WindowBase* window; Vec2i pos;        };
 		struct WindowMinimizedEvent   { WindowBase* window;                   };
 		struct WindowMaximizedEvent   { WindowBase* window;                   };

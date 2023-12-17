@@ -51,7 +51,7 @@ namespace Blaze::ECS
 		Array<Entity*> entities;
 		
 		Entity* CreateEntity(ArrayView<const ComponentTypeData*> typesData);
-		void AllocateComponents();
+		ECS::Component** AllocateComponents();
 		Component* GetCurrentComponent();
 		void FinishEntityCreation();		
 
@@ -63,21 +63,26 @@ namespace Blaze::ECS
 	
 	
 	template<typename ... C> requires (IsComponent<C> && ...)
-	inline EntityView<C...> Scene::Create()
-	{		
+		inline EntityView<C...> Scene::Create()
+	{
 		const ComponentTypeData* typesData[sizeof...(C)];
 
 		SetTypesData<C...>(typesData);
-		
-		auto entity = CreateEntity(typesData);
-		AllocateComponents();
 
-		for (auto typeData : typesData)		
-			typeData->Construct(GetCurrentComponent());		
-		
+		auto entity = CreateEntity(typesData);
+		Component** rawComponents = AllocateComponents();
+
+		for (auto typeData : typesData)
+			typeData->Construct(GetCurrentComponent());
+
 		FinishEntityCreation();
 
-		return EntityView<C...>(entity);
+		uint i = 0;
+		Tuple<C*...> components{
+			 (C*)rawComponents[i++]...
+		};
+
+		return EntityView<C...>(entity, components);
 	}
 
 	template<typename C> requires IsComponent<C>
