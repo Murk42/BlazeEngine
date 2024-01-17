@@ -1,5 +1,8 @@
 #include "pch.h"
-#include "BlazeEngineGraphics\Renderers/OpenGL/Line2DRenderer_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+
+#include "BlazeEngineGraphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -10,7 +13,7 @@ namespace Blaze::Graphics::OpenGL
 	{
 		Blaze::Graphics::OpenGLWrapper::VertexShader vert{ "assets/shaders/OpenGL/line2d.vert" };
 		Blaze::Graphics::OpenGLWrapper::FragmentShader frag{ "assets/shaders/OpenGL/line2d.frag" };
-
+		 
 		program.LinkShaders({ &vert, &frag });		
 
 		vb.Allocate(nullptr, VertexBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapAccess::Write, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapType::None);

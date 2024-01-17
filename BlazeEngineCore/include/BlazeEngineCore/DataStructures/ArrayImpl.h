@@ -34,6 +34,26 @@ namespace Blaze
 		return ptr == nullptr;
 	}
 	template<typename Array>
+	inline ArrayIterator<Array>::ValueType& ArrayIterator<Array>::operator*() const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+#endif
+
+		return *ptr;
+	}
+	template<typename Array>
+	inline ArrayIterator<Array>::ValueType* ArrayIterator<Array>::operator->() const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+#endif
+
+		return ptr;
+	}
+	template<typename Array>
 	inline ArrayIterator<Array>& ArrayIterator<Array>::operator++()
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
@@ -110,47 +130,47 @@ namespace Blaze
 		return *this;
 	}
 	template<typename Array>
-	inline ArrayIterator<Array>::ValueType& ArrayIterator<Array>::operator*() const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
-#endif
-
-		return *ptr;
-	}
-	template<typename Array>
-	inline ArrayIterator<Array>::ValueType* ArrayIterator<Array>::operator->() const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
-#endif
-
-		return ptr;
-	}
-	template<typename Array>
 	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
 	inline bool ArrayIterator<Array>::operator>(const T& i) const
 	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
 		return ptr > i.ptr;
 	}
 	template<typename Array>
 	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
 	inline bool ArrayIterator<Array>::operator>=(const T& i) const
 	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
 		return ptr >= i.ptr;
 	}
 	template<typename Array>
 	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
 	inline bool ArrayIterator<Array>::operator<(const T& i) const
 	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
 		return ptr < i.ptr;
 	}
 	template<typename Array>
 	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
 	inline bool ArrayIterator<Array>::operator<=(const T& i) const
 	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
 		return ptr <= i.ptr;
 	}
 	template<typename Array>
@@ -373,7 +393,7 @@ namespace Blaze
 	template<typename ...Args> requires std::constructible_from<T, Args...>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(Iterator it, Args && ...args) requires std::constructible_from<T, T&&>
 	{
-		return AddAt(it.ptr - ptr, std::move(args));
+		return AddAt(it.ptr - ptr, std::forward<Args>(args)...);
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires std::constructible_from<T, Args...>
@@ -448,7 +468,7 @@ namespace Blaze
 			for (uintMem i = index; i < count - 1; ++i)
 				ptr[i] = std::move(ptr[i + 1]);
 
-			std::destroy_at(ptr + count);
+			std::destroy_at(ptr + count - 1);
 		}
 
 		count--;
@@ -466,18 +486,18 @@ namespace Blaze
 			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
 #endif
 
-		if (auto newPtr = ReallocateUnsafe(other.count + other.count))
+		if (auto newPtr = ReallocateUnsafe(count + other.count))
 		{
 			for (uintMem i = 0; i < count; ++i)
-				std::construct_at(newPtr[i], std::move(ptr[i]));
+				std::construct_at(newPtr + i, std::move(ptr[i]));
 
 			std::destroy_n(ptr, count);
 			allocator.Free(ptr);
 			ptr = newPtr;
 		}
 
-		for (uintMem i = count; i < count + other.count; ++i)
-			std::construct_at(ptr + i, other.ptr[i]);
+		for (uintMem i = 0; i < other.count; ++i)
+			std::construct_at(ptr + count + i, other.ptr[i]);
 
 		count += other.count;
 	}

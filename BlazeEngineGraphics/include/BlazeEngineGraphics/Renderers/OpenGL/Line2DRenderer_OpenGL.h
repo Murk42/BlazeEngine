@@ -1,6 +1,5 @@
 #pragma once
-#include "BlazeEngineGraphics\OpenGL/Core/GraphicsContext_OpenGL.h"
-#include "BlazeEngineGraphics\OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
 
 namespace Blaze::Graphics::OpenGL
 {

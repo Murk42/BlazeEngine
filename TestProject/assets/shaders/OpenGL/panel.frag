@@ -9,6 +9,8 @@ in vec2 frag_p3;
 in float frag_borderWidth;
 in float frag_cornerRadius;
 
+out vec4 out_color;
+
 vec4 StepLerp(float x, float lower, float upper, vec4 a, vec4 b)
 {	
 	return mix(a, b, min(max(x - lower,0) / (upper - lower), 1));
@@ -73,5 +75,5 @@ void main()
 		else	
 			color = StepLerp(dist, -borderWidth - innerAntialiasing, -borderWidth, frag_fillColor, frag_borderColor);										
 
-	gl_FragColor = color;
+	out_color = color;
 }

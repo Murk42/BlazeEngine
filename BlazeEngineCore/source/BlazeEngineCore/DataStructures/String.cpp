@@ -1,8 +1,172 @@
 #include "pch.h"
-#include "BlazeEngineCore/DataStructures/String.h"
 
 namespace Blaze
 {
+	StringIterator::StringIterator()
+		: ptr(nullptr)
+	{
+	}
+	StringIterator::StringIterator(const StringIterator& i)
+		: ptr(i.ptr)
+	{
+	}
+	bool StringIterator::IsNull() const
+	{
+		return ptr == nullptr;
+	}
+	char* StringIterator::Ptr() const
+	{
+		return ptr;
+	}
+
+	char& StringIterator::operator*()
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+#endif
+		return *ptr;
+	}
+	const char& StringIterator::operator*() const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+#endif
+		return *ptr;
+	}
+	StringIterator StringIterator::operator++()
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+#endif
+
+		auto old = *this;
+		++ptr;
+		return old;
+	}
+	StringIterator& StringIterator::operator++(int)
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+#endif
+
+		++ptr;
+		return *this;
+	}
+	StringIterator StringIterator::operator--()
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+#endif
+
+		auto old = *this;
+		--ptr;
+		return old;
+	}
+	StringIterator& StringIterator::operator--(int)
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if (ptr == nullptr)
+			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+#endif
+
+		--ptr;
+		return *this;
+	}
+	StringIterator StringIterator::operator+(const uintMem& value) const
+	{
+		return StringIterator(ptr + value);
+	}
+	StringIterator StringIterator::operator+(const intMem& value) const
+	{
+		return StringIterator(ptr + value);
+	}
+	StringIterator StringIterator::operator-(const uintMem& value) const
+	{
+		return StringIterator(ptr - value);
+	}
+	StringIterator StringIterator::operator-(const intMem& value) const
+	{
+		return StringIterator(ptr - value);
+	}
+	StringIterator& StringIterator::operator+=(const uintMem& value)
+	{
+		ptr += value;
+		return *this;
+	}
+	StringIterator& StringIterator::operator+=(const intMem& value)
+	{
+		ptr += value;
+		return *this;
+	}
+	StringIterator& StringIterator::operator-=(const uintMem& value)
+	{
+		ptr -= value;
+		return *this;
+	}
+	StringIterator& StringIterator::operator-=(const intMem& value)
+	{
+		ptr -= value;
+		return *this;
+	}
+	bool StringIterator::operator==(const StringIterator& i) const
+	{
+		return ptr == i.ptr;
+	}
+	bool StringIterator::operator!=(const StringIterator& i) const
+	{
+		return ptr != i.ptr;
+	}
+	bool StringIterator::operator<(const StringIterator& i) const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
+		return ptr < i.ptr;
+	}
+	bool StringIterator::operator>(const StringIterator& i) const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
+		return ptr > i.ptr;
+	}
+	bool StringIterator::operator<=(const StringIterator& i) const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
+		return ptr <= i.ptr;
+	}
+	bool StringIterator::operator>=(const StringIterator& i) const
+	{
+#ifdef BLAZE_NULL_ITERATOR_CHECK
+		if ((ptr == nullptr) != (i.ptr == nullptr))
+			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+#endif
+
+		return ptr >= i.ptr;
+	}
+	StringIterator& StringIterator::operator=(const StringIterator& i)
+	{
+		ptr = i.ptr;		
+		return *this;
+	}
+	StringIterator::StringIterator(char* ptr)
+		: ptr(ptr)
+	{
+	}
+
 	String::String()
 		: ptr(nullptr), count(0)
 	{		
@@ -25,34 +189,6 @@ namespace Blaze
 		s.ptr = nullptr;
 		s.count = 0;
 	}
-	String::String(uintMem count)
-		: count(count)
-	{
-		if (count == 0)
-		{
-			ptr = nullptr;
-		}
-		else
-		{
-			ptr = new char[count + 1];
-			ptr[count] = '\0';
-		}
-	}	
-	String::String(const char* ptr, uintMem count)
-		: count(count)
-	{		
-		if (count == 0 || ptr == nullptr)
-		{
-			this->ptr = nullptr;
-			this->count = 0;
-		}
-		else
-		{
-			this->ptr = new char[count + 1];
-			memcpy(this->ptr, ptr, count);
-			this->ptr[count] = '\0';
-		}
-	}
 	String::String(const StringView& sv)
 		: count(sv.Count())
 	{
@@ -64,22 +200,47 @@ namespace Blaze
 			memcpy(ptr, sv.Ptr(), count + 1);
 		}
 	}	
-	String::String(const char* ptr)
-		: String(ptr, (ptr == nullptr ? 0 : strlen(ptr)))
+	String::String(uintMem count, char fill)		
+		: ptr(nullptr), count(0)
+	{
+		if (count != 0)
+		{
+			ptr = new char[count + 1];
+			memset(ptr, fill, count);
+			ptr[count] = '\0';
+		}
+	}
+	String::String(StringIterator begin, StringIterator end)
+		: String(begin.ptr, end.ptr - begin.ptr)
 	{
 	}
+	String::String(StringViewIterator begin, StringViewIterator end)
+		: String(begin.ptr, end.ptr - begin.ptr)
+	{
+	}
+	String::String(const char* ptr, uintMem count)
+		: ptr(nullptr), count(0)
+	{				
+		if (count != 0 && ptr != nullptr)
+		{
+			this->ptr = new char[count + 1];
+			memcpy(this->ptr, ptr, count);
+			this->ptr[count] = '\0';
+			this->count = count;
+		}
+	}	
 	String::~String()
 	{
 		delete[] ptr;
 	}	
-	String String::SubString(uintMem start, uintMem count) const
-	{
-		return String(ptr + start, count);
-	}
 	void String::Clear()
 	{
 		delete[] ptr;
 		count = 0;
+	}
+	String String::SubString(uintMem start, uintMem count) const
+	{
+		return String(ptr + start, count);
 	}
 	String& String::Resize(uintMem newCount, char fill)
 	{
@@ -101,32 +262,96 @@ namespace Blaze
 	}
 	uint32 String::Hash() const
 	{
-		return (uint32)std::hash<std::string_view>()(std::string_view(ptr, count));		
+		return static_cast<uint32>(std::hash<String>()(*this));
 	}
-	char* String::begin()
+	char& String::First()
+	{ 
+#ifdef BLAZE_INVALID_ITERATOR_CHECK
+		if (count == 0)
+			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+#endif
+		return ptr[0];
+	}
+	const char& String::First() const
 	{
-		return ptr;
+#ifdef BLAZE_INVALID_ITERATOR_CHECK
+		if (count == 0)
+			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+#endif
+		return ptr[0];
 	}
-	char* String::end()
+	char& String::Last()
 	{
-		return ptr + count;
+#ifdef BLAZE_INVALID_ITERATOR_CHECK
+		if (count == 0)
+			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+#endif
+		return ptr[count - 1];
 	}
-	String& String::operator=(const StringView& s)
+	const char& String::Last() const
 	{
-		delete[] ptr;
-		if (s == nullptr)
-		{
-			ptr = nullptr;
-			count = 0;			
-		}
-		else
-		{
-			count = s.Count();
-			ptr = new char[count + 1];
-			memcpy(ptr, s.Ptr(), count + 1);
-		}
-		return *this;
+#ifdef BLAZE_INVALID_ITERATOR_CHECK
+		if (count == 0)
+			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+#endif
+		return ptr[count - 1];
 	}
+	StringIterator String::FirstIterator()
+	{
+		return StringIterator(ptr);
+	}
+	StringViewIterator String::FirstIterator() const
+	{
+		return StringViewIterator(ptr);
+	}
+	StringIterator String::LastIterator()
+	{
+		return StringIterator(ptr + count - 1);
+	}
+	StringViewIterator String::LastIterator() const
+	{
+		return StringViewIterator(ptr + count - 1);
+	}
+	StringIterator String::AheadIterator()
+	{
+		return StringIterator(ptr - 1);
+	}
+	StringViewIterator String::AheadIterator() const
+	{
+		return StringViewIterator(ptr - 1);
+	}
+	StringIterator String::BehindIterator()
+	{
+		return StringIterator(ptr + count);
+	}
+	StringViewIterator String::BehindIterator() const
+	{
+		return StringViewIterator(ptr + count);
+	}
+	bool String::operator==(const StringView& s) const
+	{
+		if (ptr == nullptr && s.Ptr() == nullptr)
+			return true;
+		if (ptr == nullptr || s.Ptr() == nullptr || count != s.Count())
+			return false;
+		return memcmp(ptr, s.Ptr(), count) == 0;
+	}
+	bool String::operator!=(const StringView& s) const
+	{
+		return !(*this == s);
+	}
+	String& String::operator+=(const String& other)
+	{
+		return *this = *this + StringView(other);
+	}
+	String& String::operator+=(const StringView& other)
+	{
+		return *this = *this + other;		
+	}	
+	String& String::operator+=(const char& other)
+	{
+		return *this = *this + StringView(other);
+	}		
 	String& String::operator= (const String& s)
 	{
 		if (s.Count() == 0)
@@ -154,36 +379,39 @@ namespace Blaze
 		s.count = 0;
 		return *this;
 	}
-	bool String::operator==(const StringView& s) const
+	String& String::operator=(const StringView& s)
 	{
-		if (ptr == nullptr && s.Ptr() == nullptr)
-			return true;
-		if (ptr == nullptr || s.Ptr() == nullptr || count != s.Count())
-			return false;
-		return memcmp(ptr, s.Ptr(), count) == 0;
-	}
-	bool String::operator!=(const StringView& s) const
-	{
-		return !(*this == s);
-	}
-
-	String& String::operator+=(const String& other)
-	{
-		return *this = *this + StringView(other);
-	}
-
-	String& String::operator+=(const StringView& other)
-	{
-		return *this = *this + other;		
-	}
-	String& String::operator+=(const char* other)
-	{
-		return *this = *this + StringView(other);
-	}
-	String& String::operator+=(const char& other)
-	{
-		return *this = *this + StringView(other);
+		delete[] ptr;
+		if (s.Empty())
+		{
+			ptr = nullptr;
+			count = 0;			
+		}
+		else
+		{
+			count = s.Count();
+			ptr = new char[count + 1];
+			memcpy(ptr, s.Ptr(), count + 1);
+		}
+		return *this;
 	}	
+
+	StringIterator begin(String& string)
+	{
+		return string.FirstIterator();
+	}
+	StringViewIterator begin(const String& string)
+	{
+		return string.FirstIterator();
+	}
+	StringIterator end(String& string)
+	{
+		return string.BehindIterator();
+	}
+	StringViewIterator end(const String& string)
+	{
+		return string.BehindIterator();
+	}
 
 	String operator+(const StringView& left, const StringView& right)
 	{
@@ -200,51 +428,30 @@ namespace Blaze
 		out.count = count;
 		return out;
 	}
-
 	String operator+(const StringView& left, const String& right)
 	{
 		return operator+(left, StringView(right));
-	}
-	String operator+(const StringView& left, const char* right)
-	{
-		return operator+(left, StringView(right));
-	}
+	}	
 	String operator+(const StringView& left, const char& right)
 	{
 		return operator+(left, StringView(&right, 1));
 	}
-
 	String operator+(const String& left, const StringView& right)
 	{
 		return operator+(StringView(left), right);
-	}
-	String operator+(const char* left, const StringView& right)
-	{
-		return operator+(StringView(left), right);
-	}
+	}	
 	String operator+(const char& left, const StringView& right)
 	{
 		return operator+(StringView(&left, 1), right);		
 	}
-
 	String operator+(const String& left, const String& right)
 	{
 		return operator+(StringView(left), StringView(right));
-	}
-
-	String operator+(const String& left, const char* right)
-	{
-		return operator+(StringView(left), StringView(right));
-	}
+	}	
 	String operator+(const String& left, const char& right)
 	{
 		return operator+(StringView(left), right);
-	}
-
-	String operator+(const char* left, const String& right)
-	{
-		return operator+(StringView(left), StringView(right));
-	}
+	}	
 	String operator+(const char& left, const String& right)
 	{
 		return operator+(left, StringView(right));

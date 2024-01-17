@@ -1,31 +1,38 @@
 #pragma once
 
 namespace Blaze
-{
-	class StringViewUTF8;
-	class BLAZE_CORE_API UnicodeChar
+{	
+	class UnicodeChar
 	{
-		uint32 value;
 	public:
-		UnicodeChar();
-		UnicodeChar(const UnicodeChar&);
-		UnicodeChar(uint32 value);		
-		UnicodeChar(const void* ptr, uintMem size);
+		constexpr UnicodeChar();
+		constexpr UnicodeChar(const UnicodeChar&);
+		constexpr UnicodeChar(uint32 value);		
+		constexpr UnicodeChar(const void* ptr, uintMem size);
 
-		inline uint32 Value() const { return value; }
-		size_t UTF8Size();
-		bool ToUTF8(void* buffer, uintMem size);
+		constexpr uint32 Value() const { return value; }
+		//Returns the count of bytes that the character would take if it was
+		//in a utf8 string
+		constexpr uintMem UTF8Size() const;
+		//Converts the unicode character into a utf-8 string if it can fit and 
+		//returns the amount of bytes it takes up, if it can't fit it doesn't 
+		//change the buffer and returns 0
+		constexpr uintMem ToUTF8(void* buffer, uintMem size) const;
 
-		uint32 Hash() const;
+		constexpr uint32 Hash() const;
 
-		UnicodeChar& operator++();
-		UnicodeChar operator++(int);
-		UnicodeChar& operator--();
-		UnicodeChar operator--(int);
+		constexpr UnicodeChar& operator++();
+		constexpr UnicodeChar operator++(int);
+		constexpr UnicodeChar& operator--();
+		constexpr UnicodeChar operator--(int);
 
-		bool operator==(const UnicodeChar& other) const;
-		bool operator!=(const UnicodeChar& other) const;
+		constexpr bool operator==(const UnicodeChar& other) const;
+		constexpr bool operator!=(const UnicodeChar& other) const;
 
-		UnicodeChar& operator=(const UnicodeChar& other);
+		constexpr UnicodeChar& operator=(const UnicodeChar& other);
+	private:
+		uint32 value;
+
+		static constexpr uintMem UTF8ToUnicode(const void* ptr, uintMem size, uint32& character);
 	};
 }

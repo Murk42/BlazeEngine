@@ -47,12 +47,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <TargetName>BlazeEngineCore-static-x64-debug</TargetName>
+    <TargetName>BlazeEngineCore-static-x64-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <TargetName>BlazeEngineCore-static-x64-release</TargetName>
+    <TargetName>BlazeEngineCore-static-x64-$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -114,9 +114,6 @@
     <ClCompile Include="source\BlazeEngineCore\DataStructures\String.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\StringHash.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\StringUTF8.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\DataStructures\StringView.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\DataStructures\StringViewUTF8.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\DataStructures\UnicodeChar.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Debug\Breakpoint.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Debug\Callstack.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Debug\Log.cpp" />
@@ -173,11 +170,14 @@
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringHash.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringUTF8.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringView.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewUTF8.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewUTF8Impl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Template.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\TemplateGroup.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Tuple.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\UnicodeChar.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\UnicodeCharImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\UnorderedArray.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\UnorderedArrayImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\VirtualList.h" />
@@ -432,6 +432,15 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\default\fonts\Consola.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="source\BlazeEngineMapDebugView.natvis" />
+    <Natvis Include="source\BlazeEngineArrayDebugView.natvis" />
+    <Natvis Include="source\BlazeEngineStringDebugView.natvis" />
+    <Natvis Include="source\BlazeEngineStringUTF8DebugView.natvis" />
+    <Natvis Include="source\BlazeEngineStringViewDebugView.natvis" />
+    <Natvis Include="source\BlazeEngineStringViewUTF8DebugView.natvis" />
+    <Natvis Include="source\BlazeEngineUnicodeCharDebugView.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

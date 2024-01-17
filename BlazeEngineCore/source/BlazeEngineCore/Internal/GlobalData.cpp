@@ -1,9 +1,15 @@
 #include "pch.h"
 #include "GlobalData.h"
 
+//Used in BlazeEngine library in EntryPoint.cpp as a empty function
+void AddLoggerOutputFiles()
+{
+
+}
+
 namespace Blaze
 {
-	GlobalDataCore globalData;
+	GlobalDataCore globalDataCore;
 
 	GlobalDataCore::GlobalDataCore()
 	{		
@@ -14,6 +20,6 @@ namespace Blaze
 	}
 	uint GetThisThreadID()
 	{
-		return globalData.threadIDs.Insert(std::this_thread::get_id(), (uint)globalData.threadIDs.Count()).iterator->value;		
+		return globalDataCore.threadIDs.Insert(std::this_thread::get_id(), (uint)globalDataCore.threadIDs.Count()).iterator->value;		
 	}
 }

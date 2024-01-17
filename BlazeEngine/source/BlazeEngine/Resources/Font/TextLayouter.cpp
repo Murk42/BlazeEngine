@@ -3,15 +3,25 @@
 
 namespace Blaze
 {
-	Blaze::TextLayouterBase::~TextLayouterBase()
+	float FillCharacterLayoutData(CharacterLayoutData& data, float cursor, const FontGlyphMetrics& metrics, const FontMetrics& fontMetrics, UnicodeChar character, UnicodeChar prevCharacter)
 	{
+		data.pos = Vec2f(cursor, 0) + metrics.offset;
+		data.size = metrics.size;
+		data.character = character;
+
+		if (data.size.x == 0)
+			data.size.x = metrics.horizontalAdvance;
+
+		Vec2f kerning;
+		if (prevCharacter != '\0')
+			kerning = fontMetrics.GetGlyphKerning(prevCharacter, character);
+
+		data.pos += kerning;
+					
+		return metrics.horizontalAdvance + kerning.x;
 	}
-	bool TextLayouterBase::CharacterData::IsVisible() const
-	{
-		return size.x != 0 && size.y != 0;
-	}
-	SingleLineTextLayouter::SingleLineTextLayouter()
-		: index(0)
+
+	SingleLineTextLayouter::SingleLineTextLayouter()		
 	{
 	}
 	SingleLineTextLayouter::SingleLineTextLayouter(StringViewUTF8 text, const FontMetrics& fontMetrics)
@@ -20,40 +30,170 @@ namespace Blaze
 	}
 	void SingleLineTextLayouter::SetText(StringViewUTF8 text, const FontMetrics& fontMetrics)
 	{
-		charactersData.Resize(text.CharacterCount());
+		lines.Clear();
 
-		uint cursor = 0;
+		if (text.Empty())					
+			return;		
 
-		bool isFirst = true;
-		bool isLast = false;
+		auto line = &*lines.AddBack();
+		line->characters.Resize(text.CharacterCount());
 
-		UnicodeChar prevCharacter;
+		float cursor = 0;
+		float baselineDistance = fontMetrics.GetPixelFontHeight();
 
-		auto it = charactersData.FirstIterator();
-		for (auto character : text)
+		if (baselineDistance == 0)
+			baselineDistance = 1.0f;
+
+		UnicodeChar prevCharacter = '\0';
+
+		float lastAdvance = 0.0f;
+		float lastWidth = 0.0f;
+		auto textIt = text.FirstIterator();
+		for (uintMem i = 0; i < text.CharacterCount(); ++i, ++textIt)
 		{
-			if (it == charactersData.LastIterator())
-				isLast = true;
+			UnicodeChar character = *textIt;
+			auto& characterData = line->characters[i];
 
-			FontGlyphMetrics characterMetrics;
-			fontMetrics.GetGlyphMetrics(character, characterMetrics);
+			FontGlyphMetrics metrics;
+			if (!fontMetrics.GetGlyphMetrics(character, metrics))
+				continue;			
 
-			it->pos = Vec2i(cursor, 0) + characterMetrics.offset;
-			it->size = characterMetrics.size;
-			it->character = character;
+			lastAdvance = FillCharacterLayoutData(characterData, cursor, metrics, fontMetrics, character, prevCharacter);
+			lastWidth = characterData.size.x;
 
-			if (!isFirst)
-				it->pos += fontMetrics.GetGlyphKerning(prevCharacter, character);
-
-			if (!isLast)
-				cursor += characterMetrics.horizontalAdvance;
-
-			prevCharacter = character;
-
-			++it;
+			cursor += lastAdvance;
+				
+			prevCharacter = character;			
 		}
 
-		size.x = cursor + charactersData.Last().size.x;
-		size.y = fontMetrics.GetPixelFontHeight();
+		line->width = cursor - lastAdvance + lastWidth;
+	}
+	MultiLineTextLayouter::MultiLineTextLayouter()		
+	{ 
+	}
+	MultiLineTextLayouter::MultiLineTextLayouter(StringViewUTF8 text, const FontMetrics& fontMetrics)
+	{
+		SetText(text, fontMetrics);
+	}
+	void MultiLineTextLayouter::SetText(StringViewUTF8 text, const FontMetrics& fontMetrics)
+	{		
+		lines.Clear();
+
+		if (text.Empty())		
+			return;		
+
+		auto* line = &*lines.AddBack();		
+
+		float cursor = 0;
+		float baselineDistance = fontMetrics.GetPixelFontHeight();
+
+		if (baselineDistance == 0)
+			baselineDistance = 1.0f;
+		
+		UnicodeChar prevCharacter = '\0';
+
+		float lastAdvance = 0.0f;
+		float lastWidth = 0.0f;
+		auto textIt = text.FirstIterator();
+		for (uintMem i = 0; i < text.CharacterCount(); ++i, ++textIt)
+		{
+			UnicodeChar character = *textIt;
+			auto& characterData = *line->characters.AddBack();
+
+			if (character.Value() == (uint32)'\n')
+			{				
+				line->width = cursor - lastAdvance + lastWidth;
+				cursor = 0;
+				line = &*lines.AddBack();		
+				continue;
+			}
+
+			FontGlyphMetrics metrics;
+			if (!fontMetrics.GetGlyphMetrics(character, metrics))
+				continue;
+			
+			lastAdvance = FillCharacterLayoutData(characterData, cursor, metrics, fontMetrics, character, prevCharacter);
+			lastWidth = characterData.size.x;
+
+			cursor += lastAdvance;
+
+			prevCharacter = character;
+		}		
+
+		line->width = cursor - lastAdvance + lastWidth;
+	}
+	WrappedLineTextLayouter::WrappedLineTextLayouter()
+		: wrapWidth(0)
+	{
+	}
+	WrappedLineTextLayouter::WrappedLineTextLayouter(StringViewUTF8 text, const FontMetrics& fontMetrics, float wrapWidth)
+		: wrapWidth(wrapWidth)
+	{
+	}
+	void WrappedLineTextLayouter::SetWrapWidth(float wrapWidth)
+	{
+		this->wrapWidth = wrapWidth;
+	}
+	void WrappedLineTextLayouter::SetText(StringViewUTF8 text, const FontMetrics& fontMetrics)
+	{
+		lines.Clear();
+
+		if (text.Empty())
+			return;
+
+		auto* line = &*lines.AddBack();		
+
+		float cursor = 0;
+		float baselineDistance = fontMetrics.GetPixelFontHeight();
+
+		if (baselineDistance == 0)
+			baselineDistance = 1.0f;
+
+		UnicodeChar prevCharacter = '\0';
+
+		float lastAdvance = 0.0f;
+		float lastWidth = 0.0f;
+		auto textIt = text.FirstIterator();
+		for (uintMem i = 0; i < text.CharacterCount(); ++i, ++textIt)
+		{
+			UnicodeChar character = *textIt;
+
+			if (character.Value() == (uint32)'\n')
+			{
+				//Create empty character
+				auto& characterData = *line->characters.AddBack();
+
+				line->width = cursor - lastAdvance + lastWidth;
+				cursor = 0;
+				line = &*lines.AddBack();
+				continue;
+			}
+
+			FontGlyphMetrics metrics;
+			if (!fontMetrics.GetGlyphMetrics(character, metrics))
+			{
+				//Create empty character
+				auto& characterData = *line->characters.AddBack();
+				continue;
+			}
+
+			if (cursor + metrics.size.x > wrapWidth && wrapWidth != 0 && metrics.size.x <= wrapWidth)
+			{
+				line->width = cursor - lastAdvance + lastWidth;
+				cursor = 0;
+				line = &*lines.AddBack();
+			}
+
+			auto& characterData = *line->characters.AddBack();
+
+			lastAdvance = FillCharacterLayoutData(characterData, cursor, metrics, fontMetrics, character, prevCharacter);
+			lastWidth = characterData.size.x;
+
+			cursor += lastAdvance;
+
+			prevCharacter = character;
+		}
+
+		line->width = cursor - lastAdvance + lastWidth;
 	}
 }

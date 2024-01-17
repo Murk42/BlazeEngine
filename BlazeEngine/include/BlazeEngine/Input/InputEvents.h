@@ -9,7 +9,7 @@ namespace Blaze
 	{
 		struct KeyPressed             { Key key; double time; uint combo; };
 		struct KeyReleased            { Key key; double time;             };				
-		struct MouseMotion            { Vec2i pos; Vec2i delta;           };
+		struct MouseMotion            { Vec2i delta;           };
 		struct MouseScroll            { int value;                        };		
 		struct TextInput              { StringUTF8 input;                 };		
 		struct WindowResizedEvent     { WindowBase* window; Vec2u size;       };
@@ -21,6 +21,8 @@ namespace Blaze
 		struct WindowCloseEvent       { WindowBase* window;                   };
 		struct WindowMouseEnterEvent  { WindowBase* window;	                  };
 		struct WindowMouseLeaveEvent  { WindowBase* window;	                  };
+		struct InputPreUpdateEvent    { };
+		struct InputPostUpdateEvent { };
 
 		enum class InputEventType
 		{
@@ -38,6 +40,6 @@ namespace Blaze
 			WindowCloseEvent,
 			WindowMouseEnterEvent,
 			WindowMouseLeaveEvent,
-		};
+		};		
 	}	
 }

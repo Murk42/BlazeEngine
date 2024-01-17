@@ -3,12 +3,95 @@
 
 namespace Blaze::StringParsing
 {
-	bool SplitAtFirst(StringView _value, String& first, String& second, char ch)
+	bool SplitAtFirst(StringView value, String& first, String& second, char ch)
 	{
-		String value = _value;
-		const char* begin = value.Ptr();
-		const char* end = begin + value.Count();
-		const char* it = begin;
+		StringViewIterator end = value.BehindIterator();
+		StringViewIterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			first = value;
+			second.Clear();
+			return false;
+		}
+
+		first = String(value.FirstIterator(), it);
+		second = String(++it, end);
+		return true;
+	}
+	bool SplitAtFirst(StringViewUTF8 value, StringUTF8& first, StringUTF8& second, UnicodeChar ch)
+	{
+		StringViewUTF8Iterator end = value.BehindIterator();
+		StringViewUTF8Iterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			first = value;
+			second.Clear();
+			return false;
+		}
+
+		first = StringUTF8(value.FirstIterator(), it);
+		second = StringUTF8(++it, end);
+		return true;
+	}
+	bool SplitAtFirstGroup(StringView value, String& first, String& second, char ch)
+	{
+		StringViewIterator end = value.BehindIterator();
+		StringViewIterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			first = value;
+			second.Clear();
+			return false;
+		}
+
+		first = String(value.FirstIterator(), it);
+
+		while (it != end && *it == ch)
+			++it;
+
+		second = String(it, end);
+		return true;
+	}
+	bool SplitAtFirstGroup(StringViewUTF8 value, StringUTF8& first, StringUTF8& second, UnicodeChar ch)
+	{
+		StringViewUTF8Iterator end = value.BehindIterator();
+		StringViewUTF8Iterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			first = value;
+			second.Clear();
+			return false;
+		}
+
+		first = StringUTF8(value.FirstIterator(), it);
+
+		while (it != end && *it == ch)
+			++it;
+
+		second = StringUTF8(it, end);
+		return true;
+	}
+
+	bool GetAfterFirst(StringView value, String& out, char ch)
+	{
+		StringViewIterator end = value.BehindIterator();
+		StringViewIterator it = value.FirstIterator();
 
 		while (it != end && *it != ch)
 			++it;
@@ -16,33 +99,15 @@ namespace Blaze::StringParsing
 		if (it == end)
 			return false;
 
-		first = String(begin, it - begin);
-		second = String(it + 1, end - it - 1);
+		++it;
+
+		out = String(it, end);
 		return true;
 	}
-
-	bool GetAfterFirst(StringView _value, String& out, char ch)
+	bool GetAfterFirst(StringViewUTF8 value, StringUTF8& out, UnicodeChar ch)
 	{
-		String value = _value;
-		const char* begin = value.Ptr();
-		const char* end = begin + value.Count();
-		const char* it = begin;
-
-		while (it != end && *it != ch)
-			++it;
-
-		if (it == end)
-			return false;
-		
-		out = String(it + 1, end - it - 1);
-		return true;
-	}
-	bool GetBeforeFirst(StringView _value, String& out, char ch)
-	{
-		String value = _value;
-		const char* begin = value.Ptr();
-		const char* end = begin + value.Count();
-		const char* it = begin;
+		StringViewUTF8Iterator end = value.BehindIterator();
+		StringViewUTF8Iterator it = value.FirstIterator();
 
 		while (it != end && *it != ch)
 			++it;
@@ -50,96 +115,370 @@ namespace Blaze::StringParsing
 		if (it == end)
 			return false;
 
-		begin = value.begin();
-		out = String(begin, it - begin);
+		++it;
+
+		out = StringUTF8(it, end);
 		return true;
 	}
-	bool GetAfterLast(StringView _value, String& out, char ch)
+	bool GetAfterFirstGroup(StringView value, String& out, char ch)
 	{
-		String value = _value;
-		const char* end = value.Ptr() - 1;
-		const char* begin = end + value.Count();
-		const char* it = begin;
+		StringViewIterator end = value.BehindIterator();
+		StringViewIterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			out = value;
+			return false;
+		}
+
+		while (it != end && *it == ch)
+			++it;
+
+		out = String(it, end);
+		return true;
+	}
+	bool GetAfterFirstGroup(StringViewUTF8 value, StringUTF8& out, UnicodeChar ch)
+	{
+		StringViewUTF8Iterator end = value.BehindIterator();
+		StringViewUTF8Iterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			out = value;
+			return false;
+		}
+
+		while (it != end && *it == ch)
+			++it;
+
+		out = StringUTF8(it, end);
+		return true;
+	}
+	bool GetBeforeFirst(StringView value, String& out, char ch)
+	{
+		StringViewIterator end = value.BehindIterator();
+		StringViewIterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			out = value;
+			return false;
+		}
+
+		out = String(value.FirstIterator(), it);
+		return true;
+	}
+	bool GetBeforeFirst(StringViewUTF8 value, StringUTF8& out, UnicodeChar ch)
+	{
+		StringViewUTF8Iterator end = value.BehindIterator();
+		StringViewUTF8Iterator it = value.FirstIterator();
+
+		while (it != end && *it != ch)
+			++it;
+
+		if (it == end)
+		{
+			out = value;
+			return false;
+		}
+
+		out = StringUTF8(value.FirstIterator(), it);
+		return true;
+	}
+
+	bool GetAfterLast(StringView value, String& out, char ch)
+	{
+		StringViewIterator end = value.AheadIterator();
+		StringViewIterator it = value.LastIterator();
 
 		while (it != end && *it != ch)
 			--it;
 
 		if (it == end)
+		{
+			out = value;
 			return false;
+		}
 
-		end = value.end();
-		out = String(it + 1, end - it - 1);
+		out = String(++it, value.BehindIterator());
 		return true;
 	}
-	bool GetBeforeLast(StringView _value, String& out, char ch)
+	bool GetAfterLast(StringViewUTF8 value, StringUTF8& out, UnicodeChar ch)
 	{
-		String value = _value;
-		const char* end = value.Ptr() - 1;
-		const char* begin = end + value.Count();
-		const char* it = begin;
+		if (value.Empty())
+		{
+			out.Clear();
+			return false;
+		}
+
+		StringViewUTF8Iterator end = value.FirstIterator();
+		StringViewUTF8Iterator it = --value.BehindIterator();
 
 		while (it != end && *it != ch)
-			++it;
+			--it;
 
 		if (it == end)
-			return false;
-
-		begin = value.begin();
-		out = String(begin, it - begin);
-		return true;
-	}
-
-	bool RemoveQuotes(StringView value, String& out)
-	{		
-		if (!GetAfterFirst(value, out, '"')) return false;
-		if (!GetBeforeFirst(out, out, '"'))
 		{
+			if (*it == ch)
+			{
+				out.Clear();
+				return true;
+			}
+
 			out = value;
 			return false;
 		}
+
+		out = StringUTF8(++it, value.BehindIterator());
 		return true;
 	}
-	bool RemoveBrackets(StringView value, String& out, char right, char left)
+	bool GetBeforeLast(StringView value, String& out, char ch)
 	{
-		if (!GetAfterFirst(value, out, right)) return false;
-		if (!GetBeforeLast(out, out, left))
+		StringViewIterator end = value.AheadIterator();
+		StringViewIterator it = value.LastIterator();
+
+		while (it != end && *it != ch)
+			--it;
+
+		if (it == end)
 		{
 			out = value;
 			return false;
 		}
+
+		out = String(value.FirstIterator(), it);
 		return true;
 	}
-	void RemoveSpace(StringView value, String& out)
+	bool GetBeforeLast(StringViewUTF8 value, StringUTF8& out, UnicodeChar ch)
 	{
-		const char* begin = value.Ptr();
-		const char* end = begin + value.Count();
-		const char* it1 = begin;
-		const char* it2 = end - 1;
-
-		while (it1 != end && isspace(*it1)) ++it1;
-
-		if (it1 == end)
+		if (value.Empty())
 		{
-			out = value;
-			return;
+			out.Clear();
+			return false;
 		}
 
-		while (isspace(*it2)) --it2;
+		StringViewUTF8Iterator end = value.FirstIterator();
+		StringViewUTF8Iterator it = --value.BehindIterator();
 
-		out = String(it1, it2 - it1 + 1);
+		while (it != end && *it != ch)
+			--it;
+
+		if (it == end)
+		{
+			if (*it == ch)
+			{
+				out.Clear();
+				return true;
+			}
+
+			out = value;
+			return false;
+		}
+
+		out = StringUTF8(value.FirstIterator(), it);
+		return true;
+	}
+	bool GetBeforeLastGroup(StringView value, String& out, char ch)
+	{
+		StringViewIterator end = value.AheadIterator();
+		StringViewIterator it = value.LastIterator();
+
+		while (it != end && *it != ch)
+			--it;
+
+		if (it == end)
+		{
+			out = value;
+			return false;
+		}
+
+		while (it != end && *it == ch)
+			--it;
+
+		out = String(value.FirstIterator(), it);
+		return true;
+	}
+	bool GetBeforeLastGroup(StringViewUTF8 value, StringUTF8& out, UnicodeChar ch)
+	{
+		StringViewUTF8Iterator end = value.FirstIterator();
+		StringViewUTF8Iterator it = --value.BehindIterator();
+
+		while (it != end && *it != ch)
+			--it;
+
+		if (it == end)
+		{
+			if (*it == ch)
+			{
+				out.Clear();
+				return true;
+			}
+
+			out = value;
+			return false;
+		}
+
+		while (it != end && *it == ch)
+			--it;
+
+		out = StringUTF8(value.FirstIterator(), it);
+		return true;
+	}
+
+	String RemoveSurrounding(StringView value, char ch)
+	{
+		if (value.Empty())
+			return String();
+
+		if (value.Count() == 1)
+			if (value.First() == ch)
+				return String();
+			else
+				return value;
+
+		if (value.First() == ch)
+			if (value.Last() == ch)
+				return value.SubString(1, value.Count() - 2);
+			else
+				return value.SubString(1, value.Count() - 1);
+		else
+			if (value.Last() == ch)
+				return value.SubString(0, value.Count() - 1);
+			else
+				return value;
+	}
+	StringUTF8 RemoveSurrounding(StringViewUTF8 value, UnicodeChar ch)
+	{
+		if (value.Empty())
+			return StringUTF8();
+
+		if (value.CharacterCount() == 1)
+			if (value.First() == ch)
+				return StringUTF8();
+			else
+				return value;
+
+		auto last = *--value.BehindIterator();
+		if (value.First() == ch)
+			if (last == ch)
+				return StringUTF8(++value.FirstIterator(), --value.BehindIterator());
+			else
+				return StringUTF8(++value.FirstIterator(), value.BehindIterator());
+		else
+			if (last == ch)
+				return StringUTF8(value.FirstIterator(), --value.BehindIterator());
+			else
+				return value;
+	}
+	String RemoveSurroundingGroup(StringView value, char ch)
+	{
+		if (value.Empty())
+			return String();
+
+		auto begin = value.FirstIterator();
+		auto end = value.BehindIterator();
+
+		while (begin != end && *begin == ch)
+			++begin;
+
+		if (begin == end)
+			return String();
+
+		--end;
+
+		while (begin != end && *end == ch)
+			--end;
+
+		if (end == begin)
+			return String();
+
+		++end;
+
+		return String(begin, end);
+	}
+	StringUTF8 RemoveSurroundingGroup(StringViewUTF8 value, UnicodeChar ch)
+	{
+		if (value.Empty())
+			return StringUTF8();
+
+		auto begin = value.FirstIterator();
+		auto end = value.BehindIterator();
+
+		while (begin != end && *begin == ch)
+			++begin;
+
+		if (begin == end)
+			return StringUTF8();
+
+		--end;
+
+		while (begin != end && *end == ch)
+			--end;
+
+		if (end == begin)
+			return StringUTF8();
+
+		++end;
+
+		return StringUTF8(begin, end);
 	}
 
 	Array<String> Split(StringView value, char ch)
 	{
-		size_t count = value.Count(ch) + 1;
-		Array<String> out(count);
+		Array<String> out;
 
-		String current = value;
-		for (uint i = 0; i < count; ++i)
-			SplitAtFirst(current, out[i], current, ch);
+		auto it = value.FirstIterator();
+		auto end = value.BehindIterator();
 
-		return out;
+		while (true)
+		{
+			while (it != end && *it == ch)
+				++it;
+
+			if (it == end)
+				return out;
+
+			auto begin = it;
+
+			while (it != end && *it != ch)
+				++it;
+
+			out.AddBack(String(begin, it));
+		}
 	}
+	Array<StringUTF8> Split(StringViewUTF8 value, UnicodeChar ch)
+	{
+		Array<StringUTF8> out;
+
+		auto it = value.FirstIterator();
+		auto end = value.BehindIterator();
+
+		while (true)
+		{
+			while (it != end && *it == ch)
+				++it;
+
+			if (it == end)
+				return out;
+
+			auto begin = it;
+
+			while (it != end && *it != ch)
+				++it;
+
+			out.AddBack(StringUTF8(begin, it));
+		}
+	}
+
 
 	template<std::integral T> StringView IntegerTypeName();
 	template<> StringView IntegerTypeName<int64>() { return "int64"; }
@@ -149,11 +488,11 @@ namespace Blaze::StringParsing
 	template<> StringView IntegerTypeName<int16>() { return "int16"; }
 	template<> StringView IntegerTypeName<uint16>() { return "uint16"; }
 	template<> StringView IntegerTypeName<int8>() { return "int8"; }
-	template<> StringView IntegerTypeName<uint8>() { return "uint8"; }	
+	template<> StringView IntegerTypeName<uint8>() { return "uint8"; }
 
 	template<std::floating_point T> StringView FloatTypeName();
 	template<> StringView FloatTypeName<float>() { return "float"; }
-	template<> StringView FloatTypeName<double>() { return "double"; }	
+	template<> StringView FloatTypeName<double>() { return "double"; }
 
 	std::chars_format ToStdCharsFormat(FloatStringFormat format)
 	{
@@ -170,7 +509,7 @@ namespace Blaze::StringParsing
 
 	template<std::integral T>
 	Result CharsToNumber(const char* str, uintMem length, T& value, int base, uintMem* count)
-	{ 		
+	{
 		auto [end, err] = std::from_chars(str, str + length, value, base);
 
 		if (err == std::errc::result_out_of_range)
@@ -182,8 +521,8 @@ namespace Blaze::StringParsing
 		else if (count != nullptr)
 			*count = end - str;
 
-		return Result();		
-	}	
+		return Result();
+	}
 	template<std::floating_point T>
 	Result CharsToNumber(const char* str, uintMem length, T& value, FloatStringFormat format, uintMem* count)
 	{
@@ -199,15 +538,14 @@ namespace Blaze::StringParsing
 			*count = end - str;
 
 		return Result();
-	}	
-
+	}
 
 	template<std::integral T>
 	Result NumberToChars(T value, char* str, uintMem maxCount, int base, uintMem* count)
 	{
 		auto [end, err] = std::to_chars(str, str + maxCount, value, base);
 		if (err == std::errc::value_too_large)
-		{			
+		{
 			*count = 0;
 			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
 		}
@@ -215,13 +553,13 @@ namespace Blaze::StringParsing
 			*count = end - str;
 
 		return Result();
-	}	
+	}
 	template<std::floating_point T>
 	Result NumberToChars(T value, char* str, uintMem maxCount, FloatStringFormat format, uintMem* count)
 	{
 		auto res = std::to_chars(str, str + maxCount, value, ToStdCharsFormat(format));
 		if (res.ec == std::errc::value_too_large)
-		{			
+		{
 			*count = 0;
 			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
 		}
@@ -229,18 +567,28 @@ namespace Blaze::StringParsing
 			*count = res.ptr - str;
 
 		return Result();
-	}		
+	}
 
 	Result Convert(const StringView& from, uint64& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
-	Result Convert(const StringView& from, int64&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
+	Result Convert(const StringViewUTF8& from, uint64& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
+	Result Convert(const StringView& from, int64& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
+	Result Convert(const StringViewUTF8& from, int64& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
 	Result Convert(const StringView& from, uint32& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
-	Result Convert(const StringView& from, int32&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
+	Result Convert(const StringViewUTF8& from, uint32& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
+	Result Convert(const StringView& from, int32& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
+	Result Convert(const StringViewUTF8& from, int32& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
 	Result Convert(const StringView& from, uint16& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
-	Result Convert(const StringView& from, int16&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
-	Result Convert(const StringView& from, uint8&  to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
-	Result Convert(const StringView& from, int8&   to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
-	Result Convert(const StringView& from, float&  to, FloatStringFormat format, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, format, count); }
+	Result Convert(const StringViewUTF8& from, uint16& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
+	Result Convert(const StringView& from, int16& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
+	Result Convert(const StringViewUTF8& from, int16& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
+	Result Convert(const StringView& from, uint8& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
+	Result Convert(const StringViewUTF8& from, uint8& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
+	Result Convert(const StringView& from, int8& to, uint base, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, base, count); }
+	Result Convert(const StringViewUTF8& from, int8& to, uint base, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, base, count); }
+	Result Convert(const StringView& from, float& to, FloatStringFormat format, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, format, count); }
+	Result Convert(const StringViewUTF8& from, float& to, FloatStringFormat format, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, format, count); }
 	Result Convert(const StringView& from, double& to, FloatStringFormat format, uintMem* count) { return CharsToNumber(from.Ptr(), from.Count(), to, format, count); }
+	Result Convert(const StringViewUTF8& from, double& to, FloatStringFormat format, uintMem* count) { return CharsToNumber((const char*)from.Buffer(), from.BufferSize() - 1, to, format, count); }
 
 
 	template<std::integral T>
@@ -249,8 +597,8 @@ namespace Blaze::StringParsing
 		char buffer[64];
 
 		uintMem _count;
-		if (Result r = NumberToChars(value, buffer, 64, base, &_count))		
-			return "";		
+		if (Result r = NumberToChars(value, buffer, 64, base, &_count))
+			return "";
 
 		if (count != nullptr)
 			*count = _count;
@@ -259,19 +607,19 @@ namespace Blaze::StringParsing
 	}
 	template<std::floating_point T>
 	String _Convert(T value, FloatStringFormat format, uintMem* count)
-	{		
+	{
 		char buffer[64];
-		
+
 		uintMem _count;
-		if (Result r = NumberToChars(value, buffer, 64, format, &_count))				
+		if (Result r = NumberToChars(value, buffer, 64, format, &_count))
 			return "";
 
 		if (count != nullptr)
 			*count = _count;
-		
+
 		return String(buffer, _count);
 	}
-	
+
 	String Convert(uint64 from, uint base, uintMem* count) { return _Convert(from, base, count); }
 	String Convert(int64  from, uint base, uintMem* count) { return _Convert(from, base, count); }
 	String Convert(uint32 from, uint base, uintMem* count) { return _Convert(from, base, count); }
@@ -282,4 +630,12 @@ namespace Blaze::StringParsing
 	String Convert(int8   from, uint base, uintMem* count) { return _Convert(from, base, count); }
 	String Convert(float  from, FloatStringFormat format, uintMem* count) { return _Convert(from, format, count); }
 	String Convert(double from, FloatStringFormat format, uintMem* count) { return _Convert(from, format, count); }
+	StringView Convert(const String& string)
+	{
+		return string;
+	}
+	StringView Convert(const StringView& string)
+	{
+		return string;
+	}	
 }

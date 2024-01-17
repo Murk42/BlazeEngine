@@ -33,5 +33,5 @@ namespace Blaze
 
 	uint GetThisThreadID();
 
-	extern GlobalDataCore globalData;
+	extern GlobalDataCore globalDataCore;
 }

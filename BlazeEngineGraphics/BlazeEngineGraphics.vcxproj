@@ -19,28 +19,48 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\BlazeEngineGraphics\Dynamic\Core\GraphicsContext.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLCommon.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLContext.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLConversions.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLFence.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLFramebuffer.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLGraphicsBuffer.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLProgram.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLRenderbuffer.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLShader.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\OpenGLVertexArray.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture1D.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2D.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2DArray.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture3D.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureBuffer.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureCubemap.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\Framebuffer_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\GraphicsContext_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\RenderWindowFramebuffer_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\RenderWindow_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\OpenGL\Core\Semaphore_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\UINode.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\UIScreen.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\UIImage.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\UIInputBox.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\UIPanel.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\UIText.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\UITextButton.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\PanelRenderer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\TextRenderer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\TexturedRectRenderer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\ImageRenderStream_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\PanelRenderStream_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\TextInputRenderStream_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\TextRenderStream_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderPipelines\OpenGL\UIRenderPipeline_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIInputManager.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIInputNode.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIKeyboardEventHandler.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIMouseEventHandler.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UISelectEventHandler.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\Dynamic\GraphicsContext.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLCommon.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLContext.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFramebuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLProgram.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLRenderbuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLShader.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLVertexArray.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture1D.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture2D.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture2DArray.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture3D.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTextureBuffer.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTextureCubemap.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\Framebuffer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\GraphicsContext_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\RenderWindowFramebuffer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\RenderWindow_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\Semaphore_OpenGL.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -48,51 +68,65 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Renderers\Vulkan\Line2DRenderer_Vulkan.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\Framebuffer_Vulkan.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\GraphicsContext_Vulkan.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\RenderWindowFramebuffer_Vulkan.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\RenderWindow_Vulkan.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\Semaphore_Vulkan.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\Swapchain_Vulkan.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Vulkan\Core\VulkanInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BlazeEngineGraphics\BlazeEngineGraphics.h" />
     <ClInclude Include="include\BlazeEngineGraphics\BlazeEngineGraphicsDefines.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Dynamic\Core\GraphicsContext.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLCommon.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLContext.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLConversions.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLEnums.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLFence.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLFramebuffer.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLGraphicsBuffer.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLProgram.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLRenderbuffer.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLShader.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\OpenGLVertexArray.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture1D.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2D.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture2DArray.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTexture3D.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureBuffer.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureCubemap.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGLWrapper\Textures\OpenGLTextureEnums.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\Framebuffer_OpenGL.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\GraphicsContext_OpenGL.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\RenderWindowFramebuffer_OpenGL.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\RenderWindow_OpenGL.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\OpenGL\Core\Semaphore_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Dynamic\GraphicsContext.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLCommon.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLContext.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLEnums.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFramebuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLProgram.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLRenderbuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLShader.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLVertexArray.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture1D.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture2D.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture2DArray.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTexture3D.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTextureBuffer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTextureCubemap.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\Textures\OpenGLTextureEnums.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\Framebuffer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\GraphicsContext_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\RenderWindowFramebuffer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\RenderWindow_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\Semaphore_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\Vulkan\Line2DRenderer_Vulkan.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\Framebuffer_Vulkan.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\GraphicsContext_Vulkan.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\RenderWindowFramebuffer_Vulkan.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\RenderWindow_Vulkan.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\Semaphore_Vulkan.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\Swapchain_Vulkan.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Vulkan\Core\VulkanInstance.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\UINode.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\UIScreen.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\UIImage.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\UIInputBox.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\UIPanel.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\UIText.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\UITextButton.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\PanelRenderer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\TextRenderer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\TexturedRectRenderer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\RenderStream.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\ImageRenderStream_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\PanelRenderStream_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\TextInputRenderStream_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderStreams\OpenGL\TextRenderStream_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderPipelines\OpenGL\UIRenderPipeline_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\StreamRenderer.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIInputManager.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIInputNode.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIKeyboardEventHandler.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIMouseEventHandler.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UISelectEventHandler.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Vulkan\Framebuffer_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Vulkan\GraphicsContext_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Vulkan\RenderWindowFramebuffer_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Vulkan\RenderWindow_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Vulkan\Semaphore_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Vulkan\Swapchain_Vulkan.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Core\Vulkan\VulkanInstance.h" />
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -160,12 +194,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngineGraphics-static-x64-debug</TargetName>
+    <TargetName>BlazeEngineGraphics-static-x64-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngineGraphics-static-x64-release</TargetName>
+    <TargetName>BlazeEngineGraphics-static-x64-$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -183,8 +217,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;SDL2d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
@@ -210,8 +244,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
@@ -224,7 +258,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;$(SolutionDir)external\include\;D:\Programming\Libraries\glew\include\;$(VULKAN_SDK)\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;$(SolutionDir)external\include\;$(VULKAN_SDK)\include\</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -233,8 +267,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;SDL2d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
@@ -260,8 +294,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;opengl32.lib;libglew32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>

@@ -18,25 +18,25 @@ namespace Blaze
 
     namespace Console
     {        
-        void Write(StringView text)
-        {            
-            std::cout.write(text.Ptr(), text.Count());
+        void Write(StringViewUTF8 text)
+        {                        
+            std::cout.write((const char*)text.Buffer(), text.BufferSize() - 1);
         }
         void Write(char text)
         {   
             std::cout.write(&text, 1);
         }
-        void WriteLine(StringView text)
+        void WriteLine(StringViewUTF8 text)
         {            
             Write(text);
             Write('\n');
         }        
         
-        String Read()
+        StringUTF8 Read()
         {
             std::string input;
             std::cin >> input;
-            return String(input.c_str(), input.size());
+            return StringUTF8((const void*)input.c_str(), input.size());
         }
     }
     namespace Debug::Logger

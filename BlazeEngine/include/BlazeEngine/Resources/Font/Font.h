@@ -12,10 +12,10 @@ namespace Blaze
 	//Each point is equal to 0.352778mm so use the display parameters to find the wanted pixel size.
 	struct FontGlyphMetrics
 	{
-		uint horizontalAdvance;
-		uint verticalAdvance;
-		Vec2i offset;
-		Vec2u size;
+		float horizontalAdvance;
+		float verticalAdvance;
+		Vec2f offset;
+		Vec2f size;
 	};	
 
 	struct CharacterSpan
@@ -139,7 +139,7 @@ namespace Blaze
 		using CreateAtlasCallback = std::function<void(Vec2u)>;
 		using CopyBitmapCallback = std::function<void(UnicodeChar, Vec2u, BitmapView)>;
 
-		Vec2i GetGlyphKerning(UnicodeChar left, UnicodeChar right) const;
+		Vec2f GetGlyphKerning(UnicodeChar left, UnicodeChar right) const;
 		bool GetGlyphMetrics(UnicodeChar character, FontGlyphMetrics& data) const;
 
 		inline uint GetPixelFontHeight() const;

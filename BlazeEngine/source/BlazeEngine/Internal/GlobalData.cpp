@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GlobalData.h"
 #include "BlazeEngine/Console/Console.h"
+#include "SDL2/SDL_events.h"
 
 namespace Blaze
 {
@@ -51,7 +52,7 @@ namespace Blaze
 		{ Key::Nine,SDL_Scancode::SDL_SCANCODE_9					},
 		{ Key::Zero,SDL_Scancode::SDL_SCANCODE_0					},
 
-		{ Key::Return,	SDL_Scancode::SDL_SCANCODE_RETURN		    },
+		{ Key::Enter,	SDL_Scancode::SDL_SCANCODE_RETURN		    },		
 		{ Key::Escape,	SDL_Scancode::SDL_SCANCODE_ESCAPE		    },
 		{ Key::Backspace,	SDL_Scancode::SDL_SCANCODE_BACKSPACE		    },
 		{ Key::Tab,SDL_Scancode::SDL_SCANCODE_TAB			    	},
@@ -113,7 +114,7 @@ namespace Blaze
 		{ Key::Keypad0,SDL_Scancode::SDL_SCANCODE_KP_0					},
 		{ Key::KeypadPeriod	,SDL_Scancode::SDL_SCANCODE_KP_PERIOD			},
 
-		{ Key::BlazeEngine	,SDL_Scancode::SDL_SCANCODE_APPLICATION			},
+		{ Key::Application,SDL_Scancode::SDL_SCANCODE_APPLICATION			},
 		{ Key::Power,	SDL_Scancode::SDL_SCANCODE_POWER				},
 		{ Key::F13,SDL_Scancode::SDL_SCANCODE_F13					},
 		{ Key::F14,SDL_Scancode::SDL_SCANCODE_F14					},
@@ -188,7 +189,7 @@ namespace Blaze
 					{ SDL_Scancode::SDL_SCANCODE_9,					Key::Nine			},
 					{ SDL_Scancode::SDL_SCANCODE_0,					Key::Zero			},
 
-					{ SDL_Scancode::SDL_SCANCODE_RETURN,		    Key::Return			},
+					{ SDL_Scancode::SDL_SCANCODE_RETURN,		    Key::Enter			},
 					{ SDL_Scancode::SDL_SCANCODE_ESCAPE,		    Key::Escape			},
 					{ SDL_Scancode::SDL_SCANCODE_BACKSPACE,		    Key::Backspace		},
 					{ SDL_Scancode::SDL_SCANCODE_TAB,			    Key::Tab				},
@@ -250,7 +251,7 @@ namespace Blaze
 					{ SDL_Scancode::SDL_SCANCODE_KP_0,				Key::Keypad0			},
 					{ SDL_Scancode::SDL_SCANCODE_KP_PERIOD,			Key::KeypadPeriod	},
 
-					{ SDL_Scancode::SDL_SCANCODE_APPLICATION,		Key::BlazeEngine		},
+					{ SDL_Scancode::SDL_SCANCODE_APPLICATION,		Key::Application		},
 					{ SDL_Scancode::SDL_SCANCODE_POWER,				Key::Power			},
 					{ SDL_Scancode::SDL_SCANCODE_F13,				Key::F13				},
 					{ SDL_Scancode::SDL_SCANCODE_F14,				Key::F14				},
@@ -292,5 +293,31 @@ namespace Blaze
 	{			
 		delete globalData;
 		globalData = nullptr;
+	}
+
+	void GlobalData::ExecuteOnMainThread(std::function<void()>&& function)
+	{
+		std::lock_guard<std::mutex> lk{ mainThreadTaskMutex };
+		mainThreadTask = std::move(function);
+
+		mainThreadTaskFlag.test_and_set();
+
+		SDL_Event event;
+		SDL_memset(&event, 0, sizeof(event));
+		event.type = mainThreadTaskEventIdentifier;		
+		SDL_PushEvent(&event);		
+
+		mainThreadTaskFlag.wait(1);	
+	}
+	void GlobalData::CheckForMainThreadTask()
+	{
+		if (mainThreadTaskFlag.test())
+		{
+			if (mainThreadTask)
+				mainThreadTask();
+
+			mainThreadTaskFlag.clear();
+			mainThreadTaskFlag.notify_one();
+		}
 	}
 }

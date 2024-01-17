@@ -34,10 +34,12 @@ namespace Blaze::Debug
 		{
 			std::construct_at(&frames[i]);
 
-			frames[i].file = stacktrace[i].source_file().c_str();
+			auto s = stacktrace[i].source_file();
+			frames[i].file = StringViewUTF8(s.data(), s.size());
 			frames[i].line = stacktrace[i].source_line();
 			frames[i].address = stacktrace[i].address();
-			frames[i].locationName = stacktrace[i].name().c_str();
+			s = stacktrace[i].name();
+			frames[i].locationName = StringView(s.data(), s.size());
 		}
 		frameCount = stacktrace.size();
 	}

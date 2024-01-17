@@ -72,9 +72,6 @@
     <ClInclude Include="include\BlazeEngine\BlazeEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Input\ClientEventStack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngine\Window\WindowSDL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -105,9 +102,6 @@
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\FreeType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\Libraries\GLEW.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,9 +109,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\BlazeEngine\Internal\GlobalData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\WindowCreation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Resources\Font\TextLayouter.h">
@@ -135,11 +126,17 @@
     <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\BlazeEngine\Internal\ThreadTaskQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngine\Internal\ThreadEventStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngine\Internal\Libraries\sail.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\BlazeEngine\Input\EngineInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\Input\Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -194,9 +191,6 @@
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\FreeType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\GLEW.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\Libraries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -216,6 +210,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\SailClasses.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\sail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -68,7 +68,9 @@ namespace Blaze
 		if (handler.dispatcher != this && handler.dispatcher != nullptr)
 			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to add a evnet handler to a dispatcher but it is already subscribed to a dispatcher");
 
+		handler.dispatcher = this;		
 		handlers.AddBack(&handler);		
+
 		return Result();
 	}
 
@@ -76,6 +78,8 @@ namespace Blaze
 	inline Result EventDispatcher<T>::RemoveHandler(EventHandler<T>& handler)
 	{
 		std::lock_guard<std::mutex> lk { mutex };
+		
+		handler.dispatcher = nullptr;
 
 		for (HandlerCallData& callData : callsData)
 			if (*callData.handlerIt == &handler)
@@ -108,9 +112,7 @@ namespace Blaze
 
 		while(!callData.handlerIt.IsNull())
 		{						
-			EventHandler<T>& handler = **callData.handlerIt;
-
-			bool suppress = handler.suppress;
+			EventHandler<T>& handler = **callData.handlerIt;			
 
 			if (handler.listening)
 			{
@@ -127,7 +129,7 @@ namespace Blaze
 				callData.toBeDeleted = false;
 			}				
 								
-			if (suppress || callData.handlerIt.IsNull())
+			if (handler.suppress || callData.handlerIt.IsNull())
 				break;
 
 			++callData.handlerIt;			

@@ -1,12 +1,8 @@
 #pragma once
 #define GRAPHICS_OPENGL
-#include "BlazeEngineGraphics/BlazeEngineGraphics.h"
 
-#include "Renderers/TexturedRectRenderer_OpenGL.h"
-#include "Renderers/PanelRenderer_OpenGL.h"
-#include "Renderers/TextRenderer_OpenGL.h"
+#include "Resources/ResourceManager.h"
 #include "Pipelines/MainRenderPipeline_OpenGL.h"
-#include "Pipelines/UIRenderPipeline_OpenGL.h"
 
 class RenderSystem_OpenGL
 {	
@@ -19,13 +15,14 @@ class RenderSystem_OpenGL
 	Graphics::OpenGL::TextRenderer_OpenGL textRenderer;
 
 	MainRenderPipeline_OpenGL rp;
-	Graphics::OpenGL::UIRenderPipeline_OpenGL UIRP;	
+	Graphics::OpenGL::UIRenderPipeline_OpenGL UIRP;		
 
 	Resource::ResourceManager& resourceManager;	
+	LambdaEventHandler<Input::Events::WindowResizedEvent> windowResizedEventHandler;
 public:
 	RenderSystem_OpenGL(Resource::ResourceManager& resourceManager);
 
-	void SetActiveScreen(UI2::Screen* screen);
+	void SetScreen(UI::Screen* screen);
 
 	WindowBase& GetWindow() { return rw.GetWindow(); }
 

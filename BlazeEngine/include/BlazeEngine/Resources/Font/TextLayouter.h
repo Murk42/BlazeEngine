@@ -3,40 +3,61 @@
 
 namespace Blaze
 {
-	class BLAZE_API TextLayouterBase
+	struct CharacterLayoutData
 	{
-	public:		
-		struct BLAZE_API CharacterData
-		{
-			Vec2i pos;
-			Vec2u size;
-			UnicodeChar character;
+		Vec2f pos;
+		Vec2f size;
+		UnicodeChar character;
+	};
+	struct TextLineLayoutData
+	{
+		Array<CharacterLayoutData> characters;
+		float width;
+	};
 
-			bool IsVisible() const;
-		};		
-
-		virtual ~TextLayouterBase();
+	class TextLayouterBase
+	{
+	public:
+		virtual ~TextLayouterBase() { }
 
 		//The data returned contains exact number of elements as the string passed to SetText
-		inline ArrayView<CharacterData> GetCharactersData() const { return charactersData; }
-		//Width is the most right point of all the characters, height is the font height
-		inline Vec2u GetSize() const { return size; }
+		inline ArrayView<TextLineLayoutData> GetLines() const { return lines; }
 
 		virtual void SetText(StringViewUTF8 text, const FontMetrics& fontMetrics) = 0;
 	protected:
 		TextLayouterBase() = default;
 
-		Array<CharacterData> charactersData;
-		Vec2u size;
+		Array<TextLineLayoutData> lines;
 	};
 
 	class BLAZE_API SingleLineTextLayouter : public TextLayouterBase
 	{
-		uint index;
 	public:
 		SingleLineTextLayouter();
 		SingleLineTextLayouter(StringViewUTF8 text, const FontMetrics& fontMetrics);
 
 		void SetText(StringViewUTF8 text, const FontMetrics& fontMetrics) override;
-	};	
+	};
+
+	class BLAZE_API MultiLineTextLayouter : public TextLayouterBase
+	{
+	public:
+		MultiLineTextLayouter();
+		MultiLineTextLayouter(StringViewUTF8 text, const FontMetrics& fontMetrics);
+
+		void SetText(StringViewUTF8 text, const FontMetrics& fontMetrics) override;
+	};
+
+	class BLAZE_API WrappedLineTextLayouter : public TextLayouterBase
+	{
+		//Measured in pixels
+		float wrapWidth;
+	public:
+		WrappedLineTextLayouter();
+		WrappedLineTextLayouter(StringViewUTF8 text, const FontMetrics& fontMetrics, float wrapWidth = 0);
+
+		//Set wrap width in pixel measures, if wrapWidth is 0 no wrapping is applied
+		void SetWrapWidth(float wrapWidth);
+		void SetText(StringViewUTF8 text, const FontMetrics& fontMetrics) override;
+	};
 }

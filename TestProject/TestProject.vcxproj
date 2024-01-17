@@ -22,33 +22,21 @@
     <ClInclude Include="old\Graphics4\API.h" />
     <ClInclude Include="source\Graphics5\Vulkan\API_Vulkan.h" />
     <ClInclude Include="source\Graphics5\Vulkan\VulkanInstance.h" />
-    <ClInclude Include="source\Graphics\OpenGL\Pipelines\UIRenderPipeline_OpenGL.h" />
-    <ClInclude Include="source\Graphics\OpenGL\Renderers\PanelRenderer_OpenGL.h" />
-    <ClInclude Include="source\Graphics\OpenGL\Renderers\TextRenderer_OpenGL.h" />
-    <ClInclude Include="source\Graphics\OpenGL\Renderers\TexturedRectRenderer_OpenGL.h" />
     <ClInclude Include="source\Graphics\OpenGL\RenderSystem_OpenGL.h" />
+    <ClInclude Include="source\Graphics\OpenGL\Pipelines\UIRenderStream.h" />
     <ClInclude Include="source\LocalString.h" />
     <ClInclude Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.h" />
     <ClInclude Include="source\MainScreen.h" />
     <ClInclude Include="source\pch.h" />
     <ClInclude Include="source\Resources\ResourceManager.h" />
-    <ClInclude Include="source\UI\Graphics\OpenGL\UIImageRenderer_OpenGL.h" />
-    <ClInclude Include="source\UI\UINode.h" />
-    <ClInclude Include="source\UI\UINodeComponent.h" />
-    <ClInclude Include="source\UI\NodeRenderTask.h" />
-    <ClInclude Include="source\UI\UINodeRenderComponent.h" />
-    <ClInclude Include="source\UI\UISceneRenderTask.h" />
+    <ClInclude Include="source\TreeTraverser.h" />
     <ClInclude Include="source\vk_mem_alloc.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Graphics\OpenGL\Pipelines\UIRenderPipeline_OpenGL.cpp" />
-    <ClCompile Include="source\Graphics\OpenGL\Renderers\PanelRenderer_OpenGL.cpp" />
-    <ClCompile Include="source\Graphics\OpenGL\Renderers\TextRenderer_OpenGL.cpp" />
-    <ClCompile Include="source\Graphics\OpenGL\Renderers\TexturedRectRenderer_OpenGL.cpp" />
+    <ClCompile Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.cpp" />
     <ClCompile Include="source\Graphics\OpenGL\RenderSystem_OpenGL.cpp" />
     <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.cpp" />
-    <ClCompile Include="source\MainScene.cpp" />
+    <ClCompile Include="source\MainScreen.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -56,9 +44,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="source\Resources\ResourceManager.cpp" />
-    <ClCompile Include="source\UI\Graphics\OpenGL\UIImageRenderer_OpenGL.cpp" />
-    <ClCompile Include="source\UI\UINode.cpp" />
-    <ClCompile Include="source\UI\UINodeComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\OpenGL\panel.frag" />
@@ -72,6 +57,9 @@
     <None Include="assets\shaders\Vulkan\compileShaders.bat" />
     <None Include="assets\shaders\Vulkan\line2d.frag" />
     <None Include="assets\shaders\Vulkan\line2d.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Log.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -130,16 +118,16 @@
     <IntDir>temp\$(Configuration)\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>temp\$(Configuration)\$(PlatformTarget)\</IntDir>
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>temp\$(Configuration)\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>temp\$(Configuration)\$(PlatformTarget)\</IntDir>
+    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(ProjectDir)\temp\$(Configuration)\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,7 +144,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)install\lib;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-x64-debug.lib;BlazeEngine-static-x64-debug.lib;BlazeEngineGraphics-static-x64-debug.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-x64.lib;BlazeEngine-static-x64.lib;BlazeEngineGraphics-static-x64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"
@@ -174,6 +162,7 @@ call "$(ProjectDir)assets\shaders\Vulkan\compileShaders.bat" "$(ProjectDir)\"</C
       <AdditionalIncludeDirectories>$(ProjectDir)source;$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineGraphics\include;$(SolutionDir)BlazeEngine\include;$(VULKAN_SDK)\Include;$(SolutionDir)external\include;D:\Programming\Libraries\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -181,7 +170,7 @@ call "$(ProjectDir)assets\shaders\Vulkan\compileShaders.bat" "$(ProjectDir)\"</C
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)install\lib;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-x64-debug.lib;BlazeEngine-static-x64-debug.lib;BlazeEngineGraphics-static-x64-debug.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-x64-release.lib;BlazeEngine-static-x64-release.lib;BlazeEngineGraphics-static-x64-release.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"
@@ -203,7 +192,7 @@ call "$(ProjectDir)assets\shaders\Vulkan\compileShaders.bat" "$(ProjectDir)\"</C
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)install\lib;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-x64-debug.lib;BlazeEngine-static-x64-debug.lib;BlazeEngineGraphics-static-x64-debug.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-x64-$(Configuration).lib;BlazeEngine-static-x64-$(Configuration).lib;BlazeEngineGraphics-static-x64-$(Configuration).lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"
@@ -221,6 +210,7 @@ call "$(ProjectDir)assets\shaders\Vulkan\compileShaders.bat" "$(ProjectDir)\"</C
       <AdditionalIncludeDirectories>$(ProjectDir)source;$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineGraphics\include;$(SolutionDir)BlazeEngine\include;$(VULKAN_SDK)\Include;$(SolutionDir)external\include;D:\Programming\Libraries\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -228,7 +218,7 @@ call "$(ProjectDir)assets\shaders\Vulkan\compileShaders.bat" "$(ProjectDir)\"</C
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)install\lib;$(VULKAN_SDK)\Lib;D:\Programming\Libraries\glew\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-x64-debug.lib;BlazeEngine-static-x64-debug.lib;BlazeEngineGraphics-static-x64-debug.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-x64-release.lib;BlazeEngine-static-x64-release.lib;BlazeEngineGraphics-static-x64-release.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"

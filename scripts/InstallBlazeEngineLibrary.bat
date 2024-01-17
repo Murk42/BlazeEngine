@@ -10,4 +10,4 @@ echo Copying build files:
 xcopy /s /e /i /f /y /d %2build\%3\%4 %1install\lib
 echo .
 echo Copying dependencies:
-xcopy /s /e /i /f /y /d %1external\Release\bin %1\install\bin
+xcopy /s /e /i /f /y /d %1external\%3\bin %1\install\bin

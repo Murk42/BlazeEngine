@@ -8,9 +8,14 @@
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 
-#include "vulkan/vulkan.h"
 #define GLEW_STATIC
 #include "GL/glew.h"
 #include "SDL2/SDL.h"
+//#include "vulkan/vulkan.h"
 
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
+
+#include "BlazeEngineGraphics/Core/Dynamic/GraphicsContext.h"
+
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"

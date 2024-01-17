@@ -478,7 +478,7 @@ namespace Blaze
 		*/
 	}
 
-	Vec2i FontMetrics::GetGlyphKerning(UnicodeChar left, UnicodeChar right) const
+	Vec2f FontMetrics::GetGlyphKerning(UnicodeChar left, UnicodeChar right) const
 	{
 		FT_Face face = (FT_Face)font->ptr;
 
@@ -490,11 +490,15 @@ namespace Blaze
 		FT_Vector vec;
 		
 		if (pixelFontHeight != 0)
-			FT_Get_Kerning(face, l, r, FT_KERNING_DEFAULT, &vec);		
+		{
+			FT_Get_Kerning(face, l, r, FT_KERNING_DEFAULT, &vec);
+			return Vec2f(vec.x, vec.y) / 64.0f;
+		}
 		else
+		{
 			FT_Get_Kerning(face, l, r, FT_KERNING_UNSCALED, &vec);
-
-		return Vec2i(vec.x, vec.y);		
+			return Vec2f(vec.x, vec.y) / 64.0f / font->GetFontUnitScale();
+		}
 	}
 	bool FontMetrics::GetGlyphMetrics(UnicodeChar character, FontGlyphMetrics& data) const
 	{
@@ -521,26 +525,31 @@ namespace Blaze
 		if (glyphIndex == 0)
 			return false;
 
+		float scale = 0.0f;
 		if (pixelFontHeight != 0)
-			FT_Load_Glyph(face, glyphIndex, FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP);
+		{
+			FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_BITMAP | FT_LOAD_BITMAP_METRICS_ONLY);
+			scale = 1.0f / 64.0f;
+		}
 		else
+		{
 			FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_SCALE);
+			scale = 1.0f / font->GetFontUnitScale();
+		}
 
 		FT_GlyphSlot glyph = face->glyph;
 
-		data.size = Vec2u(glyph->metrics.width, glyph->metrics.height);
-		data.horizontalAdvance = glyph->metrics.horiAdvance;
-		data.verticalAdvance = glyph->metrics.vertAdvance;
-		data.offset = Vec2i(glyph->metrics.horiBearingX, glyph->metrics.horiBearingY - glyph->metrics.height);
+		data.size = Vec2f(glyph->metrics.width, glyph->metrics.height) * scale;
+		data.horizontalAdvance = glyph->metrics.horiAdvance * scale;
+		data.verticalAdvance = glyph->metrics.vertAdvance * scale;
+		data.offset = Vec2f(glyph->metrics.horiBearingX, glyph->metrics.horiBearingY - glyph->metrics.height) * scale;
 
 		glyphMetrics.Insert(character, data);
 
 		return true;
 	}
 	inline uint FontMetrics::GetPixelFontHeight() const
-	{
-		if (pixelFontHeight == 0)
-			return font->GetFontUnitScale();
+	{		
 		return pixelFontHeight;		
 	}
 
@@ -611,8 +620,11 @@ namespace Blaze
 	{
 	}
 	Font::Font(Font&& other) noexcept
-		: ptr(other.ptr), memory(other.memory), metrics(std::move(other.metrics))
+		: ptr(other.ptr), memory(other.memory), metrics(std::move(other.metrics)), dataMap(std::move(other.dataMap))
 	{
+		for (auto& metric : metrics)
+			metric.value.font = this;
+
 		other.ptr = nullptr;
 		other.memory = nullptr;				
 	}
@@ -707,6 +719,10 @@ namespace Blaze
 		ptr = other.ptr;
 		memory = other.memory;				
 		metrics = std::move(other.metrics);
+		dataMap = std::move(other.dataMap);
+
+		for (auto& metric : metrics)
+			metric.value.font = this;
 
 		other.ptr = nullptr;
 		other.memory = nullptr;		

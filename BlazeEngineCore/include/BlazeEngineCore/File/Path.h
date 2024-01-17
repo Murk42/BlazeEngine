@@ -1,98 +1,62 @@
 #pragma once
-#include <utility>
 
 namespace Blaze
 {
 	class BLAZE_CORE_API Path
-	{
-		String value;
+	{		
 	public:
-		Path() : value() { }
-		Path(const Path& path) : value(path.value) { }
-		Path(Path&& path) noexcept : value(std::move(path.value)) { }
-		Path(const String& string) : value(string) { }
-		Path(String&& string) noexcept : value(std::move(string)) { }
-		Path(const StringView& string) : value(string) { }
-		Path(const char* ptr) : value(ptr) { }
+		Path(); 
+		Path(const Path& path);
+		Path(Path&& path) noexcept;
+		Path(const StringView& string);
+		Path(const StringViewUTF8& string);
+		template<uintMem C>
+		Path(const char(&arr)[C]);
 
-		StringView GetString() const { return value; }
+		StringUTF8 ToString() const;
+		
+		// Root name of "C:/dir1/dir2" is "C:"				
+		StringUTF8 RootName() const;		
+		// The root directory of "C:/dir1/dir2" is "/"		
+		StringUTF8 RootDirectory() const;		
+		//	The root path of "C:/dir1/dir2" is "C:/". Effectively same as RootName() + RootDirectory()		
+		StringUTF8 RootPath() const;
+		
+		// File name of "C:/dir1/dir2/file.txt" is "file.txt"				
+		StringUTF8 FileName() const;		
+		// Stem of "C:/dir1/dir2/file.txt" is "file"				
+		StringUTF8 Stem() const;		
+		// File extension of "C:/dir1/dir2/file.txt" is ".txt"					
+		StringUTF8 FileExtension() const;
 
-		/// <summary>				
-		/// Root name of "C:/dir1/dir2" is "C:"		
-		/// </summary>		
-		String RootName() const;
-		/// <summary>
-		/// The root directory of "C:/dir1/dir2" is "/"
-		/// </summary>		
-		String RootDirectory() const;
-		/// <summary>
-		///	The root path of "C:/dir1/dir2" is "C:/". Effectively same as RootName() + RootDirectory()
-		/// </summary>		
-		String RootPath() const;
-
-		/// <summary>
-		/// File name of "C:/dir1/dir2/file.txt" is "file.txt"		
-		/// </summary>		
-		String FileName() const;
-		/// <summary>
-		/// Stem of "C:/dir1/dir2/file.txt" is "file"		
-		/// </summary>		
-		String Stem() const;
-		/// <summary>
-		/// File extension of "C:/dir1/dir2/file.txt" is ".txt"		
-		/// </summary>		
-		String FileExtension() const;		
+		Path ParentPath() const;
 
 		bool IsAbsolute() const;
 		bool IsDirectory() const;
 		bool IsFile() const;
-		bool IsEmpty() const;
-
-		Path operator/(StringView other) const
-		{
-			Path out;
-			out.value = value + '/' + other;
-			return out;
-		}
-
-		Path& operator=(const Path& other) noexcept
-		{
-			value = other.value;
-			return *this;
-		}
-		Path& operator=(Path&& other) noexcept
-		{
-			value = std::move(other.value);
-			return *this;
-		}
-		Path& operator=(const StringView& string) noexcept
-		{
-			value = string;
-			return *this;
-		}
-		Path& operator=(const String& string) noexcept
-		{
-			value = string;
-			return *this;
-		}
-		Path& operator=(String&& string) noexcept
-		{
-			value = std::move(string);
-			return *this;
-		}
-		Path& operator=(const char* ptr) noexcept
-		{
-			value = ptr;
-			return *this;
-		}
+		bool Empty() const;		
+		bool Exists() const;
 		
-		bool operator==(const Path& other) const
-		{
-			return value == other.value;
-		}
-		bool operator!=(const Path& other) const
-		{
-			return value != other.value;
-		}
+		Path operator/(const StringView& other) const;
+		Path operator/(const StringViewUTF8& other) const;
+
+		bool operator==(const Path& other) const;
+		bool operator!=(const Path& other) const;
+
+		Path& operator=(const Path& other);
+		Path& operator=(Path&& other) noexcept;
+		Path& operator=(const StringView& string);
+		Path& operator=(const StringViewUTF8& string);		
+		
+		Path(const std::filesystem::path& path);
+		std::filesystem::path& GetUnderlyingObject();
+		const std::filesystem::path& GetUnderlyingObject() const;
+	private:
+		std::filesystem::path path;
 	};
+	template<uintMem C>
+	inline Path::Path(const char(&arr)[C])
+		: Path(StringView(arr))
+	{
+	}
 }

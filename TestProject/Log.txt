@@ -1,0 +1,5 @@
+[01/17/24 16:11:20] [INFO] [Blaze Engine] Successfully initialized SDL 2.26.5
+[01/17/24 16:11:22] [INFO] [Blaze Engine] Successfully initialized FreeType 2.12.1
+[01/17/24 16:11:22] [INFO] [Blaze Engine] Successfully initialized sail 0.9.1
+[01/17/24 16:11:24] [INFO] [Blaze Engine] Successfully initialized glew 2.1.0
+[01/17/24 16:11:24] [INFO] [Blaze Engine] Created OpenGL context 4.6 core profile

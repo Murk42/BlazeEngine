@@ -9,7 +9,7 @@ namespace Blaze
 
 		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero,
 
-		Return, Escape, Backspace, Tab, Space, Minus, Equals, LeftBracket, RightBracket, Backslash,
+		Enter, Escape, Backspace, Tab, Space, Minus, Equals, LeftBracket, RightBracket, Backslash,
 		Semicolon, Aapostrophe, Grave, Comma, Period, Slash, CapsLock,
 
 		F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
@@ -22,7 +22,7 @@ namespace Blaze
 		Keypad1, Keypad2, Keypad3, Keypad4, Keypad5, Keypad6, Keypad7, Keypad8, Keypad9, Keypad0,
 		KeypadPeriod,
 
-		BlazeEngine, Power,
+		Application, Power,
 		F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24,
 		Execute, Help, Menu, Select, Stop, Again, Undo, Cut, Copy, Paste, Mute, VolumeUp, VolumeDown,
 

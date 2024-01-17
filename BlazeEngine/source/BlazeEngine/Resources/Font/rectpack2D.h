@@ -1,6 +1,6 @@
 #pragma once
 
-#include "D:/Programming/Libraries/rectpack2D/include/rectpack2D/finders_interface.h"
+#include "rectpack2D/finders_interface.h"
 
 constexpr bool allow_flip = false;
 using spaces_type = rectpack2D::empty_spaces<allow_flip, rectpack2D::default_empty_spaces>;

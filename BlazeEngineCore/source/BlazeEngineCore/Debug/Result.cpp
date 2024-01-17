@@ -45,30 +45,27 @@ namespace Blaze
 		AppendUnsafe(&log, 1);
 	}	
 
-	String Result::ToString() const
+	StringUTF8 Result::ToString() const
 	{		
-		String out;
+		StringUTF8 out;
 		
 		if (IsEmpty())
 		{
 			out = "Empty result";
 		}
-		else
-		{
-			out += "-------------------------------------------------\n";
-
+		else		
 			for (auto it = logs; it != logs + logCount; ++it)			
-				out += it->ToString() + "\n";			
-
-			out += "-------------------------------------------------\n";
-		}
+				if (it != logs + logCount - 1)
+					out += it->ToString() + "\n";
+				else
+					out += it->ToString();			
 
 		return out;		
 	}
 
-	String Result::ToStringVerbose() const
+	StringUTF8 Result::ToStringVerbose() const
 	{
-		String out;
+		StringUTF8 out;
 
 		if (IsEmpty())
 		{

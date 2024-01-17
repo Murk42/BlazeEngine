@@ -17,14 +17,14 @@ namespace Blaze::Debug
 		Log() = delete;
 		Log(const Log& log);
 		Log(Log&&) noexcept;		
-		Log(LogType type, String source, String message);
+		Log(LogType type, StringUTF8 source, StringUTF8 message);
 
-		String ToString() const;
-		String ToStringVerbose() const;
+		StringUTF8 ToString() const;
+		StringUTF8 ToStringVerbose() const;
 
 		inline LogType GetType() const { return type; }
-		inline const String& GetSource() const { return source; }
-		inline const String& GetMessage() const { return message; }		
+		inline StringViewUTF8 GetSource() const { return source; }
+		inline StringViewUTF8 GetMessage() const { return message; }		
 
 		inline TimePoint GetTimePoint() const { return time; }
 		inline uint GetThreadID() const { return threadID; }		
@@ -37,8 +37,8 @@ namespace Blaze::Debug
 		Log& operator=(Log&&) noexcept;
 	public:
 		LogType type;				 
-		String source;
-		String message;				
+		StringUTF8 source;
+		StringUTF8 message;				
 
 		TimePoint time;
 		uint threadID;				

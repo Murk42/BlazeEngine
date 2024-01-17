@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="Blaze::Map&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[bucketCount]" ExcludeView="simple">bucketCount</Item>
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
+				<Variable Name="it" InitialValue="(Node*)nullptr" />
+				<Variable Name="j" InitialValue="0" />				
+
+				<Size>count</Size>
+				<Loop Condition="j!=bucketCount">					
+					
+					<Exec>it = buckets[j].head</Exec>
+					<If Condition="it != nullptr">
+					<Loop Condition="it->next == nullptr">						
+						<Item> it->pair </Item>
+						<Exec>it = it->next</Exec>
+					</Loop>
+					</If>
+					
+					<Exec>++j</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+</AutoVisualizer>

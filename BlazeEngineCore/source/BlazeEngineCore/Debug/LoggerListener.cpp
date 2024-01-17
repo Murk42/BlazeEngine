@@ -13,7 +13,7 @@ namespace Blaze::Debug
 		: supress(supress), listening(false)
 	{
 		if (startListening)
-			StartListening();
+			StartListening(); 
 	}
 	LoggerListener::~LoggerListener()
 	{

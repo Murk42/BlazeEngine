@@ -5,31 +5,42 @@
 namespace std
 {
     template <>
-    struct BLAZE_CORE_API  hash<Blaze::String>
+    struct hash<Blaze::String>
     {
-        std::size_t operator()(const Blaze::String& k) const;
+        inline std::size_t operator()(const Blaze::String& k) const;
     };
     template <>
-    struct BLAZE_CORE_API  hash<Blaze::StringView>
+    struct hash<Blaze::StringView>
     {
-        std::size_t operator()(const Blaze::StringView& k) const;
+        inline std::size_t operator()(const Blaze::StringView& k) const;
     };
     template <>
-    struct BLAZE_CORE_API  hash<Blaze::StringUTF8>
+    struct hash<Blaze::StringUTF8>
     {
-        std::size_t operator()(const Blaze::StringUTF8& k) const;
+        inline std::size_t operator()(const Blaze::StringUTF8& k) const;
     };
     template <>
-    struct BLAZE_CORE_API  hash<Blaze::StringViewUTF8>
+    struct hash<Blaze::StringViewUTF8>
     {
-        std::size_t operator()(const Blaze::StringViewUTF8& k) const;
+        inline std::size_t operator()(const Blaze::StringViewUTF8& k) const;
     };
-}
 
-namespace Blaze
-{
-    inline uint32 StringView::Hash() const
+    inline std::size_t hash<Blaze::String>::operator()(const Blaze::String& k) const
     {
-        return static_cast<uint32>(std::hash<StringView>()(*this));
+        return hash<string_view>()(std::string_view(k.Ptr(), k.Count()));
+    }
+
+    inline std::size_t hash<Blaze::StringView>::operator()(const Blaze::StringView& k) const
+    {
+        return hash<string_view>()(std::string_view(k.Ptr(), k.Count()));
+    }
+
+    inline std::size_t hash<Blaze::StringUTF8>::operator()(const Blaze::StringUTF8& k) const
+    {
+        return hash<u8string_view>()(std::u8string_view((const char8_t*)k.Buffer(), k.BufferSize() - 1));
+    }
+    inline std::size_t hash< Blaze::StringViewUTF8>::operator()(const Blaze::StringViewUTF8& k) const
+    {
+        return hash<u8string_view>()(std::u8string_view((const char8_t*)k.Buffer(), k.BufferSize() - 1));
     }
 }

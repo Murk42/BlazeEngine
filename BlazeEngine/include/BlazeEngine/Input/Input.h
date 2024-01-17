@@ -8,12 +8,7 @@ namespace Blaze
 	namespace Input
 	{
 		struct InputEventSystem
-		{
-			EventDispatcher<Events::KeyPressed            > keyPressedDispatcher;
-			EventDispatcher<Events::KeyReleased           > keyReleasedDispatcher;
-			EventDispatcher<Events::MouseMotion           > mouseMotionDispatcher;
-			EventDispatcher<Events::MouseScroll           > mouseScrollDispatcher;
-			EventDispatcher<Events::TextInput             > textInputDispatcher;
+		{			
 			EventDispatcher<Events::WindowResizedEvent    > windowResizedDispatcher;
 			EventDispatcher<Events::WindowMovedEvent      > windowMovedDispatcher;
 			EventDispatcher<Events::WindowMinimizedEvent  > windowMinimizedDispatcher;
@@ -23,11 +18,9 @@ namespace Blaze
 			EventDispatcher<Events::WindowCloseEvent      > windowCloseDispatcher;
 			EventDispatcher<Events::WindowMouseEnterEvent > windowMouseEnterDispatcher;
 			EventDispatcher<Events::WindowMouseLeaveEvent > windowMouseLeaveDispatcher;
+			EventDispatcher<Events::InputPreUpdateEvent   > inputPreUpdateDispatcher;
+			EventDispatcher<Events::InputPostUpdateEvent   > inputPostUpdateDispatcher;
 		};
-
-		BLAZE_API InputEventSystem& GetInputEventSystem();
-
-		BLAZE_API void Update();		
 
 		struct KeyState
 		{
@@ -36,12 +29,33 @@ namespace Blaze
 			bool released;
 			bool up;
 			uint combo;
+
+			//Last moment the key state was updated, the value is got with TimePoint::GetRunTime()
 			double time;
+		};					
+
+		BLAZE_API InputEventSystem& GetInputEventSystem();
+
+		BLAZE_API void Update();		
+
+		BLAZE_API KeyState GetLastKeyState(Key key);		
+
+		enum class CursorType
+		{
+			Arrow,
+			IBeam,
+			Wait,
+			Crosshair,
+			WaitArrow,
+			SizeNWSE,
+			SizeWE,
+			SizeNW,
+			SizeAll,
+			No,
+			Hand,
+			CursorCount
 		};
 
-		inline Vec2i GetMousePos() { return Vec2i(); }
-		inline int GetMouseScroll() { return 0; }
-		inline Vec2i GetMouseMovement() { return Vec2i(); }
-		inline KeyState GetKeyState(Key key) { return { }; }
+		BLAZE_API void SetCursorType(CursorType type);
 	}
 }

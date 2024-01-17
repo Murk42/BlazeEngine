@@ -16,7 +16,7 @@ namespace Blaze::Debug
 		bool IsSupressing() const { return supress; }
 		bool IsListening() const { return listening; }						
 
-		virtual void NewString(StringView) { }
+		virtual void NewString(StringViewUTF8) { }
 		virtual void NewResult(const Result&) { }
 		virtual void NewLog(const Debug::Log&) { }
 		

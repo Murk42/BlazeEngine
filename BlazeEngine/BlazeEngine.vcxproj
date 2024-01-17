@@ -83,12 +83,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngine-static-x64-debug</TargetName>
+    <TargetName>BlazeEngine-static-x64-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngine-static-x64-release</TargetName>
+    <TargetName>BlazeEngine-static-x64-$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -159,8 +159,8 @@
       <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2d.lib;freetyped.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -187,7 +187,7 @@
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -221,13 +221,13 @@
     <ClInclude Include="include\BlazeEngine\Input\Key.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\EntityCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\SystemCreationData.h" />
-    <ClInclude Include="source\BlazeEngine\Input\ClientEventStack.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Conversions.h" />
     <ClInclude Include="source\BlazeEngine\Internal\GlobalData.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\FreeType.h" />
-    <ClInclude Include="source\BlazeEngine\Internal\Libraries\GLEW.h" />
+    <ClInclude Include="source\BlazeEngine\Internal\Libraries\sail.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDL.h" />
-    <ClInclude Include="source\BlazeEngine\Internal\WindowCreation.h" />
+    <ClInclude Include="source\BlazeEngine\Internal\ThreadEventStack.h" />
+    <ClInclude Include="source\BlazeEngine\Internal\ThreadTaskQueue.h" />
     <ClInclude Include="source\BlazeEngine\Resources\Bitmap\SailClasses.h" />
     <ClInclude Include="source\BlazeEngine\Resources\Font\rectpack2D.h" />
     <ClInclude Include="source\pch.h" />
@@ -243,14 +243,13 @@
     <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceStorage.cpp" />
     <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceTypeRegistry.cpp" />
     <ClCompile Include="source\BlazeEngine\EntryPoint\EntryPoint.cpp" />
-    <ClCompile Include="source\BlazeEngine\Input\EngineInput.cpp" />
     <ClCompile Include="source\BlazeEngine\Input\Input.cpp" />
     <ClCompile Include="source\BlazeEngine\Input\Key.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Conversions.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\GlobalData.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\FreeType.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\GLEW.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\Libraries.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\sail.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDL.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\SailClasses.cpp" />

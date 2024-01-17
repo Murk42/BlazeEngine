@@ -257,16 +257,18 @@ namespace Blaze
 	}
 
 	Result Bitmap::Load(Path path, bool flipVertically)
-	{			
+	{					
 		const sail_codec_info* codec = nullptr;
 		sail_image* image;
 		void* state = nullptr;
-		
-		String fileExtension = path.FileExtension();
-		fileExtension = fileExtension.SubString(1, fileExtension.Count() - 1);
-		SAIL_CHECK(sail_codec_info_from_extension(fileExtension.Ptr(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.");
-		SAIL_CHECK(sail_start_loading_from_file(path.GetString().Ptr(), codec, &state), "Failed to start loading form file.");
-		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next frame.");
+				
+		StringUTF8 pathString = path.ToString();
+		StringUTF8 fileExtension = path.FileExtension();
+		StringParsing::GetAfterFirst(fileExtension, fileExtension, '.');		
+
+		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension");
+		SAIL_CHECK(sail_start_loading_from_file((const char*)pathString.Buffer(), codec, &state), "Failed to start loading from file with path \"" + pathString + "\"");
+		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next from file with path \"" + pathString + "\"");
 
 		BitmapColorFormat format{ };
 		BitmapColorComponentType type{ };
@@ -303,11 +305,13 @@ namespace Blaze
 		image.meta_data_node = NULL;
 		image.iccp = NULL;
 		
-		String fileExtension = path.FileExtension();
-		fileExtension = fileExtension.SubString(1, fileExtension.Count() - 1);
-		SAIL_CHECK(sail_codec_info_from_extension(fileExtension.Ptr(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.");
-		SAIL_CHECK(sail_start_saving_into_file(path.GetString().Ptr(), codec, &state), "Failed to start saving into file.");
-		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame.");
+		StringUTF8 pathString = path.ToString();
+		StringUTF8 fileExtension = path.FileExtension();
+		StringParsing::GetAfterFirst(fileExtension, fileExtension, '.');
+
+		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.");
+		SAIL_CHECK(sail_start_saving_into_file((const char*)pathString.Buffer(), codec, &state), "Failed to start saving into from file with path \"" + pathString + "\"");
+		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame from file with path \"" + pathString + "\"");
 
 		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving");		
 		return Result();		

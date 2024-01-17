@@ -16,8 +16,8 @@ namespace Blaze
 		void AddLogs(std::initializer_list<Debug::Log> logs);
 		void AddLog(Debug::Log log);
 
-		String ToString() const;
-		String ToStringVerbose() const;
+		StringUTF8 ToString() const;
+		StringUTF8 ToStringVerbose() const;
 
 		void Clear();
 		void ClearSilent();

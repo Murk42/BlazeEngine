@@ -27,7 +27,11 @@ namespace Blaze
 	String GetKeyName(Key key)
 	{	
 		if (key < Key::MouseLeft)
-			return SDL_GetScancodeName(GetScancodeFromKey(key));		
+		{
+			const char* str = SDL_GetScancodeName(GetScancodeFromKey(key));
+			uintMem len = strlen(str);
+			return String(str, len);
+		}
 		else
 			switch (key)
 			{

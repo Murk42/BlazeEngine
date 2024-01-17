@@ -133,8 +133,8 @@ namespace Blaze::ECS
 	Component* Entity::GetComponent(uintMem index) const
 	{
 		if (index > componentCount)
-		{			
-			Debug::Logger::LogError("Blaze Engine", StringParsing::Merge("Component index out of range. Index value was: " , index));
+		{									
+			Debug::Logger::LogError("Blaze Engine", "Component index out of range. Index value was: " + StringParsing::Convert(index));
 			return nullptr;
 		}
 
@@ -144,7 +144,7 @@ namespace Blaze::ECS
 	{
 		if (index > componentCount)
 		{
-			Debug::Logger::LogError("Blaze Engine", StringParsing::Merge("Component index out of range. Index value was: ", index));
+			Debug::Logger::LogError("Blaze Engine", "Component index out of range. Index value was: " + StringParsing::Convert(index));
 			return nullptr;
 		}
 

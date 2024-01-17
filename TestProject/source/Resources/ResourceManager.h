@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngineGraphics/BlazeEngineGraphics.h"
+
 
 namespace Resource
 {				

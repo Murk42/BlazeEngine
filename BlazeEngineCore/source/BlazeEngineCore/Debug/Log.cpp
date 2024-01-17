@@ -14,16 +14,16 @@ namespace Blaze::Debug
 		type(log.type),	source(std::move(log.source)), message(std::move(log.message))
 	{		
 	}
-	Log::Log(LogType type, String source, String message) :
+	Log::Log(LogType type, StringUTF8 source, StringUTF8 message) :
 		threadID(GetThisThreadID()), time(TimePoint::GetWorldTime()), callstack(),
 		type(type),	source(std::move(source)), message(std::move(message))
 	{
 	}
 
-	String Log::ToString() const
+	StringUTF8 Log::ToString() const
 	{
-		String timeStr = TimePoint::GetWorldTime().FormatString("%D %T");
-		String typeStr;
+		StringUTF8 timeStr = (StringUTF8)TimePoint::GetWorldTime().FormatString("%D %T");
+		StringUTF8 typeStr;
 
 		switch (type)
 		{
@@ -34,13 +34,13 @@ namespace Blaze::Debug
 		case Blaze::Debug::LogType::Fatal: typeStr = "FATAL"; break;
 		}
 
-		String out = "[" + timeStr + "] [" + typeStr + "] " + message;
+		StringUTF8 out = "[" + timeStr + "] [" + typeStr + "] [" + source + "] " + message;
 
 		return out;
 	}
-	String Log::ToStringVerbose() const
+	StringUTF8 Log::ToStringVerbose() const
 	{
-		String string = ToString() + "\n\n";
+		StringUTF8 string = ToString() + "\n\n";
 
 		for (auto& frame : callstack)		
 			string += frame.FilePath().FileName() + ": " + StringParsing::Convert(frame.FileLine()) + " 0x" + StringParsing::Convert((size_t)frame.Address(), 16) + " " + frame.LocationName() + "\n";		
@@ -80,17 +80,4 @@ namespace Blaze::Debug
 
 		return *this;
 	}
-}
-
-Blaze::Path FILE_PATH(const char* macro)
-{
-	return Blaze::Path(macro);
-	//const char* ptr = nullptr;
-	//ptr = strrchr(macro, '\\') + 1;
-	//if (ptr == nullptr)
-	//	ptr = strrchr(macro, '/') + 1;
-	//
-	//if (ptr == nullptr)
-	//	return Blaze::String(macro, strlen(macro));
-	//return Blaze::String(ptr, strlen(ptr));
 }

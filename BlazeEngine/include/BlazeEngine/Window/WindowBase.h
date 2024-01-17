@@ -42,20 +42,6 @@ namespace Blaze
 		uint refreshRate = 60;
 	};	
 
-	/*
-	/// <summary>
-	/// Creates a SDL window handle and returns it.
-	/// </summary>
-	/// <param name="title">The title of the new window.</param>
-	/// <param name="pos">Position of the new window. If a component value is INT_MAX then it will be centered to the display for that component.</param>
-	/// <param name="size">Size of the new window</param>
-	/// <param name="graphicsAPI">The supported graphics API for the window</param>
-	/// <returns>Returns a handle to the SDL window. It can be directly casted to a SDL_Window* </returns>
-	
-	BLAZE_API WindowHandle CreateWindowHandle(StringView title, Vec2i pos, Vec2i size, WindowHandleGraphicsaAPI graphicsAPI);
-	BLAZE_API void DestroyWindowHandle(WindowHandle handle);
-	*/
-
 	static constexpr bool a = IsStaticAllocator<VirtualAllocator>;
 	static constexpr bool b = IsDynamicAllocator<VirtualAllocator>;
 	static constexpr bool c = IsAllocator<VirtualAllocator>;
@@ -72,6 +58,11 @@ namespace Blaze
 		EventDispatcher<Input::Events::WindowCloseEvent>       closeEventDispatcher;
 		EventDispatcher<Input::Events::WindowMouseEnterEvent>  mouseEnterDispatcher;
 		EventDispatcher<Input::Events::WindowMouseLeaveEvent>  mouseLeaveDispatcher;
+		EventDispatcher<Input::Events::KeyPressed            > keyPressedDispatcher;
+		EventDispatcher<Input::Events::KeyReleased           > keyReleasedDispatcher;
+		EventDispatcher<Input::Events::MouseMotion           > mouseMotionDispatcher;
+		EventDispatcher<Input::Events::MouseScroll           > mouseScrollDispatcher;
+		EventDispatcher<Input::Events::TextInput             > textInputDispatcher;
 		
 		WindowBase();
 		WindowBase(const WindowBase&) = delete;
@@ -80,14 +71,14 @@ namespace Blaze
 
 		virtual Vec2i GetPos() const;
 		virtual Vec2u GetSize() const;
-		virtual String GetTitle() const;
+		virtual StringUTF8 GetTitle() const;
 		virtual Vec2i GetMousePos() const;
 
 		virtual Result SetIcon(BitmapView bitmap);
 		virtual void SetOpacity(float opacity);
 		virtual void SetPos(Vec2i pos);
 		virtual void SetSize(Vec2u size);
-		virtual void SetTitle(StringView title);
+		virtual void SetTitle(StringViewUTF8 title);
 		virtual void SetMinimumSize(Vec2u size);
 		virtual void SetMaximumSize(Vec2u size);
 
@@ -101,7 +92,7 @@ namespace Blaze
 		virtual void SetWindowFullscreenMode(bool fullscreen);
 		virtual void SetWindowBorderFlag(bool hasBorder);
 		virtual void SetWindowResizableFlag(bool resizable);
-		virtual void SetLockMouseFlag(bool lockMouse);
+		virtual void SetWindowLockMouseFlag(bool lockMouse);
 
 		virtual bool IsFullscreen();
 		virtual bool IsBorderless();

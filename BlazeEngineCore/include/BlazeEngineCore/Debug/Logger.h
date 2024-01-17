@@ -3,7 +3,7 @@
 
 namespace Blaze::Debug::Logger
 {
-	BLAZE_CORE_API void ProcessString(StringView string);
+	BLAZE_CORE_API void ProcessString(StringViewUTF8 string);
 	BLAZE_CORE_API void ProcessLog(const Log& log);	
 	BLAZE_CORE_API void ProcessResult(Result&& result);	
 	
@@ -12,9 +12,9 @@ namespace Blaze::Debug::Logger
 	BLAZE_CORE_API void AddOutputFile(const Path& path);	
 	BLAZE_CORE_API void RemoveOutputFile(const Path& path);	
 	
-	BLAZE_CORE_API void LogDebug(String&& source, String&& message);
-	BLAZE_CORE_API void LogInfo(String&& source, String&& message);
-	BLAZE_CORE_API void LogWarning(String&& source, String&& message);
-	BLAZE_CORE_API void LogError(String&& source, String&& message);
-	BLAZE_CORE_API void LogFatal(String&& source, String&& message);
+	BLAZE_CORE_API void LogDebug(StringUTF8&& source, StringUTF8&& message);
+	BLAZE_CORE_API void LogInfo(StringUTF8&& source, StringUTF8&& message);
+	BLAZE_CORE_API void LogWarning(StringUTF8&& source, StringUTF8&& message);
+	BLAZE_CORE_API void LogError(StringUTF8&& source, StringUTF8&& message);
+	BLAZE_CORE_API void LogFatal(StringUTF8&& source, StringUTF8&& message);
 }

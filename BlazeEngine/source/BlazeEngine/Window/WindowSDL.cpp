@@ -1,28 +1,94 @@
 #include "pch.h"
 #include "BlazeEngine/Window/WindowSDL.h"
 #include "BlazeEngine/Internal/Conversions.h"
-#include "BlazeEngine/Internal/WindowCreation.h"
+#include "BlazeEngine/Internal/GlobalData.h"
 
 #include <SDL2/SDL.h> 
 
 namespace Blaze
-{	
-	WindowSDL::WindowSDLHandle RequestSDLWindowCreation(WindowSDLCreationData data)
+{		
+	static StringView GetSDLError()
 	{
-		return windowSDLCreationQueue.Request(data);
-	}
-	void RequestSDLWindowDestruction(WindowSDL::WindowSDLHandle window)
-	{
-		windowSDLDestructionQueue.Request({ window });
+		const char* ptr = SDL_GetError();
+		uintMem len = strlen(ptr);
+		return StringView(ptr, len);
 	}
 
-	WindowSDL::WindowSDLHandle CreateWindowSDLHandle(StringView title, Vec2i pos, Vec2u size, WindowHandleGraphicsaAPI graphicsAPI)
+	WindowSDL::WindowSDLHandle CreateWindowSDLHandle(WindowSDLCreateOptions createOptions)
 	{
-		return RequestSDLWindowCreation({ title, pos, size, graphicsAPI });
+		SDL_Window* SDLWindowHandle = nullptr;
+
+		uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE;
+		switch (createOptions.graphicsAPI)
+		{
+		case WindowSDLGraphicsAPI::Metal:
+			flags |= SDL_WINDOW_METAL;
+			break;
+		case WindowSDLGraphicsAPI::OpenGL:
+			flags |= SDL_WINDOW_OPENGL;
+			break;
+		case WindowSDLGraphicsAPI::Vulkan:
+			flags |= SDL_WINDOW_VULKAN;
+			break;
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Invalid WindowSDLGraphicsAPI enum value");
+			break;
+		}
+
+		switch (createOptions.openMode)
+		{
+		default:
+			Debug::Logger::LogError("Blaze Engine", "Invalid WindowSDLOpenMode enum value");
+			break;
+		case WindowSDLOpenMode::Normal:
+			break;
+		case WindowSDLOpenMode::Fullscreen:
+			flags |= SDL_WINDOW_FULLSCREEN;
+			break;
+		case WindowSDLOpenMode::Maximized:
+			flags |= SDL_WINDOW_MAXIMIZED;
+			break;
+		case WindowSDLOpenMode::Minimized:
+			flags |= SDL_WINDOW_MINIMIZED;
+			break;			
+		}
+
+		if ((bool)(createOptions.styleFlags & WindowSDLStyleFlags::LockMouse))
+			flags |= SDL_WINDOW_MOUSE_GRABBED;
+		if ((bool)(createOptions.styleFlags & WindowSDLStyleFlags::Resizable))
+			flags |= SDL_WINDOW_RESIZABLE;
+		if ((bool)(createOptions.styleFlags & WindowSDLStyleFlags::Borderless))
+			flags |= SDL_WINDOW_BORDERLESS;
+
+		Vec2i pos = createOptions.pos;
+		if (pos.x == INT_MAX) pos.x = SDL_WINDOWPOS_CENTERED;
+		if (pos.y == INT_MAX) pos.y = SDL_WINDOWPOS_CENTERED;
+		
+		globalData->ExecuteOnMainThread([&]() {
+			SDL_ClearError();
+
+			SDLWindowHandle = SDL_CreateWindow((const char*)createOptions.title.Buffer(), pos.x, pos.y, createOptions.size.x, createOptions.size.y, flags);
+
+			if (SDLWindowHandle == nullptr)			
+				Debug::Logger::LogFatal("Blaze Engine", "Failed to create a SDL window. SDL_GetError returned: \"" + GetSDLError() + "\"");
+
+			StringView error = GetSDLError();
+			if (!error.Empty())
+				Debug::Logger::LogFatal("Blaze Engine", "SDL_CreateWindow set an error.  SDL_GetError returned: \"" + error + "\"");
+
+			});
+		
+		if (SDLWindowHandle == nullptr)
+		{
+			Debug::Logger::LogFatal("Blaze Engine", "Failed to create a SDL window. SDL_GetError returned: \"" + GetSDLError() + "\"");
+			return (WindowSDL::WindowSDLHandle)nullptr;
+		}
+
+		return (WindowSDL::WindowSDLHandle)SDLWindowHandle;
 	}
 	void DestroyWindowSDLHandle(WindowSDL::WindowSDLHandle handle)
 	{
-		return RequestSDLWindowDestruction(handle);
+		globalData->ExecuteOnMainThread([&]() { SDL_DestroyWindow((SDL_Window*)handle); });
 	}
 		
 	WindowSDL::WindowSDL()
@@ -30,10 +96,9 @@ namespace Blaze
 	{
 
 	}
-	WindowSDL::WindowSDL(StringView title, Vec2i pos, Vec2u size, WindowHandleGraphicsaAPI graphicsAPI)
+	WindowSDL::WindowSDL(WindowSDLCreateOptions createOptions)
+		: handle(CreateWindowSDLHandle(createOptions)), graphicsAPI(createOptions.graphicsAPI)
 	{
-		handle = CreateWindowSDLHandle(title, pos, size, graphicsAPI);		
-
 		//If any events were reported before this line they wont be reported to the client.		
 		SDL_SetWindowData((SDL_Window*)handle, "Blaze", this);
 
@@ -41,6 +106,8 @@ namespace Blaze
 	WindowSDL::WindowSDL(WindowSDL&& other) noexcept
 	{
 		handle = other.handle;
+		graphicsAPI = other.graphicsAPI;
+
 		SDL_SetWindowData((SDL_Window*)handle, "Blaze", this);
 
 		other.handle = nullptr;
@@ -57,6 +124,29 @@ namespace Blaze
 		SDL_SetWindowData((SDL_Window*)handle, "Blaze", nullptr);
 		DestroyWindowSDLHandle(handle);
 		handle = nullptr;
+	}
+
+	void WindowSDL::SwapBuffers()
+	{
+		switch (graphicsAPI)
+		{
+		case Blaze::WindowSDLGraphicsAPI::OpenGL:
+
+			if (globalData->windowSwappingSkipFlag.test())
+				break;
+
+			SDL_GL_SwapWindow((SDL_Window*)handle);
+
+			break;
+		case Blaze::WindowSDLGraphicsAPI::Vulkan:
+			break;
+		case Blaze::WindowSDLGraphicsAPI::Metal:
+			break;
+		case Blaze::WindowSDLGraphicsAPI::None:
+			break;
+		default:
+			break;
+		}
 	}
 
 	Vec2i WindowSDL::GetPos() const
@@ -80,11 +170,13 @@ namespace Blaze
 		SDL_GetWindowSize((SDL_Window*)handle, &size.x, &size.y);
 		return (Vec2u)size;
 	}
-	String WindowSDL::GetTitle() const
+	StringUTF8 WindowSDL::GetTitle() const
 	{
 		if (handle == nullptr)
 			return "";
-		return SDL_GetWindowTitle((SDL_Window*)handle);
+		const char* str = SDL_GetWindowTitle((SDL_Window*)handle);
+		uintMem len = strlen(str);
+		return StringUTF8((const void*)str, len);
 	}
 
 	Vec2i WindowSDL::GetMousePos() const
@@ -133,13 +225,15 @@ namespace Blaze
 
 		SDL_SetWindowOpacity((SDL_Window*)handle, opacity);
 	}
-	void WindowSDL::SetPos(Vec2i s)
+	void WindowSDL::SetPos(Vec2i pos)
 	{
 		if (handle == nullptr)
 			return;
 
-		s.y = GetSize().y - s.y;
-		SDL_SetWindowPosition((SDL_Window*)handle, s.x, s.y);
+		if (pos.x == INT_MAX) pos.x = SDL_WINDOWPOS_CENTERED;
+		if (pos.y == INT_MAX) pos.y = SDL_WINDOWPOS_CENTERED;
+		
+		SDL_SetWindowPosition((SDL_Window*)handle, pos.x, pos.y);
 	}
 	void WindowSDL::SetSize(Vec2u s)
 	{
@@ -148,12 +242,12 @@ namespace Blaze
 
 		SDL_SetWindowSize((SDL_Window*)handle, s.x, s.y);
 	}
-	void WindowSDL::SetTitle(StringView title)
+	void WindowSDL::SetTitle(StringViewUTF8 title)
 	{
 		if (handle == nullptr)
 			return;
 
-		SDL_SetWindowTitle((SDL_Window*)handle, title.Ptr());
+		SDL_SetWindowTitle((SDL_Window*)handle, (const char*)title.Buffer());
 	}
 	void WindowSDL::SetMinimumSize(Vec2u size)
 	{
@@ -231,7 +325,7 @@ namespace Blaze
 		SDL_SetWindowResizable((SDL_Window*)handle, (SDL_bool)resizable);
 	}
 
-	void WindowSDL::SetLockMouseFlag(bool lockMouse)
+	void WindowSDL::SetWindowLockMouseFlag(bool lockMouse)
 	{
 		if (handle == nullptr)
 			return;
@@ -289,6 +383,7 @@ namespace Blaze
 	WindowSDL& WindowSDL::operator=(WindowSDL&& other) noexcept
 	{
 		handle = other.handle;
+		graphicsAPI = other.graphicsAPI;
 		other.handle = nullptr;
 
 		SDL_SetWindowData((SDL_Window*)handle, "Blaze", this);

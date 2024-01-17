@@ -2,12 +2,16 @@
 #include "RenderSystem_OpenGL.h"
 
 RenderSystem_OpenGL::RenderSystem_OpenGL(Resource::ResourceManager& resourceManager) :
+	gc({
+		.majorVersion = 4,
+		.minorVersion = 6,
+		}),
 	resourceManager(resourceManager), line2DRenderer(gc), texturedRectRenderer(gc), rp(gc, rw), 
-	panelRenderer(gc), textRenderer(gc),
-	UIRP(texturedRectRenderer, panelRenderer, textRenderer)
+	panelRenderer(gc), textRenderer(gc), 
+	UIRP(texturedRectRenderer, panelRenderer, textRenderer)	
 {		
 	Bitmap bm;
-	bm.Load("D:/Programming/Projects/BlazeEngine/TestProject/assets/images/image.bmp", true);	
+	bm.Load("assets/images/image.bmp", true);	
 
 	Graphics::OpenGLWrapper::Texture2D texture;
 	texture.Create(bm);
@@ -16,30 +20,34 @@ RenderSystem_OpenGL::RenderSystem_OpenGL(Resource::ResourceManager& resourceMana
 		.mag = Graphics::OpenGLWrapper::TextureSampling::Linear,
 		.mip = Graphics::OpenGLWrapper::TextureSampling::Linear,
 		.mipmaps = true,
-		});	
+		});		
+	
+	resourceManager.LoadTexture2DOpenGL("image", std::move(texture));	
 
-	Font font{ "assets/fonts/Consola.ttf" };	
+	rw.GetWindow().resizedEventDispatcher.AddHandler(windowResizedEventHandler);
 
-	resourceManager.LoadFont("default", std::move(font));	
-	resourceManager.LoadTexture2DOpenGL("image", std::move(texture));
+	windowResizedEventHandler.SetFunction([&](Input::Events::WindowResizedEvent event) {
+		Blaze::Graphics::OpenGLWrapper::SetRenderArea({ }, rw.GetSize());
+		});
+
+	Graphics::OpenGLWrapper::EnableBlending(true);
+//	Graphics::OpenGLWrapper::
 }
 
-void RenderSystem_OpenGL::SetActiveScreen(UI2::Screen* screen)
+void RenderSystem_OpenGL::SetScreen(UI::Screen* screen)
 {
 	UIRP.SetScreen(screen);
 }
 
-
 void RenderSystem_OpenGL::Frame()
-{		
+{			
 	rw.MakeActive();
-
+	
 	Blaze::Graphics::OpenGLWrapper::ClearTarget();
-	Blaze::Graphics::OpenGLWrapper::SetRenderArea({ }, rw.GetSize());
 
-	rp.Execute();
+	rp.Execute();	
 	 
 	UIRP.Render(rw.GetSize());
-	
-	SDL_GL_SwapWindow((SDL_Window*)rw.GetWindow().GetHandle());
+		
+	rw.GetWindow().SwapBuffers();	
 }

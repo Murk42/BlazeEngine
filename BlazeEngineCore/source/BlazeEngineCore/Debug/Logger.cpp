@@ -13,39 +13,39 @@ namespace Blaze
 	{		
 		void AddLoggerListener(Debug::LoggerListener* listener)
 		{
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
-			globalData.loggerListeners.AddFront(listener);
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
+			globalDataCore.loggerListeners.AddFront(listener);
 		}		
 		void RemoveLoggerListener(Debug::LoggerListener* listener)
 		{	
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
-			globalData.loggerListeners.EraseOne([=](auto other) { return other == listener; });
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
+			globalDataCore.loggerListeners.EraseOne([=](auto other) { return other == listener; });
 		}				
 
 		void AddOutputStream(WriteStream& stream)
 		{ 			
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
-			globalData.loggerOutputStreams.Insert(&stream);			
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
+			globalDataCore.loggerOutputStreams.Insert(&stream);			
 		}
 		void RemoveOutputStream(WriteStream& stream)
 		{
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
-			globalData.loggerOutputStreams.Erase(&stream);			
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
+			globalDataCore.loggerOutputStreams.Erase(&stream);			
 		}
 		void AddOutputFile(const Path& path)
 		{						
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
-			auto& loggerOutputFileData = *globalData.loggerOutputFiles.AddFront();
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
+			auto& loggerOutputFileData = *globalDataCore.loggerOutputFiles.AddFront();
 			loggerOutputFileData.file.Open(path, FileAccessPermission::Write);
 			loggerOutputFileData.path = path;			
 
 			if (!loggerOutputFileData.file.IsOpen())
-				globalData.loggerOutputFiles.EraseFirst();
+				globalDataCore.loggerOutputFiles.EraseFirst();
 		}
 		void RemoveOutputFile(const Path& path)
 		{			
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
-			globalData.loggerOutputFiles.EraseOne([&](const auto& it) {
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
+			globalDataCore.loggerOutputFiles.EraseOne([&](const auto& it) {
 				return it.path == path;
 			});			
 		}
@@ -53,28 +53,28 @@ namespace Blaze
 		/*
 			TS stands for thread safe, meaning it can only be called if according mutexes are locked.
 		*/
-		void WriteToStreams_TS(StringView string)
+		void WriteToStreams_TS(StringViewUTF8 string)
 		{
-			for (auto& stream : globalData.loggerOutputStreams)
+			for (auto& stream : globalDataCore.loggerOutputStreams)
 			{
-				stream->Write(string.Ptr(), string.Count());
+				stream->Write(string.Buffer(), string.BufferSize() - 1);
 				char endln = '\n';
 				stream->Write(&endln, 1);
 			}
-			for (auto& stream : globalData.loggerOutputFiles)
+			for (auto& stream : globalDataCore.loggerOutputFiles)
 			{
-				stream.file.Write(string.Ptr(), string.Count());
+				stream.file.Write(string.Buffer(), string.BufferSize() - 1);
 				char endln = '\n';
 				stream.file.Write(&endln, 1);
 			}
 		}
 
-		void ProcessString(StringView string)
+		void ProcessString(StringViewUTF8 string)
 		{	
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
 			bool supress = false;
 
-			for (auto& listener : globalData.loggerListeners)
+			for (auto& listener : globalDataCore.loggerListeners)
 			{
 				listener->NewString(string);
 
@@ -90,10 +90,10 @@ namespace Blaze
 		}
 		void ProcessLog(const Log& log)
 		{
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
 			bool supress = false;
 
-			for (auto& listener : globalData.loggerListeners)
+			for (auto& listener : globalDataCore.loggerListeners)
 			{
 				listener->NewLog(log);
 
@@ -123,11 +123,11 @@ namespace Blaze
 		}
 		void ProcessResult(Result&& result)
 		{			
-			std::lock_guard<std::mutex> lg{ globalData.loggerMutex };
+			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
 
 			bool supress = false;								
 
-			for (auto& listener : globalData.loggerListeners)
+			for (auto& listener : globalDataCore.loggerListeners)
 			{
 				listener->NewResult(result);
 
@@ -158,23 +158,23 @@ namespace Blaze
 			result.ClearSilent();
 		}
 
-		void LogDebug(String&& source, String&& message)
+		void LogDebug(StringUTF8&& source, StringUTF8&& message)
 		{
 			ProcessResult(BLAZE_DEBUG_RESULT(std::move(source), std::move(message)));
 		}
-		void LogInfo(String&& source, String&& message)
+		void LogInfo(StringUTF8&& source, StringUTF8&& message)
 		{
 			ProcessResult(BLAZE_INFO_RESULT(std::move(source), std::move(message)));
 		}
-		void LogWarning(String&& source, String&& message)
+		void LogWarning(StringUTF8&& source, StringUTF8&& message)
 		{
 			ProcessResult(BLAZE_WARNING_RESULT(std::move(source), std::move(message)));
 		}
-		void LogError(String&& source, String&& message) 
+		void LogError(StringUTF8&& source, StringUTF8&& message)
 		{ 
 			ProcessResult(BLAZE_ERROR_RESULT(std::move(source), std::move(message))); 
 		}
-		void LogFatal(String&& source, String&& message) 
+		void LogFatal(StringUTF8&& source, StringUTF8&& message)
 		{ 
 			ProcessResult(BLAZE_FATAL_RESULT(std::move(source), std::move(message))); 
 		}		

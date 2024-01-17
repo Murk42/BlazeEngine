@@ -57,6 +57,9 @@ namespace Blaze
 		
 		bool IsNull() const;				
 
+		ValueType& operator*() const;
+		ValueType* operator->() const;
+
 		ArrayIterator& operator++();
 		ArrayIterator operator++(int);
 		ArrayIterator& operator--();
@@ -67,9 +70,6 @@ namespace Blaze
 
 		ArrayIterator& operator+=(int offset);
 		ArrayIterator& operator-=(int offset);
-
-		ValueType& operator*() const;
-		ValueType* operator->() const;
 
 		template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
 		bool operator>(const T& i) const;

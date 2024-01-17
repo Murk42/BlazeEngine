@@ -6,6 +6,8 @@ in vec2 frag_pos1;
 in vec2 frag_pos2;														   
 in float frag_width;	
 
+out vec4 out_color;
+
 float line_distance(vec2 pointA, vec2 direction, vec2 point)
 {	
 	float a = -direction.y;
@@ -36,5 +38,5 @@ void main()
 	float d = segment_distance(frag_pos1, frag_pos2, frag_pos);						   
 	d = smoothstep(width - 1, width + 1, d);		
 			
-	gl_FragColor = vec4(vec3(frag_color.rgb), mix(frag_color.a, 0, d));    
+	out_color = vec4(vec3(frag_color.rgb), mix(frag_color.a, 0, d));    
 }																		   

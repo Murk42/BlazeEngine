@@ -245,7 +245,7 @@ namespace Blaze
 		io->close = write_io_close;
 		io->eof = write_io_eof;
 	}
-	const char* GetSailStatusString(sail_status_t status)
+	StringView GetSailStatusString(sail_status_t status)
 	{
 		switch (status)
 		{

@@ -43,12 +43,12 @@ namespace Blaze
 		if (implementation != nullptr)
 			return implementation->GetSize();
 		return Vec2u();
-	}
-	String WindowBase::GetTitle() const
+	} 
+	StringUTF8 WindowBase::GetTitle() const
 	{
 		if (implementation != nullptr)
 			return implementation->GetTitle();
-		return String();
+		return StringUTF8();
 	}
 	Vec2i WindowBase::GetMousePos() const
 	{
@@ -77,7 +77,7 @@ namespace Blaze
 		if (implementation != nullptr)
 			implementation->SetSize(size);		
 	}
-	void WindowBase::SetTitle(StringView title)
+	void WindowBase::SetTitle(StringViewUTF8 title)
 	{
 		if (implementation != nullptr)
 			implementation->SetTitle(title);		
@@ -132,10 +132,10 @@ namespace Blaze
 		if (implementation != nullptr)
 			implementation->SetWindowResizableFlag(resizable);
 	}
-	void WindowBase::SetLockMouseFlag(bool lockMouse)
+	void WindowBase::SetWindowLockMouseFlag(bool lockMouse)
 	{
 		if (implementation != nullptr)
-			implementation->SetLockMouseFlag(lockMouse);
+			implementation->SetWindowLockMouseFlag(lockMouse);
 	}
 		
 	bool WindowBase::IsFullscreen()

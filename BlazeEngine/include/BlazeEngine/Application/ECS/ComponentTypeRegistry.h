@@ -58,7 +58,7 @@ namespace Blaze::ECS
 		inline void DestructSystem(System* ptr) const { systemDestructor((uint8*)ptr - systemBaseOffset); }
 		inline void DestructSystemDirect(void* ptr) const { systemDestructor(ptr); }
 
-		inline bool IsNone() const { return typeName == nullptr; }
+		inline bool IsNone() const { return typeName.Empty(); }
 
 		inline const Set<StringView>& GetTypeTags() const { return typeTags; }
 

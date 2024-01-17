@@ -127,16 +127,16 @@ namespace Blaze
 			char* ptr = arr;
 			while (it != callstack.end())
 			{
-				String fileName = it->FilePath().FileName();
+				StringUTF8 fileName = it->FilePath().FileName();
 				String fileLine = StringParsing::Convert(it->FileLine());
 				
-				uintMem sizeNeeded = fileName.Count() + fileLine.Count() + 2;
+				uintMem sizeNeeded = fileName.BufferSize() - 1 + fileLine.Count();
 
 				if (sizeNeeded > sizeLeft)
 					break;
 
-				memcpy(ptr, fileName.Ptr(), fileName.Count());
-				ptr += fileName.Count();
+				memcpy(ptr, fileName.Buffer(), fileName.BufferSize() - 1);
+				ptr += fileName.BufferSize() - 1;
 
 				ptr[0] = ' ';
 				ptr += 1;

@@ -1,15 +1,17 @@
 #include "pch.h"
 #include "BlazeEngineCore/File/File.h"
+#include "BlazeEngineCore/File/FileSystem.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include "BlazeEngineCore/Internal/Windows/WindowsPlatform.h"
+#undef CreateDirectory
 #else
 #error
 #endif 
 
 namespace Blaze
 {
-	File::File()
+	File::File()  
 	{
 	}
 	File::File(File&& other) noexcept
@@ -97,32 +99,22 @@ namespace Blaze
 			break;
 		}
 		
+		//auto pathString = path.GetString();
+
 		if (parameters.createSubdirectories)
 		{
-			std::filesystem::path _path { path.GetString().Ptr() };
-			_path = _path.parent_path();
+			Path parentPath = path.ParentPath();			
+								
+			if (!parentPath.Exists() && !parentPath.Empty())			
+				FileSystem::CreateDirectory(parentPath);								
 
-			std::error_code ec;
-			bool exists = std::filesystem::exists(_path, ec) || _path.empty();
-
-			if (ec) return BLAZE_ERROR_RESULT("Blaze Engine", (String)"std::filesystem::exists failed with error: \"" + ec.message().c_str() + "\"");
-			
-			if (!exists)
-			{
-				std::filesystem::create_directories(_path, ec);
-
-				if (ec) return BLAZE_ERROR_RESULT("Blaze Engine", (String)"std::filesystem::create_directories failed with error: \"" + ec.message().c_str() + "\"");
-			}
 		}
+		
+		auto wstring = path.GetUnderlyingObject().wstring();		
+		HANDLE handle = CreateFileW(wstring.data(), desiredAccess, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, NULL, creationDisposition, flagsAndAttributes, NULL);
 
-		HANDLE handle = CreateFileA(path.GetString().Ptr(), desiredAccess, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, NULL, creationDisposition, flagsAndAttributes, NULL);
-
-		if (handle == INVALID_HANDLE_VALUE)
-		{
-			return
-				BLAZE_INFO_RESULT("Blaze Engine", "Path was: \"" + path.GetString() + "\"") +
-				BLAZE_ERROR_RESULT("Windows API", "CreateFileA failed with error: \"" + Windows::GetErrorString(GetLastError()) + "\"");
-		}
+		if (handle == INVALID_HANDLE_VALUE)		
+			return	BLAZE_ERROR_RESULT("Windows API", "CreateFileA given a path \"" + path.ToString() + "\" failed with error: \"" + Windows::GetErrorString(GetLastError()) + "\"");		
 
 		FileStreamBase::Open(handle);
 #else
