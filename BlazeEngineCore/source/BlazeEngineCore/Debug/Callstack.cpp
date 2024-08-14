@@ -3,7 +3,7 @@
 #include "BlazeEngineCore/Memory/MemoryManager.h"
 
 #define BOOST_STACKTRACE_USE_WINDBG_CACHED
-#include <boost/stacktrace.hpp>
+#include <boost/stacktrace/stacktrace.hpp>	
 #undef min
 
 namespace Blaze::Debug

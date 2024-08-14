@@ -28,10 +28,16 @@
 #include "BlazeEngineCore/File/Path.h"
 #include "BlazeEngineCore/File/Stream/Stream.h"
 
+#include "BlazeEngineCore/Debug/Breakpoint.h"
 #include "BlazeEngineCore/Debug/Callstack.h"
 #include "BlazeEngineCore/Debug/Log.h"
 #include "BlazeEngineCore/Debug/Result.h"
 #include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/Debug/LoggerListener.h"
+
+#include "BlazeEngineCore/File/Stream/FileStream.h"
+#include "BlazeEngineCore/File/Stream/BufferStream.h"
+#include "BlazeEngineCore/File/File.h"
 
 #include "BlazeEngineCore/DataStructures/StringHash.h"
 
@@ -39,6 +45,7 @@
 #include "BlazeEngineCore/DataStructures/ArrayView.h"
 #include "BlazeEngineCore/DataStructures/Hash.h"
 #include "BlazeEngineCore/DataStructures/List.h"
+#include "BlazeEngineCore/DataStructures/DualList.h"
 #include "BlazeEngineCore/DataStructures/Map.h"
 #include "BlazeEngineCore/DataStructures/Set.h"
 
@@ -47,44 +54,26 @@
 #include "BlazeEngineCore/DataStructures/UnicodeCharImpl.h"
 #include "BlazeEngineCore/DataStructures/ArrayImpl.h"
 #include "BlazeEngineCore/DataStructures/ListImpl.h"
+#include "BlazeEngineCore/DataStructures/DualListImpl.h"
 #include "BlazeEngineCore/DataStructures/MapImpl.h"
 #include "BlazeEngineCore/DataStructures/SetImpl.h"
+
+#include "BlazeEngineCore/Memory/MallocAllocator.h"
+#include "BlazeEngineCore/Memory/MemoryListener.h"
 
 #pragma endregion
 
-#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
-
-#include "BlazeEngineCore/DataStructures/Array.h"
-#include "BlazeEngineCore/DataStructures/ArrayImpl.h"
-#include "BlazeEngineCore/DataStructures/ArrayView.h"
 #include "BlazeEngineCore/DataStructures/Buffer.h"
 #include "BlazeEngineCore/DataStructures/Color.h"
 #include "BlazeEngineCore/DataStructures/Constexpr.h"
-#include "BlazeEngineCore/DataStructures/DualList.h"
-#include "BlazeEngineCore/DataStructures/DualListImpl.h"
 #include "BlazeEngineCore/DataStructures/Handle.h"
 #include "BlazeEngineCore/DataStructures/HandleImpl.h"
-#include "BlazeEngineCore/DataStructures/Hash.h"
 #include "BlazeEngineCore/DataStructures/HybridArray.h"
-#include "BlazeEngineCore/DataStructures/List.h"
-#include "BlazeEngineCore/DataStructures/ListImpl.h"
-#include "BlazeEngineCore/DataStructures/Map.h"
-#include "BlazeEngineCore/DataStructures/MapImpl.h"
 #include "BlazeEngineCore/DataStructures/Rect.h"
-#include "BlazeEngineCore/DataStructures/Set.h"
-#include "BlazeEngineCore/DataStructures/SetImpl.h"
-#include "BlazeEngineCore/DataStructures/String.h"
 #include "BlazeEngineCore/DataStructures/StringHash.h"
-#include "BlazeEngineCore/DataStructures/StringUTF8.h"
-#include "BlazeEngineCore/DataStructures/StringView.h"
-#include "BlazeEngineCore/DataStructures/StringViewImpl.h"
-#include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
-#include "BlazeEngineCore/DataStructures/StringViewUTF8Impl.h"
 #include "BlazeEngineCore/DataStructures/Template.h"
 #include "BlazeEngineCore/DataStructures/TemplateGroup.h"
 #include "BlazeEngineCore/DataStructures/Tuple.h"
-#include "BlazeEngineCore/DataStructures/UnicodeChar.h"
-#include "BlazeEngineCore/DataStructures/UnicodeCharImpl.h"
 #include "BlazeEngineCore/DataStructures/UnorderedArray.h"
 #include "BlazeEngineCore/DataStructures/UnorderedArrayImpl.h"
 #include "BlazeEngineCore/DataStructures/VirtualList.h"
@@ -92,15 +81,7 @@
 #include "BlazeEngineCore/DataStructures/VirtualMap.h"
 #include "BlazeEngineCore/DataStructures/VirtualMapImpl.h"
 
-#include "BlazeEngineCore/Debug/Breakpoint.h"
-#include "BlazeEngineCore/Debug/LoggerListener.h"
-
-#include "BlazeEngineCore/File/Path.h"
-#include "BlazeEngineCore/File/File.h"
 #include "BlazeEngineCore/File/FileSystem.h"
-#include "BlazeEngineCore/File/Stream/BufferStream.h"
-#include "BlazeEngineCore/File/Stream/FileStream.h"
-#include "BlazeEngineCore/File/Stream/Stream.h"
 #include "BlazeEngineCore/File/Stream/SubStream.h"
 
 #include "BlazeEngineCore/Math/Quaternion.h"
@@ -115,9 +96,5 @@
 
 #include "BlazeEngineCore/Threading/Thread.h"
 
-#include "BlazeEngineCore/Memory/Creator.h"
-#include "BlazeEngineCore/Memory/Allocator.h"
-#include "BlazeEngineCore/Memory/MallocAllocator.h"
-#include "BlazeEngineCore/Memory/MemoryListener.h"
 #include "BlazeEngineCore/Memory/MemoryManager.h"
 #include "BlazeEngineCore/Memory/VirtualAllocator.h"

@@ -1,18 +1,16 @@
 #include "pch.h"
 #include "GlobalData.h"
 #include "BlazeEngine/Console/Console.h"
+#include "BlazeEngine/Window/Window.h"
 #include "SDL2/SDL_events.h"
 
 namespace Blaze
 {
-	GlobalData* globalData = nullptr;
+	ConsoleOutputStream consoleOutputStream;
+	BlazeEngineContext blazeEngineContext;	
 
-	TimingResult InitializeBlazeEngine()
-	{
-		Timing timing{ "Engine core data" };
-		globalData = new GlobalData();
-
-		globalData->scancodemap = {
+	BlazeEngineContext::BlazeEngineContext() : 
+		scancodemap({
 		{ Key::Unknown, SDL_Scancode::SDL_SCANCODE_UNKNOWN			},
 		{ Key::A,	SDL_Scancode::SDL_SCANCODE_A					},
 		{ Key::B,	SDL_Scancode::SDL_SCANCODE_B					},
@@ -52,7 +50,7 @@ namespace Blaze
 		{ Key::Nine,SDL_Scancode::SDL_SCANCODE_9					},
 		{ Key::Zero,SDL_Scancode::SDL_SCANCODE_0					},
 
-		{ Key::Enter,	SDL_Scancode::SDL_SCANCODE_RETURN		    },		
+		{ Key::Enter,	SDL_Scancode::SDL_SCANCODE_RETURN		    },
 		{ Key::Escape,	SDL_Scancode::SDL_SCANCODE_ESCAPE		    },
 		{ Key::Backspace,	SDL_Scancode::SDL_SCANCODE_BACKSPACE		    },
 		{ Key::Tab,SDL_Scancode::SDL_SCANCODE_TAB			    	},
@@ -148,8 +146,8 @@ namespace Blaze
 		{ Key::RCtrl,	SDL_Scancode::SDL_SCANCODE_RCTRL				},
 		{ Key::RShift,	SDL_Scancode::SDL_SCANCODE_RSHIFT			},
 		{ Key::RAlt,SDL_Scancode::SDL_SCANCODE_RALT				}
-		};
-		globalData->keymap = {
+			}),
+		keymap({
 					{ SDL_Scancode::SDL_SCANCODE_UNKNOWN,			Key::Unknown			},
 					{ SDL_Scancode::SDL_SCANCODE_A,					Key::A				},
 					{ SDL_Scancode::SDL_SCANCODE_B,					Key::B				},
@@ -285,18 +283,18 @@ namespace Blaze
 					{ SDL_Scancode::SDL_SCANCODE_RCTRL,				Key::RCtrl			},
 					{ SDL_Scancode::SDL_SCANCODE_RSHIFT,			Key::RShift			},
 					{ SDL_Scancode::SDL_SCANCODE_RALT,				Key::RAlt			}
-		};
-
-		return timing.GetTimingResult();
-	}
-	void TerminateBlazeEngine()
-	{			
-		delete globalData;
-		globalData = nullptr;
-	}
-
-	void GlobalData::ExecuteOnMainThread(std::function<void()>&& function)
+		}),
+		mainThreadID(std::this_thread::get_id())
 	{
+
+	}
+
+	BlazeEngineContext::~BlazeEngineContext()
+	{
+	}
+
+	void BlazeEngineContext::ExecuteTaskOnMainThread(std::function<void()>&& function)
+	{		
 		std::lock_guard<std::mutex> lk{ mainThreadTaskMutex };
 		mainThreadTask = std::move(function);
 
@@ -306,10 +304,10 @@ namespace Blaze
 		SDL_memset(&event, 0, sizeof(event));
 		event.type = mainThreadTaskEventIdentifier;		
 		SDL_PushEvent(&event);		
-
+		
 		mainThreadTaskFlag.wait(1);	
 	}
-	void GlobalData::CheckForMainThreadTask()
+	void BlazeEngineContext::ExecuteMainThreadTask()
 	{
 		if (mainThreadTaskFlag.test())
 		{
@@ -319,5 +317,21 @@ namespace Blaze
 			mainThreadTaskFlag.clear();
 			mainThreadTaskFlag.notify_one();
 		}
+	}
+	void BlazeEngineContext::HandleWindowKeyEvent(const Input::Events::KeyPressed& event)
+	{
+		eventStack.Add("KeyPressed", [](const Input::Events::KeyPressed& event) {
+			event.window->HandleKeyEvent(event);			
+			}, event);		
+	}
+	void BlazeEngineContext::HandleWindowKeyEvent(const Input::Events::KeyReleased& event)
+	{
+		eventStack.Add("KeyReleased", [](const Input::Events::KeyReleased& event) {
+			event.window->HandleKeyEvent(event);
+			}, event);
+	}
+	void BlazeEngineContext::HandleWindowResizeEvent(const Input::Events::WindowResizedEvent& event)
+	{
+		event.window->HandleResizeEvent(event);
 	}
 }

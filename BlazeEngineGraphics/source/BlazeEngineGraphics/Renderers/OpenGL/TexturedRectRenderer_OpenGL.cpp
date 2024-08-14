@@ -1,9 +1,12 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
+#include "BlazeEngineGraphics/Files/shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {	
-	void TexturedRectRenderCache_OpenGL::CreateNew(TexturedRectRenderer_OpenGL& renderer, const Array<TexturedRectRenderData_OpenGL>& renderData)
+	void TexturedRectRenderCache_OpenGL::CreateNew(TexturedRectRenderer_OpenGL& renderer, const Array<TexturedRectRenderData>& renderData)
 	{						
 		groups.Clear();
 
@@ -79,7 +82,7 @@ namespace Blaze::Graphics::OpenGL
 					auto& dst = group.instances[j + TexturedRectRenderer_OpenGL::InstanceBufferInstanceCount - groupInstanceSpaceLeft];
 					auto& src = instances[j + textureInstancesProcessed];					
 
-					dst.textureIndex = i;
+					dst.textureIndex = (float)i;
 				}				
 
 				textureInstancesProcessed = copyCount;				
@@ -95,9 +98,15 @@ namespace Blaze::Graphics::OpenGL
 	}	
 
 	TexturedRectRenderer_OpenGL::TexturedRectRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext)		
+		: graphicsContext(graphicsContext)
 	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert{ "assets/shaders/OpenGL/texturedRect.vert" };
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag{ "assets/shaders/OpenGL/texturedRect.frag" };
+		Blaze::Graphics::OpenGLWrapper::VertexShader vert;
+		vert.ShaderSource(StringView((const char*)texturedRect_vert_file, texturedRect_vert_size));
+		vert.CompileShader();
+
+		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
+		frag.ShaderSource(StringView((const char*)texturedRect_frag_file, texturedRect_frag_size));
+		frag.CompileShader();
 
 		program.LinkShaders({ &vert, &frag });		
 
@@ -151,12 +160,12 @@ namespace Blaze::Graphics::OpenGL
 	}	
 	void TexturedRectRenderer_OpenGL::Render(const TexturedRectRenderCache_OpenGL& renderCache, Vec2u targetSize)
 	{				
-		Blaze::Graphics::OpenGLWrapper::SelectProgram(&program);
-		Blaze::Graphics::OpenGLWrapper::SelectVertexArray(&va);
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);		
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
+		graphicsContext.SetActiveTextureSlot(0);
 
 		Vec2u renderArea = Vec2u(targetSize);		
-		Mat4f proj = Mat4f::OrthographicMatrix(0, targetSize.x, 0, targetSize.y, -1, 1);
+		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);
 
 		program.SetUniform(0, proj);
 
@@ -182,23 +191,23 @@ namespace Blaze::Graphics::OpenGL
 
 			for (uint i = 0; i < DrawCallTextureCount && group.textures[i] != nullptr; ++i)
 			{
-				OpenGLWrapper::SetActiveTextureSlot(i);
-				OpenGLWrapper::SelectTexture(group.textures[i]);
+				graphicsContext.SetActiveTextureSlot(i);
+				graphicsContext.SelectTexture(group.textures[i]);
 			}			
 
-			Blaze::Graphics::OpenGLWrapper::RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, group.instanceCount);
+			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, group.instanceCount);
 
 			fence.SetFence();		
 		}
 	}
 	void TexturedRectRenderer_OpenGL::Render(RenderStream& stream, Vec2u targetSize)
 	{
-		Blaze::Graphics::OpenGLWrapper::SelectProgram(&program);
-		Blaze::Graphics::OpenGLWrapper::SelectVertexArray(&va);
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
+		graphicsContext.SetActiveTextureSlot(0);
 
 		Vec2u renderArea = Vec2u(targetSize);
-		Mat4f proj = Mat4f::OrthographicMatrix(0, targetSize.x, 0, targetSize.y, -1, 1);
+		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);
 
 		program.SetUniform(0, proj);
 		program.SetUniform(1, 0);
@@ -211,7 +220,10 @@ namespace Blaze::Graphics::OpenGL
 	
 		stream.BeginStream();
 
-		while (!stream.IsEmpty())
+		//When rd is nullptr it means next render data can be rendered, if not the one stored in rd should be
+		TexturedRectRenderData* rd = nullptr;
+
+		while (true)
 		{
 			if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
 			{
@@ -225,58 +237,72 @@ namespace Blaze::Graphics::OpenGL
 			uint instanceCount = 0;
 
 			while (true)
-			{
-				TexturedRectRenderData_OpenGL& rd = *(TexturedRectRenderData_OpenGL*)stream.GetCurrent();
+			{				
+				rd = (TexturedRectRenderData*)stream.Advance();
 
-				int textureIndex = -1;
-				while (true)
-				{
-					if (rd.texture == nullptr || textureIndex == DrawCallTextureCount || textures[textureIndex] == rd.texture)
-						break;
-					else if (textures[textureIndex] == nullptr)
-					{
-						textures[textureIndex] = rd.texture;						
-						break;
-					}					
+				if (rd == nullptr)
+					break;
 
-					++textureIndex;
-				}				
+				//
+				//If textureIndex is set to -1 it means no texture will be used, if it is set to DrawCallTextureCount then there arent enough texture slots and the current batch will be rendered
+				//
+				int textureIndex = 0;
+
+				if (rd->texture == nullptr)
+					textureIndex = -1;
+				else
+					for (; textureIndex < DrawCallTextureCount; ++textureIndex)
+						if (textures[textureIndex] == rd->texture)
+							break;
+						else if (textures[textureIndex] == nullptr)
+						{
+							textures[textureIndex] = rd->texture;
+							break;
+						}
 
 				if (textureIndex == DrawCallTextureCount)
 					break;
 
 				Instance instance{
-				.color = rd.color,
-				.p1 = rd.pos,
-				.p2 = rd.pos + rd.right,
-				.p3 = rd.pos + rd.up,
-				.uv1 = rd.uv1,
-				.uv2 = rd.uv2,
-				.blend = rd.blend,
-				.alpha = rd.alpha,
+				.color = rd->color,
+				.p1 = rd->pos,
+				.p2 = rd->pos + rd->right,
+				.p3 = rd->pos + rd->up,
+				.uv1 = rd->uv1,
+				.uv2 = rd->uv2,
+				.blend = rd->blend,
+				.alpha = rd->alpha,
 				.textureIndex = (float)textureIndex,
 				};
 
-				instanceBufferMap[instanceCount++] = instance;
+				instanceBufferMap[instanceCount] = instance;				
+				instanceCount++;
 
-				stream.Advance();
-
-				if (instanceCount == InstanceBufferInstanceCount || stream.IsEmpty())
+				if (instanceCount == InstanceBufferInstanceCount)
 					break;
 			}
 			
+			if (instanceCount == 0)
+			{
+				instanceBuffer.UnmapBuffer();
+				break;
+			}
+
 			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * instanceCount);
 			instanceBuffer.UnmapBuffer();
 
 			for (uint i = 0; i < DrawCallTextureCount && textures[i] != nullptr; ++i)
 			{
-				OpenGLWrapper::SetActiveTextureSlot(i);
-				OpenGLWrapper::SelectTexture(textures[i]);
+				graphicsContext.SetActiveTextureSlot(i);
+				graphicsContext.SelectTexture(textures[i]);
 			}
 
-			Blaze::Graphics::OpenGLWrapper::RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, instanceCount);
+			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, instanceCount);
 
 			fence.SetFence();
+
+			if (rd == nullptr)
+				break;
 		}
 	}	
 }

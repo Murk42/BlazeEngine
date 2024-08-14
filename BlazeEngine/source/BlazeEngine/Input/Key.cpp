@@ -7,7 +7,7 @@ namespace Blaze
 {	
 	SDL_Scancode GetScancodeFromKey(Key key)
 	{
-		auto it = globalData->scancodemap.Find(key);
+		auto it = blazeEngineContext.scancodemap.Find(key);
 
 		if (it.IsNull())
 			return SDL_SCANCODE_UNKNOWN;
@@ -16,7 +16,7 @@ namespace Blaze
 	}
 	Key GetKeyFromScancode(SDL_Scancode code)
 	{
-		auto it = globalData->keymap.Find(code);
+		auto it = blazeEngineContext.keymap.Find(code);
 
 		if (it.IsNull())
 			return Key::Unknown;

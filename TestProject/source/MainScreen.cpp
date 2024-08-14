@@ -3,9 +3,17 @@
 
 void MainScreen::Update()
 {
-	//auto transform = explanationText.GetTransform();
-	//transform.size.x = 60 + (Math::Sin(TimePoint::GetRunTime() * 2) + 1) / 2 * 400;
-	//explanationText.SetTransform(transform);
+	{
+		auto transform = explanationText.GetTransform();
+		transform.size.x = 60 + (Math::Sin(TimePoint::GetRunTime() * 2) + 1) / 2 * 400;
+		explanationText.SetTransform(transform);
+	}
+	{
+		auto transform = panel.GetTransform();
+		transform.rotation = TimePoint::GetRunTime();
+		panel.SetTransform(transform);
+	}
+	
 }
 
 MainScreen::MainScreen(Resource::ResourceManager& manager) :

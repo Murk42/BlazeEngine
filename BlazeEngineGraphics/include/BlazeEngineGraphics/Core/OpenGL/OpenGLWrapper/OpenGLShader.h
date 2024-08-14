@@ -1,24 +1,8 @@
 #pragma once
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
-{
-	enum class ShaderType
-	{
-		FragmentShader = 35632,
-		VertexShader = 35633,
-		GeometryShader = 36313,
-		TessellationControlShader = 36488,
-		TessellationEvaluationShader = 36487,
-		ComputeShader = 37305,
-	};
-
-	enum class ShaderState
-	{
-		Invalid,
-		UnsuccesfullyCompiled,
-		SuccesfullyCompiled,
-	};
-
+{	
 	class BLAZE_GRAPHICS_API Shader
 	{
 		uint id;
@@ -30,10 +14,10 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Shader(ShaderType type, const Path& path);
 		~Shader();
 
-		Result Load(const Path& path);
+		void Load(const Path& path);
 
-		Result ShaderSource(StringView source);
-		Result CompileShader();
+		void ShaderSource(StringView source);
+		void CompileShader();
 		String GetCompilationLog();
 
 		inline ShaderState GetState() const { return state; }
@@ -48,41 +32,41 @@ namespace Blaze::Graphics::OpenGLWrapper
 	{
 	public:
 		VertexShader() : Shader(ShaderType::VertexShader) { }
-		VertexShader(const StringView& path) : Shader(ShaderType::VertexShader, path) { }
+		VertexShader(const Path& path) : Shader(ShaderType::VertexShader, path) { }
 	};
 
 	class FragmentShader : public Shader
 	{
 	public:
 		FragmentShader() : Shader(ShaderType::FragmentShader) { }
-		FragmentShader(const StringView& path) : Shader(ShaderType::FragmentShader, path) { }
+		FragmentShader(const Path& path) : Shader(ShaderType::FragmentShader, path) { }
 	};
 
 	class GeometryShader : public Shader
 	{
 	public:
 		GeometryShader() : Shader(ShaderType::GeometryShader) { }
-		GeometryShader(const StringView& path) : Shader(ShaderType::GeometryShader, path) { }
+		GeometryShader(const Path& path) : Shader(ShaderType::GeometryShader, path) { }
 	};
 
 	class TessellationControlShader : public Shader
 	{
 	public:
 		TessellationControlShader() : Shader(ShaderType::TessellationControlShader) { }
-		TessellationControlShader(const StringView& path) : Shader(ShaderType::TessellationControlShader, path) { }
+		TessellationControlShader(const Path& path) : Shader(ShaderType::TessellationControlShader, path) { }
 	};
 
 	class TessellationEvaluationShader : public Shader
 	{
 	public:
 		TessellationEvaluationShader() : Shader(ShaderType::TessellationEvaluationShader) { }
-		TessellationEvaluationShader(const StringView& path) : Shader(ShaderType::TessellationEvaluationShader, path) { }
+		TessellationEvaluationShader(const Path& path) : Shader(ShaderType::TessellationEvaluationShader, path) { }
 	};
 
 	class ComputeShader : public Shader
 	{
 	public:
 		ComputeShader() : Shader(ShaderType::ComputeShader) { }
-		ComputeShader(const StringView& path) : Shader(ShaderType::ComputeShader, path) { }
+		ComputeShader(const Path& path) : Shader(ShaderType::ComputeShader, path) { }
 	};
 }

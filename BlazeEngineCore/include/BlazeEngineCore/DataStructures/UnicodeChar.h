@@ -2,7 +2,7 @@
 
 namespace Blaze
 {	
-	class UnicodeChar
+	class BLAZE_CORE_API UnicodeChar
 	{
 	public:
 		constexpr UnicodeChar();

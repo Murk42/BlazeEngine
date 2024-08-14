@@ -4,11 +4,11 @@
 namespace Blaze
 {	
 	Timing::Timing()
-		: timePoint(TimePoint::GetWorldTime()), name()
+		: timePoint(TimePoint::GetCurrentWorldTime()), name()
 	{
 	}
 	Timing::Timing(String name)
-		: timePoint(TimePoint::GetWorldTime()), name(std::move(name))
+		: timePoint(TimePoint::GetCurrentWorldTime()), name(std::move(name))
 	{
 	}
 	Timing::Timing(Timing&& other) noexcept
@@ -23,7 +23,7 @@ namespace Blaze
 		TimingResult info;
 		info.nodes = nodes;
 		info.name = name;
-		info.time = TimePoint::GetWorldTime() - timePoint;
+		info.time = TimePoint::GetCurrentWorldTime() - timePoint;
 		return info;
 	}
 	Timing& Timing::operator=(Timing&& other) noexcept

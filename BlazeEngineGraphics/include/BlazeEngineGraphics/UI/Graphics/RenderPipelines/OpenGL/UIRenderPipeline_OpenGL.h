@@ -1,13 +1,23 @@
 #include "BlazeEngineGraphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
-#include "BlazeEngineGraphics/Renderers/OpenGL/TextRenderer_OpenGL.h"
 
 #include "BlazeEngineGraphics/UI/Core/UIScreen.h"
 
-#include "BlazeEngineGraphics/Core/StreamRenderer.h"
+#include "BlazeEngineGraphics/RenderScene/RenderUnit.h"
 
 namespace Blaze::Graphics::OpenGL
-{	
+{		
+	struct UIRenderPipelineDebugData
+	{
+		struct RenderGroup
+		{
+			Array<RenderStream*> renderUnits;
+			StreamRenderer* renderer;
+		};
+
+		Array<RenderGroup> renderGroups;
+	};
+
 	class UIRenderPipeline_OpenGL :
 		EventHandler<UI::NodeCreatedEvent>,
 		EventHandler<UI::NodeDestroyedEvent>,
@@ -16,29 +26,30 @@ namespace Blaze::Graphics::OpenGL
 	public:
 		UIRenderPipeline_OpenGL(
 			TexturedRectRenderer_OpenGL& texturedRectRenderer,
-			PanelRenderer_OpenGL& panelRenderer,
-			TextRenderer_OpenGL& textRenderer);
+			PanelRenderer_OpenGL& panelRenderer
+			);
 		~UIRenderPipeline_OpenGL();
 
 		void SetScreen(UI::Screen* newScreen);
 		void Render(Vec2u targetSize);
+
+		void GetDebugData(UIRenderPipelineDebugData& debugData);
 	private:
 		UI::Screen* screen;
 		TexturedRectRenderer_OpenGL& texturedRectRenderer;
-		PanelRenderer_OpenGL& panelRenderer;
-		TextRenderer_OpenGL& textRenderer;	
+		PanelRenderer_OpenGL& panelRenderer;			
 		bool recreateRenderQueue;
 				
 		struct NodeRenderGroup
 		{
-			uint count;
+			uintMem count;
 			StreamRenderer* renderer;			
 		};
 		
-		Array<UI::Node*> renderQueue;
+		Array<RenderUnit*> renderQueue;
 		Array<NodeRenderGroup> renderGroups;
 
-		StreamRenderer* GetRenderer(UI::Node* node);		
+		StreamRenderer* GetRenderer(RenderUnit* renderUnit);
 			
 		void RecreateRenderQueue();
 

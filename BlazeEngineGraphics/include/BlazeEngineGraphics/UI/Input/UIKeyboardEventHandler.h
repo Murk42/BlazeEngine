@@ -6,8 +6,8 @@ namespace Blaze::UI
 	class UIKeyboardEventHandler
 	{
 	public:
-		struct KeyPressedEvent { UIInputManager* inputManager; Key key; double time; uint combo; };
-		struct KeyReleasedEvent { UIInputManager* inputManager; Key key; double time; };
+		struct KeyPressedEvent { UIInputManager* inputManager; Key key; TimePoint time; uint combo; };
+		struct KeyReleasedEvent { UIInputManager* inputManager; Key key; TimePoint time; };
 		struct TextInputEvent { UIInputManager* inputManager; StringUTF8 input; };
 
 		virtual void OnEvent(KeyPressedEvent event) { }

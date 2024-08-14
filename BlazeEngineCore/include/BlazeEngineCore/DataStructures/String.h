@@ -22,16 +22,15 @@ namespace Blaze
 		StringIterator& operator++(int);
 		StringIterator operator--();
 		StringIterator& operator--(int);
-
-		StringIterator operator+(const uintMem& value) const;
-		StringIterator operator+(const intMem& value) const;
-		StringIterator operator-(const uintMem& value) const;
+		
+		StringIterator operator+(const intMem& value) const;		
 		StringIterator operator-(const intMem& value) const;
-
-		StringIterator& operator+=(const uintMem& value);
-		StringIterator& operator+=(const intMem& value);
-		StringIterator& operator-=(const uintMem& value);
+		
+		StringIterator& operator+=(const intMem& value);		
 		StringIterator& operator-=(const intMem& value);
+
+		uintMem operator-(const StringIterator& other);
+		uintMem operator-(const StringViewIterator& other);
 
 		bool operator==(const StringIterator&) const;
 		bool operator!=(const StringIterator&) const;
@@ -69,7 +68,7 @@ namespace Blaze
 
 		void Clear();
 		String SubString(uintMem start, uintMem count) const;
-		String& Resize(uintMem newCount, char fill = ' ');
+		String& Resize(uintMem newCount, char fill = ' ');		
 
 		inline bool Empty() const { return count == 0; }
 		uint32 Hash() const;

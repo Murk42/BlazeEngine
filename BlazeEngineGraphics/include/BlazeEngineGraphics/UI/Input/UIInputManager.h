@@ -9,6 +9,7 @@ namespace Blaze::UI
 		EventHandler<NodeCreatedEvent>,
 		EventHandler<NodeDestroyedEvent>,
 		EventHandler<ScreenDestructionEvent>,
+		EventHandler<ScreenWindowChangedEvent>,
 		EventHandler<Input::Events::InputPreUpdateEvent>,
 		EventHandler<Input::Events::InputPostUpdateEvent>,
 		EventHandler<Input::Events::MouseMotion>,
@@ -20,27 +21,26 @@ namespace Blaze::UI
 	public:
 		UIInputManager();
 		~UIInputManager();
-
-		void SetWindow(WindowBase* window);
-		void SetScreen(Screen* screen);		
+		
+		void AddScreen(Screen* screen);
+		void RemoveScreen(Screen* screen);		
 
 		void SelectNode(nullptr_t null);
 		void SelectNode(Node* selectedNode);
 		void SelectNode(UIInputNode* selectedNode);
-
-		inline WindowBase* GetWindow() const { return window; }
-		inline Screen* GetScreen() const { return screen; }
+		
 		inline UIInputNode* GetSelectedNode() const { return selectedNode; }
 	private:
-		WindowBase* window;
-		Screen* screen;		
-		Vec2f mousePos;		
+		struct ScreenData
+		{						
+			Array<UIInputNode*> nodes;
+		};
 
-		bool recreateInputNodes;		
-		Array<UIInputNode*> nodes;
+		Map<Screen*, ScreenData> screenData;		
+		Array<Screen*> screensToRecreate;
 		UIInputNode* selectedNode;
 
-		void RecreateInputNodes();
+		void RecreateScreenInputNodes(Map<Screen*, ScreenData>::Iterator it);
 
 		void CheckMousePositionEvents(Vec2i delta);
 		void CheckMouseMotionEvents(UIMouseEventHandler* mouseEventHandler, Vec2i delta);
@@ -49,6 +49,7 @@ namespace Blaze::UI
 		void OnEvent(NodeCreatedEvent event) override;
 		void OnEvent(NodeDestroyedEvent event) override;
 		void OnEvent(ScreenDestructionEvent event) override;
+		void OnEvent(ScreenWindowChangedEvent event) override;
 		void OnEvent(Input::Events::InputPreUpdateEvent event) override;
 		void OnEvent(Input::Events::InputPostUpdateEvent event) override;
 		void OnEvent(Input::Events::MouseMotion event) override;

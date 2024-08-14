@@ -6,7 +6,7 @@ namespace Blaze::Graphics::OpenGL
 {	
 	RenderWindowFramebuffer_OpenGL::~RenderWindowFramebuffer_OpenGL()
 	{
-		framebuffer.id = -1;
+		framebuffer.id = 0;
 		framebuffer.size = Vec2u();
 	}
 	RenderWindowFramebuffer_OpenGL::RenderWindowFramebuffer_OpenGL(RenderWindow_OpenGL& renderWindow)

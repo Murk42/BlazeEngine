@@ -1,19 +1,13 @@
 #pragma once
-#include "BlazeEngineGraphics/Core/StreamRenderer.h"
+#include "BlazeEngineGraphics/Renderers/PanelRenderer.h"
+#include "BlazeEngineGraphics/RenderStructure/StreamRenderer.h"
+#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 
 namespace Blaze::Graphics::OpenGL
 {
-	struct PanelRenderData_OpenGL
-	{				
-		Vec2f pos;
-		Vec2f size;
-		float rotation;
-		float borderWidth;
-		float cornerRadius;
-		ColorRGBAf fillColor;
-		ColorRGBAf borderColor;
-	};
-
 	class PanelRenderer_OpenGL;
 
 	class PanelRenderCache_OpenGL
@@ -48,7 +42,10 @@ namespace Blaze::Graphics::OpenGL
 		
 		void Render(const PanelRenderCache_OpenGL& renderCache, Vec2u targetSize);
 		void Render(RenderStream& renderStream, Vec2u targetSize);
+
+		StringView GetRendererName() const override { return "PanelRenderer_OpenGL"; }
 	private:		
+		GraphicsContext_OpenGL& graphicsContext;
 		Blaze::Graphics::OpenGLWrapper::ShaderProgram program;
 		Blaze::Graphics::OpenGLWrapper::ImmutableStaticGraphicsBuffer vertexBuffer;
 		Blaze::Graphics::OpenGLWrapper::ImmutableMappedGraphicsBuffer instanceBuffer;

@@ -418,6 +418,25 @@ namespace Blaze::Graphics::OpenGLWrapper
 		return std::numeric_limits<GLenum>::max();
 	}
 
+	FramebufferStatus MapFramebufferStatus(GLenum status, Result& result)
+	{
+		switch (status)
+		{
+		case GL_FRAMEBUFFER_COMPLETE: return FramebufferStatus::Complete;
+		case GL_FRAMEBUFFER_UNDEFINED: return FramebufferStatus::Undefined;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: return FramebufferStatus::IncompleteAttachment;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: return FramebufferStatus::MissingAttachment;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: return FramebufferStatus::IncompleteDrawBuffer;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: return FramebufferStatus::IncompleteReadBuffer;
+		case GL_FRAMEBUFFER_UNSUPPORTED:return FramebufferStatus::Unsupported;
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: return FramebufferStatus::IncompleteMultisample;		
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: return FramebufferStatus::IncompleteLayerTargets;		
+		}
+
+		result += BLAZE_ERROR_LOG("Blaze Engine", "Invalid framebuffer status enum value. The integer value was: " + StringParsing::Convert(status));
+		return std::numeric_limits<FramebufferStatus>::max();
+	}
+
 	GLenum OpenGLBufferMappingAccess(ImmutableGraphicsBufferMapAccess mapping, Result& result)
 	{
 		GLenum out;

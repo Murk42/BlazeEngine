@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
-
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
+#include "BlazeEngineGraphics/Files/shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -34,9 +34,15 @@ namespace Blaze::Graphics::OpenGL
 		}
 	}
 	PanelRenderer_OpenGL::PanelRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext)
+		: graphicsContext(graphicsContext)
 	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert{ "assets/shaders/OpenGL/panel.vert" };
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag{ "assets/shaders/OpenGL/panel.frag" };
+		Blaze::Graphics::OpenGLWrapper::VertexShader vert;
+		vert.ShaderSource(StringView((const char*)panel_vert_file, panel_vert_size));
+		vert.CompileShader();
+
+		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
+		frag.ShaderSource(StringView((const char*)panel_frag_file, panel_frag_size));
+		frag.CompileShader();
 
 		program.LinkShaders({ &vert, &frag });
 
@@ -84,14 +90,14 @@ namespace Blaze::Graphics::OpenGL
 	{
 		using Instance = PanelRenderCache_OpenGL::Instance;
 
-		Blaze::Graphics::OpenGLWrapper::SelectProgram(&program);
-		Blaze::Graphics::OpenGLWrapper::SelectVertexArray(&va);
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
+		graphicsContext.SetActiveTextureSlot(0);
 
 		Vec2u renderArea = Vec2u(targetSize);
-		Mat4f proj = Mat4f::OrthographicMatrix(0, targetSize.x, 0, targetSize.y, -1, 1);
+		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);
 
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);
+		graphicsContext.SetActiveTextureSlot(0);
 
 		program.SetUniform(0, proj);		
 
@@ -109,7 +115,7 @@ namespace Blaze::Graphics::OpenGL
 			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * count);
 			instanceBuffer.UnmapBuffer();
 
-			Blaze::Graphics::OpenGLWrapper::RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, renderCache.instances.Count());
+			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, renderCache.instances.Count());
 
 			fence.SetFence();
 
@@ -126,14 +132,12 @@ namespace Blaze::Graphics::OpenGL
 	{ 
 		using Instance = PanelRenderCache_OpenGL::Instance;
 
-		Blaze::Graphics::OpenGLWrapper::SelectProgram(&program);
-		Blaze::Graphics::OpenGLWrapper::SelectVertexArray(&va);
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
+		graphicsContext.SetActiveTextureSlot(0);
 
 		Vec2u renderArea = Vec2u(targetSize);
-		Mat4f proj = Mat4f::OrthographicMatrix(0, targetSize.x, 0, targetSize.y, -1, 1);
-
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);
+		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);		
 
 		program.SetUniform(0, proj);
 
@@ -141,48 +145,66 @@ namespace Blaze::Graphics::OpenGL
 		fence.SetFence();
 
 		renderStream.BeginStream();
+
+		PanelRenderData_OpenGL* rd = nullptr;
 		
-		while (!renderStream.IsEmpty())
-		{			
-			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);			
-
-			uintMem instanceCount = 0;
-			while (!renderStream.IsEmpty() && instanceCount < InstanceBufferInstanceCount)
-			{
-				PanelRenderData_OpenGL rd = *(PanelRenderData_OpenGL*)renderStream.GetCurrent();
-
-				float cos = Math::Cos(rd.rotation);
-				float sin = Math::Sin(rd.rotation);
-				Vec2f right = Vec2f(cos, sin) * rd.size.x;
-				Vec2f up = Vec2f(-sin, cos) * rd.size.y;
-
-				instanceBufferMap[instanceCount] = {
-					.fillColor = rd.fillColor,
-					.borderColor = rd.borderColor,
-					.p1 = rd.pos,
-					.p2 = rd.pos + right,
-					.p3 = rd.pos + up,
-					.borderWidth = rd.borderWidth,
-					.cornerRadius = rd.cornerRadius,
-				};
-
-				renderStream.Advance();
-
-				++instanceCount;
-			}
-			
-			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * instanceCount);
-			instanceBuffer.UnmapBuffer();
-
-			Blaze::Graphics::OpenGLWrapper::RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, instanceCount);
-
-			fence.SetFence();
-
+		while (true)
+		{		
 			if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
 			{
 				Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
 				return;
 			}
+
+			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);			
+			uintMem instanceCount = 0;
+
+			while (true)
+				//!renderStream.IsEmpty() && instanceCount < InstanceBufferInstanceCount)
+			{
+				rd = (PanelRenderData_OpenGL*)renderStream.Advance();
+
+				if (rd == nullptr)
+					break;
+
+				float cos = Math::Cos(rd->rotation);
+				float sin = Math::Sin(rd->rotation);
+				Vec2f right = Vec2f(cos, sin) * rd->size.x;
+				Vec2f up = Vec2f(-sin, cos) * rd->size.y;
+
+				Instance instance = {
+					.fillColor = rd->fillColor,
+					.borderColor = rd->borderColor,
+					.p1 = rd->pos,
+					.p2 = rd->pos + right,
+					.p3 = rd->pos + up,
+					.borderWidth = rd->borderWidth,
+					.cornerRadius = rd->cornerRadius,
+				};
+
+				instanceBufferMap[instanceCount] = instance;
+				++instanceCount;
+
+
+				if (instanceCount == InstanceBufferInstanceCount)
+					break;
+			}
+
+			if (instanceCount == 0)
+			{
+				instanceBuffer.UnmapBuffer();
+				break;
+			}
+			
+			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * instanceCount);
+			instanceBuffer.UnmapBuffer();
+
+			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, instanceCount);
+
+			fence.SetFence();			
+
+			if (rd == nullptr)
+				break;
 		}
 	}
 }

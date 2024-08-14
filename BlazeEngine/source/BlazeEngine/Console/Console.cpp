@@ -19,12 +19,12 @@ namespace Blaze
     namespace Console
     {        
         void Write(StringViewUTF8 text)
-        {                        
-            std::cout.write((const char*)text.Buffer(), text.BufferSize() - 1);
+        {           
+            consoleOutputStream.Write(text.Buffer(), text.BufferSize() - 1);            
         }
         void Write(char text)
         {   
-            std::cout.write(&text, 1);
+            consoleOutputStream.Write(&text, 1);
         }
         void WriteLine(StringViewUTF8 text)
         {            
@@ -43,11 +43,11 @@ namespace Blaze
     {
         void AddOutputToConsole()
         {
-            AddOutputStream(globalData->consoleOutputStream);
+            AddOutputStream(consoleOutputStream);
         }
         void RemoveOutputFromConsole()
         {
-            RemoveOutputStream(globalData->consoleOutputStream);            
+            RemoveOutputStream(consoleOutputStream);            
         }
     }
 }

@@ -25,13 +25,13 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Result result;
 
 		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
 		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);		
@@ -44,7 +44,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		return Result();
 	}	
 
-	Result TextureCubemap::Load(StringView path, CubemapFileType fileType)
+	Result TextureCubemap::Load(Path path, CubemapFileType fileType)
 	{
 
 		Bitmap bm;
@@ -52,9 +52,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		Result result;
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 		
 		SelectTexture(this);		
 
@@ -168,7 +168,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		return result;
 	}
-	Result TextureCubemap::Load(StringView path, CubemapFace face)
+	Result TextureCubemap::Load(Path path, CubemapFace face)
 	{
 
 		Bitmap bm;
@@ -178,9 +178,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		Result result;
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		SelectTexture(this);
 		glTexImage2D((GLenum)face, 0, format, size, size, 0, format, type, bm.GetPixels());

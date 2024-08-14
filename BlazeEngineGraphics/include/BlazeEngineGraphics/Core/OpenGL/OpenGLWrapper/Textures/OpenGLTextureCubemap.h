@@ -42,8 +42,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		Result SetSettings(TextureCubemapSettings settings);		
 
-		Result Load(StringView path, CubemapFileType type);
-		Result Load(StringView path, CubemapFace face);				
+		Result Load(Path path, CubemapFileType type);
+		Result Load(Path path, CubemapFace face);				
 		
 		uint GetSize() const { return size; }
 		inline unsigned GetHandle() const { return id; }

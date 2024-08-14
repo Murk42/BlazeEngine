@@ -1,5 +1,5 @@
 #pragma once
-#include "OpenGLTextureEnums.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {	
@@ -9,35 +9,32 @@ namespace Blaze::Graphics::OpenGLWrapper
 		TextureWrapping yWrap = TextureWrapping::ClampToEdge;
 		TextureSampling min = TextureSampling::Nearest;
 		TextureSampling mag = TextureSampling::Nearest;
-		TextureSampling mip = TextureSampling::Nearest;
-		bool mipmaps = false;
+		TextureSampling mip = TextureSampling::Nearest;		
+		uint textureLevelCount = 1;
 	};
 
 	class Texture2D
 	{
-		unsigned id;
-		Vec2u size;					
 	public:
 		Texture2D();
 		Texture2D(const Texture2D&) = delete;
 		Texture2D(Texture2D&&) noexcept;	
 		~Texture2D();
 
-		Result SetSettings(Texture2DSettings settings);		
 		void SetSwizzle(TextureSwizzle red, TextureSwizzle green, TextureSwizzle blue, TextureSwizzle alpha);
-
-		Result Load(Path path);		
-		Result Load(Path path, TextureInternalPixelFormat internalFormat);
 						
-		Result Create(Vec2u size, TextureInternalPixelFormat internalFormat);
-		Result Create(BitmapView bm);								
-		Result Create(BitmapView bm, TextureInternalPixelFormat internalFormat);
+		void Create(Vec2u size, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings);
+		void Create(BitmapView bm, const Texture2DSettings& settings);
+		void Create(BitmapView bm, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings);
 
-		Result CopyPixels(Vec2u offset, BitmapView bm);		
+		void Load(Path path, const Texture2DSettings& settings);
+		void Load(Path path, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings);
+
+		void SetPixels(Vec2u offset, BitmapView bm, uint textureLevel);
 
 		Bitmap GetBitmap(BitmapColorFormat colorFormat, BitmapColorComponentType componentType) const;
 
-		void GenerateMipmaps();
+		void AutoGenerateMipmaps();
 
 		Vec2u GetSize() const { return size; }				
 
@@ -45,5 +42,11 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		Texture2D& operator=(const Texture2D&) = delete;
 		Texture2D& operator=(Texture2D&&) noexcept;		
+	private:
+		void SetSettings(const Texture2DSettings& settings);
+		void RecreateIfNeeded();
+
+		unsigned id;
+		Vec2u size;					
 	};
 }

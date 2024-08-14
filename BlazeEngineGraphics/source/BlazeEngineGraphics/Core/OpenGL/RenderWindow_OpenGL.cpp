@@ -7,8 +7,8 @@ namespace Blaze::Graphics::OpenGL
 {
 	RenderWindow_OpenGL::RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, WindowSDLCreateOptions_OpenGL createOptions)
 		: graphicsContext(graphicsContext), framebuffer(*this)
-	{
-		window = graphicsContext.CreateWindow(createOptions);				
+	{		
+		window = graphicsContext.CreateWindowSDL(createOptions);				
 		window.resizedEventDispatcher.AddHandler(*this);
 
 		std::atomic_flag_test_and_set(&acquirable);		
@@ -18,11 +18,11 @@ namespace Blaze::Graphics::OpenGL
 
 	RenderWindow_OpenGL::~RenderWindow_OpenGL()
 	{
-		graphicsContext.DestroyWindow(window);		
+		graphicsContext.DestroyWindowSDL(window);		
 	}	
 
 	RenderWindowFramebuffer_OpenGL& RenderWindow_OpenGL::AcquireNextFramebuffer(Semaphore_OpenGL& semaphore)
-	{
+	{		
 		return this->framebuffer;
 	}
 	void RenderWindow_OpenGL::PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, Array<Semaphore_OpenGL*> waitSemaphores)
@@ -35,12 +35,7 @@ namespace Blaze::Graphics::OpenGL
 		int w, h;
 		SDL_GL_GetDrawableSize((SDL_Window*)window.GetHandle(), &w, &h);
 		return Vec2u(w, h);
-	}
-
-	void RenderWindow_OpenGL::MakeActive()
-	{
-		SDL_GL_MakeCurrent((SDL_Window*)window.GetHandle(), graphicsContext.GetContext());		
-	}
+	}	
 
 	void RenderWindow_OpenGL::OnEvent(Input::Events::WindowResizedEvent event)
 	{					

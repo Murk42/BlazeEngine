@@ -27,7 +27,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Result result;
 
 		auto internalPixelFormat = OpenGLBufferInternalPixelFormat(format, result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		glTextureBuffer(id, internalPixelFormat, buffer.GetHandle());
 

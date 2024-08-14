@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFramebuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
 	Framebuffer::Framebuffer()
-		: id(-1)
+		: id(0)
 	{
 		glGenFramebuffers(1, &id);
 		
@@ -13,67 +13,45 @@ namespace Blaze::Graphics::OpenGLWrapper
 	Framebuffer::Framebuffer(Framebuffer&& fb) noexcept
 		: id(fb.id)
 	{
-		fb.id = -1;
+		fb.id = 0;
 	}
 	Framebuffer::~Framebuffer()
 	{
-		if (id != -1)
-		{
-			glDeleteFramebuffers(1, &id);
-			
-		}
+		if (id != 0)		
+			glDeleteFramebuffers(1, &id);					
 	}	
-	Result Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer)
-	{
-		CHECK_RESULT(SelectFramebuffer(this));
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+	void Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer)
+	{		
+		glNamedFramebufferRenderbuffer(id, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());		
 	}
-	Result Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture)
-	{	
-		CHECK_RESULT(SelectFramebuffer(this));
-		CHECK_RESULT(SelectTexture(&texture));		
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_TEXTURE_2D, texture.GetHandle(), 0);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+	void Framebuffer::SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture)
+	{			
+		glNamedFramebufferTexture(id, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, texture.GetHandle(), 0);
 	}
-	Result Framebuffer::SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer)
+	void Framebuffer::SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer)
 	{
-		CHECK_RESULT(SelectFramebuffer(this));
-
 		Result result;
 		GLenum _attachment = OpenGLFramebufferAttachment(attachment, result);
-		CHECK_RESULT(result);
+		if (result) return;
 
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, _attachment, GL_RENDERBUFFER, renderbuffer.GetHandle());
-		CHECK_OPENGL_RESULT();		
-
-		return Result();
+		glNamedFramebufferRenderbuffer(id, _attachment, GL_RENDERBUFFER, renderbuffer.GetHandle());	
 	}
-	Result Framebuffer::SetAttachment(FramebufferAttachment attachment, Texture2D& texture)
-	{
-		CHECK_RESULT(SelectFramebuffer(this));
-
+	void Framebuffer::SetAttachment(FramebufferAttachment attachment, Texture2D& texture)
+	{		
 		Result result;
 		GLenum _attachment = OpenGLFramebufferAttachment(attachment, result);				
-		CHECK_RESULT(result);
+		if (result) return;
 
-		glFramebufferTexture(GL_FRAMEBUFFER, _attachment, texture.GetHandle(), 0);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedFramebufferTexture(id, _attachment, texture.GetHandle(), 0);		
 	}
-	bool Framebuffer::IsComplete() const
-	{
-		bool ret = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
-		
-
-		return ret;
+	FramebufferStatus Framebuffer::GetStatus() const
+	{		
+		GLenum status = glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER);
+		Result result;
+		FramebufferStatus status_ = MapFramebufferStatus(status, result);
+		return status_;
 	}
-	Result Framebuffer::SetBufferOutputs(const std::initializer_list<int>& outputs)
+	void Framebuffer::SetBufferOutputs(const std::initializer_list<int>& outputs)
 	{
 		std::vector<GLenum> values;
 		values.resize(outputs.size());
@@ -81,23 +59,15 @@ namespace Blaze::Graphics::OpenGLWrapper
 			if (outputs.begin()[i] == -1)
 				values[i] = GL_NONE;
 			else
-				values[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + outputs.begin()[i]);
-
-		CHECK_RESULT(SelectFramebuffer(this));
-
-		glDrawBuffers(static_cast<GLsizei>(outputs.size()), values.data());
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+				values[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + outputs.begin()[i]);		
+		
+		glNamedFramebufferDrawBuffers(id, static_cast<GLsizei>(outputs.size()), values.data());		
 	}
 	Framebuffer& Framebuffer::operator=(Framebuffer&& fb) noexcept
 	{
-		if (id != -1)
-		{
-			glDeleteFramebuffers(1, &id);
-			if (FlushOpenGLResult())
-				return *this;
-		}
+		if (id != 0)		
+			glDeleteFramebuffers(1, &id);			
+		
 		id = fb.id;
 		fb.id = -1;
 		return *this;

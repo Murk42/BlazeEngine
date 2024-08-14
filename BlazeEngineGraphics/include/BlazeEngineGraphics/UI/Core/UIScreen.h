@@ -15,6 +15,11 @@ namespace Blaze::UI
 	{
 		Screen* screen;
 	};
+	struct ScreenWindowChangedEvent
+	{
+		WindowBase* oldWindow;
+		Screen* screen;
+	};
 
 	class Screen : public Node
 	{
@@ -22,16 +27,21 @@ namespace Blaze::UI
 		Blaze::EventDispatcher<NodeCreatedEvent> nodeCreatedEventDispatcher;
 		Blaze::EventDispatcher<NodeDestroyedEvent> nodeDestroyedEventDispatcher;
 		Blaze::EventDispatcher<ScreenDestructionEvent> screenDestructionEventDispatcher;
+		Blaze::EventDispatcher<ScreenWindowChangedEvent> screenWindowChangedEventDispatcher;
 
 		Screen();
 		virtual ~Screen();
 		
 		void CalculateAllTransforms();
 		
+		void SetWindow(WindowBase* window);
+
 		virtual String GetTypeName() const { return "Screen"; };
 		inline uintMem GetNodeCount() const { return nodeCount; }
+		inline WindowBase* GetWindow() const { return window; }
 	private:		
 		uintMem nodeCount;
+		WindowBase* window;
 
 		void AddNode(Node* node);
 		void RemoveNode(Node* node);

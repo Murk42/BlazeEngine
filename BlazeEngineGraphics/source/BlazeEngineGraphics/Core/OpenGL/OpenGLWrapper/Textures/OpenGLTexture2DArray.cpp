@@ -26,13 +26,13 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Result result;
 
 		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
-		CHECK_RESULT(result);		
+		if (result) return;		
 
 		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
 		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);
@@ -47,9 +47,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Result result;
 
 		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		auto format = OpenGLFormatByInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		this->size = size;
 		this->layers = layers;
@@ -65,9 +65,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Result result;
 
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		SelectTexture(this);

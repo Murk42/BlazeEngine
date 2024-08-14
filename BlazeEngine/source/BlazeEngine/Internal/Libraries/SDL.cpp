@@ -24,8 +24,8 @@ namespace Blaze
 
 		SDL_StartTextInput();
 
-		globalData->mainThreadTaskEventIdentifier = SDL_RegisterEvents(1);
-		globalData->clientThreadExitEventIdentifier = SDL_RegisterEvents(1);
+		blazeEngineContext.mainThreadTaskEventIdentifier = SDL_RegisterEvents(1);
+		blazeEngineContext.clientThreadExitEventIdentifier = SDL_RegisterEvents(1);
 
 		SDL_version version;
 		SDL_GetVersion(&version);

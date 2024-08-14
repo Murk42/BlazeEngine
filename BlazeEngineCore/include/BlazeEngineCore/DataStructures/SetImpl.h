@@ -307,9 +307,10 @@ namespace Blaze
 		return true;
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::Insert(const Value& value)
+	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::Insert(_Value&& value)
 	{
-		return InsertWithHint(value, Hash(value));
+		return InsertWithHint(std::forward<_Value>(value), Hash(value));
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
 	inline bool Set<Value, Hasher, Allocator>::Erase(const Value& value)
@@ -446,8 +447,9 @@ namespace Blaze
 		return *this;
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, Value&& value)
-		: prev(prev), next(next), hash(hash), value(std::move(value))
+	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, _Value&& value)
+		: prev(prev), next(next), hash(hash), value(std::forward<_Value>(value))
 	{
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
@@ -566,10 +568,11 @@ namespace Blaze
 		return ConstIterator(node, this);
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(const Value& value, uintMem hash)
+	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(_Value&& value, uintMem hash)
 	{
-		if (count == 0)
-			AllocateEmptyUnsafe();
+		if (count == 0)		
+			AllocateEmptyUnsafe();		
 
 		Bucket* bucket = GetBucketFromHash(hash);
 
@@ -580,43 +583,62 @@ namespace Blaze
 			return { Iterator(), false };
 		}
 
-		return InsertWithHintUnsafe(value, bucket, hash);
+		return InsertWithHintUnsafe(std::forward<_Value>(value), bucket, hash);
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(const Value& value, Bucket* bucket, uintMem hash)
+	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(_Value&& value, Bucket* bucket, uintMem hash)
 	{
+		Node* node = nullptr;
+		Node* prev = nullptr;
+		Node* next = nullptr;
+
 		if (bucket->head == nullptr)
 		{
 			bucket->head = (Node*)allocator.Allocate(sizeof(Node));
 			bucket->tail = bucket->head;
-			Node* node = bucket->head;
 
-			std::construct_at(node, nullptr, nullptr, hash, Value(value));
 			++count;
 
-			return { Iterator(node, this), true };
+			node = bucket->head;
 		}
-
-		Node* node = bucket->head;
-
-		if (node->value == value)
-			return { Iterator(node, this), false };
-
-		while (node->next != nullptr)
+		else
 		{
-			node = node->next;
+			node = bucket->head;
 
-			if (node->value == value)
-				return { Iterator(node, this), false };
+			bool found = false;
+		
+			do 
+			{
+				//if constexpr (!Replace)
+				{
+					if (node->value == value)
+						return { Iterator(node, this), false };
+				}
+				//else
+				//{
+				//	//TODO implement assignment
+				//}				
+
+				if (node->next == nullptr)
+					break;
+
+				node = node->next;
+			} while (true);
+
+			if (!found)
+			{
+				node->next = (Node*)allocator.Allocate(sizeof(Node));				
+				bucket->tail = node->next;
+
+				++count;
+
+				prev = node;
+				node = node->next;
+			}
 		}
 
-		node->next = (Node*)allocator.Allocate(sizeof(Node));
-
-		Node* prev = node;
-		node = node->next;
-
-		std::construct_at(node, prev, nullptr, hash, Value(value));
-		++count;
+		std::construct_at(node, prev, next, hash, std::forward<_Value>(value));
 
 		CheckForRehash();
 
@@ -637,7 +659,7 @@ namespace Blaze
 		--count;		
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline Result Set<Value, Hasher, Allocator>::CheckForRehash()
+	inline void Set<Value, Hasher, Allocator>::CheckForRehash()
 	{
 		static constexpr float max_load_factor = 1.0f;
 
@@ -648,20 +670,18 @@ namespace Blaze
 		else if (loadFactor * 4 < max_load_factor)
 		{
 			if (bucketCount == 8)
-				return Result();
+				return;
 
 			uintMem newBucketCount = (bucketCount + 1) / 2;
 
 			if (newBucketCount < 8)
 				newBucketCount = 8;
 
-			return Rehash(newBucketCount);
-		}
-
-		return Result();
+			Rehash(newBucketCount);
+		}		
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline Result Set<Value, Hasher, Allocator>::Rehash(uintMem newBucketCount)
+	inline void Set<Value, Hasher, Allocator>::Rehash(uintMem newBucketCount)
 	{
 		Bucket* old = buckets;
 		buckets = (Bucket*)allocator.Allocate(sizeof(Bucket) * newBucketCount);
@@ -669,15 +689,12 @@ namespace Blaze
 
 		Bucket* begin = old;
 		Bucket* end = old + bucketCount;
-
-		Result result;
+		
 		for (Bucket* it = begin; it != end; ++it)
-			result += RehashBucketUnsafe(it, buckets, newBucketCount);
+			RehashBucketUnsafe(it, buckets, newBucketCount);
 
 		allocator.Free(old);
-		bucketCount = newBucketCount;
-
-		return result;
+		bucketCount = newBucketCount;		
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
 	inline void Set<Value, Hasher, Allocator>::AllocateEmptyUnsafe()
@@ -688,7 +705,7 @@ namespace Blaze
 		count = 0;
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline Result Set<Value, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
+	inline void Set<Value, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
 	{
 		Node* node = bucket->head;
 
@@ -702,9 +719,7 @@ namespace Blaze
 			MoveNodeToBeginingUnsafe(node, newBucket);
 
 			node = next;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
 	inline void Set<Value, Hasher, Allocator>::RemoveNodeFromSpotUnsafe(Node* node, Bucket* bucket)
@@ -742,13 +757,7 @@ namespace Blaze
 			}
 
 		}
-	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	inline void Set<Value, Hasher, Allocator>::MoveNodeUnsafe(Node* node, Bucket* oldBucket, Bucket* newBucket)
-	{
-		RemoveNodeFromSpotUnsafe(node, oldBucket);
-		MoveNodeToBeginingUnsafe(node, newBucket);
-	}
+	}	
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
 	inline void Set<Value, Hasher, Allocator>::MoveNodeToBeginingUnsafe(Node* node, Bucket* bucket)
 	{
@@ -758,6 +767,10 @@ namespace Blaze
 
 		if (head != nullptr)
 			head->prev = node;
+		else
+			bucket->tail = node;
+
+		bucket->head = node;
 	}
 
 	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>

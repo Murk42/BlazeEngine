@@ -7,7 +7,7 @@ namespace Blaze
 	{
 		Map<String, TimingResult> nodes;
 		String name;
-		double time;
+		TimeInterval time;
 	};
 
 	class BLAZE_CORE_API Timing

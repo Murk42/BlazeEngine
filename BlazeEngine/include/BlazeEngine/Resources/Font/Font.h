@@ -142,7 +142,7 @@ namespace Blaze
 		Vec2f GetGlyphKerning(UnicodeChar left, UnicodeChar right) const;
 		bool GetGlyphMetrics(UnicodeChar character, FontGlyphMetrics& data) const;
 
-		inline uint GetPixelFontHeight() const;
+		inline uint GetPixelFontHeight() const { return pixelFontHeight; }
 		inline Font* GetFont() const { return font; }
 
 		Map<UnicodeChar, Bitmap> GetGlyphBitmaps(const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer) const;
@@ -183,6 +183,8 @@ namespace Blaze
 		//inline float GetBaselineDistance() const;
 
 		Font& operator=(Font&& other) noexcept;		
+
+		static Font LoadDefault();
 	private:
 		void* ptr;
 		void* memory;

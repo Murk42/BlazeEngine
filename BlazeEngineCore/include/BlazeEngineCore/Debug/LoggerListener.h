@@ -5,26 +5,20 @@ namespace Blaze::Debug
 	class BLAZE_CORE_API LoggerListener
 	{
 	public:		
-		LoggerListener(bool supress = true, bool startListening = true);
+		LoggerListener(bool suppress = true, bool startListening = true);
 		~LoggerListener();						
 
-		void StartSupressing() { supress = true; }
-		void StopSupressing() { supress = false; }
+		void StartSuppressing() { suppress = true; }
+		void StopSuppressing() { suppress = false; }
 		void StartListening();
 		void StopListening();
 
-		bool IsSupressing() const { return supress; }
+		bool IsSuppressing() const { return suppress; }
 		bool IsListening() const { return listening; }						
-
-		virtual void NewString(StringViewUTF8) { }
-		virtual void NewResult(const Result&) { }
-		virtual void NewLog(const Debug::Log&) { }
 		
-		Result& GetResult() { return result; }		
+		virtual void NewResult(const Result&) { }					
 	private:				
-		bool supress;
+		bool suppress;
 		bool listening;
-
-		Result result;
 	};			
 }

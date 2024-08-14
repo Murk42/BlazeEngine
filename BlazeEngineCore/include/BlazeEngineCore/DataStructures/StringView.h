@@ -11,7 +11,7 @@ namespace Blaze
 	public:
 		constexpr StringViewIterator();
 		constexpr StringViewIterator(const StringViewIterator&);
-		constexpr StringViewIterator(const StringIterator&);
+		StringViewIterator(const StringIterator&);
 
 		constexpr bool IsNull() const;
 
@@ -22,16 +22,14 @@ namespace Blaze
 		constexpr StringViewIterator& operator++(int);
 		constexpr StringViewIterator operator--();
 		constexpr StringViewIterator& operator--(int);
-
-		constexpr StringViewIterator operator+(const uintMem& value) const;
-		constexpr StringViewIterator operator+(const intMem& value) const;
-		constexpr StringViewIterator operator-(const uintMem& value) const;
+		
+		constexpr StringViewIterator operator+(const intMem& value) const;		
 		constexpr StringViewIterator operator-(const intMem& value) const;
-
-		constexpr StringViewIterator& operator+=(const uintMem& value);
-		constexpr StringViewIterator& operator+=(const intMem& value);
-		constexpr StringViewIterator& operator-=(const uintMem& value);
+		
+		constexpr StringViewIterator& operator+=(const intMem& value);		
 		constexpr StringViewIterator& operator-=(const intMem& value);
+
+		constexpr uintMem operator-(const StringViewIterator& other);
 
 		constexpr bool operator==(const StringViewIterator&) const;
 		constexpr bool operator!=(const StringViewIterator&) const;

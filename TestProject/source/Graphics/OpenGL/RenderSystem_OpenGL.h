@@ -7,7 +7,7 @@
 class RenderSystem_OpenGL
 {	
 	Graphics::OpenGL::GraphicsContext_OpenGL gc;
-	Graphics::OpenGL::RenderWindow_OpenGL rw{ gc, "Marko", Vec2i(INT_MAX), Vec2u(640, 480) };
+	Graphics::OpenGL::RenderWindow_OpenGL rw{ gc, { .title = "Marko", .size = Vec2u(640, 480) } };
 
 	Graphics::OpenGL::Line2DRenderer_OpenGL line2DRenderer;
 	Graphics::OpenGL::TexturedRectRenderer_OpenGL texturedRectRenderer;

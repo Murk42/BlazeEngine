@@ -4,7 +4,7 @@
 namespace Blaze::UI
 {
 	Screen::Screen()
-		: Node(nullptr, { }), nodeCount(0)
+		: Node(), nodeCount(0), window(nullptr)
 	{
 		Node::screen = this;
 	}
@@ -14,7 +14,15 @@ namespace Blaze::UI
 	}
 	void Screen::CalculateAllTransforms()
 	{
-		CalculateTransformDownwards();
+		CalculateFinalTransformDownwards();
+	}
+	void Screen::SetWindow(WindowBase* window)
+	{
+		if (window == this->window)
+			return;
+		WindowBase* old = this->window;
+		this->window = window;
+		screenWindowChangedEventDispatcher.Call({ .oldWindow = old, .screen = this });
 	}
 	void Screen::AddNode(Node* node)
 	{		

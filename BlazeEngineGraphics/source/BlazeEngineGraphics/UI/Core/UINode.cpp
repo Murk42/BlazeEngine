@@ -4,37 +4,32 @@
 
 namespace Blaze::UI
 {
-	static constexpr uint8 transformDirtyBit = 0;
-	static constexpr uint8 destroyedBit = 0;	
-
-	template<uint8 index>
-	inline static bool GetValue(uint8 state)
+	Vec2f NodeFinalTransform::TransformFromFinalToLocalTransformSpace(Vec2f finalTransformPosition)
 	{
-		return state & (index+ 1);
-	}
+		Vec2f localTransformPosition = (finalTransformPosition - position) / scale;
 
-	template<uint8 index>
-	inline static void SetValue(uint8& state, bool value)
-	{
-		state = (state & (std::remove_reference_t<decltype(state)>)(~(index + 1))) | ((uint8)value << index);
-	}
-
-	Node::Node(Node* parent, const NodeTransform& transform)
-		: parent(parent), screen(nullptr), transform(transform), state(0), renderStream(nullptr), finalRotation(0), transformState(0)
-	{
-		if (parent != nullptr)
+		if (rotation != 0)
 		{
-			screen = parent->screen;
-			parent->children.AddBack(this);
-			if (screen != nullptr)
-				screen->AddNode(this);
+			float cos = Math::Cos(rotation);
+			float sin = Math::Sin(rotation);
+			Vec2f right = Vec2f(cos, sin);
+			Vec2f up = Vec2f(-sin, cos);
+
+			localTransformPosition = Vec2f(right.DotProduct(localTransformPosition), up.DotProduct(localTransformPosition));
 		}
+
+		return localTransformPosition;
 	}
+
+	Node::Node()
+		: parent(nullptr), screen(nullptr), transform(), transformDirty(false), finalTransformDirty(false), destroyed(false), transformState(0)
+	{				
+	}	
 	Node::~Node()
 	{
-		SetValue<destroyedBit>(state, true);
+		destroyed = true;
 
-		if (parent != nullptr && !GetValue<destroyedBit>(parent->state))
+		if (parent != nullptr && !parent->destroyed)
 		{
 			if (screen != nullptr)
 				screen->RemoveNode(this);
@@ -46,142 +41,179 @@ namespace Blaze::UI
 					break;
 				}
 		}
-	}	
-	void Node::SetTransform(const NodeTransform& transform)
+	}
+	void Node::SetParent(Node* newParent)
 	{		
-		this->transform = transform;
-
-		MakeTransformDirty();
-	}
-
-	void Node::UpdateTransform()
-	{
-		MakeTransformDirty();		
-	}
-
-	void Node::ForceUpdateTransform()
-	{
-		CalculateTransformUpwards();
-	}
-
-	Vec2f Node::GetFinalPosition() const
-	{
-		CalculateTransformUpwards();		
-		return finalPosition;
-	}
-	Vec2f Node::GetFinalSize() const
-	{
-		CalculateTransformUpwards();
-		return finalSize;
-	}
-	float Node::GetFinalScale() const
-	{		
-		CalculateTransformUpwards();
-		return finalScale;
-	}
-	float Node::GetFinalRotation() const
-	{
-		CalculateTransformUpwards();
-		return finalRotation;
-	}
-
-	void Node::MakeTransformDirty() const
-	{		
-		if (!GetValue<transformDirtyBit>(state))
-		{
-			SetValue<transformDirtyBit>(state, true);
-
-			for (auto& child : children)
-				child->MakeTransformDirty();
-		}
-	}
-	void Node::CalculateTransformUpwards() const
-	{
-		if (!GetValue<transformDirtyBit>(state))
+		if (parent == newParent)
 			return;
 
 		if (parent != nullptr)
-			parent->CalculateTransformUpwards();
+		{
+			for (uintMem i = 0; i < parent->children.Count(); ++i)
+				if (parent->children[i] == this)
+					parent->children.EraseAt(i);
 
-		CalculateTransform();
+			if (parent->screen != nullptr && parent->screen != newParent->screen)
+				screen->RemoveNode(this);
+		}
+
+		parent = newParent;
+
+		if (parent != nullptr)
+		{
+			screen = parent->screen;
+
+			parent->children.AddBack(this);
+
+			if (screen != nullptr)
+				screen->AddNode(this);
+		}
+
+		MarkTransformDirty();
+		MarkFinalTransformDirty();
 	}
-	void Node::CalculateTransformDownwards() const
+	void Node::SetTransform(const NodeTransform& transform)
+	{		
+		if (this->transform != transform)
+		{			
+			this->transform = transform;
+
+			MarkTransformDirty();
+			MarkFinalTransformDirty();
+		}
+	}
+	void Node::MarkTransformDirty()
 	{
-		if (GetValue<transformDirtyBit>(state))
-			CalculateTransform();			
+		transformDirty = true;
+	}	
+	void Node::MarkFinalTransformDirty()
+	{
+		if (!finalTransformDirty)
+		{
+			finalTransformDirty = true;
+
+			for (auto& child : children)
+				child->MarkFinalTransformDirty();
+		}
+	}
+	void Node::CleanTransform()
+	{
+		if (!transformDirty)
+			return;
+
+		transformDirty = false;
+
+		transformUpdatedEventDispatcher.Call({ (UI::Node*)this });		
+	}
+	void Node::CleanFinalTransform()
+	{
+		CleanTransform();
+		CalculateFinalTransformUpwards();
+	}		
+
+	NodeTransform Node::GetTransform()
+	{
+		CleanTransform();		
+
+		return transform; 
+	}
+	NodeFinalTransform Node::GetFinalTransform()
+	{
+		CalculateFinalTransformUpwards();
+		return finalTransform;
+	}		
+	void Node::CalculateFinalTransformUpwards()
+	{
+		if (!finalTransformDirty)
+			return;		
+
+		if (parent != nullptr)						
+			parent->CalculateFinalTransformUpwards();			
+
+		do CalculateFinalTransform();
+		while (finalTransformDirty);
+	}
+	void Node::CalculateFinalTransformDownwards()
+	{
+		while (finalTransformDirty)
+			CalculateFinalTransform();
 
 		for (auto child : children)
-			child->CalculateTransformDownwards();
+			child->CalculateFinalTransformDownwards();
 	}
-	Vec2f RotatePoint(Vec2f point, Vec2f around, float cos, float sin)
+	static Vec2f RotatePoint(Vec2f point, Vec2f around, float cos, float sin)
 	{
 		return Vec2f(
 			cos * (point.x - around.x) - sin * (point.y - around.y),
 			sin * (point.x - around.x) + cos * (point.y - around.y)
 		) + around;
 	}
-	void Node::CalculateTransform() const
+	void Node::CalculateFinalTransform()
 	{
-		if (!GetValue<transformDirtyBit>(state))
-			return;
-
-		preTransformUpdateEventDispatcher.Call({ .node = (Node*)this });
+		if (!finalTransformDirty)
+			return;		
 
 		float cos;
-		float sin;
+		float sin;		
+
+		const NodeTransform transform = GetTransform();
 
 		if (parent != nullptr)
-		{
-			//if (parent->transformDirty)
-			//	parent->CalculateTransform();
+		{			
+			//Parent is required to be updated
 
-			finalScale = parent->finalScale * transform.scale;
-			finalSize = transform.size * finalScale;
-			finalRotation = transform.rotation + parent->finalRotation;
+			if (parent->finalTransformDirty)
+				Debug::Logger::LogFatal("Blaze Engine Graphics", "Parent node transform is dirty while updating transform");
 
-			cos = Math::Cos(finalRotation);
-			sin = Math::Sin(finalRotation);
+			finalTransform.scale = parent->finalTransform.scale * transform.scale;
+			finalTransform.size = transform.size * parent->finalTransform.scale;
+			finalTransform.rotation = transform.rotation + parent->finalTransform.rotation;
+
+			cos = Math::Cos(finalTransform.rotation);
+			sin = Math::Sin(finalTransform.rotation);
 
 			Vec2f parentRelativeRight = { Math::Cos(transform.rotation), Math::Sin(transform.rotation) };
 			Vec2f parentRelativeUp = { -parentRelativeRight.y, parentRelativeRight.x };
 
-			Vec2f parentRight = { Math::Cos(parent->finalRotation), Math::Sin(parent->finalRotation) };
+			Vec2f parentRight = { Math::Cos(parent->finalTransform.rotation), Math::Sin(parent->finalTransform.rotation) };
 			Vec2f parentUp = { -parentRight.y, parentRight.x };
 
-			Vec2f offset = -finalSize * transform.pivot;
+			Vec2f offset = -finalTransform.size * transform.pivot;
 			Vec2f parentRelativePos = 
-				transform.parentPivot * parent->finalSize + transform.pos * parent->finalScale +
+				transform.parentPivot * parent->finalTransform.size + transform.pos * parent->finalTransform.scale +
 				parentRelativeRight * offset.x + parentRelativeUp * offset.y;
 								
-			finalPosition =
-				parent->finalPosition +
+			finalTransform.position =
+				parent->finalTransform.position +
 				parentRight * parentRelativePos.x + parentUp * parentRelativePos.y;			
-
 		}
 		else
 		{			
-			finalScale = transform.scale;
-			finalSize = transform.size * finalScale;
-			finalRotation = transform.rotation;
+			finalTransform.scale = transform.scale;
+			finalTransform.size = transform.size * finalTransform.scale;
+			finalTransform.rotation = transform.rotation;
 
-			cos = Math::Cos(finalRotation);
-			sin = Math::Cos(finalRotation);
+			cos = Math::Cos(finalTransform.rotation);
+			sin = Math::Cos(finalTransform.rotation);
 
 			Vec2f position = transform.pos;
-			Vec2f offset = finalSize * transform.pivot;			
+			Vec2f offset = finalTransform.size * transform.pivot;
 
-			finalPosition = RotatePoint(transform.pos + transform.pivot * finalSize, transform.pos, cos, sin);						
+			finalTransform.position = RotatePoint(transform.pos + transform.pivot * finalTransform.size, transform.pos, cos, sin);
 		}
 
 		if (std::abs(cos) == 1 || std::abs(sin) == 1)
 		{
-			finalPosition.x = std::ceil(finalPosition.x);
-			finalPosition.y = std::ceil(finalPosition.y);
+			finalTransform.position.x = std::ceil(finalTransform.position.x);
+			finalTransform.position.y = std::ceil(finalTransform.position.y);
 		}
 
 		++transformState;
-		SetValue<transformDirtyBit>(state, false);		
+		finalTransformDirty = false;
 
-		transformUpdatedEventDispatcher.Call({ .node = (Node*)this });
+		finalTransformUpdatedEventDispatcher.Call({
+			.node = (Node*)this,
+			.finalTransform = finalTransform
+			});		
 	}		
 }

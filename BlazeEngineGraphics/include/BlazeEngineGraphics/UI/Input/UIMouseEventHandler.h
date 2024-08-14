@@ -11,8 +11,8 @@ namespace Blaze::UI
 			Left, Middle, Right,
 		};
 
-		struct MousePressedEvent { UIInputManager* inputManager; Vec2f pos; MouseButton button; double time; uint combo; };
-		struct MouseReleasedEvent { UIInputManager* inputManager; Vec2f pos; MouseButton button; double time; };
+		struct MousePressedEvent { UIInputManager* inputManager; Vec2f pos; MouseButton button; TimePoint time; uint combo; };
+		struct MouseReleasedEvent { UIInputManager* inputManager; Vec2f pos; MouseButton button; TimePoint time; };
 		struct MouseEnterEvent { UIInputManager* inputManager; Vec2f pos; };
 		struct MouseExitEvent { UIInputManager* inputManager; Vec2f pos; };
 		struct MouseMotionEvent { UIInputManager* inputManager; Vec2f pos; Vec2f delta; };

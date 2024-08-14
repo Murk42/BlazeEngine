@@ -4,6 +4,7 @@
 #include "BlazeEngine/BlazeEngineDefines.h"
 
 #include "BlazeEngine/Console/Console.h"
+#include "BlazeEngine/Console/ConsoleOutputStream.h"
 
 #include "BlazeEngine/Window/WindowBase.h"
 #include "BlazeEngine/Window/WindowSDL.h"
@@ -19,8 +20,6 @@
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngine/Resources/Font/TextLayouter.h"
-
-#include "BlazeEngine/EntryPoint/EntryPoint.h"
 
 #include "BlazeEngine/Application/ECS/Component.h"
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"

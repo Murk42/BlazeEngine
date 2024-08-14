@@ -7,8 +7,7 @@ namespace Blaze
 	public:
 		Path(); 
 		Path(const Path& path);
-		Path(Path&& path) noexcept;
-		Path(const StringView& string);
+		Path(Path&& path) noexcept;		
 		Path(const StringViewUTF8& string);
 		template<uintMem C>
 		Path(const char(&arr)[C]);
@@ -36,7 +35,10 @@ namespace Blaze
 		bool IsFile() const;
 		bool Empty() const;		
 		bool Exists() const;
+
+		uint32 Hash() const;
 		
+		Path operator/(const Path& other) const;
 		Path operator/(const StringView& other) const;
 		Path operator/(const StringViewUTF8& other) const;
 

@@ -35,14 +35,11 @@ namespace Blaze
 		if (text.Empty())					
 			return;		
 
+		float cursor = 0;
+		float baselineDistance = fontMetrics.GetPixelFontHeight();		
+
 		auto line = &*lines.AddBack();
 		line->characters.Resize(text.CharacterCount());
-
-		float cursor = 0;
-		float baselineDistance = fontMetrics.GetPixelFontHeight();
-
-		if (baselineDistance == 0)
-			baselineDistance = 1.0f;
 
 		UnicodeChar prevCharacter = '\0';
 
@@ -56,7 +53,14 @@ namespace Blaze
 
 			FontGlyphMetrics metrics;
 			if (!fontMetrics.GetGlyphMetrics(character, metrics))
-				continue;			
+			{
+				//Create empty character				
+				characterData.character = character;
+				characterData.pos = Vec2f(cursor + lastAdvance, 0);
+				characterData.size = Vec2f(0, 0);
+
+				continue;
+			}
 
 			lastAdvance = FillCharacterLayoutData(characterData, cursor, metrics, fontMetrics, character, prevCharacter);
 			lastWidth = characterData.size.x;
@@ -80,17 +84,13 @@ namespace Blaze
 		lines.Clear();
 
 		if (text.Empty())		
-			return;		
+			return;				
 
-		auto* line = &*lines.AddBack();		
-
-		float cursor = 0;
-		float baselineDistance = fontMetrics.GetPixelFontHeight();
-
-		if (baselineDistance == 0)
-			baselineDistance = 1.0f;
+		float cursor = 0.0f;
 		
 		UnicodeChar prevCharacter = '\0';
+
+		auto* line = &*lines.AddBack();
 
 		float lastAdvance = 0.0f;
 		float lastWidth = 0.0f;
@@ -98,20 +98,34 @@ namespace Blaze
 		for (uintMem i = 0; i < text.CharacterCount(); ++i, ++textIt)
 		{
 			UnicodeChar character = *textIt;
-			auto& characterData = *line->characters.AddBack();
 
 			if (character.Value() == (uint32)'\n')
 			{				
+				//Create empty character
+				auto& characterData = *line->characters.AddBack();
+				characterData.character = character;
+				characterData.pos = Vec2f(cursor + lastAdvance, 0);
+				characterData.size = Vec2f(0, 0);
+
 				line->width = cursor - lastAdvance + lastWidth;
-				cursor = 0;
-				line = &*lines.AddBack();		
+				cursor = 0;				
+				line = &*lines.AddBack();						
 				continue;
 			}
 
 			FontGlyphMetrics metrics;
 			if (!fontMetrics.GetGlyphMetrics(character, metrics))
+			{
+				//Create empty character
+				auto& characterData = *line->characters.AddBack();
+				characterData.character = character;
+				characterData.pos = Vec2f(cursor + lastAdvance, 0);
+				characterData.size = Vec2f(0, 0);
+
 				continue;
+			}
 			
+			auto& characterData = *line->characters.AddBack();
 			lastAdvance = FillCharacterLayoutData(characterData, cursor, metrics, fontMetrics, character, prevCharacter);
 			lastWidth = characterData.size.x;
 
@@ -119,7 +133,7 @@ namespace Blaze
 
 			prevCharacter = character;
 		}		
-
+		
 		line->width = cursor - lastAdvance + lastWidth;
 	}
 	WrappedLineTextLayouter::WrappedLineTextLayouter()
@@ -141,13 +155,10 @@ namespace Blaze
 		if (text.Empty())
 			return;
 
+
+		float cursor = 0;		
+
 		auto* line = &*lines.AddBack();		
-
-		float cursor = 0;
-		float baselineDistance = fontMetrics.GetPixelFontHeight();
-
-		if (baselineDistance == 0)
-			baselineDistance = 1.0f;
 
 		UnicodeChar prevCharacter = '\0';
 
@@ -162,6 +173,9 @@ namespace Blaze
 			{
 				//Create empty character
 				auto& characterData = *line->characters.AddBack();
+				characterData.character = character;
+				characterData.pos = Vec2f(cursor + lastAdvance, 0);
+				characterData.size = Vec2f(0, 0);
 
 				line->width = cursor - lastAdvance + lastWidth;
 				cursor = 0;
@@ -174,6 +188,10 @@ namespace Blaze
 			{
 				//Create empty character
 				auto& characterData = *line->characters.AddBack();
+				characterData.character = character;
+				characterData.pos = Vec2f(cursor + lastAdvance, 0);
+				characterData.size = Vec2f(0, 0);
+
 				continue;
 			}
 

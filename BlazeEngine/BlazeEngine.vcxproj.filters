@@ -81,9 +81,6 @@
     <ClInclude Include="include\BlazeEngine\Window\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\EntryPoint\EntryPoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\BlazeEngine\Resources\Bitmap\SailClasses.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -135,6 +132,12 @@
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\sail.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\BlazeEngine\Files\Consola.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Console\ConsoleOutputStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\BlazeEngine\Input\Input.cpp">
@@ -144,9 +147,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Window\WindowBase.cpp">
@@ -215,5 +215,17 @@
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\sail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Files\Consola.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Console\ConsoleOutputStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="source\BlazeEngine\Files\Consola.ttf" />
   </ItemGroup>
 </Project>

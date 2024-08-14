@@ -1,91 +1,84 @@
 #include "pch.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture1D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
-	void CalculateAlignmentAndStride(uint width, uint byteStride, uint pixelSize, uint& align, uint& pixelStride);
-
 	Texture1D::Texture1D()
-		: id(-1), size(0)
+		: id(0), size(0)
 	{
 		glGenTextures(1, &id);
+
+		//It is important to bind the texture to set it up as a GL_TEXTURE_2D, otherwise glTextureStorage2D wont work
+		glBindTexture(GL_TEXTURE_1D, id);
 	}
 	Texture1D::Texture1D(Texture1D&& tex) noexcept
 		: id(tex.id), size(tex.size)	
 	{
-		tex.id = -1;
+		tex.id = 0;
 	}
 	Texture1D::~Texture1D()
 	{
-		if (id != -1)
+		if (id != 0)
 			glDeleteTextures(1, &id);
 	}
-
-	Result Texture1D::SetSettings(Texture1DSettings settings)
-	{
-		Result result;
-		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);
-		CHECK_RESULT(result);
-		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
-		CHECK_RESULT(result);
-		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
-		CHECK_RESULT(result);
-		
-		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);		
-		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
-		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);
-
-		SelectTexture(this);
-		if (settings.mipmaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-		return result;
-	}		
-	Result Texture1D::Create(uint size, TextureInternalPixelFormat internalFormat)
+	
+	void Texture1D::Create(uint size, TextureInternalPixelFormat internalFormat, const Texture1DSettings& settings)
 	{
 		Result result;
 		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
-		auto format = OpenGLFormatByInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
+		if (result) return;		
 
-		this->size = size;		
-		SelectTexture(this);				
-		glTexImage1D(GL_TEXTURE_1D, 0, internalPixelFormat, static_cast<GLsizei>(size), 0, format, GL_UNSIGNED_BYTE, nullptr);
+		this->size = size;						
+		glTextureStorage1D(id, settings.textureLevelCount, internalPixelFormat, size);				
 
-		return result;
-	}	
-
-	Result Texture1D::SetPixels(uint offset, uint size, BitmapColorFormat format, BitmapColorComponentType type, void* pixels)
+		SetSettings(settings);
+	}
+	void Texture1D::Create(uint size, TextureInternalPixelFormat internalFormat, BitmapColorFormat format, BitmapColorComponentType type, void* pixels, const Texture1DSettings& settings)
+	{
+		Create(size, internalFormat, settings);
+		SetPixels(0, size, format, type, pixels, 0);
+	}
+	void Texture1D::SetPixels(uint offset, uint size, BitmapColorFormat format, BitmapColorComponentType type, void* pixels, uint textureLevel)
 	{
 		Result result;
-
+		
 		GLenum _format = OpenGLPixelFormat(format, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _type = OpenGLPixelType(type, result);
-		CHECK_RESULT(result);
-						
+		if (result) return;
+
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);		
-		glTextureSubImage1D(id, 0, static_cast<GLint>(offset), static_cast<GLsizei>(size), _format, _type, pixels);
-
-		return result;
+		glTextureSubImage1D(id, textureLevel, static_cast<GLint>(offset), static_cast<GLsizei>(size), _format, _type, pixels);				
 	}
-
-	void Texture1D::GenerateMipmaps()
+	void Texture1D::AutoGenerateMipmaps()
 	{
-		SelectTexture(this);
-		glGenerateMipmap(GL_TEXTURE_1D);
-	}
+		glGenerateTextureMipmap(id);
+	}	
 
 	Texture1D& Texture1D::operator=(Texture1D&& tex) noexcept
 	{
-		if (id != -1)
+		if (id != 0)
 			glDeleteTextures(1, &id);
 		id = tex.id;
-		tex.id = -1;
+		tex.id = 0;
 		size = tex.size;
 		return *this;
+	}
+
+	void Texture1D::SetSettings(const Texture1DSettings& settings)
+	{
+		Result result;
+		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.textureLevelCount > 1, result);
+		if (result) return;
+		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
+		if (result) return;
+		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
+		if (result) return;
+
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);
 	}
 }

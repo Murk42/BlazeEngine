@@ -1,16 +1,10 @@
 #pragma once
-#include "Textures/OpenGLTexture2D.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 #include "OpenGLRenderbuffer.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
-{
-	enum class FramebufferAttachment
-	{
-		DepthStencil,
-		Stencil,
-		Depth,
-	};
-
+{	
 	class BLAZE_GRAPHICS_API Framebuffer
 	{
 		unsigned id;
@@ -20,13 +14,13 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Framebuffer(Framebuffer&&) noexcept;
 		~Framebuffer();
 
-		Result SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer);
-		Result SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture);
-		Result SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer);
-		Result SetAttachment(FramebufferAttachment attachment, Texture2D& texture);
-		bool IsComplete() const;
+		void SetColorAttachment(uint colorAttachmentNumber, Renderbuffer& renderbuffer);
+		void SetColorAttachment(uint colorAttachmentNumber, Texture2D& texture);
+		void SetAttachment(FramebufferAttachment attachment, Renderbuffer& renderbuffer);
+		void SetAttachment(FramebufferAttachment attachment, Texture2D& texture);
+		FramebufferStatus GetStatus() const;
 
-		Result SetBufferOutputs(const std::initializer_list<int>& outputs);
+		void SetBufferOutputs(const std::initializer_list<int>& outputs);
 
 		inline unsigned GetHandle() const { return id; }
 

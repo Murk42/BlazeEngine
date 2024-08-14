@@ -259,14 +259,14 @@ namespace Blaze
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, Node* node);
 
-		Result CheckForRehash();
-		Result Rehash(uintMem newBucketCount);
+		void CheckForRehash();
+		void Rehash(uintMem newBucketCount);
 
 		//Doesn't deallocate previous memory
 		void AllocateEmptyUnsafe();
 
 		//Wont check if bucket or bucketArray is nullptr or bucketArraySize is 0
-		static Result RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
+		static void RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
 
 		//Wont check if bucket or node is nullptr
 		static void RemoveNodeFromSpotUnsafe(Node* node, Bucket* bucket);

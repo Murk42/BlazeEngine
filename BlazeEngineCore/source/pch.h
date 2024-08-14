@@ -25,10 +25,16 @@
 #include "BlazeEngineCore/File/Path.h"
 #include "BlazeEngineCore/File/Stream/Stream.h"
 
+#include "BlazeEngineCore/Debug/Breakpoint.h"
 #include "BlazeEngineCore/Debug/Callstack.h"
 #include "BlazeEngineCore/Debug/Log.h"
 #include "BlazeEngineCore/Debug/Result.h"
 #include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/Debug/LoggerListener.h"
+
+#include "BlazeEngineCore/File/Stream/FileStream.h"
+#include "BlazeEngineCore/File/Stream/BufferStream.h"
+#include "BlazeEngineCore/File/File.h"
 
 #include "BlazeEngineCore/DataStructures/StringHash.h"
 
@@ -36,6 +42,7 @@
 #include "BlazeEngineCore/DataStructures/ArrayView.h"
 #include "BlazeEngineCore/DataStructures/Hash.h"
 #include "BlazeEngineCore/DataStructures/List.h"
+#include "BlazeEngineCore/DataStructures/DualList.h"
 #include "BlazeEngineCore/DataStructures/Map.h"
 #include "BlazeEngineCore/DataStructures/Set.h"
 
@@ -44,7 +51,11 @@
 #include "BlazeEngineCore/DataStructures/UnicodeCharImpl.h"
 #include "BlazeEngineCore/DataStructures/ArrayImpl.h"
 #include "BlazeEngineCore/DataStructures/ListImpl.h"
+#include "BlazeEngineCore/DataStructures/DualListImpl.h"
 #include "BlazeEngineCore/DataStructures/MapImpl.h"
 #include "BlazeEngineCore/DataStructures/SetImpl.h"
 
-#include "BlazeEngineCore/Internal/GlobalData.h"
+#include "BlazeEngineCore/Memory/MallocAllocator.h"
+#include "BlazeEngineCore/Memory/MemoryListener.h"
+
+#include "BlazeEngineCore/BlazeEngineCoreContext.h"

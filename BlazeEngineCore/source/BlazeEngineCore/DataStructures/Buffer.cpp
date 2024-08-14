@@ -5,7 +5,7 @@ namespace Blaze
 {
 	Buffer::Buffer()
 		: ptr(nullptr), size(0)
-	{
+	{ 
 	}
 	Buffer::Buffer(const Buffer& buffer)
 		: size(buffer.size)

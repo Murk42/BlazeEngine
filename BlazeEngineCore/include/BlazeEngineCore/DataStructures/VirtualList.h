@@ -61,6 +61,8 @@ namespace Blaze
 		VirtualListIterator& operator++();
 		VirtualListIterator operator++(int);
 
+		//Returns the value that the iterator is pointing to. If the asked type does not match
+		//the stored value nullptr is returned. If the iterator is null nullptr is returned
 		template<typename Value> requires InsertableToVirtualList<Value, typename VirtualList::template ValueBaseType>
 		MatchValueBaseConst<Value>* GetValue() const;		
 

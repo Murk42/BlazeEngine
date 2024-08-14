@@ -20,25 +20,13 @@ namespace Blaze
 			EventDispatcher<Events::WindowMouseLeaveEvent > windowMouseLeaveDispatcher;
 			EventDispatcher<Events::InputPreUpdateEvent   > inputPreUpdateDispatcher;
 			EventDispatcher<Events::InputPostUpdateEvent   > inputPostUpdateDispatcher;
-		};
-
-		struct KeyState
-		{
-			bool pressed;
-			bool down;
-			bool released;
-			bool up;
-			uint combo;
-
-			//Last moment the key state was updated, the value is got with TimePoint::GetRunTime()
-			double time;
-		};					
+		};		
 
 		BLAZE_API InputEventSystem& GetInputEventSystem();
 
-		BLAZE_API void Update();		
+		BLAZE_API void Update();				
 
-		BLAZE_API KeyState GetLastKeyState(Key key);		
+		BLAZE_API Vec2i GetDesktopMousePos();
 
 		enum class CursorType
 		{
@@ -57,5 +45,9 @@ namespace Blaze
 		};
 
 		BLAZE_API void SetCursorType(CursorType type);
+
+		BLAZE_API bool HasClipboardText();
+		BLAZE_API StringUTF8 GetClipboardText();
+		BLAZE_API void SetClipboardText(StringViewUTF8 text);
 	}
 }

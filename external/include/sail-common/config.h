@@ -28,16 +28,16 @@
 
 #define SAIL_VERSION_MAJOR 0
 #define SAIL_VERSION_MINOR 9
-#define SAIL_VERSION_PATCH 1
+#define SAIL_VERSION_PATCH 5
 
-#define SAIL_VERSION_STRING "0.9.1"
+#define SAIL_VERSION_STRING "0.9.5"
 
 #define SAIL_BUILD_VERSION(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
 
-#define SAIL_VERSION SAIL_BUILD_VERSION(0, 9, 1)
+#define SAIL_VERSION SAIL_BUILD_VERSION(0, 9, 5)
 
 /* Unused when SAIL_COMBINE_CODECS is ON. */
-#define SAIL_CODECS_PATH "C:\\SAIL\\lib\\sail\\codecs"
+#define SAIL_CODECS_PATH "D:\\Programming\\Libraries\\SAIL\\lib\\sail\\codecs"
 
 /* #undef SAIL_UNIX */
 #define SAIL_WIN32
@@ -57,14 +57,14 @@
 /* #undef SAIL_VCPKG */
 
 /* Build static libs. SAIL_SHARED_[ON|OFF] is a helper macro, use SAIL_STATIC instead. */
-#define SAIL_SHARED_ON
+#define SAIL_SHARED_OFF
 
 #ifdef SAIL_SHARED_OFF
     #define SAIL_STATIC
 #endif
 
 /* Combine all codecs into a single library. */
-/* #undef SAIL_COMBINE_CODECS */
+#define SAIL_COMBINE_CODECS
 
 /* Buffer size to read from I/O sources to detect file types by magic numbers. */
 #define SAIL_MAGIC_BUFFER_SIZE 16
@@ -87,7 +87,9 @@
 /* Enabled built-in codecs. */
 #define SAIL_HAVE_BUILTIN_BMP
 #define SAIL_HAVE_BUILTIN_ICO
+#define SAIL_HAVE_BUILTIN_JPEG
 #define SAIL_HAVE_BUILTIN_PCX
+#define SAIL_HAVE_BUILTIN_PNG
 #define SAIL_HAVE_BUILTIN_PNM
 #define SAIL_HAVE_BUILTIN_PSD
 #define SAIL_HAVE_BUILTIN_QOI
@@ -98,5 +100,7 @@
 
 /* OpenMP scheduling algorithm. */
 #define SAIL_OPENMP_SCHEDULE dynamic
+
+#define SAIL_WINDOWS_UTF8_PATHS
 
 #endif

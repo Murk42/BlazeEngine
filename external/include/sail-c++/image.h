@@ -70,6 +70,19 @@ public:
     explicit image(const std::string &path);
 
     /*
+     * Constructs a new image out of the specified image properties and allocates the pixels
+     * for the specified pixel format. The pixels have uninitialized values.
+     * Assumes the pixels have no padding bytes in the end of every scan line.
+     */
+    image(SailPixelFormat pixel_format, unsigned width, unsigned height);
+
+    /*
+     * Constructs a new image out of the specified image properties and allocates the pixels
+     * for the specified pixel format. The pixels have uninitialized values.
+     */
+    image(SailPixelFormat pixel_format, unsigned width, unsigned height, unsigned bytes_per_line);
+
+    /*
      * Constructs a new image out of the specified image properties and the pixels.
      * Assumes the pixels have no padding bytes in the end of every scan line. The pixels
      * must remain valid as long as the image exists.
@@ -567,6 +580,17 @@ public:
      * Returns SAIL_PIXEL_FORMAT_UNKNOWN if no candidates found at all.
      */
     SailPixelFormat closest_pixel_format(const sail::save_features &save_features) const;
+
+    /*
+     * Mirrors the image horizontally or vertically.
+     *
+     * Only SAIL_ORIENTATION_MIRRORED_HORIZONTALLY and SAIL_ORIENTATION_MIRRORED_VERTICALLY
+     * values are accepted. When mirroring horizontally, the image pixel size must be a multiple of 8,
+     * e.g. 8, 16, 24 etc.
+     *
+     * Returns SAIL_OK on success.
+     */
+    sail_status_t mirror(SailOrientation orientation);
 
     /*
      * Returns true if the conversion or updating functions can convert or update from the input

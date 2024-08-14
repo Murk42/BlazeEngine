@@ -164,9 +164,8 @@ namespace Blaze
 	{		
 		if (this == &result)
 			return *this;
-
-		if (!IsEmpty())
-			Debug::Logger::ProcessResult(std::move(*this)); 
+		
+		Clear();			
 
 		logType = result.logType;
 		logs = std::move(result.logs);		

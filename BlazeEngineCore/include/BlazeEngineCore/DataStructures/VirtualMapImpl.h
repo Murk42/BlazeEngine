@@ -12,7 +12,7 @@ namespace Blaze
 	template<typename VirtualMap>
 	template<IsConvertibleToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
 	inline VirtualMapIterator<VirtualMap>::VirtualMapIterator(const T& other)
-		: map(other.map), nodeHeader(other.node)
+		: map(other.map), nodeHeader(other.nodeHeader)
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (nodeHeader != nullptr)
@@ -22,7 +22,7 @@ namespace Blaze
 	template<typename VirtualMap>
 	inline bool VirtualMapIterator<VirtualMap>::IsNull() const
 	{
-		return nodeHeader == nullptr;
+		return nodeHeader == nullptr && map == nullptr;
 	}
 	template<typename VirtualMap>
 	inline VirtualMapIterator<VirtualMap>& VirtualMapIterator<VirtualMap>::operator++()
@@ -145,7 +145,7 @@ namespace Blaze
 	template<typename VirtualMap>
 	template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
 	inline typename VirtualMapIterator<VirtualMap>::template MatchMapConst<Value>* VirtualMapIterator<VirtualMap>::GetValue() const
-	{
+	{		
 		if (nodeHeader == nullptr)
 			return nullptr;			
 
@@ -157,13 +157,11 @@ namespace Blaze
 		return &node->value;
 	}
 	template<typename VirtualMap>
-	inline const typename VirtualMap::template KeyType& VirtualMapIterator<VirtualMap>::GetKey() const
+	inline const typename VirtualMap::template KeyType* VirtualMapIterator<VirtualMap>::GetKey() const
 	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK				
 		if (nodeHeader == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Getting key from a null iterator");
-#endif			
-		return nodeHeader->key;
+			return nullptr;			
+		return &nodeHeader->key;
 	}
 	template<typename VirtualMap>
 	template<IsComparableToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
@@ -182,15 +180,15 @@ namespace Blaze
 	inline VirtualMapIterator<VirtualMap>& VirtualMapIterator<VirtualMap>::operator=(const T& other)
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node != nullptr)
-			--node->iteratorCount;
+		if (nodeHeader != nullptr)
+			--nodeHeader->iteratorCount;
 #endif
 		map = other.map;
 		nodeHeader = other.nodeHeader;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node != nullptr)
-			++node->iteratorCount;
+		if (nodeHeader != nullptr)
+			++nodeHeader->iteratorCount;
 #endif
 	}
 	template<typename VirtualMap>
@@ -199,6 +197,7 @@ namespace Blaze
 	{
 
 	}
+
 
 
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
@@ -248,6 +247,11 @@ namespace Blaze
 		count = 0;
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
+	inline bool VirtualMap<Key, ValueBase, Hasher, Allocator>::Empty() const
+	{
+		return count == 0;
+	}
+	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::Iterator VirtualMap<Key, ValueBase, Hasher, Allocator>::Find(const Key& key)
 	{
 		return FindWithHint(key, Hash(key));
@@ -282,11 +286,11 @@ namespace Blaze
 		return true;
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	template<typename Value, typename _Key, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
+	template<typename Value, bool Replace, typename _Key, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
 	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertResult VirtualMap<Key, ValueBase, Hasher, Allocator>::Insert(_Key&& key, Args&& ... args)
 	{
-		return InsertWithHint<_Key, Value>(std::forward<_Key>(key), Hash(key), std::forward<Args>(args)...);
-	}
+		return InsertWithHint<Replace, _Key, Value>(std::forward<_Key>(key), Hash(key), std::forward<Args>(args)...);
+	}	
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	inline bool VirtualMap<Key, ValueBase, Hasher, Allocator>::Erase(const Key& key)
 	{
@@ -498,7 +502,7 @@ namespace Blaze
 		return ConstIterator(nodeHeader, this);
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	template<typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
+	template<bool Replace, typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
 	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertResult VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertWithHint(_Key&& key, uintMem hash, Args&& ... args)
 	{
 		if (count == 0)
@@ -512,48 +516,84 @@ namespace Blaze
 			return { Iterator(), false };
 		}
 
-		return InsertWithHintUnsafe<_Key, Value>(std::forward<_Key>(key), bucket, hash, std::forward<Args>(args)...);
-	}
+		return InsertWithHintUnsafe<Replace, _Key, Value>(std::forward<_Key>(key), bucket, hash, std::forward<Args>(args)...);
+	}	
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	template<typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
+	template<bool Replace, typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
 	inline VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertResult VirtualMap<Key, ValueBase, Hasher, Allocator>::InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uintMem hash, Args&& ... args)
 	{
+		//TODO do the same for normal Map strucure:
+		NodeHeader* nodeHeader = nullptr;
+		NodeHeader* prev = nullptr;
+		NodeHeader* next = nullptr;
+
 		if (bucket->head == nullptr)
 		{
 			bucket->head = (NodeHeader*)allocator.Allocate(sizeof(Node<Value>));
 			bucket->tail = bucket->head;
-			NodeHeader* node = bucket->head;
 
-			std::construct_at((Node<Value>*)node, nullptr, nullptr, hash, std::forward<_Key>(key), std::forward<Args>(args)...);
 			++count;
 
-			return { Iterator(node, this), true };
+			nodeHeader = bucket->head;			
 		}
-
-		NodeHeader* node = bucket->head;
-
-		if (node->key == key)
-			return { Iterator(node, this), false };
-
-		while (node->next != nullptr)
+		else
 		{
-			node = node->next;
+			nodeHeader = bucket->head;
 
-			if (node->key == key)
-				return { Iterator(node, this), false };
+			bool found = false;
+			while (true)
+			{
+				if constexpr (!Replace)
+				{
+					if (nodeHeader->key == key)
+						return { Iterator(nodeHeader, this), false };
+				}
+				else
+				{
+					if (nodeHeader->key == key)
+					{
+						prev = nodeHeader->prev;
+						next = nodeHeader->next;
+						
+						std::destroy_at(nodeHeader);
+						allocator.Free(nodeHeader);
+
+						nodeHeader = (NodeHeader*)allocator.Allocate(sizeof(Node<Value>));;
+
+						if (prev != nullptr)
+							prev->next = nodeHeader;
+						if (next != nullptr)
+							next->prev = nodeHeader;
+
+						found = true;
+						
+						break;
+					}
+				}
+
+				if (nodeHeader->next == nullptr)
+					break;
+
+				nodeHeader = nodeHeader->next;
+			}
+
+			if (!found)
+			{
+				nodeHeader->next = (NodeHeader*)allocator.Allocate(sizeof(Node<Value>));
+				bucket->tail = nodeHeader->next;
+
+				++count;
+
+				prev = nodeHeader;
+				nodeHeader = nodeHeader->next;
+			}
 		}
-
-		node->next = (NodeHeader*)allocator.Allocate(sizeof(NodeHeader));
-
-		NodeHeader* prev = node;
-		node = node->next;
 		
-		std::construct_at((Node<Value>*)node, prev, nullptr, hash, std::forward<_Key>(key), std::forward<Args>(args)...);
-		++count;
+		std::construct_at((Node<Value>*)nodeHeader, prev, next, hash, std::forward<_Key>(key), std::forward<Args>(args)...);
 
 		CheckForRehash();
 
-		return { Iterator(node, this), true };
+		return { Iterator(nodeHeader, this), true };
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::EraseNodeUnsafe(Bucket* bucket, NodeHeader* nodeHeader)
@@ -570,7 +610,7 @@ namespace Blaze
 		--count;
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline Result VirtualMap<Key, ValueBase, Hasher, Allocator>::CheckForRehash()
+	inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::CheckForRehash()
 	{
 		static constexpr float max_load_factor = 1.0f;
 
@@ -581,7 +621,7 @@ namespace Blaze
 		else if (loadFactor * 4 < max_load_factor)
 		{
 			if (bucketCount == 8)
-				return Result();
+				return;
 
 			uintMem newBucketCount = (bucketCount + 1) / 2;
 
@@ -590,11 +630,10 @@ namespace Blaze
 
 			return Rehash(newBucketCount);
 		}
-
-		return Result();
+		
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline Result VirtualMap<Key, ValueBase, Hasher, Allocator>::Rehash(uintMem newBucketCount)
+	inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::Rehash(uintMem newBucketCount)
 	{
 		Bucket* old = buckets;
 		buckets = (Bucket*)allocator.Allocate(sizeof(Bucket) * newBucketCount);
@@ -602,15 +641,12 @@ namespace Blaze
 
 		Bucket* begin = old;
 		Bucket* end = old + bucketCount;
-
-		Result result;
+		
 		for (Bucket* it = begin; it != end; ++it)
-			result += RehashBucketUnsafe(it, buckets, newBucketCount);
+			RehashBucketUnsafe(it, buckets, newBucketCount);
 
 		allocator.Free(old);
-		bucketCount = newBucketCount;
-
-		return result;
+		bucketCount = newBucketCount;		
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::AllocateEmptyUnsafe()
@@ -621,7 +657,7 @@ namespace Blaze
 		count = 0;
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	inline Result VirtualMap<Key, ValueBase, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
+	inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
 	{
 		NodeHeader* node = bucket->head;
 
@@ -635,9 +671,7 @@ namespace Blaze
 			MoveNodeToBeginingUnsafe(node, newBucket);
 
 			node = next;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::RemoveNodeFromSpotUnsafe(NodeHeader* nodeHeader, Bucket* bucket)
@@ -676,19 +710,12 @@ namespace Blaze
 
 		}
 	}
-	//template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	//inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::MoveNodeHeaderUnsafe(NodeHeader* node, Bucket* oldBucket, Bucket* newBucket)
-	//{
-	//	RemoveNodeHeaderFromSpotUnsafe(node, oldBucket);
-	//	MoveNodeHeaderToBeginingUnsafe(node, newBucket);
-	//}
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	inline void VirtualMap<Key, ValueBase, Hasher, Allocator>::MoveNodeToBeginingUnsafe(NodeHeader* nodeHeader, Bucket* bucket)
 	{
 		NodeHeader* head = bucket->head;
 		nodeHeader->next = head;
 		nodeHeader->prev = nullptr;
-
 
 		if (head != nullptr)
 			head->prev = nodeHeader;

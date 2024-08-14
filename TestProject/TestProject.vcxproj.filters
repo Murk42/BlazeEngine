@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\vk_mem_alloc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,12 +42,6 @@
     <ClInclude Include="source\MainScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\TreeTraverser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Graphics\OpenGL\Pipelines\UIRenderStream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -71,21 +62,6 @@
     <ClCompile Include="source\MainScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="assets\shaders\OpenGL\line2d.frag" />
-    <None Include="assets\shaders\OpenGL\line2d.vert" />
-    <None Include="assets\shaders\OpenGL\text.frag" />
-    <None Include="assets\shaders\OpenGL\text.vert" />
-    <None Include="assets\shaders\Vulkan\line2d.frag" />
-    <None Include="assets\shaders\Vulkan\line2d.vert" />
-    <None Include="assets\shaders\Vulkan\compileShaders.bat">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="assets\shaders\OpenGL\texturedRect.frag" />
-    <None Include="assets\shaders\OpenGL\texturedRect.vert" />
-    <None Include="assets\shaders\OpenGL\panel.frag" />
-    <None Include="assets\shaders\OpenGL\panel.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Log.txt" />

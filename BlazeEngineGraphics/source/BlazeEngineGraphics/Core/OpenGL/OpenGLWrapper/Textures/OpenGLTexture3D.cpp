@@ -25,13 +25,13 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Result result;
 
 		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		//unsigned _min;
 		//if (settings.mipmaps)
 		//{
@@ -66,9 +66,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 	{
 		Result result;
 		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		auto format = OpenGLFormatByInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		this->size = size;		
 
@@ -85,9 +85,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Result result;
 
 		GLenum _format = OpenGLPixelFormat(format, result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum _type = OpenGLPixelType(type, result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		auto pixelTypeSize = BitmapColorComponentTypeSize(type);		
 		auto formatDepth = BitmapColorFormatComponentCount(format);		

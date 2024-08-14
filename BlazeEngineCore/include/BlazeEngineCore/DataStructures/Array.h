@@ -68,6 +68,8 @@ namespace Blaze
 		ArrayIterator operator+(int) const;
 		ArrayIterator operator-(int) const;
 
+		uintMem operator-(const ArrayIterator& other) const;
+
 		ArrayIterator& operator+=(int offset);
 		ArrayIterator& operator-=(int offset);
 

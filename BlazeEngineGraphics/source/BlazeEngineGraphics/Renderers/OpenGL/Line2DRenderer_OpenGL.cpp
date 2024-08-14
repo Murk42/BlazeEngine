@@ -1,8 +1,9 @@
 #include "pch.h"
-#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
-
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
+
+#include "BlazeEngineGraphics/Files/shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -10,9 +11,15 @@ namespace Blaze::Graphics::OpenGL
 	static constexpr auto VertexBufferSize = VectexBufferVertexCount * 32;
 
 	Line2DRenderer_OpenGL::Line2DRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext)		
+		: graphicsContext(graphicsContext)
 	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert{ "assets/shaders/OpenGL/line2d.vert" };
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag{ "assets/shaders/OpenGL/line2d.frag" };
+		Blaze::Graphics::OpenGLWrapper::VertexShader vert;
+		vert.ShaderSource(StringView((const char*)line2d_vert_file, line2d_vert_size));
+		vert.CompileShader();
+
+		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
+		frag.ShaderSource(StringView((const char*)line2d_frag_file, line2d_frag_size));
+		frag.CompileShader();
 		 
 		program.LinkShaders({ &vert, &frag });		
 
@@ -79,12 +86,12 @@ namespace Blaze::Graphics::OpenGL
 	}	
 	void Line2DRenderer_OpenGL::Render(const Line2DRenderCache_OpenGL& renderCache, Vec2u targetSize)
 	{		
-		Blaze::Graphics::OpenGLWrapper::SelectProgram(&program);
-		Blaze::Graphics::OpenGLWrapper::SelectVertexArray(&va);
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);		
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
+		graphicsContext.SetActiveTextureSlot(0);
 
 		Vec2u renderArea = Vec2u(targetSize);		
-		Mat4f proj = Mat4f::OrthographicMatrix(0, targetSize.x, 0, targetSize.y, -1, 1);
+		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);
 
 		program.SetUniform(0, proj);
 
@@ -104,7 +111,7 @@ namespace Blaze::Graphics::OpenGL
 			vb.FlushBufferRange(0, sizeof(Line2DRenderCache_OpenGL::Vertex) * count);
 			vb.UnmapBuffer();			
 
-			Blaze::Graphics::OpenGLWrapper::RenderPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, count);
+			graphicsContext.RenderPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, count);
 
 			fence.SetFence();
 

@@ -3,7 +3,7 @@
 #include "BlazeEngineCore/File/FileSystem.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
-#include "BlazeEngineCore/Internal/Windows/WindowsPlatform.h"
+#include "BlazeEngineCore/Internal/WindowsPlatform.h"
 #undef CreateDirectory
 #else
 #error
@@ -15,7 +15,7 @@ namespace Blaze
 	{
 	}
 	File::File(File&& other) noexcept
-		: FileStream(std::move(other))
+		: FileStream(std::move(other)), FileStreamBase(std::move(other))
 	{ 
 	}
 	File::File(const Path& path, FileAccessPermission mode)
@@ -64,8 +64,7 @@ namespace Blaze
 		case Blaze::FileAccessPermission::Write: desiredAccess = GENERIC_WRITE; break;
 		case Blaze::FileAccessPermission::ReadWrite: desiredAccess = GENERIC_READ | GENERIC_WRITE; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine", "Invalid FileAccessPermission enum value");
-			break;
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileAccessPermission enum value");			
 		}
 
 		switch (parameters.openOption)
@@ -76,8 +75,7 @@ namespace Blaze
 		case FileOpenOptions::OpenExisting: creationDisposition = OPEN_EXISTING; break;
 		case FileOpenOptions::TruncateExisting: creationDisposition = TRUNCATE_EXISTING; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine", "Invalid FileOpenOption enum value");
-			break;
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileOpenOption enum value");			
 		}
 
 		switch (parameters.usageHint)
@@ -86,7 +84,7 @@ namespace Blaze
 		case FileUsageHint::RandomAccess: flagsAndAttributes |= FILE_FLAG_RANDOM_ACCESS;
 		case FileUsageHint::Sequential: flagsAndAttributes |= FILE_FLAG_SEQUENTIAL_SCAN;
 		default:
-			Debug::Logger::LogError("Blaze Engine", "Invalid FileUsageHint enum value");
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileUsageHint enum value");
 			break;
 		}
 
@@ -95,7 +93,7 @@ namespace Blaze
 		case FileLifetimeOption::Normal: break;		
 		case FileLifetimeOption::Temporary: flagsAndAttributes |= FILE_ATTRIBUTE_TEMPORARY; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine", "Invalid FileLifetimeOption enum value");
+			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileLifetimeOption enum value");
 			break;
 		}
 		

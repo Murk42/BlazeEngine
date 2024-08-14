@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/TextRenderer_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
+#include "BlazeEngineGraphics/Files/shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -30,12 +33,12 @@ namespace Blaze::Graphics::OpenGL
 			[&](Vec2u size) {
 				atlasSize = (Vec2f)size;
 
-				atlasData->atlas.Create((Vec2u)size, OpenGLWrapper::TextureInternalPixelFormat::R8);
-				atlasData->atlas.SetSettings({
+				atlasData->atlas.Create((Vec2u)size, OpenGLWrapper::TextureInternalPixelFormat::R8, {
 					.min = OpenGLWrapper::TextureSampling::Linear,
 					.mag = OpenGLWrapper::TextureSampling::Linear,
 					.mip = OpenGLWrapper::TextureSampling::Nearest,
-					});
+					.textureLevelCount = 1
+					});				
 			}, [&](UnicodeChar ch, Vec2u offset, BitmapView bm) {
 				AtlasData::GlyphData gd{
 					.uv1 = (Vec2f)offset / atlasSize,
@@ -43,7 +46,7 @@ namespace Blaze::Graphics::OpenGL
 				};
 				std::swap(gd.uv1.y, gd.uv2.y);
 				atlasData->glyphData.Insert(ch, gd);
-				atlasData->atlas.CopyPixels(offset, bm);
+				atlasData->atlas.SetPixels(offset, bm, 0);
 				}
 			);
 
@@ -72,7 +75,7 @@ namespace Blaze::Graphics::OpenGL
 
 		for (auto& rd : renderData)
 		{
-			AtlasData* atlasData = GetAtlasData(rd.font, rd.atlasFontHeight);
+			AtlasData* atlasData = GetAtlasData(rd.font, (uint)std::round(rd.atlasFontHeight));
 
 			Vec2f right = Vec2f(Math::Cos(rd.rotation), Math::Sin(rd.rotation));
 			Vec2f up = { -right.y, right.x };
@@ -114,9 +117,15 @@ namespace Blaze::Graphics::OpenGL
 	}
 
 	TextRenderer_OpenGL::TextRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext)
-	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert{ "assets/shaders/OpenGL/text.vert" };
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag{ "assets/shaders/OpenGL/text.frag" };
+		: graphicsContext(graphicsContext)
+	{		
+		Blaze::Graphics::OpenGLWrapper::VertexShader vert;
+		vert.ShaderSource(StringView((const char*)text_vert_file, text_vert_size));
+		vert.CompileShader();
+
+		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
+		frag.ShaderSource(StringView((const char*)text_frag_file, text_frag_size));
+		frag.CompileShader();
 
 		program.LinkShaders({ &vert, &frag });
 
@@ -159,14 +168,12 @@ namespace Blaze::Graphics::OpenGL
 
 	void TextRenderer_OpenGL::Render(const TextRenderCache_OpenGL& renderCache, Vec2u targetSize)
 	{
-		Blaze::Graphics::OpenGLWrapper::SelectProgram(&program);
-		Blaze::Graphics::OpenGLWrapper::SelectVertexArray(&va);
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
+		graphicsContext.SetActiveTextureSlot(0);
 
 		Vec2u renderArea = Vec2u(targetSize);
-		Mat4f proj = Mat4f::OrthographicMatrix(0, targetSize.x, 0, targetSize.y, -1, 1);
-
-		Blaze::Graphics::OpenGLWrapper::SetActiveTextureSlot(0);
+		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);	
 
 		program.SetUniform(0, proj);
 		program.SetUniform(1, 0);
@@ -176,7 +183,7 @@ namespace Blaze::Graphics::OpenGL
 
 		for (auto& group : renderCache.groups)
 		{
-			OpenGLWrapper::SelectTexture(group.key);
+			graphicsContext.SelectTexture(group.key);
 
 			uintMem offset = 0;
 			while (offset != group.value.Count())
@@ -195,7 +202,7 @@ namespace Blaze::Graphics::OpenGL
 				instanceBuffer.FlushBufferRange(0, sizeof(Instance) * count);
 				instanceBuffer.UnmapBuffer();
 
-				Blaze::Graphics::OpenGLWrapper::RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, group.value.Count());
+				graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, group.value.Count());
 
 				fence.SetFence();
 

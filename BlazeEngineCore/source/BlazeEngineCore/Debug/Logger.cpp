@@ -1,182 +1,123 @@
 #include "pch.h"
 #include "BlazeEngineCore/Debug/Logger.h"
-#include "BlazeEngineCore/Debug/LoggerListener.h"
-#include "BlazeEngineCore/File/File.h"
 
-#include "BlazeEngineCore/Utilities/Time.h"
+namespace Blaze::Debug::Logger
+{
+	void AddLoggerListener(Debug::LoggerListener* listener)
+	{
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		blazeEngineCoreContext.loggerListeners.AddFront(listener);
+	}
+	void RemoveLoggerListener(Debug::LoggerListener* listener)
+	{
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		blazeEngineCoreContext.loggerListeners.EraseOne([=](auto other) { return other == listener; });
+	}
 
-#include "BlazeEngineCore/Debug/Breakpoint.h"
+	void AddOutputStream(WriteStream& stream)
+	{
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		blazeEngineCoreContext.loggerOutputStreams.AddBack(BlazeEngineCoreContext::LoggerOutputStreamData({ &stream }));
+	}
+	void RemoveOutputStream(WriteStream& stream)
+	{
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		for (uint i = 0; i < blazeEngineCoreContext.loggerOutputStreams.Count(); ++i)
+			if (blazeEngineCoreContext.loggerOutputStreams[i].writeStream == &stream)
+				blazeEngineCoreContext.loggerOutputStreams.EraseAt(i);		
+	}
+	Result AddOutputFile(const Path& path)
+	{
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 
-namespace Blaze
-{					
-	namespace Debug::Logger
-	{		
-		void AddLoggerListener(Debug::LoggerListener* listener)
+		if (!blazeEngineCoreContext.loggerOutputFiles.Find(path).IsNull())
+			return Result();
+
+		File file{ path, FileAccessPermission::Write };
+
+		if (!file.IsOpen())
+			return BLAZE_ERROR_RESULT("Blaze Engine Core", "Blaze::Debug::Logger::AddOutputFile failed because the file couldn't be opened");
+
+		blazeEngineCoreContext.loggerOutputFiles.Insert(path, std::move(file));
+
+		return Result();
+	}
+	Result RemoveOutputFile(const Path& path)
+	{
+		blazeEngineCoreContext.loggerOutputFiles.Erase(path);
+		return Result();
+	}
+	
+	static void WriteToStreams(StringViewUTF8 string)
+	{
+		std::unique_lock lk{ blazeEngineCoreContext.contextMutex, std::try_to_lock };
+
+		for (auto& stream : blazeEngineCoreContext.loggerOutputStreams)
 		{
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			globalDataCore.loggerListeners.AddFront(listener);
-		}		
-		void RemoveLoggerListener(Debug::LoggerListener* listener)
-		{	
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			globalDataCore.loggerListeners.EraseOne([=](auto other) { return other == listener; });
-		}				
-
-		void AddOutputStream(WriteStream& stream)
-		{ 			
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			globalDataCore.loggerOutputStreams.Insert(&stream);			
+			stream.writeStream->Write(string.Buffer(), string.BufferSize() - 1);
+			char endln = '\n';
+			stream.writeStream->Write(&endln, 1);
 		}
-		void RemoveOutputStream(WriteStream& stream)
+
+		for (auto& stream : blazeEngineCoreContext.loggerOutputFiles)
 		{
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			globalDataCore.loggerOutputStreams.Erase(&stream);			
+			stream.value.file.Write(string.Buffer(), string.BufferSize() - 1);
+			char endln = '\n';
+			stream.value.file.Write(&endln, 1);
 		}
-		void AddOutputFile(const Path& path)
-		{						
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			auto& loggerOutputFileData = *globalDataCore.loggerOutputFiles.AddFront();
-			loggerOutputFileData.file.Open(path, FileAccessPermission::Write);
-			loggerOutputFileData.path = path;			
+	}
 
-			if (!loggerOutputFileData.file.IsOpen())
-				globalDataCore.loggerOutputFiles.EraseFirst();
-		}
-		void RemoveOutputFile(const Path& path)
-		{			
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			globalDataCore.loggerOutputFiles.EraseOne([&](const auto& it) {
-				return it.path == path;
-			});			
-		}
+	void ProcessResult(Result&& result)
+	{
+		bool suppress = false;
 		
-		/*
-			TS stands for thread safe, meaning it can only be called if according mutexes are locked.
-		*/
-		void WriteToStreams_TS(StringViewUTF8 string)
+		for (auto& listener : blazeEngineCoreContext.loggerListeners)
 		{
-			for (auto& stream : globalDataCore.loggerOutputStreams)
+			listener->NewResult(result);
+
+			if (listener->IsSuppressing())
 			{
-				stream->Write(string.Buffer(), string.BufferSize() - 1);
-				char endln = '\n';
-				stream->Write(&endln, 1);
-			}
-			for (auto& stream : globalDataCore.loggerOutputFiles)
-			{
-				stream.file.Write(string.Buffer(), string.BufferSize() - 1);
-				char endln = '\n';
-				stream.file.Write(&endln, 1);
+				suppress = true;
+				break;
 			}
 		}
 
-		void ProcessString(StringViewUTF8 string)
-		{	
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			bool supress = false;
-
-			for (auto& listener : globalDataCore.loggerListeners)
-			{
-				listener->NewString(string);
-
-				if (listener->IsSupressing())
-				{
-					supress = true;
-					break;
-				}
-			}
-
-			if (!supress)
-				WriteToStreams_TS(string);
-		}
-		void ProcessLog(const Log& log)
+		if (!suppress)
 		{
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-			bool supress = false;
+			if (result.HighestLogType() >= LogType::Error)
+				WriteToStreams(result.ToStringVerbose());
+			else
+				WriteToStreams(result.ToString());
+		}
 
-			for (auto& listener : globalDataCore.loggerListeners)
-			{
-				listener->NewLog(log);
-
-				if (listener->IsSupressing())
-				{
-					supress = true;
-					break;
-				}
-			}
-
-			if (!supress)
-			{
-				if (log.GetType() >= LogType::Error)
-					WriteToStreams_TS(log.ToStringVerbose());					
-				else
-					WriteToStreams_TS(log.ToString());
-			}					
-
-			if (log.GetType() == LogType::Fatal)
-			{
+		if (result.HighestLogType() == LogType::Fatal)
+		{
 #ifdef _DEBUG				
-				Breakpoint();
-#else
-				exit(1);
+			Breakpoint();
 #endif
-			}							
-		}
-		void ProcessResult(Result&& result)
-		{			
-			std::lock_guard<std::mutex> lg{ globalDataCore.loggerMutex };
-
-			bool supress = false;								
-
-			for (auto& listener : globalDataCore.loggerListeners)
-			{
-				listener->NewResult(result);
-
-				if (listener->IsSupressing())
-				{
-					supress = true;
-					break;
-				}
-			}
-
-			if (!supress)
-			{
-				if (result.HighestLogType() >= LogType::Error)
-					WriteToStreams_TS(result.ToStringVerbose());
-				else
-					WriteToStreams_TS(result.ToString());
-			}
-
-			if (result.HighestLogType() == LogType::Fatal)
-			{
-#ifdef _DEBUG				
-				Breakpoint();
-#else
-				exit(1);
-#endif
-			}
-
-			result.ClearSilent();
 		}
 
-		void LogDebug(StringUTF8&& source, StringUTF8&& message)
-		{
-			ProcessResult(BLAZE_DEBUG_RESULT(std::move(source), std::move(message)));
-		}
-		void LogInfo(StringUTF8&& source, StringUTF8&& message)
-		{
-			ProcessResult(BLAZE_INFO_RESULT(std::move(source), std::move(message)));
-		}
-		void LogWarning(StringUTF8&& source, StringUTF8&& message)
-		{
-			ProcessResult(BLAZE_WARNING_RESULT(std::move(source), std::move(message)));
-		}
-		void LogError(StringUTF8&& source, StringUTF8&& message)
-		{ 
-			ProcessResult(BLAZE_ERROR_RESULT(std::move(source), std::move(message))); 
-		}
-		void LogFatal(StringUTF8&& source, StringUTF8&& message)
-		{ 
-			ProcessResult(BLAZE_FATAL_RESULT(std::move(source), std::move(message))); 
-		}		
+		result.ClearSilent();
+	}
+
+	void LogDebug(StringUTF8&& source, StringUTF8&& message)
+	{
+		ProcessResult(BLAZE_DEBUG_RESULT(std::move(source), std::move(message)));
+	}
+	void LogInfo(StringUTF8&& source, StringUTF8&& message)
+	{
+		ProcessResult(BLAZE_INFO_RESULT(std::move(source), std::move(message)));
+	}
+	void LogWarning(StringUTF8&& source, StringUTF8&& message)
+	{
+		ProcessResult(BLAZE_WARNING_RESULT(std::move(source), std::move(message)));
+	}
+	void LogError(StringUTF8&& source, StringUTF8&& message)
+	{
+		ProcessResult(BLAZE_ERROR_RESULT(std::move(source), std::move(message)));
+	}
+	void LogFatal(StringUTF8&& source, StringUTF8&& message)
+	{
+		ProcessResult(BLAZE_FATAL_RESULT(std::move(source), std::move(message)));
 	}
 }

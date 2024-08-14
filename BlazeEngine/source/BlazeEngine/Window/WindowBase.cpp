@@ -1,15 +1,91 @@
 #include "pch.h"
 
 #include "BlazeEngine/Window/WindowBase.h"
+#include "BlazeEngine/Internal/GlobalData.h"
 
 namespace Blaze
-{
-	WindowBase::WindowBase()
-		: implementation(nullptr)
-	{
-
+{			
+	WindowBase::WindowBase() :
+		pressedKeyCount(0), releasedKeyCount(0)
+	{		
+		{
+			std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
+			blazeEngineContext.windows.Insert(this);
+		}
 	}	
 	WindowBase::WindowBase(WindowBase&& other) noexcept :
+		WindowBase(std::move(other), std::lock_guard(other.mutex))
+	{
+	}
+	WindowBase::~WindowBase()
+	{
+		{
+			std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
+			blazeEngineContext.windows.Erase(this);			
+		}
+	}
+
+	WindowBase::KeyState WindowBase::GetLastKeyState(Key key) const
+	{
+		if ((uintMem)key > _countof(keyStates))
+			return { };
+		
+		return keyStates[(uintMem)key];		
+	}
+	void WindowBase::ResetPressedAndReleasedKeys()
+	{
+		//If the all the pressed and released keys can fit in the arrays then use the arrays,
+		//otherwise go through all the keys
+		if (releasedKeyCount < MAX_RELEASED_KEY_COUNT && pressedKeyCount < MAX_PRESSED_KEY_COUNT)
+		{
+			for (uint i = 0; i < pressedKeyCount; ++i)
+				keyStates[(uintMem)pressedKeys[i]].pressed = false;
+			for (uint i = 0; i < releasedKeyCount; ++i)
+				keyStates[(uintMem)releasedKeys[i]].released = false;
+		}
+		else
+		{
+			for (auto& keyState : keyStates)
+			{
+				keyState.pressed = false;
+				keyState.released = false;
+			}
+		}
+
+		pressedKeyCount = 0;
+		releasedKeyCount = 0;
+	}
+
+	WindowBase& WindowBase::operator=(WindowBase&& other) noexcept
+	{	
+		std::lock_guard lk1(mutex);
+		std::lock_guard lk2(other.mutex);
+
+		resizedEventDispatcher     = std::move(other.resizedEventDispatcher);
+		movedEventDispatcher       = std::move(other.movedEventDispatcher);
+		minimizedEventDispatcher   = std::move(other.minimizedEventDispatcher);
+		maximizedEventDispatcher   = std::move(other.maximizedEventDispatcher);
+		focusGainedEventDispatcher = std::move(other.focusGainedEventDispatcher);
+		focusLostEventDispatcher   = std::move(other.focusLostEventDispatcher);
+		closeEventDispatcher       = std::move(other.closeEventDispatcher);
+		mouseEnterDispatcher       = std::move(other.mouseEnterDispatcher);
+		mouseLeaveDispatcher       = std::move(other.mouseLeaveDispatcher);
+		keyPressedDispatcher       = std::move(other.keyPressedDispatcher);
+		keyReleasedDispatcher      = std::move(other.keyReleasedDispatcher);
+		mouseMotionDispatcher      = std::move(other.mouseMotionDispatcher);
+		mouseScrollDispatcher      = std::move(other.mouseScrollDispatcher);
+		textInputDispatcher        = std::move(other.textInputDispatcher);		
+
+		pressedKeyCount = other.pressedKeyCount;
+		releasedKeyCount = other.releasedKeyCount;
+		std::copy_n(other.pressedKeys, pressedKeyCount, pressedKeys);
+		std::copy_n(other.releasedKeys, releasedKeyCount, releasedKeys);
+		other.pressedKeyCount = 0;
+		other.releasedKeyCount = 0;
+
+		return *this;
+	}	
+	WindowBase::WindowBase(WindowBase&& other, const std::lock_guard<std::mutex>& lk) noexcept :
 		resizedEventDispatcher(std::move(other.resizedEventDispatcher)),
 		movedEventDispatcher(std::move(other.movedEventDispatcher)),
 		minimizedEventDispatcher(std::move(other.minimizedEventDispatcher)),
@@ -18,202 +94,62 @@ namespace Blaze
 		focusLostEventDispatcher(std::move(other.focusLostEventDispatcher)),
 		closeEventDispatcher(std::move(other.closeEventDispatcher)),
 		mouseEnterDispatcher(std::move(other.mouseEnterDispatcher)),
-		mouseLeaveDispatcher(std::move(other.mouseLeaveDispatcher)), 
-		implementation(other.implementation)
+		mouseLeaveDispatcher(std::move(other.mouseLeaveDispatcher)),
+		keyPressedDispatcher(std::move(other.keyPressedDispatcher)),
+		keyReleasedDispatcher(std::move(other.keyReleasedDispatcher)),
+		mouseMotionDispatcher(std::move(other.mouseMotionDispatcher)),
+		mouseScrollDispatcher(std::move(other.mouseScrollDispatcher)),
+		textInputDispatcher(std::move(textInputDispatcher)),		
+		pressedKeyCount(other.pressedKeyCount),
+		releasedKeyCount(other.releasedKeyCount)
 	{
-		other.implementation = nullptr;
+		std::copy_n(other.pressedKeys, pressedKeyCount, pressedKeys);
+		std::copy_n(other.releasedKeys, releasedKeyCount, releasedKeys);
+		other.pressedKeyCount = 0;
+		other.releasedKeyCount = 0;		
+
+		std::lock_guard<std::mutex> lk2{ blazeEngineContext.windowsMutex };
+		blazeEngineContext.windows.Insert(this);
 	}
-	WindowBase::~WindowBase()
+	void WindowBase::HandleKeyEvent(Input::Events::KeyPressed event)
 	{
-		if (implementation != nullptr)
+		WindowBase::KeyState& keyState = keyStates[(uint)event.key];
+
+		if (keyState.pressed == false && keyState.down == false)
 		{
-			std::destroy_at(implementation);
-			allocator.Free(implementation);			
-			implementation = nullptr;
+			pressedKeys[pressedKeyCount] = event.key;
+			++pressedKeyCount;
+			keyState.pressed = true;
 		}
-	}
-	Vec2i WindowBase::GetPos() const		
-	{
-		if (implementation != nullptr)
-			return implementation->GetPos();
-		return Vec2i();
-	}
-	Vec2u WindowBase::GetSize() const
-	{
-		if (implementation != nullptr)
-			return implementation->GetSize();
-		return Vec2u();
-	} 
-	StringUTF8 WindowBase::GetTitle() const
-	{
-		if (implementation != nullptr)
-			return implementation->GetTitle();
-		return StringUTF8();
-	}
-	Vec2i WindowBase::GetMousePos() const
-	{
-		if (implementation != nullptr)
-			return implementation->GetMousePos();
-		return Vec2i(0, 0);
-	}
-	Result WindowBase::SetIcon(BitmapView bitmap)
-	{
-		if (implementation != nullptr)
-			return implementation->SetIcon(bitmap);
-		return Result();
-	}
-	void WindowBase::SetOpacity(float opacity)
-	{
-		if (implementation != nullptr)
-			implementation->SetOpacity(opacity);		
-	}
-	void WindowBase::SetPos(Vec2i pos)
-	{
-		if (implementation != nullptr)
-			implementation->SetPos(pos);
-	}
-	void WindowBase::SetSize(Vec2u size)
-	{
-		if (implementation != nullptr)
-			implementation->SetSize(size);		
-	}
-	void WindowBase::SetTitle(StringViewUTF8 title)
-	{
-		if (implementation != nullptr)
-			implementation->SetTitle(title);		
-	}
-	void WindowBase::SetMinimumSize(Vec2u size)
-	{
-		if (implementation != nullptr)
-			implementation->SetMinimumSize(size);		
-	}
-	void WindowBase::SetMaximumSize(Vec2u size)
-	{
-		if (implementation != nullptr)
-			implementation->SetMaximumSize(size);		
-	}
-		
-	void WindowBase::Minimize()
-	{
-		if (implementation != nullptr)
-			implementation->Minimize();		
-	}
 
-	void WindowBase::Maximize()
-	{
-		if (implementation != nullptr)
-			implementation->Maximize();		
-	}
-		
-	void WindowBase::Raise()
-	{
-		if (implementation != nullptr)
-			implementation->Raise();
-	}
-		
-	void WindowBase::ShowWindow(bool show)
-	{
-		if (implementation != nullptr)
-			implementation->ShowWindow(show);
-	}
-		
-	void WindowBase::SetWindowFullscreenMode(bool fullscreen)
-	{
-		if (implementation != nullptr)
-			implementation->SetWindowFullscreenMode(fullscreen);
-	}
-	void WindowBase::SetWindowBorderFlag(bool hasBorder)
-	{
-		if (implementation != nullptr)
-			implementation->SetWindowBorderFlag(hasBorder);
-	}
-	void WindowBase::SetWindowResizableFlag(bool resizable)
-	{
-		if (implementation != nullptr)
-			implementation->SetWindowResizableFlag(resizable);
-	}
-	void WindowBase::SetWindowLockMouseFlag(bool lockMouse)
-	{
-		if (implementation != nullptr)
-			implementation->SetWindowLockMouseFlag(lockMouse);
-	}
-		
-	bool WindowBase::IsFullscreen()
-	{
-		if (implementation != nullptr)
-			return implementation->IsFullscreen();
-		return false;
-	}
-	bool WindowBase::IsBorderless()
-	{
-		if (implementation != nullptr)
-			return implementation->IsBorderless();
-		return false;
-	}
-	bool WindowBase::IsResizable()
-	{
-		if (implementation != nullptr)
-			return implementation->IsResizable();
-		return false;
-	}
-	bool WindowBase::IsMouseLocked()
-	{
-		if (implementation != nullptr)
-			return implementation->IsMouseLocked();
-		return false;
-	}
-	bool WindowBase::IsMinmized()
-	{
-		if (implementation != nullptr)
-			return implementation->IsMinmized();
-		return false;
-	}
-	bool WindowBase::IsMaximized()
-	{
-		if (implementation != nullptr)
-			return implementation->IsMaximized();
-		return false;
-	}
-	bool WindowBase::IsShown()
-	{
-		if (implementation != nullptr)
-			return implementation->IsShown();
-		return false;
-	}
-		
-	uint WindowBase::GetWindowVideoDisplayIndex()
-	{
-		if (implementation != nullptr)
-			return implementation->GetWindowVideoDisplayIndex();
-		return 0;
-	}
-	DisplayMode WindowBase::GetWindowDisplayMode()
-	{
-		if (implementation != nullptr)
-			return implementation->GetWindowDisplayMode();
+		keyState.down = true;
+		keyState.up = false;
 
-		return DisplayMode();
-	}
-	void WindowBase::SetWindowDisplayMode(DisplayMode mode)
-	{
-		if (implementation != nullptr)
-			implementation->SetWindowDisplayMode(mode);
-	}
-	
-	WindowBase& WindowBase::operator=(WindowBase&& other) noexcept
-	{
-		resizedEventDispatcher = std::move(other.resizedEventDispatcher);
-		movedEventDispatcher = std::move(other.movedEventDispatcher);
-		minimizedEventDispatcher = std::move(other.minimizedEventDispatcher);
-		maximizedEventDispatcher = std::move(other.maximizedEventDispatcher);
-		focusGainedEventDispatcher = std::move(other.focusGainedEventDispatcher);
-		focusLostEventDispatcher = std::move(other.focusLostEventDispatcher);
-		closeEventDispatcher = std::move(other.closeEventDispatcher);
-		mouseEnterDispatcher = std::move(other.mouseEnterDispatcher);
-		mouseLeaveDispatcher = std::move(other.mouseLeaveDispatcher);
-		implementation = other.implementation;
-		other.implementation = nullptr;
+		if ((event.time - keyState.lastPressedTime).ToSeconds() <= blazeEngineContext.keyComboTime)
+			++keyState.combo;
+		else
+			keyState.combo = 1;
 
-		return *this;
+		keyState.lastPressedTime = event.time;
+
+		event.combo = keyState.combo;	
+
+		keyPressedDispatcher.Call(event);
 	}
+	void WindowBase::HandleKeyEvent(Input::Events::KeyReleased event)
+	{
+		WindowBase::KeyState& keyState = keyStates[(uint)event.key];
+
+		if (keyState.released == false && keyState.up == false)
+		{
+			releasedKeys[releasedKeyCount] = event.key;
+			++releasedKeyCount;
+			keyState.released = true;
+		}
+
+		keyState.down = false;
+		keyState.up = true;
+
+		keyReleasedDispatcher.Call(event);
+	}	
 }

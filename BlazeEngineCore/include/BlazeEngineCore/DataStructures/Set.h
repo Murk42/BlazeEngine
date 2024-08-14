@@ -146,7 +146,8 @@ namespace Blaze
 		\returns
 			Returns a iterator that points to the value, and true if there wasnt a element with the same value and false otherwise.
 		*/
-		InsertResult Insert(const Value& value);
+		template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+		InsertResult Insert(_Value&& value);
 		bool Erase(const Value& value);		
 		bool Erase(const Iterator& iterator);
 
@@ -200,8 +201,8 @@ namespace Blaze
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 			uintMem iteratorCount;
 #endif
-
-			Node(Node* prev, Node* next, uintMem hash, Value&& value);
+			template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+			Node(Node* prev, Node* next, uintMem hash, _Value&& value);
 		};
 		struct Bucket
 		{
@@ -231,28 +232,28 @@ namespace Blaze
 		Iterator FindWithHintUnsafe(const Value& value, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Value& value, Bucket* bucket) const;
 
-		InsertResult InsertWithHint(const Value& value, uintMem hash);
+		template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+		InsertResult InsertWithHint(_Value&& value, uintMem hash);
 
 		//Wont check if bucket is nullptr
-		InsertResult InsertWithHintUnsafe(const Value& value, Bucket* bucket, uintMem hash);
+		template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
+		InsertResult InsertWithHintUnsafe(_Value&& value, Bucket* bucket, uintMem hash);
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, Node* node);
 
-		Result CheckForRehash();
-		Result Rehash(uintMem newBucketCount);
+		void CheckForRehash();
+		void Rehash(uintMem newBucketCount);
 		
 		//Doesn't deallocate previous memory
 		void AllocateEmptyUnsafe();
 
 		//Wont check if bucket or bucketArray is nullptr or bucketArraySize is 0
-		static Result RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
+		static void RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
 
 		//Wont check if bucket or node is nullptr
 		static void RemoveNodeFromSpotUnsafe(Node* node, Bucket* bucket);
-
-		//Wont check if oldBucket, newBucket or node is nullptr
-		static void MoveNodeUnsafe(Node* node, Bucket* oldBucket, Bucket* newBucket);
+		
 		//Wont check if node or bucket is nullptr or change old node neighbour pointers acordingly
 		static void MoveNodeToBeginingUnsafe(Node* node, Bucket* bucket);
 

@@ -100,5 +100,29 @@ namespace Blaze
             }
             return Result();
         }
+        TimePoint GetLastWriteTime(const Path& path)
+        {
+            std::error_code ec;
+            auto tp = std::filesystem::last_write_time(path.GetUnderlyingObject(), ec);
+            if (ec)
+            {
+                auto message = ec.message();
+                BLAZE_ERROR_LOG("Blaze Engine", "std::filesystem::last_write_time given path \"" + path.ToString() + "\" returned a error : \"" + StringView(message.data(), message.size()) + "\"");
+            }
+            double seconds = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch()).count() * 10e-9;
+
+            return TimePoint() + TimeInterval().SetSeconds(seconds);
+        }
+        void SetLastWriteTime(const Path& path, const TimePoint& timePoint)
+        {
+            std::error_code ec;
+            std::chrono::time_point<std::chrono::file_clock> clock{ std::chrono::microseconds{ (uint)((timePoint - TimePoint()).ToSeconds() * 10e6) } };
+            std::filesystem::last_write_time(path.GetUnderlyingObject(), clock, ec);
+            if (ec)
+            {
+                auto message = ec.message();
+                BLAZE_ERROR_LOG("Blaze Engine", "std::filesystem::last_write_time given path \"" + path.ToString() + "\" returned a error : \"" + StringView(message.data(), message.size()) + "\"");
+            }            
+        }
     }
 }

@@ -19,12 +19,12 @@ namespace Blaze::ResourceSystem
 		void SetResourceManager(ResourceManager* manager);
 
 		template<typename T>
-		ResultValue<T*> CreateResource()
+		T* CreateResource()
 		{			
 			return (T*)CreateResource(manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
 		}
 		template<typename T>
-		ResultValue<T*> CreateResource(StringView name)
+		T* CreateResource(StringView name)
 		{			
 			return (T*)CreateResource(name, manager->GetResourceTypeRegistry().GetResourceTypeIndex<T>());
 		}

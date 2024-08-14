@@ -3,7 +3,7 @@
 
 
 #ifdef BLAZE_PLATFORM_WINDOWS
-#include "BlazeEngineCore/Internal/Windows/WindowsPlatform.h"
+#include "BlazeEngineCore/Internal/WindowsPlatform.h"
 #else
 #pragma error
 #endif
@@ -16,7 +16,7 @@ namespace Blaze
 	}	
 	FileStreamBase::FileStreamBase(FileStreamBase&& other) noexcept
 		: StreamBase(std::move(other)), file(other.file)
-	{
+	{		
 		other.file = nullptr;
 	}
 	FileStreamBase::FileStreamBase(void* file)
@@ -197,7 +197,10 @@ namespace Blaze
 		BOOL result = WriteFile(GetHandle(), ptr, static_cast<DWORD>(byteCount), &bytesWritten, nullptr);
 
 		if (result == 0)
+		{
 			Debug::Logger::LogError("Windows API", "WriteFile failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			return 0;
+		}
 
 		return bytesWritten;
 #else
@@ -208,8 +211,8 @@ namespace Blaze
 	{
 	}
 	FileWriteStream::FileWriteStream(FileWriteStream&& other) noexcept
-		: WriteStream(std::move(other))
-	{
+		: WriteStream(std::move(other)), FileStreamBase(std::move(other))
+	{		
 	}	
 	FileWriteStream::~FileWriteStream()
 	{
@@ -238,7 +241,7 @@ namespace Blaze
 	{
 	}
 	FileReadStream::FileReadStream(FileReadStream&& other) noexcept
-		: ReadStream(std::move(other))
+		: ReadStream(std::move(other)), FileStreamBase(std::move(other))
 	{
 	}	
 	FileReadStream::~FileReadStream()

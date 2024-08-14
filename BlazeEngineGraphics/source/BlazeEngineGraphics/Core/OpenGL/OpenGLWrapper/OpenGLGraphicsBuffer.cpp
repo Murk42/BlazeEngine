@@ -1,71 +1,51 @@
 #include "pch.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
 	GraphicsBuffer::GraphicsBuffer()
-		: id(-1)
+		: id(0)
 	{		
 		glCreateBuffers(1, &id);			
-
-		
 	}
 	GraphicsBuffer::GraphicsBuffer(GraphicsBuffer&& buffer) noexcept
-		: id(-1)
+		: id(0)
 	{
 		id = buffer.id;
-		buffer.id = -1;
+		buffer.id = 0;
 	}
 	GraphicsBuffer::~GraphicsBuffer()
 	{
-		if (id != -1)
-		{
+		if (id != 0)		
 			glDeleteBuffers(1, &id);
-			
-		}
 	}
 
-	Result GraphicsBuffer::Invalidate() const
+	void GraphicsBuffer::Invalidate() const
 	{
-		glInvalidateBufferData(id);
-		CHECK_OPENGL_RESULT();
-
-		return Result();		
+		glInvalidateBufferData(id);		
 	}
 	GraphicsBuffer& GraphicsBuffer::operator=(GraphicsBuffer&& buffer) noexcept
 	{
-		if (id != -1)
-		{
-			glDeleteBuffers(1, &id);
-			if (FlushOpenGLResult())
-				return *this;
-		}
+		if (id != 0)		
+			glDeleteBuffers(1, &id);			
+		
 		id = buffer.id;
-		buffer.id = -1;
+		buffer.id = 0;
 
 		return *this;
 	}
-	Result ImmutableStaticGraphicsBuffer::Allocate(void* ptr, size_t size, bool clientStorage)
+	void ImmutableStaticGraphicsBuffer::Allocate(void* ptr, size_t size, bool clientStorage)
 	{		
-		glNamedBufferStorage(GetHandle(), size, ptr, (clientStorage ? GL_CLIENT_STORAGE_BIT : 0));
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedBufferStorage(GetHandle(), size, ptr, (clientStorage ? GL_CLIENT_STORAGE_BIT : 0));		
 	}
-	Result ImmutableDynamicGraphicsBuffer::Allocate(void* ptr, size_t size, bool clientStorage)
+	void ImmutableDynamicGraphicsBuffer::Allocate(void* ptr, size_t size, bool clientStorage)
 	{		
-		glNamedBufferStorage(GetHandle(), size, ptr, GL_DYNAMIC_STORAGE_BIT | (clientStorage ? GL_CLIENT_STORAGE_BIT : 0));
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedBufferStorage(GetHandle(), size, ptr, GL_DYNAMIC_STORAGE_BIT | (clientStorage ? GL_CLIENT_STORAGE_BIT : 0));		
 	}
-	Result ImmutableDynamicGraphicsBuffer::WriteData(const void* ptr, size_t size, size_t offset)
+	void ImmutableDynamicGraphicsBuffer::WriteData(const void* ptr, size_t size, size_t offset)
 	{		
-		glNamedBufferSubData(GetHandle(), offset, size, ptr);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedBufferSubData(GetHandle(), offset, size, ptr);		
 	}
 	ImmutableMappedGraphicsBuffer::ImmutableMappedGraphicsBuffer()
 		: mapAccess((ImmutableGraphicsBufferMapAccess)0), mappingType((ImmutableGraphicsBufferMapType::None)), GraphicsBuffer()
@@ -77,21 +57,18 @@ namespace Blaze::Graphics::OpenGLWrapper
 		other.mapAccess = (ImmutableGraphicsBufferMapAccess)0;
 		other.mappingType = ImmutableGraphicsBufferMapType::None;
 	}
-	Result ImmutableMappedGraphicsBuffer::Allocate(void* ptr, size_t size, ImmutableGraphicsBufferMapAccess access, ImmutableGraphicsBufferMapType type, bool clientStorage)
+	void ImmutableMappedGraphicsBuffer::Allocate(void* ptr, size_t size, ImmutableGraphicsBufferMapAccess access, ImmutableGraphicsBufferMapType mappingType, bool clientStorage)
 	{		
 		this->mapAccess = access;
 		this->mappingType = mappingType;
 
 		Result result;
 		GLenum _access = OpenGLBufferMappingAccess(access, result);
-		CHECK_RESULT(result);		
-		GLenum _type = OpenGLBufferMappingType(type, result);
-		CHECK_RESULT(result);		
+		if (result) return;
+		GLenum _mappingType = OpenGLBufferMappingType(mappingType, result);
+		if (result) return;
 
-		glNamedBufferStorage(GetHandle(), size, ptr, GL_DYNAMIC_STORAGE_BIT | (clientStorage ? GL_CLIENT_STORAGE_BIT : 0) | _access | _type);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedBufferStorage(GetHandle(), size, ptr, GL_DYNAMIC_STORAGE_BIT | (clientStorage ? GL_CLIENT_STORAGE_BIT : 0) | _access | _mappingType);		
 	}
 	void* ImmutableMappedGraphicsBuffer::MapBufferRange(size_t offset, size_t size, ImmutableGraphicsBufferMapOptions options)
 	{		
@@ -103,24 +80,17 @@ namespace Blaze::Graphics::OpenGLWrapper
 		GLenum _options = OpenGLBufferMappingOptions(options, result);
 		if (result) return nullptr;
 
-		void* map = glMapNamedBufferRange(GetHandle(), offset, size, _access | _type | _options);		
-						
+		void* map = glMapNamedBufferRange(GetHandle(), offset, size, _access | _type | _options);								
 
 		return map;
 	}
-	Result ImmutableMappedGraphicsBuffer::UnmapBuffer()
+	void ImmutableMappedGraphicsBuffer::UnmapBuffer()
 	{		
-		glUnmapNamedBuffer(GetHandle());			
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glUnmapNamedBuffer(GetHandle());					
 	}
-	Result ImmutableMappedGraphicsBuffer::FlushBufferRange(size_t offset, size_t size)
+	void ImmutableMappedGraphicsBuffer::FlushBufferRange(size_t offset, size_t size)
 	{		
-		glFlushMappedNamedBufferRange(GetHandle(), offset, size);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glFlushMappedNamedBufferRange(GetHandle(), offset, size);		
 	}
 	ImmutableMappedGraphicsBuffer& ImmutableMappedGraphicsBuffer::operator=(ImmutableMappedGraphicsBuffer&& other) noexcept
 	{
@@ -133,58 +103,39 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		return *this;
 	}
-	Result MutableDrawGraphicsBuffer::Allocate(void* ptr, size_t size, MutableGraphicsBufferUseFrequency frequency)
+	void MutableDrawGraphicsBuffer::Allocate(void* ptr, size_t size, MutableGraphicsBufferUseFrequency frequency)
 	{
 		Result result;
 		GLenum usage = OpenGLMutableBufferUsage(frequency, MutableGraphicsBufferUseType::Draw, result);
-		CHECK_RESULT(result);
+		if (result) return;
 
-		glNamedBufferData(GetHandle(), size, ptr, usage);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedBufferData(GetHandle(), size, ptr, usage);		
 	}
-	Result MutableDrawGraphicsBuffer::WriteData(const void* ptr, size_t size, size_t offset)
+	void MutableDrawGraphicsBuffer::WriteData(const void* ptr, size_t size, size_t offset)
 	{
-		glNamedBufferSubData(GetHandle(), offset, size, ptr);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedBufferSubData(GetHandle(), offset, size, ptr);		
 	}
-	Result MutableReadGraphicsBuffer::Allocate(size_t size, MutableGraphicsBufferUseFrequency frequency)
+	void MutableReadGraphicsBuffer::Allocate(size_t size, MutableGraphicsBufferUseFrequency frequency)
 	{
 		Result result;
 		GLenum usage = OpenGLMutableBufferUsage(frequency, MutableGraphicsBufferUseType::Draw, result);
-		CHECK_RESULT(result);		
+		if (result) return;
 
-		glNamedBufferData(GetHandle(), size, nullptr, usage);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glNamedBufferData(GetHandle(), size, nullptr, usage);		
 	}
-	Result MutableReadGraphicsBuffer::ReadData(void* ptr, size_t size, size_t offset) const
+	void MutableReadGraphicsBuffer::ReadData(void* ptr, size_t size, size_t offset) const
 	{		
-		glGetNamedBufferSubData(GetHandle(), offset, size, ptr);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glGetNamedBufferSubData(GetHandle(), offset, size, ptr);		
 	}
-	Result MutableCopyGraphicsBuffer::Allocate(size_t size, MutableGraphicsBufferUseFrequency frequency)
+	void MutableCopyGraphicsBuffer::Allocate(size_t size, MutableGraphicsBufferUseFrequency frequency)
 	{
 		Result result;
 		GLenum usage = OpenGLMutableBufferUsage(frequency, MutableGraphicsBufferUseType::Draw, result);
-		CHECK_RESULT(result);
-
-		glNamedBufferData(GetHandle(), size, nullptr, usage);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		
+		glNamedBufferData(GetHandle(), size, nullptr, usage);		
 	}
-	Result MutableCopyGraphicsBuffer::CopyData(GraphicsBuffer& destination, size_t readOffset, size_t writeOffset, size_t size)
+	void MutableCopyGraphicsBuffer::CopyData(GraphicsBuffer& destination, size_t readOffset, size_t writeOffset, size_t size)
 	{
-		glCopyNamedBufferSubData(GetHandle(), destination.GetHandle(), readOffset, writeOffset, size);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glCopyNamedBufferSubData(GetHandle(), destination.GetHandle(), readOffset, writeOffset, size);		
 	}
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include "BlazeEngineCore/File/Path.h"
-#include "BlazeEngineCore/Debug/ResultValue.h"
 
 namespace Blaze
 {
@@ -29,5 +28,8 @@ namespace Blaze
 
 		BLAZE_CORE_API Result CopyContents(const Path& destination, const Path& source);
 		BLAZE_CORE_API Result Copy(const Path& destination, const Path& source, CopyFlags flags = CopyFlags::Overwrite | CopyFlags::Recursive);
+
+		BLAZE_CORE_API TimePoint GetLastWriteTime(const Path& path);
+		BLAZE_CORE_API void SetLastWriteTime(const Path& path, const TimePoint& timePoint);
 	};
 }

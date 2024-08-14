@@ -1,0 +1,35 @@
+#pragma once
+#include "BlazeEngineGraphics/UI/Core/UINode.h"
+#include "BlazeEngineGraphics/UI/Elements/ImageRenderUnit.h"
+#include "BlazeEngineGraphics/RenderScene/RenderObject.h"
+
+namespace Blaze::UI
+{	
+	using ImageLayout = UIGraphics::ImageLayout;
+
+	class Image : 
+		public Node,
+		public Graphics::RenderObject
+	{
+	public:
+		Image();
+
+		inline void SetTexture(Graphics::OpenGLWrapper::Texture2D* texture) { renderUnit.SetTexture(texture); }
+		inline void SetSourceRect(Vec2f uv1, Vec2f uv2) { renderUnit.SetSourceRect(uv1, uv2); }
+		inline void SetBlendColor(ColorRGBAf color) { renderUnit.SetBlendColor(color); }		
+		inline void SetBlendFactor(float blend) { renderUnit.SetBlendFactor(blend); }
+		inline void SetAlphaMultiplier(float alpha) { renderUnit.SetAlphaMultiplier(alpha); }
+		inline void SetImageLayout(ImageLayout layout) { renderUnit.SetImageLayout(layout); }
+
+		inline Graphics::OpenGLWrapper::Texture2D* GetTexture() const { return renderUnit.GetTexture(); }
+		inline Rectf GetSourceRect() const { return renderUnit.GetSourceRect(); }
+		inline ColorRGBAf GetBlendColor() const { return renderUnit.GetBlendColor(); }
+		inline float GetBlendFactor() const { return renderUnit.GetBlendFactor(); }
+		inline float GetAlphaMultiplier() const { return renderUnit.GetAlphaMultiplier(); }
+		inline ImageLayout GetImageLayout() const { return renderUnit.GetImageLayout(); }
+		
+		Graphics::RenderUnit* GetRenderUnit(uint index) override;
+	private:				
+		UIGraphics::ImageRenderStream renderUnit;		
+	};
+}

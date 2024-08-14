@@ -5,13 +5,11 @@
 
 #include "rectpack2D.h"
 
-//#define MSDFGEN_PUBLIC
-//#include "msdfgen/msdfgen.h"
-//#include "msdfgen/msdfgen-ext.h"
+#include "BlazeEngine/Files/Consola.h"
 
 namespace Blaze
 {
-	FT_Library GetFreeTypeLibrary();			
+	FT_Library GetFreeTypeLibrary();
 
 	CharacterSetIterator::CharacterSetIterator()
 		: characterSet(nullptr), spanIndex(0), characterIndex(0)
@@ -34,7 +32,7 @@ namespace Blaze
 		if (characterSet == nullptr)
 			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
 #endif
-		
+
 		++characterIndex;
 
 		auto span = characterSet->spans[spanIndex];
@@ -67,7 +65,7 @@ namespace Blaze
 #endif
 
 
-		if (characterIndex == 0)		
+		if (characterIndex == 0)
 			if (spanIndex == 0)
 			{
 				spanIndex = 0;
@@ -78,7 +76,7 @@ namespace Blaze
 				--spanIndex;
 				auto span = characterSet->spans[spanIndex];
 				characterIndex = span.last.Value() - span.first.Value();
-			}					
+			}
 		else
 			--characterIndex;
 
@@ -97,7 +95,7 @@ namespace Blaze
 			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
 #endif
 		return UnicodeChar(characterSet->spans[spanIndex].first.Value() + characterIndex);
-	}	
+	}
 	bool CharacterSetIterator::operator==(CharacterSetIterator& other) const
 	{
 		return characterSet == other.characterSet && spanIndex == other.spanIndex && characterIndex == other.characterIndex;
@@ -173,7 +171,7 @@ namespace Blaze
 	}
 
 	namespace FontGlyphRenderers
-	{		
+	{
 		Bitmap MonochromeFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
@@ -207,7 +205,7 @@ namespace Blaze
 
 			return bitmap;
 		}
-		
+
 		Bitmap AntialiasedFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
@@ -240,7 +238,7 @@ namespace Blaze
 
 			return bitmap;
 		}
-		
+
 		Bitmap HorizontalLCDFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
@@ -273,7 +271,7 @@ namespace Blaze
 
 			return bitmap;
 		}
-		
+
 		Bitmap VerticalLCDFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
@@ -306,7 +304,7 @@ namespace Blaze
 
 			return bitmap;
 		}
-		
+
 		Bitmap SDFFontGlyphRenderer::Render(const Font& font, uint pixelFontHeight, UnicodeChar character)
 		{
 			FT_Face face = (FT_Face)font.GetHandle();
@@ -429,7 +427,7 @@ namespace Blaze
 				contourBegin = contourEnd;
 			}
 		}
-		
+
 
 		struct FontHandleRec
 		{
@@ -445,7 +443,7 @@ namespace Blaze
 			msdfgen::FontHandle* fontHandle = (msdfgen::FontHandle*)&fontHandleRec;
 
 			Vec2i size{ 32, 32 };
-			msdfgen::Shape shape;	
+			msdfgen::Shape shape;
 			msdfgen::loadGlyph(shape, fontHandle, character.Value());
 
 			shape.normalize();
@@ -488,7 +486,7 @@ namespace Blaze
 		uint l = FT_Get_Char_Index(face, left.Value());
 		uint r = FT_Get_Char_Index(face, right.Value());
 		FT_Vector vec;
-		
+
 		if (pixelFontHeight != 0)
 		{
 			FT_Get_Kerning(face, l, r, FT_KERNING_DEFAULT, &vec);
@@ -548,10 +546,6 @@ namespace Blaze
 
 		return true;
 	}
-	inline uint FontMetrics::GetPixelFontHeight() const
-	{		
-		return pixelFontHeight;		
-	}
 
 	Map<UnicodeChar, Bitmap> FontMetrics::GetGlyphBitmaps(const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer) const
 	{
@@ -588,7 +582,7 @@ namespace Blaze
 		auto glyphAtlasRectIt = glyphAtlasRects.begin();
 		for (auto character : characterSet)
 		{
-			Bitmap& bitmap = *bitmaps.AddBack(glyphRenderer.Render(*font, pixelFontHeight, character));			
+			Bitmap& bitmap = *bitmaps.AddBack(glyphRenderer.Render(*font, pixelFontHeight, character));
 			Vec2u size = bitmap.GetSize() + Vec2u(glyphBitmapExtraPadding * 2);
 			glyphAtlasRectIt->w = (int)size.x;
 			glyphAtlasRectIt->h = (int)size.y;
@@ -626,7 +620,7 @@ namespace Blaze
 			metric.value.font = this;
 
 		other.ptr = nullptr;
-		other.memory = nullptr;				
+		other.memory = nullptr;
 	}
 	Font::Font(Path path)
 		: ptr(nullptr), memory(nullptr)
@@ -634,23 +628,23 @@ namespace Blaze
 		Load(std::move(path));
 	}
 	Font::~Font()
-	{		
+	{
 		Clear();
 	}
 	Result Font::Load(Path path)
-	{		
-		File file;		
-		
+	{
+		File file;
+
 		CHECK_RESULT(file.Open(path, FileAccessPermission::Read));
 
 		return Load(file);
 	}
 	Result Font::Load(ReadStream& readStream)
-	{		
+	{
 		Clear();
 
-		FT_Error ftError;		
-		
+		FT_Error ftError;
+
 		//Load face
 		{
 			if (ptr != nullptr)
@@ -663,7 +657,7 @@ namespace Blaze
 			memory = Memory::Allocate(memorySize);
 			readStream.Read(memory, memorySize);
 
-			ftError = FT_New_Memory_Face(GetFreeTypeLibrary(), (const FT_Byte*)memory, (FT_Long)memorySize, 0, &(FT_Face&)ptr);				
+			ftError = FT_New_Memory_Face(GetFreeTypeLibrary(), (const FT_Byte*)memory, (FT_Long)memorySize, 0, &(FT_Face&)ptr);
 
 			if (ftError != 0)
 			{
@@ -683,12 +677,12 @@ namespace Blaze
 		}
 
 		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-		bool kern = FT_HAS_KERNING(face);		
+		bool kern = FT_HAS_KERNING(face);
 
 		return Result();
-	}	
+	}
 	FontMetrics& Font::GetUnscalledMetrics() const
-	{ 
+	{
 		return metrics.Insert(0, (Font*)this, 0).iterator->value;
 	}
 	FontMetrics& Font::GetMetrics(uint pixelFontHeight) const
@@ -702,7 +696,7 @@ namespace Blaze
 		return ((FT_Face)ptr)->units_per_EM;
 	}
 	void Font::Clear()
-	{						
+	{
 		if (ptr != nullptr)
 		{
 			FT_Done_Face((FT_Face)ptr);
@@ -713,11 +707,11 @@ namespace Blaze
 		{
 			Memory::Free(memory);
 		}
-	}	
+	}
 	Font& Font::operator=(Font&& other) noexcept
 	{
 		ptr = other.ptr;
-		memory = other.memory;				
+		memory = other.memory;
 		metrics = std::move(other.metrics);
 		dataMap = std::move(other.dataMap);
 
@@ -725,7 +719,18 @@ namespace Blaze
 			metric.value.font = this;
 
 		other.ptr = nullptr;
-		other.memory = nullptr;		
+		other.memory = nullptr;
 		return *this;
-	}			
+	}
+	Font Font::LoadDefault()
+	{
+		BufferReadStream stream{
+			(void*)consolaFile, consolaFileSize
+		};
+
+		Font font;
+		font.Load(stream);
+
+		return font;
+	}
 }

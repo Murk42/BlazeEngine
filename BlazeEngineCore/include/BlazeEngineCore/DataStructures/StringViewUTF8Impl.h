@@ -180,12 +180,24 @@ namespace Blaze
 	{
 	}
 	constexpr StringViewUTF8::StringViewUTF8(const StringView& other)
-		: buffer(other.Ptr()), bufferSize(other.Count() + 1), characterCount(other.Count())
+		: buffer(nullptr), bufferSize(0), characterCount(0)
 	{
+		if (!other.Empty())
+		{
+			buffer = other.Ptr();
+			bufferSize = other.Count() + 1;
+			characterCount = other.Count();
+		}
 	}
 	inline StringViewUTF8::StringViewUTF8(const String& other)
-		: buffer(other.Ptr()), bufferSize(other.Count() + 1), characterCount(other.Count())
+		: buffer(nullptr), bufferSize(0), characterCount(0)		
 	{
+		if (!other.Empty())
+		{
+			buffer = other.Ptr();
+			bufferSize = other.Count() + 1;
+			characterCount = other.Count();
+		}
 	}	
 	inline StringViewUTF8::StringViewUTF8(const void* ptr, uintMem size)
 		: buffer(nullptr), bufferSize(0), characterCount(0)
@@ -218,6 +230,15 @@ namespace Blaze
 		buffer = nullptr;
 		bufferSize = 0;
 		characterCount = 0;
+	}
+	inline StringUTF8 StringViewUTF8::SubString(uintMem start, uintMem count) const
+	{
+		auto b = FirstIterator();
+		for (uintMem i = 0; i != start; ++i, ++b);
+		auto e = b;
+		for (uintMem i = 0; i != count; ++i, ++e);
+
+		return StringUTF8(b.ptr, (char*)e.ptr - (char*)b.ptr);
 	}
 	constexpr bool StringViewUTF8::Empty() const { return bufferSize == 0; }
 	inline uint32 StringViewUTF8::Hash() const

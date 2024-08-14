@@ -71,6 +71,14 @@ namespace Blaze
 	using uintMem = std::make_unsigned_t<decltype(sizeof(int8))>;
 	using intMem = std::make_signed_t<decltype(sizeof(int8))>;
 
+	template<uint64 MaxValue>
+	using fitted_uint =
+		std::conditional_t<MaxValue <= std::numeric_limits<uint8>::max(), uint8,
+		std::conditional_t<MaxValue <= std::numeric_limits<uint16>::max(), uint16,
+		std::conditional_t<MaxValue <= std::numeric_limits<uint32>::max(), uint32,
+		std::conditional_t<MaxValue <= std::numeric_limits<uint64>::max(), uint64,
+		void>>>>;
+
 	enum byte : char { };
 	enum ubyte : unsigned char { };
 

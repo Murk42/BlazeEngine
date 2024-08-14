@@ -1,5 +1,5 @@
-#include "StringView.h"
 #pragma once
+#include "StringView.h"
 
 namespace Blaze
 {
@@ -9,6 +9,10 @@ namespace Blaze
 	}
 	constexpr StringViewIterator::StringViewIterator(const StringViewIterator& i)
 		: ptr(i.ptr)
+	{
+	}
+	inline StringViewIterator::StringViewIterator(const StringIterator& i)
+		: ptr(i.Ptr())
 	{
 	}
 	constexpr bool StringViewIterator::IsNull() const
@@ -68,42 +72,28 @@ namespace Blaze
 
 		--ptr;
 		return *this;
-	}
-	constexpr StringViewIterator StringViewIterator::operator+(const uintMem& value) const
-	{
-		return StringViewIterator(ptr + value);
-	}
+	}	
 	constexpr StringViewIterator StringViewIterator::operator+(const intMem& value) const
 	{
 		return StringViewIterator(ptr + value);
-	}
-	constexpr StringViewIterator StringViewIterator::operator-(const uintMem& value) const
-	{
-		return StringViewIterator(ptr - value);
-	}
+	}	
 	constexpr StringViewIterator StringViewIterator::operator-(const intMem& value) const
 	{
 		return StringViewIterator(ptr - value);
-	}
-	constexpr StringViewIterator& StringViewIterator::operator+=(const uintMem& value)
-	{
-		ptr += value;
-		return *this;
-	}
+	}	
 	constexpr StringViewIterator& StringViewIterator::operator+=(const intMem& value)
 	{
 		ptr += value;
 		return *this;
-	}
-	constexpr StringViewIterator& StringViewIterator::operator-=(const uintMem& value)
-	{
-		ptr -= value;
-		return *this;
-	}
+	}	
 	constexpr StringViewIterator& StringViewIterator::operator-=(const intMem& value)
 	{
 		ptr -= value;
 		return *this;
+	}
+	constexpr uintMem StringViewIterator::operator-(const StringViewIterator& other)
+	{
+		return ptr - other.ptr;
 	}
 	constexpr bool StringViewIterator::operator==(const StringViewIterator& i) const
 	{

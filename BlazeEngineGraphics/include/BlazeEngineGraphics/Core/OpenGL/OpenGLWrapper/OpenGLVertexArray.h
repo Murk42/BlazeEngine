@@ -1,19 +1,9 @@
 #pragma once
-#include "OpenGLGraphicsBuffer.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 	
 namespace Blaze::Graphics::OpenGLWrapper
-{
-	enum class VertexAttributeType
-	{
-		Int8,
-		Uint8,
-		Int16,
-		Uint16,
-		Int32,
-		Uint32,
-		Float,
-		Double
-	};
+{	
+	class GraphicsBuffer;
 
 	struct VertexAttribute
 	{
@@ -35,23 +25,21 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 	class BLAZE_GRAPHICS_API VertexArray
 	{
-		uint id;
-		GraphicsBuffer* indexBuffer;
+		uint id;		
 	public:
 		VertexArray();
 		VertexArray(const VertexArray&) = delete;
 		VertexArray(VertexArray&&) noexcept;
 		~VertexArray();
+		
+		void SetIndexBuffer(GraphicsBuffer& buffer);
 
-		GraphicsBuffer* GetIndexBuffer() const;
-		Result SetIndexBuffer(GraphicsBuffer& buffer);
+		void EnableVertexAttribute(uint index);
+		void DisableVertexAttribute(uint index);
 
-		Result EnableVertexAttribute(uint index);
-		Result DisableVertexAttribute(uint index);
-
-		Result SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset);
-		Result SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset);
-		Result SetVertexAttributeDivisor(uint index, uint divisor);
+		void SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset);
+		void SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset);
+		void SetVertexAttributeDivisor(uint index, uint divisor);
 
 		inline uint GetHandle() const { return id; }
 

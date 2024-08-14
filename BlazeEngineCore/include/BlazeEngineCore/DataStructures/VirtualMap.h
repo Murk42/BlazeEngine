@@ -17,11 +17,14 @@ namespace Blaze
 		std::same_as<std::remove_const_t<typename T2::template VirtualMapType>, std::remove_const_t<typename T1::template VirtualMapType>>;
 
 	/*
+	* -----------VirtualMapIterator-----------
 		Used with the Blaze::VirtualMap class.
+		It points to a (kay, value) pair with a value of any type derived from VirtualMap::ValueBase.
 
 		Iterator usage:
-		Increasing, decreasing or dereferencing the iterator outside of valid range or invalidating the maps previous buffers while some iterators
-		are referencing it cannot be detected if no debugging measures are taken. It is up to the client to ensure its valid use.
+		Increasing, decreasing the null iterator, or dereferencing the iterator outside of valid range or invalidating the maps previous 
+		buffers while some iterators are referencing it cannot be detected if no debugging measures are taken. It is up to the client to 
+		ensure its valid use.
 
 		Null iterators can be created by the default constructor, by copying/assigning an null iterator, or increasing\decreasing the iterator
 		outside the map. They cannot be dereferenced, incremented or decremented, it will result in an error or a possible silent fail, depending
@@ -62,9 +65,12 @@ namespace Blaze
 		VirtualMapIterator& operator--();
 		VirtualMapIterator operator--(int);
 
+		//Returns the value that the iterator is pointing to. If the asked type does not match the stored value nullptr is returned. If 
+		//the iterator isn't pointing to any data nullptr is returned
 		template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
 		MatchMapConst<Value>* GetValue() const;
-		const typename VirtualMap::template KeyType& GetKey() const;
+		//Returns the key that the iterator is pointing to. If the iterator isn't pointing to any data nullptr is returned				
+		const typename VirtualMap::template KeyType* GetKey() const;
 
 		template<IsComparableToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
 		bool operator==(const T&) const;
@@ -78,7 +84,7 @@ namespace Blaze
 		friend class ::Blaze::VirtualMap;
 
 		template<typename>
-		friend class ::Blaze::VirtualMapIterator;
+		friend class ::Blaze::VirtualMapIterator;		
 	private:
 		using VirtualMapNodeHeader = std::conditional_t<std::is_const_v<VirtualMap>, const typename VirtualMap::template NodeHeader, typename VirtualMap::template NodeHeader>;
 		using VirtualMapBucket = std::conditional_t<std::is_const_v<VirtualMap>, const typename VirtualMap::template Bucket, typename VirtualMap::template Bucket>;
@@ -87,13 +93,15 @@ namespace Blaze
 		VirtualMapNodeHeader* nodeHeader;
 
 		VirtualMapIterator(VirtualMapNodeHeader* nodeHeader, VirtualMap* map);
-	};	
+	};		
 
 	template<typename Value, typename ValueBase>
 	concept InsertableToVirtualMap = std::derived_from<Value, ValueBase> || std::same_as<ValueBase, void>;
 
 	/*
-		Basic map class
+		Virtual map class.
+		Maps any object that is derived from ValueBase to Key, while checking for type correctness on access. If the ValueBase is
+		void, then any type can be inserted.
 
 		BLAZE_INVALID_ITERATOR_CHECK:
 		If BLAZE_INVALID_ITERATOR_CHECK is defined, passing an invalid iterator to a map will result in a fatal error. Having this
@@ -119,7 +127,7 @@ namespace Blaze
 		
 		using Iterator = VirtualMapIterator<VirtualMap>;
 		using ConstIterator = VirtualMapIterator<const VirtualMap>;
-
+		
 		struct InsertResult
 		{
 			Iterator iterator;
@@ -141,13 +149,19 @@ namespace Blaze
 		bool Contains(const Key& key) const;
 
 		/*
-			Inserst a element into the map. If there is already an element with the same key it doesnt change anything.
+			Insert a element into the virtual map. If the Replace template argument is false and there is already an element 
+			with the same key, nothing will be changed. If the Replace template argument is true and there is already an element 
+			with the same key, the value will be destructed and a new one will be constructed.
 
+			The template argument Value is mandatory, other arguments can be derived. The element being inserted must be of
+			type that is derived from ValueBase, or if ValueBase is void then any type can be inserted.
+			
+			The default value of the template argument Replace is false.
 		\returns
-			Returns a iterator that points to a pair associated with the key, and true if there wasnt a element with the
-			same key and false otherwise.
+			Returns a iterator that points to the (key, value) pair. A null iterator is returned if there already was a value
+			with the same key.
 		*/
-		template<typename Value, typename _Key, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
+		template<typename Value, bool Replace = false, typename _Key, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key>&& std::constructible_from<Value, Args...>
 		InsertResult Insert(_Key&& key, Args&& ... args);
 		bool Erase(const Key& key);
 		bool Erase(const Iterator& iterator);
@@ -205,7 +219,7 @@ namespace Blaze
 			virtual ~NodeHeader();
 		};
 		template<typename Value> requires InsertableToVirtualMap<Value, ValueBase>
-		struct Node : NodeHeader
+		struct Node : public NodeHeader
 		{
 			Value value;
 
@@ -238,24 +252,24 @@ namespace Blaze
 		Iterator FindWithHintUnsafe(const Key& key, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Key& key, Bucket* bucket) const;
 
-		template<typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
+		template<bool Replace, typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
 		InsertResult InsertWithHint(_Key&& key, uintMem hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
-		template<typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
+		template<bool Replace, typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
 		InsertResult InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uintMem hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, NodeHeader* node);
 
-		Result CheckForRehash();
-		Result Rehash(uintMem newBucketCount);
+		void CheckForRehash();
+		void Rehash(uintMem newBucketCount);
 
 		//Doesn't deallocate previous memory
 		void AllocateEmptyUnsafe();
 
 		//Wont check if bucket or bucketArray is nullptr or bucketArraySize is 0
-		static Result RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
+		static void RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
 
 		//Wont check if bucket or node is nullptr
 		static void RemoveNodeFromSpotUnsafe(NodeHeader* node, Bucket* bucket);

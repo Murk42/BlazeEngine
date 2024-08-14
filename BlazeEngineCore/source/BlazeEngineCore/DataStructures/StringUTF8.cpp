@@ -105,12 +105,12 @@ namespace Blaze
 		bufferSize = 0;
 		characterCount = 0;
 	}	
-	StringUTF8 StringUTF8::SubString(uintMem start, uintMem size) const
+	StringUTF8 StringUTF8::SubString(uintMem start, uintMem count) const
 	{
 		auto b = FirstIterator();
 		for (uintMem i = 0; i != start; ++i, ++b);
 		auto e = b;
-		for (uintMem i = 0; i != size; ++i, ++e);
+		for (uintMem i = 0; i != count; ++i, ++e);
 		
 		return StringUTF8(b.ptr, (char*)e.ptr - (char*)b.ptr);
 	}

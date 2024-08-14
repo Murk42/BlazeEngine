@@ -6,6 +6,15 @@ namespace Blaze::Graphics::OpenGL
 	class GraphicsContext_OpenGL;	
 	class Semaphore_OpenGL;	
 
+	struct WindowSDLCreateOptions_OpenGL
+	{
+		StringUTF8 title = StringUTF8();
+		Vec2i pos = Vec2i(INT_MAX, INT_MAX);
+		Vec2u size = Vec2u(1, 1);
+		WindowSDLOpenMode openMode = WindowSDLOpenMode::Normal;
+		WindowSDLStyleFlags styleFlags = WindowSDLStyleFlags::Resizable;
+	};
+
 	class BLAZE_GRAPHICS_API RenderWindow_OpenGL : private EventHandler<Input::Events::WindowResizedEvent>
 	{
 	public:
@@ -16,10 +25,8 @@ namespace Blaze::Graphics::OpenGL
 		/*Parity*/void PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, Array<Semaphore_OpenGL*> waitSemaphores);
 
 		/*Parity*/inline GraphicsContext_OpenGL& GetGraphicsContext() { return graphicsContext; }
-		/*Parity*/inline WindowSDL& GetWindow() { return window; }		
-		/*Parity*/Vec2u GetSize() const;
-
-		void MakeActive();
+		/*Parity*/inline WindowSDL& GetWindowSDL() { return window; }				
+		/*Parity*/Vec2u GetSize() const;		
 	private:
 		std::atomic_flag acquirable;
 

@@ -6,33 +6,51 @@ namespace Blaze
 	template<uint MaxStackSize>
 	class EventStack
 	{
-		template<typename T>
+		template<typename Callable, typename ... Args>
 		struct EventInfo
 		{
-			EventDispatcher<T>* dispatcher;
-			T event;
+			Callable callable;
+			std::tuple<Args...> args;
+
+			EventInfo(Callable&& callable, std::tuple<Args...>&& args)
+				: callable(std::forward<Callable>(callable)), args(std::move(args))
+			{
+			}
 		};
 
 		struct EventHeader
 		{
-			uint8 size;
-			void(*fnc)(void*);
+			uint8 size;			
+			void (*func)(void*);
+
+			EventHeader(uint8 size, void (*func)(void*))
+				: size(size), func(func)
+			{
+
+			}
 		};
 
-		template<typename T>
+		template<typename Callable, typename ... Args>
+		static void CallEventFromStack(void* ptr)
+		{
+			EventInfo<Callable, Args...>* eventInfo = (EventInfo<Callable, Args...>*)ptr;
+
+
+			std::apply(eventInfo->callable, eventInfo->args);			
+		}
+
+		template<typename Callable, typename ... Args>
 		struct EventInstance
 		{
 			EventHeader header;
-			EventInfo<T> info;
-		};
-		template<typename T>
-		static void CallEventFromStack(void* ptr)
-		{
-			EventInfo<T>* eventInfo = (EventInfo<T>*)ptr;
+			EventInfo<Callable, Args...> info;
 
-			eventInfo->dispatcher->Call(eventInfo->event);
-			eventInfo->event.~T();
-		}
+			EventInstance(Callable&& callable, std::tuple<Args...>&& args) :
+				header(sizeof(EventInstance<Callable, Args...>), CallEventFromStack<Callable, Args...>),
+				info(std::forward<Callable>(callable), std::move(args))
+			{			
+			}
+		};
 
 		std::mutex mutex;
 		uint8 stack[MaxStackSize];
@@ -62,7 +80,7 @@ namespace Blaze
 			while (ptr != end)
 			{
 				EventHeader* header = (EventHeader*)ptr;
-				header->fnc((char*)ptr + sizeof(EventHeader));
+				header->func((char*)ptr + sizeof(EventHeader));
 				ptr = (char*)ptr + header->size;
 			}
 
@@ -72,7 +90,6 @@ namespace Blaze
 				uint newStackSize = stackSize - oldStackSize;
 				memmove_s(stack, MaxStackSize, stack + oldStackSize, newStackSize);
 				stackSize = newStackSize;
-
 			}
 
 			cv.notify_all();
@@ -83,28 +100,21 @@ namespace Blaze
 			cv.wait(lk, [&]() { return stackSize == 0; });
 		}
 
-		template<typename T>
-		void Add(const T& event, EventDispatcher<T>* eventDispatcher)
+		template<typename ... Args, typename Callable> requires std::invocable<Callable, Args...>
+		void Add(StringView eventName, Callable&& callable, const Args& ... args)
 		{
-			constexpr uint size = sizeof(EventInstance<T>);
-
+			constexpr uint size = sizeof(EventInstance<Callable, Args...>);
+			
 			std::unique_lock<std::mutex> lk{ mutex };
 
 			if (!cv.wait_for(lk, std::chrono::seconds(1), [&]() { return MaxStackSize >= stackSize + size; }))
-			{
-				const char* str = typeid(T).name();
-				uintMem len = strlen(str);
-				Debug::Logger::LogWarning("Blaze Engine", "Input event stack overflow. The receiving thread didn't process any events for more than 1 second. Ignoring event of type \"" + String(str, len) + "\"");
+			{				
+				Debug::Logger::LogWarning("Blaze Engine", "Input event stack overflow. The receiving thread didn't process any events for more than 1 second. Ignoring event named \"" + eventName + "\"");
 				return;
 			}
 
-			EventInstance<T>* instance = (EventInstance<T>*)(stack + stackSize);
-			instance->header.size = sizeof(EventInstance<T>);
-			instance->header.fnc = CallEventFromStack<T>;
-			instance->info.dispatcher = eventDispatcher;
-			std::construct_at(&instance->info.event, event);
-
-			stackSize += size;
+			EventInstance<Callable, Args...>* instance = std::construct_at((EventInstance<Callable, Args...>*)(stack + stackSize), std::forward<Callable>(callable), std::tuple<Args...>(args...));
+			stackSize += instance->header.size;
 		}
 	};	
 }

@@ -1,19 +1,17 @@
 #include "pch.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLCommon.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
 	Shader::Shader(ShaderType type)
-		: id(-1), state(ShaderState::Invalid)
+		: id(0), state(ShaderState::Invalid)
 	{
-		id = glCreateShader((uint)type);
-		FlushOpenGLResult();
+		id = glCreateShader((uint)type);		
 	}
 	Shader::Shader(Shader&& s) noexcept
 		: id(s.id), state(s.state)
 	{
-		s.id = -1;
+		s.id = 0;
 		s.state = ShaderState::Invalid;
 	}
 	Shader::Shader(ShaderType type, const Path& path)
@@ -23,84 +21,63 @@ namespace Blaze::Graphics::OpenGLWrapper
 	}
 	Shader::~Shader()
 	{
-		if (id != -1)
-		{
+		if (id != 0)
 			glDeleteShader(id);
-			FlushOpenGLResult();
-		}
 	}
 
-	Result Shader::Load(const Path& path)
+	void Shader::Load(const Path& path)
 	{
 		File file;
 
-		CHECK_RESULT(file.Open(path, FileAccessPermission::Read));
+		if (file.Open(path, FileAccessPermission::Read))
+			return;
 		
 		String source;
 		source.Resize(file.GetSize());
 		size_t read = file.Read(source.Ptr(), source.Count());
 
-		CHECK_RESULT(ShaderSource(source));
-
-		CHECK_RESULT(CompileShader());
-
-		return Result();
+		ShaderSource(source);			
+		CompileShader();			
 	}
 
-	Result Shader::ShaderSource(StringView source)
+	void Shader::ShaderSource(StringView source)
 	{
 		const int length = (int)source.Count();
 		const char* ptr = source.Ptr();
-		glShaderSource(id, 1, &ptr, &length);
-		CHECK_OPENGL_RESULT();
-
-		return Result();
+		glShaderSource(id, 1, &ptr, &length);		
 	}
 
-	Result Shader::CompileShader()
+	void Shader::CompileShader()
 	{
-		glCompileShader(id);
-		CHECK_OPENGL_RESULT();
+		glCompileShader(id);		
 
-		int compileStatus;
-		glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);
-		CHECK_OPENGL_RESULT();
+		int compileStatus = 0;
+		glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);		
 
 		if (compileStatus == GL_FALSE)
-		{
 			state = ShaderState::UnsuccesfullyCompiled;
-		}
 		else
 			state = ShaderState::SuccesfullyCompiled;
-
-		return Result();
 	}
 
 	String Shader::GetCompilationLog()
 	{
-		int lenght;
+		int lenght = 0;
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
-		FlushOpenGLResult();
 
 		String message(lenght);
-		glGetShaderInfoLog(id, lenght, &lenght, message.Ptr());
-		FlushOpenGLResult();
+		glGetShaderInfoLog(id, lenght, &lenght, message.Ptr());		
 
 		return message;
 	}
 
 	Shader& Shader::operator=(Shader&& s) noexcept
 	{
-		if (id != -1)
-		{
+		if (id != 0)		
 			glDeleteShader(id);
 
-			if (FlushOpenGLResult())
-				return *this;
-		}
-
 		id = s.id;
-		s.id = -1;
+		s.id = 0;
 
 		state = s.state;
 		s.state = ShaderState::Invalid;

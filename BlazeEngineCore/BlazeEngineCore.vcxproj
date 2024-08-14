@@ -1,9 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -15,22 +23,31 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{d3af4e35-1d93-4a5f-b070-a0a6dd18a31b}</ProjectGuid>
     <RootNamespace>BlazeEngine</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>BlazeEngineCore</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,31 +56,39 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <TargetName>BlazeEngineCore-static-x64-$(Configuration)</TargetName>
+    <TargetName>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <TargetName>BlazeEngineCore-static-x64-$(Configuration)</TargetName>
+    <TargetName>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,16 +106,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,7 +127,24 @@
       </AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile />
+    <ClCompile />
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile />
+    <ClCompile />
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngineCore\BlazeEngineCoreContext.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\Buffer.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\Color.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\String.cpp" />
@@ -126,8 +162,7 @@
     <ClCompile Include="source\BlazeEngineCore\File\Stream\BufferStream.cpp" />
     <ClCompile Include="source\BlazeEngineCore\File\Stream\FileStream.cpp" />
     <ClCompile Include="source\BlazeEngineCore\File\Stream\SubStream.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\Internal\GlobalData.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\Internal\Windows\WindowsPlatform.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Internal\WindowsPlatform.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Math\Random.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Memory\Allocator.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Memory\MallocAllocator.cpp" />
@@ -136,7 +171,7 @@
     <ClCompile Include="source\BlazeEngineCore\Memory\VirtualAllocator.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\Stopwatch.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\StringParsing.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\Utilities\Thread.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Threading\Thread.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\Time.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\Timing.cpp" />
     <ClCompile Include="source\pch.cpp">
@@ -146,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BlazeEngineCore\BlazeEngineCore.h" />
+    <ClInclude Include="include\BlazeEngineCore\BlazeEngineCoreContext.h" />
     <ClInclude Include="include\BlazeEngineCore\BlazeEngineCoreDefines.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Array.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayImpl.h" />
@@ -190,7 +226,6 @@
     <ClInclude Include="include\BlazeEngineCore\Debug\Logger.h" />
     <ClInclude Include="include\BlazeEngineCore\Debug\LoggerListener.h" />
     <ClInclude Include="include\BlazeEngineCore\Debug\Result.h" />
-    <ClInclude Include="include\BlazeEngineCore\Debug\ResultValue.h" />
     <ClInclude Include="include\BlazeEngineCore\File\File.h" />
     <ClInclude Include="include\BlazeEngineCore\File\FileSystem.h" />
     <ClInclude Include="include\BlazeEngineCore\File\Path.h" />
@@ -205,40 +240,10 @@
     <ClInclude Include="include\BlazeEngineCore\Math\Shapes.h" />
     <ClInclude Include="include\BlazeEngineCore\Math\Vector.h" />
     <ClInclude Include="include\BlazeEngineCore\Memory\Allocator.h" />
-    <ClInclude Include="include\BlazeEngineCore\Memory\Creator.h" />
     <ClInclude Include="include\BlazeEngineCore\Memory\MallocAllocator.h" />
     <ClInclude Include="include\BlazeEngineCore\Memory\MemoryListener.h" />
     <ClInclude Include="include\BlazeEngineCore\Memory\MemoryManager.h" />
     <ClInclude Include="include\BlazeEngineCore\Memory\VirtualAllocator.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Graphics.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsCore.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsEnums.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsLibrary.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\GraphicsLibraryType.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLFence.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLFramebuffer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLGraphicsBuffer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLProgram.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLRenderbuffer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLShader.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\OpenGLVertexArray.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture1D.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture2D.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture2DArray.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTexture3D.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTextureBuffer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTextureCubemap.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\OpenGL\Textures\OpenGLTextureEnums.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Circle2DRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\FrameRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\ImageRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Line2DRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Line3DRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\Point2DRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Renderers\TextRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Transform.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Utility\BatchStreamRenderer.h" />
-    <ClInclude Include="include\BlazeEngineCore\old_Graphics\Utility\TextVertexGenerator.h" />
     <ClInclude Include="include\BlazeEngineCore\Threading\Thread.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\Stopwatch.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\StringParsing.h" />
@@ -386,8 +391,7 @@
     <ClInclude Include="source\BlazeEngineCore\Application\ECS\SystemCreationData.h" />
     <ClInclude Include="source\BlazeEngineCore\Application\UI\Components\UIElmenetCreationData.h" />
     <ClInclude Include="source\BlazeEngineCore\Input\ClientEventStack.h" />
-    <ClInclude Include="source\BlazeEngineCore\Internal\GlobalData.h" />
-    <ClInclude Include="source\BlazeEngineCore\Internal\Windows\WindowsPlatform.h" />
+    <ClInclude Include="source\BlazeEngineCore\Internal\WindowsPlatform.h" />
     <ClInclude Include="source\BlazeEngineCore\Resources\Bitmap\SailClasses.h" />
     <ClInclude Include="source\BlazeEngineCore\Resources\Font\rectpack2D.h" />
     <ClInclude Include="source\pch.h" />
@@ -436,6 +440,7 @@
   <ItemGroup>
     <Natvis Include="source\BlazeEngineMapDebugView.natvis" />
     <Natvis Include="source\BlazeEngineArrayDebugView.natvis" />
+    <Natvis Include="source\BlazeEngineSetDebugView.natvis" />
     <Natvis Include="source\BlazeEngineStringDebugView.natvis" />
     <Natvis Include="source\BlazeEngineStringUTF8DebugView.natvis" />
     <Natvis Include="source\BlazeEngineStringViewDebugView.natvis" />

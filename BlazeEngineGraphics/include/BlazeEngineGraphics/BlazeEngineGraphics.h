@@ -11,7 +11,16 @@
 #include "BlazeEngineGraphics/Core/OpenGL/RenderWindow_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/Semaphore_OpenGL.h"
 
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFramebuffer.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLRenderbuffer.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture1D.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 
 #include "BlazeEngineGraphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
@@ -29,6 +38,10 @@
 #include "BlazeEngineGraphics/Renderers/Vulkan/Line2DRenderer_Vulkan.h"
 #endif
 
+
+//-------------------UI--------------------
+
+
 #include "BlazeEngineGraphics/UI/Core/UINode.h"
 #include "BlazeEngineGraphics/UI/Core/UIScreen.h"
 #include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
@@ -38,15 +51,11 @@
 #include "BlazeEngineGraphics/UI/Input/UISelectEventHandler.h"
 #ifdef GRAPHICS_OPENGL
 #include "BlazeEngineGraphics/UI/Graphics/RenderPipelines/OpenGL/UIRenderPipeline_OpenGL.h"
-
-#include "BlazeEngineGraphics/UI/Graphics/RenderStreams/OpenGL/ImageRenderStream_OpenGL.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderStreams/OpenGL/PanelRenderStream_OpenGL.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderStreams/OpenGL/TextInputRenderStream_OpenGL.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderStreams/OpenGL/TextRenderStream_OpenGL.h"
 #endif
 
-#include "BlazeEngineGraphics/UI/Elements/UIImage.h"
-#include "BlazeEngineGraphics/UI/Elements/UIInputBox.h"
-#include "BlazeEngineGraphics/UI/Elements/UIPanel.h"
-#include "BlazeEngineGraphics/UI/Elements/UIText.h"
-#include "BlazeEngineGraphics/UI/Elements/UITextButton.h"
+#include "BlazeEngineGraphics/UI/Nodes/Panel.h"
+#include "BlazeEngineGraphics/UI/Nodes/Image.h"
+#include "BlazeEngineGraphics/UI/Nodes/Text.h"
+#include "BlazeEngineGraphics/UI/Nodes/TextButton.h"
+#include "BlazeEngineGraphics/UI/Nodes/EditableText.h"
+#include "BlazeEngineGraphics/UI/Nodes/SelectableText.h"

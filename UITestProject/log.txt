@@ -1,0 +1,2 @@
+[01/01/70 10:26:59] [INFO] [Blaze Engine Graphics] Successfully initialized glew 2.1.0
+[01/01/70 10:26:59] [INFO] [Blaze Engine Graphics] Created OpenGL context 4.6 core profile

@@ -7,158 +7,206 @@ namespace Blaze
 	class EventHandler;
 
 	template<typename T>
-	class BLAZE_API EventDispatcher
+	class EventDispatcher
 	{
-	public:
+	public:		
+		using EventType = T;
+		using HandlerType = EventHandler<T>;
+
 		EventDispatcher();
 		EventDispatcher(const EventDispatcher& other) = delete;
 		EventDispatcher(EventDispatcher&& other) noexcept;
 		~EventDispatcher();
 		
-		Result AddHandler(EventHandler<T>& handler);
-		Result RemoveHandler(EventHandler<T>& handler);
-		
-		virtual Result Call(T event); 				
+		void AddHandler(HandlerType& handler);
+		void RemoveHandler(HandlerType& handler);
+				
+		void Call(const T& event); 
 
 		EventDispatcher& operator=(const EventDispatcher& other) = delete;
 		EventDispatcher& operator=(EventDispatcher&& other) noexcept;
-	private:
-		struct HandlerCallData
-		{			
-			DualList<EventHandler<T>*>::Iterator handlerIt;
-			bool toBeDeleted;
+	private:				
+		struct Lock
+		{
+			std::atomic_flag flag;			
+
+			Lock()
+				: flag()
+			{
+			}
+
+			void lock()
+			{				
+				while (flag.test_and_set())
+					flag.wait(true);
+			}			
+			void unlock()
+			{
+				flag.clear();
+				flag.notify_all();
+			}
 		};
-		std::mutex mutex;
 		
-		DualList<HandlerCallData> callsData;
-		DualList<EventHandler<T>*> handlers;		
+		HandlerType* head;
+		Lock lock;
+		//4 bytes unused for padding
 
-		void EraseHandlerFromCallData(EventHandler<T>* it);
-	};
-
-	class BLAZE_API std::mutex;
-
+		template<typename T>
+		friend class EventHandler;
+	};	
 	template<typename T>
 	inline EventDispatcher<T>::EventDispatcher()
-	{
-
+		: head(nullptr)
+	{		
 	}
 	template<typename T>
-	inline EventDispatcher<T>::EventDispatcher(EventDispatcher<T>&& other) noexcept		
-		: callsData(std::move(other.callsData)), handlers(std::move(other.handlers))
-	{						
-		for (EventHandler<T>*& handler : handlers)					
-			handler->dispatcher = this;		
+	inline EventDispatcher<T>::EventDispatcher(EventDispatcher<T>&& other) noexcept				
+		: head(nullptr)
+	{
+		std::lock_guard<Lock> lk{ other.lock };
+
+		HandlerType* it = head;
+
+		while (it != nullptr)
+		{
+			std::lock_guard<std::recursive_mutex> handlerLk{ it->mutex };
+
+			it->dispatcher = this;
+
+			it = it->next;
+		}
+
+		other.head = nullptr;
 	}
 	template<typename T>
 	inline EventDispatcher<T>::~EventDispatcher()
 	{
-		for (auto& handler : handlers)
+		std::lock_guard<Lock> lk{ lock };
+
+		auto it = head;		
+		
+		while (it != nullptr)
 		{
-			handler->DispatcherDestroyed();
-			handler->dispatcher = nullptr;
+			std::lock_guard<std::recursive_mutex> handlerLk{ it->mutex };
+
+			it->dispatcher = nullptr;	
+			it->next = nullptr;
+			it->Unsubscribed();
+
+			it = it->next;
 		}
+
+		head = nullptr;
 	}
-
 	template<typename T>
-	inline Result EventDispatcher<T>::AddHandler(EventHandler<T>& handler)
-	{
-		std::lock_guard<std::mutex> lk { mutex };
+	inline void EventDispatcher<T>::AddHandler(HandlerType& handler)
+	{			
+		std::unique_lock<std::recursive_mutex> handlerLk{ handler.mutex };
 
-		if (handler.dispatcher != this && handler.dispatcher != nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to add a evnet handler to a dispatcher but it is already subscribed to a dispatcher");
+		if (handler.dispatcher == this)
+			return;
+		
+		if (handler.dispatcher != nullptr)
+		{
+			handlerLk.unlock();
+			handler.dispatcher->RemoveHandler(handler);
+			handlerLk.lock();
+		}
 
 		handler.dispatcher = this;		
-		handlers.AddBack(&handler);		
 
-		return Result();
+		std::lock_guard<Lock> lk{ lock };		
+		handler.next = head;
+		head = &handler;
 	}
-
 	template<typename T>
-	inline Result EventDispatcher<T>::RemoveHandler(EventHandler<T>& handler)
+	inline void EventDispatcher<T>::RemoveHandler(HandlerType& handler)
 	{
-		std::lock_guard<std::mutex> lk { mutex };
-		
-		handler.dispatcher = nullptr;
+		{
+			std::lock_guard<std::recursive_mutex> handlerLk{ handler.mutex };
+			if (handler.dispatcher != this)
+				Debug::Logger::LogError("Blaze Engine", "Cannot remove handler from a dispatcher that it isn't subscribed to");
+		}
+		{
+			HandlerType* it;
+			{
+				std::lock_guard<Lock> lk{ lock };
 
-		for (HandlerCallData& callData : callsData)
-			if (*callData.handlerIt == &handler)
+				if (head == nullptr)
+					Debug::Logger::LogFatal("Blaze Engine", "Implementation error");
+
+				it = head;
+
+				if (it == &handler)
+					head = head->next;
+			}
+			
+			std::unique_lock<std::recursive_mutex> handlerLk{ it->mutex };
+			if (it != &handler)
 			{				
-				callData.toBeDeleted = true;
-				return Result();
+				while (it->next != &handler && it->next != nullptr)
+				{
+					it = it->next;					
+					handlerLk = std::unique_lock<std::recursive_mutex>{ it->mutex };
+				}
+
+				if (it->next == nullptr)
+					Debug::Logger::LogFatal("Blaze Engine", "Implementation error");
+
+				it->next = it->next->next;
+
+				handlerLk = std::unique_lock<std::recursive_mutex>{ handler.mutex };
 			}
 
-		handlers.EraseOne([&](auto value) -> bool {
-			if (value == &handler)
-			{
-				EraseHandlerFromCallData(value);
-				return true;
-			}
-			return false;
-			});
-
-		return Result();
-	}
-
-	template<typename T>
-	inline Result EventDispatcher<T>::Call(T event)
-	{						
-		std::unique_lock<std::mutex> lk{ mutex };
-		
-		auto callDataIt = callsData.AddBack();
-		HandlerCallData& callData = *callDataIt;
-		callData.handlerIt = handlers.FirstIterator();
-		callData.toBeDeleted = false;
-
-		while(!callData.handlerIt.IsNull())
-		{						
-			EventHandler<T>& handler = **callData.handlerIt;			
-
-			if (handler.listening)
-			{
-				lk.unlock();
-				handler.OnEvent(event);
-				lk.lock();
-			}			
-
-			if (callData.toBeDeleted)
-			{				
-				auto it = callData.handlerIt;
-				EraseHandlerFromCallData(*callData.handlerIt);				
-				handlers.Erase(it);
-				callData.toBeDeleted = false;
-			}				
-								
-			if (handler.suppress || callData.handlerIt.IsNull())
-				break;
-
-			++callData.handlerIt;			
+			handler.dispatcher = nullptr;
+			handler.next = nullptr;
 		}
 
-		callsData.Erase(callDataIt);
+		handler.Unsubscribed();
+	}
+	template<typename T>
+	inline void EventDispatcher<T>::Call(const T& event)
+	{					
+		HandlerType* it = nullptr;
 
-		return Result();
+		std::unique_lock<std::recursive_mutex> handlerLk;
+		{
+			std::lock_guard<Lock> lk{ lock };
+			if (head == nullptr)
+				return;
+
+			it = head;
+		
+			handlerLk = std::unique_lock<std::recursive_mutex>{ it->mutex };
+		}
+		while (true)
+		{
+			HandlerType* next = it->next;
+
+			it->OnEvent(event);							
+
+			if (next == nullptr)
+				break;
+
+			it = next;
+
+			handlerLk = std::unique_lock<std::recursive_mutex>{ it->mutex };
+		}
 	}	
-
 	template<typename T>
 	inline EventDispatcher<T>& EventDispatcher<T>::operator=(EventDispatcher&& other) noexcept
 	{
-		std::unique_lock<std::mutex> lk{ mutex };
+		head = other.head;
 
-		handlers = std::move(other.handlers);
-		callsData = std::move(other.callsData);
+		HandlerType* it = head;
+		while (it != nullptr)
+		{
+			it->dispatcher = this;			
 
-		for (EventHandler<T>*& handler : handlers)		
-			handler->dispatcher = this;
-		
+			it = it->next;
+		} 
+
+		other.head = nullptr;
 		return *this;
-	}
-
-	template<typename T>
-	inline void EventDispatcher<T>::EraseHandlerFromCallData(EventHandler<T>* handler)
-	{		
-		for (HandlerCallData& callData : callsData)
-			if (*callData.handlerIt == handler)
-				--callData.handlerIt;
-	}
+	}		
 }

@@ -31,7 +31,7 @@ namespace Blaze
 	}
 	Result BufferStreamBase::Clear()
 	{
-		free(this->buffer);
+		this->buffer = nullptr;
 		this->size = 0;
 		this->position = 0;
 
@@ -54,6 +54,15 @@ namespace Blaze
 			return false;
 
 		position = offset;
+
+		return true;
+	}
+	bool BufferStreamBase::SetPositionFromEnd(intMem offset)
+	{
+		if (offset < 0 || offset >= (intMem)size)
+			return false;
+
+		position = size - offset;
 
 		return true;
 	}

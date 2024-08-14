@@ -15,14 +15,14 @@ namespace Blaze::Debug
 	{		
 	}
 	Log::Log(LogType type, StringUTF8 source, StringUTF8 message) :
-		threadID(GetThisThreadID()), time(TimePoint::GetWorldTime()), callstack(),
+		threadID(GetThisThreadID()), time(TimePoint::GetCurrentWorldTime()), callstack(),
 		type(type),	source(std::move(source)), message(std::move(message))
 	{
 	}
 
 	StringUTF8 Log::ToString() const
 	{
-		StringUTF8 timeStr = (StringUTF8)TimePoint::GetWorldTime().FormatString("%D %T");
+		StringUTF8 timeStr = (StringUTF8)TimePoint::GetCurrentWorldTime().FormatString("%D %T");
 		StringUTF8 typeStr;
 
 		switch (type)

@@ -13,14 +13,13 @@ namespace Blaze
 	{
 		Array<CharacterLayoutData> characters;
 		float width;
-	};
+	};	
 
-	class TextLayouterBase
+	class BLAZE_API TextLayouterBase
 	{
 	public:
 		virtual ~TextLayouterBase() { }
-
-		//The data returned contains exact number of elements as the string passed to SetText
+		
 		inline ArrayView<TextLineLayoutData> GetLines() const { return lines; }
 
 		virtual void SetText(StringViewUTF8 text, const FontMetrics& fontMetrics) = 0;
@@ -46,7 +45,7 @@ namespace Blaze
 		MultiLineTextLayouter(StringViewUTF8 text, const FontMetrics& fontMetrics);
 
 		void SetText(StringViewUTF8 text, const FontMetrics& fontMetrics) override;
-	};
+	};	
 
 	class BLAZE_API WrappedLineTextLayouter : public TextLayouterBase
 	{

@@ -29,9 +29,9 @@ RenderSystem_OpenGL::RenderSystem_OpenGL(Resource::ResourceManager& resourceMana
 	windowResizedEventHandler.SetFunction([&](Input::Events::WindowResizedEvent event) {
 		Blaze::Graphics::OpenGLWrapper::SetRenderArea({ }, rw.GetSize());
 		});
+	rw.GetWindow().resizedEventDispatcher.Call({ .window = &rw.GetWindow(), .size = rw.GetSize() });
 
-	Graphics::OpenGLWrapper::EnableBlending(true);
-//	Graphics::OpenGLWrapper::
+	Graphics::OpenGLWrapper::EnableBlending(true);	
 }
 
 void RenderSystem_OpenGL::SetScreen(UI::Screen* screen)

@@ -60,6 +60,7 @@ namespace Blaze
 		constexpr StringViewUTF8(const char(&arr)[C]);
 
 		constexpr void Clear();
+		StringUTF8 SubString(uintMem start, uintMem count) const;
 
 		constexpr bool Empty() const;
 		inline uint32 Hash() const;

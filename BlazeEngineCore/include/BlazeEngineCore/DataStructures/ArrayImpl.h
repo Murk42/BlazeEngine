@@ -108,6 +108,11 @@ namespace Blaze
 		return ArrayIterator(ptr - offset);
 	}
 	template<typename Array>
+	inline uintMem ArrayIterator<Array>::operator-(const ArrayIterator<Array>& other) const
+	{
+		return ptr - other.ptr;
+	}
+	template<typename Array>
 	inline ArrayIterator<Array>& ArrayIterator<Array>::operator+=(int offset)
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
@@ -244,7 +249,7 @@ namespace Blaze
 		ptr = (T*)allocator.Allocate(sizeof(T) * count);
 		
 		for (uintMem i = 0; i < count; ++i)
-			std::construct_at(ptr + i, std::forward<Args>(args)...);				
+			std::construct_at(ptr + i, args...);				
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename F> requires std::invocable<F, T*, uintMem>

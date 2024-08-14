@@ -28,29 +28,25 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -59,122 +55,64 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeProjectDefaultProperties.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngine-static-x64-debug</TargetName>
+    <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngine-static-x64-release</TargetName>
+    <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngine-static-x64-$(Configuration)</TargetName>
+    <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)\build\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)\temp\$(Configuration)\</IntDir>
-    <TargetName>BlazeEngine-static-x64-$(Configuration)</TargetName>
+    <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
-    </PostBuildEvent>
-    <Lib>
-      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
-    </PostBuildEvent>
-    <Lib>
-      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\Release\lib\</AdditionalLibraryDirectories>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
+</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>SDL2d.lib;freetyped.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\;$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)external\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -183,12 +121,66 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"</Command>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
+</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
+</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>SDL2d.lib;freetyped.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
+</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\BlazeEngine\Application\ECS\Component.h" />
@@ -205,7 +197,7 @@
     <ClInclude Include="include\BlazeEngine\BlazeEngine.h" />
     <ClInclude Include="include\BlazeEngine\BlazeEngineDefines.h" />
     <ClInclude Include="include\BlazeEngine\Console\Console.h" />
-    <ClInclude Include="include\BlazeEngine\EntryPoint\EntryPoint.h" />
+    <ClInclude Include="include\BlazeEngine\Console\ConsoleOutputStream.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Font\TextLayouter.h" />
@@ -221,6 +213,7 @@
     <ClInclude Include="include\BlazeEngine\Input\Key.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\EntityCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\SystemCreationData.h" />
+    <ClInclude Include="source\BlazeEngine\Files\Consola.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Conversions.h" />
     <ClInclude Include="source\BlazeEngine\Internal\GlobalData.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\FreeType.h" />
@@ -242,7 +235,9 @@
     <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceManager.cpp" />
     <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceStorage.cpp" />
     <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceTypeRegistry.cpp" />
+    <ClCompile Include="source\BlazeEngine\Console\ConsoleOutputStream.cpp" />
     <ClCompile Include="source\BlazeEngine\EntryPoint\EntryPoint.cpp" />
+    <ClCompile Include="source\BlazeEngine\Files\Consola.cpp" />
     <ClCompile Include="source\BlazeEngine\Input\Input.cpp" />
     <ClCompile Include="source\BlazeEngine\Input\Key.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Conversions.cpp" />
@@ -264,6 +259,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="source\BlazeEngine\Files\Consola.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

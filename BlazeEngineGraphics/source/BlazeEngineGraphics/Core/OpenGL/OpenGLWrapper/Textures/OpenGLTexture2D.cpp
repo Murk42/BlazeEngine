@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
@@ -43,15 +43,10 @@ namespace Blaze::Graphics::OpenGLWrapper
 	Texture2D::Texture2D()
 		: id(0), size(0)
 	{				
-		glGenTextures(1, &id);
-		
-		if (id == 0)
-		{
-			Debug::Logger::LogError("Blaze Engine Graphics", "Failed to create texture object");
+		glGenTextures(1, &id);		
 
-			if (glGetError() != GL_NO_ERROR)
-				Debug::Logger::LogError("Blaze Engine Graphics", "OpenGL threw an error: \"" + GetGLError() + "\"");
-		}
+		//It is important to bind the texture to set it up as a GL_TEXTURE_2D, otherwise glTextureStorage2D wont work
+		glBindTexture(GL_TEXTURE_2D, id);
 	}
 	Texture2D::Texture2D(Texture2D&& tex) noexcept
 		: id(tex.id), size(tex.size)
@@ -65,34 +60,6 @@ namespace Blaze::Graphics::OpenGLWrapper
 			glDeleteTextures(1, &id);
 	}
 
-	Result Texture2D::SetSettings(Texture2DSettings settings)
-	{		
-
-		Result result;
-
-		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.mipmaps, result);		
-		CHECK_RESULT(result);		
-		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);		
-		CHECK_RESULT(result);
-		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
-		CHECK_RESULT(result);
-		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
-		CHECK_RESULT(result);
-		
-		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
-		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);
-		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
-		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);		
-		glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
-
-		SelectTexture(this);
-		if (settings.mipmaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
-
-		return result;
-	}		
 	void Texture2D::SetSwizzle(TextureSwizzle red, TextureSwizzle green, TextureSwizzle blue, TextureSwizzle alpha)
 	{		
 		auto set = [&](GLenum channel, TextureSwizzle value)
@@ -114,76 +81,52 @@ namespace Blaze::Graphics::OpenGLWrapper
 		set(GL_TEXTURE_SWIZZLE_A, alpha);
 	}
 
-	Result Texture2D::Create(Vec2u size, TextureInternalPixelFormat internalFormat)
+	void Texture2D::Create(Vec2u size, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings)
 	{
 		Result result;
 
 		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
-		auto format = OpenGLFormatByInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
+		if (result) return;		
 
-		this->size = size;		
-		SelectTexture(this);				
-		glTexImage2D(GL_TEXTURE_2D, 0, internalPixelFormat, size.x, size.y, 0, format, GL_UNSIGNED_BYTE, nullptr);
-		glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
+		this->size = size;				
+				
+		glTextureStorage2D(id, settings.textureLevelCount, internalPixelFormat, size.x, size.y);		
 
-		return Result();
+		SetSettings(settings);
 	}
-	Result Texture2D::Create(BitmapView bm)
+	void Texture2D::Create(BitmapView bm, const Texture2DSettings& settings)
 	{	
 		Result result;
 		auto internalFormat = MapInternalTexturePixelFormat(bm.GetPixelFormat(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 
-		Create(bm, internalFormat);		
+		Create(bm.GetSize(), internalFormat, settings);
 
-		return result;
+		SetPixels(Vec2u(), bm, 0);
 	}
-	Result Texture2D::Create(BitmapView sourceBitmap, TextureInternalPixelFormat internalFormat)
-	{		
-		Bitmap bitmap{ sourceBitmap, sourceBitmap.GetByteWidth() };
-
-		Result result;
-		size = bitmap.GetSize();
-
-		GLenum format = OpenGLPixelFormat(bitmap.GetPixelFormat(), result);
-		CHECK_RESULT(result);
-		GLenum type = OpenGLPixelType(bitmap.GetPixelType(), result);
-		CHECK_RESULT(result);
-		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
-		CHECK_RESULT(result);
-		
-		SelectTexture(this);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glTexImage2D(GL_TEXTURE_2D, 0, internalPixelFormat, size.x, size.y, 0, format, type, bitmap.GetPixels());
-		glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
-
-		SetSettings({ });
-
-		return result;
+	void Texture2D::Create(BitmapView bm, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings)
+	{				
+		Create(bm.GetSize(), internalFormat, settings);
+		SetPixels(Vec2u(), bm, 0);
 	}
 	 
-	Result Texture2D::Load(Path path) 
+	void Texture2D::Load(Path path, const Texture2DSettings& settings)
 	{				
 		Bitmap bm;
 		
 		if (Result r = bm.Load(path, true))
-			return r + BLAZE_ERROR_RESULT("", "");
+			return;
 
-		Create(bm);		
-
-		return Result();
+		Create(bm, settings);		
 	}
-	Result Texture2D::Load(Path path, TextureInternalPixelFormat internalFormat)
+	void Texture2D::Load(Path path, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings)
 	{
 		Bitmap bm;
-		CHECK_RESULT(bm.Load(path, true));
-		
-		CHECK_RESULT(Create(bm, internalFormat));
 
-		return Result();
+		if (Result r = bm.Load(path, true))
+			return;
+
+		Create(bm, internalFormat, settings);
 	}
 
 	Bitmap Texture2D::GetBitmap(BitmapColorFormat colorFormat, BitmapColorComponentType componentType) const
@@ -200,44 +143,55 @@ namespace Blaze::Graphics::OpenGLWrapper
 		GLenum _type = OpenGLPixelType(componentType, result);		
 		if (result) return Bitmap();
 
-		glGetTextureImage(id, 0, _format, _type, bm.GetPixelSize() * size.x * size.y, bm.GetPixels());		
+		glGetTextureImage(id, 0, _format, _type, static_cast<GLsizei>(bm.GetPixelSize() * size.x * size.y), bm.GetPixels());		
 
 		return bm; 
 	}
 
-	Result Texture2D::CopyPixels(Vec2u offset, BitmapView bm)
+	void Texture2D::SetPixels(Vec2u offset, BitmapView bm, uint textureLevel)
 	{		
-		SelectTexture(this);
-
 		Result result;
 		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
-		CHECK_RESULT(result);
+		if (result) return;
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, bm.GetSize().x, bm.GetSize().y, format, type, bm.GetPixels());
-		glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
-
-		return result;
+		glTextureSubImage2D(id, textureLevel, offset.x, offset.y, bm.GetSize().x, bm.GetSize().y, format, type, bm.GetPixels());		
 	}	
 
-	void Texture2D::GenerateMipmaps()
+	void Texture2D::AutoGenerateMipmaps()
 	{
-		glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
-		SelectTexture(this);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
+		glGenerateTextureMipmap(id);
 	}	
 
 	Texture2D& Texture2D::operator=(Texture2D&& tex) noexcept
 	{
-		if (id != -1)
+		if (id != 0)
 			glDeleteTextures(1, &id);
 		id = tex.id;
-		tex.id = -1;
+		tex.id = 0;
 		size = tex.size;
 		return *this;
 	}
+	
+	void Texture2D::SetSettings(const Texture2DSettings& settings)
+	{		
+		Result result;
+
+		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.textureLevelCount > 1, result);		
+		if (result) return;		
+		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);		
+		if (result) return;
+		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
+		if (result) return;
+		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
+		if (result) return;
+		
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, _mag);						
+	}	
 }

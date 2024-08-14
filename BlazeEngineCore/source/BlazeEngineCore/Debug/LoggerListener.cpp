@@ -8,17 +8,17 @@ namespace Blaze::Debug
 		void AddLoggerListener(LoggerListener* listener);
 		void RemoveLoggerListener(LoggerListener* listener);
 	}
-	
-	LoggerListener::LoggerListener(bool supress, bool startListening)
-		: supress(supress), listening(false)
+
+	LoggerListener::LoggerListener(bool suppress, bool startListening)
+		: suppress(suppress), listening(false)
 	{
 		if (startListening)
-			StartListening(); 
+			StartListening();
 	}
 	LoggerListener::~LoggerListener()
 	{
 		if (listening)
-			StopListening();			
+			StopListening();
 	}
 
 	void LoggerListener::StartListening()
@@ -33,5 +33,5 @@ namespace Blaze::Debug
 		if (listening)
 			Logger::RemoveLoggerListener(this);
 		listening = false;
-	}		
+	}
 }

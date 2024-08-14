@@ -16,12 +16,14 @@ namespace Blaze
 		void SetFunction(const std::function<void(T)>& function);
 		void SetFunction(std::function<void(T)>&& function);
 
+		void OnEvent(T event);
+
+		inline const std::function<void(T)>& GetFunction();
+
 		LambdaEventHandler& operator=(const std::function<void(T)>& function);
 		LambdaEventHandler& operator=(std::function<void(T)>&& function);
 	private:
 		std::function<void(T)> function;
-
-		void OnEvent(T event);
 	};
 	template<typename T>
 	inline LambdaEventHandler<T>::LambdaEventHandler()

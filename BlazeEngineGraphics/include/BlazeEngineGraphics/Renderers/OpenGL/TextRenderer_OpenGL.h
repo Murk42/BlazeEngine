@@ -1,5 +1,9 @@
 #pragma once
-#include "BlazeEngineGraphics/BlazeEngineGraphics.h"
+#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -58,6 +62,7 @@ namespace Blaze::Graphics::OpenGL
 		using Vertex = TextRenderCache_OpenGL::Vertex;
 		using Instance = TextRenderCache_OpenGL::Instance;
 
+		GraphicsContext_OpenGL& graphicsContext;
 		Blaze::Graphics::OpenGLWrapper::ShaderProgram program;
 		Blaze::Graphics::OpenGLWrapper::ImmutableStaticGraphicsBuffer vertexBuffer;
 		Blaze::Graphics::OpenGLWrapper::ImmutableMappedGraphicsBuffer instanceBuffer;

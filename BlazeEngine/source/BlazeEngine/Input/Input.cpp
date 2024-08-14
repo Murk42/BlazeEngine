@@ -3,11 +3,13 @@
 #include "BlazeEngine/Internal/GlobalData.h"
 #include "BlazeEngine/Window/WindowSDL.h"
 #include "SDL2/SDL_events.h"
+#include "SDL2/SDL_clipboard.h"
 
 namespace Blaze
 {
 	namespace Input
 	{
+		void WindowResizedEventFunction(SDL_Event* event);
 		int SDLEventWatcher(void* data, SDL_Event* event);
 	}
 
@@ -15,44 +17,55 @@ namespace Blaze
 	{
 		Timing timing{ "Input" };
 
-		SDL_AddEventWatch(Input::SDLEventWatcher, nullptr);		
+		SDL_AddEventWatch(Input::SDLEventWatcher, nullptr);	
+
+		SDL_DisplayMode displayMode;
+		SDL_GetDesktopDisplayMode(0, &displayMode);
+		blazeEngineContext.desktopHeight = displayMode.h;
 
 		return timing.GetTimingResult();
 	}
 	void TerminateInput()
 	{
-		for (auto& cursor : globalData->cursors)
+		SDL_DelEventWatch(Input::SDLEventWatcher, nullptr);
+
+		for (auto& cursor : blazeEngineContext.cursors)
 			if (cursor != nullptr)
 				SDL_FreeCursor(cursor);
 	}
 
 	namespace Input
-	{											
+	{
 		InputEventSystem& GetInputEventSystem()
 		{
-			return globalData->inputEventSystem;
+			return blazeEngineContext.inputEventSystem;
+		}
+		void Update()
+		{						
+			blazeEngineContext.inputEventSystem.inputPreUpdateDispatcher.Call({ });
+
+			{
+				std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
+				for (auto window : blazeEngineContext.windows)
+					window->ResetPressedAndReleasedKeys();
+			}
+
+			SDL_GetGlobalMouseState(&blazeEngineContext.desktopMousePos.x, &blazeEngineContext.desktopMousePos.y);
+			blazeEngineContext.desktopMousePos.y = blazeEngineContext.desktopHeight - blazeEngineContext.desktopMousePos.y - 1;
+
+			blazeEngineContext.eventStack.ProcessAndClear();
+
+			blazeEngineContext.inputEventSystem.inputPostUpdateDispatcher.Call({ });
 		}
 
-		void Update()
-		{			
-			globalData->inputEventSystem.inputPreUpdateDispatcher.Call({ });
-
-			globalData->inputEventStack.ProcessAndClear();
-
-			globalData->inputEventSystem.inputPostUpdateDispatcher.Call({ });
-		}				
-		KeyState GetLastKeyState(Key key)
+		Vec2i GetDesktopMousePos()
 		{
-			if ((uint)key > _countof(globalData->keyStates))
-				return { };
-
-			std::lock_guard<std::mutex> lk{ globalData->keyStatesMutex };
-			return globalData->keyStates[(uint)key];
+			return blazeEngineContext.desktopMousePos;
 		}
 
 		void SetCursorType(CursorType type)
 		{
-			auto& cursor = globalData->cursors[(uint)type];
+			auto& cursor = blazeEngineContext.cursors[(uint)type];
 			
 			if (cursor == nullptr)
 				cursor = SDL_CreateSystemCursor((SDL_SystemCursor)type);
@@ -60,87 +73,52 @@ namespace Blaze
 			SDL_SetCursor(cursor);			
 		}
 
+		bool HasClipboardText()
+		{			
+			return SDL_HasClipboardText();			
+		}
+
+		StringUTF8 GetClipboardText()
+		{
+			char* text = SDL_GetClipboardText();
+			uintMem bufferSize = strlen(text);
+
+			StringUTF8 out{ (void*)text, bufferSize };
+
+			SDL_free(text);
+			return out;
+		}
+
+		void SetClipboardText(StringViewUTF8 text)
+		{
+			SDL_SetClipboardText((char*)text.Buffer());
+		}
+
 		WindowSDL* GetWindowFromSDLHandle(SDL_Window* window)
 		{
 			return (WindowSDL*)SDL_GetWindowData(window, "Blaze");
-		}
+		}		
 
-		void KeyPressedEvent(Key key, WindowSDL* window)
+		template<typename T>
+		inline void AddEventToInputEventStack(T&& event, EventDispatcher<T>* dispatcher, WindowSDL* window)
 		{
-			if ((uint)key > _countof(globalData->keyStates))
-				return;
-
-			Events::KeyPressed _event;
-
-			{
-				std::lock_guard<std::mutex> lk{ globalData->keyStatesMutex };
-				auto& state = globalData->keyStates[(uint)key];
-
-				double time = TimePoint::GetRunTime();
-
-				if (state.down)				
-					state.pressed = false;
-				else
-				{
-					state.pressed = true;
-					state.down = true;
-					state.up = false;
-					state.released = false;					
-				}
-
-				if (time - state.time <= globalData->keyComboTime)
-					++state.combo;
-				else
-					state.combo = 1;
-
-				state.time = time;
-
-				_event.key = key;
-				_event.combo = state.combo;
-				_event.time = time;
-			}
-
-			if (window != nullptr)
-				globalData->inputEventStack.Add(_event, &window->keyPressedDispatcher);
-		}
-		void KeyReleasedEvent(Key key, WindowSDL* window)
-		{
-			if ((uint)key > _countof(globalData->keyStates))
-				return;
-
-			Events::KeyReleased _event;
-
-			{
-				std::lock_guard<std::mutex> lk{ globalData->keyStatesMutex };
-				auto& state = globalData->keyStates[(uint)key];				
-				
-				if (state.up)
-				{
-					state.released = false;					
-				}
-				else
-				{
-					state.pressed = false;
-					state.down = false;
-					state.up = true;
-					state.released = true;					
-				}				
-
-				_event.key = key;				
-				_event.time = state.time;
-			}
-
-			if (window != nullptr)
-				globalData->inputEventStack.Add(_event, &window->keyReleasedDispatcher);
-		}
+			const char* name = typeid(T).name();
+			uintMem length = strlen(name);
+			blazeEngineContext.eventStack.Add<T>(StringView(name, length), [dispatcher](T event) {
+				dispatcher->Call(event);
+				}, std::forward<T>(event));
+		}				
 
 		int SDLEventWatcher(void* data, SDL_Event* event)
-		{
-			if (event->type == globalData->mainThreadTaskEventIdentifier)
-				return 0;
-			if (event->type == globalData->clientThreadExitEventIdentifier)
+		{			
+			if (event->type == blazeEngineContext.mainThreadTaskEventIdentifier)
 			{
-				globalData->clientThreadExited.test_and_set();
+				//We return here because the SDLEventWatcher can be run on a another thread and the task needs to be finished on the main thread
+				return 0;
+			}
+			if (event->type == blazeEngineContext.clientThreadExitEventIdentifier)
+			{
+				blazeEngineContext.clientThreadExited.test_and_set();
 				return 0;
 			}
 
@@ -153,50 +131,86 @@ namespace Blaze
 				WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 
 				if (window != nullptr)
-					globalData->inputEventStack.Add(_event, &window->mouseScrollDispatcher);
+					AddEventToInputEventStack(std::move(_event), &window->mouseScrollDispatcher, window);
 
 				break;
 			}
 			case SDL_MOUSEMOTION: {
 				Events::MouseMotion  _event;
 				_event.delta = { event->motion.xrel, -event->motion.yrel };
-
+				
 				WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 
 				if (window != nullptr)
-					globalData->inputEventStack.Add(_event, &window->mouseMotionDispatcher);
+					AddEventToInputEventStack(std::move(_event), &window->mouseMotionDispatcher, window);
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN: {				
-				Key key = (Key)(event->button.button - 1 + (uint8)Key::MouseLeft);
+				WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 
-				KeyPressedEvent(key, GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID)));
+				if (window != nullptr)
+				{
+					Events::KeyPressed _event;
+					_event.key = (Key)(event->button.button - 1 + (uint8)Key::MouseLeft);
+					_event.time = TimePoint::GetCurrentWorldTime();
+					_event.window = window;
+
+					blazeEngineContext.HandleWindowKeyEvent(_event);
+				}
 
 				break;
 			}
 			case SDL_MOUSEBUTTONUP: {
-				Key key = (Key)(event->button.button - 1 + (uint8)Key::MouseLeft);
+				WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 
-				KeyReleasedEvent(key, GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID)));
+				if (window != nullptr)
+				{
+					Events::KeyReleased _event;
+					_event.key = (Key)(event->button.button - 1 + (uint8)Key::MouseLeft);
+					_event.time = TimePoint::GetCurrentWorldTime();
+					_event.window = window;
+
+					blazeEngineContext.HandleWindowKeyEvent(_event);
+				}
 
 				break;
 			}
 			case SDL_KEYDOWN: {
-				auto it = globalData->keymap.Find(event->key.keysym.scancode);
+				auto it = blazeEngineContext.keymap.Find(event->key.keysym.scancode);
 
 				if (it.IsNull())
 					break;
 
-				KeyPressedEvent(it->value, GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID)));								
+				WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
+
+				if (window != nullptr)
+				{
+					Events::KeyPressed _event;
+					_event.key = it->value;
+					_event.time = TimePoint::GetCurrentWorldTime();
+					_event.window = window;
+
+					blazeEngineContext.HandleWindowKeyEvent(_event);
+				}
 				break;
 			}
 			case SDL_KEYUP: {
-				auto it = globalData->keymap.Find(event->key.keysym.scancode);
+				auto it = blazeEngineContext.keymap.Find(event->key.keysym.scancode);
 
 				if (it.IsNull())
 					break;
 
-				KeyReleasedEvent(it->value, GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID)));				
+				WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
+
+				if (window != nullptr)
+				{
+					Events::KeyReleased _event;
+					_event.key = it->value;
+					_event.time = TimePoint::GetCurrentWorldTime();
+					_event.window = window;
+
+					blazeEngineContext.HandleWindowKeyEvent(_event);
+				}				
 				break;
 			}
 			case SDL_TEXTINPUT: {
@@ -206,7 +220,7 @@ namespace Blaze
 				WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 
 				if (window != nullptr)
-					globalData->inputEventStack.Add(_event, &window->textInputDispatcher);
+					AddEventToInputEventStack(std::move(_event), &window->textInputDispatcher, window);
 				break;
 			}
 			case SDL_WINDOWEVENT: {
@@ -216,59 +230,41 @@ namespace Blaze
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
 					_event.pos = Vec2i(event->window.data1, event->window.data2);
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowMovedDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowMovedDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->movedEventDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->movedEventDispatcher, window);
 					break;
 				}
 				case SDL_WINDOWEVENT_MINIMIZED: {
 					Events::WindowMinimizedEvent _event;
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowMinimizedDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowMinimizedDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->minimizedEventDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->minimizedEventDispatcher, window);
 					break;
 				}
 				case SDL_WINDOWEVENT_MAXIMIZED: {
 					Events::WindowMaximizedEvent _event;
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowMaximizedDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowMaximizedDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->maximizedEventDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->maximizedEventDispatcher, window);
 					break;
 				}											  
-				case SDL_WINDOWEVENT_RESIZED: {
-					globalData->windowSwappingSkipFlag.test_and_set();
-					
-					Input::Events::WindowResizedEvent _event;
-
+				case SDL_WINDOWEVENT_RESIZED: {					
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
-					_event.window = window;
-					_event.size = Vec2u(event->window.data1, event->window.data2);
 
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowResizedDispatcher);
-
+					Events::WindowResizedEvent _event = {
+						.window = window,
+						.size = Vec2u(event->window.data1, event->window.data2)
+					};
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &window->resizedEventDispatcher);
-
-					globalData->inputEventStack.WaitUntilEmpty();
-
-					globalData->windowSwappingSkipFlag.clear();
-
-					//if (globalData->windowSwappingWaitingMutex.try_lock())
-					//	globalData->windowSwappingWaitingMutex.unlock();
-					//else
-					//{
-					//	globalData->windowSwappingPossibleFlag.test_and_set();
-					//	globalData->windowSwappingPossibleFlag.notify_all();						
-					//
-					//	globalData->windowSwappingPossibleFlag.wait(1);
-					//}
+						blazeEngineContext.HandleWindowResizeEvent(_event);
 					
 					break;
 				}
@@ -278,10 +274,10 @@ namespace Blaze
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
 
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowFocusGainedDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowFocusGainedDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->focusGainedEventDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->focusGainedEventDispatcher, window);
 
 					break;
 				}
@@ -289,45 +285,46 @@ namespace Blaze
 					Events::WindowFocusLostEvent _event;
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowFocusLostDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowFocusLostDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->focusLostEventDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->focusLostEventDispatcher, window);
 					break;
 				}
 				case SDL_WINDOWEVENT_CLOSE: {
 					Events::WindowCloseEvent _event;
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowCloseDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowCloseDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->closeEventDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->closeEventDispatcher, window);
 					break;
 				}
 				case SDL_WINDOWEVENT_ENTER: {
 					Events::WindowMouseEnterEvent _event;
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowMouseEnterDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowMouseEnterDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->mouseEnterDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->mouseEnterDispatcher, window);
 					break;
 				}
 				case SDL_WINDOWEVENT_LEAVE: {
 					Events::WindowMouseLeaveEvent _event;
 					WindowSDL* window = GetWindowFromSDLHandle(SDL_GetWindowFromID(event->window.windowID));
 					_event.window = window;
-					globalData->inputEventStack.Add(_event, &globalData->inputEventSystem.windowMouseLeaveDispatcher);
+					AddEventToInputEventStack(std::move(_event), &blazeEngineContext.inputEventSystem.windowMouseLeaveDispatcher, window);
 
 					if (window != nullptr)
-						globalData->inputEventStack.Add(_event, &_event.window->mouseLeaveDispatcher);
+						AddEventToInputEventStack(std::move(_event), &_event.window->mouseLeaveDispatcher, window);
 					break;
 				}
 				}
 			}
 			}
+
 
 			return 0;
 		}

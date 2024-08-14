@@ -1,5 +1,5 @@
 #pragma once
-#include "Textures/OpenGLTextureEnums.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
@@ -13,7 +13,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Renderbuffer(Renderbuffer&&) noexcept;
 		~Renderbuffer();
 
-		Result Create(Vec2i size, Blaze::Graphics::OpenGLWrapper::TextureInternalPixelFormat format);
+		void Create(Vec2i size, Blaze::Graphics::OpenGLWrapper::TextureInternalPixelFormat format);
 
 		inline uint GetHandle() const { return id; }
 		inline Vec2i GetSize() const { return size; }

@@ -10,7 +10,7 @@ namespace Blaze::UI
 	class UIInputNode : public Node
 	{
 	public:
-		UIInputNode(Node* parent, const NodeTransform& transform);
+		UIInputNode();
 		~UIInputNode() override;
 
 		void SetKeyboardEventHandler(UIKeyboardEventHandler* keyboardEventHandler);

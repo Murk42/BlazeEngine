@@ -1,5 +1,8 @@
 #pragma once
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLContext.h"
+#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -31,10 +34,11 @@ namespace Blaze::Graphics::OpenGL
 		void CreateCache(const Array<Line2DRenderData_OpenGL>& renderData, Line2DRenderCache_OpenGL& task);
 		void Render(const Line2DRenderCache_OpenGL& renderCache, Vec2u targetSize);
 	private:		
+		GraphicsContext_OpenGL& graphicsContext;
 		Blaze::Graphics::OpenGLWrapper::ShaderProgram program;
 		Blaze::Graphics::OpenGLWrapper::ImmutableMappedGraphicsBuffer vb;
 		Blaze::Graphics::OpenGLWrapper::VertexArray va;
 
-		friend class Line2DRenderCache_OpenGL;
+		friend struct Line2DRenderCache_OpenGL;
 	};
 }

@@ -292,13 +292,7 @@ namespace Blaze
 #endif
 
 		Node* node = it.node;
-		Node* prev = node->prev;
-
-#ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (node == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is the last in the list");
-#endif
-
+		Node* prev = node->prev;	
 		Node* next = node->next;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK

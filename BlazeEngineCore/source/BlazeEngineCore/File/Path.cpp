@@ -13,12 +13,7 @@ namespace Blaze
 	Path::Path(Path&& path) noexcept
 		: path(std::move(path.path))
 	{
-	}
-	Path::Path(const StringView& string)
-		: path(string.Ptr(), string.Ptr() + string.Count())
-
-	{
-	}
+	}	
 	Path::Path(const StringViewUTF8& string)
 		: path((const char8_t*)string.Buffer(), (const char8_t*)string.Buffer() + string.BufferSize() - 1)
 	{
@@ -108,6 +103,16 @@ namespace Blaze
 		}
 
 		return value;
+	}
+	uint32 Path::Hash() const
+	{
+		return static_cast<uint32>(std::hash<std::filesystem::path>{}(path));
+	}
+	Path Path::operator/(const Path& other) const
+	{
+		Path out{ path };
+		out.path.operator/=(other.path);		
+		return out;
 	}
 	Path Path::operator/(const StringView& other) const
 	{

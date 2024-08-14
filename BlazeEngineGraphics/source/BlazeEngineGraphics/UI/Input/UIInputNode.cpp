@@ -3,8 +3,8 @@
 
 namespace Blaze::UI
 {
-	UIInputNode::UIInputNode(Node* parent, const NodeTransform& transform)
-		: Node(parent, transform)
+	UIInputNode::UIInputNode()
+		: Node(), keyboardHandler(nullptr), mouseHandler(nullptr), selectHandler(nullptr)
 	{
 
 	}
@@ -29,9 +29,10 @@ namespace Blaze::UI
 	}
 	bool UIInputNode::HitTest(Vec2f screenPosition)
 	{
-		Vec2f pos = GetFinalPosition();
-		Vec2f size = GetFinalSize();
-		float rot = GetFinalRotation();
+		auto finalTransform = GetFinalTransform();
+		Vec2f pos = finalTransform.position;
+		Vec2f size = finalTransform.size;
+		float rot = finalTransform.rotation;
 		float cos = Math::Cos(rot);
 		float sin = Math::Sin(rot);
 		Vec2f right = Vec2f(cos, sin) * size.x;

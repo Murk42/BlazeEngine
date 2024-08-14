@@ -3,7 +3,7 @@
 #include "BlazeEngine/Internal/Conversions.h"
 #include "BlazeEngine/Internal/GlobalData.h"
 
-#include <SDL2/SDL.h> 
+#include <SDL2/SDL.h>
 
 namespace Blaze
 {		
@@ -43,7 +43,7 @@ namespace Blaze
 		case WindowSDLOpenMode::Normal:
 			break;
 		case WindowSDLOpenMode::Fullscreen:
-			flags |= SDL_WINDOW_FULLSCREEN;
+			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 			break;
 		case WindowSDLOpenMode::Maximized:
 			flags |= SDL_WINDOW_MAXIMIZED;
@@ -64,7 +64,7 @@ namespace Blaze
 		if (pos.x == INT_MAX) pos.x = SDL_WINDOWPOS_CENTERED;
 		if (pos.y == INT_MAX) pos.y = SDL_WINDOWPOS_CENTERED;
 		
-		globalData->ExecuteOnMainThread([&]() {
+		blazeEngineContext.ExecuteTaskOnMainThread([&]() {
 			SDL_ClearError();
 
 			SDLWindowHandle = SDL_CreateWindow((const char*)createOptions.title.Buffer(), pos.x, pos.y, createOptions.size.x, createOptions.size.y, flags);
@@ -88,29 +88,32 @@ namespace Blaze
 	}
 	void DestroyWindowSDLHandle(WindowSDL::WindowSDLHandle handle)
 	{
-		globalData->ExecuteOnMainThread([&]() { SDL_DestroyWindow((SDL_Window*)handle); });
+		blazeEngineContext.ExecuteTaskOnMainThread([&]() { SDL_DestroyWindow((SDL_Window*)handle); });
 	}
 		
 	WindowSDL::WindowSDL()
-		: handle(nullptr)
+		: handle(nullptr), graphicsAPI(WindowSDLGraphicsAPI::None), resizeState(0)
 	{
 
 	}
 	WindowSDL::WindowSDL(WindowSDLCreateOptions createOptions)
-		: handle(CreateWindowSDLHandle(createOptions)), graphicsAPI(createOptions.graphicsAPI)
+		: handle(CreateWindowSDLHandle(createOptions)), graphicsAPI(createOptions.graphicsAPI), resizeState(0)
 	{
 		//If any events were reported before this line they wont be reported to the client.		
 		SDL_SetWindowData((SDL_Window*)handle, "Blaze", this);
 
 	}
-	WindowSDL::WindowSDL(WindowSDL&& other) noexcept
-	{
-		handle = other.handle;
-		graphicsAPI = other.graphicsAPI;
+	WindowSDL::WindowSDL(WindowSDL&& other) noexcept :		
+		WindowBase(std::move(other)), handle(other.handle), resizeState(0), graphicsAPI(other.graphicsAPI)
+	{		
+		{
+			std::lock_guard lk{ other.mutex };
+			if (other.resizeState == 1)
+				other.resizeState = 0;
+		}
 
+		other.handle = nullptr;		
 		SDL_SetWindowData((SDL_Window*)handle, "Blaze", this);
-
-		other.handle = nullptr;
 	}
 	WindowSDL::~WindowSDL()
 	{
@@ -130,14 +133,20 @@ namespace Blaze
 	{
 		switch (graphicsAPI)
 		{
-		case Blaze::WindowSDLGraphicsAPI::OpenGL:
+		case Blaze::WindowSDLGraphicsAPI::OpenGL: {
+			{
+				std::lock_guard lk{ mutex };
 
-			if (globalData->windowSwappingSkipFlag.test())
-				break;
+				SDL_GL_SwapWindow((SDL_Window*)handle);		
 
-			SDL_GL_SwapWindow((SDL_Window*)handle);
+				if (resizeState == 1)									
+					resizeState = 2;	
+
+				resizeCV.notify_one();
+			}
 
 			break;
+		}
 		case Blaze::WindowSDLGraphicsAPI::Vulkan:
 			break;
 		case Blaze::WindowSDLGraphicsAPI::Metal:
@@ -304,7 +313,7 @@ namespace Blaze
 			return;
 
 		if (fullscreen)
-			SDL_SetWindowFullscreen((SDL_Window*)handle, SDL_WINDOW_FULLSCREEN);
+			SDL_SetWindowFullscreen((SDL_Window*)handle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		else
 			SDL_SetWindowFullscreen((SDL_Window*)handle, 0);		
 	}
@@ -333,22 +342,22 @@ namespace Blaze
 		SDL_SetWindowGrab((SDL_Window*)handle, (SDL_bool)lockMouse);
 	}	
 
-	bool WindowSDL::IsFullscreen() { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_FULLSCREEN_DESKTOP; }
-	bool WindowSDL::IsBorderless() { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_BORDERLESS; }
-	bool WindowSDL::IsResizable() { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_RESIZABLE; }
-	bool WindowSDL::IsMouseLocked() { if (handle == nullptr) return false; return SDL_GetWindowGrab((SDL_Window*)handle); }
-	bool WindowSDL::IsMinmized() { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_MINIMIZED; }
-	bool WindowSDL::IsMaximized() { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_MAXIMIZED; }
-	bool WindowSDL::IsShown() { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_SHOWN; }
+	bool WindowSDL::IsFullscreen() const { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_FULLSCREEN_DESKTOP; }
+	bool WindowSDL::IsBorderless() const { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_BORDERLESS; }
+	bool WindowSDL::IsResizable() const { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_RESIZABLE; }
+	bool WindowSDL::IsMouseLocked() const { if (handle == nullptr) return false; return SDL_GetWindowGrab((SDL_Window*)handle); }
+	bool WindowSDL::IsMinimized() const { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_MINIMIZED; }
+	bool WindowSDL::IsMaximized() const { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_MAXIMIZED; }
+	bool WindowSDL::IsShown() const { if (handle == nullptr) return false; return SDL_GetWindowFlags((SDL_Window*)handle) & SDL_WINDOW_SHOWN; }
 
-	uint WindowSDL::GetWindowVideoDisplayIndex()
+	uint WindowSDL::GetWindowVideoDisplayIndex() const
 	{
 		if (handle == nullptr) 
 			return 0;
 		return SDL_GetWindowDisplayIndex((SDL_Window*)handle);
 	}
 
-	DisplayMode WindowSDL::GetWindowDisplayMode()
+	DisplayMode WindowSDL::GetWindowDisplayMode() const
 	{
 		if (handle == nullptr)
 			return DisplayMode();
@@ -378,7 +387,31 @@ namespace Blaze
 		out.refresh_rate = mode.refreshRate;
 		out.driverdata = nullptr;
 		SDL_SetWindowDisplayMode((SDL_Window*)handle, &out);
-	}			
+	}	
+
+	uint WindowSDL::GetDisplayCount()
+	{ 
+		return SDL_GetNumVideoDisplays();
+	}
+
+	uint WindowSDL::GetDisplayModeCount(uint videoDisplayIndex)
+	{
+		return SDL_GetNumDisplayModes(videoDisplayIndex);
+	}
+
+	DisplayMode WindowSDL::GetDisplayMode(uint videoDisplayIndex, uint index)
+	{
+		Result result;
+
+		SDL_DisplayMode mode;
+		SDL_GetDisplayMode(videoDisplayIndex, index, &mode);
+		DisplayMode out;
+
+		out.format = BlazeDisplayPixelFormat(mode.format, result);
+		out.refreshRate = mode.refresh_rate;
+		out.size = Vec2i(mode.w, mode.h);
+		return out;
+	}
 	
 	WindowSDL& WindowSDL::operator=(WindowSDL&& other) noexcept
 	{
@@ -388,5 +421,37 @@ namespace Blaze
 
 		SDL_SetWindowData((SDL_Window*)handle, "Blaze", this);
 		return *this;
+	}
+
+	void WindowSDL::WindowResizeFunction(WindowSDL* window)
+	{
+		Vec2u newWindowSize;
+
+		{
+			std::lock_guard lk{ window->mutex };
+			newWindowSize = window->latestWindowSize;
+		}
+
+		blazeEngineContext.inputEventSystem.windowResizedDispatcher.Call({ window, newWindowSize });
+		window->resizedEventDispatcher.Call({ window, newWindowSize });
+
+		{
+			std::lock_guard lk{ window->mutex };
+			window->resizeState = 1;
+		}
+	}
+
+	void WindowSDL::HandleResizeEvent(const Input::Events::WindowResizedEvent& event)
+	{
+		std::unique_lock lk{ mutex };
+		resizeState = 0;
+		latestWindowSize = event.size;
+
+		blazeEngineContext.eventStack.Add("WindowResizedEvent", WindowResizeFunction, this);
+
+		//Wait for the event to be handled (mainly to wait for the previous draw and set the viewport) and the window to be redrawn
+		resizeCV.wait_for(lk, std::chrono::milliseconds(200), [this]() {
+			return this->resizeState == 2;
+			});
 	}
 }

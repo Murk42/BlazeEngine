@@ -1,5 +1,5 @@
 #pragma once
-#include "Textures/OpenGLTextureEnums.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {	
@@ -8,29 +8,23 @@ namespace Blaze::Graphics::OpenGLWrapper
 		TextureWrapping xWrap = TextureWrapping::ClampToEdge;		
 		TextureSampling min = TextureSampling::Nearest;
 		TextureSampling mag = TextureSampling::Nearest;
-		TextureSampling mip = TextureSampling::Nearest;
-		bool mipmaps = false;
+		TextureSampling mip = TextureSampling::Nearest;	
+		uint textureLevelCount = 1;
 	};
 
 	class Texture1D
 	{
-		unsigned id;
-		uint size;
 	public:
 		Texture1D();
 		Texture1D(const Texture1D&) = delete;
 		Texture1D(Texture1D&&) noexcept;	
-		~Texture1D();
-
-		Result SetSettings(Texture1DSettings settings);		
-
-		bool Load(StringView path, bool emitLogOnFail = true);		
-		bool Load(StringView path, TextureInternalPixelFormat internalFormat, bool emitLogOnFail = true);
+		~Texture1D();		
 						
-		Result Create(uint size, TextureInternalPixelFormat internalFormat);			
-		Result SetPixels(uint offset, uint size, BitmapColorFormat format, BitmapColorComponentType type, void* pixels);				
+		void Create(uint size, TextureInternalPixelFormat internalFormat, const Texture1DSettings& settings);
+		void Create(uint size, TextureInternalPixelFormat internalFormat, BitmapColorFormat format, BitmapColorComponentType type, void* pixels, const Texture1DSettings& settings);
+		void SetPixels(uint offset, uint size, BitmapColorFormat format, BitmapColorComponentType type, void* pixels, uint textureLevel);
 
-		void GenerateMipmaps();
+		void AutoGenerateMipmaps();
 
 		uint GetSize() const { return size; }		
 
@@ -38,5 +32,10 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		Texture1D& operator=(const Texture1D&) = delete;
 		Texture1D& operator=(Texture1D&&) noexcept;
+	private:
+		void SetSettings(const Texture1DSettings& settings);
+
+		unsigned id;
+		uint size;
 	};
 }

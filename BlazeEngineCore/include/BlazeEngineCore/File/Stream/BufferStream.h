@@ -11,7 +11,7 @@ namespace Blaze
 		BufferStreamBase();
 		BufferStreamBase(uintMem size);
 		BufferStreamBase(void* buffer, uintMem size);
-		BufferStreamBase(const FileStreamBase&) = delete;
+		BufferStreamBase(const BufferStreamBase&) = delete;
 		~BufferStreamBase();
 
 		Result SetBuffer(void* buffer, uintMem size);
@@ -19,12 +19,14 @@ namespace Blaze
 
 		bool MovePosition(intMem offset) override;
 		bool SetPosition(uintMem offset) override;
+		bool SetPositionFromEnd(intMem offset) override;
+
 		uintMem GetPosition() const override;
 
 		uintMem GetSize() const override;
 		const void* GetBuffer() const;
 
-		FileStreamBase& operator=(const FileStreamBase&) = delete;
+		BufferStreamBase& operator=(const BufferStreamBase&) = delete;
 	protected:
 		void* buffer;
 		uintMem size;

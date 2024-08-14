@@ -76,42 +76,32 @@ namespace Blaze
 
 		--ptr;
 		return *this;
-	}
-	StringIterator StringIterator::operator+(const uintMem& value) const
-	{
-		return StringIterator(ptr + value);
-	}
+	}	
 	StringIterator StringIterator::operator+(const intMem& value) const
 	{
 		return StringIterator(ptr + value);
-	}
-	StringIterator StringIterator::operator-(const uintMem& value) const
-	{
-		return StringIterator(ptr - value);
-	}
+	}	
 	StringIterator StringIterator::operator-(const intMem& value) const
 	{
 		return StringIterator(ptr - value);
-	}
-	StringIterator& StringIterator::operator+=(const uintMem& value)
-	{
-		ptr += value;
-		return *this;
-	}
+	}	
 	StringIterator& StringIterator::operator+=(const intMem& value)
 	{
 		ptr += value;
 		return *this;
-	}
-	StringIterator& StringIterator::operator-=(const uintMem& value)
-	{
-		ptr -= value;
-		return *this;
-	}
+	}	
 	StringIterator& StringIterator::operator-=(const intMem& value)
 	{
 		ptr -= value;
 		return *this;
+	}
+	uintMem StringIterator::operator-(const StringIterator& other)
+	{
+		return ptr - other.ptr;
+	}
+	uintMem StringIterator::operator-(const StringViewIterator& other)
+	{
+		return ptr - other.Ptr();
 	}
 	bool StringIterator::operator==(const StringIterator& i) const
 	{
@@ -208,6 +198,7 @@ namespace Blaze
 			ptr = new char[count + 1];
 			memset(ptr, fill, count);
 			ptr[count] = '\0';
+			this->count = count;
 		}
 	}
 	String::String(StringIterator begin, StringIterator end)
@@ -259,7 +250,7 @@ namespace Blaze
 		delete[] old;
 		ptr[count] = '\0';
 		return *this;		
-	}
+	}	
 	uint32 String::Hash() const
 	{
 		return static_cast<uint32>(std::hash<String>()(*this));

@@ -1,19 +1,15 @@
 #pragma once
-#include "BlazeEngineGraphics/Core/StreamRenderer.h"
+#include "BlazeEngineGraphics/Renderers/TexturedRectRenderer.h"
+#include "BlazeEngineGraphics/RenderStructure/StreamRenderer.h"
+#include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 
 namespace Blaze::Graphics::OpenGL
-{	
-	struct TexturedRectRenderData_OpenGL
-	{
-		OpenGLWrapper::Texture2D* texture;
-		Vec2f uv1, uv2;
-		Vec2f pos, right, up;		
-		ColorRGBAf color;
-		float blend ;
-		float alpha ;
-	};
-
-	class TexturedRectRenderCache_OpenGL;	
+{		
+	class TexturedRectRenderCache_OpenGL;
 
 	class TexturedRectRenderer_OpenGL : public StreamRenderer
 	{
@@ -22,6 +18,8 @@ namespace Blaze::Graphics::OpenGL
 		
 		void Render(const TexturedRectRenderCache_OpenGL& renderCache, Vec2u targetSize);
 		void Render(RenderStream& renderStream, Vec2u targetSize);		
+		
+		StringView GetRendererName() const override { return "TexturedRectRenderer_OpenGL"; }
 	private:				
 		struct Vertex
 		{
@@ -41,10 +39,11 @@ namespace Blaze::Graphics::OpenGL
 			float textureIndex;
 		};
 
-		constexpr static uintMem DrawCallTextureCount = 4;
-		static constexpr auto InstanceBufferInstanceCount = 128;
-		static constexpr auto InstanceBufferSize = InstanceBufferInstanceCount * sizeof(Instance);
+		static constexpr uintMem DrawCallTextureCount = 4;
+		static constexpr uintMem InstanceBufferInstanceCount = 128;
+		static constexpr uintMem InstanceBufferSize = InstanceBufferInstanceCount * sizeof(Instance);
 
+		GraphicsContext_OpenGL& graphicsContext;
 		Blaze::Graphics::OpenGLWrapper::ShaderProgram program; 
 		Blaze::Graphics::OpenGLWrapper::ImmutableMappedGraphicsBuffer instanceBuffer;
 		Blaze::Graphics::OpenGLWrapper::ImmutableStaticGraphicsBuffer vertexBuffer;
@@ -56,7 +55,7 @@ namespace Blaze::Graphics::OpenGL
 	class TexturedRectRenderCache_OpenGL
 	{	
 	public:	
-		void CreateNew(TexturedRectRenderer_OpenGL& renderer, const Array<TexturedRectRenderData_OpenGL>& renderData);		
+		void CreateNew(TexturedRectRenderer_OpenGL& renderer, const Array<TexturedRectRenderData>& renderData);		
 	private:		
 		using Instance = TexturedRectRenderer_OpenGL::Instance;
 		using Vertex = TexturedRectRenderer_OpenGL::Vertex;

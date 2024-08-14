@@ -15,8 +15,8 @@ CLIENT_API void Setup()
 	RenderSystem_OpenGL renderSystem{ resourceManager };
 
 	{
-		Font font{ "assets/fonts/Consola.ttf" };
-		font.dataMap.Insert<Graphics::OpenGL::FontAtlasesData_OpenGL>("FontAtlasData_OpenGL", &font, Array<uint>({ 12, 16, 20, 24, 32, 64 }), CharacterSet::ASCIICharacterSet());
+		Font font = Font::LoadDefault();
+		font.dataMap.Insert<Graphics::OpenGL::FontAtlasesData_OpenGL>("FontAtlasesData_OpenGL", &font, Array<uint>({ 12, 16, 20, 24, 32, 256 }), CharacterSet::ASCIICharacterSet());
 		resourceManager.LoadFont("default", std::move(font));
 	}
 
@@ -38,6 +38,7 @@ CLIENT_API void Setup()
 
 	renderSystem.SetScreen(&mainScreen);
 
+	
 	UI::UIInputManager inputManager;
 	inputManager.SetScreen(&mainScreen);
 	inputManager.SetWindow(&window);
