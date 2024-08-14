@@ -4,3 +4,6 @@ install/
 temp/
 
 .vs/
+extern/
+
+*.dll
