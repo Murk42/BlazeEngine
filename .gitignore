@@ -5,5 +5,6 @@ temp/
 
 .vs/
 extern/
+vcpkg_installed/
 
 *.dll
