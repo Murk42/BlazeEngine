@@ -43,9 +43,7 @@ namespace Blaze::UIGraphics
 			//Index of the first character in the line.
 			uintMem firstCharacterIndex = 0;
 			//Count of characters in the line.
-			uintMem characterCount = 0;
-			//Horizontal scale factor of the whole line. The line might be squished if the TextHorizontalLayout is set to Squish
-			float scaling = 1.0f;
+			uintMem characterCount = 0;			
 			//Size of the line in text transform space. Includes line squishing.
 			Vec2f size;
 		};

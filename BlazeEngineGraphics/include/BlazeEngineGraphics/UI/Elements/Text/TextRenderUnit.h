@@ -13,7 +13,7 @@ namespace Blaze::UIGraphics
 
 	enum class TextLineVerticalAlign
 	{
-		Left, Center, Right
+		Top, Center, Bottom
 	};
 
 	enum class TextHorizontallyUnderfittedOptions
