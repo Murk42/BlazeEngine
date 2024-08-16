@@ -4,10 +4,13 @@
 
 #include "BlazeEngine/Console/Console.h"]
 
-#include "Windows.h"
+
+#include <Windows.h>
 #undef max
-extern "C" {
-	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+
+namespace Blaze::Windows
+{
+	String GetErrorString(DWORD error, uint recursionIndex = 0);
 }
 
 namespace Blaze::Graphics::OpenGL
@@ -300,12 +303,12 @@ namespace Blaze::Graphics::OpenGL
 			return;
 		}
 
-		//GLenum _profileType = GetOpenGLProfileType(profileType);
-		//if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, _profileType) < 0)
-		//{
-		//	Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to " + GetOpenGLProfileTypeString(_profileType) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
-		//	return;
-		//}
+		GLenum _profileType = GetOpenGLProfileType(profileType);
+		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, _profileType) < 0)
+		{
+			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to " + GetOpenGLProfileTypeString(_profileType) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
+			return;
+		}
 
 		GLenum _releaseBehaviour = GetOpenGLReleaseBehaviour(releaseBehaviour);
 		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _releaseBehaviour) < 0)
@@ -330,25 +333,58 @@ namespace Blaze::Graphics::OpenGL
 		};
 		WindowSDL initWindowSDL_{ windowCreateOptions };				
 
+		{
+			StringView error = GetSDLError();
+
+			if (!error.Empty())			
+				Debug::Logger::LogError("Blaze Engine Graphics", "An SDL error wasnt caught. SDL_Error() returned: \"" + error + "\"");			
+		}
+
+		{
+			DWORD errorID = GetLastError();
+			if (errorID != 0)
+			{
+				String error = Windows::GetErrorString(errorID);
+
+				if (!error.Empty())
+					Debug::Logger::LogError("Blaze Engine Graphics", "An Windows error wasnt caught. GetLastError() returned: \"" + error + "\"");
+			}
+		}
+
 		SDLOpenGLContext_OpenGL SDLOpenGLContext_{
 			SDL_GL_CreateContext((SDL_Window*)initWindowSDL_.GetHandle())
 		};		
 		
-		//TODO: SDL returned an error here but it wasnt handler
-		//The error was "[01/01/70 01:11:11] [ERROR] [Blaze Engine Graphics] SDL_Error() returned: "GL 3.x is not supported""
-		Debug::Logger::LogError("Blaze Engine Graphics", "SDL_Error() returned: \"" + GetSDLError() + "\"");
-
 		if (SDLOpenGLContext_.handle == nullptr)
 		{			
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to create OpenGL context. SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 
-		if (SDL_GL_MakeCurrent((SDL_Window*)initWindowSDL_.GetHandle(), SDLOpenGLContext_.handle) != 0)
 		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to make the OpenGL context current. SDL_Error() returned: \"" + GetSDLError() + "\"");
-			return;
+			DWORD errorID = GetLastError();
+			if (errorID != 0)
+			{
+				String error = Windows::GetErrorString(errorID);
+
+				if (!error.Empty())
+				{
+					Debug::Logger::LogError("Blaze Engine Graphics", "Failed to create OpenGL context. GetLastError() returned: \"" + error + "\"");
+				}
+			}
 		}
+
+		{
+			StringView error = GetSDLError();
+
+			if (!error.Empty())
+			{								
+				Debug::Logger::LogError("Blaze Engine Graphics", "Failed to create OpenGL context. SDL_Error() returned: \"" + error + "\"");
+
+				SDL_GL_DeleteContext(SDLOpenGLContext_.handle);
+				return;
+			}
+		}	
 
 		//Set the handles after creation was successfull
 		initWindowSDL = std::move(initWindowSDL_);
@@ -391,21 +427,21 @@ namespace Blaze::Graphics::OpenGL
 			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL non reset isolation context, a reset isolation was created");
 		contextFlags = GetContextFlags(finalContextFlags);
 
-		//int finalProfileType;
-		//glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &finalProfileType);
-		//String profileName = GetProfileTypeName(finalProfileType);
-		//if (finalProfileType != _profileType)
-		//{
-		//	StringView name1 = GetProfileTypeName(_profileType);
-		//	StringView name2 = profileName;
-		//
-		//	if (!name1.Empty())
-		//		if (name2.Empty())
-		//			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL " + name1 + " profile, got an invalid value");
-		//		else
-		//			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL " + name1 + " profile, got " + name2);
-		//}
-		//profileType = GetProfileType(finalProfileType);
+		int finalProfileType;
+		glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &finalProfileType);
+		String profileName = GetProfileTypeName(finalProfileType);
+		if (finalProfileType != _profileType)
+		{
+			StringView name1 = GetProfileTypeName(_profileType);
+			StringView name2 = profileName;
+		
+			if (!name1.Empty())
+				if (name2.Empty())
+					Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL " + name1 + " profile, got an invalid value");
+				else
+					Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL " + name1 + " profile, got " + name2);
+		}
+		profileType = GetProfileType(finalProfileType);
 
 		int finalMajorVersion;
 		glGetIntegerv(GL_MAJOR_VERSION, &finalMajorVersion);
@@ -441,9 +477,9 @@ namespace Blaze::Graphics::OpenGL
 				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(stencilBufferBitCount) + "-bit stencil buffer, got " + StringParsing::Convert(finalStencilSize) + "-bit");
 		stencilBufferBitCount = finalStencilSize;
 
-		//String contextFlagsText = GetContextFlagsText(finalContextFlags);
-		//if (!contextFlagsText.Empty()) contextFlagsText = " (" + contextFlagsText + ")";
-		//Debug::Logger::LogInfo("Blaze Engine Graphics", "Created OpenGL context " + StringParsing::Convert(majorVersion) + "." + StringParsing::Convert(minorVersion) + " " + profileName + " profile" + contextFlagsText);	
+		String contextFlagsText = GetContextFlagsText(finalContextFlags);
+		if (!contextFlagsText.Empty()) contextFlagsText = " (" + contextFlagsText + ")";
+		Debug::Logger::LogInfo("Blaze Engine Graphics", "Created OpenGL context " + StringParsing::Convert(majorVersion) + "." + StringParsing::Convert(minorVersion) + " " + profileName + " profile" + contextFlagsText);	
 
 		glDebugMessageCallback(MessageCallback, nullptr);
 		glEnable(GL_DEBUG_OUTPUT);

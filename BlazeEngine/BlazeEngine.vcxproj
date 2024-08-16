@@ -85,6 +85,9 @@
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -99,8 +102,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>
@@ -125,8 +128,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>
@@ -151,11 +154,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2d.lib;freetyped.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
@@ -177,8 +180,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>

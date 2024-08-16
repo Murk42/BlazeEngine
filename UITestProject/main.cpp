@@ -7,6 +7,8 @@ CLIENT_API void Setup()
 {			 	
 	Debug::Logger::AddOutputFile("log.txt");
 	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{		
+		.majorVersion = 4,
+		.minorVersion = 0,
 		.profileType = Graphics::OpenGL::ProfileType::Compatibility,
 		} };
 	Graphics::OpenGL::RenderWindow_OpenGL renderWindow{ graphicsContext, Graphics::OpenGL::WindowSDLCreateOptions_OpenGL { } };

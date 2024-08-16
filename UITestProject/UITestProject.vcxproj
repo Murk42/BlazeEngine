@@ -82,8 +82,8 @@
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\Debug\x64\;$(SolutionDir)BlazeEngine\build\Debug\x64\;$(SolutionDir)BlazeEngineGraphics\build\Debug\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -100,8 +100,8 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\Debug\x64\;$(SolutionDir)BlazeEngine\build\Debug\x64\;$(SolutionDir)BlazeEngineGraphics\build\Debug\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -120,8 +120,8 @@
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\Debug\x64\;$(SolutionDir)BlazeEngine\build\Debug\x64\;$(SolutionDir)BlazeEngineGraphics\build\Debug\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -138,8 +138,8 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\Debug\x64\;$(SolutionDir)BlazeEngine\build\Debug\x64\;$(SolutionDir)BlazeEngineGraphics\build\Debug\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
