@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "PxPhysicsAPI.h"
-#include "pvd/PxPvd.h"
+#include "physx/PxPhysicsAPI.h"
+#include "physx/pvd/PxPvd.h"
 //#include "extensions/PxDefaultErrorCallback.h"
 //#include "extensions/PxDefaultAllocator.h"
 //#include "pvd/PxPvd.h"

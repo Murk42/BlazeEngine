@@ -37,6 +37,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlazeEngineTemplateProject", "BlazeEngineTemplateProject\BlazeEngineTemplateProject.vcxproj", "{7CC4B883-40A3-4000-B66C-311D4E4999C7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PhysicsTestProject", "PhysicsTestProject\PhysicsTestProject.vcxproj", "{226D4E4B-F91F-4259-A48B-A5CA44641987}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B87FCC17-B1A8-413B-AA96-651462FCB46B} = {B87FCC17-B1A8-413B-AA96-651462FCB46B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

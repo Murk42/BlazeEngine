@@ -82,13 +82,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -100,8 +103,9 @@
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>SDL2d.lib;freetyped.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
@@ -109,10 +113,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,8 +129,9 @@
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
@@ -134,11 +139,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -150,8 +155,9 @@
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>SDL2d.lib;freetyped.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
@@ -159,10 +165,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;D:\Programming\Libraries\FreeType\include;D:\Programming\Libraries\SAIL\include;D:\Programming\Libraries\SDL\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>BLAZE_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -175,8 +181,9 @@
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib;sail-codecs.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sail-codecs.lib;sail.lib;sail-common.lib;SDL2.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
@@ -262,6 +269,9 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="source\BlazeEngine\Files\Consola.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

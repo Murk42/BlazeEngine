@@ -90,7 +90,7 @@ MainScreen::MainScreen()
 	editableText.textRenderUnit.SetFontHeight(32);
 	editableText.textRenderUnit.SetLayoutOptions(UI::TextHorizontalLayout::Wrap, UI::TextVerticalLayout::AlignCenter, UI::TextLineAlign::Left, true);
 	editableText.SetMultilineInput(true);
-	editableText.textEnteredEventDispatcher.AddHandler(
-		BoundLambdaEventHandler<UI::EditableText::TextEnteredEvent>()
-	);
+	//editableText.textEnteredEventDispatcher.AddHandler(
+	//	BoundLambdaEventHandler<UI::EditableText::TextEnteredEvent>()
+	//);
 }

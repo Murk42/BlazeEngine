@@ -228,4 +228,7 @@
   <ItemGroup>
     <Font Include="source\BlazeEngine\Files\Consola.ttf" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="vcpkg.json" />
+  </ItemGroup>
 </Project>

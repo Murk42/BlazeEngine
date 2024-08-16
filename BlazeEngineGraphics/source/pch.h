@@ -8,7 +8,6 @@
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 
-#define GLEW_STATIC
 #include "GL/glew.h"
 #include "SDL2/SDL.h"
 //#include "vulkan/vulkan.h"

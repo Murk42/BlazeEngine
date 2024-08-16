@@ -388,5 +388,6 @@
     <None Include="assets\shaders\Vulkan\line2d.vert" />
     <None Include="assets\shaders\Vulkan\line2d.frag.spv" />
     <None Include="assets\shaders\Vulkan\line2d.vert.spv" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
 </Project>

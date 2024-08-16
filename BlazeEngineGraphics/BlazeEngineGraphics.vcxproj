@@ -164,6 +164,7 @@
     <None Include="assets\shaders\Vulkan\line2d.frag.spv" />
     <None Include="assets\shaders\Vulkan\line2d.vert" />
     <None Include="assets\shaders\Vulkan\line2d.vert.spv" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -229,14 +230,18 @@
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
     <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;D:\Programming\Libraries\glew\include;D:\Programming\Libraries\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -244,8 +249,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;jpeg.lib;libpng16.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
@@ -266,11 +272,12 @@
     <ClCompile>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;D:\Programming\Libraries\glew\include;D:\Programming\Libraries\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -279,8 +286,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;jpeg.lib;libpng16.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
@@ -300,11 +308,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;D:\Programming\Libraries\glew\include;D:\Programming\Libraries\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -312,8 +321,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;jpeg.lib;libpng16.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
@@ -334,11 +344,12 @@
     <ClCompile>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;D:\Programming\Libraries\glew\include;D:\Programming\Libraries\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include\;$(SolutionDir)BlazeEngine\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -347,8 +358,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;libglew32.lib;jpeg.lib;libpng16.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\$(Configuration)\lib\;D:\Programming\Libraries\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"

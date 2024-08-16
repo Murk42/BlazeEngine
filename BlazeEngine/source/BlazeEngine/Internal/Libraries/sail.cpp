@@ -2,6 +2,8 @@
 #include "BlazeEngine/Internal/Libraries/sail.h"
 #include "BlazeEngine/Internal/GlobalData.h"
 
+#define SAIL_STATIC
+
 #include "sail/sail.h"
 
 namespace Blaze
@@ -54,6 +56,6 @@ namespace Blaze
 	}
 
 	void TerminateSail()
-	{		
+	{				
 	}
 }

@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "BlazeEngine/Internal/GlobalData.h"
-#include "SDL2/SDL_events.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include <Windows.h>
@@ -9,6 +8,10 @@
 #ifdef BLAZE_STATIC
 extern void Setup();
 extern void AddLoggerOutputFiles();
+
+static void AddLoggerOutputFiles()
+{
+}
 #else
 static void(*Setup)();
 static void(*AddLoggerOutputFiles)();
@@ -16,7 +19,6 @@ static void(*AddLoggerOutputFiles)();
 
 namespace Blaze
 {
-	void AddLoggerOutputFiles();
 
 	TimingResult InitializeConsole();
 	void TerminateConsole();	
@@ -46,15 +48,17 @@ namespace Blaze
 			ReportSubTiming(subResult.value, 1);
 	}
 
-	static void AddLoggerOutputFiles()
-	{
-	}
 
 	static void InitializeBlaze()
 	{
 		Timing timing{ "Blaze engine" };
 
+#ifdef BLAZE_STATIC
 		AddLoggerOutputFiles();
+#else
+		if (AddLoggerOutputFiles != nullptr)
+			AddLoggerOutputFiles();
+#endif
 			
 		timing.AddNode(InitializeConsole());
 		timing.AddNode(InitializeLibraries());
