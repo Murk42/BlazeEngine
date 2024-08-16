@@ -6,10 +6,47 @@
 
 namespace Blaze::UIGraphics
 {
+	/*
+	
+	enum class TextLineHorizontalAlign
+	{
+		Left, Center, Right,
+	};
+
+	enum class TextLineVerticalAlign
+	{
+		Left, Center, Right
+	};
+
+	enum class TextHorizontallyUnderfittedOptions
+	{
+		ResizeToFit, Exceed, Squish, CharacterWrap, WordWrap,
+	};
+
+	enum class TextVerticallyUnderfittedOptions
+	{
+		ResizeToFit, Exceed, Squish
+	};
+	
+	enum class TextHorizontallyOverfittedOptions
+	{
+		ResizeToFit, Nothing, SpreadCharacters, SpreadWords
+	};
+
+	enum class TextVerticallyOverfittedOptions
+	{
+		ResizeToFit, Nothing, SpreadLines
+	};
+
+	*/
 	enum class TextLineAlign
 	{
 		Left, Center, Right,
 	};
+
+	//TODO remove 'ChangeSize' from here because it doesn't impact the text layout but its size. It can be as an another property
+	//TODO make this into a 'TextFittingOption' enum
+	//TODO implement 'SpreadWords', 'SpreadCharacters'
 	enum class TextHorizontalLayout
 	{
 		//Text line will be squished if it exceeds the width of the node			
@@ -26,6 +63,9 @@ namespace Blaze::UIGraphics
 		//Line alignment has no effect
 		ChangeSize,
 	};
+
+	//TODO remove 'ChangeSize' from here because it doesn't impact the text layout but its size. It can be as an another property
+	//TODO implement 'SpreadLines'
 	enum class TextVerticalLayout
 	{
 		AlignTop,

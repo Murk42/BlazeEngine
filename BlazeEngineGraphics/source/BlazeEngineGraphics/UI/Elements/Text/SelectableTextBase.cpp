@@ -14,6 +14,10 @@ namespace Blaze::UI
 		grabbedSelectionBegin(0), grabbedSelectionEnd(0), mouseDown(false)
 	{
 	}
+	void SelectableTextBase::OnEvent(DeselectedEvent event)
+	{
+		textSelectionRenderUnit.ClearSelection();
+	}
 	void SelectableTextBase::OnEvent(KeyPressedEvent event)
 	{
 		switch (event.key)

@@ -5,7 +5,8 @@
 namespace Blaze::UIGraphics
 {	
 	class BLAZE_GRAPHICS_API TextSelectionRenderUnit :
-		public TextSelectionRenderUnitBase
+		public TextSelectionRenderUnitBase,
+		private EventHandler<UIGraphics::TextRenderUnitBase::RenderDataUpdatedEvent>
 	{
 	public:
 		UIGraphics::TextRenderUnitBase& textRenderUnit;
@@ -41,8 +42,8 @@ namespace Blaze::UIGraphics
 		Array<LineSelection> lineSelections;
 		uint lineIndex;
 		
-		bool renderDataDirty;
-		
-		void ValidateSelection();		
+		bool renderDataDirty;		
+
+		void OnEvent(UIGraphics::TextRenderUnitBase::RenderDataUpdatedEvent);
 	};
 }

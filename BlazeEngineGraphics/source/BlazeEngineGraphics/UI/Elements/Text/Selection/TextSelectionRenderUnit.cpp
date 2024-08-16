@@ -44,6 +44,8 @@ namespace Blaze::UIGraphics
 		renderData.texture = nullptr;
 		renderData.uv1 = Vec2f(0, 0);
 		renderData.uv2 = Vec2f(0, 0);
+
+		textRenderUnit.renderDataUpdatedEventDispatcher.AddHandler(*this);
 	}
 	void TextSelectionRenderUnit::BeginStream()
 	{		
@@ -65,9 +67,7 @@ namespace Blaze::UIGraphics
 	bool TextSelectionRenderUnit::CleanData()
 	{
 		if (!textRenderUnit.CleanData())
-			return false;
-
-		ValidateSelection();
+			return false;		
 
 		return true;
 	}
@@ -219,8 +219,10 @@ namespace Blaze::UIGraphics
 	{
 		CleanData();
 		return selectionBegin == selectionEnd; 
-	}
-	void TextSelectionRenderUnit::ValidateSelection()
-	{
 	}	
+	void TextSelectionRenderUnit::OnEvent(UIGraphics::TextRenderUnitBase::RenderDataUpdatedEvent)
+	{
+		renderDataDirty = true;
+	}
+
 }
