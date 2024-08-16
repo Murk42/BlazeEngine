@@ -2,7 +2,16 @@
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/RenderWindow_OpenGL.h"
 
-#include "BlazeEngine/Console/Console.h"
+#include "BlazeEngine/Console/Console.h"]
+
+
+#include <Windows.h>
+#undef max
+
+namespace Blaze::Windows
+{
+	String GetErrorString(DWORD error, uint recursionIndex = 0);
+}
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -269,6 +278,18 @@ namespace Blaze::Graphics::OpenGL
 	{
 		SDL_GL_ResetAttributes();
 
+		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, majorVersion) < 0)
+		{
+			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to " + StringParsing::Convert(majorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			return;
+		}
+		
+		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minorVersion) < 0)
+		{
+			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to " + StringParsing::Convert(minorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			return;
+		}
+
 		if (SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0) < 0)
 		{
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_ACCELERTED_VISUAL to 1. SDL_Error() returned: \"" + GetSDLError() + "\"");
@@ -294,19 +315,7 @@ namespace Blaze::Graphics::OpenGL
 		{
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_RELEASE_BEHAVIOR to " + GetOpenGLReleaseBehaviourString(_releaseBehaviour) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
-		}
-
-		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, majorVersion) < 0)
-		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to " + StringParsing::Convert(majorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
-			return;
-		}
-
-		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minorVersion) < 0)
-		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to " + StringParsing::Convert(minorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
-			return;
-		}
+		}		
 
 		if (SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthBufferBitCount) < 0)
 		{
@@ -324,21 +333,58 @@ namespace Blaze::Graphics::OpenGL
 		};
 		WindowSDL initWindowSDL_{ windowCreateOptions };				
 
+		{
+			StringView error = GetSDLError();
+
+			if (!error.Empty())			
+				Debug::Logger::LogError("Blaze Engine Graphics", "An SDL error wasnt caught. SDL_Error() returned: \"" + error + "\"");			
+		}
+
+		{
+			DWORD errorID = GetLastError();
+			if (errorID != 0)
+			{
+				String error = Windows::GetErrorString(errorID);
+
+				if (!error.Empty())
+					Debug::Logger::LogError("Blaze Engine Graphics", "An Windows error wasnt caught. GetLastError() returned: \"" + error + "\"");
+			}
+		}
+
 		SDLOpenGLContext_OpenGL SDLOpenGLContext_{
 			SDL_GL_CreateContext((SDL_Window*)initWindowSDL_.GetHandle())
 		};		
-
+		
 		if (SDLOpenGLContext_.handle == nullptr)
 		{			
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to create OpenGL context. SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 
-		if (SDL_GL_MakeCurrent((SDL_Window*)initWindowSDL_.GetHandle(), SDLOpenGLContext_.handle) != 0)
 		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to make the OpenGL context current. SDL_Error() returned: \"" + GetSDLError() + "\"");
-			return;
+			DWORD errorID = GetLastError();
+			if (errorID != 0)
+			{
+				String error = Windows::GetErrorString(errorID);
+
+				if (!error.Empty())
+				{
+					Debug::Logger::LogError("Blaze Engine Graphics", "Failed to create OpenGL context. GetLastError() returned: \"" + error + "\"");
+				}
+			}
 		}
+
+		{
+			StringView error = GetSDLError();
+
+			if (!error.Empty())
+			{								
+				Debug::Logger::LogError("Blaze Engine Graphics", "Failed to create OpenGL context. SDL_Error() returned: \"" + error + "\"");
+
+				SDL_GL_DeleteContext(SDLOpenGLContext_.handle);
+				return;
+			}
+		}	
 
 		//Set the handles after creation was successfull
 		initWindowSDL = std::move(initWindowSDL_);
@@ -388,7 +434,7 @@ namespace Blaze::Graphics::OpenGL
 		{
 			StringView name1 = GetProfileTypeName(_profileType);
 			StringView name2 = profileName;
-
+		
 			if (!name1.Empty())
 				if (name2.Empty())
 					Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL " + name1 + " profile, got an invalid value");
@@ -444,7 +490,7 @@ namespace Blaze::Graphics::OpenGL
 		glEnable(GL_BLEND);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 		glBlendEquation(GL_FUNC_ADD);
-
+		 
 		glClearColor(0, 0, 0, 1);
 	}
 	GraphicsContext_OpenGL::~GraphicsContext_OpenGL()

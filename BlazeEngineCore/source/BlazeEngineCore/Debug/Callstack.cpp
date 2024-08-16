@@ -2,9 +2,13 @@
 #include "BlazeEngineCore/Debug/Callstack.h"
 #include "BlazeEngineCore/Memory/MemoryManager.h"
 
+//#define BLAZE_USE_BOOST_STACKTRACE
+
+#ifdef BLAZE_USE_BOOST_STACKTRACE
 #define BOOST_STACKTRACE_USE_WINDBG_CACHED
 #include <boost/stacktrace/stacktrace.hpp>	
 #undef min
+#endif
 
 namespace Blaze::Debug
 {
@@ -24,8 +28,9 @@ namespace Blaze::Debug
 	}
 	
 	Callstack::Callstack(uint skip, uint max_depth)
-		: skips(skip)
+		: skips(skip), frames(nullptr), frameCount(0)
 	{		
+#ifdef BLAZE_USE_BOOST_STACKTRACE
 		auto stacktrace = boost::stacktrace::stacktrace(skip + 2, max_depth);
 		
 		frames = (StackFrame*)Memory::Allocate(sizeof(StackFrame) * stacktrace.size());
@@ -42,6 +47,7 @@ namespace Blaze::Debug
 			frames[i].locationName = StringView(s.data(), s.size());
 		}
 		frameCount = stacktrace.size();
+#endif
 	}
 
 	Callstack::Callstack(const Callstack& other)

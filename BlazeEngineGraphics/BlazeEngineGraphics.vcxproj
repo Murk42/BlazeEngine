@@ -233,6 +233,18 @@
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <ConformanceMode>true</ConformanceMode>
@@ -249,13 +261,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
@@ -286,13 +298,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
@@ -321,13 +333,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
@@ -358,13 +370,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib;GlU32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)\scripts\InstallBlazeEngineLibrary.bat" "$(SolutionDir)" "$(ProjectDir)" "$(Configuration)" "$(PlatformTarget)"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
