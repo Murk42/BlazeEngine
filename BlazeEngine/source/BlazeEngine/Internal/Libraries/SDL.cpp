@@ -22,6 +22,10 @@ namespace Blaze
 		if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
 			Debug::Logger::LogFatal("Blaze Engine", "Failed to initialize the SDL library. SDL_GetError returned: \"" + GetSDLError() + "\"");
 
+		if (SDL_InitSubSystem(SDL_INIT_EVENTS) < 0)
+			Debug::Logger::LogFatal("Blaze Engine", "Failed to initialize the SDL library. SDL_GetError returned: \"" + GetSDLError() + "\"");
+
+
 		SDL_StartTextInput();
 
 		blazeEngineContext.mainThreadTaskEventIdentifier = SDL_RegisterEvents(1);
@@ -38,5 +42,6 @@ namespace Blaze
 	{
 		SDL_StopTextInput();
 		SDL_QuitSubSystem(SDL_INIT_VIDEO);
+		SDL_QuitSubSystem(SDL_INIT_EVENTS);
 	}
 }

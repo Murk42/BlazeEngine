@@ -6,7 +6,9 @@ Array<Font> fonts;
 CLIENT_API void Setup()
 {			 	
 	Debug::Logger::AddOutputFile("log.txt");
-	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext;	
+	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{		
+		.profileType = Graphics::OpenGL::ProfileType::Compatibility,
+		} };
 	Graphics::OpenGL::RenderWindow_OpenGL renderWindow{ graphicsContext, Graphics::OpenGL::WindowSDLCreateOptions_OpenGL { } };
 	auto& window = renderWindow.GetWindowSDL();
 	bool windowClosed = false;

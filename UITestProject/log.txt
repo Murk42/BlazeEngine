@@ -1,61 +1,10 @@
-[01/01/70 02:12:28] [INFO] [Blaze Engine Graphics] Successfully initialized glew 2.1.0
-[01/01/70 02:12:28] [INFO] [Blaze Engine Graphics] Created OpenGL context 4.6 core profile
 -------------------------------------------------
-[01/01/70 02:12:29] [ERROR] [sail] sail (codec_info.c, line 236) level ERROR: "Extension jpg is not supported by any codec"
+[01/01/70 01:16:58] [ERROR] [Blaze Engine Graphics] SDL_Error() returned: "GL 3.x is not supported"
 
-Logger.cpp: 117 0x7ff639559153 Blaze::Debug::Logger::LogError
-sail.cpp: 43 0x7ff63966179c Blaze::SailLogger
-: 0 0x7ffc40725783 sail_log
-: 0 0x7ffc4064229a sail_codec_info_from_extension
-Bitmap.cpp: 269 0x7ff6395df43a Blaze::Bitmap::Load
-OpenGLTexture2D.cpp: 117 0x7ff6395f0b2c Blaze::Graphics::OpenGLWrapper::Texture2D::Load
-MainScreen.cpp: 65 0x7ff639546039 MainScreen::MainScreen
-main.cpp: 29 0x7ff6395175be Setup
-EntryPoint.cpp: 92 0x7ff63965eefa Blaze::RunSetupOnThread
-type_traits: 1706 0x7ff63965f5f0 std::invoke<unsigned int (__cdecl*&)(void)>
-tuple: 1068 0x7ff63965f57d std::_Apply_impl<unsigned int (__cdecl*&)(void),std::tuple<> >
-tuple: 1080 0x7ff63965f5c5 std::apply<unsigned int (__cdecl*&)(void),std::tuple<> >
-Thread.h: 54 0x7ff63965f53c Blaze::Thread::ThreadFunction<unsigned int (__cdecl*)(void)>
-: 0 0x7ffc63577374 BaseThreadInitThunk
-: 0 0x7ffc6423cc91 RtlUserThreadStart
 
 -------------------------------------------------
 
--------------------------------------------------
-[01/01/70 02:12:29] [ERROR] [sail] sail (codec_info.c, line 237) level ERROR: "SAIL_ERROR_CODEC_NOT_FOUND"
-
-Logger.cpp: 117 0x7ff639559153 Blaze::Debug::Logger::LogError
-sail.cpp: 43 0x7ff63966179c Blaze::SailLogger
-: 0 0x7ffc40725783 sail_log
-: 0 0x7ffc406422c4 sail_codec_info_from_extension
-Bitmap.cpp: 269 0x7ff6395df43a Blaze::Bitmap::Load
-OpenGLTexture2D.cpp: 117 0x7ff6395f0b2c Blaze::Graphics::OpenGLWrapper::Texture2D::Load
-MainScreen.cpp: 65 0x7ff639546039 MainScreen::MainScreen
-main.cpp: 29 0x7ff6395175be Setup
-EntryPoint.cpp: 92 0x7ff63965eefa Blaze::RunSetupOnThread
-type_traits: 1706 0x7ff63965f5f0 std::invoke<unsigned int (__cdecl*&)(void)>
-tuple: 1068 0x7ff63965f57d std::_Apply_impl<unsigned int (__cdecl*&)(void),std::tuple<> >
-tuple: 1080 0x7ff63965f5c5 std::apply<unsigned int (__cdecl*&)(void),std::tuple<> >
-Thread.h: 54 0x7ff63965f53c Blaze::Thread::ThreadFunction<unsigned int (__cdecl*)(void)>
-: 0 0x7ffc63577374 BaseThreadInitThunk
-: 0 0x7ffc6423cc91 RtlUserThreadStart
-
--------------------------------------------------
-
--------------------------------------------------
-[01/01/70 02:12:29] [ERROR] [SAIL image library] Failed to get codec info object from "jpg" extension Returned value:SAIL_ERROR_CODEC_NOT_FOUND
-
-Bitmap.cpp: 269 0x7ff6395df5fb Blaze::Bitmap::Load
-OpenGLTexture2D.cpp: 117 0x7ff6395f0b2c Blaze::Graphics::OpenGLWrapper::Texture2D::Load
-MainScreen.cpp: 65 0x7ff639546039 MainScreen::MainScreen
-main.cpp: 29 0x7ff6395175be Setup
-EntryPoint.cpp: 92 0x7ff63965eefa Blaze::RunSetupOnThread
-type_traits: 1706 0x7ff63965f5f0 std::invoke<unsigned int (__cdecl*&)(void)>
-tuple: 1068 0x7ff63965f57d std::_Apply_impl<unsigned int (__cdecl*&)(void),std::tuple<> >
-tuple: 1080 0x7ff63965f5c5 std::apply<unsigned int (__cdecl*&)(void),std::tuple<> >
-Thread.h: 54 0x7ff63965f53c Blaze::Thread::ThreadFunction<unsigned int (__cdecl*)(void)>
-: 0 0x7ffc63577374 BaseThreadInitThunk
-: 0 0x7ffc6423cc91 RtlUserThreadStart
-
--------------------------------------------------
-
+[01/01/70 01:16:58] [INFO] [Blaze Engine Graphics] Successfully initialized glew 2.2.0
+[01/01/70 01:16:58] [WARNING] [Blaze Engine Graphics] Asked for OpenGL Major Version 4 got 0
+[01/01/70 01:16:58] [WARNING] [Blaze Engine Graphics] Asked for OpenGL Minor Version 6 got 0
+[01/01/70 01:16:58] [WARNING] [Blaze Engine Graphics] Asked for no stencil buffer, got 8-bit stencil buffer
