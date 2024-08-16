@@ -6,8 +6,6 @@
 
 namespace Blaze::UIGraphics
 {
-	/*
-	
 	enum class TextLineHorizontalAlign
 	{
 		Left, Center, Right,
@@ -20,12 +18,12 @@ namespace Blaze::UIGraphics
 
 	enum class TextHorizontallyUnderfittedOptions
 	{
-		ResizeToFit, Exceed, Squish, CharacterWrap, WordWrap,
+		ResizeToFit, Nothing, Squish, CharacterWrap, WordWrap,
 	};
 
 	enum class TextVerticallyUnderfittedOptions
 	{
-		ResizeToFit, Exceed, Squish
+		ResizeToFit, Nothing, Squish
 	};
 	
 	enum class TextHorizontallyOverfittedOptions
@@ -38,40 +36,15 @@ namespace Blaze::UIGraphics
 		ResizeToFit, Nothing, SpreadLines
 	};
 
-	*/
-	enum class TextLineAlign
+	struct TextLayoutOptions
 	{
-		Left, Center, Right,
-	};
-
-	//TODO remove 'ChangeSize' from here because it doesn't impact the text layout but its size. It can be as an another property
-	//TODO make this into a 'TextFittingOption' enum
-	//TODO implement 'SpreadWords', 'SpreadCharacters'
-	enum class TextHorizontalLayout
-	{
-		//Text line will be squished if it exceeds the width of the node			
-		Squish,
-
-		//multi-line: Text will be wrapped if it exceeds the width of the node,
-		//single-line: Characters that exceed the width of the node aren't shown
-		Wrap,
-
-		//Text will go outside the node if it exceeds the width of the node			
-		NoWrap,
-
-		//The node size will change according to text size
-		//Line alignment has no effect
-		ChangeSize,
-	};
-
-	//TODO remove 'ChangeSize' from here because it doesn't impact the text layout but its size. It can be as an another property
-	//TODO implement 'SpreadLines'
-	enum class TextVerticalLayout
-	{
-		AlignTop,
-		AlignBottom,
-		AlignCenter,
-		ChangeSize
+		TextLineHorizontalAlign lineHorizontalAlign = TextLineHorizontalAlign::Center;
+		TextLineVerticalAlign lineVerticalAlign = TextLineVerticalAlign::Center;
+		TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption = TextHorizontallyUnderfittedOptions::Nothing;
+		TextVerticallyUnderfittedOptions verticallyUnderfittedOption = TextVerticallyUnderfittedOptions::Nothing;
+		TextHorizontallyOverfittedOptions horizontallyOverfittedOption = TextHorizontallyOverfittedOptions::Nothing;
+		TextVerticallyOverfittedOptions verticallyOverfittedOption = TextVerticallyOverfittedOptions::Nothing;
+		float lineDistance = 1.0f;
 	};
 
 	class BLAZE_GRAPHICS_API TextRenderUnit :
@@ -95,9 +68,8 @@ namespace Blaze::UIGraphics
 		void SetTextCharactersColor(const ArrayView<ColorRGBAf>& colors);
 		void SetFont(Font& font);
 		void SetFontHeight(uint pixelFontHeight);
-		void SetLayoutOptions(TextHorizontalLayout horizontalLayout, TextVerticalLayout verticalLayout, TextLineAlign lineAlign, bool multiline);
-		void SetCullingNode(UI::Node* node);
-		void SetLineDistance(float distance);		
+		void SetLayoutOptions(TextLayoutOptions layoutOptions);		
+		void SetCullingNode(UI::Node* node);		
 
 		const Array<CharacterData>& GetCharacterData() override;
 		const Array<CharacterRenderData>& GetCharacterRenderData() override;	
@@ -107,12 +79,8 @@ namespace Blaze::UIGraphics
 		inline UI::Node* GetNode() const { return node; }
 		inline Font* GetFont() const { return font; }
 		inline StringViewUTF8 GetText() const { return text; }
-		inline UI::Node* GetCullingNode() const { return cullingNode; }		
-		inline float GetLineDistanceCoefficient() const { return lineDistanceCoefficient; }
-		inline bool IsMultiline() const { return multiline; }
-		inline TextHorizontalLayout GetHorizontalLayout() const { return horizontalLayout; }
-		inline TextVerticalLayout GetVerticalLayout() const { return verticalLayout; }
-		inline TextLineAlign GetLineAlign() const { return lineAlign; }		
+		inline UI::Node* GetCullingNode() const { return cullingNode; }				
+		inline TextLayoutOptions GetLayoutOptions() const { return layoutOptions; }
 	private:
 		UI::Node* node;					
 		Array<CharacterData> characterData;		
@@ -124,17 +92,12 @@ namespace Blaze::UIGraphics
 		Graphics::FontAtlasesData* fontAtlasesData;
 		uint pixelFontHeight;		
 		UI::Node* cullingNode;		
+		TextLayoutOptions layoutOptions;		
+
+		Vec2f textSize;
 
 		bool renderDataDirty : 1;
 		bool dataDirty : 1;
-
-		bool multiline : 1;
-		TextLineAlign lineAlign;
-		TextHorizontalLayout horizontalLayout;
-		TextVerticalLayout verticalLayout;
-		float lineDistanceCoefficient;
-
-		Vec2f textSize;
 
 		uint characterIndex;
 		Graphics::TexturedRectRenderData renderData;

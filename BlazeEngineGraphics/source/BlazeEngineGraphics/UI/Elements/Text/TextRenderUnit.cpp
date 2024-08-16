@@ -76,8 +76,7 @@ namespace Blaze::UIGraphics
 	
 	TextRenderUnit::TextRenderUnit(UI::Node* node)
 		: TextRenderUnitBase("TexturedRectRenderer"), node(node), characterIndex(0), cullingNode(nullptr), font(nullptr), fontAtlasesData(nullptr),
-		horizontalLayout(TextHorizontalLayout::ChangeSize), verticalLayout(TextVerticalLayout::ChangeSize), lineAlign(TextLineAlign::Center),
-		multiline(true), pixelFontHeight(0), renderDataDirty(false), lineDistanceCoefficient(1.0f)
+		layoutOptions({ }), pixelFontHeight(0), renderDataDirty(false)
 	{
 		node->transformUpdatedEventDispatcher.AddHandler(*this);
 		node->finalTransformUpdatedEventDispatcher.AddHandler(*this);
@@ -130,11 +129,17 @@ namespace Blaze::UIGraphics
 		bool setTransform = false;
 		auto transform = node->GetTransform();
 
-		float lineDistance = pixelFontHeight * lineDistanceCoefficient;
+		float lineDistance = pixelFontHeight * layoutOptions.lineDistance;
 
+		float maxWidth = 0.0f;
+		for (auto& line : lines)
+			maxWidth = std::max(maxWidth, line.width);
+
+		bool horizontallyUnderfitted = maxWidth > transform.size.x;
+		bool verticallyUnderfitted = (lines.Count() - 1) * lineDistance + pixelFontHeight;
+		
 		if (horizontalLayout == TextHorizontalLayout::ChangeSize)
 		{
-			float maxWidth = 0.0f;
 			for (auto& line : lines)
 				maxWidth = std::max(maxWidth, line.width);
 
@@ -329,12 +334,9 @@ namespace Blaze::UIGraphics
 		this->pixelFontHeight = pixelFontHeight;
 		node->MarkTransformDirty();
 	}
-	void TextRenderUnit::SetLayoutOptions(TextHorizontalLayout horizontalLayout, TextVerticalLayout verticalLayout, TextLineAlign lineAlign, bool multiline)
+	void TextRenderUnit::SetLayoutOptions(TextLayoutOptions layoutOptions)
 	{
-		this->horizontalLayout = horizontalLayout;
-		this->verticalLayout = verticalLayout;
-		this->lineAlign = lineAlign;
-		this->multiline = multiline;
+		this->layoutOptions = layoutOptions;
 		dataDirty = true;
 		node->MarkTransformDirty();
 	}
@@ -342,12 +344,7 @@ namespace Blaze::UIGraphics
 	{
 		this->cullingNode = node;
 		renderDataDirty = true;
-	}
-	void TextRenderUnit::SetLineDistance(float distance)
-	{
-		lineDistanceCoefficient = distance;
-		node->MarkTransformDirty();
-	}
+	}	
 	const Array<TextRenderUnit::CharacterData>& TextRenderUnit::GetCharacterData() 
 	{
 		CleanData();
