@@ -7,7 +7,7 @@ namespace Blaze
 	class EventHandler;
 
 	template<typename T>
-	class EventDispatcher
+	class BLAZE_API EventDispatcher
 	{
 	public:		
 		using EventType = T;

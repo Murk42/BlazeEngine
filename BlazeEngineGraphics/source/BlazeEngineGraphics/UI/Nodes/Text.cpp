@@ -32,18 +32,14 @@ namespace Blaze::UI
 	{		
 		renderUnit.SetFontHeight(pixelFontHeight);
 	}
-	void Text::SetLayoutOptions(TextHorizontalLayout horizontalLayout, TextVerticalLayout verticalLayout, TextLineAlign lineAlign, bool multiline)
+	void Text::SetLayoutOptions(TextLayoutOptions layoutOptions)
 	{
-		renderUnit.SetLayoutOptions(horizontalLayout, verticalLayout, lineAlign, multiline);		
+		renderUnit.SetLayoutOptions(layoutOptions);		
 	}
 	void Text::SetCullingNode(UI::Node* cullingNode)
 	{
 		renderUnit.SetCullingNode(cullingNode);		
-	}
-	void Text::SetLineDistance(float distance)
-	{
-		renderUnit.SetLineDistance(distance);		
-	}
+	}	
 	Graphics::RenderUnit* Text::GetRenderUnit(uint index)
 	{
 		if (index == 0)

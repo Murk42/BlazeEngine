@@ -3,7 +3,7 @@
 namespace Blaze::UI
 {
 	class UIInputManager;
-	class UIKeyboardEventHandler
+	class BLAZE_GRAPHICS_API UIKeyboardEventHandler
 	{
 	public:
 		struct KeyPressedEvent { UIInputManager* inputManager; Key key; TimePoint time; uint combo; };

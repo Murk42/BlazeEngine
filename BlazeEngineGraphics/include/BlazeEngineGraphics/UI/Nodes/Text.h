@@ -10,9 +10,13 @@ namespace Blaze
 
 namespace Blaze::UI
 {
-	using TextHorizontalLayout = UIGraphics::TextHorizontalLayout;
-	using TextVerticalLayout = UIGraphics::TextVerticalLayout;
-	using TextLineAlign = UIGraphics::TextLineAlign;	
+	using TextLayoutOptions = UIGraphics::TextLayoutOptions;
+	using TextLineHorizontalAlign = UIGraphics::TextLineHorizontalAlign;
+	using TextLineVerticalAlign = UIGraphics::TextLineVerticalAlign;
+	using TextHorizontallyUnderfittedOptions = UIGraphics::TextHorizontallyUnderfittedOptions;
+	using TextVerticallyUnderfittedOptions = UIGraphics::TextVerticallyUnderfittedOptions;
+	using TextHorizontallyOverfittedOptions = UIGraphics::TextHorizontallyOverfittedOptions;
+	using TextVerticallyOverfittedOptions = UIGraphics::TextVerticallyOverfittedOptions;
 
 	class Text : 
 		public Node,
@@ -30,9 +34,8 @@ namespace Blaze::UI
 		void SetTextCharactersColor(const ArrayView<ColorRGBAf>& colors);
 		void SetFont(Font& font);
 		void SetFontHeight(uint pixelFontHeight);
-		void SetLayoutOptions(TextHorizontalLayout horizontalLayout, TextVerticalLayout verticalLayout, TextLineAlign lineAlign, bool multiline);
-		void SetCullingNode(UI::Node* cullingNode);
-		void SetLineDistance(float distance);
+		void SetLayoutOptions(TextLayoutOptions layoutOptions);
+		void SetCullingNode(UI::Node* cullingNode);		
 		
 		inline Font* GetFont() const { return renderUnit.GetFont(); }
 		inline StringViewUTF8 GetText() const { return renderUnit.GetText(); }
@@ -40,8 +43,7 @@ namespace Blaze::UI
 		inline auto GetCharacterData() { return renderUnit.GetCharacterData(); }
 		inline auto GetCharacterRenderData() { return renderUnit.GetCharacterRenderData(); }
 		inline auto GetLineData() { return renderUnit.GetLineData(); }
-		inline UI::Node* GetCullingNode() { return renderUnit.GetCullingNode(); }
-		inline float GetLineDistanceCoefficient() const { return renderUnit.GetLineDistanceCoefficient(); }
+		inline UI::Node* GetCullingNode() { return renderUnit.GetCullingNode(); }		
 
 		Graphics::RenderUnit* GetRenderUnit(uint index) override;
 	private:

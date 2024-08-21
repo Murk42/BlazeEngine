@@ -32,7 +32,7 @@ namespace Blaze::ECS
 		using SystemConstructor = void(*)(void*);
 		using SystemDestructor = void(*)(void*);		
 
-		ComponentTypeData(ComponentTypeRegistry* registry, StringView name, uint index,
+		ComponentTypeData(ComponentTypeRegistry* registry, StringView name, uintMem index,
 			uintMem size, ptrdiff_t baseOffset, Constructor constructor, Destructor destructor,
 			uintMem systemSize, ptrdiff_t systemBaseOffset, SystemConstructor systemConstructor, SystemConstructor systemDestructor,
 			Set<StringView> typeTags);
@@ -40,7 +40,7 @@ namespace Blaze::ECS
 
 		inline const ComponentTypeRegistry* GetRegistry() const { return registry; }
 		inline StringView GetTypeName() const { return typeName; }
-		inline uint Index() const { return index; }
+		inline uintMem Index() const { return index; }
 
 		inline uintMem Size() const { return size; }
 		inline uintMem BaseOffset() const { return baseOffset; }
@@ -72,7 +72,7 @@ namespace Blaze::ECS
 		const ComponentTypeRegistry* registry;
 		StringView typeName;
 		Set<StringView> typeTags;
-		uint index;
+		uintMem index;
 
 		uintMem size;
 		ptrdiff_t baseOffset;

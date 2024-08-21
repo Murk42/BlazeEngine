@@ -365,6 +365,14 @@ namespace Blaze::UIGraphics
 		auto& lineData = textRenderUnit.GetLineData();
 
 		cursorLineIndex = std::min(cursorLineIndex, lineData.Count() - 1);
+
+		//Wrap the cursor if the cursor is outside the line and the next line is wrapped
+		//while (cursorLineCharacterIndex > lineData[cursorLineIndex].characterCount && lineData.Count() > cursorLineIndex + 1 && lineData[cursorLineIndex + 1].wrapped)
+		//{
+		//	cursorLineCharacterIndex -= lineData[cursorLineIndex].characterCount;
+		//	++cursorLineIndex;
+		//}
+
 		cursorLineCharacterIndex = std::min(cursorLineCharacterIndex, lineData[cursorLineIndex].characterCount);
 
 		if (cursorLineIndex != 0 && cursorLineCharacterIndex == 0)
@@ -390,7 +398,7 @@ namespace Blaze::UIGraphics
 		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 	}	
 	void TextCursorRenderUnit::OnEvent(UIGraphics::TextRenderUnitBase::RenderDataUpdatedEvent event)
-	{
+	{						
 		renderDataDirty = true;
 	}
 }

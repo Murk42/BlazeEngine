@@ -3,7 +3,7 @@
 
 namespace Blaze::Graphics
 {
-	class RenderUnit : 
+	class BLAZE_GRAPHICS_API RenderUnit :
 		public RenderStream
 	{
 	public:

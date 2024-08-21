@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Elements/Text/TextRenderUnit.h"
+#include <numeric>
 
 namespace Blaze::UIGraphics
 {
@@ -73,22 +74,78 @@ namespace Blaze::UIGraphics
 		rect.size = it->value.uv2 - it->value.uv1;
 		return true;
 	}
-
-	static void WrapWords(Array<TextLineLayoutData>& lines, float wrapWidth)
+	
+	static float MaxWidth(ArrayView<TextLineLayoutData> lines)
 	{
+		return std::max_element(lines.FirstIterator(), lines.BehindIterator(), [](const auto& a, const auto& b) { return a.width < b.width; })->width;
+	}
+	
+	static float SumHeight(ArrayView<TextLineLayoutData> lines)
+	{		
+		float sum = 0;
+		for (auto& line : lines)
+			sum += line.verticalAdvance;
+		return sum;
+	}
 
+	static uintMem FindWordStart(Array<CharacterLayoutData>& characters, uintMem i)
+	{
+		while (i > 0 && !isspace(characters[i].character.Value()))
+			--i;
+
+		return i;
+	}
+
+	static void WrapWords(Array<TextLineLayoutData>& lines, float wrapWidth, float wrapLineAdvance)
+	{				
+		for (uintMem i = 0; i < lines.Count(); ++i)
+			if (lines[i].width > wrapWidth && lines[i].characters.Count() > 0)
+			{								
+				uintMem j = lines[i].characters.Count() - 1;
+				float newLineWidth = FLT_MAX;
+				for (; j != 0; --j)
+				{
+					newLineWidth = lines[i].characters[j].pos.x + lines[i].characters[j].size.x;
+					if (newLineWidth < wrapWidth)
+						break;
+				}
+
+				//j = std::max(FindWordStart(lines[i].characters, j), (uintMem)1);
+
+				auto& newLine = *lines.AddAt(i + 1);
+				auto& line = lines[i];
+
+				newLine.characters = line.characters.Split(j + 1);
+				newLine.width = newLine.characters.Last().pos.x + newLine.characters.Last().size.x - newLine.characters.First().pos.x;				
+				newLine.verticalAdvance = line.verticalAdvance;				
+				
+				line.width = newLineWidth;
+				line.verticalAdvance = wrapLineAdvance;
+											
+				float characterOffset = newLine.characters.First().pos.x;
+				for (uint j = 0; j < newLine.characters.Count(); ++j)				
+					newLine.characters[j].pos.x -= characterOffset;
+			}
 	}
 	static void WrapCharacters(Array<TextLineLayoutData>& lines, float wrapWidth)
 	{
 
 	}	
-	static void SpreadCharacters(Array<TextLineLayoutData>& lines, float spreadWidth)
+	static void SpreadCharacters(Array<TextLineLayoutData>& lines, float width, float targetWidth)
 	{
 
 	}
-	static void SpreadWords(Array<TextLineLayoutData>& lines, float spreadWidth)
+	static void SpreadWords(Array<TextLineLayoutData>& lines, float width, float targetWidth)
 	{
 
+	}
+	static void SquishCharactersHorizontally(Array<TextLineLayoutData>& lines, float width, float targetWidth)
+	{
+
+	}
+	static void SquishCharactersVertically(Array<TextLineLayoutData>& lines, float height, float targetHeight)
+	{		
+		//TODO scale characters and lines
 	}
 	
 	TextRenderUnit::TextRenderUnit(UI::Node* node)
@@ -133,200 +190,60 @@ namespace Blaze::UIGraphics
 		if (!dataDirty)
 			return false;
 
-		dataDirty = false;
+		dataDirty = false;		
 
-		if (font == nullptr)
-			return { };
+		auto transform = node->GetTransform();				
 
-		Array<TextLineLayoutData> lines;
+		Array<TextLineLayoutData> lines = GetLineLayoutData(text, font, pixelFontHeight, pixelFontHeight * layoutOptions.lineAdvance);
 
-		{
-			MultiLineTextLayouter layouter;
-			layouter.SetText(text, font->GetMetrics(pixelFontHeight));
-			lines = layouter.GetLines();
-		}
-
-		if (lines.Empty())
-			lines = { TextLineLayoutData{.characters = { }, .width = 0.0f } };
+		Vec2f textSize = FitLinesIntoBounds(
+			layoutOptions.horizontallyUnderfittedOption, 
+			layoutOptions.horizontallyOverfittedOption,
+			layoutOptions.verticallyUnderfittedOption,
+			layoutOptions.verticallyOverfittedOption,
+			lines, pixelFontHeight * layoutOptions.wrappedLineAdvance, transform.size
+		);
 		
-		auto transform = node->GetTransform();		
-		
-		float textWidth = std::max_element(lines.FirstIterator(), lines.BehindIterator(), [](const auto& a, const auto& b) { return a.width < b.width; })->width;
-		float horizontalScale = 1.0f;
-
-		if (textWidth > transform.size.x)
-		{
-			switch (layoutOptions.horizontallyUnderfittedOption)
-			{				
-			case TextHorizontallyUnderfittedOptions::Nothing:
-				break;
-			case TextHorizontallyUnderfittedOptions::ResizeToFit:
-				transform.size.x = textWidth;				
-				break;
-			case TextHorizontallyUnderfittedOptions::CharacterWrap:
-				WrapCharacters(lines, transform.size.x);
-				textWidth = transform.size.x;
-				break;
-			case TextHorizontallyUnderfittedOptions::WordWrap:
-				WrapWords(lines, transform.size.x);				
-				textWidth = transform.size.x;
-				break;
-			case TextHorizontallyUnderfittedOptions::Squish:				
-				horizontalScale = textWidth / transform.size.x;
-				textWidth = transform.size.x;
-				break;			
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)layoutOptions.horizontallyUnderfittedOption));
-				break;
-			}			
-		}
-		else if (textWidth < transform.size.x)
-		{
-			switch (layoutOptions.horizontallyOverfittedOption)
-			{
-			case TextHorizontallyOverfittedOptions::Nothing:
-				break;
-			case TextHorizontallyOverfittedOptions::ResizeToFit:
-				transform.size.x = textWidth;
-				break;
-			case TextHorizontallyOverfittedOptions::SpreadCharacters:
-				SpreadCharacters(lines, transform.size.x);
-				textWidth = transform.size.x;
-				break;
-			case TextHorizontallyOverfittedOptions::SpreadWords:
-				SpreadWords(lines, transform.size.x);
-				textWidth = transform.size.x;
-				break;			
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)layoutOptions.horizontallyOverfittedOption));
-				break;
-			}			
-		}
-		
-		float lineDistance = pixelFontHeight * layoutOptions.lineDistance;
-		float textHeight = ((float)lines.Count() - 0.4f) * lineDistance;
-		float verticalScale = 1.0f;		
-
-		if (textHeight > transform.size.y)
-		{
-			switch (layoutOptions.verticallyUnderfittedOption)
-			{
-			case TextVerticallyUnderfittedOptions::Nothing:
-				break;
-			case TextVerticallyUnderfittedOptions::ResizeToFit:
-				transform.size.y = textHeight;
-				break;
-			case TextVerticallyUnderfittedOptions::Squish: {
-				verticalScale = textHeight / transform.size.y;
-
-				if (lines.Count() == 1)
-					lineDistance *= verticalScale;
-				else
-					lineDistance = transform.size.y / ((float)lines.Count() - 0.4f);
-
-				textHeight = transform.size.y;
-				break;
-			}
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)layoutOptions.verticallyUnderfittedOption));
-				break;
-			}
-		}
-		else if (textHeight < transform.size.y)
-		{
-			switch (layoutOptions.verticallyOverfittedOption)
-			{
-			case TextVerticallyOverfittedOptions::Nothing:
-				break;
-			case TextVerticallyOverfittedOptions::ResizeToFit:
-				transform.size.y = textHeight;
-				break;
-			case TextVerticallyOverfittedOptions::SpreadLines: {
-				lineSpacing = LineSpacing::Spread;				
-
-				if (lines.Count() == 1)
-					lineDistance *= transform.size.y - pixelFontHeight;
-				else
-					lineDistance = (transform.size.y - pixelFontHeight) / (lines.Count() - 1);
-
-				textHeight = transform.size.y;
-
-				break;
-			}
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)layoutOptions.verticallyOverfittedOption));
-				break;
-			}
-		}		
+		float verticalOffset = GetLinesVerticalOffset(layoutOptions.lineVerticalAlign, textSize.y, transform.size.y) - lines.First().verticalAdvance;
 
 		characterData.ReserveExactly(text.CharacterCount());
-		lineData.ReserveExactly(lines.Count());		
-
-		Vec2f offset = { 0.0f, lineDistance * -0.6f };		
-
-		switch (layoutOptions.lineVerticalAlign)
-		{
-		case TextLineVerticalAlign::Top:
-			offset.y += transform.size.y;
-			break;
-		case TextLineVerticalAlign::Bottom:
-			offset.y += textSize.y;
-			break;
-		case TextLineVerticalAlign::Center:
-			offset.y += transform.size.y / 2 + textSize.y / 2;
-			break;
-		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextLineVerticalAlign enum value. The integer value was: " + StringParsing::Convert((uint)layoutOptions.lineVerticalAlign));
-			break;
-		}
+		lineData.ReserveExactly(lines.Count());
 
 		uint characterIndex = 0;
-		for (uintMem i = 0; i < lines.Count(); ++i, offset.y -= lineDistance)
+		for (uintMem i = 0; i < lines.Count(); ++i)
 		{
 			auto& line = lines[i];			
 
-			switch (layoutOptions.lineHorizontalAlign)
-			{
-			case TextLineHorizontalAlign::Left:
-				offset.x += 0;
-				break;
-			case TextLineHorizontalAlign::Right:
-				offset.x += textWidth - line.width;
-				break;
-			case TextLineHorizontalAlign::Center:
-				offset.x += std::ceil((textWidth + line.width) / 2);
-				break;
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextLineHorizontalAlign enum value. The integer value was: " + StringParsing::Convert((uint)layoutOptions.lineHorizontalAlign));
-				break;
-			}			
+			float horizontalOffset = GetLineHorizontalOffset(layoutOptions.lineHorizontalAlign, line.width, transform.size.x);
 
 			auto& lineData = *this->lineData.AddBack();
 			lineData.firstCharacterIndex = characterIndex;
 			lineData.characterCount = line.characters.Count();
-			lineData.pos = offset;
-			lineData.size = Vec2f(line.width, pixelFontHeight * verticalScale);			
+			lineData.pos = Vec2f(horizontalOffset, verticalOffset);
+			lineData.size = Vec2f(line.width, line.verticalAdvance);			
 
 			if (!line.characters.Empty() && line.characters.Last().character == '\n')
 				--lineData.characterCount;
 
 			for (uintMem j = 0; j < line.characters.Count(); ++j, ++characterIndex)
 			{
-				auto src = line.characters[j];
+				const auto& src = line.characters[j];
 
 				auto& dst = *characterData.AddBack();
-				dst.pos = src.pos + offset;
-				dst.size = src.size * Vec2f(1.0f, verticalScale);
+				dst.pos = src.pos + Vec2f(horizontalOffset, verticalOffset);
+				dst.size = src.size;
 				dst.character = src.character;
 				dst.lineIndex = i;
 			}
+
+			verticalOffset -= line.verticalAdvance;
 		}
 		
 		node->SetTransform(transform);
 
 		renderDataDirty = true;
 		return true;
-	}
+	}	
 	bool TextRenderUnit::CleanRenderData()
 	{
 		CleanData();	
@@ -377,7 +294,7 @@ namespace Blaze::UIGraphics
 			Rect rect = Rectf(data.pos, data.size);
 
 
-			if (cullingNode != nullptr && !RectIntersect(rect, cullingRect) || horizontalLayout == TextHorizontalLayout::Wrap && !multiline && data.lineIndex != 0)
+			if (cullingNode != nullptr && !RectIntersect(rect, cullingRect))
 			{
 				renderData.isCulled = true;
 				continue;
@@ -480,7 +397,155 @@ namespace Blaze::UIGraphics
 
 			++characterIndex;
 		}
-	}	
+	}
+	Array<TextLineLayoutData> TextRenderUnit::GetLineLayoutData(StringViewUTF8 text, Font* font, uint pixelFontHeight, float lineAdvance)
+	{	
+		Array<TextLineLayoutData> lines;
+
+		if (font != nullptr)
+		{
+			//TODO remove text layouters
+			MultiLineTextLayouter layouter;
+			layouter.SetText(text, font->GetMetrics(pixelFontHeight));
+			lines = layouter.GetLines();
+		}
+
+		if (lines.Empty())
+			lines = { TextLineLayoutData{.characters = { }, .width = 0, .verticalAdvance = 0 } };
+
+		for (auto& line : lines)
+		{
+			line.verticalAdvance = lineAdvance;			
+		}
+
+		return lines;
+	}
+	Vec2f TextRenderUnit::FitLinesIntoBounds(
+		TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption,
+		TextHorizontallyOverfittedOptions horizontallyOverfittedOption,
+		TextVerticallyUnderfittedOptions verticallyUnderfittedOption,
+		TextVerticallyOverfittedOptions verticallyOverfittedOption, 
+		Array<TextLineLayoutData>& lines, float wrappedLineAdvance, Vec2f& boundingSize
+	) {		
+		Vec2f textSize;
+		textSize.x = MaxWidth(lines);
+
+		if (textSize.x > boundingSize.x)
+		{
+			switch (horizontallyUnderfittedOption)
+			{
+			case TextHorizontallyUnderfittedOptions::Nothing:				
+				break;
+			case TextHorizontallyUnderfittedOptions::ResizeToFit:				
+				boundingSize.x = textSize.x;
+				break;
+			case TextHorizontallyUnderfittedOptions::CharacterWrap:
+				WrapCharacters(lines, boundingSize.x);
+				textSize.x = MaxWidth(lines);
+				break;
+			case TextHorizontallyUnderfittedOptions::WordWrap:
+				WrapWords(lines, boundingSize.x, wrappedLineAdvance);
+				textSize.x = MaxWidth(lines);
+				break;
+			case TextHorizontallyUnderfittedOptions::Squish:
+				SquishCharactersHorizontally(lines, textSize.x, boundingSize.x);
+				textSize.x = MaxWidth(lines);
+				break;
+			default:
+				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyUnderfittedOption));
+				break;
+			}
+		}
+		else if (textSize.x < boundingSize.x)
+		{
+			switch (horizontallyOverfittedOption)
+			{
+			case TextHorizontallyOverfittedOptions::Nothing:
+				break;
+			case TextHorizontallyOverfittedOptions::ResizeToFit:
+				boundingSize.x = textSize.x;
+				break;
+			case TextHorizontallyOverfittedOptions::SpreadCharacters:
+				SpreadCharacters(lines, textSize.x, boundingSize.x);
+				break;
+			case TextHorizontallyOverfittedOptions::SpreadWords:
+				SpreadWords(lines, textSize.x, boundingSize.x);
+				break;
+			default:
+				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyOverfittedOption));
+				break;
+			}
+		}
+
+		textSize.y = SumHeight(lines);
+
+		if (textSize.y > boundingSize.y)
+		{
+			switch (verticallyUnderfittedOption)
+			{
+			case TextVerticallyUnderfittedOptions::Nothing:
+				break;
+			case TextVerticallyUnderfittedOptions::ResizeToFit:
+				boundingSize.y = textSize.y;
+				break;
+			case TextVerticallyUnderfittedOptions::Squish: {
+				SquishCharactersVertically(lines, textSize.y, boundingSize.y);
+				textSize.y = SumHeight(lines);
+				break;
+			}
+			default:
+				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyUnderfittedOption));
+				break;
+			}
+		}
+		else if (textSize.y < boundingSize.y)
+		{
+			switch (verticallyOverfittedOption)
+			{
+			case TextVerticallyOverfittedOptions::Nothing:
+				break;
+			case TextVerticallyOverfittedOptions::ResizeToFit:
+				boundingSize.y = textSize.y;
+				break;
+			case TextVerticallyOverfittedOptions::SpreadLines: {				
+				break;
+			}
+			default:
+				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyOverfittedOption));
+				break;
+			}
+		}
+
+		return textSize;
+	}
+	float TextRenderUnit::GetLinesVerticalOffset(TextLineVerticalAlign align, float textHeight, float boundingHeight)
+	{
+		switch (align)
+		{
+		default:
+			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextLineVerticalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
+		case TextLineVerticalAlign::Top:
+			return boundingHeight;
+		case TextLineVerticalAlign::Bottom:
+			return textHeight;
+		case TextLineVerticalAlign::Center:
+			return (boundingHeight + textHeight) / 2;
+		}
+	}
+	float TextRenderUnit::GetLineHorizontalOffset(TextLineHorizontalAlign align, float lineWidth, float boundingWidth)
+	{
+		switch (align)
+		{
+		default:
+			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextLineHorizontalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
+		case TextLineHorizontalAlign::Left:
+			return 0;			
+		case TextLineHorizontalAlign::Right:
+			return boundingWidth - lineWidth;			
+		case TextLineHorizontalAlign::Center:
+			return (boundingWidth - lineWidth) / 2;
+		}
+	}
 	void TextRenderUnit::OnEvent(UI::Node::TransformUpdatedEvent event)
 	{
 		dataDirty = true;

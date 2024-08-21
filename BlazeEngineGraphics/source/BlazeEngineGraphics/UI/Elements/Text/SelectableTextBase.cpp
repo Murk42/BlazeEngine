@@ -14,6 +14,18 @@ namespace Blaze::UI
 		grabbedSelectionBegin(0), grabbedSelectionEnd(0), mouseDown(false)
 	{
 	}
+	bool SelectableTextBase::HitTest(Vec2f screenPosition)
+	{
+		if (!UIInputNode::HitTest(screenPosition))
+			return false;
+
+		Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(screenPosition);
+		uintMem lineIndex;
+
+		if (!textRenderUnit.GetLineIndexUnderPosition(localSpacePos, lineIndex))
+			return false;
+		return true;
+	}
 	void SelectableTextBase::OnEvent(DeselectedEvent event)
 	{
 		textSelectionRenderUnit.ClearSelection();
@@ -225,10 +237,7 @@ namespace Blaze::UI
 		Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.pos);
 		uintMem lineIndex;
 
-		if (textRenderUnit.GetLineIndexUnderPosition(localSpacePos, lineIndex))
-			Input::SetCursorType(Input::CursorType::IBeam);
-		else
-			Input::SetCursorType(Input::CursorType::Arrow);
+		textRenderUnit.GetLineIndexUnderPosition(localSpacePos, lineIndex);			
 
 		if (mouseDown)
 		{
@@ -257,6 +266,7 @@ namespace Blaze::UI
 	}
 	void SelectableTextBase::OnEvent(MouseEnterEvent event)
 	{		
+		Input::SetCursorType(Input::CursorType::IBeam);
 	}
 	void SelectableTextBase::OnEvent(MouseExitEvent event)
 	{		

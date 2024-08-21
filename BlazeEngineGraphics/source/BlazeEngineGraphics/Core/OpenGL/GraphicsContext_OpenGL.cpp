@@ -2,7 +2,7 @@
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/RenderWindow_OpenGL.h"
 
-#include "BlazeEngine/Console/Console.h"]
+#include "BlazeEngine/Console/Console.h"
 
 
 #include <Windows.h>

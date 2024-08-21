@@ -5,7 +5,7 @@ namespace Blaze::ECS
 {
 	//ComponentTypeData emptyComponentTypeData;
 	 
-	ComponentTypeData::ComponentTypeData(ComponentTypeRegistry* registry, StringView name, uint index,
+	ComponentTypeData::ComponentTypeData(ComponentTypeRegistry* registry, StringView name, uintMem index,
 		uintMem size, ptrdiff_t baseOffset, Constructor constructoror, Destructor destructoror,
 		uintMem systemSize, ptrdiff_t systemBaseOffset, SystemConstructor systemConstructor, SystemDestructor systemDestructor,
 		Set<StringView> typeTags)

@@ -36,24 +36,31 @@ namespace Blaze::UIGraphics
 			//UV of the upper right point.
 			Vec2f uv2;
 		};
+		struct LineWrapData
+		{
+			Vec2f pos;
+			Vec2f size;
+			uintMem characterCount;
+		};
 		struct LineData
 		{
 			//Position of the line in text transform space.
 			Vec2f pos;
+			//Size of the line in text transform space.
+			Vec2f size;
 			//Index of the first character in the line.
 			uintMem firstCharacterIndex = 0;
 			//Count of characters in the line.
 			uintMem characterCount = 0;			
-			//Size of the line in text transform space. Includes line squishing.
-			Vec2f size;
-		};
+
+			Array<LineWrapData> wrapData;
+		};		
 		struct RenderDataUpdatedEvent
 		{
 			TextRenderUnitBase* renderUnit;
-		};
-
-		EventDispatcher<RenderDataUpdatedEvent> renderDataUpdatedEventDispatcher;
-		//UI::Node& node;
+		};		
+		
+		EventDispatcher<RenderDataUpdatedEvent> renderDataUpdatedEventDispatcher;		
 
 		TextRenderUnitBase(StringView rendererName);		
 			

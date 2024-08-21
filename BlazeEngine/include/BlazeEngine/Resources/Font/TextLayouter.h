@@ -13,6 +13,7 @@ namespace Blaze
 	{
 		Array<CharacterLayoutData> characters;
 		float width;
+		float verticalAdvance;		
 	};	
 
 	class BLAZE_API TextLayouterBase

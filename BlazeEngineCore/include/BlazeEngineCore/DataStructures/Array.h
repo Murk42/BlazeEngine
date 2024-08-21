@@ -145,7 +145,7 @@ namespace Blaze
 		Array(const T (&arr)[S]) requires std::is_copy_constructible_v<T>;
 		Array(const T* ptr, uintMem count) requires std::is_copy_constructible_v<T>;
 		Array(const std::initializer_list<T>& arr) requires std::is_copy_constructible_v<T>;
-		Array(const ArrayView<std::remove_const_t<T>>& arr) requires std::is_copy_constructible_v<T>;		
+		Array(const ArrayView<std::remove_const_t<T>>& arr) requires std::is_copy_constructible_v<T>;				
 
 		~Array();
 
@@ -156,16 +156,29 @@ namespace Blaze
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddBack(Args&& ... args) requires std::constructible_from<T, T&&>;
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator AddAt(uintMem index, Args&& ... args) requires std::constructible_from<T, T&&>;
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator AddAt(Iterator it, Args&& ... args) requires std::constructible_from<T, T&&>;
 		/*
 			This function will construct a new element only if the current buffer has space for it. If not returns
 			a null iterator.
 		*/
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator TryAddBack(Args&& ... args);
+
+		template<typename ... Args> requires std::constructible_from<T, Args...>
+		Iterator AddAt(uintMem index, Args&& ... args) requires std::constructible_from<T, T&&>;
+		template<typename ... Args> requires std::constructible_from<T, Args...>
+		Iterator AddAt(Iterator it, Args&& ... args) requires std::constructible_from<T, T&&>;
+
+		//Inserts a array into the array, such that the object pointed by it will be directly after the inserted array
+		void Insert(Iterator it, ArrayView<T> array) requires std::constructible_from<T, T&&>;
+		//Inserts a array into the array, such that the object at index 'index' will be directly after the inserted array
+		void Insert(uintMem index, ArrayView<T> array) requires std::constructible_from<T, T&&>;
+
+		//Splits the array into two arrays. The elements from the first to 'it' would be in the current array and all elements
+		//after and including 'it' will be returned.
+		Array Split(Iterator it);
+		//Splits the array into two arrays. The elements from the first to 'it' would be in the current array and all elements
+		//after and including 'it' will be returned.
+		Array Split(uintMem index);
 		
 		void EraseLast();		
 		void EraseAt(uintMem index);

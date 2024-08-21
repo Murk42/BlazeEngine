@@ -323,11 +323,6 @@ namespace Blaze
 	template<typename ...Args> requires std::constructible_from<T, Args...>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddBack(Args && ...args) requires std::constructible_from<T, T&&>
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
-
 		if (auto newPtr = ReallocateUnsafe(count + 1))
 		{
 			for (uintMem i = 0; i < count; ++i)
@@ -353,13 +348,27 @@ namespace Blaze
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires std::constructible_from<T, Args...>
+	inline Array<T, Allocator>::Iterator Array<T, Allocator>::TryAddBack(Args && ...args)
+	{
+		if (count < reserved)
+		{
+			std::construct_at(ptr + count, std::forward<Args>(args)...);
+			++count;
+
+#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
+		return Iterator(ptr + count - 1, this);
+#else
+		return Iterator(ptr + count - 1);
+#endif
+		}
+		else
+			return Iterator();
+
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename ...Args> requires std::constructible_from<T, Args...>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(uintMem index, Args && ...args) requires std::constructible_from<T, T&&>
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
-
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index > count)
 			Debug::Logger::LogFatal("Blaze Engine", "Trying to add an element outside the array");
@@ -400,33 +409,79 @@ namespace Blaze
 	{
 		return AddAt(it.ptr - ptr, std::forward<Args>(args)...);
 	}
+	template<typename T, AllocatorType Allocator>	
+	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::constructible_from<T, T&&>
+	{		
+		Insert(it.ptr - ptr, array);
+	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::TryAddBack(Args && ...args)
+	inline void Array<T, Allocator>::Insert(uintMem index, ArrayView<T> array)  requires std::constructible_from<T, T&&>
 	{
-		if (count < reserved)
-		{
-			std::construct_at(ptr + count, std::forward<Args>(args)...);
-			++count;
-
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + count - 1, this);
-#else
-		return Iterator(ptr + count - 1);
+#ifdef BLAZE_INVALID_ITERATOR_CHECK
+		if (index > count)
+			Debug::Logger::LogFatal("Blaze Engine", "Trying to add an element outside the array");
 #endif
+
+		if (auto newPtr = ReallocateUnsafe(count + array.Count()))
+		{
+			uintMem i = 0;
+			for (; i < index; ++i)
+				std::construct_at(newPtr + i, std::move(ptr[i]));
+
+			for (; i < index + array.Count(); ++i)
+				std::construct_at(newPtr + i, std::move(array[i - index]));
+
+			for (; i < count + array.Count(); ++i)
+				std::construct_at(newPtr + i, std::move(ptr[i - array.Count()]));
+
+			std::destroy_n(ptr, count);
+			allocator.Free(ptr);
+			ptr = newPtr;
 		}
 		else
-			return Iterator();
+		{
+			for (uintMem i = 1; i < array.Count() + 1; ++i)
+				ptr[count + array.Count() - i] = std::move(ptr[count - i]);
 
+			for (uintMem i = index; i < index + array.Count(); ++i)
+				std::construct_at(ptr + i, std::move(array[i - index]));			
+		}
+
+		count += array.Count();
+	}
+	template<typename T, AllocatorType Allocator>
+	inline Array<T, Allocator> Array<T, Allocator>::Split(Iterator it)
+	{
+		return Split(it.ptr - ptr);
+	}
+	template<typename T, AllocatorType Allocator>
+	inline Array<T, Allocator> Array<T, Allocator>::Split(uintMem index)
+	{
+#ifdef BLAZE_INVALID_ITERATOR_CHECK
+		if (index > count)
+			Debug::Logger::LogFatal("Blaze Engine", "Trying to add an element outside the array");
+#endif
+
+		auto oldPtr = ptr;
+		auto oldCount = count;
+
+		if (auto newPtr = ReallocateUnsafe(index))
+		{
+			for (uintMem i = 0; i < index; ++i)
+				std::construct_at(newPtr + i, std::move(ptr[i]));
+
+			ptr = newPtr;
+		}
+
+		count = index;
+			
+		return Array<T, Allocator>(oldCount - count, [oldPtr, index](T* ptr, uintMem i) {
+			std::construct_at(ptr, std::move(*(oldPtr + index + i)));
+			});
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::EraseLast()
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
-
 		if (auto newPtr = ReallocateUnsafe(count - 1))
 		{
 			for (uintMem i = 0; i < count - 1; ++i)
@@ -446,11 +501,6 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::EraseAt(uintMem index)
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
-
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
 			Debug::Logger::LogFatal("Blaze Engine", "Trying to erase an element outside the array");
@@ -486,11 +536,6 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::Append(const Array& other) requires std::constructible_from<T, const T&>
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
-
 		if (auto newPtr = ReallocateUnsafe(count + other.count))
 		{
 			for (uintMem i = 0; i < count; ++i)
@@ -509,11 +554,6 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::Append(Array&& other) requires std::constructible_from<T, T&&>
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
-
 		if (auto newPtr = ReallocateUnsafe(count + other.count))
 		{
 			for (uintMem i = 0; i < count; ++i)
@@ -540,10 +580,6 @@ namespace Blaze
 	template<typename ...Args> requires std::constructible_from<T, Args...>
 	inline void Array<T, Allocator>::Resize(uintMem newCount, Args&& ...args) requires std::constructible_from<T, T&&>
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
 		auto newPtr = ReallocateUnsafe(newCount);
 
 		if (newCount < count)
@@ -584,10 +620,6 @@ namespace Blaze
 	template<typename F> requires std::invocable<F, T*, uintMem>
 	void Array<T, Allocator>::ResizeWithFunction(uintMem newCount, const F& constructFunction) requires std::constructible_from<T, T&&>
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
 		auto newPtr = ReallocateUnsafe(newCount);
 
 		if (newCount < count)
@@ -907,6 +939,11 @@ namespace Blaze
 		}
 		else
 			return nullptr;
+
+#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
+		if (iteratorCount > 0)
+			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
+#endif
 
 		return (T*)allocator.Allocate(reserved * sizeof(T));
 	}

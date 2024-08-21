@@ -30,6 +30,7 @@ namespace Blaze::UI
 	protected:
 		virtual StringUTF8 GetTextSubString(uintMem begin, uintMem end) = 0;
 		
+		bool HitTest(Vec2f screenPosition) override;
 		void OnEvent(DeselectedEvent event) override;
 		void OnEvent(KeyPressedEvent event) override;		
 		void OnEvent(MousePressedEvent event) override;

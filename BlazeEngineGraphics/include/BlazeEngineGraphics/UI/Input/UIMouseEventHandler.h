@@ -4,7 +4,7 @@ namespace Blaze::UI
 {
 	class UIInputManager;
 
-	class UIMouseEventHandler
+	class BLAZE_GRAPHICS_API UIMouseEventHandler
 	{
 	public:
 		enum class MouseButton {

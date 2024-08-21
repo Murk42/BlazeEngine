@@ -7,7 +7,7 @@ namespace Blaze::UI
 	class UIMouseEventHandler;
 	class UISelectEventHandler;
 
-	class UIInputNode : public Node
+	class BLAZE_GRAPHICS_API UIInputNode : public Node
 	{
 	public:
 		UIInputNode();

@@ -134,7 +134,7 @@ namespace Blaze
 			prevCharacter = character;
 		}		
 		
-		line->width = cursor - lastAdvance + lastWidth;
+		line->width = cursor - lastAdvance + lastWidth;		
 	}
 	WrappedLineTextLayouter::WrappedLineTextLayouter()
 		: wrapWidth(0)

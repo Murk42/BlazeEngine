@@ -5,7 +5,7 @@ namespace Blaze::UI
 {	
 	class UIInputManager;
 
-	class UISelectEventHandler
+	class BLAZE_GRAPHICS_API UISelectEventHandler
 	{
 	public:
 		struct SelectedEvent { UIInputManager* inputManager; };

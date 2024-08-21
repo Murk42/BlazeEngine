@@ -44,7 +44,8 @@ namespace Blaze::UIGraphics
 		TextVerticallyUnderfittedOptions verticallyUnderfittedOption = TextVerticallyUnderfittedOptions::Nothing;
 		TextHorizontallyOverfittedOptions horizontallyOverfittedOption = TextHorizontallyOverfittedOptions::Nothing;
 		TextVerticallyOverfittedOptions verticallyOverfittedOption = TextVerticallyOverfittedOptions::Nothing;
-		float lineDistance = 1.0f;
+		float lineAdvance = 1.0f;
+		float wrappedLineAdvance = 0.9f;
 	};
 
 	class BLAZE_GRAPHICS_API TextRenderUnit :
@@ -104,7 +105,16 @@ namespace Blaze::UIGraphics
 
 		void SkipCulledCharacters();								
 
-		Array<TextLineLayoutData> GetTextLineLayoutData();
+		static Array<TextLineLayoutData> GetLineLayoutData(StringViewUTF8 text, Font* font, uint pixelFontHeight, float lineAdvance);
+		static Vec2f FitLinesIntoBounds(
+			TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption,
+			TextHorizontallyOverfittedOptions horizontallyOverfittedOption,
+			TextVerticallyUnderfittedOptions verticallyUnderfittedOption,
+			TextVerticallyOverfittedOptions verticallyOverfittedOption, 
+			Array<TextLineLayoutData>& lines, float wrappedLineAdvance, Vec2f& boundingSize
+		);
+		static float GetLinesVerticalOffset(TextLineVerticalAlign align, float textHeight, float boundingHeight);
+		static float GetLineHorizontalOffset(TextLineHorizontalAlign align, float lineWidth, float boundingWidth);
 		
 		void OnEvent(UI::Node::TransformUpdatedEvent event) override;
 		void OnEvent(UI::Node::FinalTransformUpdatedEvent event) override;		

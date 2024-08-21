@@ -17,14 +17,11 @@ namespace Blaze::UI
 		switch (index)
 		{
 		case 0:
-			return &textRenderUnit;
-			break;
+			return &textRenderUnit;			
 		case 1:
-			return &textSelectionRenderUnit;
-			break;		
-		case 2:
-			return nullptr;
-			break;
+			return &textSelectionRenderUnit;			
+		default:
+			return nullptr;			
 		}
 	}
 }

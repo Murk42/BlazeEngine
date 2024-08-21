@@ -6,7 +6,7 @@ namespace Blaze
 	class StringViewUTF8;
 	class StringUTF8;
 
-	class StringViewIterator
+	class BLAZE_CORE_API StringViewIterator
 	{
 	public:
 		constexpr StringViewIterator();
@@ -48,7 +48,7 @@ namespace Blaze
 		friend class String;
 	};
 
-	class StringView
+	class BLAZE_CORE_API StringView
 	{
 		const char* ptr;
 		uintMem count;
