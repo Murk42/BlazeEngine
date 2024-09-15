@@ -55,7 +55,10 @@ namespace Blaze::Graphics::OpenGLWrapper
 		glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);		
 
 		if (compileStatus == GL_FALSE)
+		{
 			state = ShaderState::UnsuccesfullyCompiled;
+			Debug::Logger::LogWarning("Blaze Engine Graphics", "Shader unsuccessfully compiled. The compilation log is: \n" + GetCompilationLog());
+		}
 		else
 			state = ShaderState::SuccesfullyCompiled;
 	}

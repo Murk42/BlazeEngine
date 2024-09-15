@@ -123,9 +123,9 @@ namespace Blaze
 	protected:		
 		std::mutex mutex;
 
-		WindowBase(WindowBase&&, const std::lock_guard<std::mutex>& lk) noexcept;
+		WindowBase(WindowBase&&, const std::lock_guard<std::mutex>& lk) noexcept;		
 
-		virtual void HandleResizeEvent(const Input::Events::WindowResizedEvent& event) { }
+		virtual void HandleResizeEvent(const Input::Events::WindowResizedEvent& event) { };
 	private:						
 
 		//This doesn't limit how much key presses can be detected at once, only the

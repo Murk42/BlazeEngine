@@ -35,13 +35,7 @@ namespace Blaze::UIGraphics
 			Vec2f uv1;
 			//UV of the upper right point.
 			Vec2f uv2;
-		};
-		struct LineWrapData
-		{
-			Vec2f pos;
-			Vec2f size;
-			uintMem characterCount;
-		};
+		};		
 		struct LineData
 		{
 			//Position of the line in text transform space.
@@ -51,9 +45,7 @@ namespace Blaze::UIGraphics
 			//Index of the first character in the line.
 			uintMem firstCharacterIndex = 0;
 			//Count of characters in the line.
-			uintMem characterCount = 0;			
-
-			Array<LineWrapData> wrapData;
+			uintMem characterCount = 0;		
 		};		
 		struct RenderDataUpdatedEvent
 		{
@@ -78,15 +70,19 @@ namespace Blaze::UIGraphics
 		//Returns line data. There always must be at least one line data element, even if it's empty
 		virtual const Array<LineData>& GetLineData() = 0;
 		
+
 		bool GetLineIndexUnderPosition(Vec2f localTargetPos, uintMem& lineIndex);
 		uintMem GetClosestLineIndex(Vec2f localTargetPos);						
 		//Finds the closest character to the given screen position in the given line and returns its index.
+		uintMem GetClosestCharacterIndex(Vec2f localTargetPos);
 		uintMem GetClosestCharacterIndexInLine(Vec2f localTargetPos, uintMem lineIndex);
 		//Finds the closest character separation to the given local node space position in the given line and returns its characterLineIndex. 
 		//A character separation is any place where a cursor could be placed. This is useful for the 'Up' and 'Down' buttons on the keyboard
 		//when traversing text, so that you can find the closes character separation in the line above and put the cursor there.
+		uintMem GetClosestCharacterSeparationIndex(Vec2f localTargetPos);
 		uintMem GetClosestCharacterSeparationIndexInLine(Vec2f localTargetPos, uintMem lineIndex);		
 
+		Vec2f GetCharacterSeparationPosition(uintMem characterIndex);
 		Vec2f GetCharacterSeparationPosition(uintMem lineIndex, uintMem lineCharacterIndex);
 
 		//Find the word in which a character indexed by characterIndex is found

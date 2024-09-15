@@ -81,19 +81,24 @@ namespace Blaze
 	template<typename T>
 	inline EventDispatcher<T>::~EventDispatcher()
 	{
-		std::lock_guard<Lock> lk{ lock };
+		HandlerType* it = nullptr;
+		{
+			std::lock_guard<Lock> lk{ lock };
 
-		auto it = head;		
+			it = head;
+		}
 		
 		while (it != nullptr)
 		{
 			std::lock_guard<std::recursive_mutex> handlerLk{ it->mutex };
 
-			it->dispatcher = nullptr;	
-			it->next = nullptr;
-			it->Unsubscribed();
+			auto next = it->next;
 
-			it = it->next;
+			it->Unsubscribed();
+			it->dispatcher = nullptr;	
+			it->next = nullptr;			
+
+			it = next;
 		}
 
 		head = nullptr;

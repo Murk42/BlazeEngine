@@ -35,7 +35,7 @@ namespace Blaze
         StringUTF8 Read()
         {
             std::string input;
-            std::cin >> input;
+            std::getline(std::cin, input);            
             return StringUTF8((const void*)input.c_str(), input.size());
         }
     }

@@ -2,7 +2,7 @@
 #include "BlazeEngineCore/Debug/Callstack.h"
 #include "BlazeEngineCore/Memory/MemoryManager.h"
 
-//#define BLAZE_USE_BOOST_STACKTRACE
+#define BLAZE_USE_BOOST_STACKTRACE
 
 #ifdef BLAZE_USE_BOOST_STACKTRACE
 #define BOOST_STACKTRACE_USE_WINDBG_CACHED

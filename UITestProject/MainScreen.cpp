@@ -2,10 +2,8 @@
 #include "MainScreen.h"
 
 extern Array<Font> fonts;
-
-
 MainScreen::MainScreen()	 
-{
+{	
 	titleText.SetParent(this);
 	titleText.SetTransform({
 		.pos = Vec2f(0, -5),
@@ -57,7 +55,7 @@ MainScreen::MainScreen()
 	explanationText.textRenderUnit.SetLayoutOptions({
 		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Left,
 		.lineVerticalAlign = UI::TextLineVerticalAlign::Top,
-		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrap,
+		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrapSpread,
 		});
 	explanationText.textRenderUnit.SetCullingNode(&explanationPanel);
 				
@@ -90,7 +88,7 @@ MainScreen::MainScreen()
 	editableText.textRenderUnit.SetLayoutOptions({
 		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Left,
 		.lineVerticalAlign = UI::TextLineVerticalAlign::Top,
-		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrap,
+		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrapSpread,
 		});
 	editableText.SetMultilineInput(true);
 	//editableText.textEnteredEventDispatcher.AddHandler(

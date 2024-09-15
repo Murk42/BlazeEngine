@@ -74,76 +74,29 @@ namespace Blaze::UIGraphics
 		rect.size = it->value.uv2 - it->value.uv1;
 		return true;
 	}
-	
-	static float MaxWidth(ArrayView<TextLineLayoutData> lines)
-	{
-		return std::max_element(lines.FirstIterator(), lines.BehindIterator(), [](const auto& a, const auto& b) { return a.width < b.width; })->width;
-	}
-	
-	static float SumHeight(ArrayView<TextLineLayoutData> lines)
-	{		
-		float sum = 0;
-		for (auto& line : lines)
-			sum += line.verticalAdvance;
-		return sum;
-	}
 
-	static uintMem FindWordStart(Array<CharacterLayoutData>& characters, uintMem i)
+	static uintMem FindWordStart(Array<TextRenderUnitBase::CharacterData>& characters, uintMem i)
 	{
 		while (i > 0 && !isspace(characters[i].character.Value()))
 			--i;
+		++i;
 
 		return i;
 	}
-
-	static void WrapWords(Array<TextLineLayoutData>& lines, float wrapWidth, float wrapLineAdvance)
-	{				
-		for (uintMem i = 0; i < lines.Count(); ++i)
-			if (lines[i].width > wrapWidth && lines[i].characters.Count() > 0)
-			{								
-				uintMem j = lines[i].characters.Count() - 1;
-				float newLineWidth = FLT_MAX;
-				for (; j != 0; --j)
-				{
-					newLineWidth = lines[i].characters[j].pos.x + lines[i].characters[j].size.x;
-					if (newLineWidth < wrapWidth)
-						break;
-				}
-
-				//j = std::max(FindWordStart(lines[i].characters, j), (uintMem)1);
-
-				auto& newLine = *lines.AddAt(i + 1);
-				auto& line = lines[i];
-
-				newLine.characters = line.characters.Split(j + 1);
-				newLine.width = newLine.characters.Last().pos.x + newLine.characters.Last().size.x - newLine.characters.First().pos.x;				
-				newLine.verticalAdvance = line.verticalAdvance;				
-				
-				line.width = newLineWidth;
-				line.verticalAdvance = wrapLineAdvance;
-											
-				float characterOffset = newLine.characters.First().pos.x;
-				for (uint j = 0; j < newLine.characters.Count(); ++j)				
-					newLine.characters[j].pos.x -= characterOffset;
-			}
-	}
-	static void WrapCharacters(Array<TextLineLayoutData>& lines, float wrapWidth)
-	{
-
-	}	
-	static void SpreadCharacters(Array<TextLineLayoutData>& lines, float width, float targetWidth)
+		
+	static void SpreadCharacters(Array<TextRenderUnitBase::LineData>& lineData, Array<TextRenderUnitBase::CharacterData>& characterData, float width, float targetWidth)
 	{
 
 	}
-	static void SpreadWords(Array<TextLineLayoutData>& lines, float width, float targetWidth)
+	static void SpreadWords(Array<TextRenderUnitBase::LineData>& lineData, Array<TextRenderUnitBase::CharacterData>& characterData, float width, float targetWidth)
 	{
 
 	}
-	static void SquishCharactersHorizontally(Array<TextLineLayoutData>& lines, float width, float targetWidth)
+	static void SquishCharactersHorizontally(Array<TextRenderUnitBase::LineData>& lineData, Array<TextRenderUnitBase::CharacterData>& characterData, float width, float targetWidth)
 	{
 
 	}
-	static void SquishCharactersVertically(Array<TextLineLayoutData>& lines, float height, float targetHeight)
+	static void SquishCharactersVertically(Array<TextRenderUnitBase::LineData>& lineData, Array<TextRenderUnitBase::CharacterData>& characterData, float height, float targetHeight)
 	{		
 		//TODO scale characters and lines
 	}
@@ -170,7 +123,7 @@ namespace Blaze::UIGraphics
 	{
 		SkipCulledCharacters();
 
-		if (characterData.Count() == characterIndex || characterRenderData[characterIndex].isCulled)
+		if (characterRenderData.Count() == characterIndex || characterRenderData[characterIndex].isCulled)
 			return nullptr;
 
 		renderData.pos = characterRenderData[characterIndex].pos;
@@ -194,49 +147,37 @@ namespace Blaze::UIGraphics
 
 		auto transform = node->GetTransform();				
 
-		Array<TextLineLayoutData> lines = GetLineLayoutData(text, font, pixelFontHeight, pixelFontHeight * layoutOptions.lineAdvance);
-
-		Vec2f textSize = FitLinesIntoBounds(
-			layoutOptions.horizontallyUnderfittedOption, 
-			layoutOptions.horizontallyOverfittedOption,
-			layoutOptions.verticallyUnderfittedOption,
-			layoutOptions.verticallyOverfittedOption,
-			lines, pixelFontHeight * layoutOptions.wrappedLineAdvance, transform.size
-		);
+		InitializeLineAndCharacterData();
 		
-		float verticalOffset = GetLinesVerticalOffset(layoutOptions.lineVerticalAlign, textSize.y, transform.size.y) - lines.First().verticalAdvance;
+		float textWidth = GetTextBoundingWidth(lineData);
+		if (textWidth > transform.size.x)
+			ManageHorizontalUnderfittedOptions(layoutOptions.horizontallyUnderfittedOption, layoutOptions.wrappedLineAdvance * pixelFontHeight, textWidth, transform.size.x, lineData, characterData);
+		else
+			ManageHorizontalOverfittedOptions(layoutOptions.horizontallyOverfittedOption, textWidth, transform.size.x, lineData, characterData);						
 
-		characterData.ReserveExactly(text.CharacterCount());
-		lineData.ReserveExactly(lines.Count());
+		float textHeight = GetTextBoundingHeight(lineData);
+		if (textHeight > transform.size.y)
+			ManageVerticalUnderfittedOptions(layoutOptions.verticallyUnderfittedOption, textHeight, transform.size.y, lineData, characterData);
+		else
+			ManageVerticalOverfittedOptions(layoutOptions.verticallyOverfittedOption, textHeight, transform.size.y, lineData, characterData);	
+		
+		float verticalOffset = GetLinesVerticalOffset(layoutOptions.lineVerticalAlign, textHeight, transform.size.y);
 
 		uint characterIndex = 0;
-		for (uintMem i = 0; i < lines.Count(); ++i)
+		for (uintMem i = 0; i < lineData.Count(); ++i)
 		{
-			auto& line = lines[i];			
+			auto& line = lineData[i];			
 
-			float horizontalOffset = GetLineHorizontalOffset(layoutOptions.lineHorizontalAlign, line.width, transform.size.x);
+			float horizontalOffset = GetLineHorizontalOffset(layoutOptions.lineHorizontalAlign, line.size.x, transform.size.x);
 
-			auto& lineData = *this->lineData.AddBack();
-			lineData.firstCharacterIndex = characterIndex;
-			lineData.characterCount = line.characters.Count();
-			lineData.pos = Vec2f(horizontalOffset, verticalOffset);
-			lineData.size = Vec2f(line.width, line.verticalAdvance);			
+			line.pos += Vec2f(horizontalOffset, verticalOffset);						
 
-			if (!line.characters.Empty() && line.characters.Last().character == '\n')
-				--lineData.characterCount;
-
-			for (uintMem j = 0; j < line.characters.Count(); ++j, ++characterIndex)
+			for (uintMem j = 0; j < line.characterCount; ++j, ++characterIndex)
 			{
-				const auto& src = line.characters[j];
-
-				auto& dst = *characterData.AddBack();
-				dst.pos = src.pos + Vec2f(horizontalOffset, verticalOffset);
-				dst.size = src.size;
-				dst.character = src.character;
-				dst.lineIndex = i;
-			}
-
-			verticalOffset -= line.verticalAdvance;
+				auto& ch = characterData[j + line.firstCharacterIndex];				
+				ch.pos += Vec2f(horizontalOffset, verticalOffset);
+				ch.lineIndex = i;
+			}			
 		}
 		
 		node->SetTransform(transform);
@@ -277,14 +218,14 @@ namespace Blaze::UIGraphics
 		const bool axisAligned = abs(cos) == 1 || abs(sin) == 1;
 		const Vec2f renderOffset = axisAligned ? Vec2f(std::ceil(finalPosition.x), std::ceil(finalPosition.y)) : finalPosition;
 
-		characterRenderData.Resize(characterData.Count());
+		characterRenderData.Resize(characterData.Count() - 1);
 
 		this->renderData.blend = 1.0f;
 		this->renderData.alpha = 1.0f;
 		this->renderData.texture = &atlasData->atlas;
 
 		auto it = characterColors.FirstIterator();
-		for (uintMem i = 0; i < characterData.Count(); ++i)
+		for (uintMem i = 0; i < characterData.Count() - 1; ++i)
 		{
 			auto& renderData = characterRenderData[i];
 			auto& data = characterData[i];
@@ -292,7 +233,10 @@ namespace Blaze::UIGraphics
 			renderData.isCulled = false;
 
 			Rect rect = Rectf(data.pos, data.size);
-
+			rect.x = std::round(rect.x);
+			rect.y = std::round(rect.y);
+			rect.w = std::round(rect.w);
+			rect.h = std::round(rect.h);
 
 			if (cullingNode != nullptr && !RectIntersect(rect, cullingRect))
 			{
@@ -389,7 +333,7 @@ namespace Blaze::UIGraphics
 	{
 		while (true)
 		{
-			if (characterData.Count() == characterIndex)
+			if (characterRenderData.Count() == characterIndex)
 				break;
 
 			if (!characterRenderData[characterIndex].isCulled)
@@ -397,127 +341,328 @@ namespace Blaze::UIGraphics
 
 			++characterIndex;
 		}
+	}		
+	void TextRenderUnit::InitializeLineAndCharacterData()
+	{
+		lineData.Clear();
+		characterData.Clear();
+
+		const float lineHeight = std::round(0.9f * pixelFontHeight);
+		const float lineAdvance = std::round(layoutOptions.lineAdvance * pixelFontHeight);
+		const float wrappedLineAdvance = std::round(layoutOptions.wrappedLineAdvance * pixelFontHeight);
+
+		bool hasPrevChar = false;
+		UnicodeChar prevCharacter = '\0';
+		LineData* line = nullptr;		
+		uintMem lineIndex = 0;
+		Vec2f cursor = Vec2f(0, -std::round(0.6f * pixelFontHeight));		
+
+		const auto& fontMetrics = font->GetMetrics(pixelFontHeight);
+		const auto transform = node->GetTransform();
+		const bool wrapLines = 
+			layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::WordWrapSpread ||
+			layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::WordWrap || 
+			layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::CharacterWrap;						
+		const auto SpreadLineWords = [&](uintMem index) {
+			struct Word {
+				uintMem first;
+				uintMem last;
+				float width;				
+			};
+
+			Array<Word> words;			
+			bool isWord = false;
+
+			float sumWordWidth = 0.0f;
+
+			uintMem i;
+			for (i = line->firstCharacterIndex; i < index; ++i)
+			{
+				if (characterData[i].size.y != 0)
+				{
+					if (!isWord)
+					{
+						auto& word = *words.AddBack();
+						word.width = characterData[i].pos.x;
+						word.first = i;
+						isWord = true;
+					}
+				}
+				else
+				{
+					if (isWord)
+					{
+						auto& word = words.Last();
+						word.width = characterData[i - 1].pos.x + characterData[i - 1].size.x - word.width;
+						word.last = i - 1;
+
+						sumWordWidth += word.width;
+					}										
+
+					isWord = false;
+				}
+			}
+
+			if (isWord)
+			{
+				auto& word = words.Last();
+				word.width = characterData[i - 1].pos.x + characterData[i - 1].size.x - word.width;
+				word.last = i - 1;
+
+				sumWordWidth += word.width;
+			}
+
+			if (words.Count() < 2)
+				return;
+
+			float midWordSpaceWidth = (transform.size.x - sumWordWidth) / (words.Count() - 1);
+
+			float offset = words.First().width + midWordSpaceWidth;
+			for (uintMem i = 1; i < words.Count(); ++i)
+			{
+				float characterOffset = std::round(offset - characterData[words[i].first].pos.x);
+				for (uintMem j = words[i].first; j <= words[i].last; ++j)				
+					characterData[j].pos.x += characterOffset;
+
+				offset += words[i].width + midWordSpaceWidth;
+			}
+						
+			for (uintMem i = 0; i < words.Count() - 1; ++i)
+			{
+				float sumSpaceWidth = 0.0f;
+				for (uintMem j = words[i].last + 1; j < words[i + 1].first; ++j)				
+					sumSpaceWidth += characterData[j].size.x;
+
+				float midSpaceSpaceWidth = (midWordSpaceWidth - sumSpaceWidth) / (words[i + 1].first - words[i].last - 1 + 1);
+
+				float offset = characterData[words[i].last].pos.x + characterData[words[i].last].size.x + midSpaceSpaceWidth;
+				for (uintMem j = words[i].last + 1; j < words[i + 1].first; ++j)
+				{
+					characterData[j].pos.x = offset;
+					offset += characterData[j].size.x + midSpaceSpaceWidth;
+				}				
+			}
+
+			//this will cause all the spaces after all the words in the line to be mushed into the same space as the last caracter in the last word
+			for (uintMem i = words.Last().last + 1; i < index; ++i)
+				characterData[i].pos.x = transform.size.x - characterData[i].size.x;
+
+			line->size.x = transform.size.x;
+		};
+		const auto StartNewLine = [&](uintMem firstCharacterIndex, float lineAdvance) {			
+			cursor.y -= lineAdvance;
+			cursor.x = 0;
+			hasPrevChar = false;
+
+			line = &*lineData.AddBack();
+			line->firstCharacterIndex = firstCharacterIndex;
+			line->characterCount = 0;
+			line->pos = cursor;
+			line->size = Vec2f(0, lineHeight);			
+		};	
+		auto EndLine = [&](uintMem lastCharacterIndex) {
+			line->characterCount = lastCharacterIndex - line->firstCharacterIndex;			
+
+			++lineIndex;
+			if (lastCharacterIndex != 0)
+				line->size.x = characterData[lastCharacterIndex - 1].pos.x + characterData[lastCharacterIndex - 1].size.x;
+			else
+				line->size.x = 0;
+		};
+		const auto WrapLine = [&](uintMem& index) {
+			if (layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::WordWrap ||
+				layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::WordWrapSpread)
+			{				
+
+				if (characterData[index].size.y == 0)
+					return false;
+				else
+				{
+					uintMem originalIndex = index;
+
+					while (index > line->firstCharacterIndex && characterData[index].size.y != 0)					
+						--index;					
+
+					if (index == line->firstCharacterIndex)					
+						index = originalIndex - 1;
+										
+				}
+
+			}
+
+			if (layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::WordWrapSpread)
+				SpreadLineWords(index + 1);
+
+			EndLine(index + 1);
+			StartNewLine(index + 1, wrappedLineAdvance);
+
+			return false;
+		};
+		const auto AddCharacter = [&](UnicodeChar character, uintMem& index) {
+
+			Vec2f offset;
+			Vec2f size;
+			float advance;
+			FontGlyphMetrics metrics;
+
+			bool hasMetrics = fontMetrics.GetGlyphMetrics(character, metrics);			
+			Vec2f kerning;
+
+			if (hasMetrics)
+			{
+				offset = metrics.offset;
+				size = metrics.size;
+				advance = metrics.horizontalAdvance;
+				
+				if (hasPrevChar)
+				{
+					kerning = fontMetrics.GetGlyphKerning(prevCharacter, character);
+					offset += kerning;
+					advance += kerning.x;
+				}
+
+				if (size.x == 0)
+					size.x = advance;
+			}
+			else
+			{
+				offset = Vec2f();
+				size = Vec2f(std::round(0.3f * pixelFontHeight), 0.0f);
+				advance = pixelFontHeight * 0.35f;
+			}
+
+
+			characterData[index].character = character; //Wrap lines reads the latest character so it needs to be set before the line wrapping
+			characterData[index].size = size; //Wrap lines reads the latest character size so it needs to be set before the line wrapping
+
+			bool hadPrevChar = hasPrevChar;
+
+			if (hasMetrics && metrics.size.x > 0 && wrapLines && offset.x + size.x + cursor.x > transform.size.x)
+			{
+				if (!WrapLine(index))
+					return;
+			}			
+
+			characterData[index].pos = cursor + offset; //Cursor could change after line wrapping so it is set after it
+			characterData[index].lineIndex = lineIndex; //Line index could change after line wrapping so it is set after it
+		
+			cursor.x += advance; //Cursor must be increased before creating a new line so that the first character in the new line start at 0
+
+			hasPrevChar = true; //hasPrevChar must be set to true after getting the kerning, after line wrapping, and before a new line
+
+			if (character.Value() == '\n')
+			{
+				EndLine(index + 1);
+				StartNewLine(index + 1, lineAdvance);
+			}
+
+			prevCharacter = character;						
+		};
+
+		characterData.Resize(text.CharacterCount() + 1);
+		StartNewLine(0, 0);
+
+		uintMem i = 0;
+		for (auto it = text.FirstIterator(); it != text.BehindIterator(); ++it, ++i)
+		{
+			uintMem j = i;
+			AddCharacter(it.ToUnicode(), j);
+
+			for (uint l = j; l < i; ++l)
+				--it;
+
+			i = j;
+		}
+		AddCharacter('\0', i);
+		EndLine(text.CharacterCount() + 1);
 	}
-	Array<TextLineLayoutData> TextRenderUnit::GetLineLayoutData(StringViewUTF8 text, Font* font, uint pixelFontHeight, float lineAdvance)
-	{	
-		Array<TextLineLayoutData> lines;
-
-		if (font != nullptr)
-		{
-			//TODO remove text layouters
-			MultiLineTextLayouter layouter;
-			layouter.SetText(text, font->GetMetrics(pixelFontHeight));
-			lines = layouter.GetLines();
-		}
-
-		if (lines.Empty())
-			lines = { TextLineLayoutData{.characters = { }, .width = 0, .verticalAdvance = 0 } };
-
-		for (auto& line : lines)
-		{
-			line.verticalAdvance = lineAdvance;			
-		}
-
-		return lines;
+	float TextRenderUnit::GetTextBoundingWidth(Array<LineData>& lineData)
+	{
+		return std::max_element(lineData.FirstIterator(), lineData.BehindIterator(), [](const auto& a, const auto& b) { return a.size.x < b.size.x; })->size.x;
 	}
-	Vec2f TextRenderUnit::FitLinesIntoBounds(
-		TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption,
-		TextHorizontallyOverfittedOptions horizontallyOverfittedOption,
-		TextVerticallyUnderfittedOptions verticallyUnderfittedOption,
-		TextVerticallyOverfittedOptions verticallyOverfittedOption, 
-		Array<TextLineLayoutData>& lines, float wrappedLineAdvance, Vec2f& boundingSize
-	) {		
-		Vec2f textSize;
-		textSize.x = MaxWidth(lines);
-
-		if (textSize.x > boundingSize.x)
+	float TextRenderUnit::GetTextBoundingHeight(Array<LineData>& lineData)
+	{
+		float sum = 0;
+		for (auto& line : lineData)
+			sum += line.size.y;
+		return sum;
+	}	
+	void TextRenderUnit::ManageHorizontalUnderfittedOptions(TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption, float wrappedLineAdvance, float& textWidth, float& boundingWidth, Array<LineData>& lineData, Array<CharacterData>& characterData)
+	{		
+		switch (horizontallyUnderfittedOption)
 		{
-			switch (horizontallyUnderfittedOption)
-			{
-			case TextHorizontallyUnderfittedOptions::Nothing:				
-				break;
-			case TextHorizontallyUnderfittedOptions::ResizeToFit:				
-				boundingSize.x = textSize.x;
-				break;
-			case TextHorizontallyUnderfittedOptions::CharacterWrap:
-				WrapCharacters(lines, boundingSize.x);
-				textSize.x = MaxWidth(lines);
-				break;
-			case TextHorizontallyUnderfittedOptions::WordWrap:
-				WrapWords(lines, boundingSize.x, wrappedLineAdvance);
-				textSize.x = MaxWidth(lines);
-				break;
-			case TextHorizontallyUnderfittedOptions::Squish:
-				SquishCharactersHorizontally(lines, textSize.x, boundingSize.x);
-				textSize.x = MaxWidth(lines);
-				break;
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyUnderfittedOption));
-				break;
-			}
+		case TextHorizontallyUnderfittedOptions::WordWrapSpread:
+		case TextHorizontallyUnderfittedOptions::CharacterWrap:			
+		case TextHorizontallyUnderfittedOptions::WordWrap: //Wrapping already completed
+		case TextHorizontallyUnderfittedOptions::Nothing:
+			break;
+		case TextHorizontallyUnderfittedOptions::ResizeToFit:
+			boundingWidth = textWidth;
+			break;			
+		case TextHorizontallyUnderfittedOptions::Squish:
+			SquishCharactersHorizontally(lineData, characterData, textWidth, boundingWidth);
+			textWidth = GetTextBoundingWidth(lineData);
+			break;
+		default:
+			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyUnderfittedOption));
+			break;
 		}
-		else if (textSize.x < boundingSize.x)
-		{
-			switch (horizontallyOverfittedOption)
-			{
-			case TextHorizontallyOverfittedOptions::Nothing:
-				break;
-			case TextHorizontallyOverfittedOptions::ResizeToFit:
-				boundingSize.x = textSize.x;
-				break;
-			case TextHorizontallyOverfittedOptions::SpreadCharacters:
-				SpreadCharacters(lines, textSize.x, boundingSize.x);
-				break;
-			case TextHorizontallyOverfittedOptions::SpreadWords:
-				SpreadWords(lines, textSize.x, boundingSize.x);
-				break;
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyOverfittedOption));
-				break;
-			}
-		}
-
-		textSize.y = SumHeight(lines);
-
-		if (textSize.y > boundingSize.y)
-		{
-			switch (verticallyUnderfittedOption)
-			{
-			case TextVerticallyUnderfittedOptions::Nothing:
-				break;
-			case TextVerticallyUnderfittedOptions::ResizeToFit:
-				boundingSize.y = textSize.y;
-				break;
-			case TextVerticallyUnderfittedOptions::Squish: {
-				SquishCharactersVertically(lines, textSize.y, boundingSize.y);
-				textSize.y = SumHeight(lines);
-				break;
-			}
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyUnderfittedOption));
-				break;
-			}
-		}
-		else if (textSize.y < boundingSize.y)
-		{
-			switch (verticallyOverfittedOption)
-			{
-			case TextVerticallyOverfittedOptions::Nothing:
-				break;
-			case TextVerticallyOverfittedOptions::ResizeToFit:
-				boundingSize.y = textSize.y;
-				break;
-			case TextVerticallyOverfittedOptions::SpreadLines: {				
-				break;
-			}
-			default:
-				Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyOverfittedOption));
-				break;
-			}
-		}
-
-		return textSize;
 	}
+	void TextRenderUnit::ManageHorizontalOverfittedOptions(TextHorizontallyOverfittedOptions horizontallyOverfittedOption, float& textWidth, float& boundingWidth, Array<LineData>& lineData, Array<CharacterData>& characterData)
+	{
+		switch (horizontallyOverfittedOption)
+		{
+		case TextHorizontallyOverfittedOptions::Nothing:
+			break;
+		case TextHorizontallyOverfittedOptions::ResizeToFit:
+			boundingWidth = textWidth;
+			break;
+		case TextHorizontallyOverfittedOptions::SpreadCharacters:
+			SpreadCharacters(lineData, characterData, textWidth, boundingWidth);
+			break;
+		case TextHorizontallyOverfittedOptions::SpreadWords:
+			SpreadWords(lineData, characterData, textWidth, boundingWidth);
+			break;
+		default:
+			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyOverfittedOption));
+			break;
+		}
+	}	
+	void TextRenderUnit::ManageVerticalUnderfittedOptions(TextVerticallyUnderfittedOptions verticallyUnderfittedOption, float& textHeight, float& boundingHeight, Array<LineData>& lineData, Array<CharacterData>& characterData)
+	{
+		switch (verticallyUnderfittedOption)
+		{
+		case TextVerticallyUnderfittedOptions::Nothing:
+			break;
+		case TextVerticallyUnderfittedOptions::ResizeToFit:
+			boundingHeight = textHeight;
+			break;
+		case TextVerticallyUnderfittedOptions::Squish: {
+			SquishCharactersVertically(lineData, characterData, textHeight, boundingHeight);
+			textHeight = GetTextBoundingHeight(lineData);
+			break;
+		}
+		default:
+			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyUnderfittedOption));
+			break;
+		}
+	}
+	void TextRenderUnit::ManageVerticalOverfittedOptions(TextVerticallyOverfittedOptions verticallyOverfittedOption, float& textHeight, float& boundingHeight, Array<LineData>& lineData, Array<CharacterData>& characterData)
+	{
+		switch (verticallyOverfittedOption)
+		{
+		case TextVerticallyOverfittedOptions::Nothing:
+			break;
+		case TextVerticallyOverfittedOptions::ResizeToFit:
+			boundingHeight = textHeight;
+			break;
+		case TextVerticallyOverfittedOptions::SpreadLines:
+			break;		
+		default:
+			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyOverfittedOption));
+			break;
+		}
+	}	
 	float TextRenderUnit::GetLinesVerticalOffset(TextLineVerticalAlign align, float textHeight, float boundingHeight)
 	{
 		switch (align)

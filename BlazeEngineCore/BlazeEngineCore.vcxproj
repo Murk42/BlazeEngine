@@ -139,6 +139,7 @@
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <AdditionalOptions>/NATVIS:BlazeEngineArrayDebugView.natvis %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -149,6 +150,9 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
     </ClCompile>
+    <Lib>
+      <AdditionalOptions>/NATVIS:BlazeEngineArrayDebugView.natvis %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile />
@@ -156,6 +160,9 @@
     <ClCompile>
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Lib>
+      <AdditionalOptions>/NATVIS:BlazeEngineArrayDebugView.natvis %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\BlazeEngineCore\BlazeEngineCoreContext.cpp" />
@@ -452,14 +459,14 @@
     <Font Include="assets\default\fonts\Consola.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="source\BlazeEngineMapDebugView.natvis" />
-    <Natvis Include="source\BlazeEngineArrayDebugView.natvis" />
-    <Natvis Include="source\BlazeEngineSetDebugView.natvis" />
-    <Natvis Include="source\BlazeEngineStringDebugView.natvis" />
-    <Natvis Include="source\BlazeEngineStringUTF8DebugView.natvis" />
-    <Natvis Include="source\BlazeEngineStringViewDebugView.natvis" />
-    <Natvis Include="source\BlazeEngineStringViewUTF8DebugView.natvis" />
-    <Natvis Include="source\BlazeEngineUnicodeCharDebugView.natvis" />
+    <Natvis Include="BlazeEngineMapDebugView.natvis" />
+    <Natvis Include="BlazeEngineArrayDebugView.natvis" />
+    <Natvis Include="BlazeEngineSetDebugView.natvis" />
+    <Natvis Include="BlazeEngineStringDebugView.natvis" />
+    <Natvis Include="BlazeEngineStringUTF8DebugView.natvis" />
+    <Natvis Include="BlazeEngineStringViewDebugView.natvis" />
+    <Natvis Include="BlazeEngineStringViewUTF8DebugView.natvis" />
+    <Natvis Include="BlazeEngineUnicodeCharDebugView.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

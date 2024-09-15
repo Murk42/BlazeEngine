@@ -9,7 +9,7 @@ CLIENT_API void Setup()
 	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{		
 		.majorVersion = 4,
 		.minorVersion = 0,
-		.profileType = Graphics::OpenGL::ProfileType::Compatibility,
+		.profileType = Graphics::OpenGL::ProfileType::Core,
 		} };
 	Graphics::OpenGL::RenderWindow_OpenGL renderWindow{ graphicsContext, Graphics::OpenGL::WindowSDLCreateOptions_OpenGL { } };
 	auto& window = renderWindow.GetWindowSDL();

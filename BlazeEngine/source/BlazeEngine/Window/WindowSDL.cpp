@@ -93,8 +93,7 @@ namespace Blaze
 		
 	WindowSDL::WindowSDL()
 		: handle(nullptr), graphicsAPI(WindowSDLGraphicsAPI::None), resizeState(0)
-	{
-
+	{		
 	}
 	WindowSDL::WindowSDL(WindowSDLCreateOptions createOptions)
 		: handle(CreateWindowSDLHandle(createOptions)), graphicsAPI(createOptions.graphicsAPI), resizeState(0)
@@ -143,6 +142,8 @@ namespace Blaze
 					resizeState = 2;	
 
 				resizeCV.notify_one();
+
+				waitForSwapBuffersOnResize = true;
 			}
 
 			break;
@@ -293,7 +294,7 @@ namespace Blaze
 		if (handle == nullptr)
 			return;
 
-		SDL_RaiseWindow((SDL_Window*)handle);
+		SDL_RaiseWindow((SDL_Window*)handle);		
 	}
 
 	void WindowSDL::ShowWindow(bool show)
@@ -449,9 +450,12 @@ namespace Blaze
 
 		blazeEngineContext.eventStack.Add("WindowResizedEvent", WindowResizeFunction, this);
 
-		//Wait for the event to be handled (mainly to wait for the previous draw and set the viewport) and the window to be redrawn
-		resizeCV.wait_for(lk, std::chrono::milliseconds(200), [this]() {
-			return this->resizeState == 2;
-			});
+		if (waitForSwapBuffersOnResize)
+		{
+			//Wait for the event to be handled (mainly to wait for the previous draw and set the viewport) and the window to be redrawn
+			resizeCV.wait_for(lk, std::chrono::milliseconds(100), [this]() {
+				return this->resizeState == 2;
+				});
+		}
 	}
 }

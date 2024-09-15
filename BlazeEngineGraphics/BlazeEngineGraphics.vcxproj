@@ -172,6 +172,7 @@
     <ProjectGuid>{db841779-0bf1-42bb-95cb-c0de158a1988}</ProjectGuid>
     <RootNamespace>BlazeEngineGraphics</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>BlazeEngineGraphics</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

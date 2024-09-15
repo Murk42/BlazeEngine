@@ -388,6 +388,7 @@ namespace Blaze::Graphics::OpenGL
 
 		//Set the handles after creation was successfull
 		initWindowSDL = std::move(initWindowSDL_);
+		activeWindowSDLHandle = initWindowSDL.GetHandle();
 		SDLOpenGLContext = SDLOpenGLContext_;
 
 		if (!glewInitialized)

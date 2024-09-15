@@ -51,7 +51,9 @@ namespace Blaze
 			}
 
 			SDL_GetGlobalMouseState(&blazeEngineContext.desktopMousePos.x, &blazeEngineContext.desktopMousePos.y);
-			blazeEngineContext.desktopMousePos.y = blazeEngineContext.desktopHeight - blazeEngineContext.desktopMousePos.y - 1;
+			blazeEngineContext.desktopMousePos.y = blazeEngineContext.desktopHeight - blazeEngineContext.desktopMousePos.y - 1;			
+			SDL_GetRelativeMouseState(&blazeEngineContext.desktopMouseMovement.x, &blazeEngineContext.desktopMouseMovement.y);
+			blazeEngineContext.desktopMouseMovement.y *= -1;
 
 			blazeEngineContext.eventStack.ProcessAndClear();
 
@@ -61,6 +63,11 @@ namespace Blaze
 		Vec2i GetDesktopMousePos()
 		{
 			return blazeEngineContext.desktopMousePos;
+		}
+
+		Vec2i GetDesktopMouseMovement()
+		{
+			return blazeEngineContext.desktopMouseMovement;
 		}
 
 		void SetCursorType(CursorType type)
@@ -263,7 +270,7 @@ namespace Blaze
 						.window = window,
 						.size = Vec2u(event->window.data1, event->window.data2)
 					};
-					if (window != nullptr)
+					if (window != nullptr)						
 						blazeEngineContext.HandleWindowResizeEvent(_event);
 					
 					break;

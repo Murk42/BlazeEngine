@@ -6,7 +6,12 @@ namespace Blaze::Graphics::OpenGLWrapper
 	Fence::Fence()
 		: id(nullptr)
 	{		
-	}	
+	}
+	Fence::Fence(void* id)
+		: id(id)
+	{
+	}
+
 	Fence::~Fence()
 	{
 		if (id != nullptr)

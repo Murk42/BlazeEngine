@@ -8,6 +8,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		void* id;
 	public:
 		Fence();
+		Fence(void* id);
 		~Fence();
 
 		void SetFence();
@@ -18,5 +19,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		bool IsSet();
 		bool IsSignaled();
+
+		inline void* GetHandle() const { return id; }
 	};
 }

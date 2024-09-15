@@ -23,13 +23,14 @@ namespace Blaze
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (handle != nullptr)
+			
 			CloseHandle(handle);
 #endif
 	}	
 
 	bool Thread::WaitToFinish(float timeout) const
 	{
-#ifdef BLAZE_PLATFORM_WINDOWS		
+#ifdef BLAZE_PLATFORM_WINDOWS				
 		DWORD result = WaitForSingleObject(handle, static_cast<DWORD>(timeout * 1000.0f));
 
 		if (result == WAIT_OBJECT_0)
@@ -90,14 +91,17 @@ namespace Blaze
 		handle = t.handle;
 		t.handle = nullptr;
 		return *this;
-	}
-	Result Thread::Run(unsigned long(*function)(void*), void* task)
+	}	
+	void Thread::RunImpl(unsigned long(*function)(void*), void* task)
 	{	
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (handle != NULL)
 		{
 			if (IsRunning())
-				return BLAZE_ERROR_RESULT("Blaze Engine", "Thread::Run called on a running thread");
+			{
+				Debug::Logger::LogError("Blaze Engine", "Thread::Run called on a running thread");
+				return;
+			}
 
 			CloseHandle(handle);
 		}
@@ -105,8 +109,10 @@ namespace Blaze
 		handle = CreateThread(NULL, 0, function, task, 0, NULL);
 
 		if (handle == NULL)
-			return BLAZE_ERROR_RESULT("WinAPI", "CreateThread failed with error \"" + Windows::GetErrorString(GetLastError()) + "\"");
-#endif			
-		return Result();
+		{
+			Debug::Logger::LogError("WinAPI", "CreateThread failed with error \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			return;
+		}
+#endif					
 	}	
 }

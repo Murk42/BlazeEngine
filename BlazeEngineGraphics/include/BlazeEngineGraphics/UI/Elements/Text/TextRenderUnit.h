@@ -18,7 +18,7 @@ namespace Blaze::UIGraphics
 
 	enum class TextHorizontallyUnderfittedOptions
 	{
-		ResizeToFit, Nothing, Squish, CharacterWrap, WordWrap,
+		ResizeToFit, Nothing, Squish, CharacterWrap, WordWrap, WordWrapSpread
 	};
 
 	enum class TextVerticallyUnderfittedOptions
@@ -45,7 +45,7 @@ namespace Blaze::UIGraphics
 		TextHorizontallyOverfittedOptions horizontallyOverfittedOption = TextHorizontallyOverfittedOptions::Nothing;
 		TextVerticallyOverfittedOptions verticallyOverfittedOption = TextVerticallyOverfittedOptions::Nothing;
 		float lineAdvance = 1.0f;
-		float wrappedLineAdvance = 0.9f;
+		float wrappedLineAdvance = 0.9f;		
 	};
 
 	class BLAZE_GRAPHICS_API TextRenderUnit :
@@ -93,9 +93,7 @@ namespace Blaze::UIGraphics
 		Graphics::FontAtlasesData* fontAtlasesData;
 		uint pixelFontHeight;		
 		UI::Node* cullingNode;		
-		TextLayoutOptions layoutOptions;		
-
-		Vec2f textSize;
+		TextLayoutOptions layoutOptions;				
 
 		bool renderDataDirty : 1;
 		bool dataDirty : 1;
@@ -105,14 +103,22 @@ namespace Blaze::UIGraphics
 
 		void SkipCulledCharacters();								
 
-		static Array<TextLineLayoutData> GetLineLayoutData(StringViewUTF8 text, Font* font, uint pixelFontHeight, float lineAdvance);
-		static Vec2f FitLinesIntoBounds(
-			TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption,
-			TextHorizontallyOverfittedOptions horizontallyOverfittedOption,
-			TextVerticallyUnderfittedOptions verticallyUnderfittedOption,
-			TextVerticallyOverfittedOptions verticallyOverfittedOption, 
-			Array<TextLineLayoutData>& lines, float wrappedLineAdvance, Vec2f& boundingSize
-		);
+		struct TempCharacterData
+		{
+			Vec2f offset;
+			Vec2f size;
+			float advance;
+			UnicodeChar character;
+		};
+		
+		Array<TempCharacterData> GetTempCharacterData();
+		void InitializeLineAndCharacterData();
+		static float GetTextBoundingWidth(Array<LineData>& lineData);
+		static float GetTextBoundingHeight(Array<LineData>& lineData);				
+		static void ManageHorizontalUnderfittedOptions(TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption, float wrappedLineAdvance, float& textSize, float& boundingWidth, Array<LineData>& lineData, Array<CharacterData>& characterData);
+		static void ManageHorizontalOverfittedOptions(TextHorizontallyOverfittedOptions horizontallyOverfittedOption, float& textSize, float& boundingWidth, Array<LineData>& lineData, Array<CharacterData>& characterData);				
+		static void ManageVerticalUnderfittedOptions(TextVerticallyUnderfittedOptions verticallyUnderfittedOption, float& textHeight, float& boundingHeight, Array<LineData>& lineData, Array<CharacterData>& characterData);
+		static void ManageVerticalOverfittedOptions(TextVerticallyOverfittedOptions verticallyOverfittedOption, float& textHeight, float& boundingHeight, Array<LineData>& lineData, Array<CharacterData>& characterData);
 		static float GetLinesVerticalOffset(TextLineVerticalAlign align, float textHeight, float boundingHeight);
 		static float GetLineHorizontalOffset(TextLineHorizontalAlign align, float lineWidth, float boundingWidth);
 		

@@ -85,9 +85,7 @@ namespace Blaze::UIGraphics
 		uintMem characterCount = textRenderUnit.GetCharacterData().Count();
 
 		if (selectionEnd == 0 || selectionBegin >= selectionEnd || selectionBegin >= characterCount)
-			return true;
-
-		uintMem selectionEnd = std::min(this->selectionEnd, characterCount);
+			return true;		
 
 		auto& characterData = textRenderUnit.GetCharacterData();
 
@@ -132,17 +130,9 @@ namespace Blaze::UIGraphics
 				//The selection begins between the characters in the line
 				rect.x = (characterData[characterBegin + line.firstCharacterIndex].pos.x + characterData[characterBegin + line.firstCharacterIndex - 1].pos.x + characterData[characterBegin + line.firstCharacterIndex - 1].size.x) / 2;
 			}
-
-			if (characterEnd == line.characterCount)
-			{
-				//The selection ends behind the characters in the line
-				rect.w = characterData[characterEnd + line.firstCharacterIndex - 1].pos.x + characterData[characterEnd + line.firstCharacterIndex - 1].size.x - rect.x;
-			}
-			else
-			{
-				//The selection ends between the characters in the line
-				rect.w = (characterData[characterEnd + line.firstCharacterIndex - 1].pos.x + characterData[characterEnd + line.firstCharacterIndex - 1].size.x + characterData[characterEnd + line.firstCharacterIndex].pos.x) / 2 - rect.x;
-			}
+			
+			//The selection ends behind the characters in the line
+			rect.w = characterData[characterEnd + line.firstCharacterIndex - 1].pos.x + characterData[characterEnd + line.firstCharacterIndex - 1].size.x - rect.x;			
 
 			if (cullingRect.size != Vec2f())
 			{
@@ -167,7 +157,7 @@ namespace Blaze::UIGraphics
 	}
 	void TextSelectionRenderUnit::SetSelection(uintMem begin, uintMem end)
 	{
-		end = std::min(end, textRenderUnit.GetCharacterData().Count());
+		end = std::min(end, textRenderUnit.GetCharacterData().Count() - 1);
 		begin = std::min(begin, end);				
 
 		if (begin == end)
@@ -189,7 +179,7 @@ namespace Blaze::UIGraphics
 	}
 	void TextSelectionRenderUnit::SetSelectionEnd(uintMem end)
 	{
-		end = std::min(end, textRenderUnit.GetCharacterData().Count());		
+		end = std::min(end, textRenderUnit.GetCharacterData().Count() - 1);		
 
 		if (end == selectionBegin)
 			end = selectionBegin = 0;

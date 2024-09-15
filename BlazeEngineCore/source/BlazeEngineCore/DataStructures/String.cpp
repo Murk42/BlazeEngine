@@ -227,6 +227,7 @@ namespace Blaze
 	void String::Clear()
 	{
 		delete[] ptr;
+		ptr = nullptr;
 		count = 0;
 	}
 	String String::SubString(uintMem start, uintMem count) const

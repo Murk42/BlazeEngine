@@ -27,6 +27,7 @@ namespace Blaze
 		BLAZE_API void Update();				
 
 		BLAZE_API Vec2i GetDesktopMousePos();
+		BLAZE_API Vec2i GetDesktopMouseMovement();
 
 		enum class CursorType
 		{

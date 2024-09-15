@@ -41,13 +41,9 @@ namespace Blaze::UIGraphics
 		out.size = transfrom.size / scale;
 		return out;
 	}
-
-	TextCursorRenderUnitBase::TextCursorRenderUnitBase(StringView rendererName)
-		: RenderUnit(rendererName)
-	{		
-	}
+	
 	TextCursorRenderUnit::TextCursorRenderUnit(UIGraphics::TextRenderUnitBase& textRenderUnit) :
-		TextCursorRenderUnitBase("TexturedRectRenderer"), textRenderUnit(textRenderUnit), cursorLineIndex(0), cursorLineCharacterIndex(0), renderDataDirty(false), rendered(true), shown(false)
+		TextCursorRenderUnitBase("TexturedRectRenderer"), textRenderUnit(textRenderUnit), cursorCharacterIndex(0), renderDataDirty(false), rendered(true), shown(false)
 	{		
 		textRenderUnit.renderDataUpdatedEventDispatcher.AddHandler(*this);
 
@@ -90,19 +86,19 @@ namespace Blaze::UIGraphics
 
 		renderDataDirty = false;
 
-		auto& linesData = textRenderUnit.GetLineData();
-
-		//If there are no lines or the line or character index aren't valid, don't render anything. This should never happen, because the text render unit will always have one
-		//line, even if it is empty, and the indicies are checked if they are valid in the SetCursorPos function
-		if (linesData.Empty() || cursorLineIndex >= linesData.Count() || cursorLineCharacterIndex > linesData[cursorLineIndex].characterCount)
+		//auto& linesData = textRenderUnit.GetLineData();
+		auto& characterData = textRenderUnit.GetCharacterData();
+		
+		if (cursorCharacterIndex >= characterData.Count())
 		{
 			culled = true;
 			return true;
 		}
 
-		auto& line = linesData[cursorLineIndex];
-		auto& characterData = textRenderUnit.GetCharacterData();
-		uint cursorCharacterIndex = cursorLineCharacterIndex + line.firstCharacterIndex;
+		auto& linesData = textRenderUnit.GetLineData();
+		auto& line = linesData[characterData[cursorCharacterIndex].lineIndex];		
+		uintMem cursorLineCharacterIndex = cursorCharacterIndex - line.firstCharacterIndex;
+
 		Vec2f cursorSize = Vec2f(0.05f, 0.8f) * textRenderUnit.GetPixelFontHeight();
 		cursorSize = Vec2f(std::round(cursorSize.x), std::round(cursorSize.y));
 		Rectf rect{ Vec2f(0, line.pos.y), cursorSize };
@@ -117,16 +113,11 @@ namespace Blaze::UIGraphics
 			//The cursor is ahead of all characters in the line
 			rect.pos.x = characterData[cursorCharacterIndex].pos.x - cursorSize.x;
 		}
-		else if (cursorLineCharacterIndex == line.characterCount)
+		else
 		{
 			//The cursor is behind all characters in the line
 			rect.pos.x = characterData[cursorCharacterIndex - 1].pos.x + characterData[cursorCharacterIndex - 1].size.x;
-		}
-		else
-		{
-			//The cursor is between the characters in the line
-			rect.pos.x = (characterData[cursorCharacterIndex - 1].pos.x + characterData[cursorCharacterIndex - 1].size.x + characterData[cursorCharacterIndex].pos.x - cursorSize.x) / 2;
-		}
+		}		
 
 		auto textFinalTransform = textRenderUnit.GetFinalTransform();
 		float cos = Math::Cos(textFinalTransform.rotation);
@@ -155,39 +146,64 @@ namespace Blaze::UIGraphics
 		culled = false;
 
 		return true;
-	}
-	void TextCursorRenderUnit::SetCursorPos(uintMem lineIndex, uintMem lineCharacterIndex)
-	{
-		if (cursorLineIndex != lineIndex || cursorLineCharacterIndex != lineCharacterIndex)
-		{
-			cursorLineIndex = lineIndex;
-			cursorLineCharacterIndex = lineCharacterIndex;
-
-			ValidateCursorPos();
-
-			renderDataDirty = true;
-			lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
-		}
-	}
+	}	
 	void TextCursorRenderUnit::SetCursorPosBeforeCharacter(uintMem characterIndex)
 	{
 		auto& characterData = textRenderUnit.GetCharacterData();
 
+		if (characterIndex != 0 && characterIndex >= characterData.Count())
+		{
+			SetCursorPosToEnd();
+			return;
+		}
+
+		cursorCharacterIndex = characterIndex;
+		renderDataDirty = true;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
+	}
+	void TextCursorRenderUnit::SetCursorPosAfterCharacter(uintMem characterIndex)
+	{		
+		auto& characterData = textRenderUnit.GetCharacterData();
+
+		++characterIndex;
 		if (characterIndex >= characterData.Count())
 		{
 			SetCursorPosToEnd();
 			return;
 		}
 
+		cursorCharacterIndex = characterIndex;
+		renderDataDirty = true;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
+	}
+	void TextCursorRenderUnit::SetCursorPosToBeginning()
+	{
+		SetCursorPosBeforeCharacter(0);		
+	}
+	void TextCursorRenderUnit::SetCursorPosToBeginningOfLine(uintMem characterIndex)
+	{
+		auto& characterData = textRenderUnit.GetCharacterData();
+
+		if (characterIndex >= characterData.Count())
+		{
+			SetCursorPosToBeginning();
+			return;
+		}
+
 		auto& lineData = textRenderUnit.GetLineData();
 		auto& line = lineData[characterData[characterIndex].lineIndex];
 
-		uintMem newCursorLineIndex = characterData[characterIndex].lineIndex;
-		uintMem newCursorLineCharacterIndex = characterIndex - textRenderUnit.GetLineData()[newCursorLineIndex].firstCharacterIndex;
-
-		SetCursorPos(newCursorLineIndex, newCursorLineCharacterIndex);
+		cursorCharacterIndex = line.firstCharacterIndex;
+		renderDataDirty = true;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 	}
-	void TextCursorRenderUnit::SetCursorPosAfterCharacter(uintMem characterIndex)
+	void TextCursorRenderUnit::SetCursorPosToEnd()
+	{
+		auto& characterData = textRenderUnit.GetCharacterData();
+
+		SetCursorPosBeforeCharacter(characterData.Count() - 1);					
+	}
+	void TextCursorRenderUnit::SetCursorPosToEndOfLine(uintMem characterIndex)
 	{
 		auto& characterData = textRenderUnit.GetCharacterData();
 
@@ -200,193 +216,59 @@ namespace Blaze::UIGraphics
 		auto& lineData = textRenderUnit.GetLineData();
 		auto& line = lineData[characterData[characterIndex].lineIndex];
 
-		uintMem newCursorLineIndex = characterData[characterIndex].lineIndex;
-		uintMem newCursorLineCharacterIndex = characterIndex - textRenderUnit.GetLineData()[newCursorLineIndex].firstCharacterIndex + 1;
-
-		SetCursorPos(newCursorLineIndex, newCursorLineCharacterIndex);
-	}
-	void TextCursorRenderUnit::SetCursorPosToBeginning()
-	{
-		SetCursorPos(0, 0);
-	}
-	void TextCursorRenderUnit::SetCursorPosToEnd()
-	{
-		if (textRenderUnit.GetLineData().Empty())
-			SetCursorPos(0, 0);
-		else
-			SetCursorPos(textRenderUnit.GetLineData().Count() - 1, textRenderUnit.GetLineData().Last().characterCount);
+		cursorCharacterIndex = line.firstCharacterIndex + line.characterCount - 1;
+		renderDataDirty = true;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 	}
 	bool TextCursorRenderUnit::AdvanceCursor()
 	{
-		CleanData();
+		auto& characterData = textRenderUnit.GetCharacterData();
 
-		auto& lineData = textRenderUnit.GetLineData();
+		if (cursorCharacterIndex == characterData.Count() - 1)
+			return false;
 
-		if (cursorLineCharacterIndex == lineData[cursorLineIndex].characterCount)
-		{
-			if (cursorLineIndex == lineData.Count() - 1)
-				return false;
-			else
-			{
-				auto& characterData = textRenderUnit.GetCharacterData();
-				auto& currentLine = lineData[cursorLineIndex];
-				uintMem indexOfCharacterAfterCurrentLine = currentLine.firstCharacterIndex + currentLine.characterCount;
-
-				if (characterData[indexOfCharacterAfterCurrentLine].character != '\n')
-					SetCursorPos(cursorLineIndex + 1, 1);
-				else
-					SetCursorPos(cursorLineIndex + 1, 0);
-			}
-		}
-		else
-			SetCursorPos(cursorLineIndex, cursorLineCharacterIndex + 1);
+		++cursorCharacterIndex;
+		renderDataDirty = true;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 
 		return true;
 	}
 	bool TextCursorRenderUnit::RetreatCursor()
-	{
-		auto& lineData = textRenderUnit.GetLineData();
+	{		
+		CleanData();
 
-		if (cursorLineCharacterIndex == 0)
-		{
-			if (cursorLineIndex == 0)
-				return false;
-			else
-				SetCursorPos(cursorLineIndex - 1, lineData[cursorLineIndex - 1].characterCount);
-		}
-		else
-		{
-			if (cursorLineIndex != 0)
-			{
-				auto& characterData = textRenderUnit.GetCharacterData();
-				auto& previousLine = lineData[cursorLineIndex - 1];
-				uintMem indexOfCharacterAfterPreviousLine = previousLine.firstCharacterIndex + previousLine.characterCount;
+		if (cursorCharacterIndex == 0)
+			return false;
 
-				if (cursorLineCharacterIndex == 1 && characterData[indexOfCharacterAfterPreviousLine].character != '\n')
-					SetCursorPos(cursorLineIndex - 1, previousLine.characterCount);
-				else
-					SetCursorPos(cursorLineIndex, cursorLineCharacterIndex - 1);
-			}
-			else
-				SetCursorPos(cursorLineIndex, cursorLineCharacterIndex - 1);
-		}
+		--cursorCharacterIndex;
+		renderDataDirty = true;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 
 		return true;
-	}
-	uintMem TextCursorRenderUnit::GetCursorLineIndex()
-	{
-		CleanData();
-		return cursorLineIndex;
-	}
-	uintMem TextCursorRenderUnit::GetCursorLineCharacterIndex()
-	{
-		CleanData();
-		return cursorLineCharacterIndex;
-	}
+	}	
 	uintMem TextCursorRenderUnit::GetIndexOfCharacterAfterCursor()
 	{
 		CleanData();
 
-		auto& lineData = textRenderUnit.GetLineData();
-
-		if (lineData.Empty())
-			return 0;
-
-		if (cursorLineIndex >= lineData.Count())
-			return textRenderUnit.GetCharacterData().Count() - 1;
-
-		if (cursorLineCharacterIndex > lineData[cursorLineIndex].characterCount)
-			if (cursorLineIndex == lineData.Count() - 1)
-				if (textRenderUnit.GetCharacterData().Count() == 0)
-					return 0;
-				else
-					return textRenderUnit.GetCharacterData().Count() - 1;
-			else
-				return lineData[cursorLineIndex + 1].firstCharacterIndex;
-		else
-			return lineData[cursorLineIndex].firstCharacterIndex + cursorLineCharacterIndex;
-	}
-	uintMem TextCursorRenderUnit::GetIndexOfCharacterBeforeCursor()
-	{
-		CleanData();
-
-		auto& lineData = textRenderUnit.GetLineData();
-
-		if (lineData.Empty())
-			return 0;
-
-		if (cursorLineIndex >= lineData.Count())
-			return textRenderUnit.GetCharacterData().Count() - 1;
-
-		if (cursorLineCharacterIndex >= lineData[cursorLineIndex].characterCount)
-			return lineData[cursorLineIndex].firstCharacterIndex + lineData[cursorLineIndex].characterCount - 1;
-		else if (cursorLineCharacterIndex == 0)
-		{
-			if (cursorLineIndex == 0)
-				return 0;
-			else
-				return lineData[cursorLineIndex - 1].firstCharacterIndex + lineData[cursorLineIndex - 1].characterCount;
-		}
-		else
-			return lineData[cursorLineIndex].firstCharacterIndex + cursorLineCharacterIndex - 1;
+		return cursorCharacterIndex;		
 	}
 	bool TextCursorRenderUnit::IsCursorAtEnd()
 	{
-		auto& lineData = textRenderUnit.GetLineData();
+		auto& characterData = textRenderUnit.GetCharacterData();
 
-		if (lineData.Empty())
-			return true;
-
-		if (cursorLineIndex >= lineData.Count())
-			return true;
-
-		if (cursorLineIndex == lineData.Count() - 1)
-			return cursorLineCharacterIndex == lineData[cursorLineIndex].characterCount;
-
-		return false;
+		return cursorCharacterIndex == characterData.Count() - 1;		
 	}
 	bool TextCursorRenderUnit::IsCursorAtBeggining()
 	{
-		auto& lineData = textRenderUnit.GetLineData();
+		CleanData();
 
-		if (lineData.Empty())
-			return true;
-
-		if (cursorLineIndex >= lineData.Count())
-			return false;
-
-		if (cursorLineIndex == 0)
-			return cursorLineCharacterIndex == 0;
-
-		return false;
+		return cursorCharacterIndex == 0;
 	}
 	void TextCursorRenderUnit::ValidateCursorPos()
 	{
-		auto& lineData = textRenderUnit.GetLineData();
+		auto& characterData = textRenderUnit.GetCharacterData();
 
-		cursorLineIndex = std::min(cursorLineIndex, lineData.Count() - 1);
-
-		//Wrap the cursor if the cursor is outside the line and the next line is wrapped
-		//while (cursorLineCharacterIndex > lineData[cursorLineIndex].characterCount && lineData.Count() > cursorLineIndex + 1 && lineData[cursorLineIndex + 1].wrapped)
-		//{
-		//	cursorLineCharacterIndex -= lineData[cursorLineIndex].characterCount;
-		//	++cursorLineIndex;
-		//}
-
-		cursorLineCharacterIndex = std::min(cursorLineCharacterIndex, lineData[cursorLineIndex].characterCount);
-
-		if (cursorLineIndex != 0 && cursorLineCharacterIndex == 0)
-		{
-			auto& characterData = textRenderUnit.GetCharacterData();
-			auto& previousLine = lineData[cursorLineIndex - 1];
-			uintMem indexOfCharacterAfterPreviousLine = previousLine.firstCharacterIndex + previousLine.characterCount;
-
-			if (characterData[indexOfCharacterAfterPreviousLine].character != '\n')
-			{
-				--cursorLineIndex;
-				cursorLineCharacterIndex = previousLine.characterCount;
-			}
-		}
+		cursorCharacterIndex = std::min(cursorCharacterIndex, characterData.Count());
 	}
 	void TextCursorRenderUnit::HideCursor()
 	{

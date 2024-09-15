@@ -117,9 +117,10 @@ namespace Blaze::Graphics::OpenGL
 		vertexBuffer.Allocate(vertices, sizeof(vertices));
 		instanceBuffer.Allocate(nullptr, InstanceBufferSize, OpenGLWrapper::ImmutableGraphicsBufferMapAccess::Write, Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapType::None);
 
-		va.EnableVertexAttribute(0);
-		va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint8, 1, false, 0);
-		va.SetVertexAttributeBuffer(0, &vertexBuffer, sizeof(Vertex), 0);
+		//va.EnableVertexAttribute(0);
+		//va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint8, 1, false, 0);
+		//va.SetVertexAttributeBuffer(0, &vertexBuffer, sizeof(Vertex), 0);
+		//va.SetVertexAttributeDivisor(0, 0);
 
 		va.EnableVertexAttribute(1);
 		va.SetVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 4, false, 0);
@@ -169,7 +170,7 @@ namespace Blaze::Graphics::OpenGL
 
 		program.SetUniform(0, proj);
 
-		for (uint i = 0; i < DrawCallTextureCount; ++i)
+		for (int i = 0; i < DrawCallTextureCount; ++i)
 			program.SetUniform(1 + i, i);	
 
 		Blaze::Graphics::OpenGLWrapper::Fence fence{ };
@@ -297,7 +298,7 @@ namespace Blaze::Graphics::OpenGL
 				graphicsContext.SelectTexture(textures[i]);
 			}
 
-			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, instanceCount);
+			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::TriangleStrip, 0, 4, 0, instanceCount);
 
 			fence.SetFence();
 

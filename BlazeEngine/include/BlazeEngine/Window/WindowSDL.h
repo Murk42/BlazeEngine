@@ -97,6 +97,7 @@ namespace Blaze
 		std::condition_variable resizeCV;
 		Vec2u latestWindowSize;
 		int resizeState;
+		bool waitForSwapBuffersOnResize;
 
 		static void WindowResizeFunction(WindowSDL* window);
 		void HandleResizeEvent(const Input::Events::WindowResizedEvent& event) override final;

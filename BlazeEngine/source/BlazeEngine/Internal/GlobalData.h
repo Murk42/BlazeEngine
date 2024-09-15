@@ -34,7 +34,8 @@ namespace Blaze
 				
 		//TODO replace this mutex
 		uint desktopHeight;
-		Vec2i desktopMousePos;				
+		Vec2i desktopMousePos;			
+		Vec2i desktopMouseMovement;
 
 		std::mutex windowsMutex;
 		Set<WindowBase*> windows;

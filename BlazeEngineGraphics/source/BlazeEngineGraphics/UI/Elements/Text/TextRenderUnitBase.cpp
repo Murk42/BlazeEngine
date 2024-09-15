@@ -33,6 +33,27 @@ namespace Blaze::UIGraphics
 
 		return lineIndex;
 	}		
+	uintMem TextRenderUnitBase::GetClosestCharacterIndex(Vec2f localTargetPos)
+	{
+		auto& characterData = GetCharacterData();
+		auto& lineData = GetLineData();
+
+		uintMem lineIndex;
+
+		for (lineIndex = 0; lineIndex < lineData.Count() - 1; ++lineIndex)
+			if (localTargetPos.y > (lineData[lineIndex].pos.y + lineData[lineIndex + 1].pos.y + lineData[lineIndex + 1].size.y) / 2)
+				break;
+
+		uintMem characterBegin = lineData[lineIndex].firstCharacterIndex;
+		uintMem characterEnd = lineData[lineIndex].firstCharacterIndex + lineData[lineIndex].characterCount;
+
+		uintMem indexOut;
+		for (indexOut = characterBegin; indexOut < characterEnd - 1; ++indexOut)
+			if (localTargetPos.x < (characterData[indexOut].pos.x + characterData[indexOut].size.x + characterData[indexOut + 1].pos.x) / 2)
+				break;
+
+		return indexOut;
+	}
 	uintMem TextRenderUnitBase::GetClosestCharacterIndexInLine(Vec2f localTargetPos, uintMem lineIndex)
 	{
 		auto& characterData = GetCharacterData();
@@ -48,8 +69,32 @@ namespace Blaze::UIGraphics
 
 		return indexOut;
 	}
+	uintMem TextRenderUnitBase::GetClosestCharacterSeparationIndex(Vec2f localTargetPos)
+	{
+		auto& lineData = GetLineData();
+		auto& characterData = GetCharacterData();
 
-	uintMem TextRenderUnitBase::GetClosestCharacterSeparationIndexInLine(Vec2f targetPos, uintMem lineIndex)
+		uintMem lineIndex;
+		
+		for (lineIndex = 0; lineIndex < lineData.Count() - 1; ++lineIndex)
+			if (localTargetPos.y > (lineData[lineIndex].pos.y + lineData[lineIndex + 1].pos.y + lineData[lineIndex + 1].size.y) / 2)
+				break;
+
+		uintMem characterBegin = lineData[lineIndex].firstCharacterIndex;
+		uintMem characterEnd = lineData[lineIndex].firstCharacterIndex + lineData[lineIndex].characterCount;
+
+		if (characterBegin == characterEnd)
+			return 0;
+
+		uintMem characterIndex;
+
+		for (characterIndex = characterBegin; characterIndex < characterEnd - 1; ++characterIndex)
+			if (localTargetPos.x < characterData[characterIndex].pos.x + characterData[characterIndex].size.x / 2)
+				break;
+
+		return characterIndex;
+	}
+	uintMem TextRenderUnitBase::GetClosestCharacterSeparationIndexInLine(Vec2f localTargetPos, uintMem lineIndex)
 	{
 		auto& lineData = GetLineData();
 		auto& characterData = GetCharacterData();
@@ -59,12 +104,27 @@ namespace Blaze::UIGraphics
 
 		uintMem characterIndex;
 
-		for (characterIndex = characterBegin; characterIndex < characterEnd; ++characterIndex)
-			if (targetPos.x < characterData[characterIndex].pos.x + characterData[characterIndex].size.x / 2)
+		for (characterIndex = characterBegin; characterIndex < characterEnd - 1; ++characterIndex)
+			if (localTargetPos.x < characterData[characterIndex].pos.x + characterData[characterIndex].size.x / 2)
 				break;
 
-		return characterIndex - lineData[lineIndex].firstCharacterIndex;
+		return characterIndex;
 	}	
+	Vec2f TextRenderUnitBase::GetCharacterSeparationPosition(uintMem characterIndex)
+	{
+		auto& characterData = GetCharacterData();
+		auto& lineData = GetLineData();
+
+		auto& line = lineData[characterData[characterIndex].lineIndex];
+		uintMem lineCharacterIndex = characterIndex - line.firstCharacterIndex;
+
+		if (lineCharacterIndex == line.characterCount)
+			return characterData[characterIndex - 1].pos + Vec2f(characterData[characterIndex - 1].size.x, 0);
+		else if (lineCharacterIndex == 0)
+			return characterData[characterIndex].pos;
+		else
+			return (characterData[characterIndex - 1].pos + characterData[characterIndex].pos + Vec2f(characterData[characterIndex - 1].size.x, 0)) / 2;		
+	}
 	Vec2f TextRenderUnitBase::GetCharacterSeparationPosition(uintMem lineIndex, uintMem lineCharacterIndex)
 	{
 		auto& characterData = GetCharacterData();
@@ -137,12 +197,9 @@ namespace Blaze::UIGraphics
 		auto& characterData = GetCharacterData();		
 
 		begin = 0;
-		end = 0;
+		end = 0;		
 
-		if (characterData.Empty())
-			return;
-
-		characterIndex = std::min(characterIndex, characterData.Count());
+		characterIndex = std::min(characterIndex, characterData.Count() - 1);
 
 		begin = characterIndex;
 		end = characterIndex;
@@ -157,7 +214,7 @@ namespace Blaze::UIGraphics
 
 		while (end != characterData.Count())
 		{
-			if (characterData[end].character == '\n')
+			if (characterData[end].character == '\n' || characterData[end].character == '\0')
 				break;
 
 			++end;

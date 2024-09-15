@@ -119,6 +119,8 @@ namespace Blaze::Graphics::OpenGL
 
 		void Flush();
 		void MemoryBarrier();		
+
+		static bool IsExtensionSupported(StringView name);
 	private:
 		WindowSDL CreateWindowSDL(WindowSDLCreateOptions_OpenGL createOptions);
 		void DestroyWindowSDL(WindowSDL& window);

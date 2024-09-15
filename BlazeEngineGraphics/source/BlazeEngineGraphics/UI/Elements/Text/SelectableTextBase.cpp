@@ -71,12 +71,11 @@ namespace Blaze::UI
 
 				textCursorRenderUnit.AdvanceCursor();
 
-				uint cursorPreviousCharacterIndex = textCursorRenderUnit.GetIndexOfCharacterBeforeCursor();
-
-				if (textSelectionRenderUnit.GetSelectionBegin() == cursorPreviousCharacterIndex)
-					textSelectionRenderUnit.SetSelectionBegin(cursorPreviousCharacterIndex + 1);
-				else if (textSelectionRenderUnit.GetSelectionEnd() == cursorPreviousCharacterIndex)
-					textSelectionRenderUnit.SetSelectionEnd(cursorPreviousCharacterIndex + 1);
+				uint cursorNextCharacterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
+				if (textSelectionRenderUnit.GetSelectionBegin() == cursorNextCharacterIndex - 1)
+					textSelectionRenderUnit.SetSelectionBegin(cursorNextCharacterIndex);
+				else if (textSelectionRenderUnit.GetSelectionEnd() == cursorNextCharacterIndex - 1)
+					textSelectionRenderUnit.SetSelectionEnd(cursorNextCharacterIndex);
 				else
 					Debug::Logger::LogWarning("Blaze Engine Warning", "Cursor is inside selection. An internal error.");
 			}
@@ -84,14 +83,15 @@ namespace Blaze::UI
 			break;
 		}
 		case Key::Up: {
-			uintMem lineIndex = textCursorRenderUnit.GetCursorLineIndex();			
+			auto& characterData = textRenderUnit.GetCharacterData();
+			uintMem characterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
+			uintMem lineIndex = characterData[characterIndex].lineIndex;
 
 			if (lineIndex == 0)
 				break;
 
-			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(lineIndex, textCursorRenderUnit.GetCursorLineCharacterIndex());
-			uintMem lineCharacterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex - 1);
-			uintMem characterIndex = textRenderUnit.GetLineData()[lineIndex - 1].firstCharacterIndex + lineCharacterIndex;
+			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(characterIndex);
+			characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex - 1);
 
 			if (
 				!textSelectionRenderUnit.IsSelectionEmpty() && !mouseDown &&
@@ -115,14 +115,15 @@ namespace Blaze::UI
 			break;
 		}
 		case Key::Down: {
-			uintMem lineIndex = textCursorRenderUnit.GetCursorLineIndex();
+			auto& characterData = textRenderUnit.GetCharacterData();
+			uintMem characterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
+			uintMem lineIndex = characterData[characterIndex].lineIndex;
 
 			if (lineIndex == textRenderUnit.GetLineData().Count() - 1)
 				break;
 
-			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(lineIndex, textCursorRenderUnit.GetCursorLineCharacterIndex());
-			uintMem lineCharacterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex + 1);
-			uintMem characterIndex = textRenderUnit.GetLineData()[lineIndex + 1].firstCharacterIndex + lineCharacterIndex;
+			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(characterIndex);
+			characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex + 1);
 
 			if (
 				!textSelectionRenderUnit.IsSelectionEmpty() && !mouseDown &&
@@ -153,7 +154,8 @@ namespace Blaze::UI
 				)
 			{
 				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-				auto& line = textRenderUnit.GetLineData()[textCursorRenderUnit.GetCursorLineIndex()];
+				auto& characterData = textRenderUnit.GetCharacterData();
+				auto& line = textRenderUnit.GetLineData()[characterData[indexOfCharacterAfterCursor].lineIndex];
 
 				if (textSelectionRenderUnit.GetSelectionEnd() == indexOfCharacterAfterCursor)
 					textSelectionRenderUnit.SetSelectionEnd(textSelectionRenderUnit.GetSelectionBegin());
@@ -171,7 +173,8 @@ namespace Blaze::UI
 				)
 			{
 				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-				auto& line = textRenderUnit.GetLineData()[textCursorRenderUnit.GetCursorLineIndex()];
+				auto& characterData = textRenderUnit.GetCharacterData();
+				auto& line = textRenderUnit.GetLineData()[characterData[indexOfCharacterAfterCursor].lineIndex];
 
 				if (textSelectionRenderUnit.GetSelectionBegin() == indexOfCharacterAfterCursor)
 					textSelectionRenderUnit.SetSelectionBegin(textSelectionRenderUnit.GetSelectionEnd());
@@ -218,11 +221,9 @@ namespace Blaze::UI
 			textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
 		}
 		else if (event.combo == 1)
-		{			
-			uintMem lineCharacterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(localSpacePos, lineIndex);
-			uintMem characterIndex = lineCharacterIndex + textRenderUnit.GetLineData()[lineIndex].firstCharacterIndex;
-
-			textCursorRenderUnit.SetCursorPos(lineIndex, lineCharacterIndex);
+		{						
+			uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);
+			textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);
 
 			grabbedSelectionEnd = characterIndex;
 			grabbedSelectionBegin = grabbedSelectionEnd;
@@ -242,16 +243,13 @@ namespace Blaze::UI
 		if (mouseDown)
 		{
 			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.pos);
-
-			uintMem lineIndex = textRenderUnit.GetClosestLineIndex(localSpacePos);
-			uintMem lineCharacterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(localSpacePos, lineIndex);
-			uintMem characterIndex = textRenderUnit.GetLineData()[lineIndex].firstCharacterIndex + lineCharacterIndex;
+			uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);			
 
 			if (characterIndex > grabbedSelectionBegin && characterIndex < grabbedSelectionEnd)
 				textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
 			else
-			{
-				textCursorRenderUnit.SetCursorPos(lineIndex, lineCharacterIndex);
+			{				
+				textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);				
 
 				if (textCursorRenderUnit.IsCursorAtEnd())
 					SelectAroundGrabbedSelection(textRenderUnit.GetCharacterData().Count());

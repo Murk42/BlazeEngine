@@ -392,4 +392,9 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);		
 	}	
+	bool GraphicsContext_OpenGL::IsExtensionSupported(StringView name)
+	{
+		return glewIsSupported(name.Ptr());	
+	}
+
 }
