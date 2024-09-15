@@ -129,7 +129,7 @@ namespace Blaze
 #endif		
 
 		Thread clientThread;
-		clientThread.Run(RunSetupOnThread);
+		clientThread.Run(&RunSetupOnThread);
 
 		while (!blazeEngineContext.clientThreadExited.test())
 		{

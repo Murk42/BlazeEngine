@@ -266,65 +266,58 @@ namespace Blaze::Graphics::OpenGL
 		: GraphicsContext_OpenGL(GraphicsContextProperties_OpenGL())
 	{
 	}
-	GraphicsContext_OpenGL::GraphicsContext_OpenGL(const GraphicsContextProperties_OpenGL& properties) :
-		activeWindowSDLHandle(nullptr),
-		majorVersion(properties.majorVersion),
-		minorVersion(properties.minorVersion),
-		profileType(properties.profileType),
-		contextFlags(properties.contextFlags),
-		releaseBehaviour(properties.releaseBehaviour),
-		depthBufferBitCount(properties.depthBufferBitCount),
-		stencilBufferBitCount(properties.stencilBufferBitCount)
+	GraphicsContext_OpenGL::GraphicsContext_OpenGL(const GraphicsContextProperties_OpenGL& _properties) :
+		activeWindowSDLHandle(nullptr), properties(_properties)
 	{
 		SDL_GL_ResetAttributes();
 
-		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, majorVersion) < 0)
+		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, properties.majorVersion) < 0)
 		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to " + StringParsing::Convert(majorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to " + StringParsing::Convert(properties.majorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 		
-		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minorVersion) < 0)
+		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, properties.minorVersion) < 0)
 		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to " + StringParsing::Convert(minorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to " + StringParsing::Convert(properties.minorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 
-		if (SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0) < 0)
+		if (SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1) < 0)
 		{
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_ACCELERTED_VISUAL to 1. SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 		
-		GLenum _contextFlags = GetOpenGLContextFlags(contextFlags);
+		GLenum _contextFlags = GetOpenGLContextFlags(properties.contextFlags);
 		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, _contextFlags))
 		{
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_FLAGS to " + GetOpenGLContextFlagsString(_contextFlags) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 
-		GLenum _profileType = GetOpenGLProfileType(profileType);
+		GLenum _profileType = GetOpenGLProfileType(properties.profileType);
 		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, _profileType) < 0)
 		{
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to " + GetOpenGLProfileTypeString(_profileType) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 
-		GLenum _releaseBehaviour = GetOpenGLReleaseBehaviour(releaseBehaviour);
+		GLenum _releaseBehaviour = GetOpenGLReleaseBehaviour(properties.releaseBehaviour);
 		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _releaseBehaviour) < 0)
 		{
 			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_CONTEXT_RELEASE_BEHAVIOR to " + GetOpenGLReleaseBehaviourString(_releaseBehaviour) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}		
 
-		if (SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthBufferBitCount) < 0)
+		if (SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, properties.depthBufferBitCount) < 0)
 		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_DEPTH_SIZE to " + StringParsing::Convert(depthBufferBitCount) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_DEPTH_SIZE to " + StringParsing::Convert(properties.depthBufferBitCount) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
-		if (SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, stencilBufferBitCount) < 0)
+		if (SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, properties.stencilBufferBitCount) < 0)
 		{
-			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_STENCIL_SIZE to " + StringParsing::Convert(stencilBufferBitCount) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			Debug::Logger::LogFatal("Blaze Engine Graphics", "Failed to set OpenGL context attribute SDL_GL_STENCIL_SIZE to " + StringParsing::Convert(properties.stencilBufferBitCount) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
 			return;
 		}
 		
@@ -340,17 +333,6 @@ namespace Blaze::Graphics::OpenGL
 				Debug::Logger::LogError("Blaze Engine Graphics", "An SDL error wasnt caught. SDL_Error() returned: \"" + error + "\"");			
 		}
 
-		{
-			DWORD errorID = GetLastError();
-			if (errorID != 0)
-			{
-				String error = Windows::GetErrorString(errorID);
-
-				if (!error.Empty())
-					Debug::Logger::LogError("Blaze Engine Graphics", "An Windows error wasnt caught. GetLastError() returned: \"" + error + "\"");
-			}
-		}
-
 		SDLOpenGLContext_OpenGL SDLOpenGLContext_{
 			SDL_GL_CreateContext((SDL_Window*)initWindowSDL_.GetHandle())
 		};		
@@ -362,27 +344,12 @@ namespace Blaze::Graphics::OpenGL
 		}
 
 		{
-			DWORD errorID = GetLastError();
-			if (errorID != 0)
-			{
-				String error = Windows::GetErrorString(errorID);
-
-				if (!error.Empty())
-				{
-					Debug::Logger::LogError("Blaze Engine Graphics", "Failed to create OpenGL context. GetLastError() returned: \"" + error + "\"");
-				}
-			}
-		}
-
-		{
 			StringView error = GetSDLError();
 
 			if (!error.Empty())
 			{								
-				Debug::Logger::LogError("Blaze Engine Graphics", "Failed to create OpenGL context. SDL_Error() returned: \"" + error + "\"");
-
-				SDL_GL_DeleteContext(SDLOpenGLContext_.handle);
-				return;
+				if (SDLOpenGLContext_.handle != nullptr)
+					Debug::Logger::LogWarning("Blaze Engine Graphics", "SDL reported an error while creating a OpenGL context, the returned context wasn't nullptr, trying to continue. SDL_Error() returned: \"" + error + "\"");
 			}
 		}	
 
@@ -426,7 +393,7 @@ namespace Blaze::Graphics::OpenGL
 			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL reset isolation context, a non reset isolation was created");
 		if (!bool(_contextFlags & SDL_GL_CONTEXT_RESET_ISOLATION_FLAG) && bool(finalContextFlags & SDL_GL_CONTEXT_RESET_ISOLATION_FLAG))
 			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL non reset isolation context, a reset isolation was created");
-		contextFlags = GetContextFlags(finalContextFlags);
+		properties.contextFlags = GetContextFlags(finalContextFlags);
 
 		int finalProfileType;
 		glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &finalProfileType);
@@ -442,45 +409,45 @@ namespace Blaze::Graphics::OpenGL
 				else
 					Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL " + name1 + " profile, got " + name2);
 		}
-		profileType = GetProfileType(finalProfileType);
+		properties.profileType = GetProfileType(finalProfileType);
 
 		int finalMajorVersion;
 		glGetIntegerv(GL_MAJOR_VERSION, &finalMajorVersion);
-		if (finalMajorVersion != majorVersion)
-			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL Major Version " + StringParsing::Convert(majorVersion) + " got " + StringParsing::Convert(finalMajorVersion));
-		majorVersion = finalMajorVersion;
+		if (finalMajorVersion != properties.majorVersion)
+			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL Major Version " + StringParsing::Convert(properties.majorVersion) + " got " + StringParsing::Convert(finalMajorVersion));
+		properties.majorVersion = finalMajorVersion;
 
 		int finalMinorVersion;
 		glGetIntegerv(GL_MINOR_VERSION, &finalMinorVersion);
-		if (finalMinorVersion != minorVersion)
-			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL Minor Version " + StringParsing::Convert(minorVersion) + " got " + StringParsing::Convert(finalMinorVersion));
-		minorVersion = finalMinorVersion;
+		if (finalMinorVersion != properties.minorVersion)
+			Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for OpenGL Minor Version " + StringParsing::Convert(properties.minorVersion) + " got " + StringParsing::Convert(finalMinorVersion));
+		properties.minorVersion = finalMinorVersion;
 
 		int finalDepthSize;
 		glGetIntegerv(GL_DEPTH_BITS, &finalDepthSize);
-		if (finalDepthSize != depthBufferBitCount)
+		if (finalDepthSize != properties.depthBufferBitCount)
 			if (finalDepthSize == 0)
-				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(depthBufferBitCount) + "-bit depth buffer, got no depth buffer");
-			else if (depthBufferBitCount == 0)
+				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(properties.depthBufferBitCount) + "-bit depth buffer, got no depth buffer");
+			else if (properties.depthBufferBitCount == 0)
 				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for no depth buffer, got " + StringParsing::Convert(finalDepthSize) + "-bit depth buffer");
 			else
-				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(depthBufferBitCount) + "-bit depth buffer, got " + StringParsing::Convert(finalDepthSize) + "-bit");
-		depthBufferBitCount = finalDepthSize;
+				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(properties.depthBufferBitCount) + "-bit depth buffer, got " + StringParsing::Convert(finalDepthSize) + "-bit");
+		properties.depthBufferBitCount = finalDepthSize;
 
 		int finalStencilSize;
 		glGetIntegerv(GL_STENCIL_BITS, &finalStencilSize);
-		if (finalStencilSize != stencilBufferBitCount)
+		if (finalStencilSize != properties.stencilBufferBitCount)
 			if (finalStencilSize == 0)
-				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(stencilBufferBitCount) + "-bit stencil buffer, got no stencil buffer");
-			else if (stencilBufferBitCount == 0)
+				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(properties.stencilBufferBitCount) + "-bit stencil buffer, got no stencil buffer");
+			else if (properties.stencilBufferBitCount == 0)
 				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for no stencil buffer, got " + StringParsing::Convert(finalStencilSize) + "-bit stencil buffer");
 			else
-				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(stencilBufferBitCount) + "-bit stencil buffer, got " + StringParsing::Convert(finalStencilSize) + "-bit");
-		stencilBufferBitCount = finalStencilSize;
+				Debug::Logger::LogWarning("Blaze Engine Graphics", "Asked for " + StringParsing::Convert(properties.stencilBufferBitCount) + "-bit stencil buffer, got " + StringParsing::Convert(finalStencilSize) + "-bit");
+		properties.stencilBufferBitCount = finalStencilSize;
 
 		String contextFlagsText = GetContextFlagsText(finalContextFlags);
 		if (!contextFlagsText.Empty()) contextFlagsText = " (" + contextFlagsText + ")";
-		Debug::Logger::LogInfo("Blaze Engine Graphics", "Created OpenGL context " + StringParsing::Convert(majorVersion) + "." + StringParsing::Convert(minorVersion) + " " + profileName + " profile" + contextFlagsText);	
+		Debug::Logger::LogInfo("Blaze Engine Graphics", "Created OpenGL context " + StringParsing::Convert(properties.majorVersion) + "." + StringParsing::Convert(properties.minorVersion) + " " + profileName + " profile" + contextFlagsText);
 
 		glDebugMessageCallback(MessageCallback, nullptr);
 		glEnable(GL_DEBUG_OUTPUT);

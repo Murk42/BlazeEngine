@@ -10,7 +10,7 @@ namespace Blaze::Debug
 	void Breakpoint()
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
-lse		DebugBreak();
+		DebugBreak();
 #else
 #error
 #endif

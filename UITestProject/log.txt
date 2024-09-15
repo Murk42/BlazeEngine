@@ -1,2 +1,4 @@
-[01/01/70 03:20:58] [INFO] [Blaze Engine Graphics] Successfully initialized glew 2.2.0
-[01/01/70 03:20:58] [INFO] [Blaze Engine Graphics] Created OpenGL context 4.0 core profile
+[01/04/70 04:40:04] [INFO] [Blaze Engine Graphics] Successfully initialized glew 2.2.0
+[01/04/70 04:40:04] [WARNING] [Blaze Engine Graphics] Asked for 16-bit depth buffer, got 24-bit
+[01/04/70 04:40:04] [WARNING] [Blaze Engine Graphics] Asked for no stencil buffer, got 8-bit stencil buffer
+[01/04/70 04:40:04] [INFO] [Blaze Engine Graphics] Created OpenGL context 4.0 compatibility profile

@@ -93,6 +93,9 @@
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <ConformanceMode>true</ConformanceMode>
@@ -445,6 +448,7 @@
     <None Include="assets\default\vertexDiffuse.glsl" />
     <None Include="scripts\CopyDependencies.bat" />
     <None Include="scripts\InstallBlazeEngine.bat" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\default\cubemap\cubemap_column.png" />

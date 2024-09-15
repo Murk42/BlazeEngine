@@ -45,9 +45,9 @@ MainScreen::MainScreen()
 	explanationText.textRenderUnit.SetFont(fonts[0]);
 	explanationText.textRenderUnit.SetFontHeight(20);
 	explanationText.textRenderUnit.SetText(
-		"This is a project to test some UI elements, the key is to use as many features as possible."
-		"For example here were writing as long of a text as possible and trying a text with multiple lines."
-		"This paragraph is all in one line so they will be wrapped, non wrapped lines should be more spaced apart.\n\n"
+		"This is a project to test some UI elements, the key is to use as many features as possible. "
+		"For example here were writing as long of a text as possible and trying a text with multiple lines. "
+		"This paragraph is all in one line so they will be wrapped, non wrapped lines should be more spaced apart. \n\n"
 		"Here is a new paragraph.\n"
 		"And here is a new line\n"
 		"And a another line"
@@ -56,6 +56,7 @@ MainScreen::MainScreen()
 		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Left,
 		.lineVerticalAlign = UI::TextLineVerticalAlign::Top,
 		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrapSpread,
+		.wrappedLineAdvance = 0.9f
 		});
 	explanationText.textRenderUnit.SetCullingNode(&explanationPanel);
 				

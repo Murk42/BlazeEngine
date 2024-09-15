@@ -122,21 +122,15 @@ namespace Blaze::Graphics::OpenGL
 
 		static bool IsExtensionSupported(StringView name);
 	private:
-		WindowSDL CreateWindowSDL(WindowSDLCreateOptions_OpenGL createOptions);
-		void DestroyWindowSDL(WindowSDL& window);
-
-		uint majorVersion;
-		uint minorVersion;
-		ProfileType profileType;
-		ContextFlags contextFlags;
-		ReleaseBehaviour releaseBehaviour;
-		uint depthBufferBitCount;		
-		uint stencilBufferBitCount;
+		GraphicsContextProperties_OpenGL properties;
 
 		SDLOpenGLContext_OpenGL SDLOpenGLContext;
 
 		WindowSDL initWindowSDL;
 		WindowSDL::WindowSDLHandle activeWindowSDLHandle;
+
+		WindowSDL CreateWindowSDL(WindowSDLCreateOptions_OpenGL createOptions);
+		void DestroyWindowSDL(WindowSDL& window);
 
 		friend class RenderWindow_OpenGL;
 	};
