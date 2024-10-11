@@ -2,7 +2,7 @@
 
 namespace Blaze::UI
 {
-	class UIInputManager;
+	class InputManager;
 
 	class BLAZE_GRAPHICS_API UIMouseEventHandler
 	{
@@ -11,12 +11,12 @@ namespace Blaze::UI
 			Left, Middle, Right,
 		};
 
-		struct MousePressedEvent { UIInputManager* inputManager; Vec2f pos; MouseButton button; TimePoint time; uint combo; };
-		struct MouseReleasedEvent { UIInputManager* inputManager; Vec2f pos; MouseButton button; TimePoint time; };
-		struct MouseEnterEvent { UIInputManager* inputManager; Vec2f pos; };
-		struct MouseExitEvent { UIInputManager* inputManager; Vec2f pos; };
-		struct MouseMotionEvent { UIInputManager* inputManager; Vec2f pos; Vec2f delta; };
-		struct MouseScrollEvent { UIInputManager* inputManager; Vec2f pos; int value; };
+		struct MousePressedEvent { InputManager* inputManager; Vec2f pos; MouseButton button; TimePoint time; uint combo; };
+		struct MouseReleasedEvent { InputManager* inputManager; Vec2f pos; MouseButton button; TimePoint time; };
+		struct MouseEnterEvent { InputManager* inputManager; Vec2f pos; };
+		struct MouseExitEvent { InputManager* inputManager; Vec2f pos; };
+		struct MouseMotionEvent { InputManager* inputManager; Vec2f pos; Vec2f delta; };
+		struct MouseScrollEvent { InputManager* inputManager; Vec2f pos; int value; };
 
 		virtual void OnEvent(MouseMotionEvent event) {  }
 		virtual void OnEvent(MouseScrollEvent event) {  }
@@ -27,6 +27,6 @@ namespace Blaze::UI
 	private:		
 		uint32 lastTransformState;
 	
-		friend class UIInputManager;
+		friend class InputManager;
 	};
 }

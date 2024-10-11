@@ -35,11 +35,11 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		return *this;
 	}
-	void ImmutableStaticGraphicsBuffer::Allocate(void* ptr, size_t size, bool clientStorage)
+	void ImmutableStaticGraphicsBuffer::Allocate(const void* ptr, size_t size, bool clientStorage)
 	{		
 		glNamedBufferStorage(GetHandle(), size, ptr, (clientStorage ? GL_CLIENT_STORAGE_BIT : 0));		
 	}
-	void ImmutableDynamicGraphicsBuffer::Allocate(void* ptr, size_t size, bool clientStorage)
+	void ImmutableDynamicGraphicsBuffer::Allocate(const void* ptr, size_t size, bool clientStorage)
 	{		
 		glNamedBufferStorage(GetHandle(), size, ptr, GL_DYNAMIC_STORAGE_BIT | (clientStorage ? GL_CLIENT_STORAGE_BIT : 0));		
 	}
@@ -57,7 +57,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		other.mapAccess = (ImmutableGraphicsBufferMapAccess)0;
 		other.mappingType = ImmutableGraphicsBufferMapType::None;
 	}
-	void ImmutableMappedGraphicsBuffer::Allocate(void* ptr, size_t size, ImmutableGraphicsBufferMapAccess access, ImmutableGraphicsBufferMapType mappingType, bool clientStorage)
+	void ImmutableMappedGraphicsBuffer::Allocate(const void* ptr, size_t size, ImmutableGraphicsBufferMapAccess access, ImmutableGraphicsBufferMapType mappingType, bool clientStorage)
 	{		
 		this->mapAccess = access;
 		this->mappingType = mappingType;
@@ -103,7 +103,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		return *this;
 	}
-	void MutableDrawGraphicsBuffer::Allocate(void* ptr, size_t size, MutableGraphicsBufferUseFrequency frequency)
+	void MutableDrawGraphicsBuffer::Allocate(const void* ptr, size_t size, MutableGraphicsBufferUseFrequency frequency)
 	{
 		Result result;
 		GLenum usage = OpenGLMutableBufferUsage(frequency, MutableGraphicsBufferUseType::Draw, result);

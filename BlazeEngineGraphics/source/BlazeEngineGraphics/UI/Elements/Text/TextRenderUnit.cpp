@@ -162,6 +162,7 @@ namespace Blaze::UIGraphics
 			ManageVerticalOverfittedOptions(layoutOptions.verticallyOverfittedOption, textHeight, transform.size.y, lineData, characterData);	
 		
 		float verticalOffset = GetLinesVerticalOffset(layoutOptions.lineVerticalAlign, textHeight, transform.size.y);
+		
 
 		uint characterIndex = 0;
 		for (uintMem i = 0; i < lineData.Count(); ++i)
@@ -582,10 +583,19 @@ namespace Blaze::UIGraphics
 	}
 	float TextRenderUnit::GetTextBoundingHeight(Array<LineData>& lineData)
 	{
-		float sum = 0;
+		if (lineData.Empty())
+			return 0;
+
+		float min = FLT_MAX;
+		float max = FLT_MIN;
+		
 		for (auto& line : lineData)
-			sum += line.size.y;
-		return sum;
+		{
+			min = std::min(min, line.pos.y);
+			max = std::max(max, line.pos.y + line.size.y);
+		}		
+
+		return max - min;
 	}	
 	void TextRenderUnit::ManageHorizontalUnderfittedOptions(TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption, float wrappedLineAdvance, float& textWidth, float& boundingWidth, Array<LineData>& lineData, Array<CharacterData>& characterData)
 	{		

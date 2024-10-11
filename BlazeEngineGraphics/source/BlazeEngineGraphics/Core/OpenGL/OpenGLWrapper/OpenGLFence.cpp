@@ -20,14 +20,20 @@ namespace Blaze::Graphics::OpenGLWrapper
 			
 		}
 	}
-	void Fence::SetFence()
-	{
+	void Fence::Clear()
+	{		
 		if (id != nullptr)
 		{
-			glDeleteSync((GLsync)id);			
+			glDeleteSync((GLsync)id);
+			id = nullptr;
 		}
+	}
+	void Fence::SetFence()
+	{
+		if (id != nullptr)		
+			glDeleteSync((GLsync)id);					
 
-		id = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);				
+		id = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 	}
 	void Fence::BlockServer()
 	{	

@@ -45,7 +45,7 @@ namespace Blaze
 			blazeEngineContext.inputEventSystem.inputPreUpdateDispatcher.Call({ });
 
 			{
-				std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
+				//std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
 				for (auto window : blazeEngineContext.windows)
 					window->ResetPressedAndReleasedKeys();
 			}
@@ -78,6 +78,16 @@ namespace Blaze
 				cursor = SDL_CreateSystemCursor((SDL_SystemCursor)type);
 
 			SDL_SetCursor(cursor);			
+		}
+
+		void ShowCursor(bool show)
+		{
+			SDL_ShowCursor(show ? SDL_ENABLE : SDL_DISABLE);
+		}
+		void SetMouseRelativeMode(bool relativeMode)
+		{						
+			SDL_SetRelativeMouseMode(relativeMode ? SDL_TRUE : SDL_FALSE);			
+			SDL_SetWindowInputFocus(SDL_GetMouseFocus());
 		}
 
 		bool HasClipboardText()

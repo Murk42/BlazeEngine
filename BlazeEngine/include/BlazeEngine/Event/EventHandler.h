@@ -48,7 +48,7 @@ namespace Blaze
 	}
 	template<typename T>
 	inline EventHandler<T>::EventHandler(EventHandler&& other) noexcept
-		: dispatcher(nullptr)
+		: dispatcher(nullptr), next(nullptr)
 	{		
 		std::unique_lock<std::recursive_mutex> lk{ other.mutex };
 

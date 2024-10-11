@@ -11,7 +11,7 @@ namespace Blaze
 	{
 		if (logAllocationsToFile)
 		{
-			std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+			//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 
 			char buffer[128];
 			uintMem messageSize = 0;

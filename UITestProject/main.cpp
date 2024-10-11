@@ -19,7 +19,7 @@ CLIENT_API void Setup()
 	Graphics::OpenGL::PanelRenderer_OpenGL panelRenderer{ graphicsContext };
 
 	Graphics::OpenGL::UIRenderPipeline_OpenGL UIRenderPipeline{ texturedRectRenderer, panelRenderer };
-	UI::UIInputManager UIInputManager;
+	UI::InputManager InputManager;
 
 	fonts.Resize(4);
 	fonts[0] = Font::LoadDefault();
@@ -33,7 +33,7 @@ CLIENT_API void Setup()
 	mainScreen.SetWindow(&window);
 
 	UIRenderPipeline.SetScreen(&mainScreen);
-	UIInputManager.AddScreen(&mainScreen);
+	InputManager.SetScreen(&mainScreen);
 
 	LambdaEventHandler<Input::Events::WindowResizedEvent> windowResizedEventHandler{
 		[&](const Input::Events::WindowResizedEvent& event) {			
