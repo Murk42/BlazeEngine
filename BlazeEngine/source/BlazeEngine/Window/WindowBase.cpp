@@ -9,7 +9,7 @@ namespace Blaze
 		pressedKeyCount(0), releasedKeyCount(0)
 	{		
 		{
-			//std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
+			std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
 			blazeEngineContext.windows.Insert(this);
 		}
 	}	
@@ -20,7 +20,7 @@ namespace Blaze
 	WindowBase::~WindowBase()
 	{
 		{
-			//std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
+			std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
 			blazeEngineContext.windows.Erase(this);			
 		}
 	}
@@ -108,7 +108,7 @@ namespace Blaze
 		other.pressedKeyCount = 0;
 		other.releasedKeyCount = 0;		
 
-		//std::lock_guard<std::mutex> lk2{ blazeEngineContext.windowsMutex };
+		std::lock_guard<std::mutex> lk2{ blazeEngineContext.windowsMutex };
 		blazeEngineContext.windows.Insert(this);
 	}
 	void WindowBase::HandleKeyEvent(Input::Events::KeyPressed event)

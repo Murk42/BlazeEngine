@@ -46,8 +46,6 @@ namespace Blaze
 		};
 
 		BLAZE_API void SetCursorType(CursorType type);
-		BLAZE_API void ShowCursor(bool show);		
-		BLAZE_API void SetMouseRelativeMode(bool relativeMode);
 
 		BLAZE_API bool HasClipboardText();
 		BLAZE_API StringUTF8 GetClipboardText();

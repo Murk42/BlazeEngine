@@ -39,7 +39,7 @@ CLIENT_API void Setup()
 	renderSystem.SetScreen(&mainScreen);
 
 	
-	UI::InputManager inputManager;
+	UI::UIInputManager inputManager;
 	inputManager.SetScreen(&mainScreen);
 	inputManager.SetWindow(&window);
 

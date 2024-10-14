@@ -11,7 +11,7 @@
 namespace Blaze::UI
 {
 	class TextButton :
-		public InputNode,
+		public UIInputNode,
 		public UIMouseEventHandler,
 		public UISelectEventHandler,
 		public Graphics::RenderObject,
@@ -19,7 +19,7 @@ namespace Blaze::UI
 		EventHandler<Input::Events::KeyReleased>
 	{
 	public:
-		struct PressedEvent { InputManager* inputManager; };
+		struct PressedEvent { UIInputManager* inputManager; };
 		EventDispatcher<PressedEvent> pressedEventDispatcher;		
 
 		TextButton();

@@ -21,15 +21,13 @@ namespace Blaze::UI
 		Screen* screen;
 	};
 
-	class Screen : 
-		public Node,
-		private EventHandler<Input::Events::WindowResizedEvent>
+	class Screen : public Node
 	{
 	public:
-		EventDispatcher<NodeCreatedEvent> nodeCreatedEventDispatcher;
-		EventDispatcher<NodeDestroyedEvent> nodeDestroyedEventDispatcher;
-		EventDispatcher<ScreenDestructionEvent> screenDestructionEventDispatcher;
-		EventDispatcher<ScreenWindowChangedEvent> screenWindowChangedEventDispatcher;
+		Blaze::EventDispatcher<NodeCreatedEvent> nodeCreatedEventDispatcher;
+		Blaze::EventDispatcher<NodeDestroyedEvent> nodeDestroyedEventDispatcher;
+		Blaze::EventDispatcher<ScreenDestructionEvent> screenDestructionEventDispatcher;
+		Blaze::EventDispatcher<ScreenWindowChangedEvent> screenWindowChangedEventDispatcher;
 
 		Screen();
 		virtual ~Screen();
@@ -41,14 +39,12 @@ namespace Blaze::UI
 		virtual String GetTypeName() const { return "Screen"; };
 		inline uintMem GetNodeCount() const { return nodeCount; }
 		inline WindowBase* GetWindow() const { return window; }
-	private:				
+	private:		
 		uintMem nodeCount;
 		WindowBase* window;
 
 		void AddNode(Node* node);
 		void RemoveNode(Node* node);
-
-		void OnEvent(Input::Events::WindowResizedEvent event);
 
 		friend class Node;
 	};

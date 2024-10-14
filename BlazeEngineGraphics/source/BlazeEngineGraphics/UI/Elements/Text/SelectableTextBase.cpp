@@ -13,11 +13,10 @@ namespace Blaze::UI
 		textRenderUnit(textRenderUnit), textSelectionRenderUnit(textSelectionRenderUnit), textCursorRenderUnit(textCursorRenderUnit),
 		grabbedSelectionBegin(0), grabbedSelectionEnd(0), mouseDown(false)
 	{
-		SetBlocksMouseEventsFlag(true);
 	}
 	bool SelectableTextBase::HitTest(Vec2f screenPosition)
 	{
-		if (!InputNode::HitTest(screenPosition))
+		if (!UIInputNode::HitTest(screenPosition))
 			return false;
 
 		Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(screenPosition);

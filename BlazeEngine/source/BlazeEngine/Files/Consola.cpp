@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Consola.h"
 
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngine\source\BlazeEngine\Files\Consola.ttf" template 06/17/24 14:46:16 resource 08/27/21 17:44:53$
+//$sample timing "C:\Marko\BlazeEngine\BlazeEngine\source\BlazeEngine\Files\Consola.ttf" template 09/15/24 15:13:08 resource 09/15/24 15:13:08$
 const unsigned int consolaFileSize = 98520;
 const unsigned char consolaFile[]{
 	0x00, 0x01, 0x00, 0x00, 0x00, 0x12, 0x01, 0x00, 0x00, 0x04, 0x00, 0x20, 0x44, 0x53, 0x49, 

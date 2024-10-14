@@ -5,30 +5,30 @@ namespace Blaze::Debug::Logger
 {
 	void AddLoggerListener(Debug::LoggerListener* listener)
 	{
-		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 		blazeEngineCoreContext.loggerListeners.AddFront(listener);
 	}
 	void RemoveLoggerListener(Debug::LoggerListener* listener)
 	{
-		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 		blazeEngineCoreContext.loggerListeners.EraseOne([=](auto other) { return other == listener; });
 	}
 
 	void AddOutputStream(WriteStream& stream)
 	{
-		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 		blazeEngineCoreContext.loggerOutputStreams.AddBack(BlazeEngineCoreContext::LoggerOutputStreamData({ &stream }));
 	}
 	void RemoveOutputStream(WriteStream& stream)
 	{
-		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 		for (uint i = 0; i < blazeEngineCoreContext.loggerOutputStreams.Count(); ++i)
 			if (blazeEngineCoreContext.loggerOutputStreams[i].writeStream == &stream)
 				blazeEngineCoreContext.loggerOutputStreams.EraseAt(i);		
 	}
 	Result AddOutputFile(const Path& path)
 	{
-		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 
 		if (!blazeEngineCoreContext.loggerOutputFiles.Find(path).IsNull())
 			return Result();
@@ -50,7 +50,7 @@ namespace Blaze::Debug::Logger
 	
 	static void WriteToStreams(StringViewUTF8 string)
 	{
-		//std::unique_lock lk{ blazeEngineCoreContext.contextMutex, std::try_to_lock };
+		std::unique_lock lk{ blazeEngineCoreContext.contextMutex, std::try_to_lock };
 
 		for (auto& stream : blazeEngineCoreContext.loggerOutputStreams)
 		{

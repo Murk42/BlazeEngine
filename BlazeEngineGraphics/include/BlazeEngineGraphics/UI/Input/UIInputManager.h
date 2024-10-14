@@ -5,11 +5,13 @@
 
 namespace Blaze::UI
 {
-	class InputManager :
+	class UIInputManager :
 		EventHandler<NodeCreatedEvent>,
 		EventHandler<NodeDestroyedEvent>,
 		EventHandler<ScreenDestructionEvent>,
-		EventHandler<ScreenWindowChangedEvent>,				
+		EventHandler<ScreenWindowChangedEvent>,
+		EventHandler<Input::Events::InputPreUpdateEvent>,
+		EventHandler<Input::Events::InputPostUpdateEvent>,
 		EventHandler<Input::Events::MouseMotion>,
 		EventHandler<Input::Events::MouseScroll>,
 		EventHandler<Input::Events::KeyPressed>,
@@ -17,58 +19,39 @@ namespace Blaze::UI
 		EventHandler<Input::Events::TextInput>
 	{
 	public:
-		InputManager();
-		~InputManager();		
-
-		void SetScreen(Screen* screen);
+		UIInputManager();
+		~UIInputManager();
+		
+		void AddScreen(Screen* screen);
+		void RemoveScreen(Screen* screen);		
 
 		void SelectNode(nullptr_t null);
 		void SelectNode(Node* selectedNode);
-		void SelectNode(InputNode* selectedNode);
+		void SelectNode(UIInputNode* selectedNode);
 		
-		inline InputNode* GetSelectedNode() const { return selectedNode; }
+		inline UIInputNode* GetSelectedNode() const { return selectedNode; }
 	private:
-		class InputNodeFinalTransformUpdatedEventHandler : public EventHandler<Node::FinalTransformUpdatedEvent>
-		{
-		public:
-			InputNodeFinalTransformUpdatedEventHandler(InputManager* inputManager);
-
-			void OnEvent(Node::FinalTransformUpdatedEvent event) override;
-
-		private:
-			InputManager* inputManager;
+		struct ScreenData
+		{						
+			Array<UIInputNode*> nodes;
 		};
 
-		struct InputNodeData
-		{
-			InputNode* node;
-			InputNodeFinalTransformUpdatedEventHandler finalTransformUpdatedEventHandler;
-		};
-		Array<InputNodeData> nodesData;
-		InputNode* selectedNode;
-		Screen* screen;
-		uintMem mouseBlockInputNodeIndex;
+		Map<Screen*, ScreenData> screenData;		
+		Array<Screen*> screensToRecreate;
+		UIInputNode* selectedNode;
 
-		bool recreateScreenNodes;
-		
-		void SubscribeToScreen(Screen& screen);		
-		void UnsubscribeFromScreen(Screen& screen);		
-		void SubscribeToWindow(WindowBase& window);		
-		void UnsubscribeFromWindow(WindowBase& window);
+		void RecreateScreenInputNodes(Map<Screen*, ScreenData>::Iterator it);
 
-		void GatherInputNodes(Node* node);
-		//Expects that screen is not nullptr
-		void RecreateScreenInputNodes();
-		//Updates all nodes mouse interaction beginning from 'beginIndex'. beginIndex is expected to be less than mouseBlockInputNodeIndex
-		void CastMousePointer(uintMem beginIndex, Vec2f mousePos, Vec2f mouseDelta);
-		void NodeFinalTransformUpdated(InputNode* node);
-		
-		void UpdateMouseHitEvents(InputNode* node, Vec2i mouseDelta);
+		void CheckMousePositionEvents(Vec2i delta);
+		void CheckMouseMotionEvents(UIMouseEventHandler* mouseEventHandler, Vec2i delta);
+		void CheckMouseHitEvents(UIMouseEventHandler* mouseEventHandler, bool oldHit, bool newHit);
 
 		void OnEvent(NodeCreatedEvent event) override;
 		void OnEvent(NodeDestroyedEvent event) override;
 		void OnEvent(ScreenDestructionEvent event) override;
-		void OnEvent(ScreenWindowChangedEvent event) override;	
+		void OnEvent(ScreenWindowChangedEvent event) override;
+		void OnEvent(Input::Events::InputPreUpdateEvent event) override;
+		void OnEvent(Input::Events::InputPostUpdateEvent event) override;
 		void OnEvent(Input::Events::MouseMotion event) override;
 		void OnEvent(Input::Events::MouseScroll event) override;
 		void OnEvent(Input::Events::KeyPressed event) override;

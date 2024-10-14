@@ -26,7 +26,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		ImmutableStaticGraphicsBuffer() = default;
 		ImmutableStaticGraphicsBuffer(ImmutableStaticGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(const void* ptr, size_t size, bool clientStorage = false);
+		void Allocate(void* ptr, size_t size, bool clientStorage = false);
 
 		ImmutableStaticGraphicsBuffer& operator=(ImmutableStaticGraphicsBuffer&& other) noexcept { GraphicsBuffer::operator=(std::move(other)); return *this; }
 	};
@@ -37,7 +37,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		ImmutableDynamicGraphicsBuffer() = default;
 		ImmutableDynamicGraphicsBuffer(ImmutableDynamicGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(const void* ptr, size_t size, bool clientStorage = false);
+		void Allocate(void* ptr, size_t size, bool clientStorage = false);
 
 		void WriteData(const void* ptr, size_t size, size_t offset);
 
@@ -52,7 +52,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		ImmutableMappedGraphicsBuffer();
 		ImmutableMappedGraphicsBuffer(ImmutableMappedGraphicsBuffer&& other) noexcept;
 
-		void Allocate(const void* ptr, size_t size, ImmutableGraphicsBufferMapAccess access, ImmutableGraphicsBufferMapType type, bool clientStorage = false);
+		void Allocate(void* ptr, size_t size, ImmutableGraphicsBufferMapAccess access, ImmutableGraphicsBufferMapType type, bool clientStorage = false);
 
 		void* MapBufferRange(size_t offset, size_t size, ImmutableGraphicsBufferMapOptions options);
 		void UnmapBuffer();
@@ -67,7 +67,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		MutableDrawGraphicsBuffer() = default;
 		MutableDrawGraphicsBuffer(MutableDrawGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(const void* ptr, size_t size, MutableGraphicsBufferUseFrequency frequency);
+		void Allocate(void* ptr, size_t size, MutableGraphicsBufferUseFrequency frequency);
 
 		void WriteData(const void* ptr, size_t size, size_t offset);
 

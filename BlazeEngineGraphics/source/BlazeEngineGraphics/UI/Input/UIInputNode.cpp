@@ -3,31 +3,31 @@
 
 namespace Blaze::UI
 {
-	InputNode::InputNode()
-		: Node(), keyboardHandler(nullptr), mouseHandler(nullptr), selectHandler(nullptr), inputManagerArrayIndex(0), blocksMouseEvents(false)
+	UIInputNode::UIInputNode()
+		: Node(), keyboardHandler(nullptr), mouseHandler(nullptr), selectHandler(nullptr)
 	{
 
 	}
-	InputNode::~InputNode()
+	UIInputNode::~UIInputNode()
 	{
 	}
-	void InputNode::SetKeyboardEventHandler(UIKeyboardEventHandler* keyboardEventHandler)
+	void UIInputNode::SetKeyboardEventHandler(UIKeyboardEventHandler* keyboardEventHandler)
 	{
 		keyboardHandler = keyboardEventHandler;
 	}
-	void InputNode::SetMouseEventHandler(UIMouseEventHandler* mouseEventHandler)
+	void UIInputNode::SetMouseEventHandler(UIMouseEventHandler* mouseEventHandler)
 	{
 		mouseHandler = mouseEventHandler;
 	}
-	void InputNode::SetSelectEventHandler(UISelectEventHandler* selectEventHandler)
+	void UIInputNode::SetSelectEventHandler(UISelectEventHandler* selectEventHandler)
 	{
 		selectHandler = selectEventHandler;
 	}
-	void InputNode::SetBlocksMouseEventsFlag(bool blocksMouseEvents)
+	void UIInputNode::SetHitPropagation(bool hitPropagates)
 	{
-		this->blocksMouseEvents = blocksMouseEvents;
+		this->hitPropagates = hitPropagates;
 	}
-	bool InputNode::HitTest(Vec2f screenPosition)
+	bool UIInputNode::HitTest(Vec2f screenPosition)
 	{
 		auto finalTransform = GetFinalTransform();
 		Vec2f pos = finalTransform.position;

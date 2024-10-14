@@ -120,19 +120,9 @@ namespace Blaze
 
 		handler.dispatcher = this;		
 
-		std::lock_guard<Lock> lk{ lock };
-
-		if (head == nullptr)		
-			head = &handler;					
-		else
-		{
-			auto it = head;
-
-			while (it->next != nullptr)
-				it = it->next;
-
-			it->next = &handler;			
-		}	
+		std::lock_guard<Lock> lk{ lock };		
+		handler.next = head;
+		head = &handler;
 	}
 	template<typename T>
 	inline void EventDispatcher<T>::RemoveHandler(HandlerType& handler)

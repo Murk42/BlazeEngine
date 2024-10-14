@@ -7,28 +7,27 @@ namespace Blaze::UI
 	class UIMouseEventHandler;
 	class UISelectEventHandler;
 
-	class BLAZE_GRAPHICS_API InputNode : public Node
+	class BLAZE_GRAPHICS_API UIInputNode : public Node
 	{
 	public:
-		InputNode();
-		~InputNode() override;
+		UIInputNode();
+		~UIInputNode() override;
 
 		void SetKeyboardEventHandler(UIKeyboardEventHandler* keyboardEventHandler);
 		void SetMouseEventHandler(UIMouseEventHandler* mouseEventHandler);
 		void SetSelectEventHandler(UISelectEventHandler* selectEventHandler);
 
-		void SetBlocksMouseEventsFlag(bool blocksMouseEvents);
+		void SetHitPropagation(bool hitPropagates);
 
 		virtual bool HitTest(Vec2f screenPosition);
 	private:
 		bool hit;
-		bool blocksMouseEvents;
-		uintMem inputManagerArrayIndex;
+		bool hitPropagates;
 
 		UIKeyboardEventHandler* keyboardHandler;
 		UIMouseEventHandler* mouseHandler;
 		UISelectEventHandler* selectHandler;
 
-		friend class InputManager;
+		friend class UIInputManager;
 	};
 }

@@ -10,15 +10,11 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Fence();
 		Fence(void* id);
 		~Fence();
-		
-		//Creates a new unsignaled fence
-		void Clear();
-		//When the GPU executes this command the fence will be signaled
+
 		void SetFence();
 
-		//Blocks the GPU until this fence is signaled
 		void BlockServer();
-		//Blocks the CPU until this fence is signaled. The timeout is in seconds
+		//The timeout is in seconds
 		FenceReturnState BlockClient(double timeout);
 
 		bool IsSet();

@@ -2,7 +2,6 @@
 #include "BlazeEngineCore/Debug/Callstack.h"
 #include "BlazeEngineCore/Memory/MemoryManager.h"
 
-#define BOOST_STACKTRACE_USE_WINDBG_CACHED
 #include <boost/stacktrace/stacktrace.hpp>	
 #undef min
 

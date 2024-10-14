@@ -13,7 +13,6 @@ namespace Blaze::UI
 		textRenderUnit(textRenderUnit), textSelectionRenderUnit(textSelectionRenderUnit), textCursorRenderUnit(textCursorRenderUnit),
 		grabbedSelectionBegin(0), grabbedSelectionEnd(0), mouseDown(false), multilineInput(true)
 	{
-		SetBlocksMouseEventsFlag(true);
 	}
 	void EditableTextBase::SetMultilineInput(bool multiline)
 	{

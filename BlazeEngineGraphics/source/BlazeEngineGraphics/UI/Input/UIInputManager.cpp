@@ -7,47 +7,76 @@
 
 namespace Blaze::UI
 {
-	//TODO update mouse cast when InputNode::blocksMouseEvents is changed 
-	//TODO update node ordering when parent is changed
-
-	InputManager::InputManager()
-		: selectedNode(nullptr), screen(nullptr), mouseBlockInputNodeIndex(0)
-	{				
+	UIInputManager::UIInputManager()
+		: selectedNode(nullptr)
+	{		
+		Input::GetInputEventSystem().inputPreUpdateDispatcher.AddHandler(*this);
+		Input::GetInputEventSystem().inputPostUpdateDispatcher.AddHandler(*this);
 	}
-	InputManager::~InputManager()
+	UIInputManager::~UIInputManager()
+	{		
+	}
+	void UIInputManager::AddScreen(Screen* screen)
 	{
 		if (screen != nullptr)
-			SubscribeToScreen(*screen);
-	}
-	void InputManager::SetScreen(Screen* screen)
-	{
-		if (this->screen != nullptr)
-			UnsubscribeFromScreen(*this->screen);
-
-		this->screen = screen;
-
-		if (this->screen != nullptr)
 		{
-			SubscribeToScreen(*this->screen);
-			recreateScreenNodes = true;
-		}
-		else
-		{
-			recreateScreenNodes = false;
+			auto res = screenData.Insert(screen);
+
+			if (!res.inserted)
+				return;
+
+			auto& data = res.iterator->value;			
+
+			screensToRecreate.AddBack(screen);
+
+			screen->nodeCreatedEventDispatcher.AddHandler(*this);
+			screen->nodeDestroyedEventDispatcher.AddHandler(*this);
+			screen->screenDestructionEventDispatcher.AddHandler(*this);
+
+			if (screen->GetWindow() != nullptr)
+			{
+				screen->GetWindow()->mouseMotionDispatcher.AddHandler(*this);
+				screen->GetWindow()->mouseScrollDispatcher.AddHandler(*this);
+				screen->GetWindow()->keyPressedDispatcher.AddHandler(*this);
+				screen->GetWindow()->keyReleasedDispatcher.AddHandler(*this);
+				screen->GetWindow()->textInputDispatcher.AddHandler(*this);
+			}
 		}
 	}
 
-	void InputManager::SelectNode(nullptr_t null)
+	void UIInputManager::RemoveScreen(Screen* screen)
+	{		
+		auto it = screenData.Find(screen);
+		if (it.IsNull())
+			return;
+
+		screenData.Erase(it);
+	
+		screen->nodeCreatedEventDispatcher.RemoveHandler(*this);
+		screen->nodeDestroyedEventDispatcher.RemoveHandler(*this);
+		screen->screenDestructionEventDispatcher.RemoveHandler(*this);
+
+		if (screen->GetWindow() != nullptr)
+		{
+			screen->GetWindow()->mouseMotionDispatcher.RemoveHandler(*this);
+			screen->GetWindow()->mouseScrollDispatcher.RemoveHandler(*this);
+			screen->GetWindow()->keyPressedDispatcher.RemoveHandler(*this);
+			screen->GetWindow()->keyReleasedDispatcher.RemoveHandler(*this);
+			screen->GetWindow()->textInputDispatcher.RemoveHandler(*this);
+		}
+	}	
+
+	void UIInputManager::SelectNode(nullptr_t null)
 	{
-		SelectNode((InputNode*)null);
+		SelectNode((UIInputNode*)null);
 	}
-	void InputManager::SelectNode(Node* newSelectedNode)
-	{
-		auto newSelectedInputNode = dynamic_cast<InputNode*>(newSelectedNode);
+	void UIInputManager::SelectNode(Node* newSelectedNode)
+	{		
+		auto newSelectedInputNode = dynamic_cast<UIInputNode*>(newSelectedNode);
 
 		SelectNode(newSelectedInputNode);
 	}
-	void InputManager::SelectNode(InputNode* newSelectedInputNode)
+	void UIInputManager::SelectNode(UIInputNode* newSelectedInputNode)
 	{
 		if (selectedNode == newSelectedInputNode)
 			return;
@@ -72,262 +101,233 @@ namespace Blaze::UI
 
 			selectedNode = nullptr;
 		}
+	
+	}
 
-	}
-	void InputManager::SubscribeToScreen(Screen& screen)
+	static void GatherInputNodes(Node* node, Array<UIInputNode*>& arr)
 	{
-		screen.nodeCreatedEventDispatcher.AddHandler(*this);
-		screen.nodeDestroyedEventDispatcher.AddHandler(*this);
-		screen.screenDestructionEventDispatcher.AddHandler(*this);
+		if (auto inputNode = dynamic_cast<UIInputNode*>(node))
+		{			
+			arr.AddBack(inputNode);
+		}
 
-		if (screen.GetWindow() != nullptr)
-			SubscribeToWindow(*screen.GetWindow());		
-	}
-	void InputManager::UnsubscribeFromScreen(Screen& screen)
-	{
-		screen.nodeCreatedEventDispatcher.AddHandler(*this);
-		screen.nodeDestroyedEventDispatcher.AddHandler(*this);
-		screen.screenDestructionEventDispatcher.AddHandler(*this);
-
-		if (screen.GetWindow() != nullptr)
-			UnsubscribeFromWindow(*screen.GetWindow());		
-	}
-	void InputManager::SubscribeToWindow(WindowBase& window)
-	{		
-		window.mouseMotionDispatcher.AddHandler(*this);
-		window.mouseScrollDispatcher.AddHandler(*this);
-		window.keyPressedDispatcher.AddHandler(*this);
-		window.keyReleasedDispatcher.AddHandler(*this);
-		window.textInputDispatcher.AddHandler(*this);		
-	}
-	void InputManager::UnsubscribeFromWindow(WindowBase& window)
-	{
-		window.mouseMotionDispatcher.AddHandler(*this);
-		window.mouseScrollDispatcher.AddHandler(*this);
-		window.keyPressedDispatcher.AddHandler(*this);
-		window.keyReleasedDispatcher.AddHandler(*this);
-		window.textInputDispatcher.AddHandler(*this);
-	}
-	void InputManager::GatherInputNodes(Node* node)
-	{
-		if (auto inputNode = dynamic_cast<InputNode*>(node))
-			nodesData.AddBack(InputNodeData{ inputNode, InputNodeFinalTransformUpdatedEventHandler(this) });
-		
 		for (auto child : node->GetChildren())
-			GatherInputNodes(child);
-	}
-	void InputManager::RecreateScreenInputNodes()
+			GatherInputNodes(child, arr);
+	}	
+
+	void UIInputManager::RecreateScreenInputNodes(Map<Screen*, ScreenData>::Iterator it)
 	{
-		nodesData.Clear();
-		nodesData.ReserveExactly(screen->GetNodeCount());
+		it->value.nodes.Clear();
 
-		for (auto child : screen->GetChildren())
-			GatherInputNodes(child);
+		for (auto child : it->key->GetChildren())
+			GatherInputNodes(child, it->value.nodes);		
 
-		for (uintMem i = 0; i < nodesData.Count(); ++i)
+		for (auto node : it->value.nodes)
 		{
-			auto& nodeData = nodesData[i];			
-			nodeData.node->inputManagerArrayIndex = i;
-			nodeData.node->finalTransformUpdatedEventDispatcher.AddHandler(nodeData.finalTransformUpdatedEventHandler);
+			if (node->mouseHandler == nullptr)			
+				node->mouseHandler = dynamic_cast<UIMouseEventHandler*>(node);			
+			if (node->keyboardHandler == nullptr)
+				node->keyboardHandler = dynamic_cast<UIKeyboardEventHandler*>(node);
+			if (node->selectHandler == nullptr)
+				node->selectHandler = dynamic_cast<UISelectEventHandler*>(node);			
 
-			if (nodeData.node->mouseHandler == nullptr)
-				nodeData.node->mouseHandler = dynamic_cast<UIMouseEventHandler*>(nodeData.node);
-			if (nodeData.node->keyboardHandler == nullptr)
-				nodeData.node->keyboardHandler = dynamic_cast<UIKeyboardEventHandler*>(nodeData.node);
-			if (nodeData.node->selectHandler == nullptr)
-				nodeData.node->selectHandler = dynamic_cast<UISelectEventHandler*>(nodeData.node);
-
-			if (nodeData.node->mouseHandler != nullptr)
-				nodeData.node->mouseHandler->lastTransformState = nodeData.node->GetTransformState();
-		}
-
-		recreateScreenNodes = false;
+			if (node->mouseHandler != nullptr)
+				node->mouseHandler->lastTransformState = node->GetTransformState();
+		}		
 	}
-
-	void InputManager::CastMousePointer(uintMem beginIndex, Vec2f mousePos, Vec2f mouseDelta)
+	void UIInputManager::CheckMousePositionEvents(Vec2i delta)
 	{
-		if (nodesData.Empty())
-			return;
+		Vec2i desktopMousePos = Input::GetDesktopMousePos();
 
-		if (beginIndex >= mouseBlockInputNodeIndex)
+		auto oldSelectedNode = selectedNode;
+	
+		for (auto& data : screenData)
 		{
-			Debug::Breakpoint();
-			return;
-		}
+			if (data.key->GetWindow() == nullptr)
+				continue;
 
-		bool blocked = false;
+			Vec2f mousePos = Vec2f(desktopMousePos - data.key->GetWindow()->GetPos());
 
-		uintMem i;
-		for (i = beginIndex; i < nodesData.Count(); ++i)
-		{
-			auto node = nodesData[i].node;
-
-			bool oldHit = node->hit;
-			bool newHit = node->HitTest(mousePos);
-			node->hit = newHit;
-
-			if (oldHit && !newHit)
+			bool alreadyHit = false;
+			for (auto node : data.value.nodes)
 			{
+				bool oldHit = node->hit;
+				bool newHit = node->HitTest(mousePos) && !alreadyHit;
+				node->hit = newHit;
+
 				if (auto mouseEventHandler = node->mouseHandler)
-					mouseEventHandler->OnEvent(UIMouseEventHandler::MouseExitEvent({
-						.inputManager = this,
-						.pos = mousePos
-						}));
+				{
+					if (newHit && !oldHit)
+						mouseEventHandler->OnEvent(UIMouseEventHandler::MouseEnterEvent({
+							.inputManager = this,
+							.pos = mousePos
+							}));
+
+					if (oldHit && !newHit)
+						mouseEventHandler->OnEvent(UIMouseEventHandler::MouseExitEvent({
+							.inputManager = this,
+							.pos = mousePos
+							}));
+
+					uint32 lastState = node->GetTransformState();
+
+					if ((delta != Vec2i() || mouseEventHandler->lastTransformState != lastState) && (newHit || oldSelectedNode == node))
+					{
+						UIMouseEventHandler::MouseMotionEvent _event{
+							.inputManager = this,
+							.pos = mousePos,
+							.delta = Vec2f(delta)
+						};
+						mouseEventHandler->OnEvent(_event);
+					}
+
+					mouseEventHandler->lastTransformState = lastState;
+				}
+
+				if (!node->hitPropagates && newHit)
+					alreadyHit = true;
+			}
+		}
+	}		
+	void UIInputManager::OnEvent(NodeCreatedEvent event)
+	{
+		if (auto inputNode = dynamic_cast<UIInputNode*>(event.node))
+		{			
+			auto it = screenData.Find(event.node->GetScreen());
+
+			if (it.IsNull())
+			{
+				Debug::Logger::LogWarning("Blaze Engine Graphics", "Couldn't find screen");
+				return;
 			}
 
-			if (blocked)
-				nodesData[i].node->hit = false;
-			else
-			{
-				if (newHit)
-				{
-					if (auto mouseEventHandler = node->mouseHandler)
-						mouseEventHandler->OnEvent(UIMouseEventHandler::MouseMotionEvent{
-								.inputManager = this,
-								.pos = mousePos,
-								.delta = mouseDelta
-							});
-				}
-
-				if (newHit && !oldHit)
-				{
-					if (auto mouseEventHandler = node->mouseHandler)
-						mouseEventHandler->OnEvent(UIMouseEventHandler::MouseEnterEvent({
-								.inputManager = this,
-								.pos = mousePos
-							}));
-				}
-
-				if (newHit)
-				{
-					if (node->blocksMouseEvents)
-					{
-						mouseBlockInputNodeIndex = i;
-						blocked = true;
-					}
-				}
-			}							
+			screensToRecreate.AddBack(it->key);
 		}
-
-		//If the mouse ray wasn't blocked set the index to outside the array
-		mouseBlockInputNodeIndex = nodesData.Count();		
 	}
-
-	void InputManager::NodeFinalTransformUpdated(InputNode* node)
+	void UIInputManager::OnEvent(NodeDestroyedEvent event)
 	{
-		if (mouseBlockInputNodeIndex > node->inputManagerArrayIndex)
-			return;
-
-		Vec2f mousePos = Vec2f(screen->GetWindow()->GetMousePos());
-
-		bool oldHit = node->hit;
-		bool newHit = node->HitTest(mousePos);
-		node->hit = newHit;
-		
-		if (oldHit && !newHit)
+		if (auto inputNode = dynamic_cast<UIInputNode*>(event.node))
 		{
-			//If the mouse on its way to this node wasn't blocked send an event that the mouse exited			
-			if (auto mouseEventHandler = node->mouseHandler)
-				mouseEventHandler->OnEvent(UIMouseEventHandler::MouseExitEvent({
-					.inputManager = this,
-					.pos = mousePos
-					}));
+			auto it = screenData.Find(event.node->GetScreen());
 
-			//If this node was blocking the mouse cast the mouse pointer further
-			if (mouseBlockInputNodeIndex == node->inputManagerArrayIndex)
-				CastMousePointer(node->inputManagerArrayIndex + 1, mousePos, Vec2f());
+			if (it.IsNull())
+			{
+				Debug::Logger::LogWarning("Blaze Engine Graphics", "Couldn't find screen");
+				return;
+			}
+
+			screensToRecreate.AddBack(it->key);
 		}
-
-		if (newHit && !oldHit)		
-			CastMousePointer(mouseBlockInputNodeIndex + 1, mousePos, Vec2f());
 	}
-		
-	void InputManager::OnEvent(NodeCreatedEvent event)
-	{				
-		recreateScreenNodes = true;
-	}
-	void InputManager::OnEvent(NodeDestroyedEvent event)
+	void UIInputManager::OnEvent(ScreenDestructionEvent event)
 	{
-		recreateScreenNodes = true;
+		RemoveScreen(event.screen);
 	}
-	void InputManager::OnEvent(ScreenDestructionEvent event)
-	{
-		SetScreen(nullptr);		
-	}
-	void InputManager::OnEvent(ScreenWindowChangedEvent event)
+	void UIInputManager::OnEvent(ScreenWindowChangedEvent event)
 	{
 		if (event.oldWindow != nullptr)
-			UnsubscribeFromWindow(*event.oldWindow);		
-
-		if (screen->GetWindow() != nullptr)
-			SubscribeToWindow(*screen->GetWindow());		
-	}			
-	void InputManager::OnEvent(Input::Events::MouseMotion event)
-	{		
-		if (recreateScreenNodes)
-			RecreateScreenInputNodes();
-
-		mouseBlockInputNodeIndex = nodesData.Count();
-
-		CastMousePointer(0, (Vec2f)screen->GetWindow()->GetMousePos(), (Vec2f)event.delta);
-	}
-	void InputManager::OnEvent(Input::Events::MouseScroll event)
-	{				
-		if (recreateScreenNodes)
-			RecreateScreenInputNodes();
-
-		Vec2f mousePos = Vec2f(screen->GetWindow()->GetMousePos());
-
-		for (auto& nodeData : nodesData)
 		{
-			if (nodeData.node->hit)
+			event.oldWindow->mouseMotionDispatcher.RemoveHandler(*this);
+			event.oldWindow->mouseScrollDispatcher.RemoveHandler(*this);
+			event.oldWindow->keyPressedDispatcher.RemoveHandler(*this);
+			event.oldWindow->keyReleasedDispatcher.RemoveHandler(*this);
+			event.oldWindow->textInputDispatcher.RemoveHandler(*this);
+		}
+
+		if (event.screen->GetWindow() != nullptr)
+		{
+			event.screen->GetWindow()->mouseMotionDispatcher.AddHandler(*this);
+			event.screen->GetWindow()->mouseScrollDispatcher.AddHandler(*this);
+			event.screen->GetWindow()->keyPressedDispatcher.AddHandler(*this);
+			event.screen->GetWindow()->keyReleasedDispatcher.AddHandler(*this);
+			event.screen->GetWindow()->textInputDispatcher.AddHandler(*this);
+		}
+	}
+	void UIInputManager::OnEvent(Input::Events::InputPreUpdateEvent event)
+	{						
+		for (auto& value : screensToRecreate)
+		{
+			auto it = screenData.Find(value);
+
+			if (it.IsNull())
+				continue;
+
+			RecreateScreenInputNodes(it);
+		}
+
+		screensToRecreate.Clear();
+	}
+	void UIInputManager::OnEvent(Input::Events::InputPostUpdateEvent event)
+	{
+		CheckMousePositionEvents(Vec2i());
+	}
+	void UIInputManager::OnEvent(Input::Events::MouseMotion event)
+	{				
+		CheckMousePositionEvents(event.delta);		
+	}
+	void UIInputManager::OnEvent(Input::Events::MouseScroll event)
+	{
+		Vec2i desktopMousePos = Input::GetDesktopMousePos();
+		for (auto& data : screenData)
+		{
+			if (data.key->GetWindow() == nullptr)
+				continue;
+
+			Vec2f mousePos = Vec2f(desktopMousePos - data.key->GetWindow()->GetPos());
+
+			for (auto node : data.value.nodes)
 			{
-				if (nodeData.node->mouseHandler)					
-					nodeData.node->mouseHandler->OnEvent(UIMouseEventHandler::MouseScrollEvent {
+				if (node->hit && node->mouseHandler)
+				{
+					UIMouseEventHandler::MouseScrollEvent _event{
 						.pos = mousePos,
 						.value = event.value
-					});
+					};
+					node->mouseHandler->OnEvent(_event);
 
-				if (nodeData.node->blocksMouseEvents)
+				}
+
+				if (!node->hitPropagates && node->hit)
 					break;
 			}
 		}
 	}
-	void InputManager::OnEvent(Input::Events::KeyPressed event)
+	void UIInputManager::OnEvent(Input::Events::KeyPressed event)
 	{
-		if (recreateScreenNodes)
-			RecreateScreenInputNodes();
-
 		UIMouseEventHandler::MouseButton button = (UIMouseEventHandler::MouseButton)((uint)event.key - (uint)Key::MouseLeft);			
 		
 		if ((uint)button < 3)
 		{
 			bool selectedNodeHit = false;
 			auto oldSelectedNode = selectedNode;
-			
-			Vec2f mousePos = Vec2f(screen->GetWindow()->GetMousePos());
 
-			for (uintMem i = 0; i < mouseBlockInputNodeIndex; ++i)
+			Vec2i desktopMousePos = Input::GetDesktopMousePos();
+
+			for (auto& data : screenData)
 			{
-				auto& nodeData = nodesData[i];
+				if (data.key->GetWindow() == nullptr)
+					continue;
 
-				if (nodeData.node->hit)
-				{
-					if (nodeData.node->mouseHandler != nullptr)
-						nodeData.node->mouseHandler->OnEvent(UIMouseEventHandler::MousePressedEvent({
+				Vec2f mousePos = Vec2f(desktopMousePos - data.key->GetWindow()->GetPos());
+
+				for (auto node : data.value.nodes)
+					if (node->hit)
+					{
+						if (selectedNode == node)
+							selectedNodeHit = true;
+
+						if (node->mouseHandler != nullptr)
+							node->mouseHandler->OnEvent(UIMouseEventHandler::MousePressedEvent({
 							.inputManager = this,
 							.pos = mousePos,
 							.button = button,
 							.time = event.time,
 							.combo = event.combo
-						}));
+								}));
 
-					if (selectedNode == nodeData.node)
-						selectedNodeHit = true;
-
-					if (nodeData.node->blocksMouseEvents)
-						break;
-				}
+						if (!node->hitPropagates)
+							break;
+					}
 			}
 
 			if (!selectedNodeHit && oldSelectedNode == selectedNode)
@@ -344,47 +344,46 @@ namespace Blaze::UI
 					}));
 			}
 	}
-	void InputManager::OnEvent(Input::Events::KeyReleased event)
+	void UIInputManager::OnEvent(Input::Events::KeyReleased event)
 	{
-		if (recreateScreenNodes)
-			RecreateScreenInputNodes();
-
 		UIMouseEventHandler::MouseButton button = (UIMouseEventHandler::MouseButton)((uint)event.key - (uint)Key::MouseLeft);
 		
 		if ((uint)button < 3)
 		{
-			Vec2f mousePos = Vec2f(screen->GetWindow()->GetMousePos());
-			bool blocked = false;
+			Vec2i desktopMousePos = Input::GetDesktopMousePos();
 
-			if (selectedNode != nullptr)			
-				if (selectedNode->hit)
-				{
-					if (selectedNode->mouseHandler != nullptr)					
-						selectedNode->mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
-							.inputManager = this,
-							.pos = mousePos,
-							.button = button,
-							.time = event.time
-							}));						
+			if (selectedNode != nullptr && selectedNode->mouseHandler != nullptr)
+			{
+				Vec2f mousePos = Vec2f(desktopMousePos - selectedNode->GetScreen()->GetWindow()->GetPos());
 
-					if (selectedNode->blocksMouseEvents)
-						blocked = true;
-				}
-				else
-					SelectNode(nullptr);		
+				selectedNode->mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
+					.inputManager = this,
+					.pos = mousePos,
+					.button = button,
+					.time = event.time
+					}));
+			}
 
-			if (!blocked)
-				for (auto& nodeData : nodesData)
-					if (nodeData.node->hit && nodeData.node != selectedNode)
+
+			for (auto& data : screenData)
+			{
+				if (data.key->GetWindow() == nullptr)
+					continue;
+
+				Vec2f mousePos = Vec2f(desktopMousePos - data.key->GetWindow()->GetPos());
+
+				for (auto node : data.value.nodes)
+					if (node->hit && node != selectedNode)
 					{
-						if (nodeData.node->mouseHandler != nullptr)
-							nodeData.node->mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
-							.inputManager = this,
-							}));
+						if (node->mouseHandler != nullptr)
+							node->mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
+								.inputManager = this,
+								}));
 
-						if (nodeData.node->blocksMouseEvents)
+						if (!node->hitPropagates)
 							break;
 					}
+			}
 		}
 		else
 			if (selectedNode != nullptr && selectedNode->keyboardHandler != nullptr)
@@ -396,11 +395,8 @@ namespace Blaze::UI
 					}));
 			}
 	}
-	void InputManager::OnEvent(Input::Events::TextInput event)
+	void UIInputManager::OnEvent(Input::Events::TextInput event)
 	{
-		if (recreateScreenNodes)
-			RecreateScreenInputNodes();
-
 		if (selectedNode != nullptr && selectedNode->keyboardHandler != nullptr)
 		{
 			selectedNode->keyboardHandler->OnEvent(UIKeyboardEventHandler::TextInputEvent({
@@ -408,14 +404,5 @@ namespace Blaze::UI
 				.input = event.input
 				}));
 		}
-	}
-	InputManager::InputNodeFinalTransformUpdatedEventHandler::InputNodeFinalTransformUpdatedEventHandler(InputManager* inputManager) :
-		inputManager(inputManager)
-	{
-	}
-	void InputManager::InputNodeFinalTransformUpdatedEventHandler::OnEvent(Node::FinalTransformUpdatedEvent event)
-	{		
-		InputNode* node = (InputNode*)event.node;
-		inputManager->NodeFinalTransformUpdated(node);
 	}
 }

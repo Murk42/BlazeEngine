@@ -3,13 +3,13 @@
 
 namespace Blaze::UI
 {	
-	class InputManager;
+	class UIInputManager;
 
 	class BLAZE_GRAPHICS_API UISelectEventHandler
 	{
 	public:
-		struct SelectedEvent { InputManager* inputManager; };
-		struct DeselectedEvent { InputManager* inputManager; };		
+		struct SelectedEvent { UIInputManager* inputManager; };
+		struct DeselectedEvent { UIInputManager* inputManager; };		
 
 		bool selectable = true;
 

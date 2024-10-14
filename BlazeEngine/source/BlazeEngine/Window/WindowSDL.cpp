@@ -93,7 +93,7 @@ namespace Blaze
 		
 	WindowSDL::WindowSDL()
 		: handle(nullptr), graphicsAPI(WindowSDLGraphicsAPI::None), resizeState(0)
-	{								
+	{		
 	}
 	WindowSDL::WindowSDL(WindowSDLCreateOptions createOptions)
 		: handle(CreateWindowSDLHandle(createOptions)), graphicsAPI(createOptions.graphicsAPI), resizeState(0)

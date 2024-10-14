@@ -11,7 +11,7 @@
 namespace Blaze::UI
 {
 	class BLAZE_GRAPHICS_API EditableTextBase :
-		public InputNode,
+		public UIInputNode,
 		public UIKeyboardEventHandler,
 		public UISelectEventHandler,
 		public UIMouseEventHandler,
