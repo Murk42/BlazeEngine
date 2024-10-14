@@ -8,12 +8,12 @@ namespace Blaze::Memory
 
 	void AddListener(MemoryListener* listener)
 	{
-		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 		blazeEngineCoreContext.memoryListeners.AddBack(listener);
 	}
 	void RemoveListener(MemoryListener* listener)
 	{
-		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 		if (blazeEngineCoreContext.memoryListeners.First() == listener)
 			blazeEngineCoreContext.memoryListeners.EraseFirst();
 		else
@@ -33,7 +33,7 @@ namespace Blaze::Memory
 	}
 	void ChangeListener(MemoryListener* old, MemoryListener* ptr)
 	{
-		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 		auto it = std::find(blazeEngineCoreContext.memoryListeners.FirstIterator(), blazeEngineCoreContext.memoryListeners.BehindIterator(), old);
 		*it = ptr;
 	}
@@ -96,7 +96,7 @@ namespace Blaze::Memory
 
 		if (trackAllocations)
 		{
-			std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+			//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 
 			auto it = blazeEngineCoreContext.memoryAllocations.AddBack();
 			it->size = size;
@@ -115,7 +115,7 @@ namespace Blaze::Memory
 
 		if (trackAllocations)
 		{
-			std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+			//std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 
 			auto allocationIt = blazeEngineCoreContext.allocationMap.Find(ptr);
 			if (!allocationIt.IsNull())

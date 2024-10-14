@@ -26,7 +26,7 @@ namespace Blaze
 		uint32 clientThreadExitEventIdentifier;
 		
 		//Guards everything bellow, since everything above shouldn't change
-		std::mutex mutex;
+		//std::mutex mutex;
 		
 		std::atomic_flag clientThreadExited = ATOMIC_FLAG_INIT;
 
@@ -37,7 +37,7 @@ namespace Blaze
 		Vec2i desktopMousePos;			
 		Vec2i desktopMouseMovement;
 
-		std::mutex windowsMutex;
+		//std::mutex windowsMutex;
 		Set<WindowBase*> windows;
 
 		double keyComboTime = 0.2;
@@ -52,7 +52,7 @@ namespace Blaze
 #endif
 
 		//Used to queue up threads that wait for the main thread to execute tasks
-		std::mutex mainThreadTaskMutex;
+		//std::mutex mainThreadTaskMutex;
 		std::function<void()> mainThreadTask;
 		std::atomic_flag mainThreadTaskFlag = ATOMIC_FLAG_INIT;
 
