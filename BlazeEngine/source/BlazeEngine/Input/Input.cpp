@@ -45,7 +45,7 @@ namespace Blaze
 			blazeEngineContext.inputEventSystem.inputPreUpdateDispatcher.Call({ });
 
 			{
-				//std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
+				std::lock_guard<std::mutex> lk{ blazeEngineContext.windowsMutex };
 				for (auto window : blazeEngineContext.windows)
 					window->ResetPressedAndReleasedKeys();
 			}

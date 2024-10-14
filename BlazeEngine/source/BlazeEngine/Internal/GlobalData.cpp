@@ -295,7 +295,7 @@ namespace Blaze
 
 	void BlazeEngineContext::ExecuteTaskOnMainThread(std::function<void()>&& function)
 	{		
-		//std::lock_guard<std::mutex> lk{ mainThreadTaskMutex };
+		std::lock_guard<std::mutex> lk{ mainThreadTaskMutex };
 		mainThreadTask = std::move(function);
 
 		mainThreadTaskFlag.test_and_set();
