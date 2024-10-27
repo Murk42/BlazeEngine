@@ -1,20 +1,24 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BLazeEngineCore/Debug/Log.h"
+#include "BlazeEngineCore/DataStructures/Array.h"
+#include "BlazeEngineCore/DataStructures/ArrayView.h"
 
 namespace Blaze
-{
+{	
 	class BLAZE_CORE_API Result
 	{
 	public:			
 		Result();
 		Result(const Result&);
 		Result(Result&&) noexcept;
-		Result(Debug::Log log);
+		Result(const Debug::Log& log);
 		Result(std::initializer_list<Debug::Log> logs);
 
 		~Result();
 
 		void AddLogs(std::initializer_list<Debug::Log> logs);
-		void AddLog(Debug::Log log);
+		void AddLog(const Debug::Log& log);
 
 		StringUTF8 ToString() const;
 		StringUTF8 ToStringVerbose() const;
@@ -23,11 +27,9 @@ namespace Blaze
 		void ClearSilent();
 
 		bool IsEmpty() const;
-		Debug::LogType HighestLogType() const { return logType; }
+		Debug::LogType HighestLogType() const { return highestLogType; }
 
-		void SupressFatalLogs();
-
-		inline const Debug::Log* GetLogs() const { return logs; }
+		inline ArrayView<Debug::Log> GetLogs() const { return logs; }
 
 		operator bool() const;		
 
@@ -41,16 +43,8 @@ namespace Blaze
 		Result& operator=(const Result&);
 		Result& operator=(Result&&) noexcept;
 	private:				
-		Debug::Log* logs;		
-		uint logCount;
-
-		Debug::LogType logType;
-		bool supressFatalsLogs;
-
-		//Wont free previous contents
-		void CopyUnsafe(const Result& other);
-		//Wont check if logs is nullptr
-		void AppendUnsafe(Debug::Log* logs, uint count);
+		Array<Debug::Log> logs;		
+		Debug::LogType highestLogType;		
 
 	};
 

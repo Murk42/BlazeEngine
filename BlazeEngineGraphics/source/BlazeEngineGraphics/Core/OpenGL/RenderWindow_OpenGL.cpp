@@ -5,7 +5,7 @@
 
 namespace Blaze::Graphics::OpenGL
 {
-	RenderWindow_OpenGL::RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, WindowSDLCreateOptions_OpenGL createOptions)
+	RenderWindow_OpenGL::RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, const WindowSDLCreateOptions_OpenGL& createOptions)
 		: graphicsContext(graphicsContext), framebuffer(*this)
 	{		
 		window = graphicsContext.CreateWindowSDL(createOptions);				

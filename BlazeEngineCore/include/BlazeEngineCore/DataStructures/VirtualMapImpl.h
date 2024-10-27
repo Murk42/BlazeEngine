@@ -144,12 +144,26 @@ namespace Blaze
 	}	
 	template<typename VirtualMap>
 	template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
-	inline typename VirtualMapIterator<VirtualMap>::template MatchMapConst<Value>* VirtualMapIterator<VirtualMap>::GetValue() const
+	inline Value* VirtualMapIterator<VirtualMap>::GetValue() requires !std::is_const_v<VirtualMap>
+	{
+		if (nodeHeader == nullptr)
+			return nullptr;
+
+		auto node = dynamic_cast<typename VirtualMap::template Node<Value>*>(nodeHeader);
+
+		if (node == nullptr)
+			return nullptr;
+
+		return &node->value;
+	}
+	template<typename VirtualMap>
+	template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
+	inline const Value* VirtualMapIterator<VirtualMap>::GetValue() const
 	{		
 		if (nodeHeader == nullptr)
 			return nullptr;			
 
-		auto node = dynamic_cast<typename VirtualMap::template Node<Value>*>(nodeHeader);
+		auto node = dynamic_cast<const typename VirtualMap::template Node<Value>*>(nodeHeader);
 		
 		if (node == nullptr)
 			return nullptr;

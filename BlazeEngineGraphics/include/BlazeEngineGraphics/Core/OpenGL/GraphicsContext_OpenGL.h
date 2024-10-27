@@ -1,7 +1,9 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCore.h"
+#include "BlazeEngine/Window/WindowSDL.h"
+#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/Dynamic/GraphicsContext.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
-#include "BlazeEngineGraphics/Core/OpenGL/RenderWindow_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/SDLOpenGLContext_OpenGL.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
@@ -10,13 +12,15 @@ namespace Blaze::Graphics::OpenGLWrapper
 	class Texture1D;
 	class Texture2D;	
 	class VertexArray;
-	class ShaderProgram;
-	class Framebuffer;
+	class ShaderProgram;	
 	class Renderbuffer;
 }
 
 namespace Blaze::Graphics::OpenGL
 {		
+	class RenderWindow_OpenGL;
+	class Framebuffer_OpenGL;
+	struct WindowSDLCreateOptions_OpenGL;
 
 	enum class ProfileType
 	{
@@ -32,6 +36,7 @@ namespace Blaze::Graphics::OpenGL
 	};
 
 	ENUM_CLASS_BITWISE_OPERATIONS(ContextFlags)
+
 
 	struct GraphicsContextProperties_OpenGL
 	{		
@@ -72,9 +77,9 @@ namespace Blaze::Graphics::OpenGL
 		void SelectUniformBuffer(OpenGLWrapper::GraphicsBuffer* buffer);
 		void SelectVertexArray(OpenGLWrapper::VertexArray* vertexArray);
 		void SelectProgram(OpenGLWrapper::ShaderProgram* program);
-		void SelectFramebuffer(OpenGLWrapper::Framebuffer* framebuffer);
-		void SelectDrawFramebuffer(OpenGLWrapper::Framebuffer* framebuffer);
-		void SelectReadFramebuffer(OpenGLWrapper::Framebuffer* framebuffer);
+		void SelectFramebuffer(Framebuffer_OpenGL* framebuffer);
+		void SelectDrawFramebuffer(Framebuffer_OpenGL* framebuffer);
+		void SelectReadFramebuffer(Framebuffer_OpenGL* framebuffer);
 		void SelectRenderbuffer(OpenGLWrapper::Renderbuffer* renderbuffer);
 		void SelectShaderStorageBufferToSlot(uint slotIndex, OpenGLWrapper::GraphicsBuffer* buffer, uintMem offset, uintMem size);		
 
@@ -115,13 +120,15 @@ namespace Blaze::Graphics::OpenGL
 		void RenderInstancedPrimitiveArray(OpenGLWrapper::PrimitiveType type, uintMem firstVertexIndex, uintMem vertexCount, uintMem firstInstanceIndex, uintMem instanceCount);
 		void RenderPrimitiveArray(OpenGLWrapper::PrimitiveType type, uintMem firstVertexIndex, uintMem vertexCount);
 
+		void BlitFramebuffer(Framebuffer_OpenGL& writeFramebuffer, Framebuffer_OpenGL& readFramebuffer, Vec2i dstP1, Vec2i dstP2, Vec2i srcP1, Vec2i srcP2, bool copyColor, bool copyDepth, bool copyStencil, OpenGLWrapper::TextureSampling sampling);
+
 		void DispatchCompute(uint x, uint y, uint z);
 
 		void Flush();
 		void MemoryBarrier();		
 
 		static bool IsExtensionSupported(StringView name);
-	private:
+	private: 
 		GraphicsContextProperties_OpenGL properties;
 
 		SDLOpenGLContext_OpenGL SDLOpenGLContext;
@@ -129,7 +136,7 @@ namespace Blaze::Graphics::OpenGL
 		WindowSDL initWindowSDL;
 		WindowSDL::WindowSDLHandle activeWindowSDLHandle;
 
-		WindowSDL CreateWindowSDL(WindowSDLCreateOptions_OpenGL createOptions);
+		WindowSDL CreateWindowSDL(const WindowSDLCreateOptions_OpenGL& createOptions);
 		void DestroyWindowSDL(WindowSDL& window);
 
 		friend class RenderWindow_OpenGL;

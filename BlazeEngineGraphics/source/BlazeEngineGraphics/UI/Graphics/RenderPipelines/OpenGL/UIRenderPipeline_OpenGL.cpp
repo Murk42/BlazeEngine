@@ -49,9 +49,9 @@ namespace Blaze::Graphics::OpenGL
 	};
 	class UISimpleRenderQueue
 	{				
-		void _GetRenderOrder(UI::Node* node, Array<RenderUnit*>& arr)
+		void _GetRenderOrder(UI::Node& node, Array<RenderUnit*>& arr)
 		{
-			if (auto* renderedNode = dynamic_cast<RenderObject*>(node))
+			if (auto* renderedNode = dynamic_cast<RenderObject*>(&node))
 			{
 				uint i = 0;
 				while (auto unit = renderedNode->GetRenderUnit(i))
@@ -61,7 +61,7 @@ namespace Blaze::Graphics::OpenGL
 				}
 			}
 
-			for (auto child : node->GetChildren())
+			for (auto& child : node.GetChildren())
 				_GetRenderOrder(child, arr);
 		}
 		Array<RenderUnit*> GetRenderOrder()
@@ -69,7 +69,7 @@ namespace Blaze::Graphics::OpenGL
 			Array<RenderUnit*> arr;
 			arr.ReserveExactly(renderPipeline->screen->GetNodeCount());
 
-			for (auto child : renderPipeline->screen->GetChildren())
+			for (auto& child : renderPipeline->screen->GetChildren())
 				_GetRenderOrder(child, arr);
 
 			return arr;
@@ -152,11 +152,11 @@ namespace Blaze::Graphics::OpenGL
 			return false;
 		}
 
-		void _GetRenderOrder(UI::Node* node, Array<RenderNode>& arr)
+		void _GetRenderOrder(UI::Node& node, Array<RenderNode>& arr)
 		{
-			if (auto renderedNode = dynamic_cast<RenderObject*>(node))			
+			if (auto renderedNode = dynamic_cast<RenderObject*>(&node))			
 			{				
-				auto finalTransform = node->GetFinalTransform();
+				auto finalTransform = node.GetFinalTransform();
 				Vec2f pos = finalTransform.position;
 				Vec2f size = finalTransform.size;
 				float rot = finalTransform.rotation;
@@ -169,10 +169,13 @@ namespace Blaze::Graphics::OpenGL
 				Vec2f pMax = Vec2f(std::max({ p1.x, p2.x, p3.x, p4.x }), std::max({ p1.y, p2.y, p3.y, p4.y }));
 				Vec2f pMin = Vec2f(std::min({ p1.x, p2.x, p3.x, p4.x }), std::min({ p1.y, p2.y, p3.y, p4.y }));
 
-				arr.AddBack(Array<UINodeCache>({ { renderedNode, Rectf(pMin, pMax - pMin) } }), Array<RenderNode*>());
+				arr.AddBack(RenderNode{
+					.uiNodes = Array<UINodeCache>({ UINodeCache{ renderedNode, Rectf(pMin, pMax - pMin) } }),
+					.children = Array<RenderNode*>(),
+					});
 			}
 
-			for (auto child : node->GetChildren())
+			for (auto& child : node.GetChildren())
 				_GetRenderOrder(child, arr);
 		}
 		//Colapses the node tree into a array of renderable nodes by doing a depth first search
@@ -181,7 +184,7 @@ namespace Blaze::Graphics::OpenGL
 			Array<RenderNode> arr;
 			arr.ReserveExactly(screen->GetNodeCount());
 
-			for (auto child : screen->GetChildren())
+			for (auto& child : screen->GetChildren())
 				_GetRenderOrder(child, arr);
 
 			return arr;

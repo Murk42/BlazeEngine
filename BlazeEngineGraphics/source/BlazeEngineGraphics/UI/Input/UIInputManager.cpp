@@ -108,12 +108,12 @@ namespace Blaze::UI
 		window.keyReleasedDispatcher.AddHandler(*this);
 		window.textInputDispatcher.AddHandler(*this);
 	}
-	void InputManager::GatherInputNodes(Node* node)
+	void InputManager::GatherInputNodes(Node& node)
 	{
-		if (auto inputNode = dynamic_cast<InputNode*>(node))
-			nodesData.AddBack(InputNodeData{ inputNode, InputNodeFinalTransformUpdatedEventHandler(this) });
+		if (InputNode* inputNode = dynamic_cast<InputNode*>(&node))
+			nodesData.AddBack(InputNodeData{ *inputNode, InputNodeFinalTransformUpdatedEventHandler(this) });
 		
-		for (auto child : node->GetChildren())
+		for (auto& child : node.GetChildren())
 			GatherInputNodes(child);
 	}
 	void InputManager::RecreateScreenInputNodes()
@@ -121,24 +121,24 @@ namespace Blaze::UI
 		nodesData.Clear();
 		nodesData.ReserveExactly(screen->GetNodeCount());
 
-		for (auto child : screen->GetChildren())
+		for (auto& child : screen->GetChildren())
 			GatherInputNodes(child);
 
 		for (uintMem i = 0; i < nodesData.Count(); ++i)
 		{
 			auto& nodeData = nodesData[i];			
-			nodeData.node->inputManagerArrayIndex = i;
-			nodeData.node->finalTransformUpdatedEventDispatcher.AddHandler(nodeData.finalTransformUpdatedEventHandler);
+			nodeData.node.inputManagerArrayIndex = i;
+			nodeData.node.finalTransformUpdatedEventDispatcher.AddHandler(nodeData.finalTransformUpdatedEventHandler);
 
-			if (nodeData.node->mouseHandler == nullptr)
-				nodeData.node->mouseHandler = dynamic_cast<UIMouseEventHandler*>(nodeData.node);
-			if (nodeData.node->keyboardHandler == nullptr)
-				nodeData.node->keyboardHandler = dynamic_cast<UIKeyboardEventHandler*>(nodeData.node);
-			if (nodeData.node->selectHandler == nullptr)
-				nodeData.node->selectHandler = dynamic_cast<UISelectEventHandler*>(nodeData.node);
+			if (nodeData.node.mouseHandler == nullptr)
+				nodeData.node.mouseHandler = dynamic_cast<UIMouseEventHandler*>(&nodeData.node);
+			if (nodeData.node.keyboardHandler == nullptr)
+				nodeData.node.keyboardHandler = dynamic_cast<UIKeyboardEventHandler*>(&nodeData.node);
+			if (nodeData.node.selectHandler == nullptr)
+				nodeData.node.selectHandler = dynamic_cast<UISelectEventHandler*>(&nodeData.node);
 
-			if (nodeData.node->mouseHandler != nullptr)
-				nodeData.node->mouseHandler->lastTransformState = nodeData.node->GetTransformState();
+			if (nodeData.node.mouseHandler != nullptr)
+				nodeData.node.mouseHandler->lastTransformState = nodeData.node.GetTransformState();
 		}
 
 		recreateScreenNodes = false;
@@ -160,15 +160,15 @@ namespace Blaze::UI
 		uintMem i;
 		for (i = beginIndex; i < nodesData.Count(); ++i)
 		{
-			auto node = nodesData[i].node;
+			auto& node = nodesData[i].node;
 
-			bool oldHit = node->hit;
-			bool newHit = node->HitTest(mousePos);
-			node->hit = newHit;
+			bool oldHit = node.hit;
+			bool newHit = node.HitTest(mousePos);
+			node.hit = newHit;
 
 			if (oldHit && !newHit)
 			{
-				if (auto mouseEventHandler = node->mouseHandler)
+				if (auto mouseEventHandler = node.mouseHandler)
 					mouseEventHandler->OnEvent(UIMouseEventHandler::MouseExitEvent({
 						.inputManager = this,
 						.pos = mousePos
@@ -176,12 +176,12 @@ namespace Blaze::UI
 			}
 
 			if (blocked)
-				nodesData[i].node->hit = false;
+				nodesData[i].node.hit = false;
 			else
 			{
 				if (newHit)
 				{
-					if (auto mouseEventHandler = node->mouseHandler)
+					if (auto mouseEventHandler = node.mouseHandler)
 						mouseEventHandler->OnEvent(UIMouseEventHandler::MouseMotionEvent{
 								.inputManager = this,
 								.pos = mousePos,
@@ -191,7 +191,7 @@ namespace Blaze::UI
 
 				if (newHit && !oldHit)
 				{
-					if (auto mouseEventHandler = node->mouseHandler)
+					if (auto mouseEventHandler = node.mouseHandler)
 						mouseEventHandler->OnEvent(UIMouseEventHandler::MouseEnterEvent({
 								.inputManager = this,
 								.pos = mousePos
@@ -200,7 +200,7 @@ namespace Blaze::UI
 
 				if (newHit)
 				{
-					if (node->blocksMouseEvents)
+					if (node.blocksMouseEvents)
 					{
 						mouseBlockInputNodeIndex = i;
 						blocked = true;
@@ -213,29 +213,29 @@ namespace Blaze::UI
 		mouseBlockInputNodeIndex = nodesData.Count();		
 	}
 
-	void InputManager::NodeFinalTransformUpdated(InputNode* node)
+	void InputManager::NodeFinalTransformUpdated(InputNode& node)
 	{
-		if (mouseBlockInputNodeIndex > node->inputManagerArrayIndex)
+		if (mouseBlockInputNodeIndex > node.inputManagerArrayIndex)
 			return;
 
 		Vec2f mousePos = Vec2f(screen->GetWindow()->GetMousePos());
 
-		bool oldHit = node->hit;
-		bool newHit = node->HitTest(mousePos);
-		node->hit = newHit;
+		bool oldHit = node.hit;
+		bool newHit = node.HitTest(mousePos);
+		node.hit = newHit;
 		
 		if (oldHit && !newHit)
 		{
 			//If the mouse on its way to this node wasn't blocked send an event that the mouse exited			
-			if (auto mouseEventHandler = node->mouseHandler)
+			if (auto mouseEventHandler = node.mouseHandler)
 				mouseEventHandler->OnEvent(UIMouseEventHandler::MouseExitEvent({
 					.inputManager = this,
 					.pos = mousePos
 					}));
 
 			//If this node was blocking the mouse cast the mouse pointer further
-			if (mouseBlockInputNodeIndex == node->inputManagerArrayIndex)
-				CastMousePointer(node->inputManagerArrayIndex + 1, mousePos, Vec2f());
+			if (mouseBlockInputNodeIndex == node.inputManagerArrayIndex)
+				CastMousePointer(node.inputManagerArrayIndex + 1, mousePos, Vec2f());
 		}
 
 		if (newHit && !oldHit)		
@@ -280,15 +280,15 @@ namespace Blaze::UI
 
 		for (auto& nodeData : nodesData)
 		{
-			if (nodeData.node->hit)
+			if (nodeData.node.hit)
 			{
-				if (nodeData.node->mouseHandler)					
-					nodeData.node->mouseHandler->OnEvent(UIMouseEventHandler::MouseScrollEvent {
+				if (nodeData.node.mouseHandler)					
+					nodeData.node.mouseHandler->OnEvent(UIMouseEventHandler::MouseScrollEvent {
 						.pos = mousePos,
 						.value = event.value
 					});
 
-				if (nodeData.node->blocksMouseEvents)
+				if (nodeData.node.blocksMouseEvents)
 					break;
 			}
 		}
@@ -311,10 +311,10 @@ namespace Blaze::UI
 			{
 				auto& nodeData = nodesData[i];
 
-				if (nodeData.node->hit)
+				if (nodeData.node.hit)
 				{
-					if (nodeData.node->mouseHandler != nullptr)
-						nodeData.node->mouseHandler->OnEvent(UIMouseEventHandler::MousePressedEvent({
+					if (nodeData.node.mouseHandler != nullptr)
+						nodeData.node.mouseHandler->OnEvent(UIMouseEventHandler::MousePressedEvent({
 							.inputManager = this,
 							.pos = mousePos,
 							.button = button,
@@ -322,10 +322,10 @@ namespace Blaze::UI
 							.combo = event.combo
 						}));
 
-					if (selectedNode == nodeData.node)
+					if (selectedNode == &nodeData.node)
 						selectedNodeHit = true;
 
-					if (nodeData.node->blocksMouseEvents)
+					if (nodeData.node.blocksMouseEvents)
 						break;
 				}
 			}
@@ -356,33 +356,30 @@ namespace Blaze::UI
 			Vec2f mousePos = Vec2f(screen->GetWindow()->GetMousePos());
 			bool blocked = false;
 
-			if (selectedNode != nullptr)			
-				if (selectedNode->hit)
-				{
-					if (selectedNode->mouseHandler != nullptr)					
-						selectedNode->mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
-							.inputManager = this,
-							.pos = mousePos,
-							.button = button,
-							.time = event.time
-							}));						
+			if (selectedNode != nullptr)
+			{
+				if (selectedNode->mouseHandler != nullptr)
+					selectedNode->mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
+						.inputManager = this,
+						.pos = mousePos,
+						.button = button,
+						.time = event.time
+						}));
 
-					if (selectedNode->blocksMouseEvents)
-						blocked = true;
-				}
-				else
-					SelectNode(nullptr);		
+				if (selectedNode->blocksMouseEvents)
+					blocked = true;
+			}
 
 			if (!blocked)
 				for (auto& nodeData : nodesData)
-					if (nodeData.node->hit && nodeData.node != selectedNode)
+					if (nodeData.node.hit)
 					{
-						if (nodeData.node->mouseHandler != nullptr)
-							nodeData.node->mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
+						if (&nodeData.node != selectedNode && nodeData.node.mouseHandler != nullptr)
+							nodeData.node.mouseHandler->OnEvent(UIMouseEventHandler::MouseReleasedEvent({
 							.inputManager = this,
 							}));
 
-						if (nodeData.node->blocksMouseEvents)
+						if (nodeData.node.blocksMouseEvents)
 							break;
 					}
 		}
@@ -414,8 +411,7 @@ namespace Blaze::UI
 	{
 	}
 	void InputManager::InputNodeFinalTransformUpdatedEventHandler::OnEvent(Node::FinalTransformUpdatedEvent event)
-	{		
-		InputNode* node = (InputNode*)event.node;
-		inputManager->NodeFinalTransformUpdated(node);
+	{				
+		inputManager->NodeFinalTransformUpdated((InputNode&)event.node);
 	}
 }

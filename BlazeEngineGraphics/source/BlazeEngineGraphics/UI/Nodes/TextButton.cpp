@@ -29,7 +29,7 @@ namespace Blaze::UI
 	{
 	}
 	void TextButton::SetNormalColor(ColorRGBAf color)
-	{ 
+	{ 		
 		normalColor = color;
 		UpdateColor();
 	}

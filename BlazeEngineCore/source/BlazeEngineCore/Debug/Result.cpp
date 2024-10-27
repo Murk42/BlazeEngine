@@ -1,36 +1,32 @@
 #include "pch.h"
 #include "BlazeEngineCore/Debug/Result.h"
-#include "BlazeEngineCore/Memory/MemoryManager.h"
 
 namespace Blaze
-{
-	Result::Result()	
-		: logs(nullptr), logCount(0), logType(Debug::LogType::Info), supressFatalsLogs(false)
-	{				
+{	
+	Result::Result() :
+		highestLogType(Debug::LogType::Info)
+	{						
 	}
-	Result::Result(const Result& result)
-		: logs(nullptr), logCount(0), logType(Debug::LogType::Info), supressFatalsLogs(result.supressFatalsLogs)
-	{
-		CopyUnsafe(result);
+	Result::Result(const Result& result) : 
+		logs(result.logs), highestLogType(result.highestLogType)
+	{		
 	}
 
-	Result::Result(Result&& result) noexcept
-		: logs(result.logs), logCount(result.logCount), logType(result.logType), supressFatalsLogs(result.supressFatalsLogs)
-	{
-		result.logs = nullptr;
-		result.logCount = 0;
-	}
-	Result::Result(Debug::Log log)
-		: logs(nullptr), logCount(0), logType(log.GetType()), supressFatalsLogs(false)
+	Result::Result(Result&& result) noexcept : 
+		logs(std::move(result.logs)), highestLogType(result.highestLogType)
 	{		
-		AddLog(std::move(log));		
+		result.highestLogType = Debug::LogType::Info;
 	}
-	Result::Result(std::initializer_list<Debug::Log> logs)
-		: logType(Debug::LogType::Info), supressFatalsLogs(false)
+	Result::Result(const Debug::Log& log) :
+		highestLogType(Debug::LogType::Info)
+	{		
+		AddLog(log);
+	}
+	Result::Result(std::initializer_list<Debug::Log> logs) :
+		highestLogType(Debug::LogType::Info)
 	{
 		AddLogs(logs);
 	}
-
 	Result::~Result()
 	{		
 		Clear();
@@ -40,9 +36,9 @@ namespace Blaze
 		for (auto& log : logs)		
 			AddLog(log);
 	}
-	void Result::AddLog(Debug::Log log)
+	void Result::AddLog(const Debug::Log& log)
 	{
-		AppendUnsafe(&log, 1);
+		logs.AddBack(log);		
 	}	
 
 	StringUTF8 Result::ToString() const
@@ -53,12 +49,12 @@ namespace Blaze
 		{
 			out = "Empty result";
 		}
-		else		
-			for (auto it = logs; it != logs + logCount; ++it)			
-				if (it != logs + logCount - 1)
-					out += it->ToString() + "\n";
-				else
-					out += it->ToString();			
+		else
+		{			
+			for (uintMem i = 0; i < logs.Count() - 1; ++i)				
+				out += logs[i].ToString() + "\n";				
+			out += logs.Last().ToString();
+		}
 
 		return out;		
 	}
@@ -75,11 +71,11 @@ namespace Blaze
 		{
 			out += "-------------------------------------------------\n";
 
-			for (auto it = logs; it != logs + logCount; ++it)
-				if (it->GetType() >= Debug::LogType::Error)
-					out += it->ToStringVerbose() + "\n";
+			for (auto& log : logs)			
+				if (log.GetType() >= Debug::LogType::Error)
+					out += log.ToStringVerbose() + "\n";
 				else
-					out += it->ToString() + "\n";
+					out += log.ToString() + "\n";
 
 			out += "-------------------------------------------------\n";
 		}
@@ -97,21 +93,14 @@ namespace Blaze
 
 	void Result::ClearSilent()
 	{
-		std::destroy_n(logs, logCount);
-		Memory::Free(logs);
-		logs = nullptr;
-		logCount = 0;
+		logs.Clear();
+		highestLogType = Debug::LogType::Info;
 	}
 
 	bool Result::IsEmpty() const
 	{
-		return logCount == 0;
-	}
-
-	void Result::SupressFatalLogs()
-	{
-		this->supressFatalsLogs = true;
-	}
+		return logs.Empty();
+	}	
 
 	Result::operator bool() const
 	{
@@ -127,11 +116,9 @@ namespace Blaze
 	{
 		if (result.IsEmpty())
 			return *this;
-		
-		AppendUnsafe(result.logs, result.logCount);
-		result.logs = nullptr;
-		result.logCount = 0;
-		result.logType = Debug::LogType::Info;		
+
+		logs.Append(std::move(result.logs));
+		highestLogType = std::max(highestLogType, result.highestLogType);		
 
 		return *this;		
 	}
@@ -156,50 +143,22 @@ namespace Blaze
 		if (this == &other)
 			return *this;		
 
-		Clear();
-		CopyUnsafe(other);		
+		logs = other.logs;
+		highestLogType = other.highestLogType;
+				
 		return *this;
 	}
-	Result& Result::operator=(Result&& result) noexcept	
+	Result& Result::operator=(Result&& other) noexcept	
 	{		
-		if (this == &result)
+		if (this == &other)
 			return *this;
 		
-		Clear();			
+		logs = std::move(other.logs);
+		highestLogType = other.highestLogType;
+		other.highestLogType = Debug::LogType::Info;
 
-		logType = result.logType;
-		logs = std::move(result.logs);		
 		return *this;
-	}	
-		
-	void Result::CopyUnsafe(const Result& other)
-	{		
-		logs = (Debug::Log*)Memory::Allocate(sizeof(Debug::Log) * other.logCount);
-		logCount = other.logCount;
-		logType = other.logType;		
-
-		for (uint i = 0; i < logCount; ++i)
-			std::construct_at(&logs[i], other.logs[i]);
-	}
-
-	void Result::AppendUnsafe(Debug::Log* newLogs, uint count)
-	{
-		Debug::Log* old = logs;
-		logs = (Debug::Log*)Memory::Allocate(sizeof(Debug::Log) * (logCount + count));
-
-		for (uint i = 0; i < logCount; ++i)
-			std::construct_at(&logs[i], std::move(old[i]));
-
-		for (uint i = 0; i < count; ++i)
-		{
-			std::construct_at(&logs[i + logCount], std::move(newLogs[i]));
-			if ((uint)newLogs[i].type > (uint)logType)
-				logType = newLogs[i].type;
-		}
-
-		Memory::Free(old);
-		logCount += count;
-	}
+	}			
 
 	Result operator+(Result& a, Result&& b)
 	{

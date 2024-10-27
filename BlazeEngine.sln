@@ -41,6 +41,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PhysicsTestProject", "Physi
 		{B87FCC17-B1A8-413B-AA96-651462FCB46B} = {B87FCC17-B1A8-413B-AA96-651462FCB46B}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "property sheets", "property sheets", "{F9A1664D-2F45-4858-B82F-C3E4B0C18CC3}"
+	ProjectSection(SolutionItems) = preProject
+		BlazeProjectDebugProperties.props = BlazeProjectDebugProperties.props
+		BlazeProjectDefaultProperties.props = BlazeProjectDefaultProperties.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

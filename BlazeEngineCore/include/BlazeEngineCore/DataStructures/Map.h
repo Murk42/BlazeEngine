@@ -1,9 +1,8 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 namespace Blaze
 {
-	class Result;
-
 	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
 	class Map;
 

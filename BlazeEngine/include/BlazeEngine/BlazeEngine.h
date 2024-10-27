@@ -28,3 +28,5 @@
 #include "BlazeEngine/Application/ECS/EntityView.h"
 #include "BlazeEngine/Application/ECS/Scene.h"
 #include "BlazeEngine/Application/ECS/System.h"
+
+#include "BlazeEngine/Application/ResourceSystem/Resource.h"

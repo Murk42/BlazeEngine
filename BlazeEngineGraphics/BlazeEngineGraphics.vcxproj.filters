@@ -27,9 +27,6 @@
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFramebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -183,9 +180,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFramebuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.h">
@@ -369,6 +363,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\TextDataBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\Debug_OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

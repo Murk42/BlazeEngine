@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
@@ -24,6 +25,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 		bool IsSet();
 		bool IsSignaled();
 
+		void Swap(Fence& other);
+
+		void* ReleaseHandleOwnership();
 		inline void* GetHandle() const { return id; }
 	};
 }

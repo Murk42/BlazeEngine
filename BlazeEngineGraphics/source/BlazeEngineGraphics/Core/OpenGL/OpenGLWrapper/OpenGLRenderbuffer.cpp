@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLRenderbuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
+#include "BlazeEngineGraphics/Core/OpenGL/Debug_OpenGL.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
@@ -19,15 +20,16 @@ namespace Blaze::Graphics::OpenGLWrapper
 		if (id != 0)		
 			glDeleteRenderbuffers(1, &id);
 	}
-	void Renderbuffer::Create(Vec2i size, Blaze::Graphics::OpenGLWrapper::TextureInternalPixelFormat format)
+	void Renderbuffer::Create(Vec2u size, Blaze::Graphics::OpenGLWrapper::TextureInternalPixelFormat format)
 	{
-		this->size = size;
-
 		Result result;
 		GLenum _format = OpenGLInternalPixelFormat(format, result);
 		if (result) return;
 		
-		glNamedRenderbufferStorage(id, _format, size.x, size.y);				
+		this->size = size;
+
+		if (CHECK_OPENGL_ERROR(glNamedRenderbufferStorage(id, _format, size.x, size.y)))
+			this->size = Vec2u();
 	}
 	Renderbuffer& Renderbuffer::operator=(Renderbuffer&& rb) noexcept
 	{

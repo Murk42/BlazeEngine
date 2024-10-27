@@ -9,8 +9,36 @@
 #include "BlazeEngineGraphics/RenderScene/RenderObject.h"
 
 namespace Blaze::UI
-{
-	class TextButton :
+{	
+	class BLAZE_GRAPHICS_API StyleProperty
+	{
+
+	public:
+		enum class Type
+		{
+			Float, ColorRGB, ColorRGBA, Uint, Int, Resource, String
+		};
+	private:
+		Type type;
+		union {
+			float propertyFloat;
+			ColorRGBf propertyColorRGB;
+			ColorRGBAf propertyColorRGBA;
+			uint64 propertyUint;
+			int64 propertyInt;
+			Resource* resource;
+			String string;
+		};
+	};
+	class BLAZE_GRAPHICS_API Style
+	{
+	public:
+		Style();
+
+		void GetProperty(StringView name);
+	};
+
+	class BLAZE_GRAPHICS_API TextButton :
 		public InputNode,
 		public UIMouseEventHandler,
 		public UISelectEventHandler,
@@ -20,14 +48,15 @@ namespace Blaze::UI
 	{
 	public:
 		struct PressedEvent { InputManager* inputManager; };
+
 		EventDispatcher<PressedEvent> pressedEventDispatcher;		
 
 		TextButton();
 		~TextButton() override;		
-
-		void SetNormalColor(ColorRGBAf color);
-		void SetHighlightedColor(ColorRGBAf color);
-		void SetPressedColor(ColorRGBAf color);
+		
+		void SetNormalColor(ColorRGBAf panelColor);
+		void SetHighlightedColor(ColorRGBAf panelColor);
+		void SetPressedColor(ColorRGBAf panelColor);
 
 		inline Text& GetTextNode() { return text; }
 		inline Panel& GetPanelNode() { return panel; }

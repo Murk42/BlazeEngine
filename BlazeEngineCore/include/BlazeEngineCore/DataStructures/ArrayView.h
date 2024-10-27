@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {	
@@ -8,6 +9,12 @@ namespace Blaze
 	template<typename T>
 	class ArrayView
 	{		
+		struct ReferenceHolder
+		{
+			ReferenceHolder(T& value) : value(value) { }
+
+			T& value;
+		};
 	public:	
 		static_assert(!std::is_const_v<T>, "T shouldn't be const because const achieves nothing and makes using ArrayView much harder");
 
@@ -15,12 +22,13 @@ namespace Blaze
 		using ConstIterator = ArrayIterator<const ArrayView>;
 		using ValueType = T;
 		using value_type = ValueType;
+		using InternalValueType = std::conditional_t<std::is_reference_v<T>, ReferenceHolder, T>;
 
 		constexpr ArrayView();
 		constexpr ArrayView(const ArrayView&);
-		constexpr ArrayView(const T* ptr, uintMem count);
+		constexpr ArrayView(const InternalValueType* ptr, uintMem count);
 		template<uintMem S>
-		constexpr ArrayView(const T (&arr)[S]);		
+		constexpr ArrayView(const InternalValueType(&arr)[S]);
 
 		constexpr void Clear();
 		constexpr bool Empty() const;
@@ -28,7 +36,7 @@ namespace Blaze
 
 		constexpr const T& operator[](uintMem index) const;
 
-		constexpr const T* Ptr() const;				
+		constexpr const InternalValueType* Ptr() const;
 		
 		const T& First() const;		
 		const T& Last() const;
@@ -59,7 +67,7 @@ namespace Blaze
 		template<typename>
 		friend class ArrayIterator;
 	private:
-		const T* ptr;
+		const InternalValueType* ptr;
 		uintMem count;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -78,13 +86,13 @@ namespace Blaze
 	{
 	}
 	template<typename T>
-	inline constexpr ArrayView<T>::ArrayView(const T* ptr, uintMem count)
+	inline constexpr ArrayView<T>::ArrayView(const InternalValueType* ptr, uintMem count)
 		: ptr(ptr), count(count)
 	{
 	}
 	template<typename T>
 	template<uintMem S>
-	inline constexpr ArrayView<T>::ArrayView(const T(&arr)[S])
+	inline constexpr ArrayView<T>::ArrayView(const InternalValueType(&arr)[S])
 		: ptr(arr), count(S)
 	{
 	}
@@ -112,7 +120,7 @@ namespace Blaze
 		return ptr[index];
 	}
 	template<typename T>
-	inline constexpr const T* ArrayView<T>::Ptr() const 
+	inline constexpr const ArrayView<T>::InternalValueType* ArrayView<T>::Ptr() const
 	{
 		return ptr; 
 	}

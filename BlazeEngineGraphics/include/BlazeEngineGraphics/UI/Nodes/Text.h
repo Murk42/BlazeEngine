@@ -16,7 +16,7 @@ namespace Blaze::UI
 	using TextHorizontallyUnderfittedOptions = UIGraphics::TextHorizontallyUnderfittedOptions;
 	using TextVerticallyUnderfittedOptions = UIGraphics::TextVerticallyUnderfittedOptions;
 	using TextHorizontallyOverfittedOptions = UIGraphics::TextHorizontallyOverfittedOptions;
-	using TextVerticallyOverfittedOptions = UIGraphics::TextVerticallyOverfittedOptions;
+	using TextVerticallyOverfittedOptions = UIGraphics::TextVerticallyOverfittedOptions;	
 
 	class Text : 
 		public Node,
@@ -40,9 +40,9 @@ namespace Blaze::UI
 		inline Font* GetFont() const { return renderUnit.GetFont(); }
 		inline StringViewUTF8 GetText() const { return renderUnit.GetText(); }
 		inline uint GetPixelFontHeight() { return renderUnit.GetPixelFontHeight(); }
-		inline auto GetCharacterData() { return renderUnit.GetCharacterData(); }
-		inline auto GetCharacterRenderData() { return renderUnit.GetCharacterRenderData(); }
-		inline auto GetLineData() { return renderUnit.GetLineData(); }
+		inline const auto& GetCharacterData() { return renderUnit.GetCharacterData(); }
+		inline const auto& GetCharacterRenderData() { return renderUnit.GetCharacterRenderData(); }
+		inline const auto& GetLineData() { return renderUnit.GetLineData(); }
 		inline UI::Node* GetCullingNode() { return renderUnit.GetCullingNode(); }		
 
 		Graphics::RenderUnit* GetRenderUnit(uint index) override;

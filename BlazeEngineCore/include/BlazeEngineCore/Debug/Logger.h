@@ -1,7 +1,15 @@
 #pragma once
 
-namespace Blaze::Debug
+namespace Blaze
 {
+	class WriteStream;
+	class Path;
+	class StringUTF8;
+	class Result;
+}
+
+namespace Blaze::Debug
+{	
 	class LoggerListener;
 }
 

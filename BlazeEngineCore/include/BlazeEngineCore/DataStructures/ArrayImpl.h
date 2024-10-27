@@ -1,3 +1,4 @@
+#include "Array.h"
 #pragma once
 
 namespace Blaze
@@ -34,24 +35,30 @@ namespace Blaze
 		return ptr == nullptr;
 	}
 	template<typename Array>
-	inline ArrayIterator<Array>::ValueType& ArrayIterator<Array>::operator*() const
+	inline std::remove_reference_t<typename ArrayIterator<Array>::template ValueType>& ArrayIterator<Array>::operator*() const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
 			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
 #endif
 
-		return *ptr;
+		if constexpr (std::is_reference_v<ValueType>)
+			return ptr->value;
+		else
+			return *ptr;
 	}
 	template<typename Array>
-	inline ArrayIterator<Array>::ValueType* ArrayIterator<Array>::operator->() const
+	inline std::remove_reference_t<typename ArrayIterator<Array>::template ValueType>* ArrayIterator<Array>::operator->() const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
 			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
 #endif
 
-		return ptr;
+		if constexpr (std::is_reference_v<ValueType>)
+			return &ptr->value;
+		else
+			return ptr;		
 	}
 	template<typename Array>
 	inline ArrayIterator<Array>& ArrayIterator<Array>::operator++()
@@ -209,14 +216,14 @@ namespace Blaze
 	}
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 	template<typename Array>
-	inline ArrayIterator<Array>::ArrayIterator(ValueType* ptr, Array* arr)
+	inline ArrayIterator<Array>::ArrayIterator(InteranlValueType* ptr, Array* arr)
 		: ptr(ptr), arr(arr)
 	{
 		++arr->iteratorCount;
 	}
 #else
 	template<typename Array>
-	inline ArrayIterator<Array>::ArrayIterator(ValueType* ptr)
+	inline ArrayIterator<Array>::ArrayIterator(InteranlValueType* ptr)
 		: ptr(ptr)
 	{
 	}
@@ -227,64 +234,75 @@ namespace Blaze
 		: ptr(nullptr), count(0), reserved(0)
 	{
 	}
-	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>::Array(const Array& arr) requires std::is_copy_constructible_v<T>
+	template<typename T, AllocatorType Allocator>	
+	inline Array<T, Allocator>::Array(const Array& other) requires std::copy_constructible<InternalValueType>
 		: ptr(nullptr), count(0), reserved(0)
-	{ 
-		CopyUnsafe(arr.ptr, arr.count);
-	}
-	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>::Array(Array&& arr) noexcept
-		: ptr(arr.ptr), count(arr.count), reserved(arr.reserved)
 	{
-		arr.ptr = nullptr;
-		arr.count = 0;
-		arr.reserved = 0;
+		CopyConstructUnsafe(other.ptr, other.count);
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ... Args> requires std::constructible_from<T, Args...>
-	inline Array<T, Allocator>::Array(uintMem count, const Args& ... args)
+	inline Array<T, Allocator>::Array(Array&& other) noexcept
+		: ptr(other.ptr), count(other.count), reserved(other.reserved)
+	{
+		other.ptr = nullptr;
+		other.count = 0;
+		other.reserved = 0;
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename T2, AllocatorType Allocator2> 
+	inline Array<T, Allocator>::Array(const Array<T2, Allocator2>& other) requires IsArrayConstructibleFrom<InternalValueType, const typename Array<T2, Allocator2>::template InternalValueType&>
+		: ptr(nullptr), count(0), reserved(0)
+	{
+		CopyConstructUnsafe(other.ptr, other.count);
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename ... Args>
+	inline Array<T, Allocator>::Array(uintMem count, Args&& ... args) requires std::constructible_from<InternalValueType, Args...>
 		: ptr(nullptr), count(count), reserved(count)
 	{
-		ptr = (T*)allocator.Allocate(sizeof(T) * count);
+		ptr = (InternalValueType*)allocator.Allocate(sizeof(InternalValueType) * count);
 		
 		for (uintMem i = 0; i < count; ++i)
 			std::construct_at(ptr + i, args...);				
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename F> requires std::invocable<F, T*, uintMem>
-	inline Array<T, Allocator>::Array(uintMem count, const F& constructFunction)
+	template<typename F>
+	inline Array<T, Allocator>::Array(uintMem count, const F& constructFunction) requires std::invocable<F, InternalValueType*, uintMem>
 		: ptr(nullptr), count(count), reserved(count)
 	{
-		ptr = (T*)allocator.Allocate(sizeof(T) * count);
+		ptr = (InternalValueType*)allocator.Allocate(sizeof(InternalValueType) * count);
 
 		for (uintMem i = 0; i < count; ++i)
 			constructFunction(ptr + i, i);
-	}
-	template<typename T, AllocatorType Allocator>
-	template<uintMem S>
-	inline Array<T, Allocator>::Array(const T (&arr)[S]) requires std::is_copy_constructible_v<T>
+	}	
+	template<typename T, AllocatorType Allocator>	
+	template<typename T2, uintMem S> 
+	inline Array<T, Allocator>::Array(const T2(&arr)[S]) requires IsArrayConstructibleFrom<InternalValueType, const T2&>
 		: ptr(nullptr), count(0), reserved(0)
 	{
-		CopyUnsafe(arr, S);
+		CopyConstructUnsafe(arr, S);
 	}
-	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>::Array(const T* ptr, uintMem count) requires std::is_copy_constructible_v<T>
+	template<typename T, AllocatorType Allocator> 
+	template<typename T2>
+	inline Array<T, Allocator>::Array(const T2* ptr, uintMem count) requires IsArrayConstructibleFrom<InternalValueType, const T2&>
 		: ptr(nullptr), count(0), reserved(0)
 	{
-		CopyUnsafe(ptr, count);
+		if (ptr != nullptr)
+			CopyConstructUnsafe(ptr, count);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>::Array(const std::initializer_list<T>& arr) requires std::is_copy_constructible_v<T>
+	template<typename T2>
+	inline Array<T, Allocator>::Array(const std::initializer_list<T2>& arr) requires IsArrayConstructibleFrom<InternalValueType, const T2&>
 		: ptr(nullptr), count(0), reserved(0)
 	{
-		CopyUnsafe(arr.begin(), arr.size());
+		CopyConstructUnsafe(arr.begin(), arr.size());
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>::Array(const ArrayView<std::remove_const_t<T>>& arr) requires std::is_copy_constructible_v<T>
+	template<typename T2>
+	inline Array<T, Allocator>::Array(const ArrayView<T2>& arr) requires IsArrayConstructibleFrom<InternalValueType, const typename ArrayView<T2>::template InternalValueType&>
 		: ptr(nullptr), count(0), reserved(0)
 	{
-		CopyUnsafe(arr.Ptr(), arr.Count());
+		CopyConstructUnsafe(arr.Ptr(), arr.Count());
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::~Array()
@@ -320,8 +338,8 @@ namespace Blaze
 		return reserved;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddBack(Args && ...args) requires std::constructible_from<T, T&&>
+	template<typename ...Args>
+	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddBack(Args && ...args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>
 	{
 		if (auto newPtr = ReallocateUnsafe(count + 1))
 		{
@@ -347,8 +365,8 @@ namespace Blaze
 #endif
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::TryAddBack(Args && ...args)
+	template<typename ...Args>
+	inline Array<T, Allocator>::Iterator Array<T, Allocator>::TryAddBack(Args && ...args) requires std::constructible_from<InternalValueType, Args...>
 	{
 		if (count < reserved)
 		{
@@ -366,8 +384,8 @@ namespace Blaze
 
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(uintMem index, Args && ...args) requires std::constructible_from<T, T&&>
+	template<typename ...Args>
+	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(uintMem index, Args && ...args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index > count)
@@ -404,18 +422,18 @@ namespace Blaze
 #endif
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(Iterator it, Args && ...args) requires std::constructible_from<T, T&&>
+	template<typename ...Args>
+	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(Iterator it, Args && ...args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>
 	{
 		return AddAt(it.ptr - ptr, std::forward<Args>(args)...);
 	}
 	template<typename T, AllocatorType Allocator>	
-	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::constructible_from<T, T&&>
+	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::move_constructible<InternalValueType>
 	{		
 		Insert(it.ptr - ptr, array);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Insert(uintMem index, ArrayView<T> array)  requires std::constructible_from<T, T&&>
+	inline void Array<T, Allocator>::Insert(uintMem index, ArrayView<T> array)  requires std::move_constructible<InternalValueType>
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index > count)
@@ -519,9 +537,16 @@ namespace Blaze
 			ptr = newPtr;
 		}
 		else
-		{
-			for (uintMem i = index; i < count - 1; ++i)
-				ptr[i] = std::move(ptr[i + 1]);
+		{						
+			if constexpr (std::is_reference_v<T>)
+				for (uintMem i = index; i < count - 1; ++i)
+				{
+					std::destroy_at(ptr + i);
+					std::construct_at(ptr + i, ptr[i + 1]);
+				}					
+			else
+				for (uintMem i = index; i < count - 1; ++i)
+					ptr[i] = std::move(ptr[i + 1]);
 
 			std::destroy_at(ptr + count - 1);
 		}
@@ -534,7 +559,7 @@ namespace Blaze
 		EraseAt(it.ptr - ptr);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Append(const Array& other) requires std::constructible_from<T, const T&>
+	inline void Array<T, Allocator>::Append(const Array& other) requires std::copy_constructible<InternalValueType>
 	{
 		if (auto newPtr = ReallocateUnsafe(count + other.count))
 		{
@@ -552,7 +577,7 @@ namespace Blaze
 		count += other.count;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Append(Array&& other) requires std::constructible_from<T, T&&>
+	inline void Array<T, Allocator>::Append(Array&& other) requires std::move_constructible<InternalValueType>
 	{
 		if (auto newPtr = ReallocateUnsafe(count + other.count))
 		{
@@ -578,7 +603,7 @@ namespace Blaze
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline void Array<T, Allocator>::Resize(uintMem newCount, Args&& ...args) requires std::constructible_from<T, T&&>
+	inline void Array<T, Allocator>::Resize(uintMem newCount, Args&& ...args) requires std::move_constructible<InternalValueType>
 	{
 		auto newPtr = ReallocateUnsafe(newCount);
 
@@ -617,8 +642,8 @@ namespace Blaze
 		count = newCount;
 	}	
 	template<typename T, AllocatorType Allocator>
-	template<typename F> requires std::invocable<F, T*, uintMem>
-	void Array<T, Allocator>::ResizeWithFunction(uintMem newCount, const F& constructFunction) requires std::constructible_from<T, T&&>
+	template<typename F>
+	void Array<T, Allocator>::ResizeWithFunction(uintMem newCount, const F& constructFunction) requires std::invocable<F, InternalValueType*, uintMem> && std::move_constructible<InternalValueType>
 	{
 		auto newPtr = ReallocateUnsafe(newCount);
 
@@ -705,7 +730,10 @@ namespace Blaze
 		if (i >= count)
 			Debug::Logger::LogFatal("Blaze Engine", "Invalid index");
 #endif
-		return ptr[i];
+		if constexpr (std::is_reference_v<T>)
+			return ptr[i].value;
+		else
+			return ptr[i];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline const T& Array<T, Allocator>::operator[](uintMem i) const
@@ -717,12 +745,12 @@ namespace Blaze
 		return ptr[i];
 	}
 	template<typename T, AllocatorType Allocator>
-	inline T* Array<T, Allocator>::Ptr()
+	inline typename Array<T, Allocator>::template InternalValueType* Array<T, Allocator>::Ptr()
 	{
 		return ptr;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline const T* Array<T, Allocator>::Ptr() const
+	inline const typename Array<T, Allocator>::template InternalValueType* Array<T, Allocator>::Ptr() const
 	{
 		return ptr;
 	}
@@ -854,29 +882,17 @@ namespace Blaze
 #endif				
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>::operator ArrayView<std::remove_const_t<T>>() const
+	inline Array<T, Allocator>::operator ArrayView<T>() const
 	{
-		return ArrayView(ptr, count);
+		return ArrayView<T>((typename ArrayView<T>::template InternalValueType*)ptr, count);
 	}
-	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const ArrayView<T>& other) requires std::is_copy_assignable_v<T>
+	template<typename T, AllocatorType Allocator>	
+	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array& other) requires std::assignable_from<InternalValueType, const InternalValueType&>
 	{
-		std::destroy_n(ptr, count);
-
-		CopyUnsafe(other.Ptr(), other.Count());
+		CopyAssign(other.ptr, other.count);
 
 		return *this;
 	}	
-	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array& other) requires std::is_copy_assignable_v<T>
-{
-		std::destroy_n(ptr, count);
-
-		CopyUnsafe(other.ptr, other.count);
-
-		return *this;
-	}
-
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>& Array<T, Allocator>::operator=(Array&& other) noexcept
 	{
@@ -890,7 +906,24 @@ namespace Blaze
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::CopyUnsafe(const T* src, uintMem count)
+	template<typename T2, AllocatorType Allocator2>
+	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array<T2, Allocator2>& other) requires IsArrayAssignableFrom<InternalValueType, const typename Array<T2, Allocator2>::template InternalValueType&>
+	{
+		CopyAssign(other.ptr, other.count);
+
+		return *this;
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename T2>
+	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const ArrayView<T2>& other) requires IsArrayAssignableFrom<InternalValueType, const typename ArrayView<T2>::template InternalValueType&>
+	{
+		CopyAssign(other.Ptr(), other.Count());
+
+		return *this;
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename T2> requires IsArrayConstructibleFrom<T, const T2&>
+	inline void Array<T, Allocator>::CopyConstructUnsafe(const T2* src, uintMem count)
 	{
 		if (count != 0)
 		{
@@ -902,19 +935,76 @@ namespace Blaze
 			}
 
 			for (uintMem i = 0; i < count; ++i)
-				std::construct_at(ptr + i, src[i]);
+				if constexpr (std::constructible_from<T, T2>)
+					std::construct_at(ptr + i, src[i]);
+				else
+					std::construct_at(ptr + i, static_cast<T>(src[i]));
 
 			this->count = count;
 		}
 		else
 		{
+			allocator.Free(ptr);
 			this->count = 0;
 			this->ptr = nullptr;
 		}
 	}
-
 	template<typename T, AllocatorType Allocator>
-	inline T* Array<T, Allocator>::ReallocateUnsafe(uintMem newCount)
+	template<typename T2> requires IsArrayAssignableFrom<T, const T2&>
+	inline void Array<T, Allocator>::CopyAssign(const T2* src, uintMem newCount)
+	{
+		if (newCount != 0)
+		{
+			if (auto newPtr = ReallocateUnsafe(newCount))
+			{
+				std::destroy_n(ptr, count);
+				allocator.Free(ptr);
+
+				ptr = newPtr;
+
+				for (uintMem i = 0; i < newCount; ++i)
+					if constexpr (std::constructible_from<T, T2>)
+						std::construct_at(ptr + i, src[i]);
+					else									
+						std::construct_at(ptr + i, static_cast<T>(src[i]));
+			}
+			else if (count > newCount)
+			{
+				for (uintMem i = 0; i < newCount; ++i)				
+					if constexpr (std::assignable_from<T, T2>)
+						ptr[i] = src[i];
+					else
+						ptr[i] = static_cast<T>(src[i]);
+				
+				std::destroy_n(ptr + newCount, count - newCount);
+			}			
+			else
+			{
+				for (uintMem i = 0; i < count; ++i)
+					if constexpr (std::assignable_from<T, T2>)
+						ptr[i] = src[i];
+					else
+						ptr[i] = (T)src[i];
+
+				for (uintMem i = count; i < newCount; ++i)
+					if constexpr (std::constructible_from<T, T2>)
+						std::construct_at(ptr + i, src[i]);
+					else
+						std::construct_at(ptr + i, static_cast<T>(src[i]));
+			}
+
+			this->count = newCount;
+		}
+		else
+		{
+			std::destroy_n(ptr, count);
+			allocator.Free(ptr);
+			count = 0;
+			ptr = nullptr;
+		}
+	}
+	template<typename T, AllocatorType Allocator>
+	inline typename Array<T, Allocator>::template InternalValueType* Array<T, Allocator>::ReallocateUnsafe(uintMem newCount)
 	{
 		if (reserved == 0)
 		{
@@ -945,7 +1035,7 @@ namespace Blaze
 			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
 #endif
 
-		return (T*)allocator.Allocate(reserved * sizeof(T));
+		return (InternalValueType*)allocator.Allocate(reserved * sizeof(InternalValueType));
 	}
 
 	template<typename T, AllocatorType Allocator>

@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {
@@ -8,14 +10,19 @@ namespace Blaze
 	template<typename>
 	class ArrayView;
 
-	template<typename T1, typename T2>
+	template<typename Left, typename T2>
 	concept IsConvertibleToArrayIterator =
-		std::same_as<std::remove_const_t<typename T2::template ArrayType>, std::remove_const_t<typename T1::template ArrayType>> &&
-		(!(std::is_const_v<typename T1::template ArrayType> && !std::is_const_v<typename T2::template ArrayType>));	
+		std::same_as<std::remove_const_t<typename T2::template ArrayType>, std::remove_const_t<typename Left::template ArrayType>> &&
+		(!(std::is_const_v<typename Left::template ArrayType> && !std::is_const_v<typename T2::template ArrayType>));	
 
-	template<typename T1, typename T2>
+	template<typename Left, typename T2>
 	concept IsComparableToArrayIterator =
-		std::same_as<std::remove_const_t<typename T2::template ArrayType>, std::remove_const_t<typename T1::template ArrayType>>;
+		std::same_as<std::remove_const_t<typename T2::template ArrayType>, std::remove_const_t<typename Left::template ArrayType>>;
+
+	template<typename Left, typename Right>
+	concept IsArrayConstructibleFrom = std::constructible_from<Left, Right> || std::convertible_to<Right, Left>&& std::copy_constructible<Left>;
+	template<typename Left, typename Right>
+	concept IsArrayAssignableFrom = IsArrayConstructibleFrom<Left, Right> && (std::assignable_from<Left, Right> || std::convertible_to<Right, Left> && std::copyable<Left>);
 
 	/*
 		Used with the Blaze::Array class.
@@ -48,7 +55,9 @@ namespace Blaze
 	public:
 		using ArrayType = Array;
 		using ValueType = std::conditional_t<std::is_const_v<Array>, const typename Array::template ValueType, typename Array::template ValueType>;
-		using value_type = ValueType;
+		using value_type = ValueType;		
+		using InterfaceValueType = std::remove_reference_t<ValueType>;
+		using InteranlValueType = std::conditional_t<std::is_const_v<Array>, const typename Array::template InternalValueType, typename Array::template InternalValueType>;
 
 		ArrayIterator();
 		template<IsConvertibleToArrayIterator<ArrayIterator<Array>> T>
@@ -57,8 +66,8 @@ namespace Blaze
 		
 		bool IsNull() const;				
 
-		ValueType& operator*() const;
-		ValueType* operator->() const;
+		std::remove_reference_t<ValueType>& operator*() const;
+		std::remove_reference_t<ValueType>* operator->() const;
 
 		ArrayIterator& operator++();
 		ArrayIterator operator++(int);
@@ -95,15 +104,15 @@ namespace Blaze
 		template<typename>
 		friend class ::Blaze::ArrayView;
 	private:		
-		ValueType* ptr;
+		InteranlValueType* ptr;
 
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		Array* arr;		
 
-		ArrayIterator(ValueType* ptr, Array* arr);
+		ArrayIterator(InteranlValueType* ptr, Array* arr);
 #else
-		ArrayIterator(ValueType* ptr);
+		ArrayIterator(InteranlValueType* ptr);
 #endif
 	};
 
@@ -127,25 +136,42 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator = Blaze::DefaultAllocator>
 	class BLAZE_CORE_API Array
 	{
+		struct ReferenceHolder
+		{
+			ReferenceHolder(T& value) : value(value) { }
+			ReferenceHolder(const ReferenceHolder& other) : value(other.value) { }
+			ReferenceHolder(ReferenceHolder&& other) : value(other.value) { }
+
+			ReferenceHolder& operator=(ReferenceHolder&&) = delete;
+			ReferenceHolder& operator=(const ReferenceHolder&) = delete;
+
+			T& value;
+		};
 	public:
 		using Iterator = ArrayIterator<Array>;
 		using ConstIterator = ArrayIterator<const Array>;
 		using ValueType = T;		
-		using value_type = ValueType;
+		using value_type = ValueType;		
+		using InternalValueType = std::conditional_t<std::is_reference_v<T>, ReferenceHolder, T>;
 
 		Array();
-		Array(const Array& arr) requires std::is_copy_constructible_v<T>;
-		Array(Array&& arr) noexcept;
-
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Array(uintMem count, const Args& ... args);
-		template<typename F> requires std::invocable<F, T*, uintMem>
-		Array(uintMem count, const F& constructFunction);
-		template<uintMem S>
-		Array(const T (&arr)[S]) requires std::is_copy_constructible_v<T>;
-		Array(const T* ptr, uintMem count) requires std::is_copy_constructible_v<T>;
-		Array(const std::initializer_list<T>& arr) requires std::is_copy_constructible_v<T>;
-		Array(const ArrayView<std::remove_const_t<T>>& arr) requires std::is_copy_constructible_v<T>;				
+		Array(const Array& other) requires std::copy_constructible<InternalValueType>;
+		Array(Array&& other) noexcept;
+				
+		template<typename T2, AllocatorType Allocator2> 
+		Array(const Array<T2, Allocator2>& other) requires IsArrayConstructibleFrom<InternalValueType, const typename Array<T2, Allocator2>::template InternalValueType&>;
+		template<typename ... Args>
+		Array(uintMem count, Args&& ... args) requires std::constructible_from<InternalValueType, Args...>;
+		template<typename F>
+		Array(uintMem count, const F& constructFunction) requires std::invocable<F, InternalValueType*, uintMem>;
+		template<typename T2, uintMem S> 
+		Array(const T2(&arr)[S]) requires IsArrayConstructibleFrom<InternalValueType, const T2&>;
+		template<typename T2>
+		Array(const T2* ptr, uintMem count) requires IsArrayConstructibleFrom<InternalValueType, const T2&>;
+		template<typename T2>
+		Array(const std::initializer_list<T2>& arr) requires IsArrayConstructibleFrom<InternalValueType, const T2&>;
+		template<typename T2>
+		Array(const ArrayView<T2>& other) requires IsArrayConstructibleFrom<InternalValueType, const typename ArrayView<T2>::template InternalValueType&>;
 
 		~Array();
 
@@ -154,24 +180,24 @@ namespace Blaze
 		uintMem Count() const;
 		uintMem ReservedCount() const;
 
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator AddBack(Args&& ... args) requires std::constructible_from<T, T&&>;
+		template<typename ... Args>
+		Iterator AddBack(Args&& ... args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>;
 		/*
 			This function will construct a new element only if the current buffer has space for it. If not returns
 			a null iterator.
 		*/
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator TryAddBack(Args&& ... args);
+		template<typename ... Args>
+		Iterator TryAddBack(Args&& ... args) requires std::constructible_from<InternalValueType, Args...>;
 
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator AddAt(uintMem index, Args&& ... args) requires std::constructible_from<T, T&&>;
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator AddAt(Iterator it, Args&& ... args) requires std::constructible_from<T, T&&>;
+		template<typename ... Args>
+		Iterator AddAt(uintMem index, Args&& ... args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>;
+		template<typename ... Args>
+		Iterator AddAt(Iterator it, Args&& ... args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>;
 
 		//Inserts a array into the array, such that the object pointed by it will be directly after the inserted array
-		void Insert(Iterator it, ArrayView<T> array) requires std::constructible_from<T, T&&>;
+		void Insert(Iterator it, ArrayView<T> array) requires std::move_constructible<InternalValueType>;
 		//Inserts a array into the array, such that the object at index 'index' will be directly after the inserted array
-		void Insert(uintMem index, ArrayView<T> array) requires std::constructible_from<T, T&&>;
+		void Insert(uintMem index, ArrayView<T> array) requires std::move_constructible<InternalValueType>;
 
 		//Splits the array into two arrays. The elements from the first to 'it' would be in the current array and all elements
 		//after and including 'it' will be returned.
@@ -184,13 +210,13 @@ namespace Blaze
 		void EraseAt(uintMem index);
 		void EraseAt(Iterator it);
 		
-		void Append(const Array& other) requires std::constructible_from<T, const T&>;
-		void Append(Array&& other) requires std::constructible_from<T, T&&>;
+		void Append(const Array& other) requires std::copy_constructible<InternalValueType>;
+		void Append(Array&& other) requires std::move_constructible<InternalValueType>;
 		
 		template<typename ... Args> requires std::constructible_from<T, Args...>
-		void Resize(uintMem newCount, Args&& ... args) requires std::constructible_from<T, T&&>;
-		template<typename F> requires std::invocable<F, T*, uintMem>
-		void ResizeWithFunction(uintMem newCount, const F& constructFunction) requires std::constructible_from<T, T&&>;
+		void Resize(uintMem newCount, Args&& ... args) requires std::move_constructible<InternalValueType>;
+		template<typename F>
+		void ResizeWithFunction(uintMem newCount, const F& constructFunction) requires std::invocable<F, InternalValueType*, uintMem> && std::move_constructible<InternalValueType>;
 		
 		/*
 			Makes sure that the array buffer is big enough to support 'reserveCount' amount of elements. Destroys any
@@ -208,8 +234,8 @@ namespace Blaze
 		T& operator[](uintMem i);
 		const T& operator[](uintMem i) const;
 		
-		T* Ptr();
-		const T* Ptr() const;		
+		InternalValueType* Ptr();
+		const InternalValueType* Ptr() const;
 
 		T& First();
 		const T& First() const;
@@ -252,16 +278,19 @@ namespace Blaze
 		*/
 		ConstIterator BehindIterator() const;
 		
-		operator ArrayView<std::remove_const_t<T>>() const;		
-
-		Array& operator=(const ArrayView<T>& other) requires std::is_copy_assignable_v<T>;
-		Array& operator=(const Array& other) requires std::is_copy_assignable_v<T>;
+		operator ArrayView<T>() const;		
+		
+		Array& operator=(const Array& other) requires std::assignable_from<InternalValueType, const InternalValueType&>;
 		Array& operator=(Array&& other) noexcept;		
+		template<typename T2, AllocatorType Allocator2>
+		Array& operator=(const Array<T2, Allocator2>& arr) requires IsArrayAssignableFrom<InternalValueType, const typename Array<T2, Allocator2>::template InternalValueType&>;
+		template<typename T2>
+		Array& operator=(const ArrayView<T2>& arr) requires IsArrayAssignableFrom<InternalValueType, const typename ArrayView<T2>::template InternalValueType&>;
 
 		template<typename>
 		friend class ArrayIterator;
-	private:
-		T* ptr;
+	private:				
+		InternalValueType* ptr;
 		uintMem count;
 		uintMem reserved;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
@@ -271,22 +300,37 @@ namespace Blaze
 #endif
 
 		/*
-
-			Copies <count> elements starting at <src> without destroying previous
-			elements. Changes the current buffer, so the old buffer is freed and a 
-			new one allocated if needed.
-
+			Constructs <count> elements by copy-constructing elements starting 
+			at <src> without destroying previous elements. Changes the current 
+			buffer pointer if needed: the old one is freed and a new one 
+			allocated. 
 		\param
 			src - start of the source array to copy from
 		\param
 			count - number of elements to copy
 
 		*/
-		void CopyUnsafe(const T* src, uintMem count);
+		template<typename T2> requires IsArrayConstructibleFrom<T, const T2&>
+		void CopyConstructUnsafe(const T2* src, uintMem count);
+		/*
+			If needed creates a new buffer to fit <count> elements in the new
+			one, destroys the old elements, and copy-constructs all the elements
+			from <src> to the new buffer. If no new buffer is needed existing
+			elements are copy-assigned and excess in the current buffer are 
+			destroyed or the excess in the source buffer are copy-constructed 
+			into the current buffer.			
+		\param
+			src - start of the source array to copy from
+		\param
+			count - number of elements to copy
+
+		*/
+		template<typename T2> requires IsArrayAssignableFrom<T, const T2&>
+		void CopyAssign(const T2* src, uintMem count);
 
 		/*
 		
-			Allocates a new buffer if the old one needs to be changed, returns nullptr 
+			Allocates a new buffer if the old one needs to be changed, returns nullptr
 			otherwise. Only changes the 'reserved' variable. Doesn't move, copy or 
 			destroy anything in the old or the new buffer, just allocates the memory.
 			Doesn't free the old buffer.
@@ -298,8 +342,7 @@ namespace Blaze
 			A pointer to a new buffer if the old one needs to be changed. Nullptr otherwise.
 
 		*/
-		T* ReallocateUnsafe(uintMem newCount);
-		
+		InternalValueType* ReallocateUnsafe(uintMem newCount);		
 	};	
 
 }

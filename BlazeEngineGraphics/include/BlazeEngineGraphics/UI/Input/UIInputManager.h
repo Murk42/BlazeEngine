@@ -41,7 +41,7 @@ namespace Blaze::UI
 
 		struct InputNodeData
 		{
-			InputNode* node;
+			InputNode& node;
 			InputNodeFinalTransformUpdatedEventHandler finalTransformUpdatedEventHandler;
 		};
 		Array<InputNodeData> nodesData;
@@ -56,14 +56,14 @@ namespace Blaze::UI
 		void SubscribeToWindow(WindowBase& window);		
 		void UnsubscribeFromWindow(WindowBase& window);
 
-		void GatherInputNodes(Node* node);
+		void GatherInputNodes(Node& node);
 		//Expects that screen is not nullptr
 		void RecreateScreenInputNodes();
 		//Updates all nodes mouse interaction beginning from 'beginIndex'. beginIndex is expected to be less than mouseBlockInputNodeIndex
 		void CastMousePointer(uintMem beginIndex, Vec2f mousePos, Vec2f mouseDelta);
-		void NodeFinalTransformUpdated(InputNode* node);
+		void NodeFinalTransformUpdated(InputNode& node);
 		
-		void UpdateMouseHitEvents(InputNode* node, Vec2i mouseDelta);
+		void UpdateMouseHitEvents(InputNode& node, Vec2i mouseDelta);
 
 		void OnEvent(NodeCreatedEvent event) override;
 		void OnEvent(NodeDestroyedEvent event) override;

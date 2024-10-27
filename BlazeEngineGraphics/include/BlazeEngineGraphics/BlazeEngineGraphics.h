@@ -1,5 +1,4 @@
 #pragma once
-
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 
 #include "BlazeEngineGraphics/Core/Dynamic/GraphicsContext.h"
@@ -13,7 +12,6 @@
 
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFramebuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLRenderbuffer.h"

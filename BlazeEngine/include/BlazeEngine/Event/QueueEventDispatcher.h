@@ -4,7 +4,7 @@
 namespace Blaze
 {
 	template<typename T, AllocatorType Allocator = DefaultAllocator, uint BucketSize = 8>
-	class QueueEventDispatcher : public EventDispatcher<T>
+	class BLAZE_API QueueEventDispatcher : public EventDispatcher<T>
 	{
 	public:
 		QueueEventDispatcher();

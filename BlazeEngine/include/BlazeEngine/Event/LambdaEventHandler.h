@@ -4,7 +4,7 @@
 namespace Blaze
 {
 	template<typename T>
-	class LambdaEventHandler : public EventHandler<T>
+	class BLAZE_API LambdaEventHandler : public EventHandler<T>
 	{
 	public:
 		LambdaEventHandler();

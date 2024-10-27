@@ -49,11 +49,11 @@ namespace Blaze::UI
 	public:	
 		struct TransformUpdatedEvent
 		{
-			Node* node;			
+			Node& node;			
 		};
 		struct FinalTransformUpdatedEvent
 		{
-			Node* node;
+			Node& node;
 			NodeFinalTransform finalTransform;
 		};		
 		NodeDataMap dataMap;
@@ -84,7 +84,7 @@ namespace Blaze::UI
 		void CleanFinalTransform();				
 
 		inline uint32 GetTransformState() const { return transformState; }				
-		inline ArrayView<Node*> GetChildren() const { return children; }
+		inline ArrayView<Node&> GetChildren() const { return children; }
 		inline Node* GetParent() const { return parent; }
 		inline Screen* GetScreen() const { return screen; }
 		NodeTransform GetTransform();
@@ -92,7 +92,7 @@ namespace Blaze::UI
 	private:				
 		Screen* screen;
 		Node* parent;				
-		Array<Node*> children;
+		Array<Node&> children;
 		mutable bool finalTransformDirty : 1;
 		mutable bool destroyed : 1;		
 		mutable bool transformDirty : 1;

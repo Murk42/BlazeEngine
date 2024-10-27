@@ -1,4 +1,10 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+
+namespace Blaze
+{
+	class Result;
+}
 
 namespace Blaze::Debug
 {

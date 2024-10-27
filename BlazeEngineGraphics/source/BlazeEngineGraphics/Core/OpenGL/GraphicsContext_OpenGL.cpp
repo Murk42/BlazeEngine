@@ -478,7 +478,7 @@ namespace Blaze::Graphics::OpenGL
 		if (GetActiveOpenGLGraphicsContext() == this)
 			SetActiveOpenGLGraphicsContextForced(*this);
 	}
-	WindowSDL GraphicsContext_OpenGL::CreateWindowSDL(WindowSDLCreateOptions_OpenGL createOptions)
+	WindowSDL GraphicsContext_OpenGL::CreateWindowSDL(const WindowSDLCreateOptions_OpenGL& createOptions)
 	{
 		if (initWindowSDL.IsNullWindow())
 		{

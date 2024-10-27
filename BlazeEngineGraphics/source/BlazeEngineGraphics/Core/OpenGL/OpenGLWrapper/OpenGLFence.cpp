@@ -83,4 +83,16 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		return (value == GL_SIGNALED ? true : false);
 	}
+	void Fence::Swap(Fence& other)
+	{
+		void* temp = other.id;
+		other.id = id;
+		id = temp;
+	}
+	void* Fence::ReleaseHandleOwnership()
+	{
+		void* id = this->id;
+		this->id = nullptr;
+		return id;
+	}
 }

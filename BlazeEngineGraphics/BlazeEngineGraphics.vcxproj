@@ -59,7 +59,6 @@
     <ClCompile Include="source\BlazeEngineGraphics\Core\Dynamic\GraphicsContext.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFramebuffer.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLProgram.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLRenderbuffer.cpp" />
@@ -115,10 +114,10 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIKeyboardEventHandler.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIMouseEventHandler.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UISelectEventHandler.h" />
+    <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\Debug_OpenGL.h" />
     <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLEnums.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFramebuffer.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLProgram.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLRenderbuffer.h" />
@@ -329,7 +328,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib;SDL2d.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>

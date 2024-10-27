@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCore.h"
+#include "BlazeEngine/BlazeEngineDefines.h"
 #include "BlazeEngine/Window/WindowBase.h"
 
 namespace Blaze

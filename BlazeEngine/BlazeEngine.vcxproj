@@ -158,7 +158,7 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2d.lib;freetyped.lib;sail.lib;sail-common.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
@@ -198,9 +198,6 @@
     <ClInclude Include="include\BlazeEngine\Application\ECS\Scene.h" />
     <ClInclude Include="include\BlazeEngine\Application\ECS\System.h" />
     <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\Resource.h" />
-    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceManager.h" />
-    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceStorage.h" />
-    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\ResourceTypeRegistry.h" />
     <ClInclude Include="include\BlazeEngine\BlazeEngine.h" />
     <ClInclude Include="include\BlazeEngine\BlazeEngineDefines.h" />
     <ClInclude Include="include\BlazeEngine\Console\Console.h" />
@@ -239,9 +236,7 @@
     <ClCompile Include="source\BlazeEngine\Application\ECS\EntityCreationData.cpp" />
     <ClCompile Include="source\BlazeEngine\Application\ECS\Scene.cpp" />
     <ClCompile Include="source\BlazeEngine\Application\ECS\System.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceManager.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceStorage.cpp" />
-    <ClCompile Include="source\BlazeEngine\Application\Resource System\ResourceTypeRegistry.cpp" />
+    <ClCompile Include="source\BlazeEngine\Application\ResourceSystem\Resource.cpp" />
     <ClCompile Include="source\BlazeEngine\Console\ConsoleOutputStream.cpp" />
     <ClCompile Include="source\BlazeEngine\EntryPoint\EntryPoint.cpp" />
     <ClCompile Include="source\BlazeEngine\Files\Consola.cpp" />

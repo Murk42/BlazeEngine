@@ -4,11 +4,11 @@
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
-#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFramebuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLRenderbuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture1D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
+#include "BlazeEngineGraphics/Core/OpenGL/Framebuffer_OpenGL.h"
 
 using namespace Blaze::Graphics::OpenGLWrapper;
 
@@ -217,15 +217,15 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glUseProgram(obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectFramebuffer(Framebuffer* obj)
+	void GraphicsContext_OpenGL::SelectFramebuffer(Framebuffer_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectDrawFramebuffer(Framebuffer* obj)
+	void GraphicsContext_OpenGL::SelectDrawFramebuffer(Framebuffer_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectReadFramebuffer(Framebuffer* obj)
+	void GraphicsContext_OpenGL::SelectReadFramebuffer(Framebuffer_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}
@@ -377,6 +377,30 @@ namespace Blaze::Graphics::OpenGL
 	void GraphicsContext_OpenGL::RenderPrimitiveArray(PrimitiveType type, uintMem firstVertexIndex, uintMem vertexCount)
 	{
 		glDrawArrays(OpenGLRenderPrimitive(type), static_cast<GLint>(firstVertexIndex), static_cast<GLsizei>(vertexCount));
+	}
+
+	void GraphicsContext_OpenGL::BlitFramebuffer(Framebuffer_OpenGL& writeFramebuffer, Framebuffer_OpenGL& readFramebuffer, Vec2i dstP1, Vec2i dstP2, Vec2i srcP1, Vec2i srcP2, bool copyColor, bool copyDepth, bool copyStencil, TextureSampling sampling)
+	{
+		GLenum mask = 0;
+		if (copyColor) mask |= GL_COLOR_BUFFER_BIT;
+		if (copyDepth) mask |= GL_DEPTH_BUFFER_BIT;
+		if (copyStencil) mask |= GL_STENCIL_BUFFER_BIT;
+
+		GLenum filter = 0;
+		switch (sampling)
+		{
+		case Blaze::Graphics::OpenGLWrapper::TextureSampling::Nearest:
+			filter = GL_NEAREST;
+			break;
+		case Blaze::Graphics::OpenGLWrapper::TextureSampling::Linear:
+			filter = GL_LINEAR;
+			break;
+		default:
+			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextureSampling enum value");
+			break;
+		}
+		
+		glBlitNamedFramebuffer(readFramebuffer.GetHandle(), writeFramebuffer.GetHandle(), srcP1.x, srcP1.y, srcP2.x, srcP2.y, dstP1.x, dstP1.y, dstP2.x, dstP2.y, mask, filter);
 	}
 
 	void GraphicsContext_OpenGL::DispatchCompute(uint x, uint y, uint z)

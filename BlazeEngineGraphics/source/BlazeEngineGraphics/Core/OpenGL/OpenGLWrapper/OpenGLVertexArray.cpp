@@ -15,6 +15,10 @@ namespace Blaze::Graphics::OpenGLWrapper
     {     
         glCreateVertexArrays(1, &id);
     }
+    VertexArray::VertexArray(uint id)
+        : id(id)
+    {
+    }
     VertexArray::VertexArray(VertexArray&& va) noexcept
         : id(0)
     {
@@ -83,6 +87,20 @@ namespace Blaze::Graphics::OpenGLWrapper
     void VertexArray::SetVertexAttributeDivisor(uint index, uint divisor)
     {
         glVertexArrayBindingDivisor(id, index, divisor);        
+    }
+
+    void VertexArray::Swap(VertexArray& other)
+    {
+        uint temp = id;
+        id = other.id;
+        other.id = temp;        
+    }
+
+    uint VertexArray::ReleaseHandleOwnership()
+    {
+        uint id = this->id;
+        this->id = 0;
+        return id;
     }
 
 

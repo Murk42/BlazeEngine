@@ -46,7 +46,7 @@ namespace Blaze::UIGraphics
 		TextVerticallyOverfittedOptions verticallyOverfittedOption = TextVerticallyOverfittedOptions::Nothing;
 		float lineAdvance = 1.0f;
 		float wrappedLineAdvance = 0.9f;		
-	};
+	};	
 
 	class BLAZE_GRAPHICS_API TextRenderUnit :
 		public TextRenderUnitBase,		

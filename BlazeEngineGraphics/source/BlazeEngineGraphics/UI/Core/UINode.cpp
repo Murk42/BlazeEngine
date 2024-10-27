@@ -3,7 +3,7 @@
 #include "BlazeEngineGraphics/UI/Core/UIScreen.h"
 
 namespace Blaze::UI
-{
+{		
 	Vec2f NodeFinalTransform::TransformFromFinalToLocalTransformSpace(Vec2f finalTransformPosition)
 	{
 		Vec2f localTransformPosition = (finalTransformPosition - position) / scale;
@@ -35,7 +35,7 @@ namespace Blaze::UI
 				screen->RemoveNode(this);
 
 			for (auto it = parent->children.FirstIterator(); it != parent->children.BehindIterator(); ++it)
-				if (*it == this)
+				if (&*it == this)
 				{
 					parent->children.EraseAt(it);
 					break;
@@ -50,7 +50,7 @@ namespace Blaze::UI
 		if (parent != nullptr)
 		{
 			for (uintMem i = 0; i < parent->children.Count(); ++i)
-				if (parent->children[i] == this)
+				if (&parent->children[i] == this)
 					parent->children.EraseAt(i);
 
 			if (parent->screen != nullptr && parent->screen != newParent->screen)
@@ -63,7 +63,7 @@ namespace Blaze::UI
 		{
 			screen = parent->screen;
 
-			parent->children.AddBack(this);
+			parent->children.AddBack(*this);
 
 			if (screen != nullptr)
 				screen->AddNode(this);
@@ -93,7 +93,7 @@ namespace Blaze::UI
 			finalTransformDirty = true;
 
 			for (auto& child : children)
-				child->MarkFinalTransformDirty();
+				child.MarkFinalTransformDirty();
 		}
 	}
 	void Node::CleanTransform()
@@ -103,7 +103,7 @@ namespace Blaze::UI
 
 		transformDirty = false;
 
-		transformUpdatedEventDispatcher.Call({ (UI::Node*)this });		
+		transformUpdatedEventDispatcher.Call({ *this });		
 	}
 	void Node::CleanFinalTransform()
 	{
@@ -138,8 +138,8 @@ namespace Blaze::UI
 		while (finalTransformDirty)
 			CalculateFinalTransform();
 
-		for (auto child : children)
-			child->CalculateFinalTransformDownwards();
+		for (auto& child : children)
+			child.CalculateFinalTransformDownwards();
 	}
 	static Vec2f RotatePoint(Vec2f point, Vec2f around, float cos, float sin)
 	{
@@ -212,7 +212,7 @@ namespace Blaze::UI
 		finalTransformDirty = false;
 
 		finalTransformUpdatedEventDispatcher.Call({
-			.node = (Node*)this,
+			.node = *this,
 			.finalTransform = finalTransform
 			});		
 	}		

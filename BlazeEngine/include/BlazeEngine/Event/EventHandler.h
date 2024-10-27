@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze
 {
@@ -6,7 +7,7 @@ namespace Blaze
 	class EventDispatcher;
 
 	template<typename T>
-	class EventHandler
+	class BLAZE_API EventHandler
 	{
 	public:		
 		using EventType = T;

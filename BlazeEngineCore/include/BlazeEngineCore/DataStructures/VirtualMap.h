@@ -1,9 +1,8 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 namespace Blaze
 {
-	class Result;
-
 	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	class VirtualMap;
 
@@ -49,9 +48,7 @@ namespace Blaze
 	template<typename VirtualMap>
 	class BLAZE_CORE_API VirtualMapIterator
 	{
-	public:
-		template<typename T>
-		using MatchMapConst = std::conditional_t<std::is_const_v<VirtualMap>, const T, T>;			
+	public:		
 		using VirtualMapType = VirtualMap;				
 
 		VirtualMapIterator();
@@ -68,7 +65,11 @@ namespace Blaze
 		//Returns the value that the iterator is pointing to. If the asked type does not match the stored value nullptr is returned. If 
 		//the iterator isn't pointing to any data nullptr is returned
 		template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
-		MatchMapConst<Value>* GetValue() const;
+		Value* GetValue() requires !std::is_const_v<VirtualMap>;
+		//Returns the value that the iterator is pointing to. If the asked type does not match the stored value nullptr is returned. If 
+		//the iterator isn't pointing to any data nullptr is returned
+		template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
+		const Value* GetValue() const;
 		//Returns the key that the iterator is pointing to. If the iterator isn't pointing to any data nullptr is returned				
 		const typename VirtualMap::template KeyType* GetKey() const;
 
