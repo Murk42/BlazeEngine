@@ -28,7 +28,8 @@ namespace Blaze
 		constexpr ArrayView(const ArrayView&);
 		constexpr ArrayView(const InternalValueType* ptr, uintMem count);
 		template<uintMem S>
-		constexpr ArrayView(const InternalValueType(&arr)[S]);
+		constexpr ArrayView(const InternalValueType(&arr)[S]);		
+		constexpr ArrayView(const std::initializer_list<InternalValueType>& list);
 
 		constexpr void Clear();
 		constexpr bool Empty() const;
@@ -94,6 +95,11 @@ namespace Blaze
 	template<uintMem S>
 	inline constexpr ArrayView<T>::ArrayView(const InternalValueType(&arr)[S])
 		: ptr(arr), count(S)
+	{
+	}
+	template<typename T>
+	inline constexpr ArrayView<T>::ArrayView(const std::initializer_list<InternalValueType>& list)
+		: ptr(list.begin()), count(list.size())
 	{
 	}
 	template<typename T>

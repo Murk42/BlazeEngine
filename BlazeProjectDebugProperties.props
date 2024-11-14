@@ -5,8 +5,9 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <PostBuildEvent>
-      <Command>xcopy "$(VcpkgManifestRoot)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\debug\bin" "$(OutputPath)" /y /f</Command>
+      <Command>xcopy /s /e /i /r /f /y /d "$(VcpkgManifestRoot)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\debug\bin" "$(OutputPath)"</Command>
     </PostBuildEvent>
+    <ClCompile />
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

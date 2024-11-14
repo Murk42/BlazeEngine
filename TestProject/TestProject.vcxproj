@@ -20,30 +20,40 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\Graphics4\API.h" />
+    <ClInclude Include="source\CameraController.h" />
     <ClInclude Include="source\Graphics5\Vulkan\API_Vulkan.h" />
     <ClInclude Include="source\Graphics5\Vulkan\VulkanInstance.h" />
-    <ClInclude Include="source\Graphics\OpenGL\RenderSystem_OpenGL.h" />
     <ClInclude Include="source\LocalString.h" />
-    <ClInclude Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.h" />
-    <ClInclude Include="source\MainScreen.h" />
     <ClInclude Include="source\pch.h" />
-    <ClInclude Include="source\Resources\ResourceManager.h" />
+    <ClInclude Include="source\RenderingSystem.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.cpp" />
-    <ClCompile Include="source\Graphics\OpenGL\RenderSystem_OpenGL.cpp" />
+    <ClCompile Include="source\CameraController.cpp" />
     <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\MainScreen.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="source\Resources\ResourceManager.cpp" />
+    <ClCompile Include="source\RenderingSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Log.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BlazeEngineProjectPropertySheet.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BlazeEngineCore\BlazeEngineCore.vcxproj">
+      <Project>{d3af4e35-1d93-4a5f-b070-a0a6dd18a31b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\BlazeEngineGraphics\BlazeEngineGraphics.vcxproj">
+      <Project>{db841779-0bf1-42bb-95cb-c0de158a1988}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\BlazeEngine\BlazeEngine.vcxproj">
+      <Project>{b87fcc17-b1a8-413b-aa96-651462fcb46b}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -78,19 +88,19 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\BlazeProjectDefaultProperties.props" />
+    <Import Project="BlazeEngineProjectPropertySheet.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\BlazeProjectDefaultProperties.props" />
+    <Import Project="BlazeEngineProjectPropertySheet.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\BlazeProjectDefaultProperties.props" />
+    <Import Project="BlazeEngineProjectPropertySheet.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\BlazeProjectDefaultProperties.props" />
+    <Import Project="BlazeEngineProjectPropertySheet.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
@@ -100,82 +110,77 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineGraphics\include;$(SolutionDir)BlazeEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineGraphics\include;$(SolutionDir)BlazeEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineGraphics\include;$(SolutionDir)BlazeEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineGraphics\include;$(SolutionDir)BlazeEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>call "$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)install\bin" "$(OutDir)"
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

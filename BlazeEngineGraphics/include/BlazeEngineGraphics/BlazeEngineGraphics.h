@@ -21,6 +21,7 @@
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 
 #include "BlazeEngineGraphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
+#include "BlazeEngineGraphics/Renderers/OpenGL/Line3DRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/TextRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"

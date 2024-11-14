@@ -7,7 +7,7 @@
 namespace Blaze::Graphics::OpenGL
 {
 	static constexpr auto InstanceBufferInstanceCount = 256;
-	static constexpr auto InstanceBufferSize = InstanceBufferInstanceCount * 64;
+	static constexpr auto InstanceBufferSize = InstanceBufferInstanceCount * 64; //64 is sizeof(PanelRenderCache_OpenGL::Instance)
 
 	void PanelRenderCache_OpenGL::CreateNew(PanelRenderer_OpenGL& renderer, const Array<PanelRenderData_OpenGL>& renderData)
 	{		

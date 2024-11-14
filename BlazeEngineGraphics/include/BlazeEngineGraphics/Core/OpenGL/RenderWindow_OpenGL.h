@@ -26,8 +26,8 @@ namespace Blaze::Graphics::OpenGL
 		/*Parity*/RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, const WindowSDLCreateOptions_OpenGL& createOptions);
 		/*Parity*/~RenderWindow_OpenGL();		
 
-		/*Parity*/RenderWindowFramebuffer_OpenGL& AcquireNextFramebuffer(Semaphore_OpenGL& semaphore);
-		/*Parity*/void PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, Array<Semaphore_OpenGL*> waitSemaphores);
+		/*Parity*/RenderWindowFramebuffer_OpenGL& AcquireNextFramebuffer(Semaphore_OpenGL* semaphore);
+		/*Parity*/void PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, ArrayView<Semaphore_OpenGL*> waitSemaphores);
 
 		/*Parity*/inline GraphicsContext_OpenGL& GetGraphicsContext() { return graphicsContext; }
 		/*Parity*/inline WindowSDL& GetWindowSDL() { return window; }				

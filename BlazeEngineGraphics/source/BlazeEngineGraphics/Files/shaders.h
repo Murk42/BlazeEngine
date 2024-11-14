@@ -2,6 +2,8 @@
 
 extern const unsigned int line2d_frag_size;
 extern const unsigned int line2d_vert_size;
+extern const unsigned int line3d_frag_size;
+extern const unsigned int line3d_vert_size;
 extern const unsigned int panel_frag_size;
 extern const unsigned int panel_vert_size;
 extern const unsigned int text_frag_size;
@@ -11,6 +13,8 @@ extern const unsigned int texturedRect_vert_size;
 
 extern const unsigned char line2d_frag_file[];
 extern const unsigned char line2d_vert_file[];
+extern const unsigned char line3d_frag_file[];
+extern const unsigned char line3d_vert_file[];
 extern const unsigned char panel_frag_file[];
 extern const unsigned char panel_vert_file[];
 extern const unsigned char text_frag_file[];

@@ -240,7 +240,7 @@ namespace Blaze
 			: arr()
 		{
 		}
-		constexpr Matrix(const std::array<T, Sx* Sy>& values)
+		constexpr Matrix(const std::array<std::array<T, Sx>, Sy>& values)
 		{
 			memcpy(arr, &values, sizeof(T) * Sx * Sy);
 		}
@@ -357,8 +357,10 @@ namespace Blaze
 			m.Transpose();
 			return m;
 		}
+		//After multiplying a vector (the fourth component of the vector'w' is expected to be 1) the x, y, z
+		//components need to be divided by w to get them in clip space (x, y, z will be in the range [-1, 1]).
 		static constexpr Matrix<T, 4, 4> PerspectiveMatrix(T fov, T aspectRatio, T near, T far)
-		{
+		{			
 			T S = T(1) / Math::Tan(fov / T(2));
 
 			return Matrix<T, 4, 4>({

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\EditableText.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\RenderStructure\RenderGroupRenderer.cpp" />
@@ -82,6 +83,7 @@
     <ClInclude Include="include\BlazeEngineGraphics\BlazeEngineGraphics.h" />
     <ClInclude Include="include\BlazeEngineGraphics\BlazeEngineGraphicsDefines.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\Dynamic\GraphicsContext.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\PanelRenderer.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\TexturedRectRenderer.h" />
     <ClInclude Include="include\BlazeEngineGraphics\RenderScene\RenderObject.h" />
@@ -150,19 +152,31 @@
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\OpenGL\line2d.frag" />
-    <None Include="assets\shaders\OpenGL\line2d.vert" />
-    <None Include="assets\shaders\OpenGL\panel.frag" />
-    <None Include="assets\shaders\OpenGL\panel.vert" />
-    <None Include="assets\shaders\OpenGL\text.frag" />
-    <None Include="assets\shaders\OpenGL\text.vert" />
-    <None Include="assets\shaders\OpenGL\texturedRect.frag" />
-    <None Include="assets\shaders\OpenGL\texturedRect.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </None>
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </None>
     <None Include="assets\shaders\Vulkan\compileShaders.bat" />
     <None Include="assets\shaders\Vulkan\line2d.frag" />
     <None Include="assets\shaders\Vulkan\line2d.frag.spv" />
     <None Include="assets\shaders\Vulkan\line2d.vert" />
     <None Include="assets\shaders\Vulkan\line2d.vert.spv" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -218,19 +232,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -254,7 +276,6 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_DEBUG</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -269,14 +290,15 @@
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
       <Command>
       </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp</Outputs>
+      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
+      <Message>Converting resources into C++ files</Message>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -287,7 +309,6 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_RELEASE</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -303,14 +324,15 @@
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
       <Command>
       </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp</Outputs>
+      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
+      <Message>Converting resources into C++ files</Message>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -320,7 +342,6 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_DEBUG</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -334,14 +355,15 @@
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
       <Command>
       </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp</Outputs>
+      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
+      <Message>Converting resources into C++ files</Message>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -352,7 +374,6 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLAZE_RELEASE</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -367,14 +388,15 @@
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
       <Command>
       </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp</Outputs>
+      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
+      <Message>Converting resources into C++ files</Message>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

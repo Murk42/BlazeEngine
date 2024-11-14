@@ -127,7 +127,6 @@ noexcept
  * \f[ \tan(x) = - \frac{1}{x-\pi/2} - \sum_{k=1}^\infty \frac{(-1)^k 2^{2k} B_{2k}}{(2k)!} (x - \pi/2)^{2k - 1} \f]
  * where \f$ B_n \f$ is the n-th Bernoulli number.
  */
-
 template<typename T>
 constexpr
 return_t<T>

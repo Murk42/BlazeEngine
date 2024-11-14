@@ -15,6 +15,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlazeEngineGraphics", "BlazeEngineGraphics\BlazeEngineGraphics.vcxproj", "{DB841779-0BF1-42BB-95CB-C0DE158A1988}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B87FCC17-B1A8-413B-AA96-651462FCB46B} = {B87FCC17-B1A8-413B-AA96-651462FCB46B}
+		{D3AF4E35-1D93-4A5F-B070-A0A6DD18A31B} = {D3AF4E35-1D93-4A5F-B070-A0A6DD18A31B}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlazeEngine", "BlazeEngine\BlazeEngine.vcxproj", "{B87FCC17-B1A8-413B-AA96-651462FCB46B}"

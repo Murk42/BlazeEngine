@@ -13,11 +13,11 @@ MainScreen::MainScreen()
 	titleText.SetFont(fonts[0]);
 	titleText.SetFontHeight(32);
 	titleText.SetText("UI Test Project");
-	titleText.SetTextCharactersColor(Array<ColorRGBAf>({
-		0xff0000ff, 0xffa500ff, 0x0, 
-		0xffff00ff, 0x008000ff, 0x0000ffff, 0x4b0082ff, 0x0,
-		0xee82eeff, 0xff0000ff, 0xffa500ff, 0xffff00ff, 0x008000ff, 0x0000ffff, 0xee82eeff
-		}));
+	titleText.SetTextCharactersColor({
+		ColorRGBAf(0xff0000ff), ColorRGBAf(0xffa500ff), ColorRGBAf(0x00000000),
+		ColorRGBAf(0xffff00ff), ColorRGBAf(0x008000ff), ColorRGBAf(0x0000ffff), ColorRGBAf(0x4b0082ff), ColorRGBAf(0x00000000),
+		ColorRGBAf(0xee82eeff), ColorRGBAf(0xff0000ff), ColorRGBAf(0xffa500ff), ColorRGBAf(0xffff00ff), ColorRGBAf(0x008000ff), ColorRGBAf(0x0000ffff), ColorRGBAf(0xee82eeff)
+		});
 	titleText.SetLayoutOptions({		
 		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::ResizeToFit,
 		.verticallyUnderfittedOption = UI::TextVerticallyUnderfittedOptions::ResizeToFit,

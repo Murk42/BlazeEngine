@@ -21,11 +21,11 @@ namespace Blaze::Graphics::OpenGL
 		graphicsContext.DestroyWindowSDL(window);		
 	}	
 
-	RenderWindowFramebuffer_OpenGL& RenderWindow_OpenGL::AcquireNextFramebuffer(Semaphore_OpenGL& semaphore)
+	RenderWindowFramebuffer_OpenGL& RenderWindow_OpenGL::AcquireNextFramebuffer(Semaphore_OpenGL* semaphore)
 	{		
 		return this->framebuffer;
 	}
-	void RenderWindow_OpenGL::PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, Array<Semaphore_OpenGL*> waitSemaphores)
+	void RenderWindow_OpenGL::PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, ArrayView<Semaphore_OpenGL*> waitSemaphores)
 	{
 		SDL_GL_SwapWindow((SDL_Window*)window.GetHandle());
 	}

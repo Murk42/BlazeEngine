@@ -159,6 +159,9 @@
     <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\SelectableTextBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -368,16 +371,11 @@
     <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\Debug_OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\OpenGL\line2d.frag" />
-    <None Include="assets\shaders\OpenGL\line2d.vert" />
-    <None Include="assets\shaders\OpenGL\panel.frag" />
-    <None Include="assets\shaders\OpenGL\panel.vert" />
-    <None Include="assets\shaders\OpenGL\text.frag" />
-    <None Include="assets\shaders\OpenGL\text.vert" />
-    <None Include="assets\shaders\OpenGL\texturedRect.frag" />
-    <None Include="assets\shaders\OpenGL\texturedRect.vert" />
     <None Include="assets\shaders\Vulkan\compileShaders.bat">
       <Filter>Source Files</Filter>
     </None>
@@ -386,5 +384,15 @@
     <None Include="assets\shaders\Vulkan\line2d.frag.spv" />
     <None Include="assets\shaders\Vulkan\line2d.vert.spv" />
     <None Include="vcpkg.json" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert" />
   </ItemGroup>
 </Project>

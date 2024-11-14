@@ -30,16 +30,10 @@
     <ClInclude Include="source\Graphics5\Vulkan\VulkanInstance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.h">
+    <ClInclude Include="source\RenderingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Graphics\OpenGL\RenderSystem_OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Resources\ResourceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScreen.h">
+    <ClInclude Include="source\CameraController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,20 +44,17 @@
     <ClCompile Include="source\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Graphics\OpenGL\Pipelines\MainRenderPipeline_OpenGL.cpp">
+    <ClCompile Include="source\RenderingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Graphics\OpenGL\RenderSystem_OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Resources\ResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MainScreen.cpp">
+    <ClCompile Include="source\CameraController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Log.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BlazeEngineProjectPropertySheet.props" />
   </ItemGroup>
 </Project>
