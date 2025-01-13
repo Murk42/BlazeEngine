@@ -432,9 +432,9 @@ namespace Blaze::StringParsing
 		return StringUTF8(begin, end);
 	}
 
-	Array<String> Split(StringView value, char ch)
-	{
-		Array<String> out;
+	Array<StringView> Split(StringView value, char ch)
+	{		
+		Array<StringView> out;
 
 		auto it = value.FirstIterator();
 		auto end = value.BehindIterator();
@@ -452,10 +452,10 @@ namespace Blaze::StringParsing
 			while (it != end && *it != ch)
 				++it;
 
-			out.AddBack(String(begin, it));
+			out.AddBack(StringView(begin, it));
 		}
 	}
-	Array<StringUTF8> Split(StringViewUTF8 value, UnicodeChar ch)
+	Array<StringViewUTF8> Split(StringViewUTF8 value, UnicodeChar ch)
 	{
 		Array<StringUTF8> out;
 
@@ -475,7 +475,7 @@ namespace Blaze::StringParsing
 			while (it != end && *it != ch)
 				++it;
 
-			out.AddBack(StringUTF8(begin, it));
+			out.AddBack(StringViewUTF8(begin, it));
 		}
 	}
 

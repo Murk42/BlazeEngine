@@ -1,5 +1,8 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/Utilities/TimePoint.h"
+#include "BlazeEngineCore/Debug/Callstack.h"
 
 namespace Blaze::Debug
 {

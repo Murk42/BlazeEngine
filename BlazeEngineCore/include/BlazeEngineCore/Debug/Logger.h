@@ -1,4 +1,8 @@
 #pragma once
+#include "BlazeEngineCore/File/Path.h"
+#include "BlazeEngineCore/File/Stream/Stream.h"
+#include "BlazeEngineCore/Debug/Result.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
 
 namespace Blaze
 {

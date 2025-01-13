@@ -9,6 +9,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		: id(0)
 	{
 		glGenRenderbuffers(1, &id);	
+		//glBindRenderbuffer(GL_RENDERBUFFER, id);
 	}
 	Renderbuffer::Renderbuffer(Renderbuffer&& rb) noexcept
 		: id(rb.id)
@@ -28,7 +29,9 @@ namespace Blaze::Graphics::OpenGLWrapper
 		
 		this->size = size;
 
-		if (CHECK_OPENGL_ERROR(glNamedRenderbufferStorage(id, _format, size.x, size.y)))
+		glBindRenderbuffer(GL_RENDERBUFFER, id);
+		if (CHECK_OPENGL_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, _format, size.x, size.y)))
+		//if (CHECK_OPENGL_ERROR(glNamedRenderbufferStorage(id, _format, size.x, size.y)))
 			this->size = Vec2u();
 	}
 	Renderbuffer& Renderbuffer::operator=(Renderbuffer&& rb) noexcept

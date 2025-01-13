@@ -103,6 +103,15 @@ namespace Blaze::Graphics::OpenGLWrapper
         return id;
     }
 
+    void VertexArray::Release()
+    {
+        if (id != 0)
+        {
+            glDeleteVertexArrays(1, &id);
+            id = 0;
+        }
+    }
+
 
     void VertexArray::SetIndexBuffer(GraphicsBuffer& buffer)
     {

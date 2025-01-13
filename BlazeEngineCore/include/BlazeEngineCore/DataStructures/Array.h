@@ -289,6 +289,8 @@ namespace Blaze
 
 		template<typename>
 		friend class ArrayIterator;
+		template<typename, AllocatorType>
+		friend class Array;
 	private:				
 		InternalValueType* ptr;
 		uintMem count;

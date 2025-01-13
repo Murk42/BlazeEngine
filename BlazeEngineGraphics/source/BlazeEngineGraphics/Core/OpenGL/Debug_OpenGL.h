@@ -11,6 +11,11 @@ namespace Blaze
 		class ErrorChecker : public Debug::LoggerListener
 		{
 		public:			
+			ErrorChecker()
+				: signaled(false)
+			{
+
+			}
 			void NewResult(const Result& result) override
 			{
 				if (result.HighestLogType() == Debug::LogType::Error)

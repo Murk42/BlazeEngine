@@ -23,6 +23,7 @@
 #include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
 #include "BlazeEngineCore/DataStructures/UnicodeChar.h"
 
+#include "BlazeEngineCore/Utilities/Time.h"
 
 #include "BlazeEngineCore/File/Path.h"
 #include "BlazeEngineCore/File/Stream/Stream.h"
@@ -33,9 +34,6 @@
 #include "BlazeEngineCore/Debug/Result.h"
 #include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineCore/Debug/LoggerListener.h"
-
-#include "BlazeEngineCore/Utilities/TimeInterval.h"
-#include "BlazeEngineCore/Utilities/TimePoint.h"
 
 #include "BlazeEngineCore/File/Stream/FileStream.h"
 #include "BlazeEngineCore/File/Stream/BufferStream.h"

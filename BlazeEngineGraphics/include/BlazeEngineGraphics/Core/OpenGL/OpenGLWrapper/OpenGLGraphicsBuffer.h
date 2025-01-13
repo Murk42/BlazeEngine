@@ -14,9 +14,10 @@ namespace Blaze::Graphics::OpenGLWrapper
 		GraphicsBuffer(const GraphicsBuffer&) = delete;
 		~GraphicsBuffer();
 
-		void Invalidate() const;		
+		void Invalidate() const;	
 
 		uint ReleaseHandleOwnership();
+		void Release();
 		inline uint GetHandle() const { return id; }
 
 		GraphicsBuffer& operator=(const GraphicsBuffer&) = delete;

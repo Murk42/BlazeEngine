@@ -3,10 +3,12 @@
 
 namespace Blaze::UI
 {
-	Screen::Screen()
+	Screen::Screen(WindowBase* window, bool resizeWithWindow)
 		: Node(), nodeCount(0), window(nullptr)
 	{
 		Node::screen = this;
+
+		SetWindow(window, resizeWithWindow);
 	}
 	Screen::~Screen()
 	{
@@ -16,14 +18,13 @@ namespace Blaze::UI
 	{
 		CalculateFinalTransformDownwards();
 	}
-	void Screen::SetWindow(WindowBase* window)
+	void Screen::SetWindow(WindowBase* window, bool resizeWithWindow)
 	{
 		if (window == this->window)
 			return;
 
 		WindowBase* old = this->window;
 		this->window = window;
-		screenWindowChangedEventDispatcher.Call({ .oldWindow = old, .screen = this });
 
 		if (old != nullptr)
 			UnsubscribeFromDispatcher();
@@ -34,8 +35,11 @@ namespace Blaze::UI
 			transform.size = (Vec2f)window->GetSize();
 			SetTransform(transform);
 
-			window->resizedEventDispatcher.AddHandler(*this);
+			if (resizeWithWindow)
+				window->resizedEventDispatcher.AddHandler(*this);
 		}
+
+		screenWindowChangedEventDispatcher.Call({ .oldWindow = old, .screen = this });
 	}
 	void Screen::AddNode(Node* node)
 	{		

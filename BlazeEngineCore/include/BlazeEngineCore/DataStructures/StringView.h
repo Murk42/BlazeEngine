@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 namespace Blaze
 {
@@ -58,6 +59,7 @@ namespace Blaze
 		inline StringView(const String& other);		
 		constexpr StringView(const char* ptr, uintMem count);
 		constexpr StringView(const char* begin, const char* end);
+		constexpr StringView(StringViewIterator begin, StringViewIterator end);
 		template<size_t C>
 		constexpr StringView(const char(&arr)[C]);
 

@@ -27,7 +27,7 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void RenderWindow_OpenGL::PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, ArrayView<Semaphore_OpenGL*> waitSemaphores)
 	{
-		SDL_GL_SwapWindow((SDL_Window*)window.GetHandle());
+		window.SwapBuffers();		
 	}
 
 	Vec2u RenderWindow_OpenGL::GetSize() const

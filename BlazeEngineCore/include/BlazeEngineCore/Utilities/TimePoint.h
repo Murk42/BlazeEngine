@@ -1,43 +1,16 @@
 #pragma once
-#include <chrono>
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/DataStructures/String.h"
 
 namespace Blaze
 {		
-	class TimePoint;
-
-	class BLAZE_CORE_API TimeInterval
-	{
-	public:
-		TimeInterval();		
-		TimeInterval(const TimeInterval&);
-
-		TimeInterval& SetSeconds(double seconds);
-		double ToSeconds() const;
-
-		TimeInterval operator+(const TimeInterval&) const;
-		TimeInterval operator-(const TimeInterval&) const;
-		TimeInterval& operator+=(const TimeInterval&);
-		TimeInterval& operator-=(const TimeInterval&);
-		TimePoint operator+(const TimePoint&) const;
-		inline bool operator<(const TimeInterval& other) const { return value < other.value; }
-		inline bool operator>(const TimeInterval& other) const { return value > other.value; }
-		inline bool operator<=(const TimeInterval& other) const { return value <= other.value; }
-		inline bool operator>=(const TimeInterval& other) const { return value >= other.value; }
-		inline bool operator==(const TimeInterval& other) const { return value == other.value; }
-		inline bool operator!=(const TimeInterval& other) const { return value != other.value; }
-
-		TimeInterval& operator=(const TimeInterval&);
-	private:
-		int64 value;
-
-		friend class TimePoint;
-	};
+	class TimeInterval;
 	
 	class BLAZE_CORE_API TimePoint
 	{			
 	public:
-		TimePoint();
-		TimePoint(const TimePoint&);
+		constexpr TimePoint();
+		constexpr TimePoint(const TimePoint&);
 
 		/*
 		%a	Abbreviated weekday name *																Thu
@@ -78,22 +51,34 @@ namespace Blaze
 		*/
 		String FormatString(const char* format);		
 
-		TimePoint operator+(const TimeInterval&) const;
-		TimePoint operator-(const TimeInterval&) const;
-		TimeInterval operator-(const TimePoint&) const;
-		TimePoint& operator+=(const TimeInterval&);
-		TimePoint& operator-=(const TimeInterval&);
-		inline bool operator<(const TimePoint& other) const { return value < other.value; }
-		inline bool operator>(const TimePoint& other) const { return value > other.value; }
-		inline bool operator<=(const TimePoint& other) const { return value <= other.value; }
-		inline bool operator>=(const TimePoint& other) const { return value >= other.value; }
-		inline bool operator==(const TimePoint& other) const { return value == other.value; }
-		inline bool operator!=(const TimePoint& other) const { return value != other.value; }
+		constexpr TimePoint operator+(const TimeInterval&) const;
+		constexpr TimePoint operator-(const TimeInterval&) const;
+		constexpr TimeInterval operator-(const TimePoint&) const;
+		constexpr TimePoint& operator+=(const TimeInterval&);
+		constexpr TimePoint& operator-=(const TimeInterval&);
+		constexpr inline bool operator<(const TimePoint& other) const { return value < other.value; }
+		constexpr inline bool operator>(const TimePoint& other) const { return value > other.value; }
+		constexpr inline bool operator<=(const TimePoint& other) const { return value <= other.value; }
+		constexpr inline bool operator>=(const TimePoint& other) const { return value >= other.value; }
+		constexpr inline bool operator==(const TimePoint& other) const { return value == other.value; }
+		constexpr inline bool operator!=(const TimePoint& other) const { return value != other.value; }
 
-		TimePoint& operator=(const TimePoint&);
+		constexpr TimePoint& operator=(const TimePoint&);
+
+		static constexpr TimePoint Earliest();
+		static constexpr TimePoint Latest();
 
 		static TimePoint GetCurrentWorldTime();		
 	private:
 		uint64 value;
+
+		constexpr TimePoint(uint64 value);		
+
+		constexpr static TimePoint CustomAdd(const TimePoint& a, const TimeInterval& b);
+		constexpr static TimePoint CustomSub(const TimePoint& a, const TimeInterval& b);
+		constexpr static TimeInterval CustomSub(const TimePoint& a, const TimePoint& b);
+
+
+		friend class TimeInterval;
 	};
 }

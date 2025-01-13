@@ -126,6 +126,8 @@ namespace Blaze::UIGraphics
 		if (characterRenderData.Count() == characterIndex || characterRenderData[characterIndex].isCulled)
 			return nullptr;
 
+		renderData.blend = 0.0f;
+		renderData.alpha = 1.0f;
 		renderData.pos = characterRenderData[characterIndex].pos;
 		renderData.right = characterRenderData[characterIndex].right;
 		renderData.up = characterRenderData[characterIndex].up;

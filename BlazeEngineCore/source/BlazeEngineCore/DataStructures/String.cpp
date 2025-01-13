@@ -187,7 +187,8 @@ namespace Blaze
 		else
 		{
 			ptr = new char[count + 1];
-			memcpy(ptr, sv.Ptr(), count + 1);
+			memcpy(ptr, sv.Ptr(), count);
+			ptr[count] = '\0';
 		}
 	}	
 	String::String(uintMem count, char fill)		

@@ -16,6 +16,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		VertexArray(const VertexArray&) = delete;
 		VertexArray(VertexArray&&) noexcept;
 		~VertexArray();
+
 		
 		void SetIndexBuffer(GraphicsBuffer& buffer);
 
@@ -29,6 +30,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		void Swap(VertexArray& other);
 
 		uint ReleaseHandleOwnership();
+		void Release();
 		inline uint GetHandle() const { return id; }
 
 		VertexArray& operator=(const VertexArray&) = delete;

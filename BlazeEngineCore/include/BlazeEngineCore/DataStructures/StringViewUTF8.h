@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 #include "BlazeEngineCore/DataStructures/UnicodeChar.h"
 
 namespace Blaze
@@ -56,6 +57,7 @@ namespace Blaze
 		//The count doesn't include the null-terminating character, but
 		//the passed string must be null-terminated
 		inline StringViewUTF8(const char* ptr, uintMem count);
+		inline StringViewUTF8(StringViewUTF8Iterator begin, StringViewUTF8Iterator end);
 		template<uintMem C>
 		constexpr StringViewUTF8(const char(&arr)[C]);
 

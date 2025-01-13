@@ -1,5 +1,5 @@
-#include "Array.h"
 #pragma once
+#include "Array.h"
 
 namespace Blaze
 {
@@ -260,6 +260,9 @@ namespace Blaze
 	inline Array<T, Allocator>::Array(uintMem count, Args&& ... args) requires std::constructible_from<InternalValueType, Args...>
 		: ptr(nullptr), count(count), reserved(count)
 	{
+		if (count == 0)
+			return;
+
 		ptr = (InternalValueType*)allocator.Allocate(sizeof(InternalValueType) * count);
 		
 		for (uintMem i = 0; i < count; ++i)
@@ -270,6 +273,9 @@ namespace Blaze
 	inline Array<T, Allocator>::Array(uintMem count, const F& constructFunction) requires std::invocable<F, InternalValueType*, uintMem>
 		: ptr(nullptr), count(count), reserved(count)
 	{
+		if (count == 0)
+			return;
+
 		ptr = (InternalValueType*)allocator.Allocate(sizeof(InternalValueType) * count);
 
 		for (uintMem i = 0; i < count; ++i)

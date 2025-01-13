@@ -177,6 +177,14 @@ namespace Blaze
 		else
 			this->ptr = begin;
 	}
+	inline constexpr StringView::StringView(StringViewIterator begin, StringViewIterator end)
+		: count(end - begin)
+	{
+		if (count == 0)
+			this->ptr = nullptr; //When ptr is "" its not nullptr
+		else
+			this->ptr = begin.ptr;
+	}
 	template<size_t C>
 	constexpr StringView::StringView(const char(&arr)[C])
 		: StringView(arr, C - 1)

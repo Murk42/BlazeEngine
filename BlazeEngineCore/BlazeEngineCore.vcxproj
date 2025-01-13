@@ -194,7 +194,7 @@
     <ClCompile Include="source\BlazeEngineCore\Utilities\Stopwatch.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\StringParsing.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Threading\Thread.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\Utilities\Time.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Utilities\TimePoint.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\Timing.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -267,9 +267,12 @@
     <ClInclude Include="include\BlazeEngineCore\Memory\MemoryManager.h" />
     <ClInclude Include="include\BlazeEngineCore\Memory\VirtualAllocator.h" />
     <ClInclude Include="include\BlazeEngineCore\Threading\Thread.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\TimeInterval.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\Stopwatch.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\StringParsing.h" />
-    <ClInclude Include="include\BlazeEngineCore\Utilities\Time.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\TimePoint.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\TimeIntervalImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\Utilities\TimePointImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\Timing.h" />
     <ClInclude Include="include\BlazeEngine\Application\ECS\Component.h" />
     <ClInclude Include="include\BlazeEngine\Application\ECS\ComponentTypeRegistry.h" />

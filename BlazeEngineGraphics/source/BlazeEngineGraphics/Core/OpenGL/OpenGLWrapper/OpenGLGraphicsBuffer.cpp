@@ -35,6 +35,14 @@ namespace Blaze::Graphics::OpenGLWrapper
 		this->id = 0;
 		return id;
 	}
+	void GraphicsBuffer::Release()
+	{
+		if (id != 0)
+		{
+			glDeleteBuffers(1, &id);
+			id = 0;
+		}
+	}
 	GraphicsBuffer& GraphicsBuffer::operator=(GraphicsBuffer&& buffer) noexcept
 	{
 		if (id != 0)		

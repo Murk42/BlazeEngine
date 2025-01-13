@@ -1,20 +1,20 @@
 #include "shaders.h"
 
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.frag" template 11/13/24 17:35:02 resource 02/29/24 20:03:01$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.vert" template 11/13/24 17:35:02 resource 10/27/23 18:45:56$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.frag" template 11/13/24 17:35:02 resource 11/14/24 19:06:04$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.vert" template 11/13/24 17:35:02 resource 11/13/24 19:13:35$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.frag" template 11/13/24 17:35:02 resource 01/12/24 11:48:24$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.vert" template 11/13/24 17:35:02 resource 03/09/24 13:01:45$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.frag" template 11/13/24 17:35:02 resource 01/12/24 11:48:19$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.vert" template 11/13/24 17:35:02 resource 12/10/23 21:51:28$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.frag" template 11/13/24 17:35:02 resource 01/12/24 11:48:04$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.vert" template 11/13/24 17:35:02 resource 09/15/24 19:01:53$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
 
 const unsigned int line2d_frag_size =       1216;
 const unsigned int line2d_vert_size =       646;
 const unsigned int line3d_frag_size =		1389;
-const unsigned int line3d_vert_size =		2902;
+const unsigned int line3d_vert_size =		2903;
 const unsigned int panel_frag_size =        2251;
 const unsigned int panel_vert_size =        1107;
 const unsigned int text_frag_size =         215;
@@ -428,13 +428,13 @@ const unsigned char line3d_vert_file[] =       { 0x23, 0x76, 0x65, 0x72, 0x73, 0
 0x33, 0x5d, 0x5b, 0x32, 0x5d, 0x29, 0x2c, 0x20, 0x70, 0x6f, 0x73, 0x5f, 0x6e, 0x6f, 0x72, 
 0x6d, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x2e, 0x7a, 0x29, 0x3b, 0x0d, 0x0a, 0x0d, 0x0a, 
 0x09, 0x66, 0x72, 0x61, 0x67, 0x5f, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x20, 0x3d, 0x20, 0x76, 
-0x65, 0x72, 0x74, 0x5f, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x3b, 0x09, 0x0d, 0x0a, 0x09, 0x66, 
-0x72, 0x61, 0x67, 0x5f, 0x70, 0x6f, 0x73, 0x31, 0x20, 0x3d, 0x20, 0x70, 0x31, 0x5f, 0x73, 
-0x63, 0x72, 0x65, 0x65, 0x6e, 0x2e, 0x78, 0x79, 0x3b, 0x0d, 0x0a, 0x09, 0x66, 0x72, 0x61, 
-0x67, 0x5f, 0x70, 0x6f, 0x73, 0x32, 0x20, 0x3d, 0x20, 0x70, 0x32, 0x5f, 0x73, 0x63, 0x72, 
-0x65, 0x65, 0x6e, 0x2e, 0x78, 0x79, 0x3b, 0x0d, 0x0a, 0x09, 0x66, 0x72, 0x61, 0x67, 0x5f, 
-0x77, 0x69, 0x64, 0x74, 0x68, 0x20, 0x3d, 0x20, 0x76, 0x65, 0x72, 0x74, 0x5f, 0x77, 0x69, 
-0x64, 0x74, 0x68, 0x3b, 0x0d, 0x0a, 0x7d };
+0x65, 0x72, 0x74, 0x5f, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x3b, 0x09, 0x20, 0x0d, 0x0a, 0x09, 
+0x66, 0x72, 0x61, 0x67, 0x5f, 0x70, 0x6f, 0x73, 0x31, 0x20, 0x3d, 0x20, 0x70, 0x31, 0x5f, 
+0x73, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x2e, 0x78, 0x79, 0x3b, 0x0d, 0x0a, 0x09, 0x66, 0x72, 
+0x61, 0x67, 0x5f, 0x70, 0x6f, 0x73, 0x32, 0x20, 0x3d, 0x20, 0x70, 0x32, 0x5f, 0x73, 0x63, 
+0x72, 0x65, 0x65, 0x6e, 0x2e, 0x78, 0x79, 0x3b, 0x0d, 0x0a, 0x09, 0x66, 0x72, 0x61, 0x67, 
+0x5f, 0x77, 0x69, 0x64, 0x74, 0x68, 0x20, 0x3d, 0x20, 0x76, 0x65, 0x72, 0x74, 0x5f, 0x77, 
+0x69, 0x64, 0x74, 0x68, 0x3b, 0x0d, 0x0a, 0x7d };
 const unsigned char panel_frag_file[] =        { 0x23, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x20, 0x34, 0x35, 0x30, 0x0d, 0x0a, 0x0d, 
 0x0a, 0x69, 0x6e, 0x20, 0x76, 0x65, 0x63, 0x34, 0x20, 0x66, 0x72, 0x61, 0x67, 0x5f, 0x66, 
 0x69, 0x6c, 0x6c, 0x43, 0x6f, 0x6c, 0x6f, 0x72, 0x3b, 0x0d, 0x0a, 0x69, 0x6e, 0x20, 0x76, 

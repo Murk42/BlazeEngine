@@ -123,7 +123,11 @@ namespace Blaze
 	{
 		if (index >= count)
 			throw;
-		return ptr[index];
+
+		if constexpr (std::is_reference_v<T>)
+			return ptr[index].value;
+		else
+			return ptr[index];
 	}
 	template<typename T>
 	inline constexpr const ArrayView<T>::InternalValueType* ArrayView<T>::Ptr() const

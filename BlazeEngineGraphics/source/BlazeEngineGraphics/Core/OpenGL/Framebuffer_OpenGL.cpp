@@ -24,14 +24,19 @@ namespace Blaze::Graphics::OpenGL
 	}		
 	void Framebuffer_OpenGL::SetColorAttachment(uint colorAttachmentNumber, OpenGLWrapper::Renderbuffer& renderbuffer)
 	{
-		glNamedFramebufferRenderbuffer(id, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());
+		size = renderbuffer.GetSize();
+		glBindFramebuffer(GL_FRAMEBUFFER, id);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());
+		//glNamedFramebufferRenderbuffer(id, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, GL_RENDERBUFFER, renderbuffer.GetHandle());
 	}
 	void Framebuffer_OpenGL::SetColorAttachment(uint colorAttachmentNumber, OpenGLWrapper::Texture2D& texture)
 	{
+		size = texture.GetSize();
 		glNamedFramebufferTexture(id, GL_COLOR_ATTACHMENT0 + colorAttachmentNumber, texture.GetHandle(), 0);
 	}
 	void Framebuffer_OpenGL::SetAttachment(OpenGLWrapper::FramebufferAttachment attachment, OpenGLWrapper::Renderbuffer& renderbuffer)
 	{
+		size = renderbuffer.GetSize();
 		Result result;
 		GLenum _attachment = OpenGLFramebufferAttachment(attachment, result);
 		if (result) return;
@@ -40,6 +45,7 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void Framebuffer_OpenGL::SetAttachment(OpenGLWrapper::FramebufferAttachment attachment, OpenGLWrapper::Texture2D& texture)
 	{
+		size = texture.GetSize();
 		Result result;
 		GLenum _attachment = OpenGLFramebufferAttachment(attachment, result);
 		if (result) return;

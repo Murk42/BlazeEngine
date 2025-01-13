@@ -1,5 +1,7 @@
 #pragma once
-#include "BlazeEngineCore/Utilities/Time.h"
+#include "BlazeEngineCore/DataStructures/Map.h"
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/Utilities/TimePoint.h"
 
 namespace Blaze
 {

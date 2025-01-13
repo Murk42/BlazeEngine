@@ -1,5 +1,8 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/StringView.h"
+#include "BlazeEngineCore/DataStructures/String.h"
 #include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
 #include "BlazeEngineCore/DataStructures/Array.h"
 #include "BlazeEngineCore/DataStructures/ArrayImpl.h"
 
@@ -79,14 +82,14 @@ namespace Blaze::StringParsing
 	//of <ch> characters is removed
 	BLAZE_CORE_API StringUTF8 RemoveSurroundingGroup(StringViewUTF8 value, UnicodeChar ch);
 
-	//If there is a occurrence of <ch>, the string is split into substrings that don't containt
+	//If there is a occurrence of <ch>, the string is split into substrings that don't contain
 	//the character <ch>. If there is no occurrence of <ch>, array with <value> as the only element
-	//is returned
-	BLAZE_CORE_API Array<String> Split(StringView value, char ch);
-	//If there is a occurrence of <ch>, the string is split into substrings that don't containt
+	//is returned. If the string is empty an empty array is returned
+	BLAZE_CORE_API Array<StringView> Split(StringView value, char ch);
+	//If there is a occurrence of <ch>, the string is split into substrings that don't contain
 	//the character <ch>. If there is no occurrence of <ch>, array with <value> as the only element
-	//is returned
-	BLAZE_CORE_API Array<StringUTF8> Split(StringViewUTF8 value, UnicodeChar ch);
+	//is returned. If the string is empty an empty array is returned
+	BLAZE_CORE_API Array<StringViewUTF8> Split(StringViewUTF8 value, UnicodeChar ch);
 
 	enum class FloatStringFormat
 	{

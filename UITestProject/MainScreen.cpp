@@ -2,7 +2,8 @@
 #include "MainScreen.h"
 
 extern Array<Font> fonts;
-MainScreen::MainScreen()	 
+MainScreen::MainScreen()	
+	: Screen(nullptr)
 {	
 	titleText.SetParent(this);
 	titleText.SetTransform({

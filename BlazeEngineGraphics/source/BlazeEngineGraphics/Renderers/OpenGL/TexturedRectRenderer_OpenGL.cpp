@@ -81,8 +81,13 @@ namespace Blaze::Graphics::OpenGL
 				{
 					auto& dst = group.instances[j + TexturedRectRenderer_OpenGL::InstanceBufferInstanceCount - groupInstanceSpaceLeft];
 					auto& src = instances[j + textureInstancesProcessed];					
-
-					dst.textureIndex = (float)i;
+					
+					//dst.alpha = src.alpha;
+					//dst.blend = src.blend;
+					//dst.color = src.color;
+					//dst.p1 = src.p1
+						dst = src;
+					//dst.textureIndex = (float)i;
 				}				
 
 				textureInstancesProcessed = copyCount;				

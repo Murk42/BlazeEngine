@@ -48,6 +48,7 @@ namespace Blaze::UI
 		InputNode* selectedNode;
 		Screen* screen;
 		uintMem mouseBlockInputNodeIndex;
+		Vec2f screenMousePos;
 
 		bool recreateScreenNodes;
 		
@@ -56,11 +57,13 @@ namespace Blaze::UI
 		void SubscribeToWindow(WindowBase& window);		
 		void UnsubscribeFromWindow(WindowBase& window);
 
+		void UpdateScreenMousePos();
+
 		void GatherInputNodes(Node& node);
 		//Expects that screen is not nullptr
 		void RecreateScreenInputNodes();
 		//Updates all nodes mouse interaction beginning from 'beginIndex'. beginIndex is expected to be less than mouseBlockInputNodeIndex
-		void CastMousePointer(uintMem beginIndex, Vec2f mousePos, Vec2f mouseDelta);
+		void CastMousePointer(uintMem beginIndex, Vec2f mouseDelta);
 		void NodeFinalTransformUpdated(InputNode& node);
 		
 		void UpdateMouseHitEvents(InputNode& node, Vec2i mouseDelta);

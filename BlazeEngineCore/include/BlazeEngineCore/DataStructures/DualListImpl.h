@@ -1,5 +1,5 @@
-#include "DualList.h"
 #pragma once
+#include "DualList.h"
 
 namespace Blaze
 {

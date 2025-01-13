@@ -31,12 +31,12 @@ namespace Blaze::UI
 		EventDispatcher<ScreenDestructionEvent> screenDestructionEventDispatcher;
 		EventDispatcher<ScreenWindowChangedEvent> screenWindowChangedEventDispatcher;
 
-		Screen();
+		Screen(WindowBase* window, bool resizeWithWindow = true);
 		virtual ~Screen();
 		
 		void CalculateAllTransforms();
 		
-		void SetWindow(WindowBase* window);
+		void SetWindow(WindowBase* window, bool resizeWithWindow = true);
 
 		virtual String GetTypeName() const { return "Screen"; };
 		inline uintMem GetNodeCount() const { return nodeCount; }

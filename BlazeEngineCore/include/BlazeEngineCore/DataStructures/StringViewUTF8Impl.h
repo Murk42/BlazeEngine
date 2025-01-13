@@ -225,6 +225,17 @@ namespace Blaze
 			for (auto it = FirstIterator(); it != BehindIterator(); ++it, ++characterCount);
 		}
 	}
+	inline StringViewUTF8::StringViewUTF8(StringViewUTF8Iterator begin, StringViewUTF8Iterator end)
+		: buffer(nullptr), bufferSize(0), characterCount(0)
+	{
+		if (begin != end && begin.Ptr() != nullptr && end.Ptr() != nullptr)
+		{
+			buffer = begin.Ptr();
+			bufferSize = (byte*)end.ptr - (byte*)begin.ptr;
+
+			for (auto it = FirstIterator(); it != BehindIterator(); ++it, ++characterCount);
+		}
+	}
 	constexpr void StringViewUTF8::Clear()
 	{
 		buffer = nullptr;

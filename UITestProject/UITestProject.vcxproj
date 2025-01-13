@@ -80,6 +80,7 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -98,6 +99,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -118,6 +120,7 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -136,6 +139,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

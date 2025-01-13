@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 #include "BlazeEngineCore/DataStructures/UnicodeChar.h"
 
 namespace Blaze

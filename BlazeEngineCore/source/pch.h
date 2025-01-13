@@ -20,10 +20,11 @@
 #include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
 #include "BlazeEngineCore/DataStructures/UnicodeChar.h"
 
-#include "BlazeEngineCore/Utilities/Time.h"
-
 #include "BlazeEngineCore/File/Path.h"
 #include "BlazeEngineCore/File/Stream/Stream.h"
+
+#include "BlazeEngineCore/Utilities/TimeInterval.h"
+#include "BlazeEngineCore/Utilities/TimePoint.h"
 
 #include "BlazeEngineCore/Debug/Breakpoint.h"
 #include "BlazeEngineCore/Debug/Callstack.h"
@@ -31,6 +32,7 @@
 #include "BlazeEngineCore/Debug/Result.h"
 #include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineCore/Debug/LoggerListener.h"
+
 
 #include "BlazeEngineCore/File/Stream/FileStream.h"
 #include "BlazeEngineCore/File/Stream/BufferStream.h"
@@ -54,6 +56,9 @@
 #include "BlazeEngineCore/DataStructures/DualListImpl.h"
 #include "BlazeEngineCore/DataStructures/MapImpl.h"
 #include "BlazeEngineCore/DataStructures/SetImpl.h"
+
+#include "BlazeEngineCore/Utilities/TimeIntervalImpl.h"
+#include "BlazeEngineCore/Utilities/TimePointImpl.h"
 
 #include "BlazeEngineCore/Memory/MallocAllocator.h"
 #include "BlazeEngineCore/Memory/MemoryListener.h"
