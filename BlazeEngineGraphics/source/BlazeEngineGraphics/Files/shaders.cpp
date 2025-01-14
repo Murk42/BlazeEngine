@@ -1,15 +1,15 @@
 #include "shaders.h"
 
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
-//$sample timing "D:\Programming\Projects\BlazeEngine\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line2d.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/line3d.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/panel.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/text.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.frag" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
+//$sample timing "D:\Marko\Projects\BlazeEngineGraphics\source\BlazeEngineGraphics\Files\../Shaders/OpenGL/texturedRect.vert" template 03/25/99 05:46:43 resource 03/25/99 05:46:43$
 
 const unsigned int line2d_frag_size =       1216;
 const unsigned int line2d_vert_size =       646;

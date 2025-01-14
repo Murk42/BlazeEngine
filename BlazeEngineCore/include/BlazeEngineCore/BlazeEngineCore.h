@@ -72,7 +72,6 @@
 #include "BlazeEngineCore/DataStructures/HandleImpl.h"
 #include "BlazeEngineCore/DataStructures/HybridArray.h"
 #include "BlazeEngineCore/DataStructures/Rect.h"
-#include "BlazeEngineCore/DataStructures/StringHash.h"
 #include "BlazeEngineCore/DataStructures/Template.h"
 #include "BlazeEngineCore/DataStructures/TemplateGroup.h"
 #include "BlazeEngineCore/DataStructures/Tuple.h"

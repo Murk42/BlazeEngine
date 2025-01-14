@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/Template.h"
 
 namespace Blaze
 {
@@ -78,7 +77,7 @@ namespace Blaze
 		template<template<typename> class C, typename T1, typename ... T>
 		struct _AppliesToAll<C, T1, T...>
 		{
-			static constexpr bool value = C<T1>::value && _AppliesToAll<C, T...>::template value;
+			static constexpr bool value = C<T1>::value && _AppliesToAll<C, T...>::value;
 		};
 
 		template<typename T>
@@ -132,5 +131,5 @@ namespace Blaze
 	struct _IsInstantiationOf<C, C<T...>> : public std::true_type {};
 
 	template<template<typename...> class U, typename... T>
-	constexpr bool IsInstantiationOf = _IsInstantiationOf<U, T...>::template value;
+	constexpr bool IsInstantiationOf = _IsInstantiationOf<U, T...>::value;
 }
