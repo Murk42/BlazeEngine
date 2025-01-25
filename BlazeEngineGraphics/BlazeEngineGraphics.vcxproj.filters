@@ -96,9 +96,6 @@
     <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UISelectEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\PanelRenderUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\PanelRenderer_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -120,46 +117,55 @@
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\TextRenderUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\ImageRenderUnit.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\ImageRenderUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Text\FontAtlasesData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\Selection\TextSelectionRenderUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\Cursor\TextCursorRenderUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\EditableText.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\EditableTextBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\TextRenderUnitBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\Selection\TextSelectionRenderUnitBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\Cursor\TextCursorRenderUnitBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\SelectableText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Elements\Text\SelectableTextBase.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\SelectableTextBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnitBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnitBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnitBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\EditableTextBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\PanelRenderUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\ColoredCharacterRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\ButtonBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -296,10 +302,10 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderPipelines\OpenGL\UIRenderPipeline_OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\PanelRenderUnit.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\PanelRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\TextRenderUnit.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIInputManager.h">
@@ -317,7 +323,7 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\ImageRenderUnit.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\ImageRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Core\UIScreen.h">
@@ -338,40 +344,43 @@
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\PanelRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\Selection\TextSelectionRenderUnit.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\Cursor\TextCursorRenderUnit.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\EditableText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\EditableTextBase.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\EditableTextBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\TextRenderUnitBase.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnitBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\Selection\TextSelectionRenderUnitBase.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnitBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\Cursor\TextCursorRenderUnitBase.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnitBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\SelectableText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\SelectableTextBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Elements\Text\TextDataBase.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\SelectableTextBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\Debug_OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\ColoredCharacterRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\ButtonBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -389,7 +398,6 @@
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.frag" />
-    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag" />

@@ -5,9 +5,8 @@
 
 namespace Blaze::UI
 {
-	class InputManager :
-		EventHandler<NodeCreatedEvent>,
-		EventHandler<NodeDestroyedEvent>,
+	class InputManager :		
+		EventHandler<NodeTreeChangedEvent>,
 		EventHandler<ScreenDestructionEvent>,
 		EventHandler<ScreenWindowChangedEvent>,				
 		EventHandler<Input::Events::MouseMotion>,
@@ -21,9 +20,7 @@ namespace Blaze::UI
 		~InputManager();		
 
 		void SetScreen(Screen* screen);
-
-		void SelectNode(nullptr_t null);
-		void SelectNode(Node* selectedNode);
+		
 		void SelectNode(InputNode* selectedNode);
 		
 		inline InputNode* GetSelectedNode() const { return selectedNode; }
@@ -38,23 +35,39 @@ namespace Blaze::UI
 		private:
 			InputManager* inputManager;
 		};
+		class InputNodeEnabledStateUpdatedEventHandler : public EventHandler<Node::EnabledStateUpdatedEvent>
+		{
+		public:
+			InputNodeEnabledStateUpdatedEventHandler(InputManager* inputManager);
+
+			void OnEvent(Node::EnabledStateUpdatedEvent event) override;
+
+		private:
+			InputManager* inputManager;
+		};
 
 		struct InputNodeData
 		{
+			bool hit;
 			InputNode& node;
 			InputNodeFinalTransformUpdatedEventHandler finalTransformUpdatedEventHandler;
+			InputNodeEnabledStateUpdatedEventHandler enabledStateUpdatedEventHandler;
 		};
 		Array<InputNodeData> nodesData;
+
 		InputNode* selectedNode;
 		Screen* screen;
+
 		uintMem mouseBlockInputNodeIndex;
 		Vec2f screenMousePos;
 
 		bool recreateScreenNodes;
+
+		Array<Node*> castMousePointerBFSBuffer;
 		
-		void SubscribeToScreen(Screen& screen);		
-		void UnsubscribeFromScreen(Screen& screen);		
-		void SubscribeToWindow(WindowBase& window);		
+		void SubscribeToScreen(Screen& screen);						
+		void UnsubscribeFromScreen(Screen& screen);
+		void SubscribeToWindow(WindowBase& window);						
 		void UnsubscribeFromWindow(WindowBase& window);
 
 		void UpdateScreenMousePos();
@@ -64,12 +77,14 @@ namespace Blaze::UI
 		void RecreateScreenInputNodes();
 		//Updates all nodes mouse interaction beginning from 'beginIndex'. beginIndex is expected to be less than mouseBlockInputNodeIndex
 		void CastMousePointer(uintMem beginIndex, Vec2f mouseDelta);
+		void CastMousePointer(Node* startNode, Vec2f mouseDelta);
+		//This function will be called by the nodes event handler if it is enabled.
 		void NodeFinalTransformUpdated(InputNode& node);
-		
-		void UpdateMouseHitEvents(InputNode& node, Vec2i mouseDelta);
+		//This function will be called by the nodes event handler if the node was disabled
+		void NodeDisabled(InputNode& node);		
 
-		void OnEvent(NodeCreatedEvent event) override;
-		void OnEvent(NodeDestroyedEvent event) override;
+		
+		void OnEvent(NodeTreeChangedEvent event) override;
 		void OnEvent(ScreenDestructionEvent event) override;
 		void OnEvent(ScreenWindowChangedEvent event) override;	
 		void OnEvent(Input::Events::MouseMotion event) override;

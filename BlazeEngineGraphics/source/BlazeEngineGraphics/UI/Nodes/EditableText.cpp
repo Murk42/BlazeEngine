@@ -3,13 +3,14 @@
 #include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
 #include "BlazeEngine/Input/Input.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {			
 	EditableText::EditableText() :
 		EditableTextBase(textRenderUnit, textSelectionRenderUnit, textCursorRenderUnit),
 		textRenderUnit(this), textSelectionRenderUnit(textRenderUnit), textCursorRenderUnit(textRenderUnit),
 		selected(false), emptyColor(0x555555ff), selectedColor(0xf5f5f5ff), unselectedColor(0xd0d0d0ff), emptyText("Enter text")
 	{
+		UpdateTextRenderUnit();
 	}
 	void EditableText::SetText(StringViewUTF8 text)
 	{
@@ -66,7 +67,7 @@ namespace Blaze::UI
 		else if (text.Empty())
 		{			
 			//Set empty text
-			textRenderUnit.SetText(emptyText);
+			textRenderUnit.SetText(emptyText);			
 			textSelectionRenderUnit.ClearSelection();			
 			textRenderUnit.SetTextColor(emptyColor);
 		}

@@ -7,10 +7,10 @@ namespace Blaze::UI
 
 	struct NodeTransform
 	{
-		Vec2f pos;
-		Vec2f parentPivot;
-		Vec2f pivot;
-		Vec2f size;
+		Vec2f pos = Vec2f(0.0f, 0.0f);
+		Vec2f parentPivot = Vec2f(0.5f, 0.5f);
+		Vec2f pivot = Vec2f(0.5f, 0.5f);
+		Vec2f size = Vec2f(0.0f, 0.0f);
 		float scale = 1.0f;
 		float rotation = 0.0f;
 
@@ -26,7 +26,7 @@ namespace Blaze::UI
 		float rotation = 0.0f;
 
 		Vec2f TransformFromFinalToLocalTransformSpace(Vec2f finalTransformPosition);
-	};
+	};	
 
 	struct NodeDataMap
 	{
@@ -34,11 +34,11 @@ namespace Blaze::UI
 		VirtualMap<String> map;
 		
 		void SetTypeName(const String& name) { map.Insert<String, true>("type", name); }
-		String GetTypeName() 
+		String GetTypeName() const
 		{ 
 			auto it = map.Find("type"); 
 			if (!it.IsNull()) 
-				if (String* ptr = it.GetValue<String>()) 
+				if (const String* ptr = it.GetValue<String>()) 
 					return *ptr; 
 			return String(); 
 		}
@@ -56,13 +56,39 @@ namespace Blaze::UI
 			Node& node;
 			NodeFinalTransform finalTransform;
 		};		
+		struct EnabledStateUpdatedEvent
+		{
+			Node& node;			
+		};
+		struct SurroundingNodeTreeChangedEvent
+		{
+			enum class Type
+			{
+				//Other node is the removed child
+				ChildRemoved,
+				//Other node is the added child
+				ChildAdded,
+				//Other node is the old parent
+				ParentChanged,
+				//Other node is the new parent
+				ScreenChanged
+			};
+
+			Type type;
+			Node& node;
+			Node* otherNode;
+		};
 		NodeDataMap dataMap;
 		
-		mutable EventDispatcher<TransformUpdatedEvent> transformUpdatedEventDispatcher;		
-		mutable EventDispatcher<FinalTransformUpdatedEvent> finalTransformUpdatedEventDispatcher;						
+		EventDispatcher<TransformUpdatedEvent> transformUpdatedEventDispatcher;
+		EventDispatcher<FinalTransformUpdatedEvent> finalTransformUpdatedEventDispatcher;
+		EventDispatcher<EnabledStateUpdatedEvent> enabledStateUpdatedEventDispatcher;
+		EventDispatcher<SurroundingNodeTreeChangedEvent> surroundingNodeTreeChangedEventDispatcher;
 
 		Node();
 		virtual ~Node();		
+
+		virtual bool HitTest(Vec2f screenPosition);		
 
 		void SetParent(Node* parent);
 		//Sets the transform and marks it as dirty
@@ -83,30 +109,42 @@ namespace Blaze::UI
 		// doesn't return anything. 
 		void CleanFinalTransform();				
 
-		inline uint32 GetTransformState() const { return transformState; }				
+		void Disable();
+		void Enable();
+		
 		inline ArrayView<Node&> GetChildren() const { return children; }
 		inline Node* GetParent() const { return parent; }
 		inline Screen* GetScreen() const { return screen; }
+		//Not same as GetNodeEnabledFlag(). This returns if the node is enabled, accounting if the parent node is enabled or not. If the parent noode
+		//is not enabled neither will be this one.
+		inline bool IsEnabled() const { return parentEnabled; }
+		//Not same as IsEnabled(). This returns if the enabled flag on this node is true or false, without being effected by the parents nodes state
+		inline bool GetNodeEnabledFlag() const { return enabled; }
 		NodeTransform GetTransform();
 		NodeFinalTransform GetFinalTransform();		
 	private:				
 		Screen* screen;
 		Node* parent;				
 		Array<Node&> children;
-		mutable bool finalTransformDirty : 1;
-		mutable bool destroyed : 1;		
-		mutable bool transformDirty : 1;
+		bool finalTransformDirty : 1;		
+		bool transformDirty : 1;
+		bool parentEnabled : 1;
+		bool enabled : 1;
 
-		mutable NodeTransform transform;		
-		mutable NodeFinalTransform finalTransform;
-		mutable uint32 transformState;
-
+		NodeTransform transform;		
+		NodeFinalTransform finalTransform;		
 
 		void CalculateFinalTransformUpwards();
-		//This function should be used only if it is known that all parent transforms aren't dirty
-		void CalculateFinalTransformDownwards();
 		//The parent transformDirty should be checked if it is true and updated accordingly
 		void CalculateFinalTransform();
+		
+		void PropagateScreenChange(Screen* newScreen);
+		void PropagateScreenChangeEvent(Screen* oldScreen);	
+		
+		//Should be called if the parent changes or the enabled flag changes
+		void UpdateParentEnabledState();
+		//This functions expects that the node has a parent.
+		void PropagateEnabledState();
 	
 		friend class Screen;
 	};

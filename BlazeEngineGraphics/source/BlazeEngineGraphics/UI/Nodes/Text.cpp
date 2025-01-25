@@ -2,7 +2,7 @@
 #include "BlazeEngine/Resources/Font/TextLayouter.h"
 #include "BlazeEngineGraphics/UI/Nodes/Text.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {
 	Text::Text() :
 		renderUnit(this)
@@ -36,7 +36,7 @@ namespace Blaze::UI
 	{
 		renderUnit.SetLayoutOptions(layoutOptions);		
 	}
-	void Text::SetCullingNode(UI::Node* cullingNode)
+	void Text::SetCullingNode(Node* cullingNode)
 	{
 		renderUnit.SetCullingNode(cullingNode);		
 	}	

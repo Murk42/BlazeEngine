@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Nodes/Panel.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {
 	Panel::Panel() :
 		renderUnit(this)

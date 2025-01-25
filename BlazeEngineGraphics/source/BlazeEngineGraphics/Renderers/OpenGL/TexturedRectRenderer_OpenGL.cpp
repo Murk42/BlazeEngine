@@ -102,18 +102,21 @@ namespace Blaze::Graphics::OpenGL
 		}
 	}	
 
-	TexturedRectRenderer_OpenGL::TexturedRectRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext)		
+	TexturedRectRenderer_OpenGL::TexturedRectRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, const TexturedRectRendererOptions_OpenGL& options)
 		: graphicsContext(graphicsContext)
 	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert;
-		vert.ShaderSource(StringView((const char*)texturedRect_vert_file, texturedRect_vert_size));
-		vert.CompileShader();
+		if (options.loadDefaultShaders)
+		{
+			Blaze::Graphics::OpenGLWrapper::VertexShader vert;
+			vert.ShaderSource(StringView((const char*)texturedRect_vert_file, texturedRect_vert_size));
+			vert.CompileShader();
 
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
-		frag.ShaderSource(StringView((const char*)texturedRect_frag_file, texturedRect_frag_size));
-		frag.CompileShader();
+			Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
+			frag.ShaderSource(StringView((const char*)texturedRect_frag_file, texturedRect_frag_size));
+			frag.CompileShader();
 
-		program.LinkShaders({ &vert, &frag });		
+			program.LinkShaders({ &vert, &frag });
+		}
 
 		uint8 vertices[6]{
 			0, 1, 2, 2, 1, 3
@@ -127,42 +130,42 @@ namespace Blaze::Graphics::OpenGL
 		//va.SetVertexAttributeBuffer(0, &vertexBuffer, sizeof(Vertex), 0);
 		//va.SetVertexAttributeDivisor(0, 0);
 
+		va.EnableVertexAttribute(0);
+		va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 4, false, offsetof(Instance, color));
+		va.SetVertexAttributeBuffer(0, &instanceBuffer, sizeof(Instance), 0);
+		va.SetVertexAttributeDivisor(0, 1);
 		va.EnableVertexAttribute(1);
-		va.SetVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 4, false, 0);
+		va.SetVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, p1));
 		va.SetVertexAttributeBuffer(1, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(1, 1);
 		va.EnableVertexAttribute(2);
-		va.SetVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 16);
+		va.SetVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, p2));
 		va.SetVertexAttributeBuffer(2, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(2, 1);
 		va.EnableVertexAttribute(3);
-		va.SetVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 24);
+		va.SetVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, p3));
 		va.SetVertexAttributeBuffer(3, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(3, 1);
 		va.EnableVertexAttribute(4);
-		va.SetVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 32);
+		va.SetVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, uv1));
 		va.SetVertexAttributeBuffer(4, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(4, 1);
 		va.EnableVertexAttribute(5);
-		va.SetVertexAttributeFormat(5, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 40);
+		va.SetVertexAttributeFormat(5, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, uv2));
 		va.SetVertexAttributeBuffer(5, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(5, 1);
 		va.EnableVertexAttribute(6);
-		va.SetVertexAttributeFormat(6, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 48);
+		va.SetVertexAttributeFormat(6, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, offsetof(Instance, blend));
 		va.SetVertexAttributeBuffer(6, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(6, 1);
 		va.EnableVertexAttribute(7);
-		va.SetVertexAttributeFormat(7, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, 56);
+		va.SetVertexAttributeFormat(7, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, offsetof(Instance, alpha));
 		va.SetVertexAttributeBuffer(7, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(7, 1);
 		va.EnableVertexAttribute(8);
-		va.SetVertexAttributeFormat(8, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, 60);
+		va.SetVertexAttributeFormat(8, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, offsetof(Instance, textureIndex));
 		va.SetVertexAttributeBuffer(8, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(8, 1);
-		va.EnableVertexAttribute(9);
-		va.SetVertexAttributeFormat(9, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, 64);
-		va.SetVertexAttributeBuffer(9, &instanceBuffer, sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(9, 1);
 	}	
 	void TexturedRectRenderer_OpenGL::Render(const TexturedRectRenderCache_OpenGL& renderCache, Vec2u targetSize)
 	{				
@@ -310,5 +313,10 @@ namespace Blaze::Graphics::OpenGL
 			if (rd == nullptr)
 				break;
 		}
-	}	
+	}
+	void TexturedRectRenderer_OpenGL::SetShaderProgram(Blaze::Graphics::OpenGLWrapper::ShaderProgram&& program)
+	{
+		this->program = std::move(program);
+	}
+
 }

@@ -23,7 +23,7 @@
 #include "BlazeEngineGraphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/Line3DRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
-#include "BlazeEngineGraphics/Renderers/OpenGL/TextRenderer_OpenGL.h"
+#include "BlazeEngineGraphics/Renderers/OpenGL/ColoredCharacterRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
 #endif
 
@@ -38,19 +38,29 @@
 #endif
 
 
-//-------------------UI--------------------
-
-
+//UI
 #include "BlazeEngineGraphics/UI/Core/UINode.h"
 #include "BlazeEngineGraphics/UI/Core/UIScreen.h"
+
+//---UI Graphics
+#ifdef GRAPHICS_OPENGL
+#include "BlazeEngineGraphics/UI/Graphics/RenderPipelines/OpenGL/UIRenderPipeline_OpenGL.h"
+#endif
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/ImageRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/PanelRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnitBase.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnitBase.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnitBase.h"
+
+//---UI Input
 #include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
 #include "BlazeEngineGraphics/UI/Input/UIInputNode.h"
 #include "BlazeEngineGraphics/UI/Input/UIKeyboardEventHandler.h"
 #include "BlazeEngineGraphics/UI/Input/UIMouseEventHandler.h"
 #include "BlazeEngineGraphics/UI/Input/UISelectEventHandler.h"
-#ifdef GRAPHICS_OPENGL
-#include "BlazeEngineGraphics/UI/Graphics/RenderPipelines/OpenGL/UIRenderPipeline_OpenGL.h"
-#endif
 
 #include "BlazeEngineGraphics/UI/Nodes/Panel.h"
 #include "BlazeEngineGraphics/UI/Nodes/Image.h"

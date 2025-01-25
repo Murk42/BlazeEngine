@@ -1,18 +1,18 @@
 #pragma once
-#include "BlazeEngineGraphics/UI/Elements/Text/SelectableTextBase.h"
-#include "BlazeEngineGraphics/UI/Elements/Text/TextRenderUnit.h"
-#include "BlazeEngineGraphics/UI/Elements/Text/Selection/TextSelectionRenderUnit.h"
-#include "BlazeEngineGraphics/UI/Elements/Text/Cursor/TextCursorRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Common/SelectableTextBase.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnit.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {
 	class BLAZE_GRAPHICS_API SelectableText :
 		public SelectableTextBase
 	{
 	public:
-		UIGraphics::TextRenderUnit textRenderUnit;
-		UIGraphics::TextSelectionRenderUnit textSelectionRenderUnit;		
-		UIGraphics::TextCursorRenderUnit textCursorRenderUnit;
+		TextRenderUnit textRenderUnit;
+		TextSelectionRenderUnit textSelectionRenderUnit;		
+		TextCursorRenderUnit textCursorRenderUnit;
 
 		SelectableText();
 		

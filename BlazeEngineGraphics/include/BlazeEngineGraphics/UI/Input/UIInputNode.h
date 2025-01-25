@@ -17,13 +17,9 @@ namespace Blaze::UI
 		void SetMouseEventHandler(UIMouseEventHandler* mouseEventHandler);
 		void SetSelectEventHandler(UISelectEventHandler* selectEventHandler);
 
-		void SetBlocksMouseEventsFlag(bool blocksMouseEvents);
-
-		virtual bool HitTest(Vec2f screenPosition);
-	private:
-		bool hit;
-		bool blocksMouseEvents;
-		uintMem inputManagerArrayIndex;
+		void SetBlocksMouseEventsFlag(bool blocksMouseEvents);		
+	private:		
+		bool blocksMouseEvents;		
 
 		UIKeyboardEventHandler* keyboardHandler;
 		UIMouseEventHandler* mouseHandler;

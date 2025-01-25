@@ -6,19 +6,17 @@ Array<Font> fonts;
 CLIENT_API void Setup()
 {			 	
 	Debug::Logger::AddOutputFile("log.txt");
-	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{		
-		.majorVersion = 4,
-		.minorVersion = 0,
-		.profileType = Graphics::OpenGL::ProfileType::Compatibility,
+	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{						
 		} };
 	Graphics::OpenGL::RenderWindow_OpenGL renderWindow{ graphicsContext, Graphics::OpenGL::WindowSDLCreateOptions_OpenGL { } };
 	auto& window = renderWindow.GetWindowSDL();
 	bool windowClosed = false;
 
 	Graphics::OpenGL::TexturedRectRenderer_OpenGL texturedRectRenderer{ graphicsContext };
+	Graphics::OpenGL::ColoredCharacterRenderer_OpenGL coloredCharacterRenderer{ graphicsContext };
 	Graphics::OpenGL::PanelRenderer_OpenGL panelRenderer{ graphicsContext };
 
-	Graphics::OpenGL::UIRenderPipeline_OpenGL UIRenderPipeline{ texturedRectRenderer, panelRenderer };
+	Graphics::OpenGL::UIRenderPipeline_OpenGL UIRenderPipeline{ texturedRectRenderer, coloredCharacterRenderer, panelRenderer };
 	UI::InputManager InputManager;
 
 	fonts.Resize(4);

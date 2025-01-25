@@ -11,13 +11,20 @@ namespace Blaze::Graphics::OpenGL
 {		
 	class TexturedRectRenderCache_OpenGL;
 
-	class TexturedRectRenderer_OpenGL : public StreamRenderer
+	struct TexturedRectRendererOptions_OpenGL
 	{
-	public:
-		TexturedRectRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext);
+		bool loadDefaultShaders : 1 = true;
+	};
+
+	class BLAZE_GRAPHICS_API TexturedRectRenderer_OpenGL : public StreamRenderer
+	{
+	public:		
+		TexturedRectRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, const TexturedRectRendererOptions_OpenGL& options = TexturedRectRendererOptions_OpenGL());
 		
 		void Render(const TexturedRectRenderCache_OpenGL& renderCache, Vec2u targetSize);
 		void Render(RenderStream& renderStream, Vec2u targetSize);		
+
+		void SetShaderProgram(Blaze::Graphics::OpenGLWrapper::ShaderProgram&& program);
 		
 		StringView GetRendererName() const override { return "TexturedRectRenderer_OpenGL"; }
 	private:				
@@ -52,7 +59,7 @@ namespace Blaze::Graphics::OpenGL
 		friend class TexturedRectRenderCache_OpenGL;
 	};
 
-	class TexturedRectRenderCache_OpenGL
+	class BLAZE_GRAPHICS_API TexturedRectRenderCache_OpenGL
 	{	
 	public:	
 		void CreateNew(TexturedRectRenderer_OpenGL& renderer, const Array<TexturedRectRenderData>& renderData);		

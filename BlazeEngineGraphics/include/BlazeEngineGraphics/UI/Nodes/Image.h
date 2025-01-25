@@ -1,12 +1,10 @@
 #pragma once
 #include "BlazeEngineGraphics/UI/Core/UINode.h"
-#include "BlazeEngineGraphics/UI/Elements/ImageRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/ImageRenderUnit.h"
 #include "BlazeEngineGraphics/RenderScene/RenderObject.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {	
-	using ImageLayout = UIGraphics::ImageLayout;
-
 	class Image : 
 		public Node,
 		public Graphics::RenderObject
@@ -30,6 +28,6 @@ namespace Blaze::UI
 		
 		Graphics::RenderUnit* GetRenderUnit(uint index) override;
 	private:				
-		UIGraphics::ImageRenderStream renderUnit;		
+		ImageRenderUnit renderUnit;		
 	};
 }

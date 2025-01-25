@@ -681,13 +681,16 @@ namespace Blaze
 
 		return Result();
 	}
-	FontMetrics& Font::GetUnscalledMetrics() const
+	FontMetrics* Font::GetUnscalledMetrics() const
 	{
-		return metrics.Insert(0, (Font*)this, 0).iterator->value;
+		return &metrics.Insert(0, (Font*)this, 0).iterator->value;
 	}
-	FontMetrics& Font::GetMetrics(uint pixelFontHeight) const
+	FontMetrics* Font::GetMetrics(uint pixelFontHeight) const
 	{
-		return metrics.Insert(pixelFontHeight, (Font*)this, pixelFontHeight).iterator->value;
+		if (pixelFontHeight == 0)
+			return nullptr;
+
+		return &metrics.Insert(pixelFontHeight, (Font*)this, pixelFontHeight).iterator->value;
 	}
 	uint Font::GetFontUnitScale() const
 	{

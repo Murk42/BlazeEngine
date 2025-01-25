@@ -4,19 +4,23 @@
 namespace Blaze::UI
 {
 	Screen::Screen(WindowBase* window, bool resizeWithWindow)
-		: Node(), nodeCount(0), window(nullptr)
+		: Node(), window(nullptr), nodeCount(0)
 	{
+		SetTransform({
+			.pos = Vec2f(0.0f, 0.0f),
+			.parentPivot = Vec2f(0.0f, 0.0f),
+			.pivot = Vec2f(0.0f, 0.0f),
+			.size = Vec2f(0.0f, 0.0f),
+			.scale = 1.0f,
+			.rotation = 0.0f,
+			});
 		Node::screen = this;
 
 		SetWindow(window, resizeWithWindow);
 	}
 	Screen::~Screen()
 	{
-		screenDestructionEventDispatcher.Call({ this });
-	}
-	void Screen::CalculateAllTransforms()
-	{
-		CalculateFinalTransformDownwards();
+		screenDestructionEventDispatcher.Call({ *this });
 	}
 	void Screen::SetWindow(WindowBase* window, bool resizeWithWindow)
 	{
@@ -39,17 +43,21 @@ namespace Blaze::UI
 				window->resizedEventDispatcher.AddHandler(*this);
 		}
 
-		screenWindowChangedEventDispatcher.Call({ .oldWindow = old, .screen = this });
-	}
-	void Screen::AddNode(Node* node)
-	{		
-		++nodeCount;
-		nodeCreatedEventDispatcher.Call({ .node = node });
-	}
-	void Screen::RemoveNode(Node* node)
+		screenWindowChangedEventDispatcher.Call({ .oldWindow = old, .screen = *this });
+	}	
+	void Screen::NodeAdded(Node& node, Node* oldParent)
 	{
-		nodeDestroyedEventDispatcher.Call({ .node = node });
+		nodeTreeChangedEventDispatcher.Call({ .type = NodeTreeChangedEvent::Type::NodeAdded, .node = node, .oldParent = oldParent });
+		++nodeCount;
+	}
+	void Screen::NodeRemoved(Node& node, Node* oldParent)
+	{
 		--nodeCount;
+		nodeTreeChangedEventDispatcher.Call({ .type = NodeTreeChangedEvent::Type::NodeRemoved, .node = node, .oldParent = oldParent });
+	}
+	void Screen::NodeMoved(Node& node, Node* oldParent)
+	{
+		nodeTreeChangedEventDispatcher.Call({ .type = NodeTreeChangedEvent::Type::NodeMoved, .node = node, .oldParent = oldParent });
 	}
 	void Screen::OnEvent(Input::Events::WindowResizedEvent event)
 	{

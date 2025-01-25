@@ -9,14 +9,19 @@ namespace Blaze::UI
 	{
 	public:
 		struct SelectedEvent { InputManager* inputManager; };
-		struct DeselectedEvent { InputManager* inputManager; };		
+		struct DeselectedEvent { InputManager* inputManager; };	
 
-		bool selectable = true;
+		UISelectEventHandler();
+
+		void SetSelectableFlag(bool selectable);
+		inline bool IsSelectable() const { return selectable; }
 
 		virtual void OnEvent(Input::Events::KeyPressed event) { }
 		virtual void OnEvent(Input::Events::KeyReleased event) { }
 		virtual void OnEvent(Input::Events::TextInput event) { }
 		virtual void OnEvent(SelectedEvent event) { }
 		virtual void OnEvent(DeselectedEvent event) { }
+	private:
+		bool selectable = true;
 	};
 }

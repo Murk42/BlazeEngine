@@ -25,8 +25,6 @@ namespace Blaze::UI
 		virtual void OnEvent(MouseEnterEvent event) { }
 		virtual void OnEvent(MouseExitEvent event) { }	
 	private:		
-		uint32 lastTransformState;
-	
 		friend class InputManager;
 	};
 }

@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Nodes/SelectableText.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {
 	SelectableText::SelectableText() :
 		SelectableTextBase(textRenderUnit, textSelectionRenderUnit, textCursorRenderUnit), 
 		textRenderUnit(this), textSelectionRenderUnit(textRenderUnit), textCursorRenderUnit(textRenderUnit)
 	{
+		dataMap.SetTypeName("Text");
 	}
 	StringUTF8 SelectableText::GetTextSubString(uintMem begin, uintMem end)
 	{

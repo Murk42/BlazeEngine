@@ -25,7 +25,6 @@ void main()
 		color = texture(u_texture3, frag_uv);
 	else if (frag_textureIndex == 3)
 		color = texture(u_texture4, frag_uv);
-
-	//gl_FragColor = vec4(frag_color.rgb, color.r);
+	
 	out_color = vec4(mix(color.rgb, frag_color.rgb, frag_blend), color.a * frag_color.a * frag_alpha);
 }

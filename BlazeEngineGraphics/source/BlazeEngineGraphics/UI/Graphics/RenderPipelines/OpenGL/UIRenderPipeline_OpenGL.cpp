@@ -9,54 +9,64 @@ namespace Blaze::Graphics::OpenGL
 		public RenderStream
 	{
 	public:
-		GlobalRenderGroupStream(RenderUnit** renderUnit, uintMem count)
-			: renderUnit(renderUnit), endRenderUnit(renderUnit + count)
-		{
-			if (count == 0)
-			{
-				renderUnit = nullptr;
-				endRenderUnit = nullptr;
-			}
+		GlobalRenderGroupStream(ArrayView<UIRenderPipeline_OpenGL::RenderItem> renderItems)
+			: renderItem(renderItems.Ptr()), endRenderItem(renderItems.Ptr() + renderItems.Count())
+		{			
 		}
 
 		void BeginStream() override
 		{
-			if (renderUnit != nullptr)
-				renderUnit[0]->BeginStream();
+			if (renderItem == endRenderItem)
+				return;
+
+			while (!renderItem->node.IsEnabled())
+			{
+				++renderItem;
+
+				if (renderItem == endRenderItem)
+					return;
+			} 
+			
+			renderItem->renderUnit.BeginStream();
 		}
 		void* Advance() override
 		{
-			if (renderUnit == endRenderUnit)
+			if (renderItem == endRenderItem)
 				return nullptr;
 
-			if (auto rd = renderUnit[0]->Advance())
-				return rd;
-			else while (true)
+			while (true)
 			{
-				++renderUnit;
+				auto rd = renderItem->renderUnit.Advance();
 
-				if (renderUnit == endRenderUnit)
-					return nullptr;
+				if (rd != nullptr)
+					return rd;				
 
-				renderUnit[0]->BeginStream();
-				if (auto rd = renderUnit[0]->Advance())
-					return rd;
+				do
+				{
+					++renderItem;
+
+					if (renderItem == endRenderItem)
+						return nullptr;
+
+				} while (!renderItem->node.IsEnabled());
+
+				renderItem->renderUnit.BeginStream();
 			}			
 		}
 	private:
-		RenderUnit** renderUnit;
-		RenderUnit** endRenderUnit;
+		const UIRenderPipeline_OpenGL::RenderItem* renderItem;
+		const UIRenderPipeline_OpenGL::RenderItem* endRenderItem;
 	};
 	class UISimpleRenderQueue
 	{				
-		void _GetRenderOrder(UI::Node& node, Array<RenderUnit*>& arr)
+		void _GetRenderOrder(UI::Node& node, Array<UIRenderPipeline_OpenGL::RenderItem>& arr)
 		{
 			if (auto* renderedNode = dynamic_cast<RenderObject*>(&node))
 			{
 				uint i = 0;
 				while (auto unit = renderedNode->GetRenderUnit(i))
 				{				
-					arr.AddBack(unit);
+					arr.AddBack(UIRenderPipeline_OpenGL::RenderItem{ .renderUnit = *unit, .node = node });
 					++i;
 				}
 			}
@@ -64,10 +74,9 @@ namespace Blaze::Graphics::OpenGL
 			for (auto& child : node.GetChildren())
 				_GetRenderOrder(child, arr);
 		}
-		Array<RenderUnit*> GetRenderOrder()
+		Array<UIRenderPipeline_OpenGL::RenderItem> GetRenderOrder()
 		{
-			Array<RenderUnit*> arr;
-			arr.ReserveExactly(renderPipeline->screen->GetNodeCount());
+			Array<UIRenderPipeline_OpenGL::RenderItem> arr;			
 
 			for (auto& child : renderPipeline->screen->GetChildren())
 				_GetRenderOrder(child, arr);
@@ -91,25 +100,26 @@ namespace Blaze::Graphics::OpenGL
 			if (renderPipeline->renderQueue.Empty())
 				return;
 
-			StreamRenderer* renderer = nullptr; //renderPipeline->GetRenderer(renderPipeline->renderQueue[0]);
+			StreamRenderer* renderer = nullptr;
 			StreamRenderer* oldRenderer = nullptr;
 
-			UIRenderPipeline_OpenGL::NodeRenderGroup* group = nullptr;
-			//group->renderer = renderer;
+			UIRenderPipeline_OpenGL::NodeRenderGroup* group = nullptr;			
 
-			for (auto renderUnit : renderPipeline->renderQueue)
+			for (auto renderItem : renderPipeline->renderQueue)
 			{				
 				oldRenderer = renderer;
-				renderer = renderPipeline->GetRenderer(renderUnit);
+				renderer = renderPipeline->GetRenderer(renderItem.renderUnit);
+
+				if (renderer == nullptr)
+				{
+					Debug::Logger::LogWarning("Blaze Engine Graphics", "UI Render Pipeline couldn't find renderer");
+					continue;
+				}
 
 				if (oldRenderer == renderer)
 					++group->count;
 				else
-				{
-					group = &*renderPipeline->renderGroups.AddBack();
-					group->count = 1;
-					group->renderer = renderer;
-				}
+					group = &*renderPipeline->renderGroups.AddBack(UIRenderPipeline_OpenGL::NodeRenderGroup{ 1, *renderer});									
 
 			}			
 		}
@@ -118,7 +128,8 @@ namespace Blaze::Graphics::OpenGL
 	{
 		struct UINodeCache
 		{
-			RenderObject* node;
+			RenderObject& renderObject;
+			UI::Node& node;
 			Rectf boundingRect;
 		};
 		struct RenderNode
@@ -128,7 +139,7 @@ namespace Blaze::Graphics::OpenGL
 		};
 		struct NodeRenderPreGroup
 		{
-			Map<StreamRenderer*, Array<RenderUnit*>> subGroups;
+			Map<StreamRenderer*, Array<UIRenderPipeline_OpenGL::RenderItem>> subGroups;
 		};
 		using NodeRenderGroup = UIRenderPipeline_OpenGL::NodeRenderGroup;
 
@@ -154,7 +165,7 @@ namespace Blaze::Graphics::OpenGL
 
 		void _GetRenderOrder(UI::Node& node, Array<RenderNode>& arr)
 		{
-			if (auto renderedNode = dynamic_cast<RenderObject*>(&node))			
+			if (auto renderObject = dynamic_cast<RenderObject*>(&node))			
 			{				
 				auto finalTransform = node.GetFinalTransform();
 				Vec2f pos = finalTransform.position;
@@ -170,7 +181,7 @@ namespace Blaze::Graphics::OpenGL
 				Vec2f pMin = Vec2f(std::min({ p1.x, p2.x, p3.x, p4.x }), std::min({ p1.y, p2.y, p3.y, p4.y }));
 
 				arr.AddBack(RenderNode{
-					.uiNodes = Array<UINodeCache>({ UINodeCache{ renderedNode, Rectf(pMin, pMax - pMin) } }),
+					.uiNodes = Array<UINodeCache>({ UINodeCache{ .renderObject = *renderObject, .node = node, .boundingRect = Rectf(pMin, pMax - pMin) } }),
 					.children = Array<RenderNode*>(),
 					});
 			}
@@ -181,8 +192,7 @@ namespace Blaze::Graphics::OpenGL
 		//Colapses the node tree into a array of renderable nodes by doing a depth first search
 		Array<RenderNode> GetRenderOrder(UI::Screen* screen)
 		{
-			Array<RenderNode> arr;
-			arr.ReserveExactly(screen->GetNodeCount());
+			Array<RenderNode> arr;			
 
 			for (auto& child : screen->GetChildren())
 				_GetRenderOrder(child, arr);
@@ -291,15 +301,15 @@ namespace Blaze::Graphics::OpenGL
 				for (auto& node : el.uiNodes)
 				{
 					uint index = 0;
-					while (auto renderUnit = node.node->GetRenderUnit(index))
+					while (auto renderUnit = node.renderObject.GetRenderUnit(index))
 					{
 						if (usedRenderUnits.Find(renderUnit).IsNull())
 						{							
 							auto& preGroup = *preGroups.AddBack();
 							usedRenderUnits.Insert(renderUnit);
-							auto renderer = renderPipeline->GetRenderer(renderUnit);
+							auto renderer = renderPipeline->GetRenderer(*renderUnit);
 							auto& nodes = preGroup.subGroups.Insert(renderer).iterator->value;
-							nodes.AddBack(renderUnit);
+							nodes.AddBack(UIRenderPipeline_OpenGL::RenderItem{ *renderUnit, node.node });
 						}						
 
 						++index;
@@ -333,7 +343,7 @@ namespace Blaze::Graphics::OpenGL
 				}
 			}
 		}
-		void CreateGroupsAndQueue(const Array<NodeRenderPreGroup>& preGroups, Array<NodeRenderGroup>& renderGroups, Array<RenderUnit*>& queue)
+		void CreateGroupsAndQueue(const Array<NodeRenderPreGroup>& preGroups, Array<NodeRenderGroup>& renderGroups, Array<UIRenderPipeline_OpenGL::RenderItem>& queue)
 		{			
 			queue.Clear();
 			renderGroups.ReserveExactly(preGroups.Count());
@@ -342,9 +352,7 @@ namespace Blaze::Graphics::OpenGL
 			{
 				for (auto& subGroup : preGroup.subGroups)
 				{					
-					auto& renderGroup = *renderGroups.AddBack();
-					renderGroup.count = subGroup.value.Count();
-					renderGroup.renderer = subGroup.key;
+					auto& renderGroup = *renderGroups.AddBack(UIRenderPipeline_OpenGL::NodeRenderGroup{ subGroup.value.Count(), *subGroup.key });					
 
 					queue.Append(std::move(subGroup.value));
 				}
@@ -371,8 +379,9 @@ namespace Blaze::Graphics::OpenGL
 		}
 	};
 
-	UIRenderPipeline_OpenGL::UIRenderPipeline_OpenGL(TexturedRectRenderer_OpenGL& texturedRectRenderer, PanelRenderer_OpenGL& panelRenderer) :
+	UIRenderPipeline_OpenGL::UIRenderPipeline_OpenGL(TexturedRectRenderer_OpenGL& texturedRectRenderer, TexturedRectRenderer_OpenGL& coloredCharacterRenderer_OpenGL, PanelRenderer_OpenGL& panelRenderer) :
 		texturedRectRenderer(texturedRectRenderer),
+		coloredCharacterRenderer_OpenGL(coloredCharacterRenderer_OpenGL),
 		panelRenderer(panelRenderer),		
 		screen(nullptr),
 		recreateRenderQueue(false)		
@@ -384,9 +393,8 @@ namespace Blaze::Graphics::OpenGL
 	void UIRenderPipeline_OpenGL::SetScreen(UI::Screen* newScreen)
 	{
 		if (screen != nullptr)
-		{			
-			screen->nodeCreatedEventDispatcher.RemoveHandler(*this);
-			screen->nodeDestroyedEventDispatcher.RemoveHandler(*this);
+		{						
+			screen->nodeTreeChangedEventDispatcher.RemoveHandler(*this);
 			screen->screenDestructionEventDispatcher.RemoveHandler(*this);			
 		}
 		
@@ -394,8 +402,7 @@ namespace Blaze::Graphics::OpenGL
 
 		if (screen != nullptr)
 		{
-			screen->nodeCreatedEventDispatcher.AddHandler(*this);
-			screen->nodeDestroyedEventDispatcher.AddHandler(*this);
+			screen->nodeTreeChangedEventDispatcher.AddHandler(*this);			
 			screen->screenDestructionEventDispatcher.AddHandler(*this);						
 
 			recreateRenderQueue = true;
@@ -407,47 +414,31 @@ namespace Blaze::Graphics::OpenGL
 		}
 	}	
 	void UIRenderPipeline_OpenGL::Render(Vec2u targetSize)
-	{
+	{ 
 		if (screen == nullptr)
 			return;				
 
 		if (recreateRenderQueue)
 			RecreateRenderQueue();
 		 
-		RenderUnit** it = renderQueue.Ptr();
+		RenderItem* it = renderQueue.Ptr();
 		for (auto& group : renderGroups) 
 		{
-			GlobalRenderGroupStream globalRenderGroupStream{ it, group.count };
+			GlobalRenderGroupStream globalRenderGroupStream{ { it, group.count} };
 
-			group.renderer->Render(globalRenderGroupStream, targetSize);
+			group.renderer.Render(globalRenderGroupStream, targetSize);
 
 			it += group.count;
 		}		
-	}
-	void UIRenderPipeline_OpenGL::GetDebugData(UIRenderPipelineDebugData& debugData)
-	{
-		debugData.renderGroups.Clear();
-		debugData.renderGroups.Resize(renderGroups.Count());
-
-		uint l = 0;
-		for (uint i = 0; i < renderGroups.Count(); ++i)
-		{			
-			debugData.renderGroups[i].renderUnits.Resize(renderGroups[i].count);
-			debugData.renderGroups[i].renderer = renderGroups[i].renderer;
-
-			for (uint j = 0; j < renderGroups[i].count; ++j)
-			{
-				debugData.renderGroups[i].renderUnits[j] = renderQueue[l];
-				++l;
-			}		
-		}
-	}
-	StreamRenderer* UIRenderPipeline_OpenGL::GetRenderer(RenderUnit* renderUnit)
+	}	
+	StreamRenderer* UIRenderPipeline_OpenGL::GetRenderer(RenderUnit& renderUnit)
 	{		
-		if (renderUnit->GetRendererName() == "TexturedRectRenderer")
+		if (renderUnit.GetRendererName() == "TexturedRectRenderer")
 			return &texturedRectRenderer;
-		else if (renderUnit->GetRendererName() == "PanelRenderer")
-			return &panelRenderer;		
+		else if (renderUnit.GetRendererName() == "PanelRenderer")
+			return &panelRenderer;
+		else if (renderUnit.GetRendererName() == "ColoredCharacterRenderer")
+			return &coloredCharacterRenderer_OpenGL;
 
 		return nullptr;
 	}	
@@ -458,14 +449,10 @@ namespace Blaze::Graphics::OpenGL
 		rq.CreateRenderQueue();
 
 		recreateRenderQueue = false;
-	}
-	void UIRenderPipeline_OpenGL::OnEvent(UI::NodeCreatedEvent event)
-	{		
-		recreateRenderQueue = true;		
-	}
-	void UIRenderPipeline_OpenGL::OnEvent(UI::NodeDestroyedEvent event)
-	{	
-		recreateRenderQueue = true;		
+	}	
+	void UIRenderPipeline_OpenGL::OnEvent(UI::NodeTreeChangedEvent event)
+	{
+		recreateRenderQueue = true;
 	}
 	void UIRenderPipeline_OpenGL::OnEvent(UI::ScreenDestructionEvent event)
 	{

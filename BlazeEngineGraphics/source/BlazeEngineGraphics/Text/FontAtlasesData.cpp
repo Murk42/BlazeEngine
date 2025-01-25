@@ -61,8 +61,13 @@ namespace Blaze::Graphics
 #endif
 			auto metrics = font->GetMetrics(fontHeight);
 
+			if (metrics == nullptr)
+			{
+				Debug::Logger::LogWarning("Blaze Engine Graphics", "Failed to add atlas data for font height: " + StringParsing::Convert(fontHeight));
+			}
+
 			Vec2f atlasSize;
-			metrics.CreateAtlas(characterSet, glyphRenderer, [&](auto size) {
+			metrics->CreateAtlas(characterSet, glyphRenderer, [&](auto size) {
 #ifdef HORIZONTAL_LCD
 				data.atlasData.atlas.Create(size, OpenGLWrapper::TextureInternalPixelFormat::RGB8);
 #else

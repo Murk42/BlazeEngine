@@ -174,8 +174,8 @@ namespace Blaze
 		Result Load(ReadStream& readStream);
 		
 		//The metrics are in font units
-		FontMetrics& GetUnscalledMetrics() const;
-		FontMetrics& GetMetrics(uint pixelFontHeight) const;		
+		FontMetrics* GetUnscalledMetrics() const;
+		FontMetrics* GetMetrics(uint pixelFontHeight) const;		
 
 		//How maany font units fit in one EM
 		inline uint GetFontUnitScale() const;

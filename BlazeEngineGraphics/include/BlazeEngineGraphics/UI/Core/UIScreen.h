@@ -3,22 +3,27 @@
 
 namespace Blaze::UI
 {
-	struct NodeCreatedEvent
+	struct NodeTreeChangedEvent
 	{
-		Node* node;
-	};
-	struct NodeDestroyedEvent
-	{
-		Node* node;
-	};
+		enum class Type
+		{
+			NodeAdded,
+			NodeRemoved,
+			NodeMoved
+		};
+
+		Type type;
+		Node& node;		
+		Node* oldParent;
+	};	
 	struct ScreenDestructionEvent
 	{
-		Screen* screen;
+		Screen& screen;
 	};
 	struct ScreenWindowChangedEvent
 	{
 		WindowBase* oldWindow;
-		Screen* screen;
+		Screen& screen;
 	};
 
 	class Screen : 
@@ -26,28 +31,25 @@ namespace Blaze::UI
 		private EventHandler<Input::Events::WindowResizedEvent>
 	{
 	public:
-		EventDispatcher<NodeCreatedEvent> nodeCreatedEventDispatcher;
-		EventDispatcher<NodeDestroyedEvent> nodeDestroyedEventDispatcher;
 		EventDispatcher<ScreenDestructionEvent> screenDestructionEventDispatcher;
 		EventDispatcher<ScreenWindowChangedEvent> screenWindowChangedEventDispatcher;
+		EventDispatcher<NodeTreeChangedEvent> nodeTreeChangedEventDispatcher;
 
 		Screen(WindowBase* window, bool resizeWithWindow = true);
 		virtual ~Screen();
-		
-		void CalculateAllTransforms();
-		
-		void SetWindow(WindowBase* window, bool resizeWithWindow = true);
 
-		virtual String GetTypeName() const { return "Screen"; };
+		void SetWindow(WindowBase* window, bool resizeWithWindow = true);
+		
 		inline uintMem GetNodeCount() const { return nodeCount; }
 		inline WindowBase* GetWindow() const { return window; }
-	private:				
-		uintMem nodeCount;
+	private:						
 		WindowBase* window;
+		uintMem nodeCount;
 
-		void AddNode(Node* node);
-		void RemoveNode(Node* node);
-
+		void NodeAdded(Node& node, Node* oldParent);
+		void NodeRemoved(Node& node, Node* oldParent);
+		void NodeMoved(Node& node, Node* oldParent);
+		
 		void OnEvent(Input::Events::WindowResizedEvent event);
 
 		friend class Node;

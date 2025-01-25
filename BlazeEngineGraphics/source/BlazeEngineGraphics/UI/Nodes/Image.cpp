@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Nodes/Image.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {
 	Image::Image() :
 		renderUnit(this)
