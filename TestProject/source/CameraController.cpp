@@ -16,7 +16,7 @@ CameraController::~CameraController()
 	}
 }
 
-void CameraController::SetWindow(WindowBase* window)
+void CameraController::SetWindow(Window* window)
 {
 	if (this->window != nullptr)
 	{				

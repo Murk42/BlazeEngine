@@ -23,6 +23,10 @@
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Common\ButtonBase.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Common\EditableTextBase.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeDataMap.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeFinalTransform.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeTransform.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeTreeIterator.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\PanelRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnitBase.cpp" />
@@ -30,35 +34,36 @@
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnitBase.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnitBase.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeTreeView.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\InputNode.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\EditableText.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\RenderStructure\RenderGroupRenderer.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Text\FontAtlasesData.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\EmptyNode.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\Image.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\SelectableText.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Common\SelectableTextBase.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\ImageRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLFunctions.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\SDLOpenGLContext_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Files\shaders.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\UINode.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\UIScreen.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\Node.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\Screen.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\Panel.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\Text.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\TextButton.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\PanelRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\TexturedRectRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderPipelines\OpenGL\UIRenderPipeline_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIInputManager.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIInputNode.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIKeyboardEventHandler.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIMouseEventHandler.cpp" />
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UISelectEventHandler.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\InputManager.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\KeyboardEventHandler.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\MouseEventHandler.cpp" />
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\SelectEventHandler.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\Dynamic\GraphicsContext.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.cpp" />
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.cpp" />
@@ -95,9 +100,16 @@
     <ClInclude Include="include\BlazeEngineGraphics\RenderStructure\RenderGroupStream.h" />
     <ClInclude Include="include\BlazeEngineGraphics\RenderScene\RenderUnit.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Common\ButtonBase.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\UINode.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\UIScreen.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\Node.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeDataMap.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeFinalTransform.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeTransform.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeTreeIterator.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\Screen.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Common\EditableTextBase.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeTreeView.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\InputNode.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\EmptyNode.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\Image.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\Panel.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\SelectableText.h" />
@@ -114,11 +126,10 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnitBase.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnit.h" />
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnitBase.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIInputManager.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIInputNode.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIKeyboardEventHandler.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIMouseEventHandler.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UISelectEventHandler.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\InputManager.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\KeyboardEventHandler.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\MouseEventHandler.h" />
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\SelectEventHandler.h" />
     <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\Debug_OpenGL.h" />
     <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\OpenGLWrapper\OpenGLEnums.h" />
@@ -134,7 +145,6 @@
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\GraphicsContext_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\RenderWindowFramebuffer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\RenderWindow_OpenGL.h" />
-    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\SDLOpenGLContext_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\Semaphore_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\Line2DRenderer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\Vulkan\Line2DRenderer_Vulkan.h" />
@@ -155,18 +165,8 @@
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </None>
-    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </None>
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert" />
     <None Include="assets\shaders\Vulkan\compileShaders.bat" />
     <None Include="assets\shaders\Vulkan\line2d.frag" />
     <None Include="assets\shaders\Vulkan\line2d.frag.spv" />
@@ -178,8 +178,16 @@
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag" />
-    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert">
+      <FileType>Document</FileType>
+    </None>
     <None Include="vcpkg.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="BlazeEngineGraphicsNodeView.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="source\BlazeEngineGraphics\Shaders\shaders_template.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -234,42 +242,42 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>
-    </CustomBuildBeforeTargets>
-    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>
-    </CustomBuildBeforeTargets>
-    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>
-    </CustomBuildBeforeTargets>
-    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration)</TargetName>
-    <CustomBuildBeforeTargets>
-    </CustomBuildBeforeTargets>
-    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <VcpkgConfiguration>Release</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgConfiguration>Release</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -285,21 +293,21 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent />
-    <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
-      <Message>Converting resources into C++ files</Message>
-    </CustomBuildStep>
     <PostBuildEvent />
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt" "dst=$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp;%(Outputs)</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\text.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag;%(Inputs)</Inputs>
+      <RootFolder>
+      </RootFolder>
+      <Message>Translating shader files into shaders.cpp</Message>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -317,21 +325,20 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent />
     <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt" "dst=$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp;%(Outputs)</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\text.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag;%(Inputs)</Inputs>
+      <RootFolder>
+      </RootFolder>
+      <Message>Translating shader files into shaders.cpp</Message>
     </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
-      <Message>Converting resources into C++ files</Message>
-    </CustomBuildStep>
-    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -347,20 +354,20 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib;SDL2d.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent />
     <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt" "dst=$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp;%(Outputs)</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\text.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag;%(Inputs)</Inputs>
+      <RootFolder>
+      </RootFolder>
+      <Message>Translating shader files into shaders.cpp</Message>
     </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
-      <Message>Converting resources into C++ files</Message>
-    </CustomBuildStep>
-    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -378,20 +385,21 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glew32.lib;OpenGL32.Lib;SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent />
-    <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders_template.cpp" "$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>source/BlazeEngineGrapics/Files/shaders.cpp;%(Outputs)</Outputs>
-      <Message>Converting resources into C++ files</Message>
-    </CustomBuildStep>
     <PostBuildEvent />
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt" "dst=$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngineGraphics\Files\shaders.cpp;%(Outputs)</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngineGraphics\Shaders\shaders_template.txt;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\text.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag;%(Inputs)</Inputs>
+      <RootFolder>
+      </RootFolder>
+      <Message>Translating shader files into shaders.cpp</Message>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

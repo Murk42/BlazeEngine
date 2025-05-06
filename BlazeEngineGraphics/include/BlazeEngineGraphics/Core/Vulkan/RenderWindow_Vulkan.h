@@ -10,7 +10,7 @@ namespace Blaze::Graphics::Vulkan
 	class Semaphore_Vulkan;
 
 	class BLAZE_GRAPHICS_API RenderWindow_Vulkan :
-		private EventHandler<Input::Events::WindowResizedEvent>,
+		private EventHandler<Window::WindowResizedEvent>,
 		private EventHandler<Input::Events::WindowMinimizedEvent>
 	{
 	public:
@@ -21,7 +21,7 @@ namespace Blaze::Graphics::Vulkan
 
 		/*Parity*/inline GraphicsContext_Vulkan& GetGraphicsContext() const { return graphicsContext; }
 		/*Parity*/inline Vec2u GetSize() const { return size; }
-		/*Parity*/inline WindowSDL& GetWindow() { return window; }
+		/*Parity*/inline Window& GetWindow() { return window; }
 
 		inline VkSurfaceKHR GetSurface() const { return surface; }		
 
@@ -36,7 +36,7 @@ namespace Blaze::Graphics::Vulkan
 		GraphicsContext_Vulkan& graphicsContext;
 
 		VkSurfaceKHR surface;
-		WindowSDL window;
+		Window window;
 
 		class FramebufferData
 		{
@@ -94,7 +94,7 @@ namespace Blaze::Graphics::Vulkan
 		void CreateNewSwapchain();		
 
 		void CheckRetiredResources();
-		void OnEvent(Input::Events::WindowResizedEvent event) override;
+		void OnEvent(Window::WindowResizedEvent event) override;
 		void OnEvent(Input::Events::WindowMinimizedEvent event) override;
 
 		friend class RenderWindowFramebuffer_Vulkan;		

@@ -46,16 +46,27 @@ namespace Blaze
 	class StringViewUTF8
 	{
 	public:
+		/*
+			Constructs a empty StringViewUTF8.
+		*/
 		constexpr StringViewUTF8();
 		constexpr StringViewUTF8(const StringViewUTF8& other);
 		inline StringViewUTF8(const StringUTF8& other);
 		constexpr StringViewUTF8(const StringView& other);		
 		inline StringViewUTF8(const String& other);				
-		//The buffer size doesn't include the null-terminating character,
-		//but the passed buffer must be null-terminated
+		/*
+			Constructs a StringViewUTF8 from a buffer which holds a UTF-8 string.
+
+			\param ptr     pointer to a null-terminated string made of 1 byte characters. If <ptr> is nullptr an empty StringViewUTF8 will be created.
+			\param count   count of characters in the string, it doesn't include the null character. If <count> is 0 an empty StringViewUTF8 will be created.
+		*/
 		inline StringViewUTF8(const void* ptr, uintMem size);
-		//The count doesn't include the null-terminating character, but
-		//the passed string must be null-terminated
+		/*
+			Constructs a StringViewUTF8 from a null-terminated string.
+
+			\param ptr     pointer to a null-terminated string made of 1 byte characters. If <ptr> is nullptr an empty StringViewUTF8 will be created.
+			\param count   count of characters in the string, it doesn't include the null character. If <count> is 0 an empty StringViewUTF8 will be created.
+		*/		
 		inline StringViewUTF8(const char* ptr, uintMem count);
 		inline StringViewUTF8(StringViewUTF8Iterator begin, StringViewUTF8Iterator end);
 		template<uintMem C>

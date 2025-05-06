@@ -63,7 +63,7 @@ namespace Blaze::Graphics
 
 			if (metrics == nullptr)
 			{
-				Debug::Logger::LogWarning("Blaze Engine Graphics", "Failed to add atlas data for font height: " + StringParsing::Convert(fontHeight));
+				BLAZE_ENGINE_GRAPHICS_WARNING("Failed to add atlas data for font height: " + StringParsing::Convert(fontHeight));
 			}
 
 			Vec2f atlasSize;

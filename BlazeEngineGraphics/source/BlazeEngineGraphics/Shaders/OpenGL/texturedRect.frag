@@ -13,7 +13,7 @@ layout(location = 2) uniform sampler2D u_texture2;
 layout(location = 3) uniform sampler2D u_texture3;
 layout(location = 4) uniform sampler2D u_texture4;
 																		   
-void main()															   
+void main()				   									   
 {					
 	vec4 color = vec4(0, 0, 0, 1);
 
@@ -26,5 +26,8 @@ void main()
 	else if (frag_textureIndex == 3)
 		color = texture(u_texture4, frag_uv);
 	
+	if (color.a == 0)
+		discard;
+
 	out_color = vec4(mix(color.rgb, frag_color.rgb, frag_blend), color.a * frag_color.a * frag_alpha);
 }

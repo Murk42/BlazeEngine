@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngineGraphics/UI/Core/UINode.h"
+#include "BlazeEngineGraphics/UI/Core/Node.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/ImageRenderUnit.h"
 #include "BlazeEngineGraphics/RenderScene/RenderObject.h"
 

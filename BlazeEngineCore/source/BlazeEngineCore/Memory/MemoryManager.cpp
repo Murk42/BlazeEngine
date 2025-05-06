@@ -81,7 +81,7 @@ namespace Blaze::Memory
 
 		if (ptr == nullptr)
 		{
-			Debug::Logger::LogError("Blaze Engine", "Malloc failed with " + StringParsing::Convert(size + sizeof(AllocationHeader)) + " bytes");
+			BLAZE_ENGINE_CORE_ERROR("Malloc failed with " + StringParsing::Convert(size + sizeof(AllocationHeader)) + " bytes");
 			return nullptr;
 		}
 

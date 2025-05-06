@@ -4,15 +4,15 @@
 
 namespace Blaze
 {
-	void* AllocatorBase::Allocate(uintMem bytes)
+	void* DefaultAllocator::Allocate(uintMem bytes)
 	{
 		return Memory::Allocate(bytes);
 	}
-	void AllocatorBase::Free(void* ptr)
+	void DefaultAllocator::Free(void* ptr)
 	{
 		Memory::Free(ptr);
 	}
-	void* AllocatorBase::Reallocate(uintMem bytes, void* old)
+	void* DefaultAllocator::Reallocate(uintMem bytes, void* old)
 	{
 		return Memory::Reallocate(bytes, old);
 	}

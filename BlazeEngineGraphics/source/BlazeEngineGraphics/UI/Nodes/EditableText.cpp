@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Nodes/EditableText.h"
-#include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
+#include "BlazeEngineGraphics/UI/Input/InputManager.h"
 #include "BlazeEngine/Input/Input.h"
 
 namespace Blaze::UI::Nodes
@@ -78,7 +78,7 @@ namespace Blaze::UI::Nodes
 			textRenderUnit.SetTextColor(unselectedColor);
 		}
 	}
-	void EditableText::OnEvent(SelectedEvent event)
+	void EditableText::OnEvent(const SelectedEvent& event)
 	{
 		selected = true;
 		textCursorRenderUnit.ShowCursor();
@@ -86,7 +86,7 @@ namespace Blaze::UI::Nodes
 
 		EditableTextBase::OnEvent(event);
 	}
-	void EditableText::OnEvent(DeselectedEvent event)
+	void EditableText::OnEvent(const DeselectedEvent& event)
 	{
 		selected = false;
 		EditableTextBase::OnEvent(event);

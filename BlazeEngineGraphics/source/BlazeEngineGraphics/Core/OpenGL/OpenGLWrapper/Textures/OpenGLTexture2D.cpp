@@ -34,8 +34,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 	}
 
 	static StringView GetGLError()
-	{
-		const char* ptr = (const char*)gluErrorString(glGetError());
+	{				
+		const char* ptr = (const char*)glewGetErrorString(glGetError());
 		uintMem len = strlen(ptr);
 		return StringView(ptr, len);
 	}
@@ -114,17 +114,14 @@ namespace Blaze::Graphics::OpenGLWrapper
 	{				
 		Bitmap bm;
 		
-		if (Result r = bm.Load(path, true))
-			return;
-
+		bm.Load(path, true);
 		Create(bm, settings);		
 	}
 	void Texture2D::Load(Path path, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings)
 	{
 		Bitmap bm;
 
-		if (Result r = bm.Load(path, true))
-			return;
+		bm.Load(path, true);			
 
 		Create(bm, internalFormat, settings);
 	}

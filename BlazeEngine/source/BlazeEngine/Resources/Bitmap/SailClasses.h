@@ -7,5 +7,5 @@ namespace Blaze
 
 	StringView GetSailStatusString(sail_status_t status);
 
-#define SAIL_CHECK(value, message) if (sail_status_t status = (value)) return BLAZE_ERROR_RESULT("SAIL image library", message + StringView(" Returned value:") + GetSailStatusString(status));
+#define SAIL_CHECK(value, message, ret) if (sail_status_t status = (value)) { Debug::Logger::LogError("SAIL image library", message + StringView(" Returned value:") + GetSailStatusString(status)); return ret; }
 }

@@ -69,7 +69,7 @@ namespace Blaze
 		if (ec)
 		{
 			auto message = ec.message();
-			Debug::Logger::LogError("Blaze Engine", "std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
+			BLAZE_ENGINE_CORE_ERROR("std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
 		}
 
 		return value;
@@ -82,7 +82,7 @@ namespace Blaze
 		if (ec)
 		{
 			auto message = ec.message();
-			Debug::Logger::LogError("Blaze Engine", "std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
+			BLAZE_ENGINE_CORE_ERROR("std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
 		}
 
 		return value;		
@@ -99,7 +99,7 @@ namespace Blaze
 		if (ec)
 		{			
 			auto message = ec.message();
-			Debug::Logger::LogError("Blaze Engine", "std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
+			BLAZE_ENGINE_CORE_ERROR("std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
 		}
 
 		return value;

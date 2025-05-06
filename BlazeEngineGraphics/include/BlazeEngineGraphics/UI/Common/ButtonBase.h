@@ -1,9 +1,9 @@
 #pragma once
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
-#include "BlazeEngine/Event/EventDispatcher.h"
-#include "BlazeEngineGraphics/UI/Input/UIInputNode.h"
-#include "BlazeEngineGraphics/UI/Input/UIMouseEventHandler.h"
-#include "BlazeEngineGraphics/UI/Input/UISelectEventHandler.h"
+#include "BlazeEngineCore/Event/EventDispatcher.h"
+#include "BlazeEngineGraphics/UI/Input/InputNode.h"
+#include "BlazeEngineGraphics/UI/Input/MouseEventHandler.h"
+#include "BlazeEngineGraphics/UI/Input/SelectEventHandler.h"
 
 namespace Blaze::UI
 {
@@ -13,19 +13,30 @@ namespace Blaze::UI
 		public UISelectEventHandler
 	{
 	public:
-		struct PressedEvent { InputManager* inputManager; };				
+		struct PressableFlagChangedEvent
+		{
+			ButtonBase& button;
+		};
+		struct PressedEvent 
+		{
+			InputManager& inputManager; 
+			ButtonBase& button;
+		};
+		EventDispatcher<PressableFlagChangedEvent> pressableFlagChangedEventDispatcher;
+		std::function<void(PressedEvent)> pressedEventCallback;		
 
-		EventDispatcher<PressedEvent> pressedEventDispatcher;
+		ButtonBase();
 
-		ButtonBase();		
+		void SetPressableFlag(bool pressable);
 
 		inline bool IsPressed() const { return pressed; }	
-	protected:
-		void OnEvent(MousePressedEvent event) override;
-		void OnEvent(MouseReleasedEvent event) override;		
-		void OnEvent(DeselectedEvent event) override;
+		inline bool IsPressable() const { return pressable; }
+	protected:		
+		void OnEvent(const MouseButtonDownEvent& event) override;
+		void OnEvent(const MouseButtonUpEvent& event) override;		
+		void OnEvent(const DeselectedEvent& event) override;
 	private: 				
 		bool pressed : 1;		
-
+		bool pressable : 1;
 	};
 }

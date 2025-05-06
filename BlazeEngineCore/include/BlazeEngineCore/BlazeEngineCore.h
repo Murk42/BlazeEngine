@@ -45,6 +45,7 @@
 
 #include "BlazeEngineCore/DataStructures/Array.h"
 #include "BlazeEngineCore/DataStructures/ArrayView.h"
+#include "BlazeEngineCore/DataStructures/ArrayIterator.h"
 #include "BlazeEngineCore/DataStructures/Hash.h"
 #include "BlazeEngineCore/DataStructures/List.h"
 #include "BlazeEngineCore/DataStructures/DualList.h"
@@ -55,6 +56,8 @@
 #include "BlazeEngineCore/DataStructures/StringViewUTF8Impl.h"
 #include "BlazeEngineCore/DataStructures/UnicodeCharImpl.h"
 #include "BlazeEngineCore/DataStructures/ArrayImpl.h"
+#include "BlazeEngineCore/DataStructures/ArrayViewImpl.h"
+#include "BlazeEngineCore/DataStructures/ArrayIteratorImpl.h"
 #include "BlazeEngineCore/DataStructures/ListImpl.h"
 #include "BlazeEngineCore/DataStructures/DualListImpl.h"
 #include "BlazeEngineCore/DataStructures/MapImpl.h"
@@ -65,6 +68,10 @@
 
 #pragma endregion
 
+#include "BlazeEngineCore/Types/Template.h"
+#include "BlazeEngineCore/Types/TemplateGroup.h"
+#include "BlazeEngineCore/Types/TypeTraits.h"
+
 #include "BlazeEngineCore/DataStructures/Buffer.h"
 #include "BlazeEngineCore/DataStructures/Color.h"
 #include "BlazeEngineCore/DataStructures/Constexpr.h"
@@ -72,8 +79,6 @@
 #include "BlazeEngineCore/DataStructures/HandleImpl.h"
 #include "BlazeEngineCore/DataStructures/HybridArray.h"
 #include "BlazeEngineCore/DataStructures/Rect.h"
-#include "BlazeEngineCore/DataStructures/Template.h"
-#include "BlazeEngineCore/DataStructures/TemplateGroup.h"
 #include "BlazeEngineCore/DataStructures/Tuple.h"
 #include "BlazeEngineCore/DataStructures/UnorderedArray.h"
 #include "BlazeEngineCore/DataStructures/UnorderedArrayImpl.h"
@@ -81,6 +86,14 @@
 #include "BlazeEngineCore/DataStructures/VirtualListImpl.h"
 #include "BlazeEngineCore/DataStructures/VirtualMap.h"
 #include "BlazeEngineCore/DataStructures/VirtualMapImpl.h"
+
+#include "BlazeEngineCore/Event/EventHandler.h"
+#include "BlazeEngineCore/Event/EventHandlerData.h"
+#include "BlazeEngineCore/Event/EventHandlerDataImpl.h"
+#include "BlazeEngineCore/Event/EventDispatcher.h"
+#include "BlazeEngineCore/Event/EventDispatcherImpl.h"
+#include "BlazeEngineCore/Event/LambdaEventHandler.h"
+#include "BlazeEngineCore/Event/QueueEventDispatcher.h"
 
 #include "BlazeEngineCore/File/FileSystem.h"
 #include "BlazeEngineCore/File/Stream/SubStream.h"

@@ -8,7 +8,8 @@ namespace Blaze::UI::Nodes
 {		
 	class BLAZE_GRAPHICS_API TextButton :
 		public ButtonBase,
-		public Graphics::RenderObject
+		public Graphics::RenderObject,
+		EventHandler<ButtonBase::PressableFlagChangedEvent>
 	{
 	public:
 		PanelRenderUnit panelRenderUnit;
@@ -24,16 +25,22 @@ namespace Blaze::UI::Nodes
 		Graphics::RenderUnit* GetRenderUnit(uint index) override;
 	private:						
 		bool hovered : 1;
-		ColorRGBAf normalColor = 0x333333ff;
-		ColorRGBAf highlightedColor = 0x404040ff;
-		ColorRGBAf pressedColor = 0x282828ff;
 
-		void UpdateColor();
+		ColorRGBAf normalPanelColor = 0x333333ff;
+		ColorRGBAf highlightedPanelColor = 0x404040ff;
+		ColorRGBAf pressedPanelColor = 0x282828ff;
+		ColorRGBAf unpressablePanelColor = 0x181818ff;
+
+		ColorRGBAf normalTextColor = 0xf0f0f0ff;
+		ColorRGBAf unpressableTextColor = 0xbbbbbbff;
+
+		void UpdatePanelColor();
 		
-		void OnEvent(MouseEnterEvent event) override;
-		void OnEvent(MouseExitEvent event) override;
-		void OnEvent(MousePressedEvent event) override;
-		void OnEvent(MouseReleasedEvent event) override;		
-		void OnEvent(DeselectedEvent event) override;		
+		void OnEvent(const MouseEnterEvent& event) override;
+		void OnEvent(const MouseExitEvent& event) override;
+		void OnEvent(const MouseButtonDownEvent& event) override;
+		void OnEvent(const MouseButtonUpEvent& event) override;		
+		void OnEvent(const DeselectedEvent& event) override;		
+		void OnEvent(const PressableFlagChangedEvent& event) override;
 	};
 }

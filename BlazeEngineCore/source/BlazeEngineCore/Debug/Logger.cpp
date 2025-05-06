@@ -26,26 +26,26 @@ namespace Blaze::Debug::Logger
 			if (blazeEngineCoreContext.loggerOutputStreams[i].writeStream == &stream)
 				blazeEngineCoreContext.loggerOutputStreams.EraseAt(i);		
 	}
-	Result AddOutputFile(const Path& path)
+	void AddOutputFile(const Path& path)
 	{
 		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
 
 		if (!blazeEngineCoreContext.loggerOutputFiles.Find(path).IsNull())
-			return Result();
+			return;
 
 		File file{ path, FileAccessPermission::Write };
 
 		if (!file.IsOpen())
-			return BLAZE_ERROR_RESULT("Blaze Engine Core", "Blaze::Debug::Logger::AddOutputFile failed because the file couldn't be opened");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Blaze::Debug::Logger::AddOutputFile failed because the file couldn't be opened");
+			return;
+		}
 
-		blazeEngineCoreContext.loggerOutputFiles.Insert(path, std::move(file));
-
-		return Result();
+		blazeEngineCoreContext.loggerOutputFiles.Insert(path, std::move(file));		
 	}
-	Result RemoveOutputFile(const Path& path)
+	void RemoveOutputFile(const Path& path)
 	{
 		blazeEngineCoreContext.loggerOutputFiles.Erase(path);
-		return Result();
 	}
 	
 	static void WriteToStreams(StringViewUTF8 string)
@@ -102,22 +102,22 @@ namespace Blaze::Debug::Logger
 
 	void LogDebug(StringUTF8&& source, StringUTF8&& message)
 	{
-		ProcessResult(BLAZE_DEBUG_RESULT(std::move(source), std::move(message)));
+		ProcessResult(Result(Log(LogType::Debug, std::move(source), std::move(message))));
 	}
 	void LogInfo(StringUTF8&& source, StringUTF8&& message)
 	{
-		ProcessResult(BLAZE_INFO_RESULT(std::move(source), std::move(message)));
+		ProcessResult(Result(Log(LogType::Info, std::move(source), std::move(message))));
 	}
 	void LogWarning(StringUTF8&& source, StringUTF8&& message)
 	{
-		ProcessResult(BLAZE_WARNING_RESULT(std::move(source), std::move(message)));
+		ProcessResult(Result(Log(LogType::Warning, std::move(source), std::move(message))));
 	}
 	void LogError(StringUTF8&& source, StringUTF8&& message)
 	{
-		ProcessResult(BLAZE_ERROR_RESULT(std::move(source), std::move(message)));
+		ProcessResult(Result(Log(LogType::Error, std::move(source), std::move(message))));
 	}
 	void LogFatal(StringUTF8&& source, StringUTF8&& message)
 	{
-		ProcessResult(BLAZE_FATAL_RESULT(std::move(source), std::move(message)));
+		ProcessResult(Result(Log(LogType::Fatal, std::move(source), std::move(message))));
 	}
 }

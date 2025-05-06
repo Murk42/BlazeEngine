@@ -1,18 +1,31 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Memory/Allocator.h"
+#include <type_traits>
 
 namespace Blaze
 {
 	template<typename T, AllocatorType Allocator>
-	class VirtualList;
+	class VirtualList;	
 
-	template<typename T1, typename T2>
-	concept IsConvertibleToVirtualListIterator =
-		std::same_as<std::remove_const_t<typename T2::template VirtualListType>, std::remove_const_t<typename T1::template VirtualListType>> &&
-		(!(std::is_const_v<typename T1::template VirtualListType> && !std::is_const_v<typename T2::template VirtualListType>));
+	template<typename T>
+	struct VirtualListNodeBase
+	{
+		VirtualListNodeBase* next;
+		T& valueBase;
 
-	template<typename T1, typename T2>
-	concept IsComparableToVirtualListIterator =
-		std::same_as<std::remove_const_t<typename T2::template VirtualListType>, std::remove_const_t<typename T1::template VirtualListType>>;
+		VirtualListNodeBase(VirtualListNodeBase* next, T& valueBase);
+		virtual ~VirtualListNodeBase();
+	};
+	template<typename Base, typename Derived> requires std::derived_from<Derived, Base> || std::same_as<Base, void>
+	struct VirtualListNode : public VirtualListNodeBase<Base>
+	{
+		Derived value;
+
+		template<typename ... Args> requires std::constructible_from<Derived, Args...>
+		VirtualListNode(VirtualListNodeBase<Base>* next, Args&& ... args);
+		~VirtualListNode() override;
+	};
 
 	/*
 		Used with the Blaze::VirtualList class.
@@ -43,18 +56,17 @@ namespace Blaze
 
 		No other macros change the list iterator behaviour
 	*/
-	template<typename VirtualList>
+	template<typename T, bool IsConst = false>
 	class BLAZE_CORE_API VirtualListIterator
 	{
-	public:		
-		template<typename T>
-		using MatchValueBaseConst = std::conditional_t<std::is_const_v<typename VirtualList::template ValueBaseType> || std::is_const_v<VirtualList>, const std::remove_const_t<T>, std::remove_const_t<T>>;
-		using VirtualListType = VirtualList;
-		using ValueBaseType = MatchValueBaseConst<typename VirtualList::template ValueBaseType>;
+	public:
+		using NodeBase = std::conditional_t<IsConst, const VirtualListNodeBase<T>, VirtualListNodeBase<T>>;
+		using ValueBaseType = std::conditional_t<IsConst, const T, T>;
 
 		VirtualListIterator();
-		template<IsConvertibleToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-		VirtualListIterator(const T&);
+		VirtualListIterator(NodeBase* nodeBase);
+		template<bool IsConst2> requires (IsConst || !IsConst2)
+		VirtualListIterator(const VirtualListIterator<T, IsConst2>& other);
 
 		bool IsNull() const;
 
@@ -63,28 +75,26 @@ namespace Blaze
 
 		//Returns the value that the iterator is pointing to. If the asked type does not match
 		//the stored value nullptr is returned. If the iterator is null nullptr is returned
-		template<typename Value> requires InsertableToVirtualList<Value, typename VirtualList::template ValueBaseType>
-		MatchValueBaseConst<Value>* GetValue() const;		
+		template<typename T2> requires (std::is_const_v<T2> || !std::is_const_v<typename VirtualListIterator<T, IsConst>::template ValueBaseType>) && (std::derived_from<T2, T> || std::same_as<std::remove_const_t<T>, void>)
+		std::conditional_t<IsConst, const T2, T2>* GetValue() const;		
 
-		ValueBaseType& operator*() const requires (!std::same_as<ValueBaseType, void>);
-		ValueBaseType* operator->() const requires (!std::same_as<ValueBaseType, void>);
+		ValueBaseType& operator*() const requires (!std::same_as<std::remove_const_t<T>, void>);
+		ValueBaseType* operator->() const requires (!std::same_as<std::remove_const_t<T>, void>);
 
-		template<IsComparableToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-		bool operator==(const T& i) const;
-		template<IsComparableToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-		bool operator!=(const T& i) const;
+		template<bool IsConst2> requires (IsConst || !IsConst2)
+		bool operator==(const VirtualListIterator<T, IsConst2>& other) const;
+		template<bool IsConst2> requires (IsConst || !IsConst2)
+		bool operator!=(const VirtualListIterator<T, IsConst2>& other) const;
 
-		template<IsConvertibleToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-		VirtualListIterator& operator=(const T& i);
+		template<bool IsConst2> requires (IsConst || !IsConst2)
+		VirtualListIterator& operator=(const VirtualListIterator<T, IsConst2>& other);
 
 		template<typename, AllocatorType>
 		friend class ::Blaze::VirtualList;
-	private:
-		using Node = ::std::conditional_t<std::is_const_v<VirtualList>, const typename VirtualList::template NodeHeader, typename VirtualList::template NodeHeader>;
+	private:				
 
-		Node* node;
+		NodeBase* nodeBase;
 
-		VirtualListIterator(Node* node);
 	};
 
 	template<typename Value, typename ValueBase>
@@ -110,8 +120,8 @@ namespace Blaze
 	class BLAZE_CORE_API VirtualList
 	{
 	public:
-		using Iterator = VirtualListIterator<VirtualList>;
-		using ConstIterator = VirtualListIterator<const VirtualList>;
+		using Iterator = VirtualListIterator<T, false>;
+		using ConstIterator = VirtualListIterator<T, true>;
 		using ValueBaseType = T;				
 
 		VirtualList();
@@ -130,12 +140,12 @@ namespace Blaze
 		template<typename Derived, typename ... Args> requires InsertableToVirtualList<Derived, T> && std::constructible_from<Derived, Args...>
 		Iterator AddFront(Args&& ... args);
 
-		Result EraseAfter(const Iterator& it);
-		Result EraseFirst();
+		void EraseAfter(const Iterator& it);
+		void EraseFirst();
 		template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
-		Result EraseAll(const C& function);
+		void EraseAll(const C& function);
 		template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
-		Result EraseOne(const C& function);
+		void EraseOne(const C& function);
 
 		void AppendBack(const VirtualList& list);
 		void AppendBack(VirtualList&& list);
@@ -176,38 +186,17 @@ namespace Blaze
 		ConstIterator BehindIterator() const;
 
 		VirtualList& operator=(const VirtualList& l) = delete;
-		VirtualList& operator=(VirtualList&& l) noexcept;
-
-		template<typename VirtualList>
-		friend class VirtualListIterator;
+		VirtualList& operator=(VirtualList&& l) noexcept;		
 	private:
-		struct NodeHeader
-		{
-			NodeHeader* next;			
-			T* valueBase;
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-			uintMem iteratorCount;
-#endif
-			
-			NodeHeader(NodeHeader* next, T* valueBase);
-			virtual ~NodeHeader();
-		};
-		template<typename Value> requires InsertableToVirtualList<Value, T>
-		struct Node : public NodeHeader
-		{
-			Value value;
-
-			template<typename ... Args> requires std::constructible_from<Value, Args...>
-			Node(NodeHeader* next, Args&& ... args);
-			~Node() override;
-		};
-
+		using NodeBase = VirtualListNodeBase<T>;
+		template<typename Derived>
+		using Node = VirtualListNode<T, Derived>;
 		//Wont free previous contents
 		void CopyUnsafe(const VirtualList& other);
 
-		NodeHeader* first;
-		NodeHeader* last;
+		VirtualListNodeBase<T>* first;
+		VirtualListNodeBase<T>* last;
 		size_t count;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
-	};	
+	};		
 }

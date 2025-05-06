@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/Set.h"
 
 namespace Blaze
 {
@@ -27,7 +28,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK				
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif		
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -85,7 +86,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK			
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
 #endif			
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -146,7 +147,7 @@ namespace Blaze
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
 		{
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 			return *(ValueType*)nullptr;
 		}
 #endif
@@ -159,7 +160,7 @@ namespace Blaze
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
 		{
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 			return nullptr;
 		}
 #endif
@@ -201,19 +202,19 @@ namespace Blaze
 
 	}
 
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Set()
 		: buckets(nullptr), bucketCount(0), count(0)
 	{
 		CheckForRehash();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Set(const Set& other)
 		: buckets(nullptr), bucketCount(0), count(0)
 	{
 		CopyUnsafe(other);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Set(Set&& other) noexcept
 		: bucketCount(other.bucketCount), buckets(other.buckets), count(other.count)
 	{
@@ -221,26 +222,26 @@ namespace Blaze
 		other.buckets = nullptr;
 		other.count = 0;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Set(const ArrayView<Value>& other)
 		: buckets(nullptr), bucketCount(0), count(0)
 	{
 		for (const auto& el : other)
 			Insert(el);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Set(const std::initializer_list<Value>& other)
 		: buckets(nullptr), bucketCount(0), count(0)
 	{
 		for (const auto& el : other)
 			Insert(el);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::~Set()
 	{
 		Clear();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::Clear()
 	{
 		Bucket* begin = buckets;
@@ -252,7 +253,7 @@ namespace Blaze
 			{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK				
 				if (node->iteratorCount)
-					Debug::Logger::LogWarning("Blaze Engine", "Clearing a set while a iterator is referencing it");
+					BLAZE_ENGINE_CORE_WARNING("Clearing a set while a iterator is referencing it");
 #endif
 				Node* next = node->next;
 				std::destroy_at(node);
@@ -267,22 +268,22 @@ namespace Blaze
 		bucketCount = 0;
 		count = 0;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline bool Set<Value, Hasher, Allocator>::Empty() const
 	{
 		return count == 0;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::Find(const Value& value)
 	{
 		return FindWithHint(value, Hash(value));
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::Find(const Value& value) const
 	{
 		return ConstIterator(FindWithHint(value, Hash(value)));
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline bool Set<Value, Hasher, Allocator>::Contains(const Value& value) const
 	{
 		uintMem hash = Hash(value);
@@ -306,13 +307,15 @@ namespace Blaze
 
 		return true;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::Insert(_Value&& value)
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
+	template<typename ... Args> requires std::constructible_from<Value, Args...>
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::Insert(Args&& ... args) requires std::constructible_from<Value, Value&&>
 	{
-		return InsertWithHint(std::forward<_Value>(value), Hash(value));
+		Value value{ std::forward<Args>(args)... };
+		uintMem hash = Hash(value);
+		return InsertWithHint(hash, std::move(value));
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline bool Set<Value, Hasher, Allocator>::Erase(const Value& value)
 	{
 		Bucket* bucket = GetBucketFromHash(Hash(value));
@@ -329,12 +332,12 @@ namespace Blaze
 
 		return true;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline bool Set<Value, Hasher, Allocator>::Erase(const Iterator& iterator)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (iterator.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to erase a set value with a null iterator");
+			return BLAZE_ENGINE_CORE_ERROR("Trying to erase a set value with a null iterator");
 #endif
 
 		Bucket* bucket = GetBucketFromHash(iterator.node->hash);
@@ -346,12 +349,12 @@ namespace Blaze
 
 		return true;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline uintMem Set<Value, Hasher, Allocator>::Count() const
 	{
 		return count;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FirstIterator()
 	{
 		for (uintMem i = 0; i < bucketCount; ++i)
@@ -360,7 +363,7 @@ namespace Blaze
 
 		return Iterator();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FirstIterator() const
 	{
 		if (bucketCount == 0)
@@ -370,7 +373,7 @@ namespace Blaze
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].head, this);		
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::LastIterator()
 	{
 		if (bucketCount == 0)
@@ -380,7 +383,7 @@ namespace Blaze
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].tail, this);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::LastIterator() const
 	{
 		if (bucketCount == 0)
@@ -390,27 +393,27 @@ namespace Blaze
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].tail, this);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::AheadIterator()
 	{
 		return Iterator();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::AheadIterator() const
 	{
 		return ConstIterator();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::BehindIterator()
 	{
 		return Iterator();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::BehindIterator() const
 	{
 		return ConstIterator();
 	}	
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::operator Array<Value>() const
 	{
 		Array<Value> out { count };
@@ -424,7 +427,7 @@ namespace Blaze
 
 		return out;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>& Set<Value, Hasher, Allocator>::operator=(const Set& other)
 	{
 		Clear();
@@ -433,7 +436,7 @@ namespace Blaze
 
 		return *this;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>& Set<Value, Hasher, Allocator>::operator=(Set&& other) noexcept
 	{
 		Clear();
@@ -446,13 +449,12 @@ namespace Blaze
 		other.count = 0;
 		return *this;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, _Value&& value)
-		: prev(prev), next(next), hash(hash), value(std::forward<_Value>(value))
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>	
+	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, Value&& value) requires std::constructible_from<Value, Value&&>
+		: prev(prev), next(next), hash(hash), value(std::move(value))
 	{
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::CopyUnsafe(const Set& other)
 	{
 		bucketCount = other.bucketCount;
@@ -493,12 +495,12 @@ namespace Blaze
 			itDst->tail = nodeDst;
 		}
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline uintMem Set<Value, Hasher, Allocator>::Hash(const Value& value)
 	{
 		return Hasher::Compute(value);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHash(uintMem hash) const
 	{
 		if (bucketCount == 0)
@@ -506,12 +508,12 @@ namespace Blaze
 
 		return GetBucketFromHashModUnsafe(hash % bucketCount);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uintMem hashMod) const
 	{
 		return &buckets[hashMod];
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uintMem hash)
 	{
 		auto* bucket = GetBucketFromHash(hash);
@@ -521,7 +523,7 @@ namespace Blaze
 
 		return FindWithHintUnsafe(value, bucket);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uintMem hash) const
 	{
 		auto* bucket = GetBucketFromHash(hash);
@@ -531,7 +533,7 @@ namespace Blaze
 
 		return FindWithHintUnsafe(value, bucket);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FindWithHintUnsafe(const Value& value, Bucket* bucket)
 	{
 		Node* node = bucket->head;
@@ -549,7 +551,7 @@ namespace Blaze
 
 		return Iterator(node, this);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FindWithHintUnsafe(const Value& value, Bucket* bucket) const
 	{
 		Node* node = bucket->head;
@@ -567,9 +569,8 @@ namespace Blaze
 
 		return ConstIterator(node, this);
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(_Value&& value, uintMem hash)
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>	
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(uintMem hash, Value&& value) requires std::constructible_from<Value, Value&&>
 	{
 		if (count == 0)		
 			AllocateEmptyUnsafe();		
@@ -579,16 +580,15 @@ namespace Blaze
 		if (bucket == nullptr)
 		{
 
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to insert a set element but there are no buckets");
+			BLAZE_ENGINE_CORE_FATAL("Trying to insert a set element but there are no buckets");
 			return { Iterator(), false };
 		}
 
-		return InsertWithHintUnsafe(std::forward<_Value>(value), bucket, hash);
+		return InsertWithHintUnsafe(bucket, hash, std::move(value));
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
-	template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(_Value&& value, Bucket* bucket, uintMem hash)
-	{
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(Bucket* bucket, uintMem hash, Value&& value) requires std::constructible_from<Value, Value&&>
+	{		
 		Node* node = nullptr;
 		Node* prev = nullptr;
 		Node* next = nullptr;
@@ -601,6 +601,8 @@ namespace Blaze
 			++count;
 
 			node = bucket->head;
+
+			std::construct_at(node, prev, next, hash, std::move(value));
 		}
 		else
 		{
@@ -636,29 +638,29 @@ namespace Blaze
 				prev = node;
 				node = node->next;
 			}
-		}
-
-		std::construct_at(node, prev, next, hash, std::forward<_Value>(value));
+			
+			std::construct_at(node, prev, next, hash, std::move(value));
+		}		
 
 		CheckForRehash();
 
 		return { Iterator(node, this), true };
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::EraseNodeUnsafe(Bucket* bucket, Node* node)
 	{
 		RemoveNodeFromSpotUnsafe(node, bucket);
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK				
 		if (node->iteratorCount)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a set node while a iterator is referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Erasing a set node while a iterator is referencing it");
 #endif
 
 		std::destroy_at(node);
 		allocator.Free(node);
 		--count;		
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::CheckForRehash()
 	{
 		static constexpr float max_load_factor = 1.0f;
@@ -680,7 +682,7 @@ namespace Blaze
 			Rehash(newBucketCount);
 		}		
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::Rehash(uintMem newBucketCount)
 	{
 		Bucket* old = buckets;
@@ -696,7 +698,7 @@ namespace Blaze
 		allocator.Free(old);
 		bucketCount = newBucketCount;		
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::AllocateEmptyUnsafe()
 	{
 		bucketCount = 8;
@@ -704,7 +706,7 @@ namespace Blaze
 		memset(buckets, 0, sizeof(Bucket) * bucketCount);
 		count = 0;
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
 	{
 		Node* node = bucket->head;
@@ -721,7 +723,7 @@ namespace Blaze
 			node = next;
 		}		
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::RemoveNodeFromSpotUnsafe(Node* node, Bucket* bucket)
 	{
 		if (node->prev)
@@ -758,7 +760,7 @@ namespace Blaze
 
 		}
 	}	
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline void Set<Value, Hasher, Allocator>::MoveNodeToBeginingUnsafe(Node* node, Bucket* bucket)
 	{
 		Node* head = bucket->head;
@@ -773,22 +775,22 @@ namespace Blaze
 		bucket->head = node;
 	}
 
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	Set<Value, Hasher, Allocator>::Iterator begin(Set<Value, Hasher, Allocator>& set)
 	{
 		return set.FirstIterator();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	Set<Value, Hasher, Allocator>::ConstIterator begin(const Set<Value, Hasher, Allocator>& set)
 	{
 		return set.FirstIterator();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	Set<Value, Hasher, Allocator>::Iterator end(Set<Value, Hasher, Allocator>& set)
 	{
 		return set.BehindIterator();
 	}
-	template<typename Value, typename Hasher, AllocatorType Allocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	Set<Value, Hasher, Allocator>::ConstIterator end(const Set<Value, Hasher, Allocator>& set)
 	{
 		return set.BehindIterator();

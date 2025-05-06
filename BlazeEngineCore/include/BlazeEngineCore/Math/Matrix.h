@@ -7,22 +7,33 @@ namespace Blaze
 	template<typename T, uintMem Sx, uintMem Sy>
 	struct Matrix
 	{
-		std::array<std::array<T, Sx>, Sy> arr;
+		T arr[Sy][Sx];
 
 		constexpr Matrix()
 			: arr({ })
 		{
 		}						
-		constexpr Matrix(const std::array<T, Sx * Sy>& values)
+		constexpr Matrix(const T(&values)[Sy][Sx])
 		{
 			memcpy(&arr, &values, sizeof(T) * Sx * Sy);
 		}		
+		constexpr Matrix(const T(&values)[Sx*Sy])
+		{
+			for (uintMem i = 0; i != Sx * Sy; ++i)
+				((T*)arr)[i] = values[i];
+		}
 		constexpr Matrix(T* ptr)
 		{
 			for (uintMem i = 0; i != Sx * Sy; ++i)
-				arr[i] = ptr[i];
+				((T*)arr)[i] = ptr[i];
 		}
 
+		constexpr void Transpose()
+		{
+			for (uintMem i = 1; i < Sy; ++i)
+				for (uintMem j = 0; j < i; ++j)
+					std::swap(this->arr[i][j], this->arr[j][i]);
+		}
 		constexpr Matrix<T, Sy, Sx> Transposed() const
 		{
 			Matrix<T, Sy, Sx> mat = *this;			
@@ -36,7 +47,7 @@ namespace Blaze
 		template<uintMem Sx2>
 		constexpr Matrix<T, Sx2, Sy> operator* (const Matrix<T, Sx2, Sx>& m) const
 		{
-			Matrix<T, Sx2, Sy> out = Matrix<T, Sx2, Sy>(0.0f);
+			Matrix<T, Sx2, Sy> out;
 			
 			for (uintMem i = 0; i < Sy; ++i)
 				for (uintMem k = 0; k < Sx; ++k)				
@@ -61,7 +72,7 @@ namespace Blaze
 
 			for (uintMem i = 0; i != Sy; ++i)
 				for (uintMem j = 0; j != Sx; ++j)
-					out.arr[i] += v.arr[j] * arr[i][j];
+					out[i] += v[j] * arr[i][j];
 
 			return out;
 		}
@@ -99,126 +110,16 @@ namespace Blaze
 			return memcmp(arr, m.arr, sizeof(T) * Sx * Sy) != 0; 
 		}
 
-		constexpr std::array<T, Sy>& operator[](uintMem index)
+		constexpr auto operator[](uintMem index) -> T(&)[Sy]
 		{
 			return arr[index];
 		}
-		constexpr const std::array<T, Sy>& operator[](uintMem index) const
+		constexpr auto operator[](uintMem index) const -> const T(&)[Sy]
 		{
 			return arr[index];
-		}
-	};
-
-	template<typename T, uintMem S>
-	struct Matrix<T, S, S>
-	{
-		static constexpr uintMem Sx = S;
-		static constexpr uintMem Sy = S;
-		std::array<std::array<T, Sy>, Sx> arr;
-
-		constexpr Matrix()
-			: arr({ })
-		{
-		}
-		constexpr Matrix(const std::array<T, Sx * Sy>& values)
-		{
-			memcpy(&arr, &values, sizeof(T) * Sx * Sy);
-		}
-		constexpr Matrix(T* ptr)
-		{
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != Sx; ++j)
-					arr[i][j] = ptr[j + i * Sx];
-		}
-
-		constexpr void Transpose()
-		{
-			for (uintMem i = 1; i < Sy; ++i)
-				for (uintMem j = 0; j < i; ++j)
-					std::swap(this->arr[i][j], this->arr[j][i]);
-		}
-		constexpr Matrix<T, Sx, Sy> Transposed() const
-		{
-			Matrix<T, Sx, Sy> mat = *this;
-			mat.Transpose();
-			return mat;
-		}
-
-		template<uintMem S2>
-		constexpr Matrix<T, S2, Sy> operator* (const Matrix<T, S2, Sy>& m) const
-		{
-			Matrix<T, S2, Sy> out;
-		
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != S2; ++j)
-					for (uintMem k = 0; k != Sx; ++k)
-						out.arr[i][j] += arr[i][k] * m.arr[k][j];
-
-			return out;
-		}
-		constexpr Matrix operator* (const T& v) const
-		{
-			Matrix mat = *this;
-			
-			for (uintMem i = 0; i < Sy; ++i)
-				for (uintMem j = 0; j < Sx; ++j)
-					mat.arr[i][j] *= v;
-			return mat;
-		}
-		constexpr Vector<T, Sy> operator* (const Vector<T, Sy>& v) const
-		{
-			Vector<T, Sy> out;
-
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != Sx; ++j)
-					out[i] += v[j] * arr[i][j];
-
-			return out;
-		}
-
-		constexpr Matrix& operator*= (const T& v)
-		{
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != Sx; ++j)
-					arr[i][j] *= v;
-
-			return *this;
-		}
-		constexpr Matrix& operator*= (const Matrix<T, Sx, Sy>& m)
-		{
-			Matrix<T, S, S> res;			
-			
-			for (uintMem i = 0; i < Sy; ++i)
-				for (uintMem j = 0; j < Sx; ++j)
-					for (uintMem k = 0; k < Sx; ++k)
-						res.arr[i][j] += arr[i][k] * m.arr[k][j];
-
-			for (uintMem i = 0; i < Sy; ++i)
-				for (uintMem j = 0; j < Sx; ++j)
-					arr[i][j] = res.arr[i][j];
-
-			return *this;
-		}
-
-		constexpr bool operator== (const Matrix<T, Sx, Sy>& m) const 
-		{ 
-			return memcmp(&arr, &m.arr, sizeof(T) * Sx * Sy) == 0; 
-		}
-		constexpr bool operator!= (const Matrix<T, Sx, Sy>& m) const 
-		{ 
-			return memcmp(&arr, &m.arr, sizeof(T) * Sx * Sy) != 0; 
 		}		
 
-		constexpr std::array<T, Sy>& operator[](uintMem index)
-		{
-			return arr[index];
-		}
-		constexpr const std::array<T, Sy>& operator[](uintMem index) const
-		{
-			return arr[index];
-		}
-
-		static constexpr Matrix<T, Sx, Sy> Identity()
+		static constexpr Matrix<T, Sx, Sy> Identity() requires (Sx == Sy)		
 		{
 			Matrix<T, Sx, Sy> mat;
 
@@ -227,44 +128,8 @@ namespace Blaze
 
 			return mat;
 		}
-	};
 
-	template<typename T>
-	struct Matrix<T, 4, 4>
-	{
-		static constexpr uintMem Sx = 4;
-		static constexpr uintMem Sy = 4;
-		T arr[Sy][Sx];
-
-		constexpr Matrix()
-			: arr()
-		{
-		}
-		constexpr Matrix(const std::array<std::array<T, Sx>, Sy>& values)
-		{
-			memcpy(arr, &values, sizeof(T) * Sx * Sy);
-		}
-		constexpr Matrix(T* ptr)
-		{
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != Sx; ++j)
-					arr[i][j] = ptr[j + i * Sx];
-		}
-
-		constexpr void Transpose()
-		{
-			for (uintMem i = 1; i < Sy; ++i)
-				for (uintMem j = 0; j < i; ++j)
-					std::swap(this->arr[i][j], this->arr[j][i]);
-		}
-		constexpr Matrix<T, Sx, Sy> Transposed() const
-		{
-			Matrix<T, Sx, Sy> mat = *this;
-			mat.Transpose();
-			return mat;
-		}
-		
-		static constexpr Matrix TranslationMatrix(Vec3<T> v)
+		static constexpr Matrix TranslationMatrix(Vec3<T> v) requires (Sx == 4) && (Sy == 4)
 		{
 			return Matrix<T, 4, 4>({
 				1, 0, 0, v.x,
@@ -272,8 +137,8 @@ namespace Blaze
 				0, 0, 1, v.z,
 				0, 0, 0, 1,
 				});
-		}		
-		static constexpr Matrix ScalingMatrix(Vec3<T> v)
+		}
+		static constexpr Matrix ScalingMatrix(Vec3<T> v) requires (Sx == 4) && (Sy == 4)
 		{
 			return Matrix<T, 4, 4>({
 				v.x, 0, 0, 0,
@@ -281,8 +146,8 @@ namespace Blaze
 				0, 0, v.z, 0,
 				0, 0, 0, 1,
 				});
-		}		
-		static constexpr Matrix ScalingMatrix(T v)
+		}
+		static constexpr Matrix ScalingMatrix(T v) requires (Sx == 4) && (Sy == 4)
 		{
 			return Matrix<T, 4, 4>({
 				v, 0, 0, 0,
@@ -291,7 +156,7 @@ namespace Blaze
 				0, 0, 0, 1,
 				});
 		}
-		static constexpr Matrix RotationMatrix(Quat<T> q)
+		static constexpr Matrix RotationMatrix(Quat<T> q) requires (Sx == 4) && (Sy == 4)
 		{
 			const T xx = q.x * q.x;
 			const T yy = q.y * q.y;
@@ -309,7 +174,7 @@ namespace Blaze
 				0, 0, 0, 1
 				});
 		}
-		static constexpr Matrix RotationMatrixAxisX(T radians)
+		static constexpr Matrix RotationMatrixAxisX(T radians) requires (Sx == 4) && (Sy == 4)
 		{
 			const T sin = Math::Sin(radians);
 			const T cos = Math::Cos(radians);
@@ -320,7 +185,7 @@ namespace Blaze
 				0,   0,   0,   1
 				});
 		}
-		static constexpr Matrix RotationMatrixAxisY(T radians)
+		static constexpr Matrix RotationMatrixAxisY(T radians) requires (Sx == 4) && (Sy == 4)
 		{
 			const T sin = Math::Sin(radians);
 			const T cos = Math::Cos(radians);
@@ -331,7 +196,7 @@ namespace Blaze
 				   0,   0,   0,  1
 				});
 		}
-		static constexpr Matrix RotationMatrixAxisZ(T radians)
+		static constexpr Matrix RotationMatrixAxisZ(T radians) requires (Sx == 4) && (Sy == 4)
 		{
 			const T sin = Math::Sin(radians);
 			const T cos = Math::Cos(radians);
@@ -342,8 +207,8 @@ namespace Blaze
 				  0,   0,   0,   1
 				});
 		}
-		
-		static constexpr Matrix<T, 4, 4> OrthographicMatrix(T left, T right, T bottom, T top, T near, T far)
+
+		static constexpr Matrix<T, 4, 4> OrthographicMatrix(T left, T right, T bottom, T top, T near, T far) requires (Sx == 4) && (Sy == 4)
 		{
 			T rml = right - left;
 			T tmb = top - bottom;
@@ -359,8 +224,8 @@ namespace Blaze
 		}
 		//After multiplying a vector (the fourth component of the vector'w' is expected to be 1) the x, y, z
 		//components need to be divided by w to get them in clip space (x, y, z will be in the range [-1, 1]).
-		static constexpr Matrix<T, 4, 4> PerspectiveMatrix(T fov, T aspectRatio, T near, T far)
-		{			
+		static constexpr Matrix<T, 4, 4> PerspectiveMatrix(T fov, T aspectRatio, T near, T far) requires (Sx == 4) && (Sy == 4)
+		{
 			T S = T(1) / Math::Tan(fov / T(2));
 
 			return Matrix<T, 4, 4>({
@@ -368,85 +233,9 @@ namespace Blaze
 				T(0), S * aspectRatio	, T(0)							, T(0),
 				T(0), T(0)				, (far + near) / (far - near)	,-2 * near * far / (far - near),
 				T(0), T(0)				, 1	, 0
-				});			
+				});
 		}
-
-		template<uintMem S2>
-		constexpr Matrix<T, S2, Sy> operator* (const Matrix<T, S2, Sy>& m) const
-		{
-			Matrix<T, S2, Sy> out;
-
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != S2; ++j)
-					for (uintMem k = 0; k != Sx; ++k)
-						out.arr[i][j] += arr[i][k] * m.arr[k][j];
-
-			return out;
-		}
-		constexpr Matrix operator* (const T& v) const
-		{
-			Matrix mat = *this;
-
-			for (uintMem i = 0; i < Sy; ++i)
-				for (uintMem j = 0; j < Sx; ++j)
-					mat.arr[i][j] *= v;
-
-			return mat;
-		}
-		constexpr Vector<T, Sy> operator* (const Vector<T, Sy>& v) const
-		{
-			Vector<T, Sy> out;
-
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != Sx; ++j)
-					out[i] += v[j] * arr[i][j];
-
-			return out;
-		}
-
-		constexpr Matrix& operator*= (const T& v)
-		{
-			for (uintMem i = 0; i != Sy; ++i)
-				for (uintMem j = 0; j != Sx; ++j)
-					arr[i][j] *= v;
-
-			return *this;
-		}
-		constexpr Matrix& operator*= (const Matrix<T, Sx, Sy>& m)
-		{
-			Matrix<T, Sx, Sy> res;
-
-			for (uintMem i = 0; i < Sy; ++i)
-				for (uintMem j = 0; j < Sx; ++j)
-					for (uintMem k = 0; k < Sx; ++k)
-						res.arr[i][j] += arr[i][k] * m.arr[k][j];
-
-			for (uintMem i = 0; i < Sy; ++i)
-				for (uintMem j = 0; j < Sx; ++j)
-					arr[i][j] = res.arr[i][j];
-
-			return *this;
-		}
-
-		constexpr bool operator== (const Matrix<T, Sx, Sy>& m) const
-		{
-			return memcmp(&arr, &m.arr, sizeof(T) * Sx * Sy) == 0;
-		}
-		constexpr bool operator!= (const Matrix<T, Sx, Sy>& m) const
-		{
-			return memcmp(&arr, &m.arr, sizeof(T) * Sx * Sy) != 0;
-		}		
-
-		static constexpr Matrix<T, Sx, Sy> Identity()
-		{
-			Matrix<T, Sx, Sy> mat;
-
-			for (int i = 0; i < Sx; ++i)
-				mat.arr[i][i] = 1;
-
-			return mat;
-		}
-	};
+	};	
 	
 	template<typename T>
 	using Mat2 = Matrix<T, 2, 2>;

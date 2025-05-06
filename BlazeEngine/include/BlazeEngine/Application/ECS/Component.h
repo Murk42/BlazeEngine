@@ -79,10 +79,10 @@ namespace Blaze::ECS
 		{
 			const ComponentTypeData* typeData;
 			if (!GetTypeData(typeData))
-				Debug::Logger::LogError("Blaze Engine", "Component has to type data");
+				BLAZE_ENGINE_CORE_ERROR("Component has to type data");
 
 			if (typeData->GetTypeName() != T::typeName)				
-				Debug::Logger::LogError("Blaze Engine", "Invalid component cast");								
+				BLAZE_ENGINE_CORE_ERROR("Invalid component cast");
 
 			return (T*)this;					
 		}
@@ -154,7 +154,7 @@ namespace Blaze::ECS
 		ComponentContainer();
 		~ComponentContainer();
 
-		Result SetTypeData(const ComponentTypeData&);
+		void SetTypeData(const ComponentTypeData&);
 
 		Component* Create();
 		Component* Allocate();

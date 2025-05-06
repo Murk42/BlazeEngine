@@ -21,8 +21,8 @@ namespace Blaze::Graphics::Vulkan
 
 		GraphicsContext_Vulkan(const GraphicsContextProperties_Vulkan& properties);
 
-		void CreateWindowAndSurface(WindowSDL& window, VkSurfaceKHR& surface, StringView title, Vec2i pos, Vec2u size);
-		void DestroyWindowAndSurface(WindowSDL& window, VkSurfaceKHR surface);
+		void CreateWindowAndSurface(Window& window, VkSurfaceKHR& surface, StringView title, Vec2i pos, Vec2u size);
+		void DestroyWindowAndSurface(Window& window, VkSurfaceKHR surface);
 
 		void RunSingleTimeCommand(const std::function<void(VkCommandBuffer)>&);
 		void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess);
@@ -39,7 +39,7 @@ namespace Blaze::Graphics::Vulkan
 		uint32 graphicsQueueFamily;
 		uint32 presentQueueFamily;
 
-		WindowSDL initWindow;
+		Window initWindow;
 		VkSurfaceKHR initSurface;				
 
 		VkQueue graphicsQueue;

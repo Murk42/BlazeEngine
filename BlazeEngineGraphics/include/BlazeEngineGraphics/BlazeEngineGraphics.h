@@ -39,8 +39,13 @@
 
 
 //UI
-#include "BlazeEngineGraphics/UI/Core/UINode.h"
-#include "BlazeEngineGraphics/UI/Core/UIScreen.h"
+#include "BlazeEngineGraphics/UI/Core/NodeDataMap.h"
+#include "BlazeEngineGraphics/UI/Core/NodeTransform.h"
+#include "BlazeEngineGraphics/UI/Core/NodeFinalTransform.h"
+#include "BlazeEngineGraphics/UI/Core/NodeTreeIterator.h"
+#include "BlazeEngineGraphics/UI/Core/NodeTreeView.h"
+#include "BlazeEngineGraphics/UI/Core/Node.h"
+#include "BlazeEngineGraphics/UI/Core/Screen.h"
 
 //---UI Graphics
 #ifdef GRAPHICS_OPENGL
@@ -56,12 +61,13 @@
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnitBase.h"
 
 //---UI Input
-#include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
-#include "BlazeEngineGraphics/UI/Input/UIInputNode.h"
-#include "BlazeEngineGraphics/UI/Input/UIKeyboardEventHandler.h"
-#include "BlazeEngineGraphics/UI/Input/UIMouseEventHandler.h"
-#include "BlazeEngineGraphics/UI/Input/UISelectEventHandler.h"
+#include "BlazeEngineGraphics/UI/Input/InputManager.h"
+#include "BlazeEngineGraphics/UI/Input/InputNode.h"
+#include "BlazeEngineGraphics/UI/Input/KeyboardEventHandler.h"
+#include "BlazeEngineGraphics/UI/Input/MouseEventHandler.h"
+#include "BlazeEngineGraphics/UI/Input/SelectEventHandler.h"
 
+#include "BlazeEngineGraphics/UI/Nodes/EmptyNode.h"
 #include "BlazeEngineGraphics/UI/Nodes/Panel.h"
 #include "BlazeEngineGraphics/UI/Nodes/Image.h"
 #include "BlazeEngineGraphics/UI/Nodes/Text.h"

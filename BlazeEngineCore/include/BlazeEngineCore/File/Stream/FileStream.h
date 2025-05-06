@@ -9,15 +9,14 @@ namespace Blaze
 	{
 	public:
 		FileStreamBase();
-		FileStreamBase(FileStreamBase&& other) noexcept;
-		FileStreamBase(void* file);
+		FileStreamBase(FileStreamBase&& other) noexcept;		
 		~FileStreamBase();
 
-		Result Open(void* file);
+		void AcquireHandle(void* file);
 		bool IsOpen() const;
 
-		Result Close();
-		Result Flush();
+		void Close();
+		void Flush();
 
 		bool MovePosition(intMem offset) override;
 		bool SetPosition(uintMem offset) override;

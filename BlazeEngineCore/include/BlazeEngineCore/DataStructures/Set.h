@@ -1,13 +1,14 @@
 #pragma once
+#include "BlazeEngineCore/Types/TypeTraits.h"
+#include "BlazeEngineCore/DataStructures/Hash.h"
 
 namespace Blaze
 {
-	template<typename Value, typename Hasher>
-	concept ValidSetTemplateArguments =
-		CanHashType<Hasher, Value>;
+	template<typename T>
+	concept SetValueType = std::equality_comparable<T>;
 
-	template<typename Value, typename Hasher, AllocatorType> requires ValidSetTemplateArguments<Value, Hasher>
-	class Set;	
+	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType>
+	class Set;
 
 	template<typename T1, typename T2>
 	concept IsConvertibleToSetIterator =
@@ -75,11 +76,11 @@ namespace Blaze
 		template<IsConvertibleToSetIterator<SetIterator<Set>> T>
 		SetIterator& operator=(const T&);
 
-		template<typename Value, typename Hasher, AllocatorType> requires ValidSetTemplateArguments<Value, Hasher>
+		template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType>
 		friend class ::Blaze::Set;
 
 		template<typename>
-		friend class ::Blaze::SetIterator;
+		friend class SetIterator;
 	private:
 		using Node = std::conditional_t<std::is_const_v<Set>, const typename Set::template Node, typename Set::template Node>;
 		using Bucket = std::conditional_t<std::is_const_v<Set>, const typename Set::template Bucket, typename Set::template Bucket>;
@@ -106,7 +107,7 @@ namespace Blaze
 
 		No other macros change the list behaviour
 	*/
-	template<typename Value, typename Hasher = ::Blaze::Hash<Value>, AllocatorType Allocator = Blaze::DefaultAllocator> requires ValidSetTemplateArguments<Value, Hasher>
+	template<SetValueType Value, HasherOf<Value> Hasher = ::Blaze::Hash<Value>, AllocatorType Allocator = Blaze::DefaultAllocator>
 	class BLAZE_CORE_API Set
 	{
 	public:		
@@ -146,8 +147,9 @@ namespace Blaze
 		\returns
 			Returns a iterator that points to the value, and true if there wasnt a element with the same value and false otherwise.
 		*/
-		template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-		InsertResult Insert(_Value&& value);
+		template<typename ... Args> requires std::constructible_from<Value, Args...>
+		InsertResult Insert(Args&& ... args) requires std::constructible_from<Value, Value&&>;
+
 		bool Erase(const Value& value);		
 		bool Erase(const Iterator& iterator);
 
@@ -200,9 +202,8 @@ namespace Blaze
 			Value value;
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 			uintMem iteratorCount;
-#endif
-			template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-			Node(Node* prev, Node* next, uintMem hash, _Value&& value);
+#endif			
+			Node(Node* prev, Node* next, uintMem hash, Value&& value) requires std::constructible_from<Value, Value&&>;
 		};
 		struct Bucket
 		{
@@ -231,13 +232,11 @@ namespace Blaze
 		//Wont check if bucket is nullptr
 		Iterator FindWithHintUnsafe(const Value& value, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Value& value, Bucket* bucket) const;
+		
+		InsertResult InsertWithHint(uintMem hash, Value&& value) requires std::constructible_from<Value, Value&&>;
 
-		template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-		InsertResult InsertWithHint(_Value&& value, uintMem hash);
-
-		//Wont check if bucket is nullptr
-		template<typename _Value> requires std::same_as<std::remove_cvref_t<_Value>, Value>
-		InsertResult InsertWithHintUnsafe(_Value&& value, Bucket* bucket, uintMem hash);
+		//Wont check if bucket is nullptr		
+		InsertResult InsertWithHintUnsafe(Bucket* bucket, uintMem hash, Value&& value) requires std::constructible_from<Value, Value&&>;
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, Node* node);

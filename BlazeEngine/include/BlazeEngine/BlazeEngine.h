@@ -6,16 +6,9 @@
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Console/ConsoleOutputStream.h"
 
-#include "BlazeEngine/Window/WindowBase.h"
-#include "BlazeEngine/Window/WindowSDL.h"
 #include "BlazeEngine/Window/Window.h"
 
 #include "BlazeEngine/Input/Input.h"
-
-#include "BlazeEngine/Event/EventDispatcher.h"
-#include "BlazeEngine/Event/EventHandler.h"
-#include "BlazeEngine/Event/LambdaEventHandler.h"
-#include "BlazeEngine/Event/QueueEventDispatcher.h"
 
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"

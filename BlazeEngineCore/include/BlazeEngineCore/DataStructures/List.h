@@ -121,12 +121,12 @@ namespace Blaze
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddFront(Args&& ... args);
 
-		Result EraseAfter(const Iterator& it);
-		Result EraseFirst();		
+		void EraseAfter(const Iterator& it);
+		void EraseFirst();
 		template<typename C> requires std::invocable<C, T&> && std::same_as<std::invoke_result_t<C, T&>, bool>
-		Result EraseAll(const C& function);
+		void EraseAll(const C& function);
 		template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
-		Result EraseOne(const C& function);
+		void EraseOne(const C& function);
 
 		void AppendBack(const List& list);
 		void AppendBack(List&& list);

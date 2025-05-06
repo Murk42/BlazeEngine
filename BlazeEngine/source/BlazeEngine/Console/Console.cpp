@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Internal/GlobalData.h"
+#include "BlazeEngine/Internal/BlazeEngineContext.h"
 #include <iostream>
 
 namespace Blaze

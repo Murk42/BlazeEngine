@@ -14,8 +14,8 @@ namespace Blaze
 		BufferStreamBase(const BufferStreamBase&) = delete;
 		~BufferStreamBase();
 
-		Result SetBuffer(void* buffer, uintMem size);
-		Result Clear();
+		void SetBuffer(void* buffer, uintMem size);
+		void Clear();
 
 		bool MovePosition(intMem offset) override;
 		bool SetPosition(uintMem offset) override;

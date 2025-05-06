@@ -16,6 +16,10 @@ namespace Blaze::UI
 	{		
 		node->finalTransformUpdatedEventDispatcher.AddHandler(*this);
 	}
+	PanelRenderUnit::~PanelRenderUnit()
+	{
+		node->finalTransformUpdatedEventDispatcher.RemoveHandler(*this);
+	}
 	void PanelRenderUnit::BeginStream()
 	{
 		node->CleanFinalTransform();
@@ -46,10 +50,11 @@ namespace Blaze::UI
 	{
 		rd.borderWidth = width;
 	}
-	void PanelRenderUnit::OnEvent(Node::FinalTransformUpdatedEvent event)
+	void PanelRenderUnit::OnEvent(const Node::FinalTransformUpdatedEvent& event)
 	{
-		rd.pos = event.finalTransform.position;
-		rd.size = event.finalTransform.size;
-		rd.rotation = event.finalTransform.rotation;
+		auto finalTransform = node->GetFinalTransform();
+		rd.pos = finalTransform.position;
+		rd.size = finalTransform.size;
+		rd.rotation = finalTransform.rotation;
 	}
 }

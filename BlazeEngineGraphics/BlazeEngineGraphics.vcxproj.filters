@@ -63,10 +63,10 @@
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\Semaphore_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\UINode.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\UIScreen.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\Screen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\Panel.cpp">
@@ -81,19 +81,16 @@
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderPipelines\OpenGL\UIRenderPipeline_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIInputManager.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\InputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIInputNode.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\KeyboardEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIKeyboardEventHandler.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\MouseEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UIMouseEventHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\UISelectEventHandler.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\SelectEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\PanelRenderer_OpenGL.cpp">
@@ -103,9 +100,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Files\shaders.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\SDLOpenGLContext_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Core\OpenGL\OpenGLFunctions.cpp">
@@ -166,6 +160,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\UI\Common\ButtonBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeDataMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeFinalTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeTreeIterator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Core\NodeTreeView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\EmptyNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\UI\Input\InputNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -269,9 +284,6 @@
     <ClInclude Include="source\BlazeEngineGraphics\Files\shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\Core\OpenGL\SDLOpenGLContext_OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\RenderScene\RenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -287,7 +299,7 @@
     <ClInclude Include="include\BlazeEngineGraphics\RenderScene\RenderScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UISelectEventHandler.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\SelectEventHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\Panel.h">
@@ -308,16 +320,13 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIInputManager.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\InputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIInputNode.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\KeyboardEventHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIKeyboardEventHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\UIMouseEventHandler.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\MouseEventHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\Image.h">
@@ -326,10 +335,10 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\ImageRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\UIScreen.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\Screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\UINode.h">
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\TexturedRectRenderer.h">
@@ -383,6 +392,27 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Common\ButtonBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeTransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeFinalTransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeDataMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeTreeIterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Core\NodeTreeView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\EmptyNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\UI\Input\InputNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\Vulkan\compileShaders.bat">
@@ -399,8 +429,14 @@
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\text.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.frag" />
-    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert" />
+    <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\texturedRect.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="BlazeEngineGraphicsNodeView.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="source\BlazeEngineGraphics\Shaders\shaders_template.txt" />
   </ItemGroup>
 </Project>

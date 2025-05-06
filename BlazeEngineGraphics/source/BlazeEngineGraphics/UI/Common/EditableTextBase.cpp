@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Common/EditableTextBase.h"
-#include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
+#include "BlazeEngineGraphics/UI/Input/InputManager.h"
 #include "BlazeEngine/Input/Input.h"
 
 namespace Blaze::UI
@@ -12,8 +12,7 @@ namespace Blaze::UI
 	) :
 		textRenderUnit(textRenderUnit), textSelectionRenderUnit(textSelectionRenderUnit), textCursorRenderUnit(textCursorRenderUnit),
 		grabbedSelectionBegin(0), grabbedSelectionEnd(0), mouseDown(false), multilineInput(true)
-	{
-		SetBlocksMouseEventsFlag(true);
+	{		
 	}
 	void EditableTextBase::SetMultilineInput(bool multiline)
 	{
@@ -46,30 +45,30 @@ namespace Blaze::UI
 
 		grabbedSelectionBegin = grabbedSelectionEnd = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
 	}
-	void EditableTextBase::OnEvent(SelectedEvent event)
+	void EditableTextBase::OnEvent(const SelectedEvent& event)
 	{
 		textCursorRenderUnit.SetCursorPosToEnd();
 	}
-	void EditableTextBase::OnEvent(DeselectedEvent event)
+	void EditableTextBase::OnEvent(const DeselectedEvent& event)
 	{
 		textSelectionRenderUnit.ClearSelection();
 	}
-	void EditableTextBase::OnEvent(KeyPressedEvent event)
+	void EditableTextBase::OnEvent(const KeyDownEvent& event)
 	{
 		switch (event.key)
 		{
-		case Key::Escape: {
-			event.inputManager->SelectNode(nullptr);
+		case Keyboard::Key::ESCAPE: {
+			event.inputManager.SelectNode(nullptr);
 			break;
 		}
-		case Key::Enter: {
+		case Keyboard::Key::ENTER: {
 			if (multilineInput)
 				InsertAtCursor("\n");
 			else
-				event.inputManager->SelectNode(nullptr);
+				event.inputManager.SelectNode(nullptr);
 			break;
 		}
-		case Key::Backspace: {
+		case Keyboard::Key::BACKSPACE: {
 			if (textSelectionRenderUnit.IsSelectionEmpty())
 			{
 				if (textCursorRenderUnit.IsCursorAtBeggining())
@@ -92,7 +91,7 @@ namespace Blaze::UI
 			}
 			break;
 		}
-		case Key::Delete: {
+		case Keyboard::Key::DELETE: {
 			if (textSelectionRenderUnit.IsSelectionEmpty())
 			{
 				if (textCursorRenderUnit.IsCursorAtEnd())
@@ -108,9 +107,9 @@ namespace Blaze::UI
 			}
 			break;
 		}
-		case Key::Left: {
+		case Keyboard::Key::LEFT: {
 
-			if (GetScreen()->GetWindow()->GetLastKeyState(Key::LShift).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RShift).down)
+			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT))
 			{
 				if (textCursorRenderUnit.IsCursorAtBeggining())
 					break;
@@ -143,8 +142,8 @@ namespace Blaze::UI
 				mouseDown = false;
 			break;
 		}
-		case Key::Right: {
-			if (GetScreen()->GetWindow()->GetLastKeyState(Key::LShift).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RShift).down)
+		case Keyboard::Key::RIGHT: {
+			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT))
 			{
 				if (textCursorRenderUnit.IsCursorAtEnd())
 					break;
@@ -177,7 +176,7 @@ namespace Blaze::UI
 				mouseDown = false;
 			break;
 		}
-		case Key::Up: {
+		case Keyboard::Key::UP: {
 			auto& characterData = textRenderUnit.GetCharacterData();
 			uintMem characterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
 			uintMem lineIndex = characterData[characterIndex].lineIndex;
@@ -188,7 +187,7 @@ namespace Blaze::UI
 			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(characterIndex);		
 			characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex - 1);
 
-			if (GetScreen()->GetWindow()->GetLastKeyState(Key::LShift).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RShift).down)
+			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT))
 			{
 				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
 
@@ -216,7 +215,7 @@ namespace Blaze::UI
 
 			break;
 		}
-		case Key::Down: {
+		case Keyboard::Key::DOWN: {
 			auto& characterData = textRenderUnit.GetCharacterData();
 			uintMem characterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
 			uintMem lineIndex = characterData[characterIndex].lineIndex;
@@ -227,7 +226,7 @@ namespace Blaze::UI
 			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(characterIndex);
 			characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex + 1);
 
-			if (GetScreen()->GetWindow()->GetLastKeyState(Key::LShift).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RShift).down)
+			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT))
 			{
 				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
 
@@ -255,8 +254,8 @@ namespace Blaze::UI
 			
 			break;
 		}
-		case Key::Home: {
-			if (GetScreen()->GetWindow()->GetLastKeyState(Key::LShift).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RShift).down)
+		case Keyboard::Key::HOME: {
+			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT))
 			{
 				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
 				auto& characterData = textRenderUnit.GetCharacterData();
@@ -290,9 +289,9 @@ namespace Blaze::UI
 
 			break;
 		}
-		case Key::End: {
+		case Keyboard::Key::END: {
 
-			if (GetScreen()->GetWindow()->GetLastKeyState(Key::LShift).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RShift).down)
+			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT))
 			{
 				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
 				auto& characterData = textRenderUnit.GetCharacterData();
@@ -320,65 +319,70 @@ namespace Blaze::UI
 
 			break;
 		}
-		case Key::C: {
-			if ((GetScreen()->GetWindow()->GetLastKeyState(Key::LCtrl).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RCtrl).down) && !textSelectionRenderUnit.IsSelectionEmpty())
+		case Keyboard::Key::C: {
+			if (bool(event.modifier & Keyboard::KeyModifier::CTRL) && !textSelectionRenderUnit.IsSelectionEmpty())
 				Input::SetClipboardText(GetTextSubString(textSelectionRenderUnit.GetSelectionBegin(), textSelectionRenderUnit.GetSelectionEnd()));
 			break;
 		}
-		case Key::V: {
-			if (GetScreen()->GetWindow()->GetLastKeyState(Key::LCtrl).down || GetScreen()->GetWindow()->GetLastKeyState(Key::RCtrl).down)
+		case Keyboard::Key::V: {
+			if (bool(event.modifier & Keyboard::KeyModifier::CTRL))			
 				InsertAtCursor(Input::GetClipboardText());
 			break;
 		}
 		}
 	}
-	void EditableTextBase::OnEvent(TextInputEvent event)
+	void EditableTextBase::OnEvent(const TextInputEvent& event)
 	{
-		InsertAtCursor(event.input);
+		InsertAtCursor(event.string);
 	}
-	void EditableTextBase::OnEvent(MousePressedEvent event)
+	void EditableTextBase::OnEvent(const MouseButtonDownEvent& event)
 	{
-		event.inputManager->SelectNode(this);
+		uintMem combo = (event.combo - 1) % 3 + 1;
 
-		if (event.combo == 3)
+		event.inputManager.SelectNode(this);
+
+		switch (combo)
 		{
+		case 1: {
+			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.screenPos);
+			uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);
+			textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);
+
+			grabbedSelectionEnd = characterIndex;
+			grabbedSelectionBegin = grabbedSelectionEnd;
+			break;
+		}
+		case 2: {
+			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.screenPos);
+			uintMem characterIndex = textRenderUnit.GetClosestCharacterIndex(localSpacePos);
+
+			textRenderUnit.FindWord(characterIndex, grabbedSelectionBegin, grabbedSelectionEnd);
+			textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
+			break;
+		}
+		case 3: {
 			if (!textRenderUnit.GetCharacterData().Empty())
 			{
-				Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.pos);
+				Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.screenPos);
 				uintMem characterIndex = textRenderUnit.GetClosestCharacterIndex(localSpacePos);
 
 				textRenderUnit.FindLine(characterIndex, grabbedSelectionBegin, grabbedSelectionEnd);
 
 				textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
 			}
+			break;
 		}
-		else if (event.combo == 2)
-		{
-			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.pos);			
-			uintMem characterIndex = textRenderUnit.GetClosestCharacterIndex(localSpacePos);
-
-			textRenderUnit.FindWord(characterIndex, grabbedSelectionBegin, grabbedSelectionEnd);
-			textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
-		}
-		else if (event.combo == 1)
-		{
-			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.pos);
-			uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);			
-			textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);
-
-			grabbedSelectionEnd = characterIndex;
-			grabbedSelectionBegin = grabbedSelectionEnd;
 		}
 
 		textSelectionRenderUnit.SetSelection(grabbedSelectionBegin, grabbedSelectionEnd);
 
 		mouseDown = true;
 	}
-	void EditableTextBase::OnEvent(MouseMotionEvent event)
+	void EditableTextBase::OnEvent(const MouseMotionEvent& event)
 	{
 		if (mouseDown)
 		{
-			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.pos);
+			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.screenPos);
 			uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);
 
 			if (characterIndex > grabbedSelectionBegin && characterIndex < grabbedSelectionEnd)
@@ -394,15 +398,15 @@ namespace Blaze::UI
 			}
 		}
 	}
-	void EditableTextBase::OnEvent(MouseReleasedEvent event)
+	void EditableTextBase::OnEvent(const MouseButtonUpEvent& event)
 	{
 		mouseDown = false;
 	}
-	void EditableTextBase::OnEvent(MouseEnterEvent event)
+	void EditableTextBase::OnEvent(const MouseEnterEvent& event)
 	{
 		Input::SetCursorType(Input::CursorType::IBeam);
 	}
-	void EditableTextBase::OnEvent(MouseExitEvent event)
+	void EditableTextBase::OnEvent(const MouseExitEvent& event)
 	{
 		Input::SetCursorType(Input::CursorType::Arrow);
 	}

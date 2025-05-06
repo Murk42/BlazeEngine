@@ -31,7 +31,7 @@ namespace Blaze
 	}
 
 
-	Result File::Open(const Path& path, FileAccessPermission mode)
+	void File::Open(const Path& path, FileAccessPermission mode)
 	{
 		FileOpenParameters parameters;
 		if (mode == FileAccessPermission::Read)
@@ -48,10 +48,10 @@ namespace Blaze
 			parameters.openOption = FileOpenOptions::OpenAlways;
 		}
 
-		return Open(path, mode, parameters);
+		Open(path, mode, parameters);
 	}
 
-	Result File::Open(const Path& path, FileAccessPermission mode, FileOpenParameters parameters)
+	void File::Open(const Path& path, FileAccessPermission mode, FileOpenParameters parameters)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS		
 		DWORD desiredAccess = 0;
@@ -64,7 +64,8 @@ namespace Blaze
 		case Blaze::FileAccessPermission::Write: desiredAccess = GENERIC_WRITE; break;
 		case Blaze::FileAccessPermission::ReadWrite: desiredAccess = GENERIC_READ | GENERIC_WRITE; break;
 		default:
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileAccessPermission enum value");			
+			BLAZE_ENGINE_CORE_ERROR("Invalid FileAccessPermission enum value");
+			return;
 		}
 
 		switch (parameters.openOption)
@@ -75,51 +76,55 @@ namespace Blaze
 		case FileOpenOptions::OpenExisting: creationDisposition = OPEN_EXISTING; break;
 		case FileOpenOptions::TruncateExisting: creationDisposition = TRUNCATE_EXISTING; break;
 		default:
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileOpenOption enum value");			
+			BLAZE_ENGINE_CORE_ERROR("Invalid FileOpenOption enum value");
+			return;
 		}
 
 		switch (parameters.usageHint)
 		{
 		case FileUsageHint::Normal: break;
-		case FileUsageHint::RandomAccess: flagsAndAttributes |= FILE_FLAG_RANDOM_ACCESS;
-		case FileUsageHint::Sequential: flagsAndAttributes |= FILE_FLAG_SEQUENTIAL_SCAN;
+		case FileUsageHint::RandomAccess: flagsAndAttributes |= FILE_FLAG_RANDOM_ACCESS; break;
+		case FileUsageHint::Sequential: flagsAndAttributes |= FILE_FLAG_SEQUENTIAL_SCAN; break;
 		default:
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileUsageHint enum value");
+			BLAZE_ENGINE_CORE_ERROR("Invalid FileUsageHint enum value");
+			return;
 			break;
 		}
 
 		switch (parameters.locationHint)
 		{
-		case FileLifetimeOption::Normal: break;		
+		case FileLifetimeOption::Normal: break;
 		case FileLifetimeOption::Temporary: flagsAndAttributes |= FILE_ATTRIBUTE_TEMPORARY; break;
 		default:
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid FileLifetimeOption enum value");
+			BLAZE_ENGINE_CORE_ERROR("Invalid FileLifetimeOption enum value");
+			return;
 			break;
 		}
-		
+
 		//auto pathString = path.GetString();
 
 		if (parameters.createSubdirectories)
 		{
-			Path parentPath = path.ParentPath();			
-								
-			if (!parentPath.Exists() && !parentPath.Empty())			
-				FileSystem::CreateDirectory(parentPath);								
+			Path parentPath = path.ParentPath();
+
+			if (!parentPath.Exists() && !parentPath.Empty())
+				FileSystem::CreateDirectory(parentPath);
 
 		}
-		
-		auto wstring = path.GetUnderlyingObject().wstring();		
+
+		auto wstring = path.GetUnderlyingObject().wstring();
 		HANDLE handle = CreateFileW(wstring.data(), desiredAccess, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, NULL, creationDisposition, flagsAndAttributes, NULL);
 
-		if (handle == INVALID_HANDLE_VALUE)		
-			return	BLAZE_ERROR_RESULT("Windows API", "CreateFileA given a path \"" + path.ToString() + "\" failed with error: \"" + Windows::GetErrorString(GetLastError()) + "\"");		
+		if (handle == INVALID_HANDLE_VALUE)
+		{
+			Debug::Logger::LogError("Windows API", "CreateFileA given a path \"" + path.ToString() + "\" failed with error: \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			return;
+		}
 
-		FileStreamBase::Open(handle);
+		AcquireHandle(handle);
 #else
 #error
-#endif
-
-		return Result();
+#endif		
 	}
 	File& File::operator=(File&& other) noexcept
 	{

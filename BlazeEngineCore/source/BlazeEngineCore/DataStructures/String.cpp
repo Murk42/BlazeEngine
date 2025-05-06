@@ -23,7 +23,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 		return *ptr;
 	}
@@ -31,7 +31,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 		return *ptr;
 	}
@@ -39,7 +39,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
 		auto old = *this;
@@ -50,7 +50,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
 		++ptr;
@@ -60,7 +60,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
 #endif
 
 		auto old = *this;
@@ -71,7 +71,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
 #endif
 
 		--ptr;
@@ -115,7 +115,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
 #endif
 
 		return ptr < i.ptr;
@@ -124,7 +124,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
 #endif
 
 		return ptr > i.ptr;
@@ -133,7 +133,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
 #endif
 
 		return ptr <= i.ptr;
@@ -142,7 +142,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
 #endif
 
 		return ptr >= i.ptr;
@@ -261,7 +261,7 @@ namespace Blaze
 	{ 
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+			BLAZE_ENGINE_CORE_FATAL("String is empty");
 #endif
 		return ptr[0];
 	}
@@ -269,7 +269,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+			BLAZE_ENGINE_CORE_FATAL("String is empty");
 #endif
 		return ptr[0];
 	}
@@ -277,7 +277,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+			BLAZE_ENGINE_CORE_FATAL("String is empty");
 #endif
 		return ptr[count - 1];
 	}
@@ -285,7 +285,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+			BLAZE_ENGINE_CORE_FATAL("String is empty");
 #endif
 		return ptr[count - 1];
 	}

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Nodes/TextButton.h"
-#include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
+#include "BlazeEngineGraphics/UI/Input/InputManager.h"
 
 namespace Blaze::UI::Nodes
 {
@@ -9,43 +9,50 @@ namespace Blaze::UI::Nodes
 	{
 		dataMap.SetTypeName("TextButton");		
 
-		panelRenderUnit.SetFillColor(normalColor);		
+		UpdatePanelColor();
+				
 		panelRenderUnit.SetBorderWidth(0.0f);
 		panelRenderUnit.SetCornerRadius(5.0f);
 
 		textRenderUnit.SetCullingNode(this);		
+		textRenderUnit.SetTextColor(normalTextColor);
 		textRenderUnit.SetFontHeight(16);
 		textRenderUnit.SetLayoutOptions(TextLayoutOptions{			
 			.lineHorizontalAlign = TextLineHorizontalAlign::Center,
 			.lineVerticalAlign = TextLineVerticalAlign::Center			
 			});		
+
+		pressableFlagChangedEventDispatcher.AddHandler(*this);
 	}
 	TextButton::~TextButton()
 	{
+		pressableFlagChangedEventDispatcher.RemoveHandler(*this);
 	}
 	void TextButton::SetNormalColor(ColorRGBAf color)
 	{ 		
-		normalColor = color;
-		UpdateColor();
+		normalPanelColor = color;
+		UpdatePanelColor();
 	}
 	void TextButton::SetHighlightedColor(ColorRGBAf color)
 	{
-		highlightedColor = color;
-		UpdateColor();
+		highlightedPanelColor = color;
+		UpdatePanelColor();
 	}
 	void TextButton::SetPressedColor(ColorRGBAf color)
 	{
-		pressedColor = color;
-		UpdateColor();
+		pressedPanelColor = color;
+		UpdatePanelColor();
 	}
-	void TextButton::UpdateColor()
+	void TextButton::UpdatePanelColor()
 	{
-		if (IsPressed())
-			panelRenderUnit.SetFillColor(pressedColor);
+		if (!IsPressable())		
+			panelRenderUnit.SetFillColor(unpressablePanelColor);					
+		else if (IsPressed())
+			panelRenderUnit.SetFillColor(pressedPanelColor);
 		else if (hovered)
-			panelRenderUnit.SetFillColor(highlightedColor);
+			panelRenderUnit.SetFillColor(highlightedPanelColor);
 		else
-			panelRenderUnit.SetFillColor(normalColor);
+			panelRenderUnit.SetFillColor(normalPanelColor);		
 	}
 	Graphics::RenderUnit* TextButton::GetRenderUnit(uint index)
 	{
@@ -59,29 +66,39 @@ namespace Blaze::UI::Nodes
 			return nullptr;
 		}
 	}	
-	void TextButton::OnEvent(MouseEnterEvent event)
+	void TextButton::OnEvent(const MouseEnterEvent& event)
 	{
 		hovered = true;
-		UpdateColor();
+		UpdatePanelColor();
 	}
-	void TextButton::OnEvent(MouseExitEvent event)
+	void TextButton::OnEvent(const MouseExitEvent& event)
 	{
 		hovered = false;
-		UpdateColor();
+		UpdatePanelColor();
 	}
-	void TextButton::OnEvent(MousePressedEvent event)
+	void TextButton::OnEvent(const MouseButtonDownEvent& event)
 	{		
 		ButtonBase::OnEvent(event);			
-		UpdateColor();		
+		UpdatePanelColor();		
 	}
-	void Nodes::TextButton::OnEvent(MouseReleasedEvent event)
+	void Nodes::TextButton::OnEvent(const MouseButtonUpEvent& event)
 	{
 		ButtonBase::OnEvent(event);
-		UpdateColor();		
+		UpdatePanelColor();		
 	}
-	void TextButton::OnEvent(DeselectedEvent event)
+	void TextButton::OnEvent(const DeselectedEvent& event)
 	{
 		ButtonBase::OnEvent(event);		
-		UpdateColor();
-	}	
+		UpdatePanelColor();
+	}
+	void TextButton::OnEvent(const PressableFlagChangedEvent& event)
+	{
+		if (IsPressable())
+			textRenderUnit.SetTextColor(normalTextColor);
+		else
+			textRenderUnit.SetTextColor(unpressableTextColor);
+
+		UpdatePanelColor();
+	}
+
 }

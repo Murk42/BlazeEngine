@@ -38,6 +38,7 @@ namespace Blaze
 	}
 	void Result::AddLog(const Debug::Log& log)
 	{
+		highestLogType = (Debug::LogType)std::max((std::underlying_type_t<Debug::LogType>)highestLogType, (std::underlying_type_t<Debug::LogType>)log.GetType());
 		logs.AddBack(log);		
 	}	
 
@@ -141,8 +142,8 @@ namespace Blaze
 	Result& Result::operator=(const Result& other)
 	{
 		if (this == &other)
-			return *this;		
-
+			return *this;
+		
 		logs = other.logs;
 		highestLogType = other.highestLogType;
 				

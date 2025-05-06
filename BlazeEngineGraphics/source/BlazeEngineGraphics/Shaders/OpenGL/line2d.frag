@@ -6,7 +6,7 @@ in vec2 frag_pos1;
 in vec2 frag_pos2;														   
 in float frag_width;	
  
-out vec4 out_color; //a
+out vec4 out_color;
 
 float line_distance(vec2 pointA, vec2 direction, vec2 point)
 {	

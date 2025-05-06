@@ -248,32 +248,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		Unsupported,
 		IncompleteMultisample,
 		IncompleteLayerTargets
-	};
-	enum class ImmutableGraphicsBufferMapAccess
-	{
-		Read = 1,
-		Write = 2,
-	};
-	enum class ImmutableGraphicsBufferMapType
-	{
-		None = 0,
-		PersistentUncoherent = 1,
-		PersistentCoherent = 2,
-	};
-	enum class ImmutableGraphicsBufferMapOptions
-	{
-		None = 0,
-		InvalidateRange = 1,
-		InvalidateBuffer = 2,
-		ExplicitFlush = 4,
-		Unsynchronized = 8
-	};
-	enum class MutableGraphicsBufferUseFrequency
-	{
-		Static,
-		Dynamic,
-		Stream
-	};
+	};	
 	enum class ShaderType
 	{
 		FragmentShader = 35632,
@@ -312,9 +287,34 @@ namespace Blaze::Graphics::OpenGLWrapper
 		ConditionSatisfied,
 		Error,
 		FenceNotSet,
+	};	
+	enum class GraphicsBufferMapAccessFlags
+	{
+		Read = 1,
+		Write = 2,
+	};
+	ENUM_CLASS_BITWISE_OPERATIONS(GraphicsBufferMapAccessFlags);
+	enum class GraphicsBufferMapType
+	{
+		None = 0,
+		PersistentUncoherent = 1,
+		PersistentCoherent = 2,
+	};
+	ENUM_CLASS_BITWISE_OPERATIONS(GraphicsBufferMapType);
+	enum class GraphicsBufferMapOptions
+	{
+		None = 0,
+		InvalidateRange = 1,
+		InvalidateBuffer = 2,
+		ExplicitFlush = 4,
+		Unsynchronized = 8
+	};
+	ENUM_CLASS_BITWISE_OPERATIONS(GraphicsBufferMapOptions);
+	enum class GraphicsBufferUseFrequency
+	{
+		Static,
+		Dynamic,
+		Stream
 	};
 
-	ENUM_CLASS_BITWISE_OPERATIONS(ImmutableGraphicsBufferMapAccess);
-	ENUM_CLASS_BITWISE_OPERATIONS(ImmutableGraphicsBufferMapType);
-	ENUM_CLASS_BITWISE_OPERATIONS(ImmutableGraphicsBufferMapOptions);
 }

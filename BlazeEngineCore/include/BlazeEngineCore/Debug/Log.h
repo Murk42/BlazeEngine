@@ -8,17 +8,17 @@ namespace Blaze::Debug
 {
 	enum class LogType
 	{
-		Info,
-		Warning,
-		Error,
-		Fatal,
-		Debug,
+		Info = 0,
+		Warning = 1,
+		Error = 2,
+		Fatal = 3,
+		Debug = 4,
 	};
 
 	class BLAZE_CORE_API Log
 	{
 	public:				
-		Log() = delete;
+		Log();
 		Log(const Log& log);
 		Log(Log&&) noexcept;		
 		Log(LogType type, StringUTF8 source, StringUTF8 message);
@@ -49,9 +49,3 @@ namespace Blaze::Debug
 		Callstack callstack;
 	};
 }
-
-#define BLAZE_DEBUG_LOG(source, message)	::Blaze::Debug::Log(::Blaze::Debug::LogType::Debug	 , source, message)
-#define BLAZE_INFO_LOG(source, message)		::Blaze::Debug::Log(::Blaze::Debug::LogType::Info	 , source, message)
-#define BLAZE_WARNING_LOG(source, message)	::Blaze::Debug::Log(::Blaze::Debug::LogType::Warning , source, message)
-#define BLAZE_ERROR_LOG(source, message)	::Blaze::Debug::Log(::Blaze::Debug::LogType::Error	 , source, message)
-#define BLAZE_FATAL_LOG(source, message)	::Blaze::Debug::Log(::Blaze::Debug::LogType::Fatal	 , source, message)

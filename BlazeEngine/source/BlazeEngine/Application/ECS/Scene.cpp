@@ -14,7 +14,7 @@ namespace Blaze::ECS
 	{
 		Clear();
 	}
-	Result Scene::SetRegistry(ComponentTypeRegistry registry)
+	void Scene::SetRegistry(ComponentTypeRegistry registry)
 	{
 		this->registry = std::move(registry);
 
@@ -39,9 +39,7 @@ namespace Blaze::ECS
 
 			systemCreationData.scene = nullptr;
 			systemCreationData.typeData = nullptr;			
-		}		
-
-		return Result();
+		}				
 	}
 	void Scene::Clear()
 	{
@@ -83,13 +81,16 @@ namespace Blaze::ECS
 		return entity;
 	}
 	
-	Result Scene::Destroy(Entity* entity)
+	void Scene::Destroy(Entity* entity)
 	{
 		if (entity == nullptr)
-			return Result();
+			return;
 
 		if (entity->scene != this)
-			return BLAZE_ERROR_RESULT("BlazeEngine", "Trying to delete a entity from a scene that it doesn't belong to.");
+		{
+			BLAZE_ENGINE_ERROR("BlazeEngine", "Trying to delete a entity from a scene that it doesn't belong to.");
+			return;
+		}
 
 		auto componentsTypeData = GetEntityComponentsTypeData(entity);
 		auto components = GetEntityComponents(entity);
@@ -107,16 +108,14 @@ namespace Blaze::ECS
 
 		std::destroy_at(entity);
 
-		Memory::Free(entity);
-
-		return Result();
+		Memory::Free(entity);		
 	}
-	Result Scene::UpdateSystem(const ComponentTypeData& typeData)
+	void Scene::UpdateSystem(const ComponentTypeData& typeData)
 	{
-		return UpdateSystem(typeData.Index());
+		UpdateSystem(typeData.Index());
 	}
 
-	Result Scene::UpdateSystem(uintMem index)
+	void Scene::UpdateSystem(uintMem index)
 	{
 		auto* system = systems[index];
 
@@ -128,9 +127,7 @@ namespace Blaze::ECS
 				system->Update(component);
 
 			system->PostUpdate();
-		}
-
-		return Result();
+		}		
 	}
 
 	System* Scene::GetSystem(const ComponentTypeData& typeData)

@@ -12,15 +12,15 @@ CLIENT_API void Setup()
 {			
 	RenderingSystem renderSystem;
 
-	WindowBase& window = renderSystem.GetWindow();
+	Window& window = renderSystem.GetWindow();
 	window.ShowWindow(true);
 	window.Raise();	
 
 	bool exit = false;
-	LambdaEventHandler<Input::Events::WindowCloseEvent> keyPressed{ [&](auto event) {
+	LambdaEventHandler<Input::Events::WindowCloseEvent> keyDown{ [&](auto event) {
 		exit = true;
 	} };	
-	window.closeEventDispatcher.AddHandler(keyPressed);	
+	window.closeEventDispatcher.AddHandler(keyDown);	
 
 	CameraController cameraController;
 	cameraController.SetWindow(&window);

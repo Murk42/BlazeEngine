@@ -12,6 +12,11 @@
 
 using namespace Blaze::Graphics::OpenGLWrapper;
 
+namespace Blaze
+{
+	StringView GetSDLError();
+}
+
 namespace Blaze::Graphics::OpenGL
 {
 	template<typename T>
@@ -49,7 +54,7 @@ namespace Blaze::Graphics::OpenGL
 		case PrimitiveType::TriangleFan: return GL_TRIANGLE_FAN;
 		case PrimitiveType::Pathes: return GL_PATCHES;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid PrimitiveType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid PrimitiveType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLIndexType(IndexType type)
@@ -60,7 +65,7 @@ namespace Blaze::Graphics::OpenGL
 		case IndexType::Uint16: return GL_UNSIGNED_SHORT;
 		case IndexType::Uint8: return GL_UNSIGNED_BYTE;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid IndexType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid IndexType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLPolygonMode(PolygonMode mode)
@@ -71,7 +76,7 @@ namespace Blaze::Graphics::OpenGL
 		case PolygonMode::Line: return GL_LINE;
 		case PolygonMode::Fill: return GL_FILL;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid PolygonMode. The integer value was: " + StringParsing::Convert(ToInteger(mode)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid PolygonMode. The integer value was: " + StringParsing::Convert(ToInteger(mode)));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLImageAccess(ImageAccess access)
@@ -82,7 +87,7 @@ namespace Blaze::Graphics::OpenGL
 		case ImageAccess::Write: return GL_WRITE_ONLY;
 		case ImageAccess::ReadWrite: return GL_READ_WRITE;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid ImageAccess enum value. The integer value was: " + StringParsing::Convert(ToInteger(access)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ImageAccess enum value. The integer value was: " + StringParsing::Convert(ToInteger(access)));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLImageFormat(ImageFormat format)
@@ -129,7 +134,7 @@ namespace Blaze::Graphics::OpenGL
 		case ImageFormat::R16_SNORM:		return GL_R16_SNORM;
 		case ImageFormat::R8_SNORM:		return GL_R8_SNORM;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid ImageFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ImageFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
 		return std::numeric_limits<GLenum>::max();
 	}
 
@@ -146,7 +151,7 @@ namespace Blaze::Graphics::OpenGL
 		case StencilOperationType::DecreaseWrap: return GL_DECR_WRAP;
 		case StencilOperationType::Invert: return GL_INVERT;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid StencilOperationType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid StencilOperationType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLStencilComparison(StencilComparison comparison)
@@ -162,7 +167,7 @@ namespace Blaze::Graphics::OpenGL
 		case StencilComparison::NotEqual: return GL_NOTEQUAL;
 		case StencilComparison::Always: return GL_ALWAYS;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid StencilComparison enum value. The integer value was: " + StringParsing::Convert(ToInteger(comparison)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid StencilComparison enum value. The integer value was: " + StringParsing::Convert(ToInteger(comparison)));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLScreenBufferType(ScreenBufferType type)
@@ -173,7 +178,7 @@ namespace Blaze::Graphics::OpenGL
 		case ScreenBufferType::Back: return GL_BACK;
 		case ScreenBufferType::BackAndFront: return GL_FRONT_AND_BACK;
 		}
-		Debug::Logger::LogError("Blaze Engine", "Invalid ScreenBufferType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ScreenBufferType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
 		return std::numeric_limits<GLenum>::max();
 	}
 
@@ -279,6 +284,33 @@ namespace Blaze::Graphics::OpenGL
 	void GraphicsContext_OpenGL::SetScissorRect(Vec2i pos, Vec2i size)
 	{
 		glScissor(pos.x, pos.y, size.x, size.y);		
+	}
+
+	bool GraphicsContext_OpenGL::SetSwapInterval(WindowSwapInterval swapInterval)
+	{
+		//TODO do error checking
+
+		switch (swapInterval)
+		{
+		case Blaze::Graphics::OpenGL::WindowSwapInterval::None:
+			if (!SDL_GL_SetSwapInterval(0))
+				BLAZE_ENGINE_GRAPHICS_ERROR("SDL_GL_SetSwapInterval failed. SDL returned error: \"" + GetSDLError() + "\"");
+			return true;
+		case Blaze::Graphics::OpenGL::WindowSwapInterval::VSync:
+			if (!SDL_GL_SetSwapInterval(1))
+				BLAZE_ENGINE_GRAPHICS_ERROR("SDL_GL_SetSwapInterval failed. SDL returned error: \"" + GetSDLError() + "\"");
+			return true;
+		case Blaze::Graphics::OpenGL::WindowSwapInterval::AdaptiveVSync:
+			if (!SDL_GL_SetSwapInterval(-1))
+			{
+				if (!SDL_GL_SetSwapInterval(1))
+					BLAZE_ENGINE_GRAPHICS_ERROR("SDL_GL_SetSwapInterval failed. SDL returned error: \"" + GetSDLError() + "\"");
+
+				return false;
+			}			
+
+			return true;			
+		}
 	}
 
 	uint GraphicsContext_OpenGL::GetMaxBoundTextures()
@@ -396,7 +428,7 @@ namespace Blaze::Graphics::OpenGL
 			filter = GL_LINEAR;
 			break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextureSampling enum value");
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextureSampling enum value");
 			break;
 		}
 		

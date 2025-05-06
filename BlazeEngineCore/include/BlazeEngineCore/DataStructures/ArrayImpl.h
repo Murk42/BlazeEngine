@@ -1,241 +1,19 @@
 #pragma once
-#include "Array.h"
+#include "BlazeEngineCore/DataStructures/Array.h"
+#include "BlazeEngineCore/DataStructures/ArrayView.h"
+#include "BlazeEngineCore/DataStructures/ArrayIterator.h"
+#include "BlazeEngineCore/DataStructures/ArrayViewImpl.h"
+#include "BlazeEngineCore/DataStructures/ArrayIteratorImpl.h"
 
 namespace Blaze
-{
-	template<typename Array>
-	inline ArrayIterator<Array>::ArrayIterator()
-		: ptr(nullptr)
-	{
-	}
-	template<typename Array>
-	template<IsConvertibleToArrayIterator<ArrayIterator<Array>> T>
-	inline ArrayIterator<Array>::ArrayIterator(const T& other)
-		: ptr(other.ptr)
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		, arr(other.arr)
-#endif
-	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (arr != nullptr)
-			++arr->iteratorCount;
-#endif
-	}
-	template<typename Array>
-	inline ArrayIterator<Array>::~ArrayIterator()
-	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (arr != nullptr)
-			--arr->iteratorCount;
-#endif
-	}
-	template<typename Array>
-	inline bool ArrayIterator<Array>::IsNull() const
-	{
-		return ptr == nullptr;
-	}
-	template<typename Array>
-	inline std::remove_reference_t<typename ArrayIterator<Array>::template ValueType>& ArrayIterator<Array>::operator*() const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
-#endif
-
-		if constexpr (std::is_reference_v<ValueType>)
-			return ptr->value;
-		else
-			return *ptr;
-	}
-	template<typename Array>
-	inline std::remove_reference_t<typename ArrayIterator<Array>::template ValueType>* ArrayIterator<Array>::operator->() const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
-#endif
-
-		if constexpr (std::is_reference_v<ValueType>)
-			return &ptr->value;
-		else
-			return ptr;		
-	}
-	template<typename Array>
-	inline ArrayIterator<Array>& ArrayIterator<Array>::operator++()
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
-#endif
-
-		++ptr;
-		return *this;
-	}
-	template<typename Array>
-	inline ArrayIterator<Array> ArrayIterator<Array>::operator++(int)
-	{
-		ArrayIterator copy = *this;
-		++copy;
-		return copy;
-	}
-	template<typename Array>
-	inline ArrayIterator<Array>& ArrayIterator<Array>::operator--()
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
-#endif
-
-		--ptr;
-		return *this;
-	}
-	template<typename Array>
-	inline ArrayIterator<Array> ArrayIterator<Array>::operator--(int)
-	{
-		ArrayIterator copy = *this;
-		--copy;
-		return copy;
-	}
-	template<typename Array>
-	inline ArrayIterator<Array> ArrayIterator<Array>::operator+(int offset) const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Adding to a null iterator");
-#endif		
-		return ArrayIterator(ptr + offset);
-	}
-	template<typename Array>
-	inline ArrayIterator<Array> ArrayIterator<Array>::operator-(int offset) const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Subtracting from a null iterator");
-#endif		
-		return ArrayIterator(ptr - offset);
-	}
-	template<typename Array>
-	inline uintMem ArrayIterator<Array>::operator-(const ArrayIterator<Array>& other) const
-	{
-		return ptr - other.ptr;
-	}
-	template<typename Array>
-	inline ArrayIterator<Array>& ArrayIterator<Array>::operator+=(int offset)
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Adding to a null iterator");
-#endif		
-		ptr += offset;
-
-		return *this;
-	}
-	template<typename Array>
-	inline ArrayIterator<Array>& ArrayIterator<Array>::operator-=(int offset)
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Subtracting from a null iterator");
-#endif		
-		ptr -= offset;
-
-		return *this;
-	}
-	template<typename Array>
-	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
-	inline bool ArrayIterator<Array>::operator>(const T& i) const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
-#endif
-
-		return ptr > i.ptr;
-	}
-	template<typename Array>
-	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
-	inline bool ArrayIterator<Array>::operator>=(const T& i) const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
-#endif
-
-		return ptr >= i.ptr;
-	}
-	template<typename Array>
-	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
-	inline bool ArrayIterator<Array>::operator<(const T& i) const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
-#endif
-
-		return ptr < i.ptr;
-	}
-	template<typename Array>
-	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
-	inline bool ArrayIterator<Array>::operator<=(const T& i) const
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (i.ptr == nullptr))
-			Debug::Logger::LogFatal("Blaze Engine", "Comparing a null iterator");
-#endif
-
-		return ptr <= i.ptr;
-	}
-	template<typename Array>
-	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
-	inline bool ArrayIterator<Array>::operator==(const T& i) const
-	{
-		return ptr == i.ptr;
-	}
-	template<typename Array>
-	template<IsComparableToArrayIterator<ArrayIterator<Array>> T>
-	inline bool ArrayIterator<Array>::operator!=(const T& i) const
-	{
-		return ptr != i.ptr;
-	}
-	template<typename Array>
-	template<IsConvertibleToArrayIterator<ArrayIterator<Array>> T>
-	inline ArrayIterator<Array>& ArrayIterator<Array>::operator=(const T& i)
-	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (arr != nullptr)
-			--arr->iteratorCount;
-
-		arr = i.arr;
-
-		if (arr != nullptr)
-			++arr->iteratorCount;
-#endif
-		ptr = i.ptr;
-
-		return *this;
-	}
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-	template<typename Array>
-	inline ArrayIterator<Array>::ArrayIterator(InteranlValueType* ptr, Array* arr)
-		: ptr(ptr), arr(arr)
-	{
-		++arr->iteratorCount;
-	}
-#else
-	template<typename Array>
-	inline ArrayIterator<Array>::ArrayIterator(InteranlValueType* ptr)
-		: ptr(ptr)
-	{
-	}
-#endif
-
+{	
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::Array()
 		: ptr(nullptr), count(0), reserved(0)
 	{
 	}
 	template<typename T, AllocatorType Allocator>	
-	inline Array<T, Allocator>::Array(const Array& other) requires std::copy_constructible<InternalValueType>
+	inline Array<T, Allocator>::Array(const Array& other) requires std::copy_constructible<StoredType>
 		: ptr(nullptr), count(0), reserved(0)
 	{
 		CopyConstructUnsafe(other.ptr, other.count);
@@ -249,66 +27,93 @@ namespace Blaze
 		other.reserved = 0;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2, AllocatorType Allocator2> 
-	inline Array<T, Allocator>::Array(const Array<T2, Allocator2>& other) requires IsArrayConstructibleFrom<InternalValueType, const typename Array<T2, Allocator2>::template InternalValueType&>
+	inline Array<T, Allocator>::Array(const ArrayView<T>& other) requires std::copy_constructible<StoredType>
 		: ptr(nullptr), count(0), reserved(0)
 	{
-		CopyConstructUnsafe(other.ptr, other.count);
+		CopyConstructUnsafe(other.Ptr(), other.Count());
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ... Args>
-	inline Array<T, Allocator>::Array(uintMem count, Args&& ... args) requires std::constructible_from<InternalValueType, Args...>
+	inline Array<T, Allocator>::Array(Iterator begin, Iterator end)
+		: ptr(nullptr), count(0), reserved(0)
+	{
+		if (begin.IsNull() || end.IsNull())
+			return;
+
+		CopyConstructUnsafe(begin.Ptr(), end.Ptr() - begin.Ptr());
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename F> requires std::invocable<F, typename Array<T, Allocator>::template StoredType*, uintMem>
+	inline Array<T, Allocator>::Array(uintMem count, const F& constructFunction) 
 		: ptr(nullptr), count(count), reserved(count)
 	{
 		if (count == 0)
 			return;
 
-		ptr = (InternalValueType*)allocator.Allocate(sizeof(InternalValueType) * count);
-		
-		for (uintMem i = 0; i < count; ++i)
-			std::construct_at(ptr + i, args...);				
-	}
-	template<typename T, AllocatorType Allocator>
-	template<typename F>
-	inline Array<T, Allocator>::Array(uintMem count, const F& constructFunction) requires std::invocable<F, InternalValueType*, uintMem>
-		: ptr(nullptr), count(count), reserved(count)
-	{
-		if (count == 0)
-			return;
-
-		ptr = (InternalValueType*)allocator.Allocate(sizeof(InternalValueType) * count);
+		ptr = (StoredType*)allocator.Allocate(sizeof(StoredType) * count);
 
 		for (uintMem i = 0; i < count; ++i)
 			constructFunction(ptr + i, i);
-	}	
-	template<typename T, AllocatorType Allocator>	
-	template<typename T2, uintMem S> 
-	inline Array<T, Allocator>::Array(const T2(&arr)[S]) requires IsArrayConstructibleFrom<InternalValueType, const T2&>
-		: ptr(nullptr), count(0), reserved(0)
-	{
-		CopyConstructUnsafe(arr, S);
 	}
-	template<typename T, AllocatorType Allocator> 
-	template<typename T2>
-	inline Array<T, Allocator>::Array(const T2* ptr, uintMem count) requires IsArrayConstructibleFrom<InternalValueType, const T2&>
+	template<typename T, AllocatorType Allocator>
+	template<typename ... Args> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, Args...>
+	inline Array<T, Allocator>::Array(uintMem count, Args&& ... args)
+		: ptr(nullptr), count(count), reserved(count)
+	{
+		if (count == 0)
+			return;
+
+		ptr = (StoredType*)allocator.Allocate(sizeof(StoredType) * count);
+
+		for (uintMem i = 0; i < count; ++i)
+			std::construct_at(ptr + i, args...);
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename T2, uintMem S> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>
+	inline Array<T, Allocator>::Array(const T2(&other)[S])
 		: ptr(nullptr), count(0), reserved(0)
 	{
+		CopyConstructUnsafe(other, S);
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename T2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>
+	inline Array<T, Allocator>::Array(const std::initializer_list<T2>& other)
+		: ptr(nullptr), count(0), reserved(0)
+	{
+		CopyConstructUnsafe(other.begin(), other.size());
+	}
+	template<typename T, AllocatorType Allocator>
+	template<typename T2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>
+	inline Array<T, Allocator>::Array(const T2* ptr, uintMem count)
+		: ptr(nullptr), count(0), reserved(0)
+	{		
 		if (ptr != nullptr)
-			CopyConstructUnsafe(ptr, count);
+			if (count != 0)
+				CopyConstructUnsafe(ptr, count);
+			else
+				BLAZE_ENGINE_CORE_FATAL("Creating array with a non nullptr but a count 0");
+		else if (count != 0)
+		{
+			this->ptr = ReallocateUnsafe(count);
+			
+			for (uintMem i = 0; i < count; ++i)
+				std::construct_at(this->ptr + i);			
+			
+			this->count = count;
+		}
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2>
-	inline Array<T, Allocator>::Array(const std::initializer_list<T2>& arr) requires IsArrayConstructibleFrom<InternalValueType, const T2&>
+	template<typename T2, AllocatorType Allocator2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>
+	inline Array<T, Allocator>::Array(const Array<T2, Allocator2>& other)
 		: ptr(nullptr), count(0), reserved(0)
 	{
-		CopyConstructUnsafe(arr.begin(), arr.size());
-	}
+		CopyConstructUnsafe(other.ptr, other.count);
+	}			
 	template<typename T, AllocatorType Allocator>
-	template<typename T2>
-	inline Array<T, Allocator>::Array(const ArrayView<T2>& arr) requires IsArrayConstructibleFrom<InternalValueType, const typename ArrayView<T2>::template InternalValueType&>
+	template<typename T2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>
+	inline Array<T, Allocator>::Array(const ArrayView<T2>& other)
 		: ptr(nullptr), count(0), reserved(0)
 	{
-		CopyConstructUnsafe(arr.Ptr(), arr.Count());
+		CopyConstructUnsafe(other.Ptr(), other.Count());
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::~Array()
@@ -318,10 +123,6 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::Clear()
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Clearing an array while some iterators are referencing it");
-#endif
 		std::destroy_n(ptr, count);
 		allocator.Free(ptr);
 		ptr = nullptr;
@@ -344,15 +145,18 @@ namespace Blaze
 		return reserved;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddBack(Args && ...args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>
+	template<typename ...Args> requires std::constructible_from<T, Args...>
+	inline auto Array<T, Allocator>::AddBack(Args&& ...args) -> Iterator requires std::move_constructible<StoredType>
 	{
 		if (auto newPtr = ReallocateUnsafe(count + 1))
 		{
-			for (uintMem i = 0; i < count; ++i)
+			for (uintMem i = 0; i < count; ++i)	
 				std::construct_at(newPtr + i, std::move(ptr[i]));
 
-			std::construct_at(newPtr + count, std::forward<Args>(args)...);
+			if constexpr (std::is_reference_v<T>)
+				std::construct_at(newPtr + count, &args...);
+			else
+				std::construct_at(newPtr + count, std::forward<Args>(args)...);
 
 			std::destroy_n(ptr, count);
 			allocator.Free(ptr);
@@ -360,42 +164,38 @@ namespace Blaze
 		}
 		else
 		{
-			std::construct_at(ptr + count, std::forward<Args>(args)...);
+			if constexpr (std::is_reference_v<T>)
+				std::construct_at(ptr + count, &args...);
+			else
+				std::construct_at(ptr + count, std::forward<Args>(args)...);
 		}
+
 		++count;
 
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + count - 1, this);
-#else
-		return Iterator(ptr + count - 1);
-#endif
-	}
+		return LastIterator();
+	}	
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::TryAddBack(Args && ...args) requires std::constructible_from<InternalValueType, Args...>
+	template<typename ...Args> requires std::constructible_from<T, Args...>
+	inline auto Array<T, Allocator>::TryAddBack(Args && ...args) -> Iterator
 	{
 		if (count < reserved)
 		{
 			std::construct_at(ptr + count, std::forward<Args>(args)...);
 			++count;
 
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + count - 1, this);
-#else
-		return Iterator(ptr + count - 1);
-#endif
+			return Iterator(ptr + count - 1);
 		}
 		else
 			return Iterator();
 
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(uintMem index, Args && ...args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>
+	template<typename ...Args> requires std::constructible_from<T, Args...>
+	inline auto Array<T, Allocator>::AddAt(uintMem index, Args && ...args) -> Iterator requires std::move_constructible<StoredType>
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index > count)
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to add an element outside the array");
+			BLAZE_ENGINE_CORE_FATAL("Trying to add an element outside the array");
 #endif
 
 		if (auto newPtr = ReallocateUnsafe(count + 1))
@@ -421,29 +221,25 @@ namespace Blaze
 		}
 		++count;
 
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + index, this);
-#else
 		return Iterator(ptr + index);
-#endif
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename ...Args>
-	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AddAt(Iterator it, Args && ...args) requires std::constructible_from<InternalValueType, Args...> && std::move_constructible<InternalValueType>
+	template<typename ...Args> requires std::constructible_from<T, Args...>
+	inline auto Array<T, Allocator>::AddAt(Iterator it, Args && ...args) -> Iterator requires std::move_constructible<StoredType>
 	{
 		return AddAt(it.ptr - ptr, std::forward<Args>(args)...);
 	}
 	template<typename T, AllocatorType Allocator>	
-	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::move_constructible<InternalValueType>
+	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::move_constructible<StoredType>
 	{		
 		Insert(it.ptr - ptr, array);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Insert(uintMem index, ArrayView<T> array)  requires std::move_constructible<InternalValueType>
+	inline void Array<T, Allocator>::Insert(uintMem index, ArrayView<T> array)  requires std::move_constructible<StoredType>
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index > count)
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to add an element outside the array");
+			BLAZE_ENGINE_CORE_FATAL("Trying to add an element outside the array");
 #endif
 
 		if (auto newPtr = ReallocateUnsafe(count + array.Count()))
@@ -483,7 +279,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index > count)
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to add an element outside the array");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Trying to add an element outside the array");
+			return;
+		}
 #endif
 
 		auto oldPtr = ptr;
@@ -504,8 +303,14 @@ namespace Blaze
 			});
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::EraseLast()
+	inline void Array<T, Allocator>::EraseLast() requires std::is_move_constructible_v<StoredType>
 	{
+		if (count == 0)
+		{
+			BLAZE_ENGINE_CORE_FATAL("Trying to erase the last element of an empty array.");
+			return;
+		}
+
 		if (auto newPtr = ReallocateUnsafe(count - 1))
 		{
 			for (uintMem i = 0; i < count - 1; ++i)
@@ -523,11 +328,11 @@ namespace Blaze
 		count--;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::EraseAt(uintMem index)
+	inline void Array<T, Allocator>::EraseAt(uintMem index) requires std::is_move_assignable_v<StoredType> || std::is_move_constructible_v<StoredType>
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to erase an element outside the array");
+			BLAZE_ENGINE_CORE_FATAL("Trying to erase an element outside the array");
 #endif
 
 		if (auto newPtr = ReallocateUnsafe(count - 1))
@@ -544,15 +349,15 @@ namespace Blaze
 		}
 		else
 		{						
-			if constexpr (std::is_reference_v<T>)
+			if constexpr (std::is_move_assignable_v<StoredType>)
+				for (uintMem i = index; i < count - 1; ++i)
+					ptr[i] = std::move(ptr[i + 1]);
+			else			
 				for (uintMem i = index; i < count - 1; ++i)
 				{
 					std::destroy_at(ptr + i);
 					std::construct_at(ptr + i, ptr[i + 1]);
-				}					
-			else
-				for (uintMem i = index; i < count - 1; ++i)
-					ptr[i] = std::move(ptr[i + 1]);
+				}
 
 			std::destroy_at(ptr + count - 1);
 		}
@@ -560,12 +365,12 @@ namespace Blaze
 		count--;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::EraseAt(Iterator it)
+	inline void Array<T, Allocator>::EraseAt(Iterator it) requires std::is_move_assignable_v<StoredType> || std::is_move_constructible_v<StoredType>
 	{
 		EraseAt(it.ptr - ptr);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Append(const Array& other) requires std::copy_constructible<InternalValueType>
+	inline void Array<T, Allocator>::Append(const Array& other) requires std::copy_constructible<StoredType>
 	{
 		if (auto newPtr = ReallocateUnsafe(count + other.count))
 		{
@@ -583,7 +388,7 @@ namespace Blaze
 		count += other.count;
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Append(Array&& other) requires std::move_constructible<InternalValueType>
+	inline void Array<T, Allocator>::Append(Array&& other) requires std::move_constructible<StoredType>
 	{
 		if (auto newPtr = ReallocateUnsafe(count + other.count))
 		{
@@ -609,7 +414,7 @@ namespace Blaze
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires std::constructible_from<T, Args...>
-	inline void Array<T, Allocator>::Resize(uintMem newCount, Args&& ...args) requires std::move_constructible<InternalValueType>
+	inline void Array<T, Allocator>::Resize(uintMem newCount, Args&& ...args) requires std::move_constructible<StoredType>
 	{
 		auto newPtr = ReallocateUnsafe(newCount);
 
@@ -648,8 +453,8 @@ namespace Blaze
 		count = newCount;
 	}	
 	template<typename T, AllocatorType Allocator>
-	template<typename F>
-	void Array<T, Allocator>::ResizeWithFunction(uintMem newCount, const F& constructFunction) requires std::invocable<F, InternalValueType*, uintMem> && std::move_constructible<InternalValueType>
+	template<typename F> requires std::invocable<F, typename Array<T, Allocator>::StoredType*, uintMem>
+	void Array<T, Allocator>::ResizeWithFunction(uintMem newCount, const F& constructFunction) requires std::move_constructible<StoredType>
 	{
 		auto newPtr = ReallocateUnsafe(newCount);
 
@@ -734,10 +539,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (i >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Invalid index");
+			BLAZE_ENGINE_CORE_FATAL("Invalid index");
 #endif
 		if constexpr (std::is_reference_v<T>)
-			return ptr[i].value;
+			return ptr[i][0];
 		else
 			return ptr[i];
 	}
@@ -746,17 +551,17 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (i >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Invalid index");
+			BLAZE_ENGINE_CORE_FATAL("Invalid index");
 #endif
 		return ptr[i];
 	}
 	template<typename T, AllocatorType Allocator>
-	inline typename Array<T, Allocator>::template InternalValueType* Array<T, Allocator>::Ptr()
+	inline typename  Array<T, Allocator>::template StoredType* Array<T, Allocator>::Ptr()
 	{
 		return ptr;
-	}
+	}	
 	template<typename T, AllocatorType Allocator>
-	inline const typename Array<T, Allocator>::template InternalValueType* Array<T, Allocator>::Ptr() const
+	inline const typename  Array<T, Allocator>::template StoredType* Array<T, Allocator>::Ptr() const
 	{
 		return ptr;
 	}
@@ -765,44 +570,59 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "Array is empty");
+			BLAZE_ENGINE_CORE_FATAL("Array is empty");
 #endif
 
-		return ptr[0];
+		if constexpr (std::is_reference_v<T>)
+			return ptr[0][0];
+		else
+			return ptr[0];		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline const T& Array<T, Allocator>::First() const
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "Array is empty");
+			BLAZE_ENGINE_CORE_FATAL("Array is empty");
 #endif
-		return ptr[0];
+
+		if constexpr (std::is_reference_v<T>)
+			return ptr[0][0];
+		else
+			return ptr[0];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline T& Array<T, Allocator>::Last()
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "Array is empty");
+			BLAZE_ENGINE_CORE_FATAL("Array is empty");
 #endif
-		return ptr[count - 1];
+
+		if constexpr (std::is_reference_v<T>)
+			return ptr[count - 1][0];
+		else
+			return ptr[count - 1];		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline const T& Array<T, Allocator>::Last() const
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "Array is empty");
+			BLAZE_ENGINE_CORE_FATAL("Array is empty");
 #endif
-		return ptr[count - 1];
+
+		if constexpr (std::is_reference_v<T>)
+			return ptr[count - 1][0];
+		else
+			return ptr[count - 1];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::GetIterator(uintMem index)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Index out of range");
+			BLAZE_ENGINE_CORE_FATAL("Index out of range");
 #endif		
 		return Iterator(ptr + index);
 	}
@@ -811,89 +631,99 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Index out of range");
+			BLAZE_ENGINE_CORE_FATAL("Index out of range");
 #endif		
 		return ConstIterator(ptr + index);
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::FirstIterator()
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr, this);
-#else
 		return Iterator(ptr);
-#endif				
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::ConstIterator Array<T, Allocator>::FirstIterator() const
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return ConstIterator(ptr, this);
-#else
 		return ConstIterator(ptr);
-#endif				
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::LastIterator()
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + count - 1, this);
-#else
 		return Iterator(ptr + count - 1);
-#endif				
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::ConstIterator Array<T, Allocator>::LastIterator() const
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return ConstIterator(ptr + count - 1, this);
-#else
 		return ConstIterator(ptr + count - 1);
-#endif				
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::AheadIterator()
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr - 1, this);
-#else
 		return Iterator(ptr - 1);
-#endif
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::ConstIterator Array<T, Allocator>::AheadIterator() const
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return ConstIterator(ptr - 1, this);
-#else
 		return ConstIterator(ptr - 1);
-#endif
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::BehindIterator()
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + count, this);
-#else
 		return Iterator(ptr + count);
-#endif				
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::ConstIterator Array<T, Allocator>::BehindIterator() const
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return ConstIterator(ptr + count, this);
-#else
 		return ConstIterator(ptr + count);
-#endif				
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::operator ArrayView<T>() const
 	{
-		return ArrayView<T>((typename ArrayView<T>::template InternalValueType*)ptr, count);
+		return ArrayView<T>(ptr, count);
 	}
-	template<typename T, AllocatorType Allocator>	
-	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array& other) requires std::assignable_from<InternalValueType, const InternalValueType&>
+	template<typename T, AllocatorType Allocator>
+	inline bool Array<T, Allocator>::operator==(const ArrayView<T>& other) const requires std::equality_comparable<StoredType>
+	{
+		if (count != other.Count())
+			return false;
+
+		auto const end = ptr + count;
+		auto it1 = ptr;
+		auto it2 = other.Ptr();
+		
+		while (it1 != end)
+		{
+			if (!(*it1 == *it2))
+				return false;
+
+			++it1;
+			++it2;
+		}
+		
+		return true;
+	}
+	template<typename T, AllocatorType Allocator>
+	inline bool Array<T, Allocator>::operator!=(const ArrayView<T>& other) const requires std::equality_comparable<StoredType>
+	{
+		if (count != other.Count())
+			return true;
+
+		auto const end = ptr + count;
+		auto it1 = ptr;
+		auto it2 = other.Ptr();
+
+		while (it1 != end)
+		{
+			if (!(*it1 == *it2))
+				return true;
+
+			++it1;
+			++it2;
+		}
+
+		return false;
+	}
+	template<typename T, AllocatorType Allocator>
+	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array& other) requires std::copy_constructible<StoredType>&& std::assignable_from<StoredType&, const StoredType&>
 	{
 		CopyAssign(other.ptr, other.count);
 
@@ -912,23 +742,23 @@ namespace Blaze
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2, AllocatorType Allocator2>
-	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array<T2, Allocator2>& other) requires IsArrayAssignableFrom<InternalValueType, const typename Array<T2, Allocator2>::template InternalValueType&>
+	template<typename T2, AllocatorType Allocator2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::template StoredType&, const T2&>
+	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array<T2, Allocator2>& other)
 	{
 		CopyAssign(other.ptr, other.count);
 
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2>
-	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const ArrayView<T2>& other) requires IsArrayAssignableFrom<InternalValueType, const typename ArrayView<T2>::template InternalValueType&>
+	template<typename T2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::template StoredType&, const T2&>
+	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const ArrayView<T2>& other)
 	{
 		CopyAssign(other.Ptr(), other.Count());
 
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsArrayConstructibleFrom<T, const T2&>
+	template<typename T2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>
 	inline void Array<T, Allocator>::CopyConstructUnsafe(const T2* src, uintMem count)
 	{
 		if (count != 0)
@@ -939,12 +769,9 @@ namespace Blaze
 
 				ptr = newPtr;
 			}
-
-			for (uintMem i = 0; i < count; ++i)
-				if constexpr (std::constructible_from<T, T2>)
-					std::construct_at(ptr + i, src[i]);
-				else
-					std::construct_at(ptr + i, static_cast<T>(src[i]));
+			
+			for (uintMem i = 0; i < count; ++i)					
+				std::construct_at(ptr + i, static_cast<T>(src[i]));												
 
 			this->count = count;
 		}
@@ -956,7 +783,7 @@ namespace Blaze
 		}
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsArrayAssignableFrom<T, const T2&>
+	template<typename T2> requires std::constructible_from<typename Array<T, Allocator>::template StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::template StoredType&, const T2&>
 	inline void Array<T, Allocator>::CopyAssign(const T2* src, uintMem newCount)
 	{
 		if (newCount != 0)
@@ -1010,7 +837,7 @@ namespace Blaze
 		}
 	}
 	template<typename T, AllocatorType Allocator>
-	inline typename Array<T, Allocator>::template InternalValueType* Array<T, Allocator>::ReallocateUnsafe(uintMem newCount)
+	inline typename Array<T, Allocator>::template StoredType* Array<T, Allocator>::ReallocateUnsafe(uintMem newCount)
 	{
 		if (reserved == 0)
 		{
@@ -1036,12 +863,7 @@ namespace Blaze
 		else
 			return nullptr;
 
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
-#endif
-
-		return (InternalValueType*)allocator.Allocate(reserved * sizeof(InternalValueType));
+		return (StoredType*)allocator.Allocate(reserved * sizeof(StoredType));
 	}
 
 	template<typename T, AllocatorType Allocator>

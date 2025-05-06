@@ -1,8 +1,8 @@
 {
-  "builtin-baseline": "91f002cae2281636da5155efc5a11d67efa72415",
+  "builtin-baseline": "9df46ca3f4ec3bd05984e5668218630c52ea302a",
   "dependencies": [
     "sail",
-    "sdl2",
+    "sdl3",
     "freetype"
   ]
 }

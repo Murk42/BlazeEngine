@@ -85,15 +85,19 @@
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <VcpkgConfiguration>Release</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgConfiguration>Release</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -138,7 +142,6 @@
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>
       </AdditionalDependencies>
-      <AdditionalOptions>/NATVIS:BlazeEngineArrayDebugView.natvis %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -149,9 +152,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
     </ClCompile>
-    <Lib>
-      <AdditionalOptions>/NATVIS:BlazeEngineArrayDebugView.natvis %(AdditionalOptions)</AdditionalOptions>
-    </Lib>
+    <Lib />
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -160,9 +161,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Lib>
-      <AdditionalOptions>/NATVIS:BlazeEngineArrayDebugView.natvis %(AdditionalOptions)</AdditionalOptions>
-    </Lib>
+    <Lib />
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -207,7 +206,10 @@
     <ClInclude Include="include\BlazeEngineCore\BlazeEngineCoreDefines.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Array.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayIterator.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayIteratorImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayView.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayViewImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Buffer.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Color.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Constexpr.h" />
@@ -231,8 +233,11 @@
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewUTF8.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewUTF8Impl.h" />
-    <ClInclude Include="include\BlazeEngineCore\DataStructures\Template.h" />
-    <ClInclude Include="include\BlazeEngineCore\DataStructures\TemplateGroup.h" />
+    <ClInclude Include="include\BlazeEngineCore\Event\EventDispatcherImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\Event\EventHandlerData.h" />
+    <ClInclude Include="include\BlazeEngineCore\Event\EventHandlerDataImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\Types\Template.h" />
+    <ClInclude Include="include\BlazeEngineCore\Types\TemplateGroup.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Tuple.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\UnicodeChar.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\UnicodeCharImpl.h" />
@@ -267,6 +272,8 @@
     <ClInclude Include="include\BlazeEngineCore\Memory\MemoryManager.h" />
     <ClInclude Include="include\BlazeEngineCore\Memory\VirtualAllocator.h" />
     <ClInclude Include="include\BlazeEngineCore\Threading\Thread.h" />
+    <ClInclude Include="include\BlazeEngineCore\Types\TypeTraits.h" />
+    <ClInclude Include="include\BlazeEngineCore\Types\TypeTraitsImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\TimeInterval.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\Stopwatch.h" />
     <ClInclude Include="include\BlazeEngineCore\Utilities\StringParsing.h" />
@@ -412,6 +419,10 @@
     <ClInclude Include="include\BlazeEngine\Utilities\Threading.h" />
     <ClInclude Include="include\BlazeEngine\Utilities\Time.h" />
     <ClInclude Include="include\BlazeEngine\Utilities\Timing.h" />
+    <ClInclude Include="include\BlazeEngineCore\Event\EventDispatcher.h" />
+    <ClInclude Include="include\BlazeEngineCore\Event\EventHandler.h" />
+    <ClInclude Include="include\BlazeEngineCore\Event\LambdaEventHandler.h" />
+    <ClInclude Include="include\BlazeEngineCore\Event\QueueEventDispatcher.h" />
     <ClInclude Include="source\BlazeEngineCore\Application\ECS\EntityCreationData.h" />
     <ClInclude Include="source\BlazeEngineCore\Application\ECS\SystemCreationData.h" />
     <ClInclude Include="source\BlazeEngineCore\Application\UI\Components\UIElmenetCreationData.h" />
@@ -464,6 +475,7 @@
     <Font Include="assets\default\fonts\Consola.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="BlazeEngineArrayViewDebugView.natvis" />
     <Natvis Include="BlazeEngineMapDebugView.natvis" />
     <Natvis Include="BlazeEngineArrayDebugView.natvis" />
     <Natvis Include="BlazeEngineSetDebugView.natvis" />

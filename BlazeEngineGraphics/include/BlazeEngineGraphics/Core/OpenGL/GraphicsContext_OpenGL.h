@@ -1,10 +1,9 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCore.h"
-#include "BlazeEngine/Window/WindowSDL.h"
+#include "BlazeEngine/Window/Window.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/Dynamic/GraphicsContext.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
-#include "BlazeEngineGraphics/Core/OpenGL/SDLOpenGLContext_OpenGL.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
@@ -19,8 +18,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 namespace Blaze::Graphics::OpenGL
 {		
 	class RenderWindow_OpenGL;
-	class Framebuffer_OpenGL;
-	struct WindowSDLCreateOptions_OpenGL;
+	class Framebuffer_OpenGL;	
 
 	enum class ProfileType
 	{
@@ -34,6 +32,14 @@ namespace Blaze::Graphics::OpenGL
 	{
 		None, Flush
 	};
+
+	enum class WindowSwapInterval
+	{
+		None,
+		VSync,
+		AdaptiveVSync
+	};
+
 
 	ENUM_CLASS_BITWISE_OPERATIONS(ContextFlags)
 
@@ -64,8 +70,8 @@ namespace Blaze::Graphics::OpenGL
 
 		void SetActiveRenderWindow(RenderWindow_OpenGL&);
 
-		inline WindowSDL::WindowSDLHandle GetActiveWindowSDLHandle() const { return activeWindowSDLHandle; }
-		inline SDLOpenGLContext_OpenGL GetSDLOpenGLContext() const { return SDLOpenGLContext; }
+		inline void* GetActiveWindowHandle() const { return activeWindowHandle; }
+		inline void* GetSDLOpenGLContext() const { return SDLOpenGLContext; }
 
 		void SelectTexture(OpenGLWrapper::Texture1D*);
 		void SelectTexture(OpenGLWrapper::Texture2D*);
@@ -95,6 +101,10 @@ namespace Blaze::Graphics::OpenGL
 		void SetPatchSize(uint size);
 		void SetPointSize(uint size);
 		void SetScissorRect(Vec2i pos, Vec2i size);
+
+		//Returns false if AdaptiveVSync is requirested but it isn't supported, in which case VSync is used. 
+		//Otherwise returns true
+		bool SetSwapInterval(WindowSwapInterval swapInterval);
 
 		uint GetMaxBoundTextures();		
 
@@ -131,13 +141,12 @@ namespace Blaze::Graphics::OpenGL
 	private: 
 		GraphicsContextProperties_OpenGL properties;
 
-		SDLOpenGLContext_OpenGL SDLOpenGLContext;
+		void* SDLOpenGLContext;
 
-		WindowSDL initWindowSDL;
-		WindowSDL::WindowSDLHandle activeWindowSDLHandle;
-
-		WindowSDL CreateWindowSDL(const WindowSDLCreateOptions_OpenGL& createOptions);
-		void DestroyWindowSDL(WindowSDL& window);
+		void* initWindow;
+		void* activeWindowHandle;
+		
+		void ActiveWindowDestroyed(const Window::WindowDestroyedEvent& event);
 
 		friend class RenderWindow_OpenGL;
 	};

@@ -5,6 +5,45 @@
 
 namespace Blaze
 {
+	template<typename T>
+	inline std::underlying_type_t<T> ToInteger(T value)
+	{
+		return static_cast<std::underlying_type_t<T>>(value);
+	}
+	uint BitmapColorFormatComponentCount(BitmapColorFormat format)
+	{
+		switch (format)
+		{
+		case Blaze::BitmapColorFormat::Red: return 1;
+		case Blaze::BitmapColorFormat::RG: return 2;
+		case Blaze::BitmapColorFormat::RGB:	return 3;
+		case Blaze::BitmapColorFormat::RGBA: return 4;
+		case Blaze::BitmapColorFormat::BGR:	return 3;
+		case Blaze::BitmapColorFormat::BGRA: return 4;
+		default:
+			BLAZE_ENGINE_ERROR("Invalid BitmapColorFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+			return 4;
+		}
+	}
+
+	uintMem BitmapColorComponentTypeSize(BitmapColorComponentType type)
+	{
+		switch (type)
+		{
+		case Blaze::BitmapColorComponentType::Int8: return sizeof(int8);
+		case Blaze::BitmapColorComponentType::Uint8: return sizeof(uint8);
+		case Blaze::BitmapColorComponentType::Int16:	return sizeof(int);
+		case Blaze::BitmapColorComponentType::Uint16: return sizeof(uint16);
+		case Blaze::BitmapColorComponentType::Int32:	return sizeof(int32);
+		case Blaze::BitmapColorComponentType::Uint32: return sizeof(uint32);
+		case Blaze::BitmapColorComponentType::Float:	return sizeof(float);
+		case Blaze::BitmapColorComponentType::Double: return sizeof(double);
+		default:
+			BLAZE_ENGINE_ERROR("Invalid BitmapColorComponentType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+			return sizeof(uint8);
+		}
+	}
+
 	BitmapRef::BitmapRef()
 		: pixels(nullptr), format(BitmapColorFormat::RGBA), type(BitmapColorComponentType::Int32), size(0, 0), stride(0)
 	{
@@ -256,35 +295,36 @@ namespace Blaze
 		}  
 	}
 
-	Result Bitmap::Load(Path path, bool flipVertically)
-	{					
+	void Bitmap::Load(Path path, bool flipVertically)
+	{
 		const sail_codec_info* codec = nullptr;
 		sail_image* image;
 		void* state = nullptr;
-				
+
 		StringUTF8 pathString = path.ToString();
 		StringUTF8 fileExtension = path.FileExtension();
-		StringParsing::GetAfterFirst(fileExtension, fileExtension, '.');		
+		StringParsing::GetAfterFirst(fileExtension, fileExtension, '.');
 
-		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension");
-		SAIL_CHECK(sail_start_loading_from_file((const char*)pathString.Buffer(), codec, &state), "Failed to start loading from file with path \"" + pathString + "\"");
-		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next from file with path \"" + pathString + "\"");
+		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.");
+		SAIL_CHECK(sail_start_loading_from_file((const char*)pathString.Buffer(), codec, &state), "Failed to start loading from file with path \"" + pathString + "\".");
+		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next from file with path \"" + pathString + "\".");
 
 		BitmapColorFormat format{ };
 		BitmapColorComponentType type{ };
 		Vec2u size = Vec2u(image->width, image->height);
 
 		if (!ConvertToConvenientImage(image, format, type))
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Unsupported color format for deserialization");
+		{
+			BLAZE_ENGINE_ERROR("Unsupported color format for deserialization");
+			return;
+		}
 
 		Create(size, format, type, image->pixels, image->bytes_per_line, flipVertically);
 
-		SAIL_CHECK(sail_stop_loading(state), "Failed to stop loading");		
-		sail_destroy_image(image);
-
-		return Result();
+		SAIL_CHECK(sail_stop_loading(state), "Failed to stop loading.");		
+		sail_destroy_image(image);		
 	}	
-	Result Bitmap::Save(Path path)
+	void Bitmap::Save(Path path)
 	{				
 		const sail_codec_info* codec = nullptr;
 		sail_image image;
@@ -310,13 +350,12 @@ namespace Blaze
 		StringParsing::GetAfterFirst(fileExtension, fileExtension, '.');
 
 		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.");
-		SAIL_CHECK(sail_start_saving_into_file((const char*)pathString.Buffer(), codec, &state), "Failed to start saving into from file with path \"" + pathString + "\"");
-		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame from file with path \"" + pathString + "\"");
+		SAIL_CHECK(sail_start_saving_into_file((const char*)pathString.Buffer(), codec, &state), "Failed to start saving into from file with path \"" + pathString + "\".");
+		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame from file with path \"" + pathString + "\".");
 
-		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving");		
-		return Result();		
+		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving.");		
 	}
-	Result Bitmap::Serialize(WriteStream& stream) const
+	void Bitmap::Serialize(WriteStream& stream) const
 	{
 		sail_io* io = nullptr;
 		const sail_codec_info* codec = nullptr;
@@ -345,13 +384,10 @@ namespace Blaze
 		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame.");		
 		
 		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving");
-		sail_destroy_io(io);		
-		
-		return Result();
+		sail_destroy_io(io);				
 	}
-	Result Bitmap::Deserialize(ReadStream& stream)
+	void Bitmap::Deserialize(ReadStream& stream)
 	{	
-		
 		sail_io* io = nullptr;		
 		const sail_codec_info* codec = nullptr;
 		sail_image* image;
@@ -368,18 +404,18 @@ namespace Blaze
 		Vec2u size = Vec2u(image->width, image->height);
 
 		if (!ConvertToConvenientImage(image, format, type))
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Unsupported color format for deserialization");
+		{
+			BLAZE_ENGINE_ERROR("Unsupported color format for deserialization");
+			return;
+		}
 
 		Create(size, format, type, image->pixels, image->bytes_per_line, false);
 
 		SAIL_CHECK(sail_stop_loading(state), "Failed to stop loading");
 		sail_destroy_io(io);
-		sail_destroy_image(image);
-
-		return Result();
+		sail_destroy_image(image);		
 	}
-
-	Result Bitmap::Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, uintMem stride, bool flipVertically)
+	void Bitmap::Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, uintMem stride, bool flipVertically)
 	{
 		Clear();
 
@@ -404,7 +440,7 @@ namespace Blaze
 		void* dst = this->pixels;
 		
 		if (src == nullptr)
-			return Result();
+			return;
 		
 		if (flipVertically)
 		{
@@ -421,9 +457,7 @@ namespace Blaze
 		else
 		{
 			memcpy(dst, src, bitmapSize);
-		}
-		
-		return Result();
+		}		
 	}	
 
 	Bitmap& Bitmap::operator=(const Bitmap& other)

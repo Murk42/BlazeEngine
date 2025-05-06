@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngineGraphics/Renderers/TexturedRectRenderer.h"
 #include "BlazeEngineGraphics/RenderScene/RenderUnit.h"
-#include "BlazeEngineGraphics/UI/Core/UINode.h"
+#include "BlazeEngineGraphics/UI/Core/Node.h"
 
 namespace Blaze::UI
 {
@@ -21,6 +21,7 @@ namespace Blaze::UI
 	{
 	public:
 		ImageRenderUnit(Node* node);
+		~ImageRenderUnit();
 
 		void BeginStream() override;
 		void* Advance() override;
@@ -48,8 +49,8 @@ namespace Blaze::UI
 
 		Graphics::TexturedRectRenderData rd;
 
-		void OnEvent(Node::TransformUpdatedEvent event) override;
-		void OnEvent(Node::FinalTransformUpdatedEvent event) override;
+		void OnEvent(const Node::TransformUpdatedEvent& event) override;
+		void OnEvent(const Node::FinalTransformUpdatedEvent& event) override;
 
 		//Cleans renderData if it is dirty, if not does nothing
 		void CleanRenderData();

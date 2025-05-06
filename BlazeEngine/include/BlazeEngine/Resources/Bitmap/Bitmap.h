@@ -66,13 +66,13 @@ namespace Blaze
 		Bitmap(const BitmapView& bitmapView, uintMem newStride);
 		~Bitmap();		
 
-		Result Load(Path path, bool flipVertically = false);				
-		Result Save(Path path);		
+		void Load(Path path, bool flipVertically = false);				
+		void Save(Path path);
 
-		Result Serialize(WriteStream& stream) const;
-		Result Deserialize(ReadStream& stream);
+		void Serialize(WriteStream& stream) const;
+		void Deserialize(ReadStream& stream);
 				
-		Result Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, uintMem stride = 0, bool flipVertically = false);		
+		void Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, uintMem stride = 0, bool flipVertically = false);
 
 		void Clear();		
 

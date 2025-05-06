@@ -36,7 +36,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 	void ShaderProgram::LinkProgram()
 	{
 		if (state == ShaderProgramState::SuccesfullyLinked)
-			BLAZE_WARNING_RESULT("Blaze Engine", "Relinking a shader program. This might cause driver errors. Recreate the shader program before linking again");
+			BLAZE_ENGINE_WARNING("Relinking a shader program. This might cause driver errors. Recreate the shader program before linking again");
 
 		state = ShaderProgramState::UnsuccesfullyLinked;
 
@@ -54,7 +54,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 			glGetProgramInfoLog(id, lenght, &lenght, message.Ptr());			
 
-			Debug::Logger::LogWarning("Blaze Engine Graphics", "Failed to compile shader program with message:\n" + message);
+			BLAZE_ENGINE_GRAPHICS_WARNING("Failed to compile shader program with message:\n" + message);
 			return;
 		}
 

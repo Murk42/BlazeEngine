@@ -10,7 +10,7 @@ namespace Blaze
 	template<typename T>
 	concept VirtualAllocatorType = IsVirtualAllocator<T>;
 
-	class BLAZE_CORE_API VirtualAllocator : public AllocatorBase
+	class BLAZE_CORE_API VirtualAllocator
 	{
 	public:		
 		VirtualAllocator();		

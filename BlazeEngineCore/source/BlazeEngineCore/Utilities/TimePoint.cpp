@@ -17,7 +17,7 @@ namespace Blaze
 	static uint64 GetCurrentTimeValue()
 	{
 		//returns value in nanoseconds
-		return std::chrono::high_resolution_clock::now().time_since_epoch().count();
+		return std::chrono::nanoseconds(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 	}		
 	
 	TimePoint TimePoint::GetCurrentWorldTime()

@@ -3,7 +3,12 @@
 #include "BlazeEngineCore/Utilities/StringParsing.h"
 
 namespace Blaze::Debug
-{	
+{
+	Log::Log() :
+		threadID(UINT_MAX), time(), callstack(),
+		type(LogType::Info), source(), message()
+	{
+	}
 	Log::Log(const Log& log) :
 		threadID(log.threadID), time(log.time), callstack(log.callstack),
 		type(log.type), source(log.source), message(log.message)

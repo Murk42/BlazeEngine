@@ -51,7 +51,7 @@ namespace Blaze::Graphics::OpenGL
 		};
 
 		vertexBuffer.Allocate(vertices, sizeof(vertices));
-		instanceBuffer.Allocate(nullptr, InstanceBufferSize, Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapAccess::Write, Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapType::None);
+		instanceBuffer.Allocate(nullptr, InstanceBufferSize, Graphics::OpenGLWrapper::GraphicsBufferMapAccessFlags::Write, Graphics::OpenGLWrapper::GraphicsBufferMapType::None);
 
 		va.EnableVertexAttribute(0);
 		va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint8, 1, false, 0);
@@ -109,7 +109,7 @@ namespace Blaze::Graphics::OpenGL
 		{
 			uintMem count = renderCache.instances.Count() % InstanceBufferInstanceCount;
 
-			void* instanceBufferMap = instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);
+			void* instanceBufferMap = instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
 
 			memcpy(instanceBufferMap, renderCache.instances.Ptr() + offset, sizeof(Instance) * count);
 			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * count);
@@ -156,7 +156,7 @@ namespace Blaze::Graphics::OpenGL
 				return;
 			}
 
-			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);			
+			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);			
 			uintMem instanceCount = 0;
 
 			while (true)

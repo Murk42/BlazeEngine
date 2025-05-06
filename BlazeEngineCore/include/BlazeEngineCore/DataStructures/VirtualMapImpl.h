@@ -29,7 +29,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK				
 		if (nodeHeader == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif		
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -88,7 +88,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK			
 		if (nodeHeader == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
 #endif			
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -244,7 +244,7 @@ namespace Blaze
 			{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK				
 				if (nodeHeader->iteratorCount)
-					Debug::Logger::LogWarning("Blaze Engine", "Clearing a map while a iterator is referencing it");
+					BLAZE_ENGINE_CORE_WARNING("Clearing a map while a iterator is referencing it");
 #endif
 				NodeHeader* next = nodeHeader->next;
 
@@ -327,7 +327,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (iterator.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to erase a map pair with a null iterator");
+			return BLAZE_ENGINE_CORE_ERROR("Trying to erase a map pair with a null iterator");
 #endif
 
 		Bucket* bucket = GetBucketFromHash(iterator.node->hash);
@@ -526,7 +526,7 @@ namespace Blaze
 
 		if (bucket == nullptr)
 		{
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to insert a map pair but there are no buckets");
+			BLAZE_ENGINE_CORE_FATAL("Trying to insert a map pair but there are no buckets");
 			return { Iterator(), false };
 		}
 
@@ -616,7 +616,7 @@ namespace Blaze
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK				
 		if (nodeHeader->iteratorCount)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a map node while a iterator is referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Erasing a map node while a iterator is referencing it");
 #endif
 
 		std::destroy_at(nodeHeader);

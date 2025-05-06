@@ -28,8 +28,8 @@ namespace Blaze::Graphics::OpenGL
 		program.LinkShaders({ &vert, &frag });
 
 		instanceBuffer.Allocate(nullptr, sizeof(Line3DInstance) * bufferLineCapacity,
-			OpenGLWrapper::ImmutableGraphicsBufferMapAccess::Write,
-			OpenGLWrapper::ImmutableGraphicsBufferMapType::PersistentUncoherent
+			OpenGLWrapper::GraphicsBufferMapAccessFlags::Write,
+			OpenGLWrapper::GraphicsBufferMapType::PersistentUncoherent
 		);		
 
 		vertexArray.EnableVertexAttribute(0);
@@ -84,7 +84,7 @@ namespace Blaze::Graphics::OpenGL
 				return;
 			}
 			
-			Line3DInstance* instanceBufferMap = (Line3DInstance*)instanceBuffer.MapBufferRange(0, sizeof(Line3DInstance) * bufferInstanceCapacity, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);
+			Line3DInstance* instanceBufferMap = (Line3DInstance*)instanceBuffer.MapBufferRange(0, sizeof(Line3DInstance) * bufferInstanceCapacity, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
 			uintMem instanceCount = 0;
 
 			while (true)				

@@ -1,10 +1,10 @@
 #pragma once
-#include "BlazeEngineCore/BlazeEngineCore.h"
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
-{
+{		
 	class BLAZE_GRAPHICS_API GraphicsBuffer
 	{	
 	public:
@@ -33,7 +33,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		ImmutableStaticGraphicsBuffer(uint id) : GraphicsBuffer(id) { }
 		ImmutableStaticGraphicsBuffer(ImmutableStaticGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(const void* ptr, size_t size, bool clientStorage = false);
+		void Allocate(const void* ptr, uintMem size, bool clientStorage = false);
 
 		void Swap(ImmutableStaticGraphicsBuffer& other);
 
@@ -47,8 +47,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 		ImmutableDynamicGraphicsBuffer(uint id) : GraphicsBuffer(id) { }
 		ImmutableDynamicGraphicsBuffer(ImmutableDynamicGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(const void* ptr, size_t size, bool clientStorage = false);
-		void WriteData(const void* ptr, size_t size, size_t offset);
+		void Allocate(const void* ptr, uintMem size, bool clientStorage = false);
+		void WriteData(const void* ptr, uintMem size, uintMem offset);
 
 		void Swap(ImmutableDynamicGraphicsBuffer& other);
 
@@ -57,20 +57,23 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 	class BLAZE_GRAPHICS_API ImmutableMappedGraphicsBuffer : public GraphicsBuffer
 	{
-		ImmutableGraphicsBufferMapAccess mapAccess;
-		ImmutableGraphicsBufferMapType mappingType;
+		GraphicsBufferMapAccessFlags mapAccess;
+		GraphicsBufferMapType mappingType;
 	public:
 		ImmutableMappedGraphicsBuffer();
 		ImmutableMappedGraphicsBuffer(uint id) : GraphicsBuffer(id) { }
 		ImmutableMappedGraphicsBuffer(ImmutableMappedGraphicsBuffer&& other) noexcept;
 
-		void Allocate(const void* ptr, size_t size, ImmutableGraphicsBufferMapAccess access, ImmutableGraphicsBufferMapType type, bool clientStorage = false);
+		void Allocate(const void* ptr, uintMem size, GraphicsBufferMapAccessFlags access, GraphicsBufferMapType type, bool clientStorage = false);
 
-		void* MapBufferRange(size_t offset, size_t size, ImmutableGraphicsBufferMapOptions options);
+		void* MapBufferRange(uintMem offset, uintMem size, GraphicsBufferMapOptions options);
 		void UnmapBuffer();
-		void FlushBufferRange(size_t offset, size_t size);
+		void FlushBufferRange(uintMem offset, uintMem size);
 
 		void Swap(ImmutableMappedGraphicsBuffer& other);
+
+		inline GraphicsBufferMapAccessFlags GetMapAccessOptions() const { return mapAccess; }
+		inline GraphicsBufferMapType GetMapType() const { return mappingType; }
 
 		ImmutableMappedGraphicsBuffer& operator=(ImmutableMappedGraphicsBuffer&& other) noexcept;
 	};
@@ -82,8 +85,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 		MutableDrawGraphicsBuffer(uint id) : GraphicsBuffer(id) { }
 		MutableDrawGraphicsBuffer(MutableDrawGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(const void* ptr, size_t size, MutableGraphicsBufferUseFrequency frequency);
-		void WriteData(const void* ptr, size_t size, size_t offset);
+		void Allocate(const void* ptr, uintMem size, GraphicsBufferUseFrequency frequency);
+		void WriteData(const void* ptr, uintMem size, uintMem offset);
 
 		void Swap(MutableDrawGraphicsBuffer& other);
 
@@ -97,8 +100,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 		MutableReadGraphicsBuffer(uint id) : GraphicsBuffer(id) { }
 		MutableReadGraphicsBuffer(MutableReadGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(size_t size, MutableGraphicsBufferUseFrequency frequency);
-		void ReadData(void* ptr, size_t size, size_t offset) const;
+		void Allocate(uintMem size, GraphicsBufferUseFrequency frequency);
+		void ReadData(void* ptr, uintMem size, uintMem offset) const;
 
 		void Swap(MutableReadGraphicsBuffer& other);
 
@@ -112,8 +115,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 		MutableCopyGraphicsBuffer(uint id) : GraphicsBuffer(id) { }
 		MutableCopyGraphicsBuffer(MutableCopyGraphicsBuffer&& other) noexcept : GraphicsBuffer(std::move(other)) { }
 
-		void Allocate(size_t size, MutableGraphicsBufferUseFrequency frequency);
-		void CopyData(GraphicsBuffer& destination, size_t readOffset, size_t writeOffset, size_t size);
+		void Allocate(uintMem size, GraphicsBufferUseFrequency frequency);
+		void CopyData(GraphicsBuffer& destination, uintMem readOffset, uintMem writeOffset, uintMem size);
 
 		void Swap(MutableCopyGraphicsBuffer& other);
 

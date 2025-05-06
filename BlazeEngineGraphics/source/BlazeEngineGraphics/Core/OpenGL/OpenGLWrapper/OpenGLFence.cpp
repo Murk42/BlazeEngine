@@ -38,35 +38,42 @@ namespace Blaze::Graphics::OpenGLWrapper
 	void Fence::BlockServer()
 	{	
 		if (id == nullptr)
+		{
+			BLAZE_ENGINE_GRAPHICS_FATAL("Trying to block server with a fence that is not set");
 			return;
+		}			
 
-		glWaitSync((GLsync)id, 0, GL_TIMEOUT_IGNORED);		
+		glWaitSync((GLsync)id, 0, GL_TIMEOUT_IGNORED);				
 	}
 	FenceReturnState Fence::BlockClient(double timeout)
 	{
 		if (id == nullptr)
 			return FenceReturnState::FenceNotSet;
 
-		GLenum ret = glClientWaitSync((GLsync)id, GL_SYNC_FLUSH_COMMANDS_BIT, timeout * 1000000000.0);		
+		GLenum ret = glClientWaitSync((GLsync)id, GL_SYNC_FLUSH_COMMANDS_BIT, timeout * 1000000000.0);				
 		
+		FenceReturnState returnState;
 		switch (ret)
 		{
 		case GL_ALREADY_SIGNALED:
-			return FenceReturnState::AlreadySignaled;
+			returnState = FenceReturnState::AlreadySignaled;
 			break;
 		case GL_TIMEOUT_EXPIRED:
-			return FenceReturnState::TimeoutExpired;
+			returnState = FenceReturnState::TimeoutExpired;
 			break;
 		case GL_CONDITION_SATISFIED:
-			return FenceReturnState::ConditionSatisfied;
+			returnState = FenceReturnState::ConditionSatisfied;
 			break;
 		case GL_WAIT_FAILED:
-			return FenceReturnState::Error;
+			returnState = FenceReturnState::Error;
 			break;
-		default:
-			return (FenceReturnState)-1;
+		default:			
+			BLAZE_ENGINE_GRAPHICS_FATAL("glClie ntWaitSync returned an invalid value");
+			returnState = (FenceReturnState)-1;
 			break;
-		}		
+		}
+
+		return returnState;
 	}
 	bool Fence::IsSet()
 	{

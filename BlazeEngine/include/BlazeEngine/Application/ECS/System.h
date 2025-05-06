@@ -29,7 +29,7 @@ namespace Blaze::ECS
 		{
 			if (typeData->GetTypeName().Ptr() != T::typeName)
 			{
-				Debug::Logger::LogError("Blaze Engine", "Invalid component cast");
+				BLAZE_ENGINE_CORE_ERROR("Invalid component cast");
 				return nullptr;
 			}
 

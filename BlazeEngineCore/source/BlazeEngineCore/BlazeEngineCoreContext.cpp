@@ -33,8 +33,7 @@ namespace Blaze
 		{
 			if (!std::filesystem::exists("logs"))
 				std::filesystem::create_directories("logs");
-			if (memoryLogFile.Open("logs/memory.txt", FileAccessPermission::Write))
-				exit(1);
+			memoryLogFile.Open("logs/memory.txt", FileAccessPermission::Write);
 		}
 
 		atexit(SaveMemoryLog);

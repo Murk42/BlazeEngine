@@ -172,7 +172,7 @@ namespace Blaze
 
 		if (index > (intMem)characterCount || index < 0)
 		{
-			Debug::Logger::LogError("Blaze Engine", "Trying to insert a string at the index that is outside of the the target string");
+			BLAZE_ENGINE_CORE_ERROR("Trying to insert a string at the index that is outside of the the target string");
 			return;
 		}
 		else if (index == (intMem)characterCount)
@@ -284,7 +284,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (bufferSize == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "String is empty");
+			BLAZE_ENGINE_CORE_FATAL("String is empty");
 #endif
 		return UnicodeChar(buffer, bufferSize);
 	}

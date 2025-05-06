@@ -99,7 +99,7 @@ namespace Blaze
 		{
 			if (IsRunning())
 			{
-				Debug::Logger::LogError("Blaze Engine", "Thread::Run called on a running thread");
+				BLAZE_ENGINE_CORE_ERROR("Thread::Run called on a running thread");
 				return;
 			}
 

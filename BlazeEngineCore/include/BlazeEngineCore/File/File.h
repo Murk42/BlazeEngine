@@ -62,8 +62,8 @@ namespace Blaze
 		File(const Path& path, FileAccessPermission mode, FileOpenParameters parameters);
 		~File();
 		
-		Result Open(const Path& path, FileAccessPermission mode);
-		Result Open(const Path& path, FileAccessPermission mode, FileOpenParameters parameters);
+		void Open(const Path& path, FileAccessPermission mode);
+		void Open(const Path& path, FileAccessPermission mode, FileOpenParameters parameters);
 
 		File& operator=(File&& other) noexcept;
 	};

@@ -2,7 +2,7 @@
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Renderers/PanelRenderer.h"
 #include "BlazeEngineGraphics/RenderScene/RenderUnit.h"
-#include "BlazeEngineGraphics/UI/Core/UINode.h"
+#include "BlazeEngineGraphics/UI/Core/Node.h"
 
 namespace Blaze::UI
 {	
@@ -12,6 +12,7 @@ namespace Blaze::UI
 	{
 	public:
 		PanelRenderUnit(Node* node);
+		~PanelRenderUnit();
 
 		void BeginStream() override;		
 		void* Advance() override;			
@@ -31,6 +32,6 @@ namespace Blaze::UI
 		Node* node;
 		bool rendered : 1;		
 
-		void OnEvent(Node::FinalTransformUpdatedEvent event);
+		void OnEvent(const Node::FinalTransformUpdatedEvent& event);
 	};
 }

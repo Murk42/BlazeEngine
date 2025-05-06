@@ -8,8 +8,12 @@ CLIENT_API void Setup()
 	Debug::Logger::AddOutputFile("log.txt");
 	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{						
 		} };
-	Graphics::OpenGL::RenderWindow_OpenGL renderWindow{ graphicsContext, Graphics::OpenGL::WindowSDLCreateOptions_OpenGL { } };
-	auto& window = renderWindow.GetWindowSDL();
+	Graphics::OpenGL::RenderWindow_OpenGL renderWindow{ graphicsContext, WindowCreateOptions{			
+		.hidden = true,
+		.title = "UI test", 		
+	}};
+	graphicsContext.SetActiveRenderWindow(renderWindow);
+	auto& window = renderWindow.GetWindow();
 	bool windowClosed = false;
 
 	Graphics::OpenGL::TexturedRectRenderer_OpenGL texturedRectRenderer{ graphicsContext };
@@ -33,8 +37,10 @@ CLIENT_API void Setup()
 	UIRenderPipeline.SetScreen(&mainScreen);
 	InputManager.SetScreen(&mainScreen);
 
-	LambdaEventHandler<Input::Events::WindowResizedEvent> windowResizedEventHandler{
-		[&](const Input::Events::WindowResizedEvent& event) {			
+	Console::WriteLine(StringParsing::Convert(window.GetDisplayIndex()));
+
+	LambdaEventHandler<Window::WindowResizedEvent> windowResizedEventHandler{
+		[&](const Window::WindowResizedEvent& event) {			
 		
 			graphicsContext.Flush();
 			graphicsContext.SetRenderArea(Vec2i(), event.size);
@@ -43,30 +49,27 @@ CLIENT_API void Setup()
 			transform.size = (Vec2f)event.size;
 			mainScreen.SetTransform(transform);						
 		} };
-	LambdaEventHandler<Input::Events::WindowCloseEvent> windowCloseEventHandler{
-		[&](const Input::Events::WindowCloseEvent& event) {
+	LambdaEventHandler<Window::WindowCloseEvent> windowCloseEventHandler{
+		[&](const Window::WindowCloseEvent& event) {
 			windowClosed = true;
 		} };
-	window.resizedEventDispatcher.AddHandler(windowResizedEventHandler);
-	window.closeEventDispatcher.AddHandler(windowCloseEventHandler);
-	window.SetSize({ 1000, 1000 });
-	windowResizedEventHandler.OnEvent({ .window = &window, .size = window.GetSize() });
-	window.ShowWindow(true);	
+	window.windowResizedEventDispatcher.AddHandler(windowResizedEventHandler);
+	window.windowCloseEventDispatcher.AddHandler(windowCloseEventHandler);
+	windowResizedEventHandler.OnEvent({ .window = window, .size = window.GetSize() });
+	window.SetHiddenFlag(false);	
+
 
 	while (true)
 	{
 		Input::Update();		
 
 		if (windowClosed)
-			break;
+			break;		
 		
 		graphicsContext.ClearTarget();	
 		
 
 		UIRenderPipeline.Render(renderWindow.GetSize());
-
-		//Graphics::OpenGL::UIRenderPipelineDebugData debug;
-		//UIRenderPipeline.GetDebugData(debug);
 		
 		window.SwapBuffers();		
 	}

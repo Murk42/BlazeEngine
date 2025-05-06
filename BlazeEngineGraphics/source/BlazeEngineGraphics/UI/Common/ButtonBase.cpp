@@ -1,26 +1,40 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Common/ButtonBase.h"
-#include "BlazeEngineGraphics/UI/Input/UIInputManager.h"
+#include "BlazeEngineGraphics/UI/Input/InputManager.h"
 
 namespace Blaze::UI
 {
 	ButtonBase::ButtonBase()
 		: pressed(false)
-	{		
-		SetBlocksMouseEventsFlag(true);
+	{				
 	}
-	void ButtonBase::OnEvent(MousePressedEvent event)
+	void ButtonBase::SetPressableFlag(bool pressable)
 	{
-		pressed = true;
-		event.inputManager->SelectNode(this);		
+		if (this->pressable != pressable)
+		{
+			this->pressable = pressable;
 
-		pressedEventDispatcher.Call({ event.inputManager });
+			if (!pressable && pressed)
+				pressed = false;
+
+			pressableFlagChangedEventDispatcher.Call({ *this });
+		}
 	}
-	void ButtonBase::OnEvent(MouseReleasedEvent event)
+	void ButtonBase::OnEvent(const MouseButtonDownEvent& event)
+	{
+		if (pressable)
+		{
+			pressed = true;
+			event.inputManager.SelectNode(this);
+
+			pressedEventCallback({ event.inputManager, *this });
+		}
+	}
+	void ButtonBase::OnEvent(const MouseButtonUpEvent& event)
 	{
 		pressed = false;
 	}
-	void ButtonBase::OnEvent(DeselectedEvent event)
+	void ButtonBase::OnEvent(const DeselectedEvent& event)
 	{
 		pressed = false;
 	}

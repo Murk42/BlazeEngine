@@ -51,7 +51,7 @@ namespace Blaze::ECS
 		if (registry->GetComponentTypeData<C>(typeData))
 			return (C*)GetComponent(*typeData);		
 		{
-			Debug::Logger::LogError("Blaze Engine", "Registry doesnt contain this component type");
+			BLAZE_ENGINE_CORE_ERROR("Registry doesnt contain this component type");
 			return nullptr;
 		}
 	}

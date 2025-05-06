@@ -10,7 +10,7 @@ namespace Blaze::ECS
 		Scene();
 		~Scene();
 
-		Result SetRegistry(ComponentTypeRegistry registry);
+		void SetRegistry(ComponentTypeRegistry registry);
 
 		void Clear();		
 
@@ -18,12 +18,12 @@ namespace Blaze::ECS
 		template<typename ... C> requires (IsComponent<C> && ...)
 		EntityView<C...> Create();		
 
-		Result Destroy(Entity* entity);
+		void Destroy(Entity* entity);
 
 		template<typename C> requires IsComponent<C>
-		Result UpdateSystem();
-		Result UpdateSystem(const ComponentTypeData&);
-		Result UpdateSystem(uintMem index);
+		void UpdateSystem();
+		void UpdateSystem(const ComponentTypeData&);
+		void UpdateSystem(uintMem index);
 		
 		template<typename C> requires IsComponent<C>
 		typename C::template System* GetSystem();
@@ -86,12 +86,15 @@ namespace Blaze::ECS
 	}
 
 	template<typename C> requires IsComponent<C>
-	inline Result Scene::UpdateSystem()
+	inline void Scene::UpdateSystem()
 	{
 		const ComponentTypeData* typeData;
 
 		if (!registry.GetComponentTypeData<C>(typeData))
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Component type is not in registry");
+		{
+			BLAZE_ENGINE_ERROR("Component type is not in registry");
+			return;
+		}
 
 		return UpdateSystem(*typeData);
 	}
@@ -102,7 +105,7 @@ namespace Blaze::ECS
 		const ComponentTypeData* typeData;
 
 		if (!registry.GetComponentTypeData<C>(typeData))
-			Debug::Logger::LogError("Blaze Engine", "Component type is not in registry");
+			BLAZE_ENGINE_CORE_ERROR("Component type is not in registry");
 		
 		return (typename C::template System*)GetSystem(*typeData);
 	}
@@ -113,7 +116,7 @@ namespace Blaze::ECS
 		const ComponentTypeData* typeData;
 
 		if (!registry.GetComponentTypeData<C>(typeData))
-			Debug::Logger::LogError("Blaze Engine", "Component type is not in registry");
+			BLAZE_ENGINE_CORE_ERROR("Component type is not in registry");
 
 		return GetComponents(*typeData);
 	}	
@@ -122,7 +125,7 @@ namespace Blaze::ECS
 	inline void Scene::SetTypeData(const ComponentTypeData*& ptr)
 	{
 		if (!registry.GetComponentTypeData<C>(ptr))
-			Debug::Logger::LogError("Blaze Engine", "Registry doesnt contain the component type");		
+			BLAZE_ENGINE_CORE_ERROR("Registry doesnt contain the component type");
 	}
 
 	template<typename ... C> requires (IsComponent<C> && ...)

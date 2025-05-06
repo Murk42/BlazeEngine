@@ -6,7 +6,7 @@ in float frag_textureIndex;
 in vec2 frag_uv;
 in vec4 frag_color;
 
-out vec4 out_color;
+out vec4 out_color; 
 
 layout(location = 1) uniform sampler2D u_texture1;
 layout(location = 2) uniform sampler2D u_texture2;

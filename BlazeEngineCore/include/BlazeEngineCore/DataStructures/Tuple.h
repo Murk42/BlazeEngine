@@ -1,5 +1,6 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/TemplateGroup.h"
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Types/TemplateGroup.h"
 
 namespace Blaze
 {

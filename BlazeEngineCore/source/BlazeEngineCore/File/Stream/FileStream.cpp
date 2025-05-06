@@ -18,58 +18,50 @@ namespace Blaze
 		: StreamBase(std::move(other)), file(other.file)
 	{		
 		other.file = nullptr;
-	}
-	FileStreamBase::FileStreamBase(void* file)
-		: file(nullptr)
-	{
-		Open(file);
-	}
+	}	
 	FileStreamBase::~FileStreamBase()
 	{
 		Close();
 	}
-	Result FileStreamBase::Open(void* file)
+	void FileStreamBase::AcquireHandle(void* file)
 	{
 		Close();
 
-		this->file = file;
-
-		return Result();
+		this->file = file;		
 	}
 	bool FileStreamBase::IsOpen() const
 	{
 		return file != nullptr;
 	}
-	Result FileStreamBase::Close()
+	void FileStreamBase::Close()
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
-			return Result();
+			return;
 
 		BOOL result = CloseHandle(file);
 
 		if (result == 0)
 			Debug::Logger::LogError("Windows API", "CloseHandle failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
 
-		file = nullptr;
-
-		return Result();
+		file = nullptr;		
 #else
 #pragma error
 #endif
 	}
-	Result FileStreamBase::Flush()
+	void FileStreamBase::Flush()
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "file is nullptr");
+		{
+			BLAZE_ENGINE_CORE_ERROR("file is nullptr");
+			return;
+		}
 
 		BOOL result = FlushFileBuffers(file);
 
 		if (result == 0)
-			Debug::Logger::LogError("Windows API", "FlushFileBuffers failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
-
-		return Result();
+			Debug::Logger::LogError("Windows API", "FlushFileBuffers failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");		
 #else
 #pragma error
 #endif
@@ -78,7 +70,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "file is nullptr");
+		{
+			BLAZE_ENGINE_CORE_ERROR("file is nullptr");
+			return false;
+		}
 
 		LARGE_INTEGER position;
 		position.QuadPart = offset;
@@ -99,7 +94,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "file is nullptr");
+		{
+			BLAZE_ENGINE_CORE_ERROR("file is nullptr");
+			return false;
+		}
 
 		LARGE_INTEGER position;
 		position.QuadPart = offset;
@@ -120,7 +118,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "file is nullptr");
+		{
+			BLAZE_ENGINE_CORE_ERROR("file is nullptr");
+			return false;
+		}
 
 		LARGE_INTEGER position;
 		position.QuadPart = offset;
@@ -141,7 +142,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "file is nullptr");
+		{
+			BLAZE_ENGINE_CORE_ERROR("file is nullptr");
+			return 0;
+		}
 
 		LARGE_INTEGER position;
 		LARGE_INTEGER nullPosition;
@@ -160,7 +164,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (file == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "file is nullptr");
+		{
+			BLAZE_ENGINE_CORE_ERROR("file is nullptr");
+			return 0;
+		}
 
 		LARGE_INTEGER size;
 		BOOL result = GetFileSizeEx(file, &size);

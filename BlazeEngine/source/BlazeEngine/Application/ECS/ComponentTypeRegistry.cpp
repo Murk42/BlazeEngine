@@ -86,7 +86,7 @@ namespace Blaze::ECS
 		types.ReserveExactly(count);				
 	}
 
-	Result ComponentTypeRegistry::AddType(StringView name,
+	void ComponentTypeRegistry::AddType(StringView name,
 		uintMem size, ptrdiff_t baseOffset, ComponentTypeData::Constructor constructor, ComponentTypeData::Destructor destructor,
 		uintMem systemSize, ptrdiff_t systemBaseOffset, ComponentTypeData::SystemConstructor systemConstructor, ComponentTypeData::SystemDestructor systemDestructor,
 		Array<StringView> typeTags)
@@ -94,12 +94,14 @@ namespace Blaze::ECS
 		auto [it, inserted] = nameTable.Insert(StringView(name), nullptr);
 
 		if (!inserted)
-			return BLAZE_WARNING_RESULT("Blaze Engine", "Trying to register a type but there is a type with the same name already registered");		
+		{
+			BLAZE_ENGINE_WARNING("Trying to register a type but there is a type with the same name already registered");
+			return;
+		}
 
 		types.TryAddBack(this, name, types.Count(), size, baseOffset, constructor, destructor, systemSize, systemBaseOffset, systemConstructor, systemDestructor, ArrayView<StringView>(typeTags));		
 
-		it->value = &types.Last();		
-		return Result();
+		it->value = &types.Last();				
 	}	
 	ComponentTypeRegistry::ComponentTypeRegistry()		
 	{

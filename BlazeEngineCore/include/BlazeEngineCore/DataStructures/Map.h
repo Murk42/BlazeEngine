@@ -16,8 +16,8 @@ namespace Blaze
 		Value value;
 
 		MapPair() : key(), value() { }				
-		template<typename ... Args> requires std::constructible_from<Value, Args...>
-		MapPair(Key&& key, Args&& ... args) : key(std::move(key)), value(std::forward<Args>(args)...) { }
+		template<typename _Key, typename ... Args> requires std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
+		MapPair(_Key&& key, Args&& ... args) : key(std::forward<_Key>(key)), value(std::forward<Args>(args)...) {}		
 	};
 
 	template<typename T1, typename T2>
@@ -165,8 +165,8 @@ namespace Blaze
 		*/		
 		template<typename ... Args> requires std::constructible_from<Value, Args...>
 		InsertResult Insert(const Key& key, Args&& ... args);	
-		bool Erase(const Key& key);
-		bool Erase(const Iterator& iterator);
+		void Erase(const Key& key);
+		void Erase(const Iterator& iterator);
 
 		uintMem Count() const;
 

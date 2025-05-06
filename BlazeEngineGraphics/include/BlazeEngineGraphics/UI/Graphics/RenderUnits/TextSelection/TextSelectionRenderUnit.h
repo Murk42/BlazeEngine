@@ -12,6 +12,7 @@ namespace Blaze::UI
 		TextRenderUnitBase& textRenderUnit;
 
 		TextSelectionRenderUnit(TextRenderUnitBase& textRenderUnit);
+		~TextSelectionRenderUnit();
 
 		void BeginStream() override;
 		void* Advance() override;
@@ -44,6 +45,9 @@ namespace Blaze::UI
 		
 		bool renderDataDirty;		
 
-		void OnEvent(TextRenderUnitBase::RenderDataUpdatedEvent);
+		void OnEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event);
+
+		template<typename T>
+		friend class EventHandlerData;
 	};
 }

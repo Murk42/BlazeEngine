@@ -5,11 +5,12 @@
 
 namespace Blaze::Graphics::OpenGL
 {
-	RenderWindow_OpenGL::RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, const WindowSDLCreateOptions_OpenGL& createOptions)
+	RenderWindow_OpenGL::RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, WindowCreateOptions createOptions)
 		: graphicsContext(graphicsContext), framebuffer(*this)
-	{		
-		window = graphicsContext.CreateWindowSDL(createOptions);				
-		window.resizedEventDispatcher.AddHandler(*this);
+	{				
+		createOptions.graphicsAPI = WindowGraphicsAPI::OpenGL;
+		window = Window(createOptions);
+		window.windowResizedEventDispatcher.AddHandler(*this);
 
 		std::atomic_flag_test_and_set(&acquirable);		
 
@@ -18,7 +19,7 @@ namespace Blaze::Graphics::OpenGL
 
 	RenderWindow_OpenGL::~RenderWindow_OpenGL()
 	{
-		graphicsContext.DestroyWindowSDL(window);		
+		window.windowResizedEventDispatcher.RemoveHandler(*this);
 	}	
 
 	RenderWindowFramebuffer_OpenGL& RenderWindow_OpenGL::AcquireNextFramebuffer(Semaphore_OpenGL* semaphore)
@@ -31,13 +32,12 @@ namespace Blaze::Graphics::OpenGL
 	}
 
 	Vec2u RenderWindow_OpenGL::GetSize() const
-	{
-		int w, h;
-		SDL_GL_GetDrawableSize((SDL_Window*)window.GetHandle(), &w, &h);
-		return Vec2u(w, h);
+	{		
+		return framebuffer.framebuffer.size;		
 	}	
 
-	void RenderWindow_OpenGL::OnEvent(Input::Events::WindowResizedEvent event)
+
+	void RenderWindow_OpenGL::OnEvent(const Window::WindowResizedEvent& event)
 	{					
 		framebuffer.framebuffer.size = event.size;
 	}

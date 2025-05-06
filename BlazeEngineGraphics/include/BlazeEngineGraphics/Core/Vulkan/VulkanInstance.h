@@ -1,6 +1,6 @@
 #pragma once
 #include "vulkan/vulkan.h"
-#include "SDL2/SDL_vulkan.h"
+#include "SDL3/SDL_vulkan.h"
 
 #ifdef _DEBUG
 #define BLAZE_VULKAN_VALIDATION_LAYERS
@@ -24,8 +24,8 @@ namespace Blaze::Graphics::Vulkan
 
 		void Destroy();
 
-		WindowSDL CreateWindow(StringView title, Vec2i pos, Vec2u size);
-		void FreeWindow(WindowSDL& window);
+		Window CreateWindow(StringView title, Vec2i pos, Vec2u size);
+		void FreeWindow(Window& window);
 
 		inline VkInstance GetHandle() { return instance; }		
 
@@ -34,7 +34,7 @@ namespace Blaze::Graphics::Vulkan
 	private:
 		VkInstance instance;
 
-		WindowSDL initWindow;
+		Window initWindow;
 		
 #ifdef BLAZE_VULKAN_VALIDATION_LAYERS
 		VkDebugUtilsMessengerEXT debugMessenger;

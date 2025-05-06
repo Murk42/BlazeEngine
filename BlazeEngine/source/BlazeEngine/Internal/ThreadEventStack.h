@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngine/Event/EventDispatcher.h"
+#include "BlazeEngineCore/Event/EventDispatcher.h"
 
 namespace Blaze
 {
@@ -109,7 +109,7 @@ namespace Blaze
 
 			if (!cv.wait_for(lk, std::chrono::seconds(1), [&]() { return MaxStackSize >= stackSize + size; }))
 			{				
-				Debug::Logger::LogWarning("Blaze Engine", "Input event stack overflow. The receiving thread didn't process any events for more than 1 second. Ignoring event named \"" + eventName + "\"");
+				BLAZE_ENGINE_CORE_WARNING("Input event stack overflow. The receiving thread didn't process any events for more than 1 second. Ignoring event named \"" + eventName + "\"");
 				return;
 			}
 

@@ -39,34 +39,10 @@
     <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Event\EventDispatcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Event\EventHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Event\LambdaEventHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Event\QueueEventDispatcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngine\Input\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Input\InputEvents.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Input\Key.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngine\BlazeEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Window\WindowSDL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Window\WindowBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Window\Window.h">
@@ -93,10 +69,7 @@
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\Conversions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\GlobalData.h">
+    <ClInclude Include="source\BlazeEngine\Internal\BlazeEngineContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Resources\Font\TextLayouter.h">
@@ -129,21 +102,30 @@
     <ClInclude Include="include\BlazeEngine\Console\ConsoleOutputStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngine\ExecuteOnMainThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Input\Keyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Input\Mouse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Window\Display.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDLConversions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\BlazeEngine\Input\Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Input\Key.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Window\WindowBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Window\WindowSDL.cpp">
+    <ClCompile Include="source\BlazeEngine\Window\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\EntryPoint\EntryPoint.cpp">
@@ -179,10 +161,7 @@
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\Conversions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\GlobalData.cpp">
+    <ClCompile Include="source\BlazeEngine\Internal\BlazeEngineContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Resources\Font\TextLayouter.cpp">
@@ -207,6 +186,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Application\ResourceSystem\Resource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\ExecuteOnMainThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Input\Keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Window\Display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDLConversions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

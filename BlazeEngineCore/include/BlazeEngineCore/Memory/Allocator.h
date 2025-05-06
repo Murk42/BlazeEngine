@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 namespace Blaze
 {
@@ -7,36 +8,21 @@ namespace Blaze
 #else
 #define BLAZE_ALLOCATOR_ATTRIBUTE [[no_unique_address]]
 #endif
-	
-	class BLAZE_CORE_API AllocatorBase
-	{
+		
+	class BLAZE_CORE_API DefaultAllocator
+	{	
 	public:
 		static void* Allocate(uintMem bytes);
 		static void Free(void* ptr);
-		static void* Reallocate(uintMem bytes, void* old);		
-	};
-
-	class BLAZE_CORE_API DefaultAllocator : public AllocatorBase
-	{			
+		static void* Reallocate(uintMem bytes, void* old);
 	};			
 
 	template<typename T>
-	concept IsAllocator = std::derived_from<T, AllocatorBase>;
+	concept IsAllocator = requires (T& allocator, uintMem bytes, void* pointer) {
+		{ allocator.Allocate(bytes) } -> std::same_as<void*>;
+		{ allocator.Free(pointer) };
+	};
 
 	template<typename T>
 	concept AllocatorType = IsAllocator<T>;		
-
-	template<typename T>
-	concept IsStaticAllocator = !requires(const T & allocator, uintMem bytes, void* pointer)
-	{
-		{ allocator.Allocate(bytes) } -> std::same_as<void*>;
-		{ allocator.Free(pointer) };
-	} && IsAllocator<T>;
-
-	template<typename T>
-	concept IsDynamicAllocator = requires(const T & allocator, uintMem bytes, void* pointer)
-	{
-		{ allocator.Allocate(bytes) } -> std::same_as<void*>;
-		{ allocator.Free(pointer) };
-	} && IsAllocator<T>;	
 }

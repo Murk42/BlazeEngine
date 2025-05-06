@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Internal/Libraries/sail.h"
-#include "BlazeEngine/Internal/GlobalData.h"
+#include "BlazeEngine/Internal/BlazeEngineContext.h"
 
 #include "sail/sail.h"
 
@@ -16,12 +16,12 @@ namespace Blaze
 		String message;
 
 		if (size <= 0)		
-			Debug::Logger::LogError("Blaze Engine", "Failed to format sail log");		
+			BLAZE_ENGINE_ERROR("Failed to format sail log");		
 		else
 		{
 			message.Resize(size);
 			if (vsprintf_s(message.Ptr(), message.Count() + 1, format, args) <= 0)
-				Debug::Logger::LogError("Blaze Engine", "Failed to format sail log");
+				BLAZE_ENGINE_ERROR("Failed to format sail log");
 		}
 
 		StringView levelString;
@@ -48,7 +48,7 @@ namespace Blaze
 		sail_set_logger(SailLogger);
 		sail_init();	
 
-		Debug::Logger::LogInfo("Blaze Engine", "Successfully initialized sail " SAIL_VERSION_STRING);
+		BLAZE_ENGINE_CORE_INFO("Successfully initialized sail " SAIL_VERSION_STRING);
 
 		return timing.GetTimingResult();
 	}

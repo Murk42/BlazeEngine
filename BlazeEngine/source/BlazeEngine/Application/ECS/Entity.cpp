@@ -134,7 +134,7 @@ namespace Blaze::ECS
 	{
 		if (index > componentCount)
 		{									
-			Debug::Logger::LogError("Blaze Engine", "Component index out of range. Index value was: " + StringParsing::Convert(index));
+			BLAZE_ENGINE_ERROR("Component index out of range. Index value was: " + StringParsing::Convert(index));
 			return nullptr;
 		}
 
@@ -144,7 +144,7 @@ namespace Blaze::ECS
 	{
 		if (index > componentCount)
 		{
-			Debug::Logger::LogError("Blaze Engine", "Component index out of range. Index value was: " + StringParsing::Convert(index));
+			BLAZE_ENGINE_ERROR("Component index out of range. Index value was: " + StringParsing::Convert(index));
 			return nullptr;
 		}
 

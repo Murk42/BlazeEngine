@@ -468,7 +468,7 @@ namespace Blaze::StringParsing
 				++it;
 
 			if (it == end)
-				return out;
+				return Array<StringViewUTF8>(out);
 
 			auto begin = it;
 
@@ -516,7 +516,7 @@ namespace Blaze::StringParsing
 		{
 			value = 0;
 			*count = 0;
-			return BLAZE_ERROR_RESULT("Blaze Engine", "The number in the string cannot be stored in a " + IntegerTypeName<T>() + ". The string was" + StringView(str, length));
+			return Debug::Log(Debug::LogType::Error, "Blaze Engine Core", "The number in the string cannot be stored in a " + IntegerTypeName<T>() + ".The string was" + StringView(str, length));
 		}
 		else if (count != nullptr)
 			*count = end - str;
@@ -532,7 +532,7 @@ namespace Blaze::StringParsing
 		{
 			value = 0;
 			*count = 0;
-			return BLAZE_ERROR_RESULT("Blaze Engine", "The number in the string cannot be stored in a " + FloatTypeName<T>() + ". The string was" + StringView(str, length));
+			return Debug::Log(Debug::LogType::Error, "Blaze Engine Core", "The number in the string cannot be stored in a " + FloatTypeName<T>() + ". The string was" + StringView(str, length));
 		}
 		else if (count != nullptr)
 			*count = end - str;
@@ -547,7 +547,7 @@ namespace Blaze::StringParsing
 		if (err == std::errc::value_too_large)
 		{
 			*count = 0;
-			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
+			return Debug::Log(Debug::LogType::Error, "Blaze Engine Core", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
 		}
 		else if (count != nullptr)
 			*count = end - str;
@@ -561,7 +561,7 @@ namespace Blaze::StringParsing
 		if (res.ec == std::errc::value_too_large)
 		{
 			*count = 0;
-			return BLAZE_ERROR_RESULT("Blaze Engine", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
+			return Debug::Log(Debug::LogType::Error, "Blaze Engine Core", "The value is too large to be represented in a string with " + Convert(maxCount) + " characters");
 		}
 		else if (count != nullptr)
 			*count = res.ptr - str;

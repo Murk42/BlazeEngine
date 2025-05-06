@@ -1,9 +1,9 @@
 #pragma once
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
-#include "BlazeEngineGraphics/UI/Input/UIInputNode.h"
-#include "BlazeEngineGraphics/UI/Input/UIMouseEventHandler.h"
-#include "BlazeEngineGraphics/UI/Input/UIKeyboardEventHandler.h"
-#include "BlazeEngineGraphics/UI/Input/UISelectEventHandler.h"
+#include "BlazeEngineGraphics/UI/Input/InputNode.h"
+#include "BlazeEngineGraphics/UI/Input/MouseEventHandler.h"
+#include "BlazeEngineGraphics/UI/Input/KeyboardEventHandler.h"
+#include "BlazeEngineGraphics/UI/Input/SelectEventHandler.h"
 #include "BlazeEngineGraphics/RenderScene/RenderObject.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnitBase.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnitBase.h"
@@ -50,15 +50,15 @@ namespace Blaze::UI
 		virtual void InsertStringIntoText(uintMem index, StringViewUTF8 string) = 0;
 		virtual StringUTF8 GetTextSubString(uintMem begin, uintMem end) = 0;
 
-		void OnEvent(SelectedEvent event) override;
-		void OnEvent(DeselectedEvent event) override;
-		void OnEvent(KeyPressedEvent event) override;
-		void OnEvent(TextInputEvent event) override;
-		void OnEvent(MousePressedEvent event) override;
-		void OnEvent(MouseMotionEvent event) override;
-		void OnEvent(MouseReleasedEvent event) override;
-		void OnEvent(MouseEnterEvent event) override;
-		void OnEvent(MouseExitEvent event) override;
+		void OnEvent(const SelectedEvent& event) override;
+		void OnEvent(const DeselectedEvent& event) override;
+		void OnEvent(const KeyDownEvent& event) override;
+		void OnEvent(const TextInputEvent& event) override;
+		void OnEvent(const MouseButtonDownEvent& event) override;
+		void OnEvent(const MouseMotionEvent& event) override;
+		void OnEvent(const MouseButtonUpEvent& event) override;
+		void OnEvent(const MouseEnterEvent& event) override;
+		void OnEvent(const MouseExitEvent& event) override;
 	private:
 
 		bool mouseDown : 1;

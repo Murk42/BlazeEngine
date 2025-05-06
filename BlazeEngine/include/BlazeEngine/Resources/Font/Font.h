@@ -170,8 +170,8 @@ namespace Blaze
 
 		void Clear();		
 
-		Result Load(Path path);
-		Result Load(ReadStream& readStream);
+		void Load(Path path);
+		void Load(ReadStream& readStream);
 		
 		//The metrics are in font units
 		FontMetrics* GetUnscalledMetrics() const;

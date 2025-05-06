@@ -4,21 +4,21 @@
 RenderingSystem::RenderingSystem() :
 	graphicsContext(Graphics::OpenGL::GraphicsContextProperties_OpenGL{
 		}),
-	renderWindow(graphicsContext, Graphics::OpenGL::WindowSDLCreateOptions_OpenGL{
+	renderWindow(graphicsContext, Graphics::OpenGL::WindowCreateOptions_OpenGL{
 		.title = "Title",
 		.pos = Vec2i(INT_MAX),
 		.size = Vec2u(1000, 500),
-		.openMode = WindowSDLOpenMode::Normal,
-		.styleFlags = WindowSDLStyleFlags::Resizable,		
+		.openMode = WindowOpenMode::Normal,
+		.styleFlags = WindowStyleFlags::Resizable,		
 	}),
 	line3DRenderer(graphicsContext)
 {	
-	windowResizedEventHandler.SetFunction([&](Input::Events::WindowResizedEvent event) {
+	windowResizedEventHandler.SetFunction([&](Window::WindowResizedEvent event) {
 		graphicsContext.SetRenderArea(Vec2i(), event.size);
 		projectionMatrix = Mat4f::PerspectiveMatrix(Math::PI / 2, (float)event.size.x / event.size.y, 0.1, 1000);
 		line3DRenderer.SetProjectionMatrix(projectionMatrix);		
 		});
-	renderWindow.GetWindowSDL().resizedEventDispatcher.AddHandler(windowResizedEventHandler);
+	renderWindow.GetWindow().resizedEventDispatcher.AddHandler(windowResizedEventHandler);
 	
 	graphicsContext.SetClearColor(0x100000ff);
 	graphicsContext.EnableDepthTest(true);

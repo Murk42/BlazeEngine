@@ -123,7 +123,7 @@ namespace Blaze::Graphics::OpenGL
 		};
 
 		vertexBuffer.Allocate(vertices, sizeof(vertices));
-		instanceBuffer.Allocate(nullptr, InstanceBufferSize, OpenGLWrapper::ImmutableGraphicsBufferMapAccess::Write, Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapType::None);
+		instanceBuffer.Allocate(nullptr, InstanceBufferSize, OpenGLWrapper::GraphicsBufferMapAccessFlags::Write, Graphics::OpenGLWrapper::GraphicsBufferMapType::None);
 
 		//va.EnableVertexAttribute(0);
 		//va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint8, 1, false, 0);
@@ -192,7 +192,7 @@ namespace Blaze::Graphics::OpenGL
 				return;
 			}
 
-			void* instanceBufferMap = instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);
+			void* instanceBufferMap = instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
 
 			memcpy(instanceBufferMap, group.instances, sizeof(Instance) * group.instanceCount);
 			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * group.instanceCount);
@@ -242,7 +242,7 @@ namespace Blaze::Graphics::OpenGL
 
 			OpenGLWrapper::Texture2D* textures[DrawCallTextureCount]{ };
 
-			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);
+			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
 			uint instanceCount = 0;
 
 			while (true)

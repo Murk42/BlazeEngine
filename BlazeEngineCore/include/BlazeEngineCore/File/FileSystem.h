@@ -18,16 +18,16 @@ namespace Blaze
 
 		BLAZE_CORE_API Path GetCurrentPath();
 		
-		BLAZE_CORE_API Result DeleteFile(const Path& path);
-		BLAZE_CORE_API Result ResizeFile(const Path& path, uintMem newSize);
+		BLAZE_CORE_API void DeleteFile(const Path& path);
+		BLAZE_CORE_API void ResizeFile(const Path& path, uintMem newSize);
 		BLAZE_CORE_API uintMem FileSize(const Path& path);
 
-		BLAZE_CORE_API Result CreateDirectory(const Path& path);
-		BLAZE_CORE_API Result CreateDirectoryRecursive(const Path& path);
-		BLAZE_CORE_API Result DeleteDirectory(const Path& path);		
+		BLAZE_CORE_API void CreateDirectory(const Path& path);
+		BLAZE_CORE_API void CreateDirectoryRecursive(const Path& path);
+		BLAZE_CORE_API void DeleteDirectory(const Path& path);
 
-		BLAZE_CORE_API Result CopyContents(const Path& destination, const Path& source);
-		BLAZE_CORE_API Result Copy(const Path& destination, const Path& source, CopyFlags flags = CopyFlags::Overwrite | CopyFlags::Recursive);
+		BLAZE_CORE_API void CopyContents(const Path& destination, const Path& source);
+		BLAZE_CORE_API void Copy(const Path& destination, const Path& source, CopyFlags flags = CopyFlags::Overwrite | CopyFlags::Recursive);
 
 		BLAZE_CORE_API TimePoint GetLastWriteTime(const Path& path);
 		BLAZE_CORE_API void SetLastWriteTime(const Path& path, const TimePoint& timePoint);

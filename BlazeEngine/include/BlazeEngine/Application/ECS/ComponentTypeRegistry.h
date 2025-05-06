@@ -35,7 +35,7 @@ namespace Blaze::ECS
 		ComponentTypeData(ComponentTypeRegistry* registry, StringView name, uintMem index,
 			uintMem size, ptrdiff_t baseOffset, Constructor constructor, Destructor destructor,
 			uintMem systemSize, ptrdiff_t systemBaseOffset, SystemConstructor systemConstructor, SystemConstructor systemDestructor,
-			Set<StringView> typeTags);
+			Set<StringView> typeTags);		
 		ComponentTypeData(const ComponentTypeData&) = delete;
 
 		inline const ComponentTypeRegistry* GetRegistry() const { return registry; }
@@ -122,13 +122,13 @@ namespace Blaze::ECS
 
 		void ReserveTypeCount(uint count);
 
-		Result AddType(StringView name,
+		void AddType(StringView name,
 			uintMem size, ptrdiff_t baseOffset, ComponentTypeData::Constructor constructor, ComponentTypeData::Destructor destructor,
 			uintMem systemSize, ptrdiff_t systemBaseOffset, ComponentTypeData::SystemConstructor systemConstructor, ComponentTypeData::SystemDestructor systemDestructor,
 			Array<StringView> customData);
 
 		template<typename T> requires IsComponent<T>
-		Result AddType();		
+		void AddType();		
 
 		template<typename T>
 		Array<StringView> GetTypeTags();
@@ -155,10 +155,10 @@ namespace Blaze::ECS
 	}
 
 	template<typename T>  requires IsComponent<T>
-	Result ComponentTypeRegistry::AddType()
+	void ComponentTypeRegistry::AddType()
 	{
 		using System = typename T::System;
-		return AddType(T::typeName,
+		AddType(T::typeName,
 			sizeof(T), BaseOffset<Component, T>(), Construct<T>, Destruct<T>,
 			sizeof(System), BaseOffset<ECS::System, System>(), ConstructSystem<System>, DestructSystem<System>,
 			GetTypeTags<T>());

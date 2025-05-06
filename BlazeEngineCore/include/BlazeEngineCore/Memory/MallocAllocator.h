@@ -2,7 +2,7 @@
 
 namespace Blaze
 {	
-	class BLAZE_CORE_API MallocAllocator : public AllocatorBase
+	class BLAZE_CORE_API MallocAllocator
 	{
 	public:				
 		static void* Allocate(uintMem byteCount);

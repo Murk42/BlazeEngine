@@ -5,7 +5,7 @@ class RenderingSystem
 public:
 	RenderingSystem();
 
-	inline Window& GetWindow() { return renderWindow.GetWindowSDL(); }
+	inline Window& GetWindow() { return renderWindow.GetWindow(); }
 
 	void Render();
 
@@ -18,5 +18,5 @@ private:
 	Mat4f projectionMatrix;
 	Mat4f viewMatrix;
 
-	LambdaEventHandler<Input::Events::WindowResizedEvent> windowResizedEventHandler;
+	LambdaEventHandler<Window::WindowResizedEvent> windowResizedEventHandler;
 };

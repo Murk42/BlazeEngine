@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderPipelines/OpenGL/UIRenderPipeline_OpenGL.h"
-
 #include "BlazeEngineGraphics/RenderScene/RenderObject.h"
 
 namespace Blaze::Graphics::OpenGL
@@ -76,10 +75,21 @@ namespace Blaze::Graphics::OpenGL
 		}
 		Array<UIRenderPipeline_OpenGL::RenderItem> GetRenderOrder()
 		{
-			Array<UIRenderPipeline_OpenGL::RenderItem> arr;			
+			Array<UIRenderPipeline_OpenGL::RenderItem> arr;
 
-			for (auto& child : renderPipeline->screen->GetChildren())
-				_GetRenderOrder(child, arr);
+			for (auto& node : renderPipeline->screen->GetTree())
+				if (auto* renderedNode = dynamic_cast<RenderObject*>(&node))
+				{
+					uint i = 0;
+					while (auto unit = renderedNode->GetRenderUnit(i))
+					{
+						arr.AddBack(UIRenderPipeline_OpenGL::RenderItem{ .renderUnit = *unit, .node = node });
+						++i;
+					}
+				}
+
+			//for (auto& child : renderPipeline->screen->GetChildren())
+			//	_GetRenderOrder(child, arr);
 
 			return arr;
 		}
@@ -112,7 +122,7 @@ namespace Blaze::Graphics::OpenGL
 
 				if (renderer == nullptr)
 				{
-					Debug::Logger::LogWarning("Blaze Engine Graphics", "UI Render Pipeline couldn't find renderer");
+					BLAZE_ENGINE_GRAPHICS_WARNING("UI Render Pipeline couldn't find renderer");
 					continue;
 				}
 
@@ -389,6 +399,11 @@ namespace Blaze::Graphics::OpenGL
 	}
 	UIRenderPipeline_OpenGL::~UIRenderPipeline_OpenGL()
 	{
+		if (screen != nullptr)
+		{
+			screen->nodeTreeChangedEventDispatcher.RemoveHandler(*this);
+			screen->screenDestructionEventDispatcher.RemoveHandler(*this);
+		}
 	}
 	void UIRenderPipeline_OpenGL::SetScreen(UI::Screen* newScreen)
 	{
@@ -444,17 +459,17 @@ namespace Blaze::Graphics::OpenGL
 	}	
 	void UIRenderPipeline_OpenGL::RecreateRenderQueue()
 	{
-		UIBestRenderQueue rq{ this };
+		UISimpleRenderQueue rq{ this };
 
 		rq.CreateRenderQueue();
 
 		recreateRenderQueue = false;
 	}	
-	void UIRenderPipeline_OpenGL::OnEvent(UI::NodeTreeChangedEvent event)
+	void UIRenderPipeline_OpenGL::OnEvent(const UI::NodeTreeChangedEvent& event)
 	{
 		recreateRenderQueue = true;
 	}
-	void UIRenderPipeline_OpenGL::OnEvent(UI::ScreenDestructionEvent event)
+	void UIRenderPipeline_OpenGL::OnEvent(const UI::ScreenDestructionEvent& event)
 	{
 		SetScreen(nullptr);
 	}

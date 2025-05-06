@@ -1,5 +1,6 @@
 #include "pch.h"
-#include "BlazeEngine/Internal/GlobalData.h"
+#include "BlazeEngine/Internal/BlazeEngineContext.h"
+#include "BlazeEngine/Internal/Libraries/SDL.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include <Windows.h>
@@ -33,7 +34,7 @@ namespace Blaze
 	{
 		String indentString;
 		indentString.Resize(indent * 4, ' ');
-		Debug::Logger::LogInfo("Blaze Engine", indentString + result.name + " - " + StringParsing::Convert(result.time.ToSeconds(), StringParsing::FloatStringFormat::Fixed) + "s");
+		BLAZE_ENGINE_CORE_INFO(indentString + result.name + " - " + StringParsing::Convert(result.time.ToSeconds(), StringParsing::FloatStringFormat::Fixed) + "s");
 
 		for (auto& subResult : result.nodes)
 			ReportSubTiming(subResult.value, indent + 1);
@@ -42,7 +43,7 @@ namespace Blaze
 	static void ReportTiming(Timing& timing)
 	{
 		auto result = timing.GetTimingResult();
-		Debug::Logger::LogInfo("Blaze Engine", result.name + " initialization took " + StringParsing::Convert(result.time.ToSeconds(), StringParsing::FloatStringFormat::Fixed) + "s");
+		BLAZE_ENGINE_CORE_INFO(result.name + " initialization took " + StringParsing::Convert(result.time.ToSeconds(), StringParsing::FloatStringFormat::Fixed) + "s");
 
 		for (auto& subResult : result.nodes)
 			ReportSubTiming(subResult.value, 1);
@@ -81,10 +82,7 @@ namespace Blaze
 		{
 			~ThreadExitReporter()
 			{
-				SDL_Event event;
-				SDL_memset(&event, 0, sizeof(event));
-				event.type = blazeEngineContext.clientThreadExitEventIdentifier;
-				SDL_PushEvent(&event);
+				Blaze::PostSDLClientThreadExitEvent();				
 			}
 		};
 
@@ -128,21 +126,29 @@ namespace Blaze
 #endif
 #endif		
 
-		Thread clientThread;
-		clientThread.Run(&RunSetupOnThread);
-
-		while (!blazeEngineContext.clientThreadExited.test())
+		if (blazeEngineContext.createClientThread)
 		{
-			SDL_Event event;
-			if (SDL_WaitEvent(&event) == 0)
-				Debug::Logger::LogError("SDL", "SDL_WaitEvent failed, SDL_GetError returned: \"" + GetSDLError() + "\"");			
+			Thread clientThread;
+			clientThread.Run(&RunSetupOnThread);
 
-			//Must be run here because the SDLEventWatcher can be run on a another thread
-			blazeEngineContext.ExecuteMainThreadTask();
+			while (!blazeEngineContext.clientThreadExited.test())
+			{
+				SDL_Event event;
+				if (SDL_WaitEvent(&event) == 0)
+					Debug::Logger::LogError("SDL", "SDL_WaitEvent failed, SDL returned error: \"" + GetSDLError() + "\"");
+
+				blazeEngineContext.ExecuteMainThreadTask();
+			}
+
+			if (!clientThread.WaitToFinish(5.0f))
+				BLAZE_ENGINE_CORE_WARNING("Client thread didnt finish 5 seconds after notifying the main thread that it is exiting");
 		}
-
-		while (clientThread.IsRunning());
-
+		else		
+			Setup();	
+				
+		SDL_Event event;
+		while (SDL_PollEvent(&event));
+			
 		return 0;
 	}
 }

@@ -3,34 +3,34 @@
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
-	BLAZE_GRAPHICS_API GLenum OpenGLPixelFormat(BitmapColorFormat format, Result& result);
+	GLenum OpenGLPixelFormat(BitmapColorFormat format, Result& result);
 
-	BLAZE_GRAPHICS_API GLenum OpenGLFormatByInternalPixelFormat(TextureInternalPixelFormat format, Result& result);
-	BLAZE_GRAPHICS_API GLenum OpenGLInternalPixelFormat(TextureInternalPixelFormat format, Result& result);
-	BLAZE_GRAPHICS_API GLenum OpenGLBufferInternalPixelFormat(TextureBufferInternalPixelFormat format, Result& result);
+	GLenum OpenGLFormatByInternalPixelFormat(TextureInternalPixelFormat format, Result& result);
+	GLenum OpenGLInternalPixelFormat(TextureInternalPixelFormat format, Result& result);
+	GLenum OpenGLBufferInternalPixelFormat(TextureBufferInternalPixelFormat format, Result& result);
 
-	BLAZE_GRAPHICS_API GLenum OpenGLPixelType(BitmapColorComponentType type, Result& result);	
-	BLAZE_GRAPHICS_API BitmapColorComponentType OpenGLToBlazePixelType(GLenum type, Result& result);
+	GLenum OpenGLPixelType(BitmapColorComponentType type, Result& result);	
+	BitmapColorComponentType OpenGLToBlazePixelType(GLenum type, Result& result);
 
-	BLAZE_GRAPHICS_API GLenum OpenGLTextureMinSampling(TextureSampling min, TextureSampling mip, bool mipmaps, Result& result);
-	BLAZE_GRAPHICS_API GLenum OpenGLTextureMagSampling(TextureSampling sampling, Result& result);
-	BLAZE_GRAPHICS_API GLenum OpenGLTextureWrapping(TextureWrapping wrapping, Result& result);
+	GLenum OpenGLTextureMinSampling(TextureSampling min, TextureSampling mip, bool mipmaps, Result& result);
+	GLenum OpenGLTextureMagSampling(TextureSampling sampling, Result& result);
+	GLenum OpenGLTextureWrapping(TextureWrapping wrapping, Result& result);
 
-	BLAZE_GRAPHICS_API TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapColorFormat format, Result& result);
-	BLAZE_GRAPHICS_API BitmapColorFormat MapInternalTexturePixelFormat(TextureInternalPixelFormat format, Result& result);
+	TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapColorFormat format, Result& result);
+	BitmapColorFormat MapInternalTexturePixelFormat(TextureInternalPixelFormat format, Result& result);
 
-	BLAZE_GRAPHICS_API GLenum OpenGLVertexAttributeType(VertexAttributeType type, Result& result);
+	GLenum OpenGLVertexAttributeType(VertexAttributeType type, Result& result);
 
-	BLAZE_GRAPHICS_API GLenum OpenGLFramebufferAttachment(FramebufferAttachment attachment, Result& result);
-	BLAZE_GRAPHICS_API FramebufferStatus MapFramebufferStatus(GLenum status, Result& result);
+	GLenum OpenGLFramebufferAttachment(FramebufferAttachment attachment, Result& result);
+	FramebufferStatus MapFramebufferStatus(GLenum status, Result& result);
 
-	BLAZE_GRAPHICS_API GLenum OpenGLBufferMappingAccess(ImmutableGraphicsBufferMapAccess mapping, Result& result);	
-	BLAZE_GRAPHICS_API GLenum OpenGLBufferMappingType(ImmutableGraphicsBufferMapType type, Result& result);
-	BLAZE_GRAPHICS_API GLenum OpenGLBufferMappingOptions(ImmutableGraphicsBufferMapOptions options, Result& result);
+	GLenum OpenGLBufferMappingAccess(GraphicsBufferMapAccessFlags mapping, Result& result);	
+	GLenum OpenGLBufferMappingType(GraphicsBufferMapType type, Result& result);
+	GLenum OpenGLBufferMappingOptions(GraphicsBufferMapOptions options, Result& result);
 
-	enum class MutableGraphicsBufferUseType
+	enum class GraphicsBufferUseType
 	{
 		Draw, Read, Copy
 	};
-	BLAZE_GRAPHICS_API GLenum OpenGLMutableBufferUsage(MutableGraphicsBufferUseFrequency frequency, MutableGraphicsBufferUseType use, Result& result);
+	GLenum OpenGLMutableBufferUsage(GraphicsBufferUseFrequency frequency, GraphicsBufferUseType use, Result& result);
 }

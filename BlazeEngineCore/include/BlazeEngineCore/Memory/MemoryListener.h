@@ -29,8 +29,8 @@ namespace Blaze
 
 		void AddMemoryEvent(const MemoryEvent&);
 
-		Result StartListening();
-		Result StopListening();
+		void StartListening();
+		void StopListening();
 
 		void ClearEvents();
 

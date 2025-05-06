@@ -23,7 +23,7 @@ namespace Blaze::Graphics::OpenGL
 		 
 		program.LinkShaders({ &vert, &frag });		
 
-		vb.Allocate(nullptr, VertexBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapAccess::Write, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapType::None);
+		vb.Allocate(nullptr, VertexBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapAccessFlags::Write, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapType::None);
 
 		va.EnableVertexAttribute(0);
 		va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 0);
@@ -102,7 +102,7 @@ namespace Blaze::Graphics::OpenGL
 		{
 			uintMem count = renderCache.vertices.Count() % VectexBufferVertexCount;
 
-			void* vbMap = vb.MapBufferRange(0, VertexBufferSize, Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::ImmutableGraphicsBufferMapOptions::ExplicitFlush);
+			void* vbMap = vb.MapBufferRange(0, VertexBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
 
 			GLenum err = glGetError();
 			if (err != GL_NO_ERROR)

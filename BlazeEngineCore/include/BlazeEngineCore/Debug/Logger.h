@@ -24,8 +24,8 @@ namespace Blaze::Debug::Logger
 		  
 	BLAZE_CORE_API void AddOutputStream(WriteStream& stream);
 	BLAZE_CORE_API void RemoveOutputStream(WriteStream& stream);
-	BLAZE_CORE_API Result AddOutputFile(const Path& path);
-	BLAZE_CORE_API Result RemoveOutputFile(const Path& path);
+	BLAZE_CORE_API void AddOutputFile(const Path& path);
+	BLAZE_CORE_API void RemoveOutputFile(const Path& path);
 		  
 	BLAZE_CORE_API void ProcessResult(Result&& result);
 		  

@@ -108,6 +108,11 @@ namespace Blaze::UI
 		node->transformUpdatedEventDispatcher.AddHandler(*this);
 		node->finalTransformUpdatedEventDispatcher.AddHandler(*this);
 	}
+	TextRenderUnit::~TextRenderUnit()
+	{
+		node->transformUpdatedEventDispatcher.RemoveHandler(*this);
+		node->finalTransformUpdatedEventDispatcher.RemoveHandler(*this);
+	}
 	NodeFinalTransform TextRenderUnit::GetFinalTransform()
 	{
 		return node->GetFinalTransform();
@@ -619,7 +624,7 @@ namespace Blaze::UI
 			textWidth = GetTextBoundingWidth(lineData);
 			break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyUnderfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyUnderfittedOption));
 			break;
 		}
 	}
@@ -639,7 +644,7 @@ namespace Blaze::UI
 			SpreadWords(lineData, characterData, textWidth, boundingWidth);
 			break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyOverfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyOverfittedOption));
 			break;
 		}
 	}	
@@ -658,7 +663,7 @@ namespace Blaze::UI
 			break;
 		}
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyUnderfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyUnderfittedOption));
 			break;
 		}
 	}
@@ -674,7 +679,7 @@ namespace Blaze::UI
 		case TextVerticallyOverfittedOptions::SpreadLines:
 			break;		
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextVerticallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyOverfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextVerticallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyOverfittedOption));
 			break;
 		}
 	}	
@@ -683,7 +688,7 @@ namespace Blaze::UI
 		switch (align)
 		{
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextLineVerticalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextLineVerticalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
 		case TextLineVerticalAlign::Top:
 			return boundingHeight;
 		case TextLineVerticalAlign::Bottom:
@@ -697,7 +702,7 @@ namespace Blaze::UI
 		switch (align)
 		{
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid TextLineHorizontalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextLineHorizontalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
 		case TextLineHorizontalAlign::Left:
 			return 0;			
 		case TextLineHorizontalAlign::Right:
@@ -706,11 +711,11 @@ namespace Blaze::UI
 			return (boundingWidth - lineWidth) / 2;
 		}
 	}
-	void TextRenderUnit::OnEvent(Node::TransformUpdatedEvent event)
+	void TextRenderUnit::OnEvent(const Node::TransformUpdatedEvent& event)
 	{
 		dataDirty = true;
 	}
-	void TextRenderUnit::OnEvent(Node::FinalTransformUpdatedEvent event)
+	void TextRenderUnit::OnEvent(const Node::FinalTransformUpdatedEvent& event)
 	{
 		renderDataDirty = true;
 	}	

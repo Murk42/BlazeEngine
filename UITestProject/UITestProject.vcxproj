@@ -84,7 +84,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -103,8 +103,8 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
-      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>"$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)" "$(OutputPath)" "$(Configuration)" "$(PlatformTarget)"</Command>
@@ -124,7 +124,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -143,8 +143,8 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
-      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>"$(SolutionDir)scripts\CopyDependencies.bat" "$(SolutionDir)" "$(OutputPath)" "$(Configuration)" "$(PlatformTarget)"</Command>
@@ -159,10 +159,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MainScreen.cpp" />
+    <ClCompile Include="RegionSplitter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainScreen.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RegionSplitter.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\images\Mountains.jpg" />

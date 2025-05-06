@@ -43,7 +43,7 @@ namespace Blaze::Windows
 
 		if (errorString == nullptr)
 		{
-			Debug::Logger::LogError("Blaze Engine", "FormatMessageA passed a empyt string pointer");
+			BLAZE_ENGINE_CORE_ERROR("FormatMessageA passed a empyt string pointer");
 
 			return "error code " + StringParsing::Convert((uint32)error);
 		}

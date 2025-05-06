@@ -28,7 +28,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -55,7 +55,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -82,7 +82,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
 		return node->value;
@@ -92,7 +92,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
 		return &node->value;
@@ -170,7 +170,7 @@ namespace Blaze
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 			if (it->iteratorCount != 0)
-				Debug::Logger::LogWarning("Blaze Engine", "Clearing a list while a iterator is referencing it");
+				BLAZE_ENGINE_CORE_WARNING("Clearing a list while a iterator is referencing it");
 #endif
 
 			std::destroy_at(it);
@@ -199,7 +199,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (it.IsNull())
-			Debug::Logger::LogFatal("Blaze Engine", "Iterator is null");
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
 #endif		
 
 		Node* next = it.node;
@@ -225,7 +225,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (it.IsNull())
-			Debug::Logger::LogFatal("Blaze Engine", "Iterator is null");
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
 #endif		
 
 		Node* prev = it.node;
@@ -281,23 +281,29 @@ namespace Blaze
 		return Iterator(first);
 	}	
 	template<typename T, AllocatorType Allocator>
-	inline Result DualList<T, Allocator>::Erase(const Iterator& it)
+	inline void DualList<T, Allocator>::Erase(const Iterator& it)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Erasing from an empty list");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing from an empty list");
+			return;
+		}
 
 		if (it.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
+			return;
+		}
 #endif
 
 		Node* node = it.node;
-		Node* prev = node->prev;	
+		Node* prev = node->prev;
 		Node* next = node->next;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node->iteratorCount != 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a list element while a iterator is referencing it");
+		if (node->iteratorCount != 0)		
+			BLAZE_ENGINE_CORE_ERROR("Erasing a list element while a iterator is referencing it");
 #endif
 
 		std::destroy_at(node);
@@ -319,23 +325,24 @@ namespace Blaze
 		{
 			first = nullptr;
 			last = nullptr;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result DualList<T, Allocator>::EraseFirst()
+	inline void DualList<T, Allocator>::EraseFirst()
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Erasing from an empty list");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing from an empty list");
+			return;
+		}
 #endif
 		Node* next = first->next;
 		Node* node = first;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (node->iteratorCount != 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a list element while a iterator is referencing it");
+			BLAZE_ENGINE_CORE_ERROR("Erasing a list element while a iterator is referencing it");
 #endif
 
 		std::destroy_at(node);
@@ -352,23 +359,24 @@ namespace Blaze
 		else if (count == 1)
 		{
 			last = first;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result DualList<T, Allocator>::EraseLast()
+	inline void DualList<T, Allocator>::EraseLast()
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Erasing from an empty list");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing from an empty list");
+			return;
+		}
 #endif
 		Node* prev = last->prev;
 		Node* node = last;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (node->iteratorCount != 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a list element while a iterator is referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Erasing a list element while a iterator is referencing it");
 #endif
 
 		std::destroy_at(node);
@@ -385,19 +393,23 @@ namespace Blaze
 		else if (count == 1)
 		{
 			first = last;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result DualList<T, Allocator>::MoveBefore(const ConstIterator& it, const ConstIterator& relative)
+	inline void DualList<T, Allocator>::MoveBefore(const ConstIterator& it, const ConstIterator& relative)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK					
 		if (it.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
+			return;
+		}
 
 		if (relative.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
+			return;
+		}
 #endif
 		Node* node = it.node;
 
@@ -412,19 +424,23 @@ namespace Blaze
 		next->prev = node;
 
 		node->prev = prev;
-		node->next = next;
-
-		return Result();
+		node->next = next;		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result DualList<T, Allocator>::MoveAfter(const ConstIterator& it, const ConstIterator& relative)
+	inline void DualList<T, Allocator>::MoveAfter(const ConstIterator& it, const ConstIterator& relative)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK					
 		if (it.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
+			return;
+		}
 
 		if (relative.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
+			return;
+		}
 #endif
 		Node* node = it.node;
 
@@ -439,16 +455,17 @@ namespace Blaze
 		prev->next = node;
 
 		node->prev = prev;
-		node->next = next;
-
-		return Result();
+		node->next = next;		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result DualList<T, Allocator>::MoveFront(const ConstIterator& it)
+	inline void DualList<T, Allocator>::MoveFront(const ConstIterator& it)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK					
 		if (it.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");				
+		{
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
+			return;
+		}
 #endif
 		Node* node = it.node;
 
@@ -466,16 +483,17 @@ namespace Blaze
 		{
 			first = node;
 			last = node;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result DualList<T, Allocator>::MoveBack(const ConstIterator& it)
+	inline void DualList<T, Allocator>::MoveBack(const ConstIterator& it)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK					
 		if (it.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
+			return;
+		}
 #endif
 		Node* node = it.node;
 
@@ -499,14 +517,14 @@ namespace Blaze
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, const T&>&& std::same_as<std::invoke_result_t<C, const T&>, bool>
-	inline Result DualList<T, Allocator>::EraseAll(const C& function)
+	inline void DualList<T, Allocator>::EraseAll(const C& function)
 	{
 		if (first == nullptr)
-			return Result();
+			return;
 
 		while (function(first->value))
 		{
-			CHECK_RESULT(EraseFirst());
+			EraseFirst();
 
 			if (first == nullptr)
 				return Result();
@@ -519,25 +537,26 @@ namespace Blaze
 			Node* next = curr->next;
 
 			if (function(curr->value))			
-				CHECK_RESULT(Erase(Iterator(curr)));
+				Erase(Iterator(curr));
 
 			curr = next;			
 		}
-
-		return Result();
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, const T&>&& std::same_as<std::invoke_result_t<C, const T&>, bool>
-	inline Result DualList<T, Allocator>::EraseOne(const C& function)
+	inline void DualList<T, Allocator>::EraseOne(const C& function)
 	{
 		if (count == 0)
-			return Result();
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing one from a empty dual list");
+			return;
+		}			
 
 		Node* it = first;
 
 		if (function(it->value))
 		{
-			CHECK_RESULT(EraseFirst());
+			EraseFirst();
 			return Result();
 		}
 
@@ -545,14 +564,12 @@ namespace Blaze
 		{
 			if (function(it->value))
 			{
-				CHECK_RESULT(Erase(Iterator(it)));
+				Erase(Iterator(it));
 				break;
 			}
 
 			it = it->next;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void DualList<T, Allocator>::AppendBack(const DualList& list)
@@ -611,7 +628,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "DualList is empty");
+			BLAZE_ENGINE_CORE_FATAL("DualList is empty");
 #endif
 		return first->value;
 	}
@@ -620,7 +637,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "DualList is empty");
+			BLAZE_ENGINE_CORE_FATAL("DualList is empty");
 #endif
 		return first->value;
 	}
@@ -629,7 +646,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "DualList is empty");
+			BLAZE_ENGINE_CORE_FATAL("DualList is empty");
 #endif
 		return last->value;
 	}
@@ -638,7 +655,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "DualList is empty");
+			BLAZE_ENGINE_CORE_FATAL("DualList is empty");
 #endif
 		return last->value;
 	}

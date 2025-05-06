@@ -54,6 +54,10 @@ namespace Blaze::UI
 		renderData.uv1 = Vec2f(0, 0);
 		renderData.uv2 = Vec2f(0, 0);
 	}
+	TextCursorRenderUnit::~TextCursorRenderUnit()
+	{
+		textRenderUnit.renderDataUpdatedEventDispatcher.RemoveHandler(*this);
+	}
 	void TextCursorRenderUnit::BeginStream()
 	{		
 		CleanRenderData();
@@ -281,7 +285,7 @@ namespace Blaze::UI
 		shown = true;
 		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 	}	
-	void TextCursorRenderUnit::OnEvent(TextRenderUnitBase::RenderDataUpdatedEvent event)
+	void TextCursorRenderUnit::OnEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event)
 	{						
 		renderDataDirty = true;
 	}

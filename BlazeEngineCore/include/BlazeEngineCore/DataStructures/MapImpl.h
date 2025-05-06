@@ -27,7 +27,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK				
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif		
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -86,7 +86,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK			
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
 #endif			
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -146,7 +146,7 @@ namespace Blaze
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
 		{
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 			return *(MapPairType*)nullptr;
 		}
 #endif
@@ -159,7 +159,7 @@ namespace Blaze
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
 		{
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 			return nullptr;
 		}
 #endif
@@ -244,7 +244,7 @@ namespace Blaze
 			{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK				
 				if (node->iteratorCount)
-					Debug::Logger::LogWarning("Blaze Engine", "Clearing a map while a iterator is referencing it");
+					BLAZE_ENGINE_CORE_WARNING("Clearing a map while a iterator is referencing it");
 #endif
 				Node* next = node->next;
 
@@ -301,38 +301,46 @@ namespace Blaze
 		return InsertWithHint(key, Hash(key), std::forward<Args>(args)...);
 	}
 	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
-	inline bool Map<Key, Value, Hasher, Allocator>::Erase(const Key& key)
+	inline void Map<Key, Value, Hasher, Allocator>::Erase(const Key& key)
 	{
 		Bucket* bucket = GetBucketFromHash(Hash(key));
 
 		if (bucket == nullptr)
-			return false;
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing a map element from an empty map");
+			return;
+		}			
 
 		auto it = FindWithHintUnsafe(key, bucket);
 
 		if (it.IsNull())
-			return false;
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing a invalid element from a map");
+			return;
+		}
 
-		EraseNodeUnsafe(bucket, it.node);
-
-		return true;
+		EraseNodeUnsafe(bucket, it.node);		
 	}
 	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
-	inline bool Map<Key, Value, Hasher, Allocator>::Erase(const Iterator& iterator)
+	inline void Map<Key, Value, Hasher, Allocator>::Erase(const Iterator& iterator)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (iterator.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to erase a map pair with a null iterator");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Trying to erase a map pair with a null iterator");
+			return;
+		}
 #endif
 
 		Bucket* bucket = GetBucketFromHash(iterator.node->hash);
 
 		if (bucket == nullptr)
-			return false;
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing a map element from an empty map");
+			return;
+		}
 
-		EraseNodeUnsafe(bucket, iterator.node);
-		
-		return true;
+		EraseNodeUnsafe(bucket, iterator.node);		
 	}
 	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
 	inline uintMem Map<Key, Value, Hasher, Allocator>::Count() const
@@ -555,7 +563,7 @@ namespace Blaze
 
 		if (bucket == nullptr)
 		{
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to insert a map pair but there are no buckets");
+			BLAZE_ENGINE_CORE_FATAL("Trying to insert a map pair but there are no buckets");
 			return { Iterator(), false };
 		}
 
@@ -627,7 +635,7 @@ namespace Blaze
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK				
 		if (node->iteratorCount)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a map node while a iterator is referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Erasing a map node while a iterator is referencing it");
 #endif
 
 		std::destroy_at(node);

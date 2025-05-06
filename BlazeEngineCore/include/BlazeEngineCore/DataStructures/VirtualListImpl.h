@@ -3,121 +3,116 @@
 
 namespace Blaze
 {
-	template<typename VirtualList>
-	inline VirtualListIterator<VirtualList>::VirtualListIterator()
-		: node(nullptr)
+	template<typename T>
+	inline VirtualListNodeBase<T>::VirtualListNodeBase(VirtualListNodeBase* next, T& valueBase)
+		: next(next), valueBase(valueBase)
 	{
 	}
-	template<typename VirtualList>
-	template<IsConvertibleToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-	inline VirtualListIterator<VirtualList>::VirtualListIterator(const T& i)
-		: node(i.node)
+	template<typename T>
+	inline VirtualListNodeBase<T>::~VirtualListNodeBase()
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node != nullptr)
-			++node->iteratorCount;
-#endif
 	}
-	template<typename VirtualList>
-	inline bool VirtualListIterator<VirtualList>::IsNull() const
+
+	template<typename Base, typename Derived> requires std::derived_from<Derived, Base> || std::same_as<Base, void>
+	template<typename ... Args> requires std::constructible_from<Derived, Args...>
+	inline VirtualListNode<Base, Derived>::VirtualListNode(VirtualListNodeBase<Base>* next, Args && ...args)
+		: VirtualListNodeBase<Base>(next, value), value(std::forward<Args>(args)...)
 	{
-		return node == nullptr;
 	}
-	template<typename VirtualList>
-	inline VirtualListIterator<VirtualList>& VirtualListIterator<VirtualList>::operator++()
+	template<typename Base, typename Derived> requires std::derived_from<Derived, Base> || std::same_as<Base, void>
+	inline VirtualListNode<Base, Derived>::~VirtualListNode()
+	{
+	}
+
+	template<typename T, bool IsConst>
+	inline VirtualListIterator<T, IsConst> ::VirtualListIterator()
+		: nodeBase(nullptr)
+	{
+	}
+	template<typename T, bool IsConst>
+	inline VirtualListIterator<T, IsConst>::VirtualListIterator(NodeBase* nodeBase)
+		: nodeBase(nodeBase)
+	{
+	}
+	template<typename T, bool IsConst>
+	template<bool IsConst2> requires (IsConst || !IsConst2)
+	inline VirtualListIterator<T, IsConst>::VirtualListIterator(const VirtualListIterator<T, IsConst2>& other)
+		: nodeBase(other.nodeBase)
+	{
+	}
+	template<typename T, bool IsConst>
+	inline bool VirtualListIterator<T, IsConst>::IsNull() const
+	{
+		return nodeBase == nullptr;
+	}
+	template<typename T, bool IsConst>
+	inline VirtualListIterator<T, IsConst>& VirtualListIterator<T, IsConst>::operator++()
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+		if (nodeBase == nullptr)
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		--node->iteartorCount;
-#endif
-
-		node = node->next;
-
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node != nullptr)
-			++node->iteartorCount;
-#endif
+		nodeBase = nodeBase->next;
 		return *this;
 	}
-	template<typename VirtualList>
-	inline VirtualListIterator<VirtualList> VirtualListIterator<VirtualList>::operator++(int)
+	template<typename T, bool IsConst>
+	inline VirtualListIterator<T, IsConst> VirtualListIterator<T, IsConst>::operator++(int)
 	{
 		VirtualListIterator copy = *this;
 		++copy;
 		return copy;
-	}
-	template<typename VirtualList>
-	inline typename VirtualListIterator<VirtualList>::template ValueBaseType& VirtualListIterator<VirtualList>::operator*() const requires (!std::same_as<ValueBaseType, void>)
+	}	
+	template<typename T, bool IsConst>
+	inline auto VirtualListIterator<T, IsConst>::operator*() const -> ValueBaseType& requires (!std::same_as<std::remove_const_t<T>, void>)
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+		if (nodeBase == nullptr)
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
-		return *node->valueBase;
+		return nodeBase->valueBase;
 	}
 
-	template<typename VirtualList>
-	inline typename VirtualListIterator<VirtualList>::template ValueBaseType* VirtualListIterator<VirtualList>::operator->() const requires (!std::same_as<ValueBaseType, void>)
+	template<typename T, bool IsConst>
+	inline auto VirtualListIterator<T, IsConst>::operator->() const -> ValueBaseType* requires (!std::same_as<std::remove_const_t<T>, void>)
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+		if (nodeBase == nullptr)
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
-		return node->valueBase;
+		return &nodeBase->valueBase;
 	}
-
-	template<typename VirtualList>
-	template<typename Value> requires InsertableToVirtualList<Value, typename VirtualList::template ValueBaseType>
-	inline typename VirtualListIterator<VirtualList>::template MatchValueBaseConst<Value>* VirtualListIterator<VirtualList>::GetValue() const 
+	template<typename T, bool IsConst>
+	template<typename T2> requires (std::is_const_v<T2> || !std::is_const_v<typename VirtualListIterator<T, IsConst>::template ValueBaseType>) && (std::derived_from<T2, T> || std::same_as<std::remove_const_t<T>, void>)
+	inline std::conditional_t<IsConst, const T2, T2>* VirtualListIterator<T, IsConst>::GetValue() const
 	{
-		if (node == nullptr)
+		if (nodeBase == nullptr)
 			return nullptr;
 
-		auto nodeRead = dynamic_cast<typename VirtualList::template Node<Value>*>(node);
-
-		if (nodeRead == nullptr)
-			return nullptr;
-
-		return &nodeRead->value;
-	}
-	template<typename VirtualList>
-	template<IsComparableToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-	inline bool VirtualListIterator<VirtualList>::operator==(const T& i) const
+		return dynamic_cast<T2*>(&nodeBase->valueBase);
+	}	
+	template<typename T, bool IsConst>
+	template<bool IsConst2> requires (IsConst || !IsConst2)
+	inline bool VirtualListIterator<T, IsConst>::operator==(const VirtualListIterator<T, IsConst2>& other) const
 	{
-		return node == i.node;
+		return nodeBase == other.nodeBase;
 	}
-	template<typename VirtualList>
-	template<IsComparableToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-	inline bool VirtualListIterator<VirtualList>::operator!=(const T& i) const
+	template<typename T, bool IsConst>
+	template<bool IsConst2> requires (IsConst || !IsConst2)
+	inline bool VirtualListIterator<T, IsConst>::operator!=(const VirtualListIterator<T, IsConst2>& other) const
 	{
-		return node != i.node;
+		return nodeBase != other.nodeBase;
 	}
-	template<typename VirtualList>
-	template<IsConvertibleToVirtualListIterator<VirtualListIterator<VirtualList>> T>
-	inline VirtualListIterator<VirtualList>& VirtualListIterator<VirtualList>::operator=(const T& i)
+	template<typename T, bool IsConst>
+	template<bool IsConst2> requires (IsConst || !IsConst2)
+	inline VirtualListIterator<T, IsConst>& VirtualListIterator<T, IsConst>::operator=(const VirtualListIterator<T, IsConst2>& other)
 	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node != nullptr)
-			--node.iteratorCount;
-#endif
-		node = i.node;
+		nodeBase = other.nodeBase;
 
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		++node->iteartorCount;
-#endif
 		return *this;
-	}
-	template<typename VirtualList>
-	inline VirtualListIterator<VirtualList>::VirtualListIterator(Node* node)
-		: node(node)
-	{
-	}
+	}	
 
 	template<typename T, AllocatorType Allocator>
 	inline VirtualList<T, Allocator>::VirtualList()
@@ -145,16 +140,11 @@ namespace Blaze
 		if (count == 0)
 			return;
 
-		NodeHeader* it = first;
+		NodeBase* it = first;
 
 		while (it != nullptr)
 		{
-			NodeHeader* next = it->next;
-
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-			if (it->iteratorCount != 0)
-				Debug::Logger::LogWarning("Blaze Engine", "Clearing a list while a iterator is referencing it");
-#endif
+			NodeBase* next = it->next;
 
 			std::destroy_at(it);
 			allocator.Free(it);
@@ -182,13 +172,13 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (it.IsNull())
-			Debug::Logger::LogFatal("Blaze Engine", "Iterator is null");
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
 #endif		
 
-		NodeHeader* prev = it.node;
-		NodeHeader* next = prev->next;
+		NodeBase* prev = it.node;
+		NodeBase* next = prev->next;
 		Node<Derived>* nodeReal = (Node<Derived>*)allocator.Allocate(sizeof(Node<Derived>));
-		NodeHeader* node = (NodeHeader*)nodeReal;
+		NodeBase* node = (NodeBase*)nodeReal;
 		prev->next = node;
 		std::construct_at(nodeReal, next, std::forward<Args>(args)...);
 
@@ -207,7 +197,7 @@ namespace Blaze
 		else
 		{
 			Node<Derived>* node = (Node<Derived>*)allocator.Allocate(sizeof(Node<Derived>));
-			last->next = (NodeHeader*)node;
+			last->next = (NodeBase*)node;
 			std::construct_at(node, nullptr, std::forward<Args>(args)...);
 
 			last = last->next;
@@ -220,10 +210,10 @@ namespace Blaze
 	template<typename Derived, typename ... Args> requires InsertableToVirtualList<Derived, T>&& std::constructible_from<Derived, Args...>
 	inline VirtualList<T, Allocator>::template Iterator VirtualList<T, Allocator>::AddFront(Args&& ... args)
 	{
-		NodeHeader* second = first;
+		NodeBase* second = first;
 
 		Node<Derived>* node = (Node<Derived>*)allocator.Allocate(sizeof(Node<Derived>));
-		first = (NodeHeader*)node;
+		first = (NodeBase*)node;
 		std::construct_at(node, second, std::forward<Args>(args)...);
 
 		++count;
@@ -234,30 +224,34 @@ namespace Blaze
 		return Iterator(first);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result VirtualList<T, Allocator>::EraseAfter(const Iterator& it)
+	inline void VirtualList<T, Allocator>::EraseAfter(const Iterator& it)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Erasing from an empty list");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Erasing from an empty list");
+			return;
+		}
 
 		if (it.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Iterator is null");
+			return;
+		}
 #endif
 
-		NodeHeader* prev = it.node;
-		NodeHeader* node = prev->next;
+		NodeBase* prev = it.node;
+		NodeBase* node = prev->next;
 
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (node == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is the last in the list");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Iterator is the last in the list");
+			return;
+		}
 #endif
 
-		NodeHeader* next = node->next;
-
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node->iteratorCount != 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a list element while a iterator is referencing it");
-#endif
+		NodeBase* next = node->next;
 
 		std::destroy_at(node);
 		allocator.Free(node);
@@ -272,24 +266,19 @@ namespace Blaze
 		{
 			first = nullptr;
 			last = nullptr;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result VirtualList<T, Allocator>::EraseFirst()
+	inline void VirtualList<T, Allocator>::EraseFirst()
 	{
-#ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Erasing from an empty list");
-#endif
-		NodeHeader* next = first->next;
-		NodeHeader* node = first;
+		{
+			BLAZE_ENGINE_CORE_ERROR("Erasing from an empty list");
+			return;
+		}
 
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		if (node->iteratorCount != 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a list element while a iterator is referencing it");
-#endif
+		NodeBase* next = first->next;
+		NodeBase* node = first;
 
 		std::destroy_at(node);
 		allocator.Free(node);
@@ -305,71 +294,68 @@ namespace Blaze
 		else if (count == 1)
 		{
 			last = first;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
-	inline Result VirtualList<T, Allocator>::EraseAll(const C& function)
+	inline void VirtualList<T, Allocator>::EraseAll(const C& function)
 	{
 		if (count == 0)
-			return Result();
+			return;
 
-		NodeHeader* prev = first;
-		NodeHeader* curr = prev->next;
+		NodeBase* prev = first;
+		NodeBase* curr = prev->next;
 
 		if (function(first->value))
-			CHECK_RESULT(EraseFirst())
+			EraseFirst();
 
-			while (curr != nullptr)
+		while (curr != nullptr)
+		{
+			NodeBase* next = curr->next;
+
+			if (function(curr->value))
 			{
-				NodeHeader* next = curr->next;
+				EraseAfter(Iterator(prev));
 
-				if (function(curr->value))
-				{
-					CHECK_RESULT(EraseAfter(Iterator(prev)));
-
-					curr = next;
-				}
-				else
-				{
-					prev = curr;
-					curr = next;
-				}
+				curr = next;
 			}
-
-		return Result();
+			else
+			{
+				prev = curr;
+				curr = next;
+			}
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
-	inline Result VirtualList<T, Allocator>::EraseOne(const C& function)
+	inline void VirtualList<T, Allocator>::EraseOne(const C& function)
 	{
 		if (count == 0)
-			return Result();
+		{
+			BLAZE_ENGINE_CORE_ERROR("Erasing from an empty list");
+			return;
+		}		
 
-		NodeHeader* prev = first;
-		NodeHeader* curr = prev->next;
+		NodeBase* prev = first;
+		NodeBase* curr = prev->next;
 
 		if (function(first->value))
 		{
-			CHECK_RESULT(EraseFirst())
-				return Result();
+			EraseFirst();
+			return;
 		}
 
 		while (curr != nullptr)
 		{
 			if (function(curr->value))
 			{
-				CHECK_RESULT(EraseAfter(Iterator(prev)));
-				return Result();
+				EraseAfter(Iterator(prev));
+				return;
 			}
 
 			prev = curr;
 			curr = curr->next;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void VirtualList<T, Allocator>::AppendBack(const VirtualList& list)
@@ -474,27 +460,6 @@ namespace Blaze
 		other.last = nullptr;
 		other.count = 0;
 		return *this;
-	}
-	template<typename T, AllocatorType Allocator>
-	inline VirtualList<T, Allocator>::NodeHeader::NodeHeader(NodeHeader* next, T* valueBase)
-		: next(next), valueBase(valueBase)
-	{
-	}
-	template<typename T, AllocatorType Allocator>
-	inline VirtualList<T, Allocator>::NodeHeader::~NodeHeader()
-	{
-	}	
-	template<typename T, AllocatorType Allocator>
-	template<typename Value> requires InsertableToVirtualList<Value, T>
-	template<typename ...Args> requires std::constructible_from<Value, Args...>
-	inline VirtualList<T, Allocator>::Node<Value>::Node(typename VirtualList<T, Allocator>::template NodeHeader* next, Args && ...args)
-		: NodeHeader(next, &value), value(std::forward<Args>(args)...)
-	{
-	}
-	template<typename T, AllocatorType Allocator>	
-	template<typename Value> requires InsertableToVirtualList<Value, T>
-	inline VirtualList<T, Allocator>::Node<Value>::~Node()
-	{
 	}	
 
 	template<typename T, AllocatorType Allocator>

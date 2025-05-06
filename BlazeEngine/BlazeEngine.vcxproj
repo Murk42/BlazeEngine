@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -74,27 +74,42 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>BlazeEngine-static-$(PlatformTarget)-$(Configuration)</TargetName>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgAutoLink>true</VcpkgAutoLink>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
   </PropertyGroup>
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>D:\Programming\Libraries\rectpack2D\include;$(SolutionDir)BlazeEngineCore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -110,14 +125,19 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;freetyped.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngine\Files\Consola.cpp</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -134,14 +154,19 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;freetype.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngine\Files\Consola.cpp</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -158,13 +183,19 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>SDL2d.lib;freetyped.lib;sail.lib;sail-common.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;freetyped.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngine\Files\Consola.cpp</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -181,13 +212,19 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>SDL2.lib;freetype.lib;sail.lib;sail-common.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;freetype.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" "resourceToCPP" "$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" "$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\Files\Consola.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngine\Files\Consola.cpp</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Files\Consola_template.cpp</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\BlazeEngine\Application\ECS\Component.h" />
@@ -202,27 +239,23 @@
     <ClInclude Include="include\BlazeEngine\BlazeEngineDefines.h" />
     <ClInclude Include="include\BlazeEngine\Console\Console.h" />
     <ClInclude Include="include\BlazeEngine\Console\ConsoleOutputStream.h" />
+    <ClInclude Include="include\BlazeEngine\ExecuteOnMainThread.h" />
+    <ClInclude Include="include\BlazeEngine\Input\Keyboard.h" />
+    <ClInclude Include="include\BlazeEngine\Input\Mouse.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Font\TextLayouter.h" />
+    <ClInclude Include="include\BlazeEngine\Window\Display.h" />
     <ClInclude Include="include\BlazeEngine\Window\Window.h" />
-    <ClInclude Include="include\BlazeEngine\Window\WindowBase.h" />
-    <ClInclude Include="include\BlazeEngine\Window\WindowSDL.h" />
-    <ClInclude Include="include\BlazeEngine\Event\EventDispatcher.h" />
-    <ClInclude Include="include\BlazeEngine\Event\EventHandler.h" />
-    <ClInclude Include="include\BlazeEngine\Event\LambdaEventHandler.h" />
-    <ClInclude Include="include\BlazeEngine\Event\QueueEventDispatcher.h" />
     <ClInclude Include="include\BlazeEngine\Input\Input.h" />
-    <ClInclude Include="include\BlazeEngine\Input\InputEvents.h" />
-    <ClInclude Include="include\BlazeEngine\Input\Key.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\EntityCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Application\ECS\SystemCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Files\Consola.h" />
-    <ClInclude Include="source\BlazeEngine\Internal\Conversions.h" />
-    <ClInclude Include="source\BlazeEngine\Internal\GlobalData.h" />
+    <ClInclude Include="source\BlazeEngine\Internal\BlazeEngineContext.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\FreeType.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\sail.h" />
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDL.h" />
+    <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDLConversions.h" />
     <ClInclude Include="source\BlazeEngine\Internal\ThreadEventStack.h" />
     <ClInclude Include="source\BlazeEngine\Internal\ThreadTaskQueue.h" />
     <ClInclude Include="source\BlazeEngine\Resources\Bitmap\SailClasses.h" />
@@ -239,21 +272,22 @@
     <ClCompile Include="source\BlazeEngine\Application\ResourceSystem\Resource.cpp" />
     <ClCompile Include="source\BlazeEngine\Console\ConsoleOutputStream.cpp" />
     <ClCompile Include="source\BlazeEngine\EntryPoint\EntryPoint.cpp" />
+    <ClCompile Include="source\BlazeEngine\ExecuteOnMainThread.cpp" />
     <ClCompile Include="source\BlazeEngine\Files\Consola.cpp" />
     <ClCompile Include="source\BlazeEngine\Input\Input.cpp" />
-    <ClCompile Include="source\BlazeEngine\Input\Key.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\Conversions.cpp" />
-    <ClCompile Include="source\BlazeEngine\Internal\GlobalData.cpp" />
+    <ClCompile Include="source\BlazeEngine\Input\Keyboard.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\BlazeEngineContext.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\FreeType.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\Libraries.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\sail.cpp" />
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDL.cpp" />
+    <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDLConversions.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\SailClasses.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Font\TextLayouter.cpp" />
-    <ClCompile Include="source\BlazeEngine\Window\WindowBase.cpp" />
-    <ClCompile Include="source\BlazeEngine\Window\WindowSDL.cpp" />
+    <ClCompile Include="source\BlazeEngine\Window\Display.cpp" />
+    <ClCompile Include="source\BlazeEngine\Window\Window.cpp" />
     <ClCompile Include="source\BlazeEngine\Console\Console.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

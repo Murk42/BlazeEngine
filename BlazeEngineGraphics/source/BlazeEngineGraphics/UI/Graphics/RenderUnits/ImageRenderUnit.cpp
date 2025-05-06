@@ -21,6 +21,11 @@ namespace Blaze::UI
 		node->finalTransformUpdatedEventDispatcher.AddHandler(*this);
 		node->transformUpdatedEventDispatcher.AddHandler(*this);
 	}
+	ImageRenderUnit::~ImageRenderUnit()
+	{
+		node->finalTransformUpdatedEventDispatcher.RemoveHandler(*this);
+		node->transformUpdatedEventDispatcher.RemoveHandler(*this);
+	}
 	void ImageRenderUnit::BeginStream()
 	{				
 		CleanRenderData();
@@ -86,7 +91,7 @@ namespace Blaze::UI
 		renderDataDirty = true;
 		this->layout = layout;		
 	}
-	void ImageRenderUnit::OnEvent(Node::TransformUpdatedEvent event)
+	void ImageRenderUnit::OnEvent(const Node::TransformUpdatedEvent& event)
 	{
 		if (rd.texture == nullptr)
 			return;
@@ -108,7 +113,7 @@ namespace Blaze::UI
 
 		node->SetTransform(transform);
 	}
-	void ImageRenderUnit::OnEvent(Node::FinalTransformUpdatedEvent event)
+	void ImageRenderUnit::OnEvent(const Node::FinalTransformUpdatedEvent& event)
 	{				
 		renderDataDirty = true;
 	}

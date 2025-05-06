@@ -20,22 +20,18 @@ namespace Blaze
 	{
 		Clear();
 	}
-	Result BufferStreamBase::SetBuffer(void* buffer, uintMem size)
+	void BufferStreamBase::SetBuffer(void* buffer, uintMem size)
 	{
-		CHECK_RESULT(Clear());
+		Clear();
 		this->buffer = buffer;
 		this->size = size;
-		this->position = 0;
-
-		return Result();
+		this->position = 0;		
 	}
-	Result BufferStreamBase::Clear()
+	void BufferStreamBase::Clear()
 	{
 		this->buffer = nullptr;
 		this->size = 0;
 		this->position = 0;
-
-		return Result();
 	}
 	bool BufferStreamBase::MovePosition(intMem offset)
 	{

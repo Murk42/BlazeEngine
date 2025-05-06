@@ -42,7 +42,7 @@ namespace Blaze::ECS
 		FlagType mask = FlagType(1) << index;
 
 		if ((flags & mask) == 0)
-			Debug::Logger::LogError("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet");
+			BLAZE_ENGINE_ERROR("Trying to free a element in a HybridArray that wasn't allocated yet");
 
 		flags ^= mask;
 	}
@@ -66,7 +66,7 @@ namespace Blaze::ECS
 		uintMem byteOffset = (byte*)element - (byte*)bucket - sizeof(BucketHeader);
 
 		if (byteOffset % elementSize != 0)
-			Debug::Logger::LogError("Blaze Engine", "Invalid component pointer");
+			BLAZE_ENGINE_ERROR("Invalid component pointer");
 
 		index = byteOffset / elementSize;
 	}
@@ -152,7 +152,7 @@ namespace Blaze::ECS
 				break;
 
 		if (i == bucketCount)
-			Debug::Logger::LogError("Blaze Engine", "Trying to free a invalid pointer");
+			BLAZE_ENGINE_ERROR("Trying to free a invalid pointer");
 
 		--bucketCount;
 		--nonFullBucketCount;
@@ -188,14 +188,16 @@ namespace Blaze::ECS
 	{
 		Clear();
 	}
-	Result ComponentContainer::SetTypeData(const ComponentTypeData& typeData)
+	void ComponentContainer::SetTypeData(const ComponentTypeData& typeData)
 	{
 		if (typeData.IsNone())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Trying to set type data to none");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Trying to set type data to none");
+			return;
+		}
 
 		this->typeData = &typeData;
-		elementSize = typeData.Size() + sizeof(ElementHeader);
-		return Result();
+		elementSize = typeData.Size() + sizeof(ElementHeader);		
 	}
 	Component* ComponentContainer::Create()
 	{
@@ -409,7 +411,7 @@ namespace Blaze::ECS
 	//		if (typeIndex >= typeCount)
 	//		{
 	//			Clear();
-	//			return BLAZE_ERROR_RESULT("Blaze Engine", "Invalid type index: " + StringParsing::Convert(typeIndex).value);
+	//			return BLAZE_ENGINE_CORE_ERROR("Invalid type index: " + StringParsing::Convert(typeIndex).value);
 	//		}
 	//
 	//		size_t stateOffset = typeIndex >> 3;
@@ -429,10 +431,10 @@ namespace Blaze::ECS
 	//Result ComponentGroup::SetComponent(Component* component)
 	//{
 	//	if (component == nullptr)
-	//		return BLAZE_ERROR_RESULT("Blaze Engine", "Component is nullptr");
+	//		return BLAZE_ENGINE_CORE_ERROR("Component is nullptr");
 	//
 	//	if (data == nullptr)
-	//		return BLAZE_ERROR_RESULT("Blaze Engine", "ComponentGroup is empty, cant set components");
+	//		return BLAZE_ENGINE_CORE_ERROR("ComponentGroup is empty, cant set components");
 	//
 	//	auto typeIndex = component->GetTypeData()->Index();
 	//	size_t index = CountOnes((byte*)data, typeIndex);

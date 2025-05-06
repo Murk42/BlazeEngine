@@ -30,7 +30,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (characterSet == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
 		++characterIndex;
@@ -61,7 +61,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (characterSet == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
 #endif
 
 
@@ -92,7 +92,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (characterSet == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 		return UnicodeChar(characterSet->spans[spanIndex].first.Value() + characterIndex);
 	}
@@ -504,7 +504,7 @@ namespace Blaze
 
 		if (face == nullptr)
 		{
-			Debug::Logger::LogWarning("Blaze Engine", "Trying to get a glyph metrics from a font object that wasn't loaded from anywhere");
+			BLAZE_ENGINE_CORE_WARNING("Trying to get a glyph metrics from a font object that wasn't loaded from anywhere");
 			return false;
 		}
 
@@ -552,7 +552,7 @@ namespace Blaze
 		FT_Face face = (FT_Face)font->ptr;
 		if (face == nullptr)
 		{
-			Debug::Logger::LogWarning("Blaze Engine", "Trying to get a glyph bitmaps from a font object that wasn't loaded from anywhere");
+			BLAZE_ENGINE_CORE_WARNING("Trying to get a glyph bitmaps from a font object that wasn't loaded from anywhere");
 			return { };
 		}
 
@@ -568,7 +568,7 @@ namespace Blaze
 		FT_Face face = (FT_Face)font->ptr;
 		if (face == nullptr)
 		{
-			Debug::Logger::LogWarning("Blaze Engine", "Trying to create a atlas from a font object that wasn't loaded from anywhere");
+			BLAZE_ENGINE_CORE_WARNING("Trying to create a atlas from a font object that wasn't loaded from anywhere");
 			return;
 		}
 
@@ -631,15 +631,15 @@ namespace Blaze
 	{
 		Clear();
 	}
-	Result Font::Load(Path path)
+	void Font::Load(Path path)
 	{
 		File file;
 
-		CHECK_RESULT(file.Open(path, FileAccessPermission::Read));
+		file.Open(path, FileAccessPermission::Read);
 
-		return Load(file);
+		Load(file);
 	}
-	Result Font::Load(ReadStream& readStream)
+	void Font::Load(ReadStream& readStream)
 	{
 		Clear();
 
@@ -665,7 +665,8 @@ namespace Blaze
 				memory = nullptr;
 				ptr = nullptr;
 
-				return BLAZE_WARNING_RESULT("BlazeEngine", "Failed to open font file!");
+				BLAZE_ENGINE_ERROR("Failed to open font file!");
+				return;
 			}
 		}
 
@@ -673,13 +674,12 @@ namespace Blaze
 
 		if (!(face->face_flags & FT_FACE_FLAG_SCALABLE))
 		{
-			return BLAZE_WARNING_RESULT("BlazeEngine", "Font file not supported, it's not a scalable font!");
+			BLAZE_ENGINE_ERROR("Font file not supported, it's not a scalable font!");
+			return;
 		}
 
 		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-		bool kern = FT_HAS_KERNING(face);
-
-		return Result();
+		bool kern = FT_HAS_KERNING(face);		
 	}
 	FontMetrics* Font::GetUnscalledMetrics() const
 	{

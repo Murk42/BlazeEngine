@@ -40,7 +40,7 @@ namespace Blaze::UI::Nodes
 
 		void UpdateTextRenderUnit();
 		
-		void OnEvent(SelectedEvent event) override;
-		void OnEvent(DeselectedEvent event) override;		
+		void OnEvent(const SelectedEvent& event) override;
+		void OnEvent(const DeselectedEvent& event) override;		
 	};
 }

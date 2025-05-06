@@ -29,8 +29,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 	{
 		File file;
 
-		if (file.Open(path, FileAccessPermission::Read))
-			return;
+		file.Open(path, FileAccessPermission::Read);			
 		
 		String source;
 		source.Resize(file.GetSize());
@@ -57,7 +56,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		if (compileStatus == GL_FALSE)
 		{
 			state = ShaderState::UnsuccesfullyCompiled;
-			Debug::Logger::LogWarning("Blaze Engine Graphics", "Shader unsuccessfully compiled. The compilation log is: \n" + GetCompilationLog());
+			BLAZE_ENGINE_GRAPHICS_WARNING("Shader unsuccessfully compiled. The compilation log is: \n" + GetCompilationLog());
 		}
 		else
 			state = ShaderState::SuccesfullyCompiled;

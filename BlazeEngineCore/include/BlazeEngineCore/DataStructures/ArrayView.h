@@ -1,35 +1,28 @@
 #pragma once
 #include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/Types/TypeTraits.h"
 
 namespace Blaze
-{	
-	template<typename T, AllocatorType Allocator>
-	class Array;
+{		
+	template<typename T>
+	class ArrayIterator;
 
 	template<typename T>
-	class ArrayView
-	{		
-		struct ReferenceHolder
-		{
-			ReferenceHolder(T& value) : value(value) { }
-
-			T& value;
-		};
-	public:	
-		static_assert(!std::is_const_v<T>, "T shouldn't be const because const achieves nothing and makes using ArrayView much harder");
-
-		using Iterator = ArrayIterator<const ArrayView>;
-		using ConstIterator = ArrayIterator<const ArrayView>;
-		using ValueType = T;
-		using value_type = ValueType;
-		using InternalValueType = std::conditional_t<std::is_reference_v<T>, ReferenceHolder, T>;
+	class BLAZE_CORE_API ArrayView
+	{			
+	public:
+		using Iterator = ArrayIterator<const T>;		
+		using ValueType = T;				
+		using StoredType = std::conditional_t<std::is_reference_v<T>, std::remove_reference_t<T>* const, T>;
+		using value_type = T;
 
 		constexpr ArrayView();
 		constexpr ArrayView(const ArrayView&);
-		constexpr ArrayView(const InternalValueType* ptr, uintMem count);
+		constexpr ArrayView(Iterator begin, Iterator end);
 		template<uintMem S>
-		constexpr ArrayView(const InternalValueType(&arr)[S]);		
-		constexpr ArrayView(const std::initializer_list<InternalValueType>& list);
+		constexpr ArrayView(const StoredType(&arr)[S]);
+		constexpr ArrayView(const std::initializer_list<StoredType>& list);
+		constexpr ArrayView(const StoredType* ptr, uintMem count);
 
 		constexpr void Clear();
 		constexpr bool Empty() const;
@@ -37,9 +30,9 @@ namespace Blaze
 
 		constexpr const T& operator[](uintMem index) const;
 
-		constexpr const InternalValueType* Ptr() const;
+		constexpr const StoredType* Ptr() const;
 		
-		const T& First() const;		
+		const T& First() const;
 		const T& Last() const;
 		
 		Iterator GetIterator(uintMem index) const;
@@ -61,171 +54,20 @@ namespace Blaze
 		*/
 		Iterator BehindIterator() const;		
 
+		/*
+			If T is a reference type, true is returned if all of the references in this array refer to the same object as the coresponding reference in the second array, otherwise returnes false
+		*/
+		constexpr bool operator==(const ArrayView<T>& other) const requires std::equality_comparable<T> || std::is_reference_v<T>;
+		/*
+			If T is a reference type, false is returned if all of the references in this array refer to the same object as the coresponding reference in the second array, otherwise returnes true
+		*/
+		constexpr bool operator!=(const ArrayView<T>& other) const requires std::equality_comparable<T> || std::is_reference_v<T>;
+
 		constexpr ArrayView& operator=(const ArrayView& array);
 		template<AllocatorType Allocator>
 		constexpr ArrayView& operator=(const Array<T, Allocator>& array);		
-
-		template<typename>
-		friend class ArrayIterator;
-	private:
-		const InternalValueType* ptr;
+	private:		
+		const StoredType* ptr;
 		uintMem count;
-
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		uint32 iteratorCount;
-#endif
-	};		
-
-	template<typename T>
-	inline constexpr ArrayView<T>::ArrayView()
-		: ptr(nullptr), count(0)
-	{
-	}
-	template<typename T>
-	inline constexpr ArrayView<T>::ArrayView(const ArrayView& other)
-		: ptr(other.ptr), count(other.count)
-	{
-	}
-	template<typename T>
-	inline constexpr ArrayView<T>::ArrayView(const InternalValueType* ptr, uintMem count)
-		: ptr(ptr), count(count)
-	{
-	}
-	template<typename T>
-	template<uintMem S>
-	inline constexpr ArrayView<T>::ArrayView(const InternalValueType(&arr)[S])
-		: ptr(arr), count(S)
-	{
-	}
-	template<typename T>
-	inline constexpr ArrayView<T>::ArrayView(const std::initializer_list<InternalValueType>& list)
-		: ptr(list.begin()), count(list.size())
-	{
-	}
-	template<typename T>
-	inline constexpr void ArrayView<T>::Clear()
-	{
-		ptr = nullptr;
-		count = 0;
-	}
-	template<typename T>
-	inline constexpr bool ArrayView<T>::Empty() const
-	{
-		return count == 0;
-	}
-	template<typename T>
-	inline constexpr uintMem ArrayView<T>::Count() const
-	{
-		return count; 
-	}
-	template<typename T>
-	inline constexpr const T& ArrayView<T>::operator[](uintMem index) const
-	{
-		if (index >= count)
-			throw;
-
-		if constexpr (std::is_reference_v<T>)
-			return ptr[index].value;
-		else
-			return ptr[index];
-	}
-	template<typename T>
-	inline constexpr const ArrayView<T>::InternalValueType* ArrayView<T>::Ptr() const
-	{
-		return ptr; 
-	}
-	template<typename T>
-	inline const T& ArrayView<T>::First() const
-	{
-#ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "Array is empty");
-#endif
-
-		return ptr[0];
-	}
-	template<typename T>
-	inline const T& ArrayView<T>::Last() const
-	{
-#ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "Array is empty");
-#endif
-
-		return ptr[count - 1];
-	}
-	template<typename T>
-	inline ArrayView<T>::Iterator ArrayView<T>::GetIterator(uintMem index) const
-	{
-#ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (index >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Index out of range");
-#endif		
-		return Iterator(ptr + index);
-	}
-	template<typename T>
-	inline ArrayView<T>::Iterator ArrayView<T>::FirstIterator() const
-	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr, this);
-#else
-		return Iterator(ptr);
-#endif			
-	}
-	template<typename T>
-	inline ArrayView<T>::Iterator ArrayView<T>::LastIterator() const
-	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + count - 1, this);
-#else
-		return Iterator(ptr + count - 1);
-#endif			
-	}
-
-	template<typename T>
-	inline ArrayView<T>::Iterator ArrayView<T>::AheadIterator() const
-	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr - 1, this);
-#else
-		return Iterator(ptr - 1);
-#endif			
-	}
-
-	template<typename T>
-	inline ArrayView<T>::Iterator ArrayView<T>::BehindIterator() const
-	{
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-		return Iterator(ptr + count, this);
-#else
-		return Iterator(ptr + count);
-#endif			
-	}
-
-	template<typename T>
-	inline constexpr ArrayView<T>& ArrayView<T>::operator=(const ArrayView& other)
-	{
-		ptr = other.ptr;
-		count = other.count;
-		return *this;
-	}
-	template<typename T>
-	template<AllocatorType Allocator>
-	inline constexpr ArrayView<T>& Blaze::ArrayView<T>::operator=(const Array<T, Allocator>& array)
-	{
-		ptr = array.Ptr();
-		count = array.Count();
-
-		return *this;
-	}
-	template<typename T>
-	inline constexpr ArrayView<T>::Iterator begin(const ArrayView<T>& arr) 
-	{
-		return arr.FirstIterator();
-	}
-	template<typename T>
-	inline constexpr ArrayView<T>::Iterator end(const ArrayView<T>& arr)
-	{
-		return arr.BehindIterator();
-	}
+	};			
 }

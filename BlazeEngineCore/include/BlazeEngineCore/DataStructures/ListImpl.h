@@ -27,7 +27,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
@@ -54,7 +54,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
 		return node->value;
@@ -64,7 +64,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (node == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
 		return &node->value;
@@ -142,7 +142,7 @@ namespace Blaze
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 			if (it->iteratorCount != 0)
-				Debug::Logger::LogWarning("Blaze Engine", "Clearing a list while a iterator is referencing it");
+				BLAZE_ENGINE_CORE_WARNING("Clearing a list while a iterator is referencing it");
 #endif
 
 			std::destroy_at(it);
@@ -171,7 +171,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (it.IsNull())
-			Debug::Logger::LogFatal("Blaze Engine", "Iterator is null");
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
 #endif		
 
 		Node* prev = it.node;		
@@ -220,14 +220,20 @@ namespace Blaze
 		return Iterator(first);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result List<T, Allocator>::EraseAfter(const Iterator& it)
+	inline void List<T, Allocator>::EraseAfter(const Iterator& it)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Erasing from an empty list");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Erasing from an empty list");
+			return;
+		}
 
 		if (it.IsNull())
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is null");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Iterator is null");
+			return;
+		}
 #endif
 
 		Node* prev = it.node;
@@ -235,14 +241,17 @@ namespace Blaze
 
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (node == nullptr)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Iterator is the last in the list");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Iterator is the last in the list");
+			return;
+		}
 #endif
 
 		Node* next = node->next;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (node->iteratorCount != 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a list element while a iterator is referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Erasing a list element while a iterator is referencing it");
 #endif
 
 		std::destroy_at(node);
@@ -258,23 +267,24 @@ namespace Blaze
 		{
 			first = nullptr;
 			last = nullptr;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Result List<T, Allocator>::EraseFirst()
+	inline void List<T, Allocator>::EraseFirst()
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			return BLAZE_ERROR_RESULT("Blaze Engine", "Erasing from an empty list");
+		{
+			BLAZE_ENGINE_CORE_ERROR("Erasing from an empty list");
+			return;
+		}
 #endif
 		Node* next = first->next;
 		Node* node = first;
 
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (node->iteratorCount != 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Erasing a list element while a iterator is referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Erasing a list element while a iterator is referencing it");
 #endif
 
 		std::destroy_at(node);
@@ -291,23 +301,21 @@ namespace Blaze
 		else if (count == 1)
 		{
 			last = first;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
-	inline Result List<T, Allocator>::EraseAll(const C& function)
+	inline void List<T, Allocator>::EraseAll(const C& function)
 	{
 		if (first == nullptr)
-			return Result();
+			return;
 
 		while (function(first->value))
 		{
-			CHECK_RESULT(EraseFirst());
+			EraseFirst();
 
 			if (first == nullptr)
-				return Result();			
+				return;
 		}
 
 		Node* prev = first;
@@ -319,7 +327,7 @@ namespace Blaze
 
 			if (function(curr->value))
 			{
-				CHECK_RESULT(EraseAfter(Iterator(prev)));				
+				EraseAfter(Iterator(prev));
 
 				curr = next;
 			}
@@ -329,20 +337,21 @@ namespace Blaze
 				curr = next;
 			}
 		}
-
-		return Result();
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
-	inline Result List<T, Allocator>::EraseOne(const C& function)
+	inline void List<T, Allocator>::EraseOne(const C& function)
 	{
-		if (first == nullptr)
-			return Result();
+		if (first == nullptr)			
+		{
+			BLAZE_ENGINE_CORE_FATAL("Erasing from an empty list");
+			return;
+		}
 
 		if (function(first->value))
 		{
-			CHECK_RESULT(EraseFirst());			
-			return Result();
+			EraseFirst();			
+			return;
 		}
 
 		Node* prev = first;
@@ -352,15 +361,13 @@ namespace Blaze
 		{
 			if (function(curr->value))
 			{
-				CHECK_RESULT(EraseAfter(Iterator(prev)));
-				return Result();
+				EraseAfter(Iterator(prev));
+				return;
 			}
 
 			prev = curr;
 			curr = curr->next;
-		}
-
-		return Result();
+		}		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void List<T, Allocator>::AppendBack(const List& list)
@@ -419,7 +426,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "List is empty");
+			BLAZE_ENGINE_CORE_FATAL("List is empty");
 #endif
 		return first->value;
 	}
@@ -428,7 +435,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "List is empty");
+			BLAZE_ENGINE_CORE_FATAL("List is empty");
 #endif
 		return first->value;
 	}
@@ -437,7 +444,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "List is empty");
+			BLAZE_ENGINE_CORE_FATAL("List is empty");
 #endif
 		return last->value;
 	}
@@ -446,7 +453,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "List is empty");
+			BLAZE_ENGINE_CORE_FATAL("List is empty");
 #endif
 		return last->value;
 	}

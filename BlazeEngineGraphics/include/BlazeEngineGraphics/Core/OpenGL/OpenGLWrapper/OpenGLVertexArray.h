@@ -23,8 +23,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 		void EnableVertexAttribute(uint index);
 		void DisableVertexAttribute(uint index);
 
-		void SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset);
-		void SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset);
+		void SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uintMem stride, uintMem offset);
+		void SetVertexAttributeFormat(uint index, VertexAttributeType type, uintMem count, bool normalised, uintMem offset);
 		void SetVertexAttributeDivisor(uint index, uint divisor);
 
 		void Swap(VertexArray& other);

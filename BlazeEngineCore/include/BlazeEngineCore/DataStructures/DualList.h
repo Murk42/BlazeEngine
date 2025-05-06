@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {
@@ -128,18 +130,18 @@ namespace Blaze
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddFront(Args&& ... args);
 		
-		Result Erase(const Iterator& it);
+		void Erase(const Iterator& it);
 		template<typename C> requires std::invocable<C, const T&>&& std::same_as<std::invoke_result_t<C, const T&>, bool>
-		Result EraseAll(const C& function);
+		void EraseAll(const C& function);
 		template<typename C> requires std::invocable<C, const T&>&& std::same_as<std::invoke_result_t<C, const T&>, bool>
-		Result EraseOne(const C& function);
-		Result EraseFirst();
-		Result EraseLast();
+		void EraseOne(const C& function);
+		void EraseFirst();
+		void EraseLast();
 
-		Result MoveBefore(const ConstIterator& iterator, const ConstIterator& relative);
-		Result MoveAfter(const ConstIterator& iterator, const ConstIterator& relative);
-		Result MoveFront(const ConstIterator& iterator);
-		Result MoveBack(const ConstIterator& iterator);
+		void MoveBefore(const ConstIterator& iterator, const ConstIterator& relative);
+		void MoveAfter(const ConstIterator& iterator, const ConstIterator& relative);
+		void MoveFront(const ConstIterator& iterator);
+		void MoveBack(const ConstIterator& iterator);
 
 		void AppendBack(const DualList& list);
 		void AppendBack(DualList&& list);

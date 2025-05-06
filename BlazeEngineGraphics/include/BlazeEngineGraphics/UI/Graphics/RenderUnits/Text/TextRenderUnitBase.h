@@ -1,6 +1,6 @@
 #pragma once
 #include "BlazeEngineGraphics/RenderScene/RenderUnit.h"
-#include "BlazeEngineGraphics/UI/Core/UINode.h"
+#include "BlazeEngineGraphics/UI/Core/Node.h"
 
 namespace Blaze::UI
 {

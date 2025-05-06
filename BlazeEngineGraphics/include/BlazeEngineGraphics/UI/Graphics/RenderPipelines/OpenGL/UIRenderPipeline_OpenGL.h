@@ -2,7 +2,7 @@
 #include "BlazeEngineGraphics/Renderers/OpenGL/ColoredCharacterRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
 
-#include "BlazeEngineGraphics/UI/Core/UIScreen.h"
+#include "BlazeEngineGraphics/UI/Core/Screen.h"
 
 #include "BlazeEngineGraphics/RenderScene/RenderUnit.h"
 
@@ -47,8 +47,8 @@ namespace Blaze::Graphics::OpenGL
 			
 		void RecreateRenderQueue();
 		
-		void OnEvent(UI::NodeTreeChangedEvent event) override;
-		void OnEvent(UI::ScreenDestructionEvent event) override;
+		void OnEvent(const UI::NodeTreeChangedEvent& event) override;
+		void OnEvent(const UI::ScreenDestructionEvent& event) override;
 		
 		friend class GlobalRenderGroupStream;
 		friend class UIBestRenderQueue;

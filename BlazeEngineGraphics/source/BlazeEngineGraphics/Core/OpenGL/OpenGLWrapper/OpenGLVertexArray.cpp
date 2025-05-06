@@ -41,7 +41,7 @@ namespace Blaze::Graphics::OpenGLWrapper
         glDisableVertexArrayAttrib(id, index);        
     }
 
-    void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uint stride, uint offset)
+    void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uintMem stride, uintMem offset)
     {
         if (buffer != nullptr)
             glVertexArrayVertexBuffer(id, index, buffer->GetHandle(), static_cast<GLintptr>(offset), static_cast<GLsizei>(stride));
@@ -49,7 +49,7 @@ namespace Blaze::Graphics::OpenGLWrapper
             glVertexArrayVertexBuffer(id, index, 0, offset, stride);
     }
 
-    void VertexArray::SetVertexAttributeFormat(uint index, VertexAttributeType type, uint count, bool normalised, uint offset)
+    void VertexArray::SetVertexAttributeFormat(uint index, VertexAttributeType type, uintMem count, bool normalised, uintMem offset)
     {
         Result result;
         auto attributeType = OpenGLVertexAttributeType(type, result);

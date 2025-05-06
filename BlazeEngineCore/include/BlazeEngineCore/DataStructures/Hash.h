@@ -62,5 +62,5 @@ namespace Blaze
 	concept HasherType = IsHasher<T>;
 
 	template<typename Hasher, typename Type>
-	concept CanHashType = IsHasher<Hasher> && std::same_as<Type, typename Hasher::template Type>;
+	concept HasherOf = IsHasher<Hasher> && std::same_as<Type, typename Hasher::template Type>;
 }

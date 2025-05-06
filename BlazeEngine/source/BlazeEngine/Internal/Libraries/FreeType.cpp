@@ -28,9 +28,9 @@ namespace Blaze
 		Timing timing{ "FreeType initialization" };	
 
 		if (auto error = FT_Init_FreeType(&freeTypeLibrary))
-			Debug::Logger::LogFatal("Blaze Engine", "Failed to initialize the FreeType libary. FT_Error_String returned \"" + GetFTError(error) + "\"");
+			BLAZE_ENGINE_CORE_FATAL("Failed to initialize the FreeType libary. FT_Error_String returned \"" + GetFTError(error) + "\"");
 		
-		Debug::Logger::LogInfo("Blaze Engine", "Successfully initialized FreeType " STRINGIZE(FREETYPE_MAJOR) "." STRINGIZE(FREETYPE_MINOR) "." STRINGIZE(FREETYPE_PATCH));
+		BLAZE_ENGINE_CORE_INFO("Successfully initialized FreeType " STRINGIZE(FREETYPE_MAJOR) "." STRINGIZE(FREETYPE_MINOR) "." STRINGIZE(FREETYPE_PATCH));
 
 		return timing;
 	}

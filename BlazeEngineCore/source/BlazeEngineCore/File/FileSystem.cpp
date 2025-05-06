@@ -9,49 +9,49 @@ namespace Blaze
         {
             return Path(std::filesystem::current_path());
         }
-        Result CreateDirectory(const Path& path)
+        void CreateDirectory(const Path& path)
         {   
             std::error_code ec;                  
             std::filesystem::create_directory(path.GetUnderlyingObject(), ec);
             if (ec)
             {
                 auto message = ec.message();
-                return BLAZE_ERROR_RESULT("Blaze Engine", "std::filesystem::create_directory given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::create_directory given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                return;
             }
-            return Result();
         }
-        Result CreateDirectoryRecursive(const Path& path)
+        void CreateDirectoryRecursive(const Path& path)
         {
             std::error_code ec;
             std::filesystem::create_directories(path.GetUnderlyingObject(), ec);
             if (ec)
             {
                 auto message = ec.message();
-                return BLAZE_ERROR_RESULT("Blaze Engine", "std::filesystem::create_directory given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::create_directory given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                return;
             }
-            return Result();
         }
-        Result DeleteFile(const Path& path)
+        void DeleteFile(const Path& path)
         {
             std::error_code ec;
             std::filesystem::remove(path.GetUnderlyingObject(), ec);
             if (ec)
             {
                 auto message = ec.message();
-                return BLAZE_ERROR_RESULT("Blaze Engine", "std::filesystem::remove given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
-            }
-            return Result();
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::remove given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                return;
+            }            
         }
-        Result ResizeFile(const Path& path, uintMem newSize)
+        void ResizeFile(const Path& path, uintMem newSize)
         {
             std::error_code ec;
             std::filesystem::resize_file(path.GetUnderlyingObject(), newSize, ec);
             if (ec)
             {
                 auto message = ec.message();
-                return BLAZE_ERROR_RESULT("Blaze Engine", "std::filesystem::resize_file given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
-            }
-            return Result();
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::resize_file given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                return;
+            }            
         }
         uintMem FileSize(const Path& path)
         {
@@ -60,45 +60,45 @@ namespace Blaze
             if (ec)
             {
                 auto message = ec.message();
-                Debug::Logger::LogError("Blaze Engine", "std::filesystem::file_size given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::file_size given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
                 return 0;
             }
             return size;
         }        
 
-        Result DeleteDirectory(const Path& path)
+        void DeleteDirectory(const Path& path)
         {
             std::error_code ec;
             std::filesystem::remove_all(path.GetUnderlyingObject(), ec);
             if (ec)
             {
                 auto message = ec.message();
-                return BLAZE_ERROR_RESULT("Blaze Engine", "std::filesystem::remove_all given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
-            }
-            return Result();
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::remove_all given an path \"" + path.ToString() + "\" returned a error: \"" + StringView(message.data(), message.size()) + "\"");
+                return;
+            }            
         }   
         
-        Result CopyContents(const Path& dst, const Path& src)
+        void CopyContents(const Path& dst, const Path& src)
         {
             std::error_code ec;            
             std::filesystem::copy_file(src.GetUnderlyingObject(), dst.GetUnderlyingObject(), ec);
             if (ec)
             {
                 auto message = ec.message();
-                return BLAZE_ERROR_RESULT("Blaze Engine", "std::filesystem::copy_file given path \"" + src.ToString() + "\" as source and \"" + dst.ToString() + "\" as destination returned a error : \"" + StringView(message.data(), message.size()) + "\"");
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::copy_file given path \"" + src.ToString() + "\" as source and \"" + dst.ToString() + "\" as destination returned a error : \"" + StringView(message.data(), message.size()) + "\"");
+                return;
             }
-            return Result();
         }
-        Result Copy(const Path& dst, const Path& src, CopyFlags flags)
+        void Copy(const Path& dst, const Path& src, CopyFlags flags)
         {
             std::error_code ec;
             std::filesystem::copy(src.GetUnderlyingObject(), dst.GetUnderlyingObject(), ec);
             if (ec)
             {
                 auto message = ec.message();
-                return BLAZE_ERROR_RESULT("Blaze Engine", "std::filesystem::copy given path \"" + src.ToString() + "\" as source and \"" + dst.ToString() + "\" as destination returned a error : \"" + StringView(message.data(), message.size()) + "\"");
-            }
-            return Result();
+                BLAZE_ENGINE_CORE_ERROR("std::filesystem::copy given path \"" + src.ToString() + "\" as source and \"" + dst.ToString() + "\" as destination returned a error : \"" + StringView(message.data(), message.size()) + "\"");
+                return;
+            }            
         }
         TimePoint GetLastWriteTime(const Path& path)
         {
@@ -107,21 +107,22 @@ namespace Blaze
             if (ec)
             {
                 auto message = ec.message();
-                BLAZE_ERROR_LOG("Blaze Engine", "std::filesystem::last_write_time given path \"" + path.ToString() + "\" returned a error : \"" + StringView(message.data(), message.size()) + "\"");
+                Debug::Log(Debug::LogType::Error, "Blaze Engine", "std::filesystem::last_write_time given path \"" + path.ToString() + "\" returned a error : \"" + StringView(message.data(), message.size()) + "\"");
             }
-            double seconds = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch()).count() * 10e-9;
+                
+            double seconds = (tp.time_since_epoch()).count() * 1e-8;            
 
-            return TimePoint() + TimeInterval().SetSeconds(seconds);
+            return TimePoint() + TimeInterval::FromSeconds(seconds);;
         }
         void SetLastWriteTime(const Path& path, const TimePoint& timePoint)
         {
             std::error_code ec;
-            std::chrono::time_point<std::chrono::file_clock> clock{ std::chrono::microseconds{ (uint)((timePoint - TimePoint()).ToSeconds() * 10e6) } };
+            std::chrono::time_point<std::chrono::file_clock> clock{ std::chrono::microseconds( int64((timePoint - TimePoint()).ToSeconds() * 1e6)) };
             std::filesystem::last_write_time(path.GetUnderlyingObject(), clock, ec);
             if (ec)
             {
                 auto message = ec.message();
-                BLAZE_ERROR_LOG("Blaze Engine", "std::filesystem::last_write_time given path \"" + path.ToString() + "\" returned a error : \"" + StringView(message.data(), message.size()) + "\"");
+                Debug::Log(Debug::LogType::Error, "Blaze Engine", "std::filesystem::last_write_time given path \"" + path.ToString() + "\" returned a error : \"" + StringView(message.data(), message.size()) + "\"");
             }            
         }
     }

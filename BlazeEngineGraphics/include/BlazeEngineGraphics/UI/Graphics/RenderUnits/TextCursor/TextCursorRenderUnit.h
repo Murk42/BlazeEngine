@@ -13,6 +13,7 @@ namespace Blaze::UI
 		TextRenderUnitBase& textRenderUnit;
 
 		TextCursorRenderUnit(TextRenderUnitBase& textRenderUnit);
+		~TextCursorRenderUnit();
 
 		void BeginStream() override;
 		void* Advance() override;
@@ -56,6 +57,6 @@ namespace Blaze::UI
 		bool renderDataDirty : 1;
 
 		void ValidateCursorPos();
-		void OnEvent(TextRenderUnitBase::RenderDataUpdatedEvent event);
+		void OnEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event);
 	};
 }

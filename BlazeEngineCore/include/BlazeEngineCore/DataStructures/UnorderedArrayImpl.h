@@ -38,7 +38,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Incrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
 #endif
 
 		++ptr;
@@ -56,7 +56,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Decrementing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
 #endif
 
 		--ptr;
@@ -74,7 +74,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Adding to a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Adding to a null iterator");
 #endif		
 		return UnorderedArrayIterator(ptr + offset);
 	}
@@ -83,7 +83,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Subtracting from a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Subtracting from a null iterator");
 #endif		
 		return UnorderedArrayIterator(ptr - offset);
 	}
@@ -92,7 +92,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Adding to a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Adding to a null iterator");
 #endif		
 		ptr += offset;
 
@@ -103,7 +103,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Subtracting from a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Subtracting from a null iterator");
 #endif		
 		ptr -= offset;
 
@@ -114,7 +114,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
 		return *ptr;
@@ -124,7 +124,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			Debug::Logger::LogFatal("Blaze Engine", "Dereferencing a null iterator");
+			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
 #endif
 
 		return ptr;
@@ -258,7 +258,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Clearing an array while some iterators are referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Clearing an array while some iterators are referencing it");
 #endif
 		std::destroy_n(ptr, count);
 		allocator.Free(ptr);
@@ -282,7 +282,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an unordered array while some iterators are referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Changing an unordered array while some iterators are referencing it");
 #endif
 
 		if (auto newPtr = ReallocateUnsafe(count + 1))
@@ -312,12 +312,12 @@ namespace Blaze
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Changing an array while some iterators are referencing it");
 #endif
 
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Trying to erase an element outside the array");
+			BLAZE_ENGINE_CORE_FATAL("Trying to erase an element outside the array");
 #endif
 
 		if (auto newPtr = ReallocateUnsafe(count - 1))
@@ -345,7 +345,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (it.IsNull())
-			Debug::Logger::LogFatal("Blaze Engine", "Iterator is null");
+			BLAZE_ENGINE_CORE_FATAL("Iterator is null");
 #endif
 		EraseAt(it.ptr - ptr);
 	}
@@ -354,7 +354,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Changing an array while some iterators are referencing it");
 #endif
 
 		if (auto newPtr = ReallocateUnsafe(other.count + other.count))
@@ -377,7 +377,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Changing an array while some iterators are referencing it");
 #endif
 
 		if (auto newPtr = ReallocateUnsafe(other.count + other.count))
@@ -408,7 +408,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		if (iteratorCount > 0)
-			Debug::Logger::LogWarning("Blaze Engine", "Changing an array while some iterators are referencing it");
+			BLAZE_ENGINE_CORE_WARNING("Changing an array while some iterators are referencing it");
 #endif
 		auto newPtr = ReallocateUnsafe(newCount);
 
@@ -454,7 +454,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (i >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Invalid index");
+			BLAZE_ENGINE_CORE_FATAL("Invalid index");
 #endif
 		return ptr[i];
 	}
@@ -463,7 +463,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (i >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Invalid index");
+			BLAZE_ENGINE_CORE_FATAL("Invalid index");
 #endif
 		return ptr[i];
 	}
@@ -482,7 +482,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "UnorderedArray is empty");
+			BLAZE_ENGINE_CORE_FATAL("UnorderedArray is empty");
 #endif
 
 		return ptr[0];
@@ -492,7 +492,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "UnorderedArray is empty");
+			BLAZE_ENGINE_CORE_FATAL("UnorderedArray is empty");
 #endif
 		return ptr[0];
 	}
@@ -501,7 +501,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "UnorderedArray is empty");
+			BLAZE_ENGINE_CORE_FATAL("UnorderedArray is empty");
 #endif
 		return ptr[count - 1];
 	}
@@ -510,7 +510,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (count == 0)
-			Debug::Logger::LogFatal("Blaze Engine", "UnorderedArray is empty");
+			BLAZE_ENGINE_CORE_FATAL("UnorderedArray is empty");
 #endif
 		return ptr[count - 1];
 	}
@@ -519,7 +519,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Index out of range");
+			BLAZE_ENGINE_CORE_FATAL("Index out of range");
 #endif		
 		return Iterator(ptr + index);
 	}
@@ -528,7 +528,7 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index >= count)
-			Debug::Logger::LogFatal("Blaze Engine", "Index out of range");
+			BLAZE_ENGINE_CORE_FATAL("Index out of range");
 #endif		
 		return ConstIterator(ptr + index);
 	}

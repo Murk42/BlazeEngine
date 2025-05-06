@@ -9,11 +9,11 @@ public:
 	CameraController();
 	~CameraController();
 
-	void SetWindow(WindowBase* window);
+	void SetWindow(Window* window);
 
 	Mat4f GetViewMatrix() const;	
 private:
-	WindowBase* window;
+	Window* window;
 
 	Vec2f angles;
 	Quatf rotation;

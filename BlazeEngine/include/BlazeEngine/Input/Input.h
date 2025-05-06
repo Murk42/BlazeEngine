@@ -1,33 +1,21 @@
 #pragma once
-#include "BlazeEngine/Input/Key.h"
-#include "BlazeEngine/Input/InputEvents.h"
-#include "BlazeEngine/Event/EventDispatcher.h"
+#include "BlazeEngineCore/Event/EventDispatcher.h"
 
 namespace Blaze
 {		
 	namespace Input
 	{
-		struct InputEventSystem
-		{			
-			EventDispatcher<Events::WindowResizedEvent    > windowResizedDispatcher;
-			EventDispatcher<Events::WindowMovedEvent      > windowMovedDispatcher;
-			EventDispatcher<Events::WindowMinimizedEvent  > windowMinimizedDispatcher;
-			EventDispatcher<Events::WindowMaximizedEvent  > windowMaximizedDispatcher;
-			EventDispatcher<Events::WindowFocusGainedEvent> windowFocusGainedDispatcher;
-			EventDispatcher<Events::WindowFocusLostEvent  > windowFocusLostDispatcher;
-			EventDispatcher<Events::WindowCloseEvent      > windowCloseDispatcher;
-			EventDispatcher<Events::WindowMouseEnterEvent > windowMouseEnterDispatcher;
-			EventDispatcher<Events::WindowMouseLeaveEvent > windowMouseLeaveDispatcher;
-			EventDispatcher<Events::InputPreUpdateEvent   > inputPreUpdateDispatcher;
-			EventDispatcher<Events::InputPostUpdateEvent   > inputPostUpdateDispatcher;
-		};		
+		struct InputPreUpdateEvent {};
+		struct InputPostUpdateEvent {};
 
-		BLAZE_API InputEventSystem& GetInputEventSystem();
+		BLAZE_API EventDispatcher<InputPreUpdateEvent>& GetInputPreUpdateEventDispatcher();
+		BLAZE_API EventDispatcher<InputPostUpdateEvent>& GetInputPostUpdateEventDispatcher();
 
 		BLAZE_API void Update();				
 
-		BLAZE_API Vec2i GetDesktopMousePos();
-		BLAZE_API Vec2i GetDesktopMouseMovement();
+		//Move to mouse namespace ?
+		BLAZE_API Vec2f GetLastUpdateDesktopMousePos();
+		BLAZE_API Vec2f GetLastUpdateMouseMovement();
 
 		enum class CursorType
 		{
@@ -44,13 +32,15 @@ namespace Blaze
 			Hand,
 			CursorCount
 		};
-
+		
 		BLAZE_API void SetCursorType(CursorType type);
-		BLAZE_API void ShowCursor(bool show);		
-		BLAZE_API void SetMouseRelativeMode(bool relativeMode);
+		BLAZE_API void ShowCursor(bool show);	
+		//To here
 
+		//Move to keyboard namespace ?
 		BLAZE_API bool HasClipboardText();
 		BLAZE_API StringUTF8 GetClipboardText();
-		BLAZE_API void SetClipboardText(StringViewUTF8 text);
+		BLAZE_API void SetClipboardText(StringViewUTF8 text);		
+		//To here
 	}
 }

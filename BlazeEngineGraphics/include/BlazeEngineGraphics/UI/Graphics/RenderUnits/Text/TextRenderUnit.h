@@ -55,7 +55,8 @@ namespace Blaze::UI
 		private EventHandler<Node::FinalTransformUpdatedEvent>
 	{		
 	public:										
-		TextRenderUnit(Node* node);		
+		TextRenderUnit(Node* node);	
+		~TextRenderUnit();
 			
 		void BeginStream() override;
 		void* Advance() override;		
@@ -123,7 +124,7 @@ namespace Blaze::UI
 		static float GetLinesVerticalOffset(TextLineVerticalAlign align, float textHeight, float boundingHeight);
 		static float GetLineHorizontalOffset(TextLineHorizontalAlign align, float lineWidth, float boundingWidth);
 		
-		void OnEvent(Node::TransformUpdatedEvent event) override;
-		void OnEvent(Node::FinalTransformUpdatedEvent event) override;		
+		void OnEvent(const Node::TransformUpdatedEvent& event) override;
+		void OnEvent(const Node::FinalTransformUpdatedEvent& event) override;		
 	};
 }

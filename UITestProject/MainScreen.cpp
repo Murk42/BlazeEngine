@@ -3,30 +3,11 @@
 
 extern Array<Font> fonts;
 MainScreen::MainScreen()	
-	: Screen(nullptr)
-{	
-	titleText.SetParent(this);
-	titleText.SetTransform({
-		.pos = Vec2f(0, -5),
-		.parentPivot = Vec2f(0.5f, 1.0f),
-		.pivot = Vec2f(0.5f, 1.0f),
-		});
-	titleText.SetFont(fonts[0]);
-	titleText.SetFontHeight(32);
-	titleText.SetText("UI Test Project");
-	titleText.SetTextCharactersColor({
-		ColorRGBAf(0xff0000ff), ColorRGBAf(0xffa500ff), ColorRGBAf(0x00000000),
-		ColorRGBAf(0xffff00ff), ColorRGBAf(0x008000ff), ColorRGBAf(0x0000ffff), ColorRGBAf(0x4b0082ff), ColorRGBAf(0x00000000),
-		ColorRGBAf(0xee82eeff), ColorRGBAf(0xff0000ff), ColorRGBAf(0xffa500ff), ColorRGBAf(0xffff00ff), ColorRGBAf(0x008000ff), ColorRGBAf(0x0000ffff), ColorRGBAf(0xee82eeff)
-		});
-	titleText.SetLayoutOptions({		
-		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::ResizeToFit,
-		.verticallyUnderfittedOption = UI::TextVerticallyUnderfittedOptions::ResizeToFit,
-		});
-
+	: Screen(nullptr), replaceTextMenu(editableText)
+{
 	explanationPanel.SetParent(this);
 	explanationPanel.SetTransform({
-		.pos = Vec2f(5, -40),
+		.pos = Vec2f(5, -5),
 		.parentPivot = Vec2f(0.0f, 1.0f),
 		.pivot = Vec2f(0.0f, 1.0f),
 		.size = Vec2f(500, 400),
@@ -103,11 +84,9 @@ MainScreen::MainScreen()
 	clearTextButton.textRenderUnit.SetFont(fonts[0]);
 	clearTextButton.textRenderUnit.SetFontHeight(20);	
 	clearTextButton.textRenderUnit.SetText("Clear");
-
-	clearTextButtonPressedEventHandler.SetFunction([&](auto event) {
+	clearTextButton.pressedEventCallback = [&](auto event) {
 		editableText.SetText("");
-		});
-	clearTextButton.pressedEventDispatcher.AddHandler(clearTextButtonPressedEventHandler);
+		};
 
 	replaceTextButton.SetParent(&editableText);
 	replaceTextButton.SetTransform({
@@ -119,18 +98,25 @@ MainScreen::MainScreen()
 	replaceTextButton.textRenderUnit.SetFont(fonts[0]);
 	replaceTextButton.textRenderUnit.SetFontHeight(20);
 	replaceTextButton.textRenderUnit.SetText("Replace");
-
-	replaceTextButtonPressedEventHandler.SetFunction([&](auto event) {
+	replaceTextButton.pressedEventCallback = [&](auto event) {
 		replaceTextMenu.Enable();
-		});
-	replaceTextButton.pressedEventDispatcher.AddHandler(replaceTextButtonPressedEventHandler);
-
-	replaceTextMenu.SetParent(this);	
+		};	
+	
+	replaceTextMenu.SetParent(this);
 	replaceTextMenu.Disable();
+
 }
 
-ReplaceTextMenu::ReplaceTextMenu()
+ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
+	: target(target)
 {
+
+	backgroundPanel.SetParent(this);
+	backgroundPanel.SetTransform({
+		.size = Vec2f(10000)
+		});
+	backgroundPanel.SetFillColor(0x40404088);
+
 	mainPanel.SetParent(this);
 	mainPanel.SetTransform({
 		.pos = Vec2f(0, 0),
@@ -198,12 +184,16 @@ ReplaceTextMenu::ReplaceTextMenu()
 		.size = Vec2f(80, 35),
 		});
 	replaceButton.textRenderUnit.SetText("Replace");
-	replaceButton.textRenderUnit.SetFontHeight(20);
+	replaceButton.textRenderUnit.SetFontHeight(12);
 	replaceButton.textRenderUnit.SetFont(fonts[0]);
 	replaceButton.textRenderUnit.SetLayoutOptions({
 		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Center,
 		.lineVerticalAlign = UI::TextLineVerticalAlign::Center,
 		});
+	replaceButton.pressedEventCallback = [&](auto event) {		
+
+		Disable();
+		};
 
 	cancelButton.SetParent(&mainPanel);
 	cancelButton.SetTransform({
@@ -213,16 +203,15 @@ ReplaceTextMenu::ReplaceTextMenu()
 		.size = Vec2f(80, 35),
 		});
 	cancelButton.textRenderUnit.SetText("Cancel");
-	cancelButton.textRenderUnit.SetFontHeight(20);
+	cancelButton.textRenderUnit.SetFontHeight(12);
 	cancelButton.textRenderUnit.SetFont(fonts[0]);
 	cancelButton.textRenderUnit.SetLayoutOptions({
 		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Center,
 		.lineVerticalAlign = UI::TextLineVerticalAlign::Center,
 		});
-	cancelButton.pressedEventDispatcher.AddHandler(cancelButtonPressed);
-	cancelButtonPressed.SetFunction([&](auto event) {
+	cancelButton.pressedEventCallback = [&](auto event) {
 		Disable();
-		});
+		};	
 }
 
 ReplaceTextMenu::~ReplaceTextMenu()

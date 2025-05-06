@@ -29,23 +29,21 @@ namespace Blaze
 	{
 		events.AddBack(event);
 	}
-	Result MemoryListener::StartListening()
+	void MemoryListener::StartListening()
 	{
 		if (listening)
-			return BLAZE_WARNING_RESULT("Blaze Engine", "The moemory listener is already listening");
+			return;
 
 		Memory::AddListener(this);
-		listening = true;
-		return { };
+		listening = true;		
 	}
-	Result MemoryListener::StopListening()
+	void MemoryListener::StopListening()
 	{
 		if (!listening)
-			return BLAZE_WARNING_RESULT("Blaze Engine", "The moemory listener isnt listening anymore");
+			return;
 
 		Memory::RemoveListener(this);
 		listening = false;
-		return { };
 	}
 
 	void MemoryListener::ClearEvents()

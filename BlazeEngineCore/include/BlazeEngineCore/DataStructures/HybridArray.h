@@ -402,7 +402,7 @@ namespace Blaze
 		uint index = ptr - bucket->elements;
 
 		if (GetBit(bucket->state, index) == false)
-			Debug::Logger::LogError("Blaze Engine", "Trying to free a element in a HybridArray that wasn't allocated yet");
+			BLAZE_ENGINE_CORE_ERROR("Trying to free a element in a HybridArray that wasn't allocated yet");
 
 		FlipBit(bucket->state, index);
 
