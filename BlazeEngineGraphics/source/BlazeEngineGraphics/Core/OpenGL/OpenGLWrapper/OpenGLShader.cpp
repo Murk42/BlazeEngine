@@ -1,23 +1,58 @@
 #include "pch.h"
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/File/File.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include <GL/glew.h>
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
+	static String GetCompilationLog(uint id)
+	{
+		int lenght = 0;
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
+
+		String message(lenght);
+		glGetShaderInfoLog(id, lenght, &lenght, message.Ptr());
+
+		return message;
+	}
+
+	static bool CompileShader(uint id)
+	{
+		glCompileShader(id);
+
+		int compileStatus = 0;
+		glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);
+
+		if (compileStatus == GL_FALSE)
+		{
+			BLAZE_ENGINE_GRAPHICS_ERROR("Shader unsuccessfully compiled. The compilation log is: {}", GetCompilationLog(id));
+			return false;
+		}
+		else
+			return true;
+	}
+
 	Shader::Shader(ShaderType type)
-		: id(0), state(ShaderState::Invalid)
+		: id(0)
 	{
 		id = glCreateShader((uint)type);		
 	}
 	Shader::Shader(Shader&& s) noexcept
-		: id(s.id), state(s.state)
+		: id(s.id)
 	{
 		s.id = 0;
-		s.state = ShaderState::Invalid;
 	}
 	Shader::Shader(ShaderType type, const Path& path)
 		: Shader(type)
 	{
 		Load(path);
+	}
+	Shader::Shader(ShaderType type, StringView source)
+		: Shader(type)
+	{
+		Load(source);
 	}
 	Shader::~Shader()
 	{
@@ -25,7 +60,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 			glDeleteShader(id);
 	}
 
-	void Shader::Load(const Path& path)
+	bool Shader::Load(const Path& path)
 	{
 		File file;
 
@@ -33,45 +68,24 @@ namespace Blaze::Graphics::OpenGLWrapper
 		
 		String source;
 		source.Resize(file.GetSize());
-		size_t read = file.Read(source.Ptr(), source.Count());
-
-		ShaderSource(source);			
-		CompileShader();			
-	}
-
-	void Shader::ShaderSource(StringView source)
-	{
-		const int length = (int)source.Count();
-		const char* ptr = source.Ptr();
-		glShaderSource(id, 1, &ptr, &length);		
-	}
-
-	void Shader::CompileShader()
-	{
-		glCompileShader(id);		
-
-		int compileStatus = 0;
-		glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);		
-
-		if (compileStatus == GL_FALSE)
+		if (file.Read(source.Ptr(), source.Count()) != source.Count())
 		{
-			state = ShaderState::UnsuccesfullyCompiled;
-			BLAZE_ENGINE_GRAPHICS_WARNING("Shader unsuccessfully compiled. The compilation log is: \n" + GetCompilationLog());
+			BLAZE_ENGINE_GRAPHICS_ERROR("Field to read file");
+			return false;
 		}
-		else
-			state = ShaderState::SuccesfullyCompiled;
-	}
 
-	String Shader::GetCompilationLog()
+		return Load(source);
+	}
+	bool Shader::Load(StringView source)
 	{
-		int lenght = 0;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
+		const char* ptr = source.Ptr();
+		int length = static_cast<int>(source.Count());
 
-		String message(lenght);
-		glGetShaderInfoLog(id, lenght, &lenght, message.Ptr());		
+		glShaderSource(id, 1, &ptr, &length);
 
-		return message;
+		return CompileShader(id);
 	}
+
 
 	Shader& Shader::operator=(Shader&& s) noexcept
 	{
@@ -80,9 +94,6 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		id = s.id;
 		s.id = 0;
-
-		state = s.state;
-		s.state = ShaderState::Invalid;
 
 		return *this;
 	}

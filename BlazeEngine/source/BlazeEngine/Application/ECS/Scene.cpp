@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "BlazeEngineCore/Memory/MemoryManager.h"
 #include "BlazeEngine/Application/ECS/Scene.h"
 
 #include "EntityCreationData.h"

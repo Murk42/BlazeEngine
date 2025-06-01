@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture1D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
+#include <GL/glew.h>
 
 namespace Blaze::Graphics::OpenGLWrapper
 {

@@ -1,8 +1,11 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/File/Stream/Stream.h"
+#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze
 {
-	class ConsoleOutputStream : public WriteStream
+	class BLAZE_API ConsoleOutputStream : public WriteStream
 	{
 		WriteStream* linkStream;
 	public:

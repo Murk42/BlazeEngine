@@ -1,5 +1,6 @@
 #pragma once
-#include "StringView.h"
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {
@@ -162,33 +163,61 @@ namespace Blaze
 	{
 	}	
 	constexpr StringView::StringView(const char* ptr, uintMem count)
-		: count(count)
+		: ptr(nullptr), count(0)
 	{
 		if (count == 0)
-			this->ptr = nullptr;
+			return;
+
+		if (ptr[count - 1] == '\0')
+			if (count == 1)
+				return;
+			else
+			{
+				this->ptr = ptr;
+				this->count = count - 1;
+			}
 		else
+		{
 			this->ptr = ptr;
+			this->count = count;
+		}
 	}
 	constexpr StringView::StringView(const char* begin, const char* end)
-		: count(end - begin)
+		: ptr(nullptr), count(0)
 	{
-		if (count == 0)
-			this->ptr = nullptr; //When ptr is "" its not nullptr
-		else
-			this->ptr = begin;
+		if (begin != end && begin != nullptr && end != nullptr)
+		{
+			count = end - begin;			
+			if (end[-1] == '\0')
+				--count;
+
+			if (count == 0)
+				return;
+
+			ptr = begin;
+		}
 	}
 	inline constexpr StringView::StringView(StringViewIterator begin, StringViewIterator end)
-		: count(end - begin)
+		: StringView(begin.Ptr(), end.Ptr())
 	{
-		if (count == 0)
-			this->ptr = nullptr; //When ptr is "" its not nullptr
-		else
-			this->ptr = begin.ptr;
+		
 	}
 	template<size_t C>
 	constexpr StringView::StringView(const char(&arr)[C])
-		: StringView(arr, C - 1)
+		: ptr(nullptr), count(0)
 	{
+		if constexpr (C != 0)
+		{
+			if (arr[C - 1] == '\0')
+				if (C == 1)
+					return;
+				else				
+					count = C - 1;				
+			else			
+				count = C;			
+
+			ptr = arr;
+		}
 	}	
 	inline uint32 StringView::Hash() const
 	{
@@ -289,16 +318,11 @@ namespace Blaze
 	}
 	inline StringView& StringView::operator=(const String& other)
 	{
-		ptr = other.Ptr();
-		count = other.Count();
-		return *this;
+		return operator=(StringView(other));
 	}	
 	template<size_t C>
 	constexpr StringView& StringView::operator=(const char(&arr)[C])
 	{
-		ptr = arr;
-		count = C - 1;
-
-		return *this;
+		return operator=(StringView(arr));				
 	}
 }

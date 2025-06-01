@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "sail/sail.h"
 #include "SailClasses.h"
+#include "BlazeEngineCore/File/Stream/Stream.h"
 
 namespace Blaze
 {		

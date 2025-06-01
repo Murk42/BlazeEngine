@@ -1,9 +1,12 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Memory/Allocator.h"
+#include "BlazeEngineCore/DataStructures/Hash.h"
+#include <type_traits>
 
 namespace Blaze
 {
-	template<typename Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
+	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
 	class VirtualMap;
 
 	template<typename T1, typename T2>
@@ -81,7 +84,7 @@ namespace Blaze
 		template<IsConvertibleToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
 		VirtualMapIterator& operator=(const T&);
 
-		template<typename, typename, typename, AllocatorType>
+		template<HashableType, typename, typename, AllocatorType>
 		friend class ::Blaze::VirtualMap;
 
 		template<typename>
@@ -117,7 +120,7 @@ namespace Blaze
 
 		No other macros change the map behaviour
 	*/
-	template<typename Key, typename ValueBase = void, typename Hasher = ::Blaze::Hash<Key>, AllocatorType Allocator = Blaze::DefaultAllocator>
+	template<HashableType Key, typename ValueBase = void, typename Hasher = ::Blaze::Hash<Key>, AllocatorType Allocator = Blaze::DefaultAllocator>
 	class BLAZE_CORE_API VirtualMap
 	{
 	public:
@@ -284,4 +287,25 @@ namespace Blaze
 		template<typename>
 		friend class VirtualMapIterator;
 	};		
+
+	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, ValueBase, Hasher, Allocator>::Iterator begin(VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	{
+		return map.FirstIterator();
+	}
+	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, ValueBase, Hasher, Allocator>::ConstIterator begin(const VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	{
+		return map.FirstIterator();
+	}
+	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, ValueBase, Hasher, Allocator>::Iterator end(VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	{
+		return map.BehindIterator();
+	}
+	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, ValueBase, Hasher, Allocator>::ConstIterator end(const VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	{
+		return map.BehindIterator();
+	}
 }

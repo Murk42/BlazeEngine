@@ -19,7 +19,7 @@ namespace Blaze::UI::Nodes
 		inline void SetAlphaMultiplier(float alpha) { renderUnit.SetAlphaMultiplier(alpha); }
 		inline void SetImageLayout(ImageLayout layout) { renderUnit.SetImageLayout(layout); }
 
-		inline Graphics::OpenGLWrapper::Texture2D* GetTexture() const { return renderUnit.GetTexture(); }
+		inline const Graphics::OpenGLWrapper::Texture2D* GetTexture() const { return renderUnit.GetTexture(); }
 		inline Rectf GetSourceRect() const { return renderUnit.GetSourceRect(); }
 		inline ColorRGBAf GetBlendColor() const { return renderUnit.GetBlendColor(); }
 		inline float GetBlendFactor() const { return renderUnit.GetBlendFactor(); }

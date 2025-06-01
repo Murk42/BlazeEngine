@@ -27,7 +27,7 @@ namespace Blaze
 	class BLAZE_CORE_API EventDispatcher : public EventDispatcherBase<T>
 	{
 	public:
-		using EventType = T;		
+		using EventType = T;
 
 		EventDispatcher();
 		EventDispatcher(const EventDispatcher& other) = delete;
@@ -58,7 +58,9 @@ namespace Blaze
 
 		EventDispatcher& operator=(const EventDispatcher& other) = delete;
 		EventDispatcher& operator=(EventDispatcher&& other) noexcept;
-	private:		
-		Array<EventHandlerData<T>, Allocator> handlers;		
+	private:			
+		Array<EventHandlerData<T>, Allocator> handlers;
 	};	
-};
+}
+
+#include "BlazeEngineCore/Event/EventDispatcherImpl.h"

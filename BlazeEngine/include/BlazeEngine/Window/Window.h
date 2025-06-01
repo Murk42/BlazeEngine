@@ -1,9 +1,5 @@
 #pragma once
-#include <mutex>
-#include <climits>
-#include <cstdint>
 #include <BlazeEngineCore/BlazeEngineCoreDefines.h>
-#include <BlazeEngineCore/DataStructures/Rect.h>
 #include <BlazeEngineCore/DataStructures/StringUTF8.h>
 #include <BlazeEngineCore/DataStructures/StringViewUTF8.h>
 #include <BlazeEngineCore/Math/Vector.h>
@@ -13,6 +9,7 @@
 #include <BlazeEngineCore/Event/EventDispatcher.h>
 #include <BlazeEngine/Input/Keyboard.h>
 #include <BlazeEngine/Input/Mouse.h>
+#include <mutex>
 
 namespace Blaze
 {	
@@ -29,6 +26,12 @@ namespace Blaze
 	{
 		Fullscreen, Maximized, Minimized, Normal
 	};
+	enum class WindowFlashOperation
+	{
+		FlashBriefly,
+		CancelFlash,
+		FlashUntilFocused
+	};
 
 	//Popup and menu windows are handled seperatelly
 	struct WindowCreateOptions
@@ -42,7 +45,7 @@ namespace Blaze
 		bool highPixelDensity : 1        = false;
 		bool alwaysOnTop : 1             = false;
 		bool utilityWindow : 1           = false;
-		Window* parentWindow          = nullptr;
+		Window* parentWindow                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   = nullptr;
 		StringUTF8 title                 = StringUTF8();
 		Vec2i pos                        = Vec2i(INT_MAX, INT_MAX);
 		Vec2u size                       = Vec2u(960, 540);
@@ -134,7 +137,7 @@ namespace Blaze
 		Vec2u GetMaximumSize() const;
 		void SetMaximumSize(Vec2u size);
 		void SetIcon(BitmapView bitmap);
-		void Flash();
+		void Flash(WindowFlashOperation flashOperation);
 		float GetContentScale();
 
 		//Window input properties

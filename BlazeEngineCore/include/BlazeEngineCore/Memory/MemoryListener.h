@@ -1,4 +1,7 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/DataStructures/Array.h"
+#include "BlazeEngineCore/Memory/MallocAllocator.h"
 
 namespace Blaze
 {
@@ -17,7 +20,7 @@ namespace Blaze
 	class BLAZE_CORE_API MemoryListener
 	{
 	public:
-		using ContainerType = List<MemoryEvent, MallocAllocator>;
+		using ContainerType = Array<MemoryEvent, MallocAllocator>;
 	private:
 		bool listening;
 		ContainerType events;

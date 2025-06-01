@@ -2,7 +2,9 @@
 #include "BlazeEngine/Internal/Libraries/SDL.h"
 #include "BlazeEngine/Internal/BlazeEngineContext.h"
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_version.h>
 #include <SDL3/SDL_main.h>
 
 namespace Blaze 
@@ -64,7 +66,7 @@ namespace Blaze
 			BLAZE_ENGINE_CORE_FATAL("Failed to add event watcher for SDL. SDL returned error: \"" + GetSDLError() + "\"");		
 
 		int version = SDL_GetVersion();
-		BLAZE_ENGINE_CORE_INFO("Successfully initialized SDL " + StringParsing::Convert(SDL_VERSIONNUM_MAJOR(version)) + "." + StringParsing::Convert(SDL_VERSIONNUM_MINOR(version)) + "." + StringParsing::Convert(SDL_VERSIONNUM_MICRO(version)));
+		BLAZE_ENGINE_CORE_INFO("Successfully initialized SDL {}.{}.{}", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
 
 
 		return timing.GetTimingResult();

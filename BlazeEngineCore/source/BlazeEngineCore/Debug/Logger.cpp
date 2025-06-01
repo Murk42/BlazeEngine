@@ -1,5 +1,13 @@
 #include "pch.h"
 #include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/Debug/LoggerListener.h"
+#include "BlazeEngineCore/Debug/Breakpoint.h"
+#include "BlazeEngineCore/Debug/Result.h"
+#include "BlazeEngineCore/BlazeEngineCoreContext.h"
+#include "BlazeEngineCore/DataStructures/ArrayImpl.h"
+#include "BlazeEngineCore/DataStructures/ListImpl.h"
+#include "BlazeEngineCore/DataStructures/MapImpl.h"
+#include "BlazeEngineCore/DataStructures/DualListImpl.h"
 
 namespace Blaze::Debug::Logger
 {
@@ -54,14 +62,14 @@ namespace Blaze::Debug::Logger
 
 		for (auto& stream : blazeEngineCoreContext.loggerOutputStreams)
 		{
-			stream.writeStream->Write(string.Buffer(), string.BufferSize() - 1);
+			stream.writeStream->Write(string.Buffer(), string.BufferSize());
 			char endln = '\n';
 			stream.writeStream->Write(&endln, 1);
 		}
 
 		for (auto& stream : blazeEngineCoreContext.loggerOutputFiles)
 		{
-			stream.value.file.Write(string.Buffer(), string.BufferSize() - 1);
+			stream.value.file.Write(string.Buffer(), string.BufferSize());
 			char endln = '\n';
 			stream.value.file.Write(&endln, 1);
 		}
@@ -100,23 +108,28 @@ namespace Blaze::Debug::Logger
 		result.ClearSilent();
 	}
 
-	void LogDebug(StringUTF8&& source, StringUTF8&& message)
+	template<>
+	void LogDebug<>(StringUTF8&& source, StringUTF8&& message)
 	{
 		ProcessResult(Result(Log(LogType::Debug, std::move(source), std::move(message))));
 	}
-	void LogInfo(StringUTF8&& source, StringUTF8&& message)
+	template<>
+	void LogInfo<>(StringUTF8&& source, StringUTF8&& message)
 	{
 		ProcessResult(Result(Log(LogType::Info, std::move(source), std::move(message))));
 	}
-	void LogWarning(StringUTF8&& source, StringUTF8&& message)
+	template<>
+	void LogWarning<>(StringUTF8&& source, StringUTF8&& message)
 	{
 		ProcessResult(Result(Log(LogType::Warning, std::move(source), std::move(message))));
 	}
-	void LogError(StringUTF8&& source, StringUTF8&& message)
+	template<>
+	void LogError<>(StringUTF8&& source, StringUTF8&& message)
 	{
 		ProcessResult(Result(Log(LogType::Error, std::move(source), std::move(message))));
 	}
-	void LogFatal(StringUTF8&& source, StringUTF8&& message)
+	template<>
+	void LogFatal<>(StringUTF8&& source, StringUTF8&& message)
 	{
 		ProcessResult(Result(Log(LogType::Fatal, std::move(source), std::move(message))));
 	}

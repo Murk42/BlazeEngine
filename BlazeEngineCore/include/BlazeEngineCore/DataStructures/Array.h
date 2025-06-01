@@ -1,8 +1,9 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 #include "BlazeEngineCore/Types/TypeTraits.h"
-#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineCore/Memory/Allocator.h"
+#include "BlazeEngineCore/DataStructures/ArrayIterator.h"
+#include <initializer_list>
 
 namespace Blaze
 {
@@ -20,7 +21,7 @@ namespace Blaze
 
 		No other macros change the array behaviour
 	*/
-	template<typename T, AllocatorType Allocator = Blaze::DefaultAllocator>
+	template<typename T, AllocatorType Allocator = DefaultAllocator>
 	class BLAZE_CORE_API Array
 	{						
 	public:
@@ -473,4 +474,24 @@ namespace Blaze
 		StoredType* ReallocateUnsafe(uintMem newCount);		
 	};	
 
+	template<typename T, AllocatorType Allocator>
+	auto begin(Array<T, Allocator>& arr)
+	{
+		return arr.FirstIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	auto begin(const Array<T, Allocator>& arr)
+	{
+		return arr.FirstIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	auto end(Array<T, Allocator>& arr)
+	{
+		return arr.BehindIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	auto end(const Array<T, Allocator>& arr)
+	{
+		return arr.BehindIterator();
+	}
 }

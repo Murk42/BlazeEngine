@@ -1,14 +1,10 @@
 #pragma once
-#include "BlazeEngineCore/File/Path.h"
-#include "BlazeEngineCore/File/Stream/Stream.h"
-#include "BlazeEngineCore/Debug/Result.h"
-#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/Format/Format.h"
 
 namespace Blaze
 {
-	class WriteStream;
 	class Path;
-	class StringUTF8;
+	class WriteStream;
 	class Result;
 }
 
@@ -29,9 +25,52 @@ namespace Blaze::Debug::Logger
 		  
 	BLAZE_CORE_API void ProcessResult(Result&& result);
 		  
-	BLAZE_CORE_API void LogDebug(StringUTF8&& source, StringUTF8&& message);
-	BLAZE_CORE_API void LogInfo(StringUTF8&& source, StringUTF8&& message);
-	BLAZE_CORE_API void LogWarning(StringUTF8&& source, StringUTF8&& message);
-	BLAZE_CORE_API void LogError(StringUTF8&& source, StringUTF8&& message);
-	BLAZE_CORE_API void LogFatal(StringUTF8&& source, StringUTF8&& message);
+	template<Formatable ... Args>
+	void LogDebug(StringUTF8&& source, StringUTF8&& message, const Args& ... args);
+	template<Formatable ... Args>
+	void LogInfo(StringUTF8&& source, StringUTF8&& message, const Args& ... args);
+	template<Formatable ... Args>
+	void LogWarning(StringUTF8&& source, StringUTF8&& message, const Args& ... args);
+	template<Formatable ... Args>
+	void LogError(StringUTF8&& source, StringUTF8&& message, const Args& ... args);
+	template<Formatable ... Args>
+	void LogFatal(StringUTF8&& source, StringUTF8&& message, const Args& ... args);
+
+	template<>
+	BLAZE_CORE_API void LogDebug<>(StringUTF8&& source, StringUTF8&& message);
+	template<>
+	BLAZE_CORE_API void LogInfo<>(StringUTF8&& source, StringUTF8&& message);
+	template<>
+	BLAZE_CORE_API void LogWarning<>(StringUTF8&& source, StringUTF8&& message);
+	template<>
+	BLAZE_CORE_API void LogError<>(StringUTF8&& source, StringUTF8&& message);
+	template<>
+	BLAZE_CORE_API void LogFatal<>(StringUTF8&& source, StringUTF8&& message);
+
+	template<Formatable ...Args>
+	void LogDebug(StringUTF8&& source, StringUTF8&& message, const Args& ...args)
+	{
+		LogDebug(std::move(source), FormatUTF8(message, args...));
+	}
+	template<Formatable ...Args>
+	void LogInfo(StringUTF8&& source, StringUTF8&& message, const Args& ...args)
+	{
+		LogInfo(std::move(source), FormatUTF8(message, args...));
+	}
+	template<Formatable ...Args>
+	void LogWarning(StringUTF8&& source, StringUTF8&& message, const Args& ...args)
+	{
+		LogWarning(std::move(source), FormatUTF8(message, args...));
+	}
+	template<Formatable ...Args>
+	void LogError(StringUTF8&& source, StringUTF8&& message, const Args& ...args)
+	{
+		LogError(std::move(source), FormatUTF8(message, args...));
+	}
+	template<Formatable ...Args>
+	void LogFatal(StringUTF8&& source, StringUTF8&& message, const Args& ...args)
+	{
+		LogFatal(std::move(source), FormatUTF8(message, args...));
+	}
+
 }

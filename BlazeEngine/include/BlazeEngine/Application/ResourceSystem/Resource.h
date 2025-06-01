@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze
 {

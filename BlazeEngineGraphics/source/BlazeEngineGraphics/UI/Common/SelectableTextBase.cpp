@@ -1,267 +1,185 @@
 #include "pch.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineGraphics/UI/Common/SelectableTextBase.h"
-#include "BlazeEngineGraphics/UI/Input/InputManager.h"
+#include "BlazeEngineGraphics/UI/Common/TextSelection.h"
 #include "BlazeEngine/Input/Input.h"
 
 namespace Blaze::UI
 {	
-	SelectableTextBase::SelectableTextBase(
+	SelectableTextBase::SelectableTextBase(				
 		TextRenderUnitBase& textRenderUnit,
-		TextSelectionRenderUnitBase& textSelectionRenderUnit,
-		TextCursorRenderUnitBase& textCursorRenderUnit
-		) :
-		textRenderUnit(textRenderUnit), textSelectionRenderUnit(textSelectionRenderUnit), textCursorRenderUnit(textCursorRenderUnit),
-		grabbedSelectionBegin(0), grabbedSelectionEnd(0), mouseDown(false)
-	{		
+		TextSelectionRenderUnitBase& textSelectionRenderUnit) :
+		textRenderUnit(textRenderUnit), textSelectionRenderUnit(textSelectionRenderUnit)
+	{			
+		SetMouseMotionReportPolicy(MouseMotionReportPolicy::ReportWhileSelected);
+
+		selectedStateChangedEventDispatcher.AddHandler<&SelectableTextBase::SelectedStateChangedEvent>(*this);
+		keyDownEventDispatcher.AddHandler<&SelectableTextBase::KeyDownEvent>(*this);
+		mouseMotionEventDispatcher.AddHandler<&SelectableTextBase::MouseMotionEvent>(*this);		
+		mouseButtonDownEventDispatcher.AddHandler<&SelectableTextBase::MouseButtonDownEvent>(*this);		
+	}
+	SelectableTextBase::~SelectableTextBase()
+	{
+		selectedStateChangedEventDispatcher.RemoveHandler<&SelectableTextBase::SelectedStateChangedEvent>(*this);
+		keyDownEventDispatcher.RemoveHandler<&SelectableTextBase::KeyDownEvent>(*this);
+		mouseButtonDownEventDispatcher.RemoveHandler<&SelectableTextBase::MouseButtonDownEvent>(*this);
+		mouseMotionEventDispatcher.RemoveHandler<&SelectableTextBase::MouseMotionEvent>(*this);				
 	}
 	int SelectableTextBase::HitTest(Vec2f screenPosition)
 	{
 		if (!InputNode::HitTest(screenPosition))
-			return false;
+			return 0;
 
 		Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(screenPosition);
 		uintMem lineIndex;
 
-		if (!textRenderUnit.GetLineIndexUnderPosition(localSpacePos, lineIndex))
-			return false;
-		return true;
+		if (textRenderUnit.GetLineIndexUnderPosition(localSpacePos, lineIndex))
+			return 2;
+		return 1;
 	}
-	void SelectableTextBase::OnEvent(const DeselectedEvent& event)
+	void SelectableTextBase::SelectedStateChangedEvent(const InputNode::SelectedStateChangedEvent& event)
 	{
-		textSelectionRenderUnit.ClearSelection();
+		if (!IsSelected())
+		{
+			uintMem characterCount = textSelectionRenderUnit.selection.textContainer.CharacterCount();
+			textSelectionRenderUnit.selection.Set(characterCount, characterCount);
+		}		
 	}
-	void SelectableTextBase::OnEvent(const KeyDownEvent& event)
+	void SelectableTextBase::KeyDownEvent(const InputNode::KeyDownEvent& event)
 	{
 		switch (event.key)
 		{
 		case Keyboard::Key::ESCAPE: {
-			event.inputManager.SelectNode(nullptr);
+			Unselect();
 			break;
 		}				
 		case Keyboard::Key::LEFT: {
+			if (textSelectionRenderUnit.selection.Empty() || !bool(event.modifier & Keyboard::KeyModifier::SHIFT))
+				break;
 
-			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT) && !textSelectionRenderUnit.IsSelectionEmpty())
-			{				
-				if (textCursorRenderUnit.IsCursorAtBeggining())
-					break;
+			const uintMem tail = textSelectionRenderUnit.selection.GetTail();
 
-				textCursorRenderUnit.RetreatCursor();
+			if (tail == 0)
+				break;
 
-				uintMem cursorNextCharacterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-				if (textSelectionRenderUnit.GetSelectionBegin() == cursorNextCharacterIndex + 1)
-					textSelectionRenderUnit.SetSelectionBegin(cursorNextCharacterIndex);
-				else if (textSelectionRenderUnit.GetSelectionEnd() == cursorNextCharacterIndex + 1)
-					textSelectionRenderUnit.SetSelectionEnd(cursorNextCharacterIndex);
-				else
-					Debug::Logger::LogWarning("Blaze Engine Warning", "Cursor is inside selection. An internal error.");
-			}
+			const uintMem newTail = tail - 1;			
+			textSelectionRenderUnit.selection.SetTail(newTail);			
+
 			break;
 		}
 		case Keyboard::Key::RIGHT: {
-			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT) && !textSelectionRenderUnit.IsSelectionEmpty() && !mouseDown)
-			{
-				if (textCursorRenderUnit.IsCursorAtEnd())
-					break;
+			if (textSelectionRenderUnit.selection.Empty() || !bool(event.modifier & Keyboard::KeyModifier::SHIFT))
+				break;
 
-				textCursorRenderUnit.AdvanceCursor();
+			const uintMem tail = textSelectionRenderUnit.selection.GetTail();
 
-				uint cursorNextCharacterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-				if (textSelectionRenderUnit.GetSelectionBegin() == cursorNextCharacterIndex - 1)
-					textSelectionRenderUnit.SetSelectionBegin(cursorNextCharacterIndex);
-				else if (textSelectionRenderUnit.GetSelectionEnd() == cursorNextCharacterIndex - 1)
-					textSelectionRenderUnit.SetSelectionEnd(cursorNextCharacterIndex);
-				else
-					Debug::Logger::LogWarning("Blaze Engine Warning", "Cursor is inside selection. An internal error.");
-			}
-	
+			if (tail == textSelectionRenderUnit.selection.textContainer.CharacterCount())
+				break;
+
+			const uintMem newTail = tail + 1;
+			textSelectionRenderUnit.selection.SetTail(newTail);			
+
 			break;
 		}
 		case Keyboard::Key::UP: {
-			auto& characterData = textRenderUnit.GetCharacterData();
-			uintMem characterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-			uintMem lineIndex = characterData[characterIndex].lineIndex;
+			if (textSelectionRenderUnit.selection.Empty() || !bool(event.modifier & Keyboard::KeyModifier::SHIFT))
+				break;
+
+			const uintMem tail = textSelectionRenderUnit.selection.GetTail();
+
+			if (tail == 0)
+				break;
+			
+			const uintMem lineIndex = textRenderUnit.GetCharacterData()[tail].lineIndex;
 
 			if (lineIndex == 0)
 				break;
 
-			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(characterIndex);
-			characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex - 1);
+			const Vec2f position = textRenderUnit.GetCharacterSeparationPosition(tail);
+			const uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex - 1);
+			textSelectionRenderUnit.selection.SetTail(characterIndex);			
 
-			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT) && !textSelectionRenderUnit.IsSelectionEmpty() && !mouseDown)
-			{
-				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-
-				if (textSelectionRenderUnit.GetSelectionBegin() == indexOfCharacterAfterCursor)
-					textSelectionRenderUnit.SetSelectionBegin(characterIndex);
-				else if (textSelectionRenderUnit.GetSelectionEnd() == indexOfCharacterAfterCursor)
-					if (textSelectionRenderUnit.GetSelectionBegin() > characterIndex)
-						textSelectionRenderUnit.SetSelection(characterIndex, textSelectionRenderUnit.GetSelectionBegin());
-					else
-						textSelectionRenderUnit.SetSelectionEnd(characterIndex);
-				else
-					Debug::Logger::LogWarning("Blaze Engine Warning", "Cursor is inside selection. An internal error.");
-
-				textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);
-			}
 			break;
 		}
 		case Keyboard::Key::DOWN: {
-			auto& characterData = textRenderUnit.GetCharacterData();
-			uintMem characterIndex = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-			uintMem lineIndex = characterData[characterIndex].lineIndex;
+			if (textSelectionRenderUnit.selection.Empty() || !bool(event.modifier & Keyboard::KeyModifier::SHIFT))
+				break;
+
+			const uintMem tail = textSelectionRenderUnit.selection.GetTail();
+
+			if (tail >= textSelectionRenderUnit.selection.textContainer.CharacterCount() - 1)
+				break;
+
+			const uintMem lineIndex = textRenderUnit.GetCharacterData()[tail].lineIndex;
 
 			if (lineIndex == textRenderUnit.GetLineData().Count() - 1)
 				break;
 
-			Vec2f position = textRenderUnit.GetCharacterSeparationPosition(characterIndex);
-			characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex + 1);
+			const Vec2f position = textRenderUnit.GetCharacterSeparationPosition(tail);
+			const uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndexInLine(position, lineIndex + 1);
+			textSelectionRenderUnit.selection.SetTail(characterIndex);			
 
-			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT) && !textSelectionRenderUnit.IsSelectionEmpty() && !mouseDown)
-			{
-				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-
-				if (textSelectionRenderUnit.GetSelectionBegin() == indexOfCharacterAfterCursor)
-					if (textSelectionRenderUnit.GetSelectionEnd() < characterIndex)
-						textSelectionRenderUnit.SetSelection(textSelectionRenderUnit.GetSelectionEnd(), characterIndex);
-					else
-						textSelectionRenderUnit.SetSelectionBegin(characterIndex);
-
-				else if (textSelectionRenderUnit.GetSelectionEnd() == indexOfCharacterAfterCursor)
-					textSelectionRenderUnit.SetSelectionEnd(characterIndex);
-				else
-					Debug::Logger::LogWarning("Blaze Engine Warning", "Cursor is inside selection. An internal error.");
-
-				textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);
-			}
 			break;
 		}
 		case Keyboard::Key::HOME: {
-			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT) && !textSelectionRenderUnit.IsSelectionEmpty() && !mouseDown)
-			{
-				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-				auto& characterData = textRenderUnit.GetCharacterData();
-				auto& line = textRenderUnit.GetLineData()[characterData[indexOfCharacterAfterCursor].lineIndex];
+			if (textSelectionRenderUnit.selection.Empty() || !bool(event.modifier & Keyboard::KeyModifier::SHIFT))
+				break;
 
-				if (textSelectionRenderUnit.GetSelectionEnd() == indexOfCharacterAfterCursor)
-					textSelectionRenderUnit.SetSelectionEnd(textSelectionRenderUnit.GetSelectionBegin());
-
-				textSelectionRenderUnit.SetSelectionBegin(line.firstCharacterIndex);
-				textCursorRenderUnit.SetCursorPosBeforeCharacter(textSelectionRenderUnit.GetSelectionBegin());
-			}
+			const uintMem tail = textSelectionRenderUnit.selection.GetTail();
+			const auto& line = textRenderUnit.GetLineData()[textRenderUnit.GetCharacterData()[tail].lineIndex];
+			textSelectionRenderUnit.selection.SetTail(line.firstCharacterIndex);			
 
 			break;
 		}
 		case Keyboard::Key::END: {
-			if (bool(event.modifier & Keyboard::KeyModifier::SHIFT) && !textSelectionRenderUnit.IsSelectionEmpty() && !mouseDown)				
-			{
-				uintMem indexOfCharacterAfterCursor = textCursorRenderUnit.GetIndexOfCharacterAfterCursor();
-				auto& characterData = textRenderUnit.GetCharacterData();
-				auto& line = textRenderUnit.GetLineData()[characterData[indexOfCharacterAfterCursor].lineIndex];
+			if (textSelectionRenderUnit.selection.Empty() || !bool(event.modifier & Keyboard::KeyModifier::SHIFT))
+				break;
 
-				if (textSelectionRenderUnit.GetSelectionBegin() == indexOfCharacterAfterCursor)
-					textSelectionRenderUnit.SetSelectionBegin(textSelectionRenderUnit.GetSelectionEnd());
+			const uintMem tail = textSelectionRenderUnit.selection.GetTail();			
+			const auto& line = textRenderUnit.GetLineData()[textRenderUnit.GetCharacterData()[tail].lineIndex];
+			textSelectionRenderUnit.selection.SetTail(line.firstCharacterIndex + line.characterCount);			
 
-				textSelectionRenderUnit.SetSelectionEnd(line.firstCharacterIndex + line.characterCount);
-
-				textCursorRenderUnit.SetCursorPosBeforeCharacter(textSelectionRenderUnit.GetSelectionEnd());
-			}
 			break;
 		}
 		case Keyboard::Key::C: {
-			if (bool(event.modifier & Keyboard::KeyModifier::CTRL) && !textSelectionRenderUnit.IsSelectionEmpty())
-				Input::SetClipboardText(GetTextSubString(textSelectionRenderUnit.GetSelectionBegin(), textSelectionRenderUnit.GetSelectionEnd()));
+			if (bool(event.modifier & Keyboard::KeyModifier::CTRL) && !textSelectionRenderUnit.selection.Empty())
+				Input::SetClipboardText(textSelectionRenderUnit.selection.textContainer.GetSubString(textSelectionRenderUnit.selection.GetBeginning(), textSelectionRenderUnit.selection.GetEnd()));
 			break;
 		}		
 		}
 	}	
-	void SelectableTextBase::OnEvent(const MouseButtonDownEvent& event)
+	void SelectableTextBase::MouseButtonDownEvent(const InputNode::MouseButtonDownEvent& event)
 	{
-		uintMem combo = (event.combo - 1) % 3 + 1;
+		if (!IsPressed())
+			return;
+
+		uintMem combo = ((uintMem)event.combo - 1) % 3 + 1;
 
 		Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.screenPos);
-		uintMem lineIndex;
-
-		if (!textRenderUnit.GetLineIndexUnderPosition(localSpacePos, lineIndex))
-			return;
-		
-		event.inputManager.SelectNode(this);
+		uintMem characterSeparationIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);
+		uintMem characterIndex = characterSeparationIndex != 0 && characterSeparationIndex == textSelectionRenderUnit.selection.textContainer.CharacterCount() ? characterSeparationIndex - 1 : characterSeparationIndex;
 
 		switch (combo)
 		{
-		case 1: {
-			uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);
-			textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);
-
-			grabbedSelectionEnd = characterIndex;
-			grabbedSelectionBegin = grabbedSelectionEnd;
-			break;
+		case 1:
+			textSelectionRenderUnit.selection.Set(characterSeparationIndex, characterSeparationIndex);
+			break;		
+		case 2:
+			textSelectionRenderUnit.selection.FocusWord(characterIndex);
+			break;		
+		case 3:
+			textSelectionRenderUnit.selection.FocusLine(characterIndex);
+			break;		
 		}
-		case 2: {
-			uintMem characterIndex = textRenderUnit.GetClosestCharacterIndexInLine(localSpacePos, lineIndex);
-
-			textRenderUnit.FindWord(characterIndex, grabbedSelectionBegin, grabbedSelectionEnd);
-			textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
-			break;
-		}
-		case 3: {
-			if (!textRenderUnit.GetCharacterData().Empty())
-			{
-				uintMem characterIndex = textRenderUnit.GetClosestCharacterIndexInLine(localSpacePos, lineIndex);
-
-				textRenderUnit.FindLine(characterIndex, grabbedSelectionBegin, grabbedSelectionEnd);
-
-				textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
-			}
-			break;
-		}
-		}						
-		
-		textSelectionRenderUnit.SetSelection(grabbedSelectionBegin, grabbedSelectionEnd);
-
-		mouseDown = true;
 	}
-	void SelectableTextBase::OnEvent(const MouseMotionEvent& event)
-	{
+	void SelectableTextBase::MouseMotionEvent(const InputNode::MouseMotionEvent& event)
+	{				
+		if (!IsPressed())
+			return;
+
 		Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.screenPos);
-		uintMem lineIndex;
+		uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);
 
-		textRenderUnit.GetLineIndexUnderPosition(localSpacePos, lineIndex);			
-
-		if (mouseDown)
-		{
-			Vec2f localSpacePos = textRenderUnit.GetFinalTransform().TransformFromFinalToLocalTransformSpace(event.screenPos);
-			uintMem characterIndex = textRenderUnit.GetClosestCharacterSeparationIndex(localSpacePos);			
-
-			if (characterIndex > grabbedSelectionBegin && characterIndex < grabbedSelectionEnd)
-				textCursorRenderUnit.SetCursorPosBeforeCharacter(grabbedSelectionEnd);
-			else
-			{				
-				textCursorRenderUnit.SetCursorPosBeforeCharacter(characterIndex);				
-
-				if (textCursorRenderUnit.IsCursorAtEnd())
-					SelectAroundGrabbedSelection(textRenderUnit.GetCharacterData().Count());
-				else
-					SelectAroundGrabbedSelection(textCursorRenderUnit.GetIndexOfCharacterAfterCursor());
-			}
-		}
-	}
-	void SelectableTextBase::OnEvent(const MouseButtonUpEvent& event)
-	{
-		mouseDown = false;
-	}
-	void SelectableTextBase::OnEvent(const MouseEnterEvent& event)
-	{		
-		Input::SetCursorType(Input::CursorType::IBeam);
-	}
-	void SelectableTextBase::OnEvent(const MouseExitEvent& event)
-	{		
-		Input::SetCursorType(Input::CursorType::Arrow);
-	}	
-	void SelectableTextBase::SelectAroundGrabbedSelection(uintMem characterIndex)
-	{
-		uintMem begin = std::min(characterIndex, grabbedSelectionBegin);
-		uintMem end = std::max(characterIndex, grabbedSelectionEnd);
-
-		textSelectionRenderUnit.SetSelection(begin, end);
-	}	
+		textSelectionRenderUnit.selection.SetTail(characterIndex);
+	}		
 }

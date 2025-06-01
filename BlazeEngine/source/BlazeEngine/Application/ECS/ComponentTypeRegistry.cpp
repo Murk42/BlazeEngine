@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze::ECS
 {

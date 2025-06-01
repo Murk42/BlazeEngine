@@ -47,7 +47,6 @@ namespace Blaze::Graphics::OpenGL
 	private:		
 		GraphicsContext_OpenGL& graphicsContext;
 		Blaze::Graphics::OpenGLWrapper::ShaderProgram program;
-		Blaze::Graphics::OpenGLWrapper::ImmutableStaticGraphicsBuffer vertexBuffer;
 		Blaze::Graphics::OpenGLWrapper::ImmutableMappedGraphicsBuffer instanceBuffer;
 		Blaze::Graphics::OpenGLWrapper::VertexArray va;
 

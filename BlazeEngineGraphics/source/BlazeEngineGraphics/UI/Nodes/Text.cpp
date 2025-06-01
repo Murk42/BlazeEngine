@@ -1,20 +1,19 @@
 #include "pch.h"
-#include "BlazeEngine/Resources/Font/TextLayouter.h"
 #include "BlazeEngineGraphics/UI/Nodes/Text.h"
 
 namespace Blaze::UI::Nodes
 {
-	Text::Text() :
-		renderUnit(this)
+	Text::Text() 
+		: renderUnit(textContainer, this)
 	{		
 		dataMap.SetTypeName("Text");				
 	}
 	Text::~Text()
 	{		
 	}
-	void Text::SetText(StringUTF8 textRenderUnit)
+	void Text::SetText(StringViewUTF8 textRenderUnit)
 	{
-		renderUnit.SetText(textRenderUnit);	
+		textContainer.SwapStrings(textRenderUnit);		
 	}
 	void Text::SetTextColor(ColorRGBAf color)
 	{
@@ -24,14 +23,10 @@ namespace Blaze::UI::Nodes
 	{
 		renderUnit.SetTextCharactersColor(colors);
 	}
-	void Text::SetFont(Font& font)
+	void Text::SetFontStyle(const FontStyle& fontStyle)
 	{
-		renderUnit.SetFont(font);				
-	}
-	void Text::SetFontHeight(uint pixelFontHeight)
-	{		
-		renderUnit.SetFontHeight(pixelFontHeight);
-	}
+		renderUnit.SetFontStyle(fontStyle);
+	}	
 	void Text::SetLayoutOptions(TextLayoutOptions layoutOptions)
 	{
 		renderUnit.SetLayoutOptions(layoutOptions);		

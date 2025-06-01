@@ -50,15 +50,6 @@ namespace Blaze
 
 		return out;
 	}
-	static Display::DisplayData* GetDisplayData(SDL_DisplayID id)
-	{
-		auto it = blazeEngineContext.displaysData.Find((Display::DisplayID)id);
-
-		if (it.IsNull())
-			return nullptr;
-
-		return &it->value;
-	}	
 
 	BlazeEngineContext::BlazeEngineContext() :
 		mainThreadID(std::this_thread::get_id()),
@@ -126,6 +117,18 @@ namespace Blaze
 		}
 
 		eventStack.ProcessAndClear();
+	}
+	static Mouse::MouseButton GetBlazeMouseButton(int value)
+	{
+		switch (value)
+		{
+		case SDL_BUTTON_LEFT: return Mouse::MouseButton::Left;
+		case SDL_BUTTON_RIGHT: return Mouse::MouseButton::Right;
+		case SDL_BUTTON_MIDDLE: return Mouse::MouseButton::Middle;
+		default:
+			return Mouse::MouseButton::Other;
+			break;
+		}
 	}
 	void BlazeEngineContext::HandleSDLEvent(const SDL_Event& event)
 	{
@@ -202,7 +205,7 @@ namespace Blaze
 				.window = window,
 				.timeNS = event.button.timestamp,
 				.mouseID = event.button.which,
-				.button = (Mouse::MouseButton)event.button.button,
+				.button = GetBlazeMouseButton(event.button.button),
 				.combo = event.button.clicks,
 				.pos = windowPos,
 				.desktopPos = desktopPos
@@ -223,7 +226,7 @@ namespace Blaze
 				.window = window,
 				.timeNS = event.button.timestamp,
 				.mouseID = event.button.which,
-				.button = (Mouse::MouseButton)event.button.button,
+				.button = GetBlazeMouseButton(event.button.button),
 				.combo = event.button.clicks,
 				.pos = windowPos,
 				.desktopPos = desktopPos
@@ -303,224 +306,67 @@ namespace Blaze
 			break;
 		}
 		case SDL_EVENT_DISPLAY_ORIENTATION: {
-			Display::DisplayData* data = GetDisplayData(event.display.displayID);
 
-			if (data == nullptr)
-				return;
-						
-			if (!SDLToBlaze_DisplayOrientation((SDL_DisplayOrientation)event.display.data1, data->currentOrientation))
-			{
-				BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayOrientation enum value to Blaze::DisplayOrientation enum value");
-				break;
-			}
-
-			Display::DisplayOrientationChangedEvent _event{
+			Display::DisplayEvent _event{
 				.displayID = (Display::DisplayID)event.display.displayID,
-				.timeNS = event.display.timestamp,
-				.data = *data
+				.timeNS = event.display.timestamp,				
 			};
 
-			AddToInputEventStack(_event, &displayOrientationChangedEventDispatcher);			
+			AddToInputEventStack(_event, &displayEventDispatcher);			
 			break;
 			}
 		case SDL_EVENT_DISPLAY_ADDED: {
-			auto currentDisplayModeSDL = SDL_GetCurrentDisplayMode(event.display.displayID);
-
-			if (currentDisplayModeSDL == nullptr)
-			{
-				BLAZE_ENGINE_ERROR("SDL_GetCurrentDisplayMode failed. SDL return error: \"" + GetSDLError() + "\"");
-				break;
-			}
-
-			auto desktopDisplayModeSDL = SDL_GetDesktopDisplayMode(event.display.displayID);
-
-			if (desktopDisplayModeSDL == nullptr)
-			{
-				BLAZE_ENGINE_ERROR("SDL_GetDesktopDisplayMode failed. SDL return error: \"" + GetSDLError() + "\"");
-				break;
-			}
-
-			auto currentOrientationSDL = SDL_GetCurrentDisplayOrientation(event.display.displayID);
-			auto naturalOrientationSDL = SDL_GetNaturalDisplayOrientation(event.display.displayID);
-			auto displayNameSDL = SDL_GetDisplayName(event.display.displayID);			
-
-			if (displayNameSDL == nullptr)
-			{
-				BLAZE_ENGINE_ERROR("SDL_GetDisplayName failed. SDL return error: \"" + GetSDLError() + "\"");
-				break;
-			}
-
-			SDL_Rect displayBoundsSDL;
-			if (!SDL_GetDisplayBounds(event.display.displayID, &displayBoundsSDL))
-			{
-				BLAZE_ENGINE_ERROR("SDL_GetDisplayBounds failed. SDL return error: \"" + GetSDLError() + "\"");
-				break;
-			}
-
-			float scaleSDL = SDL_GetDisplayContentScale(event.display.displayID);
-
-			if (scaleSDL == 0)
-			{
-				BLAZE_ENGINE_ERROR("SDL_GetDisplayContentScale failed. SDL return error: \"" + GetSDLError() + "\"");
-				break;
-			}
-
-			int fullscreenDisplayModeCount = 0;
-			SDL_DisplayMode** fullscreenDisplayModesSDL = SDL_GetFullscreenDisplayModes(event.display.displayID, &fullscreenDisplayModeCount);
-			
-			if (fullscreenDisplayModesSDL == nullptr)
-			{
-				BLAZE_ENGINE_ERROR("SDL_GetFullscreenDisplayModes failed. SDL return error: \"" + GetSDLError() + "\"");
-				break;
-			}
-
-			Array<Display::DisplayMode> fullscreenDisplayModes{ fullscreenDisplayModeCount };
-
-			for (uintMem i = 0; i < fullscreenDisplayModeCount; ++i)
-				if (!SDLToBlaze_DisplayMode(*fullscreenDisplayModesSDL[i], fullscreenDisplayModes[i]))
-				{
-					BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayMode to Blaze::DisplayMode");					
-					break;
-				}
-
-			Display::DisplayData data;			
-
-			if (!SDLToBlaze_DisplayMode(*currentDisplayModeSDL, data.currentMode))
-			{
-				BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayMode to Blaze::DisplayMode");
-				break;
-			}
-
-			if (!SDLToBlaze_DisplayMode(*desktopDisplayModeSDL, data.desktopMode))
-			{
-				BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayMode to Blaze::DisplayMode");
-				break;
-			}
-
-			if (!SDLToBlaze_DisplayOrientation(currentOrientationSDL, data.currentOrientation))
-			{
-				BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayOrientation to Blaze::DisplayOrientation");
-				break;
-			}
-
-			if (!SDLToBlaze_DisplayOrientation(naturalOrientationSDL, data.naturalOrientation))
-			{
-				BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayOrientation to Blaze::DisplayOrientation");
-				break;
-			}
-
-			data.name = StringViewUTF8(displayNameSDL, strlen(displayNameSDL));
-			data.rect = Recti(displayBoundsSDL.x, displayBoundsSDL.y, displayBoundsSDL.w, displayBoundsSDL.h);
-			data.fullscreenDisplayModes = std::move(fullscreenDisplayModes);			
-
-			data.contentScale = scaleSDL;			
-
-			Display::DisplayAddedEvent _event{
+			Display::DisplayEvent _event{
 				.displayID = (Display::DisplayID)event.display.displayID,
-				.timeNS = event.display.timestamp,
-				.data = data
+				.timeNS = event.display.timestamp,				
 			};
 
-			AddToInputEventStack(_event, &displayAddedEventDispatcher);
+			AddToInputEventStack(_event, &displayEventDispatcher);
 			break;
 			}
 		case SDL_EVENT_DISPLAY_REMOVED: {
-			auto it = displaysData.Find((Display::DisplayID)event.display.displayID);			
-
-			if (it.IsNull())
-				break;
-
-			Display::DisplayRemovedEvent _event{
+			Display::DisplayEvent _event{
 				.displayID = (Display::DisplayID)event.display.displayID,
 				.timeNS = event.display.timestamp,
-				.data = it->value
 			};
 
-			displaysData.Erase(it);
-
-			AddToInputEventStack(_event, &displayRemovedEventDispatcher);
+			AddToInputEventStack(_event, &displayEventDispatcher);
 			break;
 			}
-		case SDL_EVENT_DISPLAY_MOVED: {
-			Display::DisplayData* data = GetDisplayData(event.display.displayID);
-
-			if (data == nullptr)
-				return;
-			
-			data->rect.pos = Vec2i(event.display.data1, event.display.data2);
-
-			Display::DisplayMovedEvent _event{
+		case SDL_EVENT_DISPLAY_MOVED: {			
+			Display::DisplayEvent _event{
 				.displayID = (Display::DisplayID)event.display.displayID,
-				.timeNS = event.display.timestamp,
-				.data = *data
+				.timeNS = event.display.timestamp
 			};
 
-			AddToInputEventStack(_event, &displayMovedEventDispatcher);
+			AddToInputEventStack(_event, &displayEventDispatcher);
 			break;
 			}
 		case SDL_EVENT_DISPLAY_DESKTOP_MODE_CHANGED: {
-			Display::DisplayData* data = GetDisplayData(event.display.displayID);
-
-			if (data == nullptr)
-				return;
-
-			auto mode = SDL_GetDesktopDisplayMode(event.display.displayID);
-
-			if (!SDLToBlaze_DisplayMode(*mode, data->desktopMode))
-			{
-				BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayMode value to Blaze::DisplayMode value");
-				break;
-			}
-
-			Display::DisplayDesktopModeChangedEvent _event{
+			Display::DisplayEvent _event{
 				.displayID = (Display::DisplayID)event.display.displayID,
-				.timeNS = event.display.timestamp,
-				.data = *data
+				.timeNS = event.display.timestamp,				
 			};
 
-			AddToInputEventStack(_event, &displayDesktopModeChangedEventDispatcher);
+			AddToInputEventStack(_event, &displayEventDispatcher);
 			break;
 			}
-		case SDL_EVENT_DISPLAY_CURRENT_MODE_CHANGED: {
-			Display::DisplayData* data = GetDisplayData(event.display.displayID);
-
-			if (data == nullptr)
-				return;
-
-			auto mode = SDL_GetCurrentDisplayMode(event.display.displayID);
-
-			if (!SDLToBlaze_DisplayMode(*mode, data->currentMode))
-			{
-				BLAZE_ENGINE_ERROR("Failed to convert SDL_DisplayMode value to Blaze::DisplayMode value");
-				break;
-			}
-
-			Display::DisplayCurrentModeChangedEvent _event{
+		case SDL_EVENT_DISPLAY_CURRENT_MODE_CHANGED: {			
+			Display::DisplayEvent _event{
 				.displayID = (Display::DisplayID)event.display.displayID,
-				.timeNS = event.display.timestamp,
-				.data = *data
+				.timeNS = event.display.timestamp
 			};
 
-			AddToInputEventStack(_event, &displayCurrentModeChangedEventDispatcher);
+			AddToInputEventStack(_event, &displayEventDispatcher);
 			break;
 			}
 		case SDL_EVENT_DISPLAY_CONTENT_SCALE_CHANGED: {
-			Display::DisplayData* data = GetDisplayData(event.display.displayID);
-
-			if (data == nullptr)
-				return;
-
-			auto scale = SDL_GetDisplayContentScale(event.display.displayID);
-
-			data->contentScale = scale;
-
-			Display::DisplayContentScaleChangedEvent _event{
+			Display::DisplayEvent _event{
 				.displayID = (Display::DisplayID)event.display.displayID,
-				.timeNS = event.display.timestamp,
-				.data = *data
+				.timeNS = event.display.timestamp
 			};
 
-			AddToInputEventStack(_event, &displayContentScaleChangedEventDispatcher);
+			AddToInputEventStack(_event, &displayEventDispatcher);
 			break;
 			}
 		case SDL_EVENT_WINDOW_MOVED: {

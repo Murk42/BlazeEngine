@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 namespace Blaze
 {
@@ -7,41 +8,23 @@ namespace Blaze
 	class BLAZE_CORE_API Buffer
 	{
 		void* ptr;
-		size_t size;		
 	public:
 		Buffer();
-		Buffer(const Buffer&);
+		Buffer(const Buffer&) = delete;
 		Buffer(Buffer&&) noexcept;
-		Buffer(size_t size);
-		Buffer(const BufferView&);
+		Buffer(uintMem size);		
 		~Buffer();
+				
+		inline bool Empty() const { return ptr == nullptr; }
+		inline void* Ptr() const { return ptr; }
 
-		inline size_t Size() const { return size; }
-		inline void* Ptr() { return ptr; }
-		inline const void* Ptr() const { return ptr; }
+		void Clear();
 
-		void Allocate(size_t size);
-		void Free();
+		void* Allocate(uintMem size);		
 
-		Buffer& operator=(const Buffer&);
-		Buffer& operator=(Buffer&&) noexcept;
-		Buffer& operator=(const BufferView&);
-	};
+		operator void* () const { return ptr; }
 
-	class BLAZE_CORE_API BufferView
-	{
-		const void* ptr;
-		size_t size;
-	public: 
-		BufferView();
-		BufferView(const BufferView&);		
-		BufferView(const void* ptr, size_t size);
-		BufferView(const Buffer&);
-
-		inline size_t Size() const { return size; }
-		inline const void* Ptr() const { return ptr; }
-
-		BufferView& operator=(const BufferView&);
-		BufferView& operator=(const Buffer&);
+		Buffer& operator=(const Buffer&) = delete;
+		Buffer& operator=(Buffer&&) noexcept;		
 	};
 }

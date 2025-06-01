@@ -2,7 +2,7 @@
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
-#include "BlazeEngineGraphics/Files/shaders.h"
+#include "BlazeEngineGraphics/Shaders/Shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -36,55 +36,40 @@ namespace Blaze::Graphics::OpenGL
 	PanelRenderer_OpenGL::PanelRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext)
 		: graphicsContext(graphicsContext)
 	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert;
-		vert.ShaderSource(StringView((const char*)panel_vert_file, panel_vert_size));
-		vert.CompileShader();
-
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
-		frag.ShaderSource(StringView((const char*)panel_frag_file, panel_frag_size));
-		frag.CompileShader();
-
+		auto vert = OpenGLWrapper::VertexShader(ShaderSources::panel_vert);
+		auto frag = OpenGLWrapper::FragmentShader(ShaderSources::panel_frag);		
 		program.LinkShaders({ &vert, &frag });
 
-		uint8 vertices[6]{
-			0, 1, 2, 2, 1, 3
-		};
-
-		vertexBuffer.Allocate(vertices, sizeof(vertices));
 		instanceBuffer.Allocate(nullptr, InstanceBufferSize, Graphics::OpenGLWrapper::GraphicsBufferMapAccessFlags::Write, Graphics::OpenGLWrapper::GraphicsBufferMapType::None);
 
-		va.EnableVertexAttribute(0);
-		va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint8, 1, false, 0);
-		va.SetVertexAttributeBuffer(0, &vertexBuffer, sizeof(PanelRenderCache_OpenGL::Vertex), 0);
-
+		va.EnableVertexAttribute(0);		
+		va.SetFloatVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 4, 0);
+		va.SetVertexAttributeBuffer(0, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
+		va.SetVertexAttributeDivisor(0, 1);
 		va.EnableVertexAttribute(1);		
-		va.SetVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 4, false, 0);
+		va.SetFloatVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 4, 16);
 		va.SetVertexAttributeBuffer(1, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
 		va.SetVertexAttributeDivisor(1, 1);
 		va.EnableVertexAttribute(2);		
-		va.SetVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 4, false, 16);
+		va.SetFloatVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, 32);
 		va.SetVertexAttributeBuffer(2, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
 		va.SetVertexAttributeDivisor(2, 1);
 		va.EnableVertexAttribute(3);		
-		va.SetVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 32);
+		va.SetFloatVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, 40);
 		va.SetVertexAttributeBuffer(3, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
 		va.SetVertexAttributeDivisor(3, 1);
 		va.EnableVertexAttribute(4);		
-		va.SetVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 40);
+		va.SetFloatVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, 48);
 		va.SetVertexAttributeBuffer(4, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
-		va.SetVertexAttributeDivisor(4, 1);
+		va.SetVertexAttributeDivisor(4, 1);		
 		va.EnableVertexAttribute(5);		
-		va.SetVertexAttributeFormat(5, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 48);
+		va.SetFloatVertexAttributeFormat(5, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 1, 56);
 		va.SetVertexAttributeBuffer(5, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
-		va.SetVertexAttributeDivisor(5, 1);		
-		va.EnableVertexAttribute(6);		
-		va.SetVertexAttributeFormat(6, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, 56);
+		va.SetVertexAttributeDivisor(5, 1);
+		va.EnableVertexAttribute(6);
+		va.SetFloatVertexAttributeFormat(6, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 1, 60);
 		va.SetVertexAttributeBuffer(6, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
 		va.SetVertexAttributeDivisor(6, 1);
-		va.EnableVertexAttribute(7);
-		va.SetVertexAttributeFormat(7, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, 60);
-		va.SetVertexAttributeBuffer(7, &instanceBuffer, sizeof(PanelRenderCache_OpenGL::Instance), 0);
-		va.SetVertexAttributeDivisor(7, 1);
 	}
 	void PanelRenderer_OpenGL::Render(const PanelRenderCache_OpenGL& renderCache, Vec2u targetSize)
 	{
@@ -92,17 +77,14 @@ namespace Blaze::Graphics::OpenGL
 
 		graphicsContext.SelectProgram(&program);
 		graphicsContext.SelectVertexArray(&va);
-		graphicsContext.SetActiveTextureSlot(0);
-
-		Vec2u renderArea = Vec2u(targetSize);
-		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);
+		graphicsContext.SetActiveTextureSlot(0);		
 
 		graphicsContext.SetActiveTextureSlot(0);
 
-		program.SetUniform(0, proj);		
+		program.SetUniform(0, Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1));
 
-		Blaze::Graphics::OpenGLWrapper::Fence fence{ };
-		fence.SetFence();
+		//Blaze::Graphics::OpenGLWrapper::Fence fence{ };
+		//fence.SetFence();
 
 		uintMem offset = 0;
 		while (offset != renderCache.instances.Count())
@@ -115,15 +97,15 @@ namespace Blaze::Graphics::OpenGL
 			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * count);
 			instanceBuffer.UnmapBuffer();
 
-			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, renderCache.instances.Count());
+			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::TriangleStrip, 0, 4, 0, renderCache.instances.Count());
 
-			fence.SetFence();
-
-			if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
-			{
-				Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
-				return;
-			}
+			//fence.SetFence();
+			//
+			//if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
+			//{
+			//	Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
+			//	return;
+			//}
 
 			offset += count;
 		}
@@ -136,13 +118,10 @@ namespace Blaze::Graphics::OpenGL
 		graphicsContext.SelectVertexArray(&va);
 		graphicsContext.SetActiveTextureSlot(0);
 
-		Vec2u renderArea = Vec2u(targetSize);
-		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);		
+		program.SetUniform(0, Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1));
 
-		program.SetUniform(0, proj);
-
-		Blaze::Graphics::OpenGLWrapper::Fence fence{ };
-		fence.SetFence();
+		//Blaze::Graphics::OpenGLWrapper::Fence fence{ };
+		//fence.SetFence();
 
 		renderStream.BeginStream();
 
@@ -150,11 +129,11 @@ namespace Blaze::Graphics::OpenGL
 		
 		while (true)
 		{		
-			if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
-			{
-				Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
-				return;
-			}
+			//if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
+			//{
+			//	Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
+			//	return;
+			//}
 
 			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);			
 			uintMem instanceCount = 0;
@@ -199,9 +178,9 @@ namespace Blaze::Graphics::OpenGL
 			instanceBuffer.FlushBufferRange(0, sizeof(Instance) * instanceCount);
 			instanceBuffer.UnmapBuffer();
 
-			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, instanceCount);
+			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::TriangleStrip, 0, 4, 0, instanceCount);
 
-			fence.SetFence();			
+			//fence.SetFence();			
 
 			if (rd == nullptr)
 				break;

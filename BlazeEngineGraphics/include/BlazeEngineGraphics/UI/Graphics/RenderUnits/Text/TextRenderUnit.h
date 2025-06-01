@@ -1,61 +1,46 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/Align.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnitBase.h"
 #include "BlazeEngineGraphics/Renderers/TexturedRectRenderer.h"
-#include "BlazeEngineGraphics/Text/FontAtlasesData.h"
-#include "BlazeEngine/Resources/Font/TextLayouter.h"
+#include "BlazeEngineGraphics/UI/Common/TextContainerBase.h"
 
 namespace Blaze::UI
-{
-	enum class TextLineHorizontalAlign
-	{
-		Left, Center, Right,
-	};
-
-	enum class TextLineVerticalAlign
-	{
-		Top, Center, Bottom
-	};
-
-	enum class TextHorizontallyUnderfittedOptions
+{		
+	enum class TextHorizontallyUnderfittedOptions : uint8
 	{
 		ResizeToFit, Nothing, Squish, CharacterWrap, WordWrap, WordWrapSpread
 	};
-
-	enum class TextVerticallyUnderfittedOptions
+	enum class TextVerticallyUnderfittedOptions : uint8
 	{
 		ResizeToFit, Nothing, Squish
-	};
-	
-	enum class TextHorizontallyOverfittedOptions
+	};	
+	enum class TextHorizontallyOverfittedOptions : uint8
 	{
 		ResizeToFit, Nothing, SpreadCharacters, SpreadWords
 	};
-
-	enum class TextVerticallyOverfittedOptions
+	enum class TextVerticallyOverfittedOptions : uint8
 	{
 		ResizeToFit, Nothing, SpreadLines
 	};
 
 	struct TextLayoutOptions
 	{
-		TextLineHorizontalAlign lineHorizontalAlign = TextLineHorizontalAlign::Center;
-		TextLineVerticalAlign lineVerticalAlign = TextLineVerticalAlign::Center;
+		float lineAdvance = 1.0f;
+		float wrappedLineAdvance = 0.9f;		
+		HorizontalAlign lineHorizontalAlign = HorizontalAlign::Center;
+		VerticalAlign lineVerticalAlign = VerticalAlign::Center;
 		TextHorizontallyUnderfittedOptions horizontallyUnderfittedOption = TextHorizontallyUnderfittedOptions::Nothing;
 		TextVerticallyUnderfittedOptions verticallyUnderfittedOption = TextVerticallyUnderfittedOptions::Nothing;
 		TextHorizontallyOverfittedOptions horizontallyOverfittedOption = TextHorizontallyOverfittedOptions::Nothing;
 		TextVerticallyOverfittedOptions verticallyOverfittedOption = TextVerticallyOverfittedOptions::Nothing;
-		float lineAdvance = 1.0f;
-		float wrappedLineAdvance = 0.9f;		
-	};	
+	};		
 
 	class BLAZE_GRAPHICS_API TextRenderUnit :
-		public TextRenderUnitBase,		
-		private EventHandler<Node::TransformUpdatedEvent>,
-		private EventHandler<Node::FinalTransformUpdatedEvent>
+		public TextRenderUnitBase
 	{		
 	public:										
-		TextRenderUnit(Node* node);	
+		TextRenderUnit(TextContainerBase& textContainer, Node* node);
 		~TextRenderUnit();
 			
 		void BeginStream() override;
@@ -65,37 +50,33 @@ namespace Blaze::UI
 		bool CleanRenderData() override;
 
 		NodeFinalTransform GetFinalTransform() override;
-		
-		void SetText(const StringViewUTF8& text);
+				
 		void SetTextColor(ColorRGBAf color);
-		void SetTextCharactersColor(const ArrayView<ColorRGBAf>& colors);
-		void SetFont(Font& font);
-		void SetFontHeight(uint pixelFontHeight);
+		void SetTextCharactersColor(const ArrayView<ColorRGBAf>& colors);		
+		void SetFontStyle(const FontStyle& style);
 		void SetLayoutOptions(TextLayoutOptions layoutOptions);		
 		void SetCullingNode(Node* node);		
 
 		const Array<CharacterData>& GetCharacterData() override;
 		const Array<CharacterRenderData>& GetCharacterRenderData() override;	
 		const Array<LineData>& GetLineData() override;
-		NodeFinalTransform GetCullingTransform() override;
-		uint GetPixelFontHeight() override { return pixelFontHeight; }
-		inline Node* GetNode() const { return node; }
-		inline Font* GetFont() const { return font; }
-		inline StringViewUTF8 GetText() const { return text; }
+		NodeFinalTransform GetCullingTransform() override;		
+		inline Node* GetNode() const { return node; }		
+		inline const FontStyle* GetFontStyle() const override { return fontStyle; }
+		inline TextContainerBase& GetTextContainer() const { return textContainer; }
 		inline Node* GetCullingNode() const { return cullingNode; }				
 		inline TextLayoutOptions GetLayoutOptions() const { return layoutOptions; }
-	private:
+	private:		
 		Node* node;					
 		Array<CharacterData> characterData;		
 		Array<CharacterRenderData> characterRenderData;
 		Array<ColorRGBAf> characterColors;		
 		Array<LineData> lineData;
-		StringUTF8 text;
-		Font* font;
-		Graphics::FontAtlasesData* fontAtlasesData;
-		uint pixelFontHeight;		
-		Node* cullingNode;		
-		TextLayoutOptions layoutOptions;				
+		
+		const FontStyle* fontStyle;
+
+		Node* cullingNode;
+		TextLayoutOptions layoutOptions;
 
 		bool renderDataDirty : 1;
 		bool dataDirty : 1;
@@ -121,10 +102,11 @@ namespace Blaze::UI
 		static void ManageHorizontalOverfittedOptions(TextHorizontallyOverfittedOptions horizontallyOverfittedOption, float& textSize, float& boundingWidth, Array<LineData>& lineData, Array<CharacterData>& characterData);				
 		static void ManageVerticalUnderfittedOptions(TextVerticallyUnderfittedOptions verticallyUnderfittedOption, float& textHeight, float& boundingHeight, Array<LineData>& lineData, Array<CharacterData>& characterData);
 		static void ManageVerticalOverfittedOptions(TextVerticallyOverfittedOptions verticallyOverfittedOption, float& textHeight, float& boundingHeight, Array<LineData>& lineData, Array<CharacterData>& characterData);
-		static float GetLinesVerticalOffset(TextLineVerticalAlign align, float textHeight, float boundingHeight);
-		static float GetLineHorizontalOffset(TextLineHorizontalAlign align, float lineWidth, float boundingWidth);
+		static float GetLinesVerticalOffset(VerticalAlign align, float textHeight, float boundingHeight);
+		static float GetLineHorizontalOffset(HorizontalAlign align, float lineWidth, float boundingWidth);
 		
-		void OnEvent(const Node::TransformUpdatedEvent& event) override;
-		void OnEvent(const Node::FinalTransformUpdatedEvent& event) override;		
+		void TextUpdatedEvent(const TextContainerBase::TextUpdatedEvent& event);
+		void TransformUpdatedEvent(const Node::TransformUpdatedEvent& event);
+		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
 	};
 }

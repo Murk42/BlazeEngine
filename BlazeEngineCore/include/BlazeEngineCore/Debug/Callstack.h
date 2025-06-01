@@ -1,4 +1,7 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/File/Path.h"
 
 namespace Blaze::Debug
 {

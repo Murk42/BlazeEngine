@@ -1,9 +1,14 @@
 #pragma once
-#include "BlazeEngineCore/BlazeEngineCore.h"
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Math/Vector.h"
+#include "BlazeEngineCore/File/Path.h"
 #include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze
 {			
+	class WriteStream;
+	class ReadStream;
+
 	enum class BitmapColorFormat 
 	{
 		Red,
@@ -37,6 +42,7 @@ namespace Blaze
 		BitmapRef(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, uintMem stride, void* pixels);
 		BitmapRef(const BitmapRef& other);
 
+		inline bool Empty() const { return pixels == nullptr; }
 		inline uintMem GetStride() const { return stride; }
 		inline void* GetPixels() const { return pixels; }
 		inline Vec2u GetSize() const { return size; }
@@ -64,7 +70,7 @@ namespace Blaze
 		Bitmap(const Bitmap&);
 		Bitmap(Bitmap&&) noexcept;
 		Bitmap(const BitmapView& bitmapView, uintMem newStride);
-		~Bitmap();		
+		~Bitmap();				
 
 		void Load(Path path, bool flipVertically = false);				
 		void Save(Path path);

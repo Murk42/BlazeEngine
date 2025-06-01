@@ -1,21 +1,11 @@
 #pragma once
-#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
-#include "BlazeEngineCore/DataStructures/Hash.h"
-#include "BlazeEngineCore/DataStructures/Map.h"
 #include "BlazeEngineCore/DataStructures/Set.h"
 #include "BlazeEngineCore/Math/Vector.h"
-#include "BlazeEngineCore/Memory/MallocAllocator.h"
-#include "BlazeEngineCore/Types/TemplateGroup.h"
-#include "BlazeEngineCore/Types/TypeTraits.h"
 #include "BlazeEngineCore/Utilities/Timing.h"
 #include "BlazeEngine/Window/Window.h"
 #include "BlazeEngine/Input/Input.h"
 #include "BlazeEngine/Console/ConsoleOutputStream.h"
 #include "ThreadEventStack.h"
-#include <atomic>
-#include <concepts>
-#include <mutex>
-#include <thread>
 #include <bitset>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_mouse.h>
@@ -45,8 +35,7 @@ namespace Blaze
 
 		EventStack<EVENT_STACK_SIZE> eventStack;
 				
-		//TODO replace this mutex
-		Map<Display::DisplayID, Display::DisplayData> displaysData;
+		//TODO replace this mutex		
 
 		uint primaryDesktopHeight;
 		Vec2f currentDesktopMousePos;
@@ -86,13 +75,7 @@ namespace Blaze
 		EventDispatcher<Mouse::MouseScrollEvent>                  mouseScrollEventDispatcher;
 		EventDispatcher<Input::InputPreUpdateEvent>               inputPreUpdateEventDispatcher;
 		EventDispatcher<Input::InputPostUpdateEvent>              inputPostUpdateEventDispatcher;		
-		EventDispatcher<Display::DisplayOrientationChangedEvent>  displayOrientationChangedEventDispatcher;
-		EventDispatcher<Display::DisplayAddedEvent>               displayAddedEventDispatcher;
-		EventDispatcher<Display::DisplayRemovedEvent>             displayRemovedEventDispatcher;
-		EventDispatcher<Display::DisplayMovedEvent>               displayMovedEventDispatcher;
-		EventDispatcher<Display::DisplayDesktopModeChangedEvent>  displayDesktopModeChangedEventDispatcher;
-		EventDispatcher<Display::DisplayCurrentModeChangedEvent>  displayCurrentModeChangedEventDispatcher;
-		EventDispatcher<Display::DisplayContentScaleChangedEvent> displayContentScaleChangedEventDispatcher;
+		EventDispatcher<Display::DisplayEvent>                    displayEventDispatcher;
 
 		
 #ifdef BLAZE_PLATFORM_WINDOWS

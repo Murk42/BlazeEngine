@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineCore/Utilities/StringParsing.h"
+#include "BlazeEngineCore/Debug/Log.h"
 
 namespace Blaze::StringParsing
 {
@@ -221,10 +222,10 @@ namespace Blaze::StringParsing
 		}
 
 		StringViewUTF8Iterator end = value.FirstIterator();
-		StringViewUTF8Iterator it = --value.BehindIterator();
+		StringViewUTF8Iterator it = value.LastIterator();
 
 		while (it != end && *it != ch)
-			--it;
+			it.Decrement(value);
 
 		if (it == end)
 		{
@@ -267,10 +268,10 @@ namespace Blaze::StringParsing
 		}
 
 		StringViewUTF8Iterator end = value.FirstIterator();
-		StringViewUTF8Iterator it = --value.BehindIterator();
+		StringViewUTF8Iterator it = value.LastIterator();
 
 		while (it != end && *it != ch)
-			--it;
+			it.Decrement(value);
 
 		if (it == end)
 		{
@@ -310,10 +311,10 @@ namespace Blaze::StringParsing
 	bool GetBeforeLastGroup(StringViewUTF8 value, StringUTF8& out, UnicodeChar ch)
 	{
 		StringViewUTF8Iterator end = value.FirstIterator();
-		StringViewUTF8Iterator it = --value.BehindIterator();
+		StringViewUTF8Iterator it = value.BehindIterator();
 
 		while (it != end && *it != ch)
-			--it;
+			it.Decrement(value);
 
 		if (it == end)
 		{
@@ -328,7 +329,7 @@ namespace Blaze::StringParsing
 		}
 
 		while (it != end && *it == ch)
-			--it;
+			it.Decrement(value);
 
 		out = StringUTF8(value.FirstIterator(), it);
 		return true;
@@ -367,15 +368,15 @@ namespace Blaze::StringParsing
 			else
 				return value;
 
-		auto last = *--value.BehindIterator();
+		auto last = *value.LastIterator();
 		if (value.First() == ch)
 			if (last == ch)
-				return StringUTF8(++value.FirstIterator(), --value.BehindIterator());
+				return StringUTF8(++value.FirstIterator(), value.LastIterator());
 			else
-				return StringUTF8(++value.FirstIterator(), value.BehindIterator());
+				return StringUTF8(++value.FirstIterator(), value.LastIterator());
 		else
 			if (last == ch)
-				return StringUTF8(value.FirstIterator(), --value.BehindIterator());
+				return StringUTF8(value.FirstIterator(), value.LastIterator());
 			else
 				return value;
 	}
@@ -419,10 +420,10 @@ namespace Blaze::StringParsing
 		if (begin == end)
 			return StringUTF8();
 
-		--end;
+		end.Decrement(value);
 
 		while (begin != end && *end == ch)
-			--end;
+			end.Decrement(value);
 
 		if (end == begin)
 			return StringUTF8();
@@ -477,6 +478,35 @@ namespace Blaze::StringParsing
 
 			out.AddBack(StringViewUTF8(begin, it));
 		}
+	}
+
+	StringViewUTF8Iterator Find(StringViewUTF8 value, StringViewUTF8 target)
+	{
+		if (target.BufferSize() > value.BufferSize())
+			return StringViewUTF8Iterator();
+
+		if (target == value)
+			return value.FirstIterator();
+
+		auto end = value.BehindIterator();
+		for (uintMem i = 0; i < target.CharacterCount() - 1; ++i) end.Decrement(value);
+
+		for (auto i = value.FirstIterator(); i != end; ++i)
+		{
+			auto k = i;
+			bool found = true;
+			for (auto j = target.FirstIterator(); j != target.BehindIterator(); ++j, ++k)
+				if (*k != *j)
+				{
+					found = false;
+					break;
+				}
+
+			if (found)
+				return i;
+		}
+		
+		return StringViewUTF8Iterator();
 	}
 
 

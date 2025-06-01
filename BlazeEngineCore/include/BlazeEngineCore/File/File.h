@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/File/Stream/FileStream.h"
+#include "BlazeEngineCore/File/Path.h"
 
 namespace Blaze
 {

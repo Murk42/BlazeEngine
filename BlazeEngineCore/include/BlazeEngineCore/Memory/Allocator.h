@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include <concepts>
 
 namespace Blaze
 {
@@ -24,5 +25,5 @@ namespace Blaze
 	};
 
 	template<typename T>
-	concept AllocatorType = IsAllocator<T>;		
+	concept AllocatorType = IsAllocator<T>;			
 }

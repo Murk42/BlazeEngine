@@ -1,5 +1,8 @@
 #pragma once
 #include "BlazeEngineCore/Event/EventDispatcher.h"
+#include "BlazeEngineCore/Math/Vector.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze
 {		
@@ -19,17 +22,26 @@ namespace Blaze
 
 		enum class CursorType
 		{
-			Arrow,
-			IBeam,
+			Default,
+			Text,
 			Wait,
 			Crosshair,
-			WaitArrow,
-			SizeNWSE,
-			SizeWE,
-			SizeNW,
-			SizeAll,
-			No,
-			Hand,
+			Progress,
+			NotAllowed,
+			Move,
+			Pointer,
+			ResizeNWSE,
+			ResizeNESW,
+			ResizeNW,
+			ResizeNS,
+			ResizeNE,
+			ResizeSE,
+			ResizeSW,
+			ResizeEW,
+			ResizeN,
+			ResizeW,
+			ResizeS,
+			ResizeE,
 			CursorCount
 		};
 		

@@ -25,7 +25,7 @@ namespace Blaze
 		}
 
 		StringView levelString;
-		auto logFunc = Debug::Logger::LogError;
+		auto logFunc = Debug::Logger::LogError<>;
 		switch (level)
 		{
 		case SAIL_LOG_LEVEL_SILENCE: logFunc = Debug::Logger::LogInfo;levelString = "SILENCE"; break;
@@ -38,7 +38,7 @@ namespace Blaze
 		default: levelString = "UNKNOWN"; break;
 		}
 
-		logFunc("sail", "sail (" + Path(file).FileName() + ", line " + StringParsing::Convert(line) + ") level " + levelString + ": \"" + message + "\"");
+		logFunc("sail", Format("sail ({}, line {}) level {}: \"{}\"", Path(StringView(file, strlen(file))).FileName(), line, levelString, message));
 	}
 
 	TimingResult InitializeSail()

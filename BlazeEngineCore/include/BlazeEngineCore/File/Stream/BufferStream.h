@@ -8,8 +8,7 @@ namespace Blaze
 	class BLAZE_CORE_API BufferStreamBase : virtual public StreamBase
 	{
 	public:
-		BufferStreamBase();
-		BufferStreamBase(uintMem size);
+		BufferStreamBase();		
 		BufferStreamBase(void* buffer, uintMem size);
 		BufferStreamBase(const BufferStreamBase&) = delete;
 		~BufferStreamBase();
@@ -36,8 +35,7 @@ namespace Blaze
 	class BLAZE_CORE_API BufferWriteStream : virtual public BufferStreamBase, virtual public WriteStream
 	{
 	public:
-		BufferWriteStream();
-		BufferWriteStream(uintMem size);
+		BufferWriteStream();		
 		BufferWriteStream(void* buffer, uintMem size);
 		~BufferWriteStream();
 
@@ -49,8 +47,7 @@ namespace Blaze
 	class BLAZE_CORE_API BufferReadStream : virtual public BufferStreamBase, virtual public ReadStream
 	{
 	public:
-		BufferReadStream();
-		BufferReadStream(uintMem size);
+		BufferReadStream();		
 		BufferReadStream(void* buffer, uintMem size);
 		~BufferReadStream();
 

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngine/Internal/BlazeEngineContext.h"
+#include <string>
+#include <codecvt>
 #include <iostream>
 
 namespace Blaze
@@ -17,26 +19,20 @@ namespace Blaze
     }
 
     namespace Console
-    {        
-        void Write(StringViewUTF8 text)
+    {    
+        template<>
+        void Write<>(StringViewUTF8 text)
         {           
             consoleOutputStream.Write(text.Buffer(), text.BufferSize() - 1);            
-        }
-        void Write(char text)
-        {   
-            consoleOutputStream.Write(&text, 1);
-        }
-        void WriteLine(StringViewUTF8 text)
-        {            
-            Write(text);
-            Write('\n');
-        }        
+        }                
         
         StringUTF8 Read()
         {
-            std::string input;
-            std::getline(std::cin, input);            
-            return StringUTF8((const void*)input.c_str(), input.size());
+            std::wstring input;
+            std::getline(std::wcin, input);
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            auto temp = converter.to_bytes(input);
+            return StringUTF8((const void*)temp.data(), temp.size());
         }
     }
     namespace Debug::Logger

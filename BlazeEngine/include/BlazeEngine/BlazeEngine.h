@@ -10,9 +10,10 @@
 
 #include "BlazeEngine/Input/Input.h"
 
+#include "BlazeEngine/Resources/Font/CharacterSet.h"
+#include "BlazeEngine/Resources/Font/FontGlyphRenderer.h"
 #include "BlazeEngine/Resources/Font/Font.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
-#include "BlazeEngine/Resources/Font/TextLayouter.h"
 
 #include "BlazeEngine/Application/ECS/Component.h"
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"

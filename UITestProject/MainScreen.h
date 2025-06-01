@@ -1,6 +1,9 @@
 #pragma once
 #include "RegionSplitter.h"
 
+extern Array<Font> fonts;
+extern Map<String, UI::FontStyle> fontStyles;
+
 class ReplaceTextMenu : 
 	public UI::Node
 {
@@ -22,7 +25,7 @@ public:
 
 class MainScreen : public UI::Screen
 {	
-public:		
+public:
 	UI::Nodes::Panel explanationPanel;
 	UI::Nodes::SelectableText explanationText;
 	UI::Nodes::Image image;

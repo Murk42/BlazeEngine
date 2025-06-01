@@ -1,5 +1,9 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/DataStructures/Hash.h"
+#include "BlazeEngineCore/Memory/Allocator.h"
+#include <concepts>
+#include <initializer_list>
 
 namespace Blaze
 {
@@ -279,4 +283,25 @@ namespace Blaze
 		template<typename>
 		friend class MapIterator;
 	};
+
+	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	Map<Key, Value, Hasher, Allocator>::Iterator begin(Map<Key, Value, Hasher, Allocator>& map)
+	{
+		return map.FirstIterator();
+	}
+	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	Map<Key, Value, Hasher, Allocator>::ConstIterator begin(const Map<Key, Value, Hasher, Allocator>& map)
+	{
+		return map.FirstIterator();
+	}
+	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	Map<Key, Value, Hasher, Allocator>::Iterator end(Map<Key, Value, Hasher, Allocator>& map)
+	{
+		return map.BehindIterator();
+	}
+	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	Map<Key, Value, Hasher, Allocator>::ConstIterator end(const Map<Key, Value, Hasher, Allocator>& map)
+	{
+		return map.BehindIterator();
+	}
 }

@@ -1,5 +1,5 @@
-#pragma once
-#include "BlazeEngineCore/BlazeEngineCore.h"
+ #pragma once
+#include "BlazeEngineCore/DataStructures/Color.h"
 #include "BlazeEngine/Window/Window.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/Dynamic/GraphicsContext.h"
@@ -73,21 +73,21 @@ namespace Blaze::Graphics::OpenGL
 		inline void* GetActiveWindowHandle() const { return activeWindowHandle; }
 		inline void* GetSDLOpenGLContext() const { return SDLOpenGLContext; }
 
-		void SelectTexture(OpenGLWrapper::Texture1D*);
-		void SelectTexture(OpenGLWrapper::Texture2D*);
+		void SelectTexture(const OpenGLWrapper::Texture1D*);
+		void SelectTexture(const OpenGLWrapper::Texture2D*);
 		//void SelectTexture(OpenGLWrapper::Texture2DArray*);
 		//void SelectTexture(OpenGLWrapper::TextureCubemap*);
 		//void SelectTexture(OpenGLWrapper::Texture3D*);
 		//void SelectTexture(OpenGLWrapper::TextureBuffer*);
-		void SelectVertexBuffer(OpenGLWrapper::GraphicsBuffer* buffer);		
-		void SelectUniformBuffer(OpenGLWrapper::GraphicsBuffer* buffer);
-		void SelectVertexArray(OpenGLWrapper::VertexArray* vertexArray);
-		void SelectProgram(OpenGLWrapper::ShaderProgram* program);
-		void SelectFramebuffer(Framebuffer_OpenGL* framebuffer);
-		void SelectDrawFramebuffer(Framebuffer_OpenGL* framebuffer);
-		void SelectReadFramebuffer(Framebuffer_OpenGL* framebuffer);
-		void SelectRenderbuffer(OpenGLWrapper::Renderbuffer* renderbuffer);
-		void SelectShaderStorageBufferToSlot(uint slotIndex, OpenGLWrapper::GraphicsBuffer* buffer, uintMem offset, uintMem size);		
+		void SelectVertexBuffer(const OpenGLWrapper::GraphicsBuffer* buffer);
+		void SelectUniformBuffer(const OpenGLWrapper::GraphicsBuffer* buffer);
+		void SelectVertexArray(const OpenGLWrapper::VertexArray* vertexArray);
+		void SelectProgram(const OpenGLWrapper::ShaderProgram* program);
+		void SelectFramebuffer(const Framebuffer_OpenGL* framebuffer);
+		void SelectDrawFramebuffer(const Framebuffer_OpenGL* framebuffer);
+		void SelectReadFramebuffer(const Framebuffer_OpenGL* framebuffer);
+		void SelectRenderbuffer(const OpenGLWrapper::Renderbuffer* renderbuffer);
+		void SelectShaderStorageBufferToSlot(uint slotIndex, const OpenGLWrapper::GraphicsBuffer* buffer, uintMem offset, uintMem size);
 
 		void SetActiveTextureSlot(uint slot);
 

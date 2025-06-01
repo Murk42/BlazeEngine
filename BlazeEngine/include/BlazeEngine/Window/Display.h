@@ -4,6 +4,7 @@
 #include "BlazeEngineCore/DataStructures/Array.h"
 #include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
 #include "BlazeEngineCore/Math/Vector.h"
+#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze::Display
 {
@@ -102,54 +103,27 @@ namespace Blaze::Display
 		*/
 		DisplayMode currentMode;
 		Array<DisplayMode> fullscreenDisplayModes;
-		Recti rect;
+		Rectf rect;
 		DisplayOrientation currentOrientation;
 		DisplayOrientation naturalOrientation;
 		float contentScale;
 	};
 
-	struct DisplayAddedEvent
+	struct DisplayEvent
 	{
+		enum class Type
+		{
+			DisplayAdded,
+			DisplayRemoved,
+			OrientationChanged,
+			Moved,
+			DesktopModeChanged,
+			CurrentModeChanged,
+			ContentScaleChanged
+		};
 		DisplayID displayID;
-		uint64 timeNS;
-		DisplayData data;
+		uint64 timeNS;		
 	};
-	struct DisplayRemovedEvent
-	{
-		DisplayID displayID;
-		uint64 timeNS;
-		DisplayData data;
-	};
-	struct DisplayOrientationChangedEvent
-	{
-		DisplayID displayID;
-		uint64 timeNS;
-		DisplayData data;
-	};
-	struct DisplayMovedEvent
-	{
-		DisplayID displayID;
-		uint64 timeNS;
-		DisplayData data;
-	};
-	struct DisplayDesktopModeChangedEvent
-	{
-		DisplayID displayID;
-		uint64 timeNS;
-		DisplayData data;
-	};
-	struct DisplayCurrentModeChangedEvent
-	{
-		DisplayID displayID;
-		uint64 timeNS;
-		DisplayData data;
-	};
-	struct DisplayContentScaleChangedEvent
-	{
-		DisplayID displayID;
-		uint64 timeNS;
-		DisplayData data;
-	};	
 
 	Array<DisplayID> GetDisplays();
 	DisplayData GetDisplayData(DisplayID id);
@@ -180,7 +154,7 @@ namespace Blaze::Display
 		and finally checking the refresh rate. If all the available modes are too
 		small, then false is returned.
 	*/
-	bool GetClosestFullscreenDisplayMode(DisplayID id, Vec2u size, float refreshRate, bool includeHighPixelDensityModes, DisplayMode& displayMode);
+	DisplayMode GetClosestFullscreenDisplayMode(DisplayID id, Vec2u size, float refreshRate, bool includeHighPixelDensityModes);
 
 	DisplayOrientation GetNaturalDisplayOrientation(DisplayID id);
 	DisplayOrientation GetCurrentDisplayOrientation(DisplayID id);

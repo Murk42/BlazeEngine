@@ -4,6 +4,173 @@
 
 namespace Blaze
 {
+	Display::DisplayOrientation SDLToBlaze_DisplayOrientation(const SDL_DisplayOrientation& value)
+	{
+		switch (value)
+		{
+		case SDL_ORIENTATION_LANDSCAPE:          return Display::DisplayOrientation::Landscape;
+		case SDL_ORIENTATION_LANDSCAPE_FLIPPED:  return Display::DisplayOrientation::LandscapeFlipped;
+		case SDL_ORIENTATION_PORTRAIT:           return Display::DisplayOrientation::Portrait;
+		case SDL_ORIENTATION_PORTRAIT_FLIPPED:   return Display::DisplayOrientation::PortraitFlipped;
+		case SDL_ORIENTATION_UNKNOWN:            return Display::DisplayOrientation::Unknown;
+		default:
+			BLAZE_ENGINE_ERROR("Unrecognized SDL display orientation enum value");
+			return Display::DisplayOrientation::Unknown;
+		}
+
+	}
+	Display::DisplayPixelFormat SDLToBlaze_DisplayPixelFormat(const SDL_PixelFormat& value)
+	{
+		switch (value)
+		{
+		case SDL_PIXELFORMAT_UNKNOWN:       return Display::DisplayPixelFormat::Unknown;
+		case SDL_PIXELFORMAT_INDEX1LSB:     return Display::DisplayPixelFormat::Index1LSB;
+		case SDL_PIXELFORMAT_INDEX1MSB:     return Display::DisplayPixelFormat::Index1MSB;
+		case SDL_PIXELFORMAT_INDEX2LSB:     return Display::DisplayPixelFormat::Index2LSB;
+		case SDL_PIXELFORMAT_INDEX2MSB:     return Display::DisplayPixelFormat::Index2MSB;
+		case SDL_PIXELFORMAT_INDEX4LSB:     return Display::DisplayPixelFormat::Index4LSB;
+		case SDL_PIXELFORMAT_INDEX4MSB:     return Display::DisplayPixelFormat::Index4MSB;
+		case SDL_PIXELFORMAT_INDEX8:        return Display::DisplayPixelFormat::Index8;
+		case SDL_PIXELFORMAT_RGB332:        return Display::DisplayPixelFormat::RGB332;
+		case SDL_PIXELFORMAT_XRGB4444:      return Display::DisplayPixelFormat::XRGB4444;
+		case SDL_PIXELFORMAT_XBGR4444:      return Display::DisplayPixelFormat::XBGR4444;
+		case SDL_PIXELFORMAT_XRGB1555:      return Display::DisplayPixelFormat::XRGB1555;
+		case SDL_PIXELFORMAT_XBGR1555:      return Display::DisplayPixelFormat::XBGR1555;
+		case SDL_PIXELFORMAT_ARGB4444:      return Display::DisplayPixelFormat::ARGB4444;
+		case SDL_PIXELFORMAT_RGBA4444:      return Display::DisplayPixelFormat::RGBA4444;
+		case SDL_PIXELFORMAT_ABGR4444:      return Display::DisplayPixelFormat::ABGR4444;
+		case SDL_PIXELFORMAT_BGRA4444:      return Display::DisplayPixelFormat::BGRA4444;
+		case SDL_PIXELFORMAT_ARGB1555:      return Display::DisplayPixelFormat::ARGB1555;
+		case SDL_PIXELFORMAT_RGBA5551:      return Display::DisplayPixelFormat::RGBA5551;
+		case SDL_PIXELFORMAT_ABGR1555:      return Display::DisplayPixelFormat::ABGR1555;
+		case SDL_PIXELFORMAT_BGRA5551:      return Display::DisplayPixelFormat::BGRA5551;
+		case SDL_PIXELFORMAT_RGB565:        return Display::DisplayPixelFormat::RGB565;
+		case SDL_PIXELFORMAT_BGR565:        return Display::DisplayPixelFormat::BGR565;
+		case SDL_PIXELFORMAT_RGB24:         return Display::DisplayPixelFormat::RGB24;
+		case SDL_PIXELFORMAT_BGR24:         return Display::DisplayPixelFormat::BGR24;
+		case SDL_PIXELFORMAT_XRGB8888:      return Display::DisplayPixelFormat::XRGB8888;
+		case SDL_PIXELFORMAT_RGBX8888:      return Display::DisplayPixelFormat::RGBX8888;
+		case SDL_PIXELFORMAT_XBGR8888:      return Display::DisplayPixelFormat::XBGR8888;
+		case SDL_PIXELFORMAT_BGRX8888:      return Display::DisplayPixelFormat::BGRX8888;
+		case SDL_PIXELFORMAT_ARGB8888:      return Display::DisplayPixelFormat::ARGB8888;
+		case SDL_PIXELFORMAT_RGBA8888:      return Display::DisplayPixelFormat::RGBA8888;
+		case SDL_PIXELFORMAT_ABGR8888:      return Display::DisplayPixelFormat::ABGR8888;
+		case SDL_PIXELFORMAT_BGRA8888:      return Display::DisplayPixelFormat::BGRA8888;
+		case SDL_PIXELFORMAT_XRGB2101010:   return Display::DisplayPixelFormat::XRGB2101010;
+		case SDL_PIXELFORMAT_XBGR2101010:   return Display::DisplayPixelFormat::XBGR2101010;
+		case SDL_PIXELFORMAT_ARGB2101010:   return Display::DisplayPixelFormat::ARGB2101010;
+		case SDL_PIXELFORMAT_ABGR2101010:   return Display::DisplayPixelFormat::ABGR2101010;
+		case SDL_PIXELFORMAT_RGB48:         return Display::DisplayPixelFormat::RGB48;
+		case SDL_PIXELFORMAT_BGR48:         return Display::DisplayPixelFormat::BGR48;
+		case SDL_PIXELFORMAT_RGBA64:        return Display::DisplayPixelFormat::RGBA64;
+		case SDL_PIXELFORMAT_ARGB64:        return Display::DisplayPixelFormat::ARGB64;
+		case SDL_PIXELFORMAT_BGRA64:        return Display::DisplayPixelFormat::BGRA64;
+		case SDL_PIXELFORMAT_ABGR64:        return Display::DisplayPixelFormat::ABGR64;
+		case SDL_PIXELFORMAT_RGB48_FLOAT:   return Display::DisplayPixelFormat::RGB48_float;
+		case SDL_PIXELFORMAT_BGR48_FLOAT:   return Display::DisplayPixelFormat::BGR48_float;
+		case SDL_PIXELFORMAT_RGBA64_FLOAT:  return Display::DisplayPixelFormat::RGBA64_float;
+		case SDL_PIXELFORMAT_ARGB64_FLOAT:  return Display::DisplayPixelFormat::ARGB64_float;
+		case SDL_PIXELFORMAT_BGRA64_FLOAT:  return Display::DisplayPixelFormat::BGRA64_float;
+		case SDL_PIXELFORMAT_ABGR64_FLOAT:  return Display::DisplayPixelFormat::ABGR64_float;
+		case SDL_PIXELFORMAT_RGB96_FLOAT:   return Display::DisplayPixelFormat::RGB96_float;
+		case SDL_PIXELFORMAT_BGR96_FLOAT:   return Display::DisplayPixelFormat::BGR96_float;
+		case SDL_PIXELFORMAT_RGBA128_FLOAT: return Display::DisplayPixelFormat::RGBA128_float;
+		case SDL_PIXELFORMAT_ARGB128_FLOAT: return Display::DisplayPixelFormat::ARGB128_float;
+		case SDL_PIXELFORMAT_BGRA128_FLOAT: return Display::DisplayPixelFormat::BGRA128_float;
+		default:
+			BLAZE_ENGINE_ERROR("Unrecognized SDL display pixel format enum value");
+			return Display::DisplayPixelFormat::Unknown;
+		}
+	}
+	Display::DisplayMode SDLToBlaze_DisplayMode(const SDL_DisplayMode& displayMode)
+	{
+		return {
+			.displayID = displayMode.displayID,
+			.pixelFormat = SDLToBlaze_DisplayPixelFormat(displayMode.format),
+			.size = Vec2u(displayMode.w, displayMode.h),
+			.pixelDensity = displayMode.pixel_density,
+			.refreshRate = displayMode.refresh_rate,
+			.refreshRateNumerator = (uint)displayMode.refresh_rate_numerator,
+			.refreshRateDenominator = (uint)displayMode.refresh_rate_denominator,
+		};
+	}
+	SDL_PixelFormat BlazeToSDL_DisplayPixelFormat(const Display::DisplayPixelFormat& value)
+	{
+		switch (value)
+		{
+		case Display::DisplayPixelFormat::Unknown:       return SDL_PIXELFORMAT_UNKNOWN;
+		case Display::DisplayPixelFormat::Index1LSB:     return SDL_PIXELFORMAT_INDEX1LSB;
+		case Display::DisplayPixelFormat::Index1MSB:     return SDL_PIXELFORMAT_INDEX1MSB;
+		case Display::DisplayPixelFormat::Index2LSB:     return SDL_PIXELFORMAT_INDEX2LSB;
+		case Display::DisplayPixelFormat::Index2MSB:     return SDL_PIXELFORMAT_INDEX2MSB;
+		case Display::DisplayPixelFormat::Index4LSB:     return SDL_PIXELFORMAT_INDEX4LSB;
+		case Display::DisplayPixelFormat::Index4MSB:     return SDL_PIXELFORMAT_INDEX4MSB;
+		case Display::DisplayPixelFormat::Index8:        return SDL_PIXELFORMAT_INDEX8;
+		case Display::DisplayPixelFormat::RGB332:        return SDL_PIXELFORMAT_RGB332;
+		case Display::DisplayPixelFormat::XRGB4444:      return SDL_PIXELFORMAT_XRGB4444;
+		case Display::DisplayPixelFormat::XBGR4444:      return SDL_PIXELFORMAT_XBGR4444;
+		case Display::DisplayPixelFormat::XRGB1555:      return SDL_PIXELFORMAT_XRGB1555;
+		case Display::DisplayPixelFormat::XBGR1555:      return SDL_PIXELFORMAT_XBGR1555;
+		case Display::DisplayPixelFormat::ARGB4444:      return SDL_PIXELFORMAT_ARGB4444;
+		case Display::DisplayPixelFormat::RGBA4444:      return SDL_PIXELFORMAT_RGBA4444;
+		case Display::DisplayPixelFormat::ABGR4444:      return SDL_PIXELFORMAT_ABGR4444;
+		case Display::DisplayPixelFormat::BGRA4444:      return SDL_PIXELFORMAT_BGRA4444;
+		case Display::DisplayPixelFormat::ARGB1555:      return SDL_PIXELFORMAT_ARGB1555;
+		case Display::DisplayPixelFormat::RGBA5551:      return SDL_PIXELFORMAT_RGBA5551;
+		case Display::DisplayPixelFormat::ABGR1555:      return SDL_PIXELFORMAT_ABGR1555;
+		case Display::DisplayPixelFormat::BGRA5551:      return SDL_PIXELFORMAT_BGRA5551;
+		case Display::DisplayPixelFormat::RGB565:        return SDL_PIXELFORMAT_RGB565;
+		case Display::DisplayPixelFormat::BGR565:        return SDL_PIXELFORMAT_BGR565;
+		case Display::DisplayPixelFormat::RGB24:         return SDL_PIXELFORMAT_RGB24;
+		case Display::DisplayPixelFormat::BGR24:         return SDL_PIXELFORMAT_BGR24;
+		case Display::DisplayPixelFormat::XRGB8888:      return SDL_PIXELFORMAT_XRGB8888;
+		case Display::DisplayPixelFormat::RGBX8888:      return SDL_PIXELFORMAT_RGBX8888;
+		case Display::DisplayPixelFormat::XBGR8888:      return SDL_PIXELFORMAT_XBGR8888;
+		case Display::DisplayPixelFormat::BGRX8888:      return SDL_PIXELFORMAT_BGRX8888;
+		case Display::DisplayPixelFormat::ARGB8888:      return SDL_PIXELFORMAT_ARGB8888;
+		case Display::DisplayPixelFormat::RGBA8888:      return SDL_PIXELFORMAT_RGBA8888;
+		case Display::DisplayPixelFormat::ABGR8888:      return SDL_PIXELFORMAT_ABGR8888;
+		case Display::DisplayPixelFormat::BGRA8888:      return SDL_PIXELFORMAT_BGRA8888;
+		case Display::DisplayPixelFormat::XRGB2101010:   return SDL_PIXELFORMAT_XRGB2101010;
+		case Display::DisplayPixelFormat::XBGR2101010:   return SDL_PIXELFORMAT_XBGR2101010;
+		case Display::DisplayPixelFormat::ARGB2101010:   return SDL_PIXELFORMAT_ARGB2101010;
+		case Display::DisplayPixelFormat::ABGR2101010:   return SDL_PIXELFORMAT_ABGR2101010;
+		case Display::DisplayPixelFormat::RGB48:         return SDL_PIXELFORMAT_RGB48;
+		case Display::DisplayPixelFormat::BGR48:         return SDL_PIXELFORMAT_BGR48;
+		case Display::DisplayPixelFormat::RGBA64:        return SDL_PIXELFORMAT_RGBA64;
+		case Display::DisplayPixelFormat::ARGB64:        return SDL_PIXELFORMAT_ARGB64;
+		case Display::DisplayPixelFormat::BGRA64:        return SDL_PIXELFORMAT_BGRA64;
+		case Display::DisplayPixelFormat::ABGR64:        return SDL_PIXELFORMAT_ABGR64;
+		case Display::DisplayPixelFormat::RGB48_float:   return SDL_PIXELFORMAT_RGB48_FLOAT;
+		case Display::DisplayPixelFormat::BGR48_float:   return SDL_PIXELFORMAT_BGR48_FLOAT;
+		case Display::DisplayPixelFormat::RGBA64_float:  return SDL_PIXELFORMAT_RGBA64_FLOAT;
+		case Display::DisplayPixelFormat::ARGB64_float:  return SDL_PIXELFORMAT_ARGB64_FLOAT;
+		case Display::DisplayPixelFormat::BGRA64_float:  return SDL_PIXELFORMAT_BGRA64_FLOAT;
+		case Display::DisplayPixelFormat::ABGR64_float:  return SDL_PIXELFORMAT_ABGR64_FLOAT;
+		case Display::DisplayPixelFormat::RGB96_float:   return SDL_PIXELFORMAT_RGB96_FLOAT;
+		case Display::DisplayPixelFormat::BGR96_float:   return SDL_PIXELFORMAT_BGR96_FLOAT;
+		case Display::DisplayPixelFormat::RGBA128_float: return SDL_PIXELFORMAT_RGBA128_FLOAT;
+		case Display::DisplayPixelFormat::ARGB128_float: return SDL_PIXELFORMAT_ARGB128_FLOAT;
+		case Display::DisplayPixelFormat::BGRA128_float: return SDL_PIXELFORMAT_BGRA128_FLOAT;
+		default:
+			BLAZE_ENGINE_ERROR("Unrecognized Blaze display pixel format enum value");
+			return SDL_PIXELFORMAT_UNKNOWN;
+		}
+	}
+	SDL_DisplayMode BlazeToSDL_DisplayMode(const Display::DisplayMode& displayMode)
+	{
+		return {
+			.displayID = displayMode.displayID,
+			.format = BlazeToSDL_DisplayPixelFormat(displayMode.pixelFormat),
+			.w = (int)displayMode.size.x,
+			.h = (int)displayMode.size.y,
+			.pixel_density = displayMode.pixelDensity,
+			.refresh_rate = displayMode.refreshRate,
+			.refresh_rate_numerator = (int)displayMode.refreshRateNumerator,
+			.refresh_rate_denominator = (int)displayMode.refreshRateDenominator,
+			.internal = nullptr
+		};
+	}
 	StringView GetSDLEventName(uint32 type)
 	{
 		if (type == blazeEngineContext.mainThreadTaskEventIdentifier)

@@ -1,16 +1,13 @@
 #include "pch.h"
 #include "BlazeEngineCore/File/Stream/BufferStream.h"
+#include "BlazeEngineCore/Memory/MemoryManager.h"
+
 
 namespace Blaze
 {
 	Blaze::BufferStreamBase::BufferStreamBase()
 		: buffer(nullptr), size(0), position(0)
 	{
-	}
-	BufferStreamBase::BufferStreamBase(uintMem size)
-		: size(size), position(0)
-	{
-		buffer = malloc(size);		
 	}
 	BufferStreamBase::BufferStreamBase(void* buffer, uintMem size)
 		: buffer(buffer), size(size), position(0)
@@ -37,7 +34,7 @@ namespace Blaze
 	{
 		uintMem newPos = position + offset;
 
-		if (std::cmp_greater_equal(offset, size) || newPos >= size)
+		if (offset >= size || newPos >= size)
 			return false;
 		
 		position = newPos;
@@ -78,11 +75,6 @@ namespace Blaze
 	BufferWriteStream::BufferWriteStream()
 	{
 	}
-	BufferWriteStream::BufferWriteStream(uintMem size)
-		: BufferStreamBase(size)
-	{
-
-	}
 	BufferWriteStream::BufferWriteStream(void* buffer, uintMem size)
 		: BufferStreamBase(buffer, size)
 	{
@@ -105,9 +97,10 @@ namespace Blaze
 		if (newSize != size)
 		{
 			void* old = buffer;
-			buffer = malloc(newSize);
+			buffer = Memory::Allocate(newSize);
 			memcpy(buffer, old, size);
 			size = newSize;
+			Memory::Free(old);
 		}
 
 		memcpy((char*)buffer + position, ptr, byteCount);
@@ -119,12 +112,7 @@ namespace Blaze
 
 	BufferReadStream::BufferReadStream()
 	{
-	}
-	BufferReadStream::BufferReadStream(uintMem size)
-		: BufferStreamBase(size)
-	{
-
-	}
+	}	
 	BufferReadStream::BufferReadStream(void* buffer, uintMem size)
 		: BufferStreamBase(buffer, size)
 	{

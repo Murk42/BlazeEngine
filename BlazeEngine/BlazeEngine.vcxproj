@@ -94,7 +94,7 @@
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
-    <VcpkgAutoLink>true</VcpkgAutoLink>
+    <VcpkgAutoLink>false</VcpkgAutoLink>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
@@ -118,6 +118,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,7 +126,7 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>SDL3.lib;freetyped.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;SDL3.lib;freetyped.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
@@ -145,6 +146,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -154,7 +156,7 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>SDL3.lib;freetype.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;SDL3.lib;freetype.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
@@ -176,6 +178,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -183,7 +186,7 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>SDL3.lib;freetyped.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;SDL3.lib;freetyped.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
@@ -203,6 +206,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>SAIL_STATIC;SDL_MAIN_HANDLED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -212,7 +216,7 @@
     </Link>
     <PostBuildEvent />
     <Lib>
-      <AdditionalDependencies>SDL3.lib;freetype.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;SDL3.lib;freetype.lib;sail.lib;sail-common.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
@@ -243,8 +247,9 @@
     <ClInclude Include="include\BlazeEngine\Input\Keyboard.h" />
     <ClInclude Include="include\BlazeEngine\Input\Mouse.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Font\CharacterSet.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h" />
-    <ClInclude Include="include\BlazeEngine\Resources\Font\TextLayouter.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Font\FontGlyphRenderer.h" />
     <ClInclude Include="include\BlazeEngine\Window\Display.h" />
     <ClInclude Include="include\BlazeEngine\Window\Window.h" />
     <ClInclude Include="include\BlazeEngine\Input\Input.h" />
@@ -284,8 +289,9 @@
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDLConversions.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\SailClasses.cpp" />
+    <ClCompile Include="source\BlazeEngine\Resources\Font\CharacterSet.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp" />
-    <ClCompile Include="source\BlazeEngine\Resources\Font\TextLayouter.cpp" />
+    <ClCompile Include="source\BlazeEngine\Resources\Font\FontGlyphRenderer.cpp" />
     <ClCompile Include="source\BlazeEngine\Window\Display.cpp" />
     <ClCompile Include="source\BlazeEngine\Window\Window.cpp" />
     <ClCompile Include="source\BlazeEngine\Console\Console.cpp" />

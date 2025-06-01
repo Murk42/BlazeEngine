@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngine/Window/Window.h"
 #include "BlazeEngineGraphics/UI/Core/Node.h"
 
 namespace Blaze::UI
@@ -26,7 +27,7 @@ namespace Blaze::UI
 		Screen& screen;
 	};
 
-	class Screen : 
+	class BLAZE_GRAPHICS_API Screen : 
 		public Node,
 		private EventHandler<Window::WindowResizedEvent>
 	{

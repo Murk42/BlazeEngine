@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/Math/Vector.h"
+#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper

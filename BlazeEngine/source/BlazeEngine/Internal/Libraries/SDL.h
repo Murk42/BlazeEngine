@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/StringView.h"
+#include "BlazeEngineCore/Utilities/Timing.h"
 
 namespace Blaze
 {	

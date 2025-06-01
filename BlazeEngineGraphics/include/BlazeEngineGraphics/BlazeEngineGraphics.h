@@ -3,6 +3,8 @@
 
 #include "BlazeEngineGraphics/Core/Dynamic/GraphicsContext.h"
 
+#include "BlazeEngineGraphics/Text/FontAtlas.h"
+
 #ifdef GRAPHICS_OPENGL
 #include "BlazeEngineGraphics/Core/OpenGL/Framebuffer_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
@@ -25,6 +27,7 @@
 #include "BlazeEngineGraphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/ColoredCharacterRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
+#include "BlazeEngineGraphics/Renderers/OpenGL/BasicMeshRenderer_OpenGL.h"
 #endif
 
 #ifdef GRAPHICS_VULKAN
@@ -63,9 +66,6 @@
 //---UI Input
 #include "BlazeEngineGraphics/UI/Input/InputManager.h"
 #include "BlazeEngineGraphics/UI/Input/InputNode.h"
-#include "BlazeEngineGraphics/UI/Input/KeyboardEventHandler.h"
-#include "BlazeEngineGraphics/UI/Input/MouseEventHandler.h"
-#include "BlazeEngineGraphics/UI/Input/SelectEventHandler.h"
 
 #include "BlazeEngineGraphics/UI/Nodes/EmptyNode.h"
 #include "BlazeEngineGraphics/UI/Nodes/Panel.h"

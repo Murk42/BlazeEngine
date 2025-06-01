@@ -1,178 +1,120 @@
 #include "pch.h"
 #include "BlazeEngineCore/File/Path.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/DataStructures/StringView.h"
+#include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
+#include "BlazeEngineCore/Debug/Logger.h"
+#include <filesystem>
+
+#define PATH std::filesystem::path(std::u8string_view((char8_t*)value.Buffer(), value.BufferSize()))
+#define PATH_OF(x) std::filesystem::path(std::u8string_view((char8_t*)x.Buffer(), x.BufferSize()))
+
+
+#define PATH_FUNC_STR(x) ToString(PATH.x())
+#define PATH_FUNC_BOOL(x) PATH.x()
+#define FILESYSTEM_FUNC_BOOL(x) \
+	std::error_code ec; \
+	bool out = std::filesystem::x(PATH, ec);	 \
+	if (ec) \
+	BLAZE_ENGINE_CORE_ERROR("std::filesystem::x returned an error: \"{}\"", ec.message());	 \
+	return out; \
 
 namespace Blaze
 {
-	Path::Path()
-	{
-	}
-	Path::Path(const Path& path)
-		: path(path.path)
-	{ 
-	}
-	Path::Path(Path&& path) noexcept
-		: path(std::move(path.path))
-	{
-	}	
-	Path::Path(const StringViewUTF8& string)
-		: path((const char8_t*)string.Buffer(), (const char8_t*)string.Buffer() + string.BufferSize() - 1)
-	{
-	}
-	StringUTF8 Path::ToString() const
+	static StringUTF8 ToString(const std::filesystem::path& path)
 	{
 		auto string = path.u8string();
-		return StringUTF8(string.c_str(), string.size());
+		return StringUTF8((void*)string.data(), string.size());
 	}
+
+
 	StringUTF8 Path::RootName() const
-	{		
-		auto u8 = path.root_name().u8string();
-		return StringUTF8((void*)u8.data(), u8.size());
+	{					
+		return PATH_FUNC_STR(root_name);
 	}
 	StringUTF8 Path::RootDirectory() const
 	{
-		auto u8 = path.root_directory().u8string();
-		return StringUTF8((void*)u8.data(), u8.size());
+		return PATH_FUNC_STR(root_directory);
 	}
 	StringUTF8 Path::RootPath() const
 	{
-		auto u8 = path.root_path().u8string();
-		return StringUTF8((void*)u8.data(), u8.size());
+		return PATH_FUNC_STR(root_path);
 	}
 	StringUTF8 Path::FileName() const
 	{
-		auto u8 = path.filename().u8string();
-		return StringUTF8((void*)u8.data(), u8.size());
+		return PATH_FUNC_STR(filename);
 	}
 	StringUTF8 Path::Stem() const
-	{
-		auto u8 = path.stem().u8string();
-		return StringUTF8((void*)u8.data(), u8.size());
+	{		
+		return PATH_FUNC_STR(stem);
 	}
 	StringUTF8 Path::FileExtension() const
-	{
-		auto u8 = path.extension().u8string();
-		return StringUTF8((void*)u8.data(), u8.size());
+	{		
+		return PATH_FUNC_STR(extension);
 	}
 	Path Path::ParentPath() const
 	{
-		return Path(path.parent_path());
+		return PATH_FUNC_STR(parent_path);
 	}
 	bool Path::IsAbsolute() const
 	{
-		return path.is_absolute();
+		return PATH_FUNC_BOOL(is_absolute);		
 	}
 	bool Path::IsDirectory() const
 	{
-		std::error_code ec;
-		bool value = std::filesystem::is_directory(path, ec);
-
-		if (ec)
-		{
-			auto message = ec.message();
-			BLAZE_ENGINE_CORE_ERROR("std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
-		}
-
-		return value;
+		FILESYSTEM_FUNC_BOOL(is_directory);		
 	}
 	bool Path::IsFile() const
 	{
-		std::error_code ec;
-		bool value = std::filesystem::is_regular_file(path, ec);
-
-		if (ec)
-		{
-			auto message = ec.message();
-			BLAZE_ENGINE_CORE_ERROR("std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
-		}
-
-		return value;		
-	}
-	bool Path::Empty() const
-	{
-		return path.empty();
-	}
+		FILESYSTEM_FUNC_BOOL(is_regular_file);		
+	}	
 	bool Path::Exists() const
 	{
-		std::error_code ec;
-		bool value = std::filesystem::exists(path, ec);
-
-		if (ec)
-		{			
-			auto message = ec.message();
-			BLAZE_ENGINE_CORE_ERROR("std::filesystem::exists returned an error: \"" + StringView(message.data(), message.c_str()) + "\"");
-		}
-
-		return value;
+		FILESYSTEM_FUNC_BOOL(exists);
 	}
 	uint32 Path::Hash() const
 	{
-		return static_cast<uint32>(std::hash<std::filesystem::path>{}(path));
+		return static_cast<uint32>(std::hash<StringUTF8>{}(value));
 	}
 	Path Path::operator/(const Path& other) const
 	{
-		Path out{ path };
-		out.path.operator/=(other.path);		
+		Path out = *this;
+		out.operator/=(other);		
 		return out;
 	}
-	Path Path::operator/(const StringView& other) const
+	Path& Path::operator/=(const Path& other)
 	{
-		Path out{ path };
-		out.path.append(other.Ptr(), other.Ptr() + other.Count());
-		return out;
-	}
-	Path Path::operator/(const StringViewUTF8& other) const
-	{
-		Path out{ path };
-		out.path.append((char8_t*)other.Buffer(), (char8_t*)other.Buffer() + other.BufferSize() - 1);
-		return out;
-	}
-
+		auto path = PATH;
+		path /= PATH_OF(other.value);
+		value = ToString(path);
+		return *this;
+	}	
 	bool Path::operator==(const Path& other) const
 	{
-		return path == other.path;
+		return value == other.value;
 	}
 	bool Path::operator!=(const Path& other) const
 	{
-		return path != other.path;
+		return value != other.value;
 	}
-
-	Path& Path::operator=(const Path& other)
+	Path& Path::operator=(const String& string)
 	{
-		path = other.path;
-		return *this;
-	}
-	Path& Path::operator=(Path&& other) noexcept
-	{
-		path = std::move(other.path);
-		return *this;
+		value = string;
+		return *this;		
 	}
 	Path& Path::operator=(const StringView& string)
 	{
-		path = std::filesystem::path(string.Ptr(), string.Ptr() + string.Count());
+		value = string;
+		return *this;
+	}
+	Path& Path::operator=(const StringUTF8& string)
+	{
+		value = string;
 		return *this;
 	}
 	Path& Path::operator=(const StringViewUTF8& string) 
 	{
-		if (string.Empty())
-			path.clear();
-		else
-			path = std::filesystem::path((char8_t*)string.Buffer(), (char8_t*)string.Buffer() + string.BufferSize() - 1);
+		value = string;
 		return *this;
 	}
-
-	Path::Path(const std::filesystem::path& path)
-		: path(path)
-	{
-	}
-
-	std::filesystem::path& Path::GetUnderlyingObject()
-	{
-		return path;
-	}
-
-	const std::filesystem::path& Path::GetUnderlyingObject() const
-	{
-		return path;
-	}
-
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngineCore/Event/EventDispatcher.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {

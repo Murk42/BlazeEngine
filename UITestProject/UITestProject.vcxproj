@@ -84,7 +84,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -103,7 +103,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -124,7 +124,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -143,7 +143,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Gdi32.lib;User32.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
+      <AdditionalDependencies>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngine-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>

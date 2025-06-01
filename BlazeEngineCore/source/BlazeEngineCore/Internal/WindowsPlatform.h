@@ -1,10 +1,15 @@
 #pragma once
-#include <Windows.h>
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+
+namespace Blaze
+{
+	class String;
+}
 
 namespace Blaze::Windows
 {	
 	// Parameters:
 	// error - usually the result of GetLastError()
 	// recursionIndex - for internal use
-	String GetErrorString(DWORD error, uint recursionIndex = 0);	
+	String GetErrorString(uint32 error, uint recursionIndex = 0);	
 }

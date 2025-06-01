@@ -1,5 +1,6 @@
 #pragma once
 #include "DualList.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
 
 namespace Blaze
 {
@@ -763,26 +764,5 @@ namespace Blaze
 			prev->next = next;
 		if (next != nullptr)
 			next->prev = prev;		
-	}
-
-	template<typename T, AllocatorType Allocator>
-	DualList<T, Allocator>::Iterator begin(DualList<T, Allocator>& list)
-	{
-		return list.FirstIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	DualList<T, Allocator>::ConstIterator begin(const DualList<T, Allocator>& list)
-	{
-		return list.FirstIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	DualList<T, Allocator>::Iterator end(DualList<T, Allocator>& list)
-	{
-		return list.BehindIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	DualList<T, Allocator>::ConstIterator end(const DualList<T, Allocator>& list)
-	{
-		return list.BehindIterator();
-	}
+	}	
 }

@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/Color.h"
+#include "BlazeEngineCore/Math/Vector.h"
 
 namespace Blaze::Graphics
 {

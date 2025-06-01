@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
@@ -9,7 +10,8 @@
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture1D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/Framebuffer_OpenGL.h"
-
+#include <GL/glew.h>
+#include <SDL3/SDL_video.h>
 using namespace Blaze::Graphics::OpenGLWrapper;
 
 namespace Blaze
@@ -53,9 +55,10 @@ namespace Blaze::Graphics::OpenGL
 		case PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;
 		case PrimitiveType::TriangleFan: return GL_TRIANGLE_FAN;
 		case PrimitiveType::Pathes: return GL_PATCHES;
+		default:
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid PrimitiveType enum value. The integer value was: {}", ToInteger(type));
+			return 0;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid PrimitiveType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
-		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLIndexType(IndexType type)
 	{
@@ -64,9 +67,10 @@ namespace Blaze::Graphics::OpenGL
 		case IndexType::Uint32: return GL_UNSIGNED_INT;
 		case IndexType::Uint16: return GL_UNSIGNED_SHORT;
 		case IndexType::Uint8: return GL_UNSIGNED_BYTE;
+		default:
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid IndexType enum value. The integer value was: {}", ToInteger(type));
+			return 0;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid IndexType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
-		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLPolygonMode(PolygonMode mode)
 	{
@@ -75,9 +79,10 @@ namespace Blaze::Graphics::OpenGL
 		case PolygonMode::Point: return GL_POINT;
 		case PolygonMode::Line: return GL_LINE;
 		case PolygonMode::Fill: return GL_FILL;
+		default:
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid PolygonMode. The integer value was: {}", ToInteger(mode));
+			return 0;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid PolygonMode. The integer value was: " + StringParsing::Convert(ToInteger(mode)));
-		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLImageAccess(ImageAccess access)
 	{
@@ -86,9 +91,10 @@ namespace Blaze::Graphics::OpenGL
 		case ImageAccess::Read: return GL_READ_ONLY;
 		case ImageAccess::Write: return GL_WRITE_ONLY;
 		case ImageAccess::ReadWrite: return GL_READ_WRITE;
+		default:
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ImageAccess enum value. The integer value was: {}", ToInteger(access));
+			return 0;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ImageAccess enum value. The integer value was: " + StringParsing::Convert(ToInteger(access)));
-		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLImageFormat(ImageFormat format)
 	{
@@ -133,9 +139,10 @@ namespace Blaze::Graphics::OpenGL
 		case ImageFormat::RG8_SNORM:		return GL_RG8_SNORM;
 		case ImageFormat::R16_SNORM:		return GL_R16_SNORM;
 		case ImageFormat::R8_SNORM:		return GL_R8_SNORM;
+		default:
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ImageFormat enum value. The integer value was: {}", ToInteger(format));
+			return 0;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ImageFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
-		return std::numeric_limits<GLenum>::max();
 	}
 
 	GLenum OpenGLStencilOperationType(StencilOperationType type)
@@ -151,7 +158,7 @@ namespace Blaze::Graphics::OpenGL
 		case StencilOperationType::DecreaseWrap: return GL_DECR_WRAP;
 		case StencilOperationType::Invert: return GL_INVERT;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid StencilOperationType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid StencilOperationType enum value. The integer value was: {}", ToInteger(type));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLStencilComparison(StencilComparison comparison)
@@ -167,7 +174,7 @@ namespace Blaze::Graphics::OpenGL
 		case StencilComparison::NotEqual: return GL_NOTEQUAL;
 		case StencilComparison::Always: return GL_ALWAYS;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid StencilComparison enum value. The integer value was: " + StringParsing::Convert(ToInteger(comparison)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid StencilComparison enum value. The integer value was: {}", ToInteger(comparison));
 		return std::numeric_limits<GLenum>::max();
 	}
 	GLenum OpenGLScreenBufferType(ScreenBufferType type)
@@ -178,15 +185,15 @@ namespace Blaze::Graphics::OpenGL
 		case ScreenBufferType::Back: return GL_BACK;
 		case ScreenBufferType::BackAndFront: return GL_FRONT_AND_BACK;
 		}
-		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ScreenBufferType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+		BLAZE_ENGINE_GRAPHICS_ERROR("Invalid ScreenBufferType enum value. The integer value was: {}", ToInteger(type));
 		return std::numeric_limits<GLenum>::max();
 	}
 
-	void GraphicsContext_OpenGL::SelectTexture(Texture1D* obj)
+	void GraphicsContext_OpenGL::SelectTexture(const Texture1D* obj)
 	{
 		glBindTexture(GL_TEXTURE_1D, obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectTexture(Texture2D* obj)
+	void GraphicsContext_OpenGL::SelectTexture(const Texture2D* obj)
 	{
 		glBindTexture(GL_TEXTURE_2D, obj == nullptr ? 0 : obj->GetHandle());
 	}
@@ -206,39 +213,39 @@ namespace Blaze::Graphics::OpenGL
 	//{
 	//	glBindTexture(GL_TEXTURE_BUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	//}
-	void GraphicsContext_OpenGL::SelectVertexBuffer(GraphicsBuffer* obj)
+	void GraphicsContext_OpenGL::SelectVertexBuffer(const GraphicsBuffer* obj)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}	
-	void GraphicsContext_OpenGL::SelectUniformBuffer(GraphicsBuffer* obj)
+	void GraphicsContext_OpenGL::SelectUniformBuffer(const GraphicsBuffer* obj)
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
 	}
-	void GraphicsContext_OpenGL::SelectVertexArray(VertexArray* obj)
+	void GraphicsContext_OpenGL::SelectVertexArray(const VertexArray* obj)
 	{
 		glBindVertexArray(obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectProgram(ShaderProgram* obj)
+	void GraphicsContext_OpenGL::SelectProgram(const ShaderProgram* obj)
 	{
 		glUseProgram(obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectFramebuffer(Framebuffer_OpenGL* obj)
+	void GraphicsContext_OpenGL::SelectFramebuffer(const Framebuffer_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectDrawFramebuffer(Framebuffer_OpenGL* obj)
+	void GraphicsContext_OpenGL::SelectDrawFramebuffer(const Framebuffer_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectReadFramebuffer(Framebuffer_OpenGL* obj)
+	void GraphicsContext_OpenGL::SelectReadFramebuffer(const Framebuffer_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectRenderbuffer(Renderbuffer* obj)
+	void GraphicsContext_OpenGL::SelectRenderbuffer(const Renderbuffer* obj)
 	{
 		glBindRenderbuffer(GL_RENDERBUFFER, obj == nullptr ? 0 : obj->GetHandle());		
 	}
-	void GraphicsContext_OpenGL::SelectShaderStorageBufferToSlot(uint slotIndex, GraphicsBuffer* buffer, uintMem offset, uintMem size)
+	void GraphicsContext_OpenGL::SelectShaderStorageBufferToSlot(uint slotIndex, const GraphicsBuffer* buffer, uintMem offset, uintMem size)
 	{
 		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, slotIndex, buffer->GetHandle(), offset, size);
 	}
@@ -247,7 +254,6 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);		
 	}
-
 	void GraphicsContext_OpenGL::BindUniformBuffer(const GraphicsBuffer& buffer, uint binding)
 	{
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding, buffer.GetHandle());		

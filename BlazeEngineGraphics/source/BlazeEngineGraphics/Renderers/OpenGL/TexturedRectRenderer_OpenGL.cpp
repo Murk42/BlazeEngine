@@ -1,8 +1,9 @@
 #include "pch.h"
+#include "BlazeEngineCore/DataStructures/Map.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
-#include "BlazeEngineGraphics/Files/shaders.h"
+#include "BlazeEngineGraphics/Shaders/Shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {	
@@ -15,7 +16,7 @@ namespace Blaze::Graphics::OpenGL
 			uintMem counter;
 			Array<Instance> instances;
 		};
-		Map<OpenGLWrapper::Texture2D*, TextureDivision> textures;
+		Map<const OpenGLWrapper::Texture2D*, TextureDivision> textures;
 
 		for (auto& rd : renderData)
 		{			
@@ -51,13 +52,22 @@ namespace Blaze::Graphics::OpenGL
 		auto textureIt = textures.FirstIterator();
 		uintMem textureInstancesProcessed = 0;
 
+		List<Group>::Iterator lastGroupsIterator;
+		auto AddGroup = [&]() -> Group& {
+			if (groups.Empty())
+				lastGroupsIterator = groups.AddFront();
+			else
+				lastGroupsIterator = groups.AddAfter(lastGroupsIterator);
+
+			return *lastGroupsIterator;			
+			};
 		//At each iteration of this loop we fill a group
 		while (true)
 		{
 			if (textureIt == textures.BehindIterator())
 				break;					
 
-			Group& group = *groups.AddBack();
+			Group& group = AddGroup();
 			memset(group.textures, 0, sizeof(group.textures));
 									
 			uintMem groupInstanceSpaceLeft = TexturedRectRenderer_OpenGL::InstanceBufferInstanceCount;
@@ -81,13 +91,8 @@ namespace Blaze::Graphics::OpenGL
 				{
 					auto& dst = group.instances[j + TexturedRectRenderer_OpenGL::InstanceBufferInstanceCount - groupInstanceSpaceLeft];
 					auto& src = instances[j + textureInstancesProcessed];					
-					
-					//dst.alpha = src.alpha;
-					//dst.blend = src.blend;
-					//dst.color = src.color;
-					//dst.p1 = src.p1
-						dst = src;
-					//dst.textureIndex = (float)i;
+										
+					dst = src;					
 				}				
 
 				textureInstancesProcessed = copyCount;				
@@ -107,63 +112,50 @@ namespace Blaze::Graphics::OpenGL
 	{
 		if (options.loadDefaultShaders)
 		{
-			Blaze::Graphics::OpenGLWrapper::VertexShader vert;
-			vert.ShaderSource(StringView((const char*)texturedRect_vert_file, texturedRect_vert_size));
-			vert.CompileShader();
-
-			Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
-			frag.ShaderSource(StringView((const char*)texturedRect_frag_file, texturedRect_frag_size));
-			frag.CompileShader();
-
+			auto vert = OpenGLWrapper::VertexShader(ShaderSources::texturedRect_vert);
+			auto frag = OpenGLWrapper::FragmentShader(ShaderSources::texturedRect_frag);
 			program.LinkShaders({ &vert, &frag });
+
+			for (int i = 0; i < DrawCallTextureCount; ++i)
+				program.SetUniform(1 + i, i);
 		}
 
-		uint8 vertices[6]{
-			0, 1, 2, 2, 1, 3
-		};
-
-		vertexBuffer.Allocate(vertices, sizeof(vertices));
-		instanceBuffer.Allocate(nullptr, InstanceBufferSize, OpenGLWrapper::GraphicsBufferMapAccessFlags::Write, Graphics::OpenGLWrapper::GraphicsBufferMapType::None);
-
-		//va.EnableVertexAttribute(0);
-		//va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint8, 1, false, 0);
-		//va.SetVertexAttributeBuffer(0, &vertexBuffer, sizeof(Vertex), 0);
-		//va.SetVertexAttributeDivisor(0, 0);
+		instanceBuffer.Allocate(nullptr, InstanceBufferSize , OpenGLWrapper::GraphicsBufferMapAccessFlags::Write, Graphics::OpenGLWrapper::GraphicsBufferMapType::None);
 
 		va.EnableVertexAttribute(0);
-		va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 4, false, offsetof(Instance, color));
+		va.SetFloatVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 4, offsetof(Instance, color));
 		va.SetVertexAttributeBuffer(0, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(0, 1);
 		va.EnableVertexAttribute(1);
-		va.SetVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, p1));
+		va.SetFloatVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, offsetof(Instance, p1));
 		va.SetVertexAttributeBuffer(1, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(1, 1);
 		va.EnableVertexAttribute(2);
-		va.SetVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, p2));
+		va.SetFloatVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, offsetof(Instance, p2));
 		va.SetVertexAttributeBuffer(2, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(2, 1);
 		va.EnableVertexAttribute(3);
-		va.SetVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, p3));
+		va.SetFloatVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, offsetof(Instance, p3));
 		va.SetVertexAttributeBuffer(3, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(3, 1);
 		va.EnableVertexAttribute(4);
-		va.SetVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, uv1));
+		va.SetFloatVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, offsetof(Instance, uv1));
 		va.SetVertexAttributeBuffer(4, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(4, 1);
 		va.EnableVertexAttribute(5);
-		va.SetVertexAttributeFormat(5, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, offsetof(Instance, uv2));
+		va.SetFloatVertexAttributeFormat(5, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, offsetof(Instance, uv2));
 		va.SetVertexAttributeBuffer(5, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(5, 1);
 		va.EnableVertexAttribute(6);
-		va.SetVertexAttributeFormat(6, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, offsetof(Instance, blend));
+		va.SetFloatVertexAttributeFormat(6, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 1, offsetof(Instance, blend));
 		va.SetVertexAttributeBuffer(6, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(6, 1);
 		va.EnableVertexAttribute(7);
-		va.SetVertexAttributeFormat(7, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, offsetof(Instance, alpha));
+		va.SetFloatVertexAttributeFormat(7, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 1, offsetof(Instance, alpha));
 		va.SetVertexAttributeBuffer(7, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(7, 1);
 		va.EnableVertexAttribute(8);
-		va.SetVertexAttributeFormat(8, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, offsetof(Instance, textureIndex));
+		va.SetFloatVertexAttributeFormat(8, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 1, offsetof(Instance, textureIndex));
 		va.SetVertexAttributeBuffer(8, &instanceBuffer, sizeof(Instance), 0);
 		va.SetVertexAttributeDivisor(8, 1);
 	}	
@@ -173,24 +165,18 @@ namespace Blaze::Graphics::OpenGL
 		graphicsContext.SelectVertexArray(&va);
 		graphicsContext.SetActiveTextureSlot(0);
 
-		Vec2u renderArea = Vec2u(targetSize);		
-		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);
+		program.SetUniform(0, Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1));
 
-		program.SetUniform(0, proj);
-
-		for (int i = 0; i < DrawCallTextureCount; ++i)
-			program.SetUniform(1 + i, i);	
-
-		Blaze::Graphics::OpenGLWrapper::Fence fence{ };
-		fence.SetFence();
+		//Blaze::Graphics::OpenGLWrapper::Fence fence{ };
+		//fence.SetFence();
 
 		for (auto& group : renderCache.groups)
 		{
-			if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
-			{
-				Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
-				return;
-			}
+			//if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
+			//{
+			//	Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
+			//	return;
+			//}
 
 			void* instanceBufferMap = instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
 
@@ -206,27 +192,20 @@ namespace Blaze::Graphics::OpenGL
 
 			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::Triangles, 0, 6, 0, group.instanceCount);
 
-			fence.SetFence();		
+			//fence.SetFence();		
 		}
 	}
 	void TexturedRectRenderer_OpenGL::Render(RenderStream& stream, Vec2u targetSize)
 	{
 		graphicsContext.SelectProgram(&program);
 		graphicsContext.SelectVertexArray(&va);
-		graphicsContext.SetActiveTextureSlot(0);
+		graphicsContext.SetActiveTextureSlot(0);		
 
-		Vec2u renderArea = Vec2u(targetSize);
-		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1);
+		program.SetUniform(0, Mat4f::OrthographicMatrix(0, (float)targetSize.x, 0, (float)targetSize.y, -1, 1));
 
-		program.SetUniform(0, proj);
-		program.SetUniform(1, 0);
-		program.SetUniform(2, 1);
-		program.SetUniform(3, 2);
-		program.SetUniform(4, 3);
-
-		Blaze::Graphics::OpenGLWrapper::Fence fence{ };
-		fence.SetFence();
-	
+		//Blaze::Graphics::OpenGLWrapper::Fence fence{ };
+		//fence.SetFence();
+			
 		stream.BeginStream();
 
 		//When rd is nullptr it means next render data can be rendered, if not the one stored in rd should be
@@ -234,13 +213,13 @@ namespace Blaze::Graphics::OpenGL
 
 		while (true)
 		{
-			if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
-			{
-				Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
-				return;
-			}
+			//if (fence.BlockClient(1.0) == Blaze::Graphics::OpenGLWrapper::FenceReturnState::TimeoutExpired)
+			//{
+			//	Debug::Logger::LogWarning("Blaze Graphics API", "Fence timeout");
+			//	return;
+			//}
 
-			OpenGLWrapper::Texture2D* textures[DrawCallTextureCount]{ };
+			const OpenGLWrapper::Texture2D* textures[DrawCallTextureCount]{ };
 
 			Instance* instanceBufferMap = (Instance*)instanceBuffer.MapBufferRange(0, InstanceBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
 			uint instanceCount = 0;
@@ -308,7 +287,7 @@ namespace Blaze::Graphics::OpenGL
 
 			graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGLWrapper::PrimitiveType::TriangleStrip, 0, 4, 0, instanceCount);
 
-			fence.SetFence();
+			//fence.SetFence();
 
 			if (rd == nullptr)
 				break;
@@ -317,6 +296,9 @@ namespace Blaze::Graphics::OpenGL
 	void TexturedRectRenderer_OpenGL::SetShaderProgram(Blaze::Graphics::OpenGLWrapper::ShaderProgram&& program)
 	{
 		this->program = std::move(program);
+
+		for (int i = 0; i < DrawCallTextureCount; ++i)
+			this->program.SetUniform(1 + i, i);
 	}
 
 }

@@ -7,10 +7,19 @@
 #include "BlazeEngineGraphics/RenderScene/RenderUnit.h"
 
 namespace Blaze::Graphics::OpenGL
-{			
-	class UIRenderPipeline_OpenGL :
-		EventHandler<UI::NodeTreeChangedEvent>,		
-		EventHandler<UI::ScreenDestructionEvent>
+{
+	struct UINodeRenderGroup
+	{
+		uintMem count;
+		StreamRenderer& renderer;
+	};
+	struct UIRenderItem
+	{
+		RenderUnit& renderUnit;
+		UI::Node& node;
+	};
+
+	class UIRenderPipeline_OpenGL
 	{
 	public:
 		UIRenderPipeline_OpenGL(
@@ -22,36 +31,25 @@ namespace Blaze::Graphics::OpenGL
 
 		void SetScreen(UI::Screen* newScreen);
 		void Render(Vec2u targetSize);		
+
+		StreamRenderer* GetRenderer(RenderUnit& renderUnit);
+		
+		inline UI::Screen* GetScreen() const { return screen; }
 	private:
 		UI::Screen* screen;
 		TexturedRectRenderer_OpenGL& texturedRectRenderer;
 		TexturedRectRenderer_OpenGL& coloredCharacterRenderer_OpenGL;
 		PanelRenderer_OpenGL& panelRenderer;			
-		bool recreateRenderQueue;
-				
-		struct NodeRenderGroup
-		{
-			uintMem count;
-			StreamRenderer& renderer;			
-		};
-		struct RenderItem
-		{
-			RenderUnit& renderUnit;
-			UI::Node& node;
-		};
+		bool recreateRenderQueue;				
 		
-		Array<RenderItem> renderQueue;
-		Array<NodeRenderGroup> renderGroups;
+		Array<UIRenderItem> renderQueue;
+		Array<UINodeRenderGroup> renderGroups;
 
-		StreamRenderer* GetRenderer(RenderUnit& renderUnit);
 			
 		void RecreateRenderQueue();
 		
-		void OnEvent(const UI::NodeTreeChangedEvent& event) override;
-		void OnEvent(const UI::ScreenDestructionEvent& event) override;
-		
-		friend class GlobalRenderGroupStream;
-		friend class UIBestRenderQueue;
-		friend class UISimpleRenderQueue;
+		void NodeTreeChanged(const UI::NodeTreeChangedEvent& event);
+		void ScreenDestroyed(const UI::ScreenDestructionEvent& event);
+		void NodeEnabledStateUpdated(const UI::Node::EnabledStateChangedEvent& event);
 	};
 }

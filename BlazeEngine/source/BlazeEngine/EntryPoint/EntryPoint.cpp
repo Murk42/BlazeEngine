@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "BlazeEngineCore/Threading/Thread.h"
 #include "BlazeEngine/Internal/BlazeEngineContext.h"
 #include "BlazeEngine/Internal/Libraries/SDL.h"
 
@@ -34,7 +35,7 @@ namespace Blaze
 	{
 		String indentString;
 		indentString.Resize(indent * 4, ' ');
-		BLAZE_ENGINE_CORE_INFO(indentString + result.name + " - " + StringParsing::Convert(result.time.ToSeconds(), StringParsing::FloatStringFormat::Fixed) + "s");
+		BLAZE_ENGINE_CORE_INFO("{} {} - {:.4}s", indentString, result.name, result.time.ToSeconds());
 
 		for (auto& subResult : result.nodes)
 			ReportSubTiming(subResult.value, indent + 1);
@@ -43,7 +44,7 @@ namespace Blaze
 	static void ReportTiming(Timing& timing)
 	{
 		auto result = timing.GetTimingResult();
-		BLAZE_ENGINE_CORE_INFO(result.name + " initialization took " + StringParsing::Convert(result.time.ToSeconds(), StringParsing::FloatStringFormat::Fixed) + "s");
+		BLAZE_ENGINE_CORE_INFO("{} initialization took {:.4}s", result.name, result.time.ToSeconds());
 
 		for (auto& subResult : result.nodes)
 			ReportSubTiming(subResult.value, 1);

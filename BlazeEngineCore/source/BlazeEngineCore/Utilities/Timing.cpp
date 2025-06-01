@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineCore/Utilities/Timing.h"
+#include "BlazeEngineCore/Utilities/TimeIntervalImpl.h"
 
 namespace Blaze
 {	

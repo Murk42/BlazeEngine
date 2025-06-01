@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
+#include <GL/glew.h>
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
@@ -31,13 +32,6 @@ namespace Blaze::Graphics::OpenGLWrapper
 		}
 		
 		pixelStride = (uint)byteStride / pixelSize;
-	}
-
-	static StringView GetGLError()
-	{				
-		const char* ptr = (const char*)glewGetErrorString(glGetError());
-		uintMem len = strlen(ptr);
-		return StringView(ptr, len);
 	}
 
 	Texture2D::Texture2D()

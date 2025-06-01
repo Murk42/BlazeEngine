@@ -3,8 +3,8 @@
 
 namespace Blaze::UI
 {
-	TextRenderUnitBase::TextRenderUnitBase(StringView rendererName) :
-		RenderUnit(rendererName)
+	TextRenderUnitBase::TextRenderUnitBase(TextContainerBase& textContainer, StringView rendererName) :
+		RenderUnit(rendererName), textContainer(textContainer)
 	{
 	}
 	bool TextRenderUnitBase::GetLineIndexUnderPosition(Vec2f localTargetPos, uintMem& lineIndex)
@@ -24,10 +24,12 @@ namespace Blaze::UI
 	}
 	uintMem TextRenderUnitBase::GetClosestLineIndex(Vec2f localTargetPos)
 	{
-		uint lineIndex;
-
 		auto& lineData = GetLineData();
-		for (lineIndex = 0; lineIndex < lineData.Count() - 1; ++lineIndex)
+				
+		uint lineIndex = 0;
+
+		//lineData is never empty so 'lineData.Count() - 1' wont overflow
+		for (; lineIndex < lineData.Count() - 1; ++lineIndex)
 			if (localTargetPos.y > (lineData[lineIndex].pos.y + lineData[lineIndex + 1].pos.y + lineData[lineIndex + 1].size.y) / 2)
 				break;
 
@@ -38,17 +40,16 @@ namespace Blaze::UI
 		auto& characterData = GetCharacterData();
 		auto& lineData = GetLineData();
 
-		uintMem lineIndex;
-
-		for (lineIndex = 0; lineIndex < lineData.Count() - 1; ++lineIndex)
-			if (localTargetPos.y > (lineData[lineIndex].pos.y + lineData[lineIndex + 1].pos.y + lineData[lineIndex + 1].size.y) / 2)
-				break;
-
+		uintMem lineIndex = GetClosestLineIndex(localTargetPos);
 		uintMem characterBegin = lineData[lineIndex].firstCharacterIndex;
-		uintMem characterEnd = lineData[lineIndex].firstCharacterIndex + lineData[lineIndex].characterCount;
+		uintMem characterEnd = characterBegin + lineData[lineIndex].characterCount;
 
-		uintMem indexOut;
-		for (indexOut = characterBegin; indexOut < characterEnd - 1; ++indexOut)
+		if (characterEnd == characterBegin) //this can be true only for the last line
+			return characterBegin;
+
+		uintMem indexOut = characterBegin;
+		
+		for (; indexOut < characterEnd - 1; ++indexOut)
 			if (localTargetPos.x < (characterData[indexOut].pos.x + characterData[indexOut].size.x + characterData[indexOut + 1].pos.x) / 2)
 				break;
 
@@ -142,85 +143,5 @@ namespace Blaze::UI
 			return characterData[characterIndex].pos;
 		else
 			return (characterData[characterIndex - 1].pos + characterData[characterIndex].pos + Vec2f(characterData[characterIndex - 1].size.x, 0)) / 2;
-	}
-	void TextRenderUnitBase::FindWord(uintMem characterIndex, uintMem& begin, uintMem& end)
-	{
-		auto& characterData = GetCharacterData();
-
-		begin = 0;
-		end = 0;
-
-		if (characterData.Empty())
-			return;
-
-		enum class WordType {
-			AlphaNumeric,
-			Numeric,
-			Space,
-			Unknown,
-		};
-
-		WordType wordType = WordType::Unknown;
-		for (auto it = characterData.FirstIterator(); it != characterData.BehindIterator(); ++it)
-		{
-			char value = it->character.Value();
-
-			WordType newWordType = WordType::Unknown;
-
-			if (isalpha(value) || isdigit(value) && wordType == WordType::AlphaNumeric)
-				newWordType = WordType::AlphaNumeric;
-			else if (isdigit(value))
-				newWordType = WordType::Numeric;
-			else if (value == ' ')
-				newWordType = WordType::Space;
-			else
-				newWordType = WordType::Unknown;
-
-			bool newWord = wordType != newWordType || wordType == WordType::Unknown;
-
-			if (newWord)
-			{
-				if (characterIndex < end)
-					break;
-
-				begin = end;
-			}
-
-			wordType = newWordType;
-
-			++end;
-
-		}
-
-		if (wordType == WordType::Unknown)
-			begin = --end;
-	}
-	void TextRenderUnitBase::FindLine(uintMem characterIndex, uintMem& begin, uintMem& end)
-	{
-		auto& characterData = GetCharacterData();		
-
-		begin = 0;
-		end = 0;		
-
-		characterIndex = std::min(characterIndex, characterData.Count() - 1);
-
-		begin = characterIndex;
-		end = characterIndex;
-
-		while (begin != 0)
-		{
-			if (characterData[begin - 1].character == '\n')
-				break;
-
-			--begin;
-		}
-
-		while (end != characterData.Count())
-		{
-			if (characterData[end].character == '\n' || characterData[end].character == '\0')
-				break;
-
-			++end;
-		}
-	}
+	}	
 }

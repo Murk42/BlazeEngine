@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineCore/Memory/MallocAllocator.h"
+#include <memory>
 
 namespace Blaze
 {

@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"
 
 namespace Blaze::ECS

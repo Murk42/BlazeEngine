@@ -50,11 +50,11 @@
 	constexpr name& operator^=(name& left, name right) { return (left = static_cast<name>(static_cast<uint64>(left) ^ static_cast<uint64>(right))); } \
 	constexpr name operator~(name value) { return static_cast<name>(~static_cast<uint64>(value)); } 
 
-#define BLAZE_ENGINE_CORE_DEBUG(message) ::Blaze::Debug::Logger::LogDebug("Blaze Engine Core", message)
-#define BLAZE_ENGINE_CORE_INFO(message) ::Blaze::Debug::Logger::LogInfo("Blaze Engine Core", message)
-#define BLAZE_ENGINE_CORE_WARNING(message) ::Blaze::Debug::Logger::LogWarning("Blaze Engine Core", message)
-#define BLAZE_ENGINE_CORE_ERROR(message) ::Blaze::Debug::Logger::LogError("Blaze Engine Core", message)
-#define BLAZE_ENGINE_CORE_FATAL(message) ::Blaze::Debug::Logger::LogFatal("Blaze Engine Fatal", message)
+#define BLAZE_ENGINE_CORE_DEBUG(message, ...) ::Blaze::Debug::Logger::LogDebug("Blaze Engine Core", message, __VA_ARGS__)
+#define BLAZE_ENGINE_CORE_INFO(message, ...) ::Blaze::Debug::Logger::LogInfo("Blaze Engine Core", message, __VA_ARGS__)
+#define BLAZE_ENGINE_CORE_WARNING(message, ...) ::Blaze::Debug::Logger::LogWarning("Blaze Engine Core", message, __VA_ARGS__)
+#define BLAZE_ENGINE_CORE_ERROR(message, ...) ::Blaze::Debug::Logger::LogError("Blaze Engine Core", message, __VA_ARGS__)
+#define BLAZE_ENGINE_CORE_FATAL(message, ...) ::Blaze::Debug::Logger::LogFatal("Blaze Engine Fatal", message, __VA_ARGS__)
 
 namespace Blaze
 {

@@ -1,8 +1,13 @@
 #include "pch.h"
 #include "BlazeEngineCore/File/File.h"
 #include "BlazeEngineCore/File/FileSystem.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/Debug/Logger.h"
+
+#include <codecvt>
 
 #ifdef BLAZE_PLATFORM_WINDOWS
+#include <Windows.h>
 #include "BlazeEngineCore/Internal/WindowsPlatform.h"
 #undef CreateDirectory
 #else
@@ -112,12 +117,14 @@ namespace Blaze
 
 		}
 
-		auto wstring = path.GetUnderlyingObject().wstring();
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		auto string = path.GetString();		
+		auto wstring = converter.from_bytes((char*)string.Buffer(), (char*)string.Buffer() + string.BufferSize());
 		HANDLE handle = CreateFileW(wstring.data(), desiredAccess, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, NULL, creationDisposition, flagsAndAttributes, NULL);
 
 		if (handle == INVALID_HANDLE_VALUE)
 		{
-			Debug::Logger::LogError("Windows API", "CreateFileA given a path \"" + path.ToString() + "\" failed with error: \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "CreateFileA given a path \"{}\" failed with error: \"{}\"", path, Windows::GetErrorString(GetLastError()));
 			return;
 		}
 

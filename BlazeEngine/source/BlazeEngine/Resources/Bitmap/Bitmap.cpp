@@ -1,4 +1,6 @@
 #include "pch.h"
+#include "BlazeEngineCore/Memory/MemoryManager.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "sail/sail.h"
 #include "SailClasses.h"
@@ -21,7 +23,7 @@ namespace Blaze
 		case Blaze::BitmapColorFormat::BGR:	return 3;
 		case Blaze::BitmapColorFormat::BGRA: return 4;
 		default:
-			BLAZE_ENGINE_ERROR("Invalid BitmapColorFormat enum value. The integer value was: " + StringParsing::Convert(ToInteger(format)));
+			BLAZE_ENGINE_ERROR("Invalid BitmapColorFormat enum value. The integer value was: {}", ToInteger(format));
 			return 4;
 		}
 	}
@@ -39,19 +41,27 @@ namespace Blaze
 		case Blaze::BitmapColorComponentType::Float:	return sizeof(float);
 		case Blaze::BitmapColorComponentType::Double: return sizeof(double);
 		default:
-			BLAZE_ENGINE_ERROR("Invalid BitmapColorComponentType enum value. The integer value was: " + StringParsing::Convert(ToInteger(type)));
+			BLAZE_ENGINE_ERROR("Invalid BitmapColorComponentType enum value. The integer value was: {}", ToInteger(type));
 			return sizeof(uint8);
 		}
 	}
 
 	BitmapRef::BitmapRef()
-		: pixels(nullptr), format(BitmapColorFormat::RGBA), type(BitmapColorComponentType::Int32), size(0, 0), stride(0)
+		: pixels(nullptr), format(BitmapColorFormat::RGBA), type(BitmapColorComponentType::Uint8), size(0, 0), stride(0)
 	{
 		  
 	}
 	BitmapRef::BitmapRef(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, uintMem stride, void* pixels)
 		: size(size), format(format), type(type), stride(stride), pixels(pixels)
 	{
+		if (size.x == 0 || size.y == 0 || pixels == nullptr)
+		{
+			size = Vec2u();
+			pixels = nullptr;			
+			format = BitmapColorFormat::RGBA;
+			type = BitmapColorComponentType::Uint8;
+			stride = 0;
+		}
 	}
 	BitmapRef::BitmapRef(const BitmapRef& other)
 		: pixels(other.pixels), format(other.format), type(other.type), size(other.size), stride(other.stride)
@@ -60,17 +70,19 @@ namespace Blaze
 	}
 
 	BitmapRef BitmapRef::GetSubBitmap(Vec2u size, Vec2u offset)
-	{
+	{		
 		uintMem pixelSize = BitmapColorFormatComponentCount(format) * BitmapColorComponentTypeSize(type);
 		return BitmapRef(size, format, type, stride, (char*)pixels + offset.y * stride + offset.x * pixelSize);
 	}
 
 	Bitmap::Bitmap()
-		: BitmapRef()
 	{
 	}
 	Bitmap::Bitmap(const Bitmap& other)
 	{
+		if (other.Empty())
+			return;
+
 		uint componentCount = BitmapColorFormatComponentCount(other.format);
 		uintMem componentSize = BitmapColorComponentTypeSize(other.type);
 		uintMem pixelSize = componentCount * componentSize;
@@ -85,7 +97,7 @@ namespace Blaze
 		stride = other.stride;
 	}
 	Bitmap::Bitmap(Bitmap&& other) noexcept
-		: BitmapRef(other)
+		: BitmapRef(std::move(other))
 	{
 		other.pixels = nullptr;
 		other.size = Vec2u();
@@ -301,13 +313,19 @@ namespace Blaze
 		sail_image* image;
 		void* state = nullptr;
 
-		StringUTF8 pathString = path.ToString();
+		if (path.Empty())
+		{
+			BLAZE_ENGINE_ERROR("Loading a bitmap with an empty path");
+			return;
+		}
+		
+		StringUTF8 pathString = path.GetString();
 		StringUTF8 fileExtension = path.FileExtension();
-		StringParsing::GetAfterFirst(fileExtension, fileExtension, '.');
+		if (fileExtension.First() == '.') fileExtension = fileExtension.SubString(1, fileExtension.CharacterCount() - 1);		
 
-		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.");
-		SAIL_CHECK(sail_start_loading_from_file((const char*)pathString.Buffer(), codec, &state), "Failed to start loading from file with path \"" + pathString + "\".");
-		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next from file with path \"" + pathString + "\".");
+		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.", );
+		SAIL_CHECK(sail_start_loading_from_file((const char*)pathString.Buffer(), codec, &state), "Failed to start loading from file with path \"" + pathString + "\".", );
+		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next from file with path \"" + pathString + "\".", );
 
 		BitmapColorFormat format{ };
 		BitmapColorComponentType type{ };
@@ -321,11 +339,21 @@ namespace Blaze
 
 		Create(size, format, type, image->pixels, image->bytes_per_line, flipVertically);
 
-		SAIL_CHECK(sail_stop_loading(state), "Failed to stop loading.");		
+		SAIL_CHECK(sail_stop_loading(state), "Failed to stop loading.",);		
 		sail_destroy_image(image);		
 	}	
 	void Bitmap::Save(Path path)
 	{				
+		if (path.Empty())
+		{
+			BLAZE_ENGINE_ERROR("Saving a bitmap with an empty path");
+			return;
+		}
+
+		StringUTF8 pathString = path.GetString();
+		StringUTF8 fileExtension = path.FileExtension();
+		if (fileExtension.First() == '.') fileExtension = fileExtension.SubString(1, fileExtension.CharacterCount() - 1);
+
 		const sail_codec_info* codec = nullptr;
 		sail_image image;
 		void* state = nullptr;
@@ -343,17 +371,13 @@ namespace Blaze
 		image.delay = 0;
 		image.palette = NULL;
 		image.meta_data_node = NULL;
-		image.iccp = NULL;
-		
-		StringUTF8 pathString = path.ToString();
-		StringUTF8 fileExtension = path.FileExtension();
-		StringParsing::GetAfterFirst(fileExtension, fileExtension, '.');
+		image.iccp = NULL;				
 
-		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.");
-		SAIL_CHECK(sail_start_saving_into_file((const char*)pathString.Buffer(), codec, &state), "Failed to start saving into from file with path \"" + pathString + "\".");
-		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame from file with path \"" + pathString + "\".");
+		SAIL_CHECK(sail_codec_info_from_extension((const char*)fileExtension.Buffer(), &codec), "Failed to get codec info object from \"" + fileExtension + "\" extension.", );
+		SAIL_CHECK(sail_start_saving_into_file((const char*)pathString.Buffer(), codec, &state), "Failed to start saving into from file with path \"" + pathString + "\".", );
+		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame from file with path \"" + pathString + "\".", );
 
-		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving.");		
+		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving.", );		
 	}
 	void Bitmap::Serialize(WriteStream& stream) const
 	{
@@ -377,13 +401,13 @@ namespace Blaze
 		image.meta_data_node = NULL;
 		image.iccp = NULL;
 				
-		SAIL_CHECK(sail_alloc_io(&io), "Failed to allocate io object.");
+		SAIL_CHECK(sail_alloc_io(&io), "Failed to allocate io object.", );
 		SetupSailWriteIO(io, stream);
-		SAIL_CHECK(sail_codec_info_from_extension("bmp", &codec), "Failed to get codec info object from \".bmp\" extension.");
-		SAIL_CHECK(sail_start_saving_into_io(io, codec, &state), "Failed to start saving into io.");
-		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame.");		
+		SAIL_CHECK(sail_codec_info_from_extension("bmp", &codec), "Failed to get codec info object from \".bmp\" extension.", );
+		SAIL_CHECK(sail_start_saving_into_io(io, codec, &state), "Failed to start saving into io.", );
+		SAIL_CHECK(sail_write_next_frame(state, &image), "Failed to load next frame.", );		
 		
-		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving");
+		SAIL_CHECK(sail_stop_saving(state), "Failed to stop saving", );
 		sail_destroy_io(io);				
 	}
 	void Bitmap::Deserialize(ReadStream& stream)
@@ -393,11 +417,11 @@ namespace Blaze
 		sail_image* image;
 		void* state = nullptr;
 		
-		SAIL_CHECK(sail_alloc_io(&io), "Failed to allocate io object.");
+		SAIL_CHECK(sail_alloc_io(&io), "Failed to allocate io object.", );
 		SetupSailReadIO(io, stream);
-		SAIL_CHECK(sail_codec_info_from_extension("bmp", &codec), "Failed to get codec info object from \".bmp\" extension.");
-		SAIL_CHECK(sail_start_loading_from_io(io, codec, &state), "Failed to start loading form io.");
-		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next frame.");
+		SAIL_CHECK(sail_codec_info_from_extension("bmp", &codec), "Failed to get codec info object from \".bmp\" extension.", );
+		SAIL_CHECK(sail_start_loading_from_io(io, codec, &state), "Failed to start loading form io.", );
+		SAIL_CHECK(sail_load_next_frame(state, &image), "Failed to load next frame.", );
 		
 		BitmapColorFormat format{ };
 		BitmapColorComponentType type{ };
@@ -411,7 +435,7 @@ namespace Blaze
 
 		Create(size, format, type, image->pixels, image->bytes_per_line, false);
 
-		SAIL_CHECK(sail_stop_loading(state), "Failed to stop loading");
+		SAIL_CHECK(sail_stop_loading(state), "Failed to stop loading", );
 		sail_destroy_io(io);
 		sail_destroy_image(image);		
 	}

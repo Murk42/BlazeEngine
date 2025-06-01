@@ -1,34 +1,24 @@
 #pragma once
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnitBase.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
+#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnitBase.h"
+#include "BlazeEngineGraphics/UI/Common/TextSelection.h"
+#include "BlazeEngineGraphics/Renderers/TexturedRectRenderer.h"
 
 namespace Blaze::UI
 {	
 	class BLAZE_GRAPHICS_API TextSelectionRenderUnit :
-		public TextSelectionRenderUnitBase,
-		private EventHandler<TextRenderUnitBase::RenderDataUpdatedEvent>
+		public TextSelectionRenderUnitBase
 	{
-	public:
+	public:		
 		TextRenderUnitBase& textRenderUnit;
 
-		TextSelectionRenderUnit(TextRenderUnitBase& textRenderUnit);
+		TextSelectionRenderUnit(TextSelection& selection, TextRenderUnitBase& textRenderUnit);
 		~TextSelectionRenderUnit();
 
 		void BeginStream() override;
 		void* Advance() override;
-
-		bool CleanData() override;
+		
 		bool CleanRenderData() override;
-
-		void SetSelection(uintMem begin, uintMem end) override;
-		void SetSelectionBegin(uintMem begin) override;
-		void SetSelectionEnd(uintMem end) override;
-		
-		void ClearSelection() override;
-		
-		uintMem GetSelectionBegin() override;
-		uintMem GetSelectionEnd() override;
-		bool IsSelectionEmpty() override;
 	private:
 		struct LineSelection 
 		{
@@ -36,18 +26,14 @@ namespace Blaze::UI
 			Vec2f right;
 			Vec2f up;
 		};
-
-		uintMem selectionBegin;
-		uintMem selectionEnd;
+		
 		Graphics::TexturedRectRenderData renderData;				
 		Array<LineSelection> lineSelections;
 		uint lineIndex;
 		
 		bool renderDataDirty;		
 
-		void OnEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event);
-
-		template<typename T>
-		friend class EventHandlerData;
+		void SelectionChangedEvent(const TextSelection::SelectionChangedEvent& event);
+		void RenderDataUpdatedEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event);
 	};
 }

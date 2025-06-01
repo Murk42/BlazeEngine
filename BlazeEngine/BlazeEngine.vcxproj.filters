@@ -72,9 +72,6 @@
     <ClInclude Include="source\BlazeEngine\Internal\BlazeEngineContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Resources\Font\TextLayouter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngine\BlazeEngineDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,6 +112,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDLConversions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Resources\Font\CharacterSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Resources\Font\FontGlyphRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -164,9 +167,6 @@
     <ClCompile Include="source\BlazeEngine\Internal\BlazeEngineContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Font\TextLayouter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\Console\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -198,6 +198,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDLConversions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Resources\Font\CharacterSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Resources\Font\FontGlyphRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

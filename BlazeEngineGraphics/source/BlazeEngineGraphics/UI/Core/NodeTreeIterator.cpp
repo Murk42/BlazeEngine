@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Core/NodeTreeIterator.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineGraphics/UI/Core/Node.h"
 
 namespace Blaze::UI

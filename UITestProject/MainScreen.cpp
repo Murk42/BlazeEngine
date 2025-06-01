@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "MainScreen.h"
 
-extern Array<Font> fonts;
+Array<Font> fonts;
+Map<String, UI::FontStyle> fontStyles;
+
 MainScreen::MainScreen()	
 	: Screen(nullptr), replaceTextMenu(editableText)
 {
@@ -14,7 +16,7 @@ MainScreen::MainScreen()
 		});
 	explanationPanel.SetFillColor(0x002000ff);
 	explanationPanel.SetBorderWidth(0);
-	explanationPanel.SetCornerRadius(5);		
+	explanationPanel.SetCornerRadius(5);
 
 	explanationText.SetParent(&explanationPanel);
 	explanationText.SetTransform({
@@ -23,9 +25,8 @@ MainScreen::MainScreen()
 		.pivot = Vec2f(0.5f, 0.5f),
 		.size = Vec2f(490, 390)
 		});				
-	explanationText.textRenderUnit.SetFont(fonts[0]);
-	explanationText.textRenderUnit.SetFontHeight(20);
-	explanationText.textRenderUnit.SetText(
+	explanationText.textRenderUnit.SetFontStyle(fontStyles.Find("default")->value);
+	explanationText.SetText(
 		"This is a project to test some UI elements, the key is to use as many features as possible. "
 		"For example here were writing as long of a text as possible and trying a text with multiple lines. "
 		"This paragraph is all in one line so they will be wrapped, non wrapped lines should be more spaced apart. \n\n"
@@ -34,16 +35,16 @@ MainScreen::MainScreen()
 		"And a another line"
 		);
 	explanationText.textRenderUnit.SetLayoutOptions({
-		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Left,
-		.lineVerticalAlign = UI::TextLineVerticalAlign::Top,
-		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrapSpread,
-		.wrappedLineAdvance = 0.9f
+		.wrappedLineAdvance = 0.9f,
+		.lineHorizontalAlign = HorizontalAlign::Left,
+		.lineVerticalAlign = VerticalAlign::Top,
+		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrapSpread
 		});
 	explanationText.textRenderUnit.SetCullingNode(&explanationPanel);
 				
 	texture.Load("assets/images/Mountains.jpg", Graphics::OpenGLWrapper::Texture2DSettings{
 		.min = Graphics::OpenGLWrapper::TextureSampling::Linear,
-		.mip = Graphics::OpenGLWrapper::TextureSampling::Linear,
+		.mip = Graphics::OpenGLWrapper::TextureSampling::Linear,		
 		.textureLevelCount = 1
 		});
 	image.SetTexture(&texture);
@@ -65,11 +66,10 @@ MainScreen::MainScreen()
 		.size = Vec2f(400, 300),
 		});
 	editableText.SetEmptyText("Enter text");
-	editableText.textRenderUnit.SetFont(fonts[1]);
-	editableText.textRenderUnit.SetFontHeight(32);
+	editableText.textRenderUnit.SetFontStyle(fontStyles.Find("large")->value);
 	editableText.textRenderUnit.SetLayoutOptions({
-		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Left,
-		.lineVerticalAlign = UI::TextLineVerticalAlign::Top,
+		.lineHorizontalAlign = HorizontalAlign::Left,
+		.lineVerticalAlign = VerticalAlign::Top,
 		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrapSpread,
 		});
 	editableText.SetMultilineInput(true);
@@ -81,9 +81,8 @@ MainScreen::MainScreen()
 		.pivot = Vec2f(0.0f, 1.0f),
 		.size = Vec2f(200, 50)
 		});	
-	clearTextButton.textRenderUnit.SetFont(fonts[0]);
-	clearTextButton.textRenderUnit.SetFontHeight(20);	
-	clearTextButton.textRenderUnit.SetText("Clear");
+	clearTextButton.textRenderUnit.SetFontStyle(fontStyles.Find("default")->value);
+	clearTextButton.SetText("Clear");
 	clearTextButton.pressedEventCallback = [&](auto event) {
 		editableText.SetText("");
 		};
@@ -95,9 +94,8 @@ MainScreen::MainScreen()
 		.pivot = Vec2f(0.0f, 1.0f),
 		.size = Vec2f(200, 50)
 		});
-	replaceTextButton.textRenderUnit.SetFont(fonts[0]);
-	replaceTextButton.textRenderUnit.SetFontHeight(20);
-	replaceTextButton.textRenderUnit.SetText("Replace");
+	replaceTextButton.textRenderUnit.SetFontStyle(fontStyles.Find("default")->value);
+	replaceTextButton.SetText("Replace");
 	replaceTextButton.pressedEventCallback = [&](auto event) {
 		replaceTextMenu.Enable();
 		};	
@@ -110,7 +108,6 @@ MainScreen::MainScreen()
 ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
 	: target(target)
 {
-
 	backgroundPanel.SetParent(this);
 	backgroundPanel.SetTransform({
 		.size = Vec2f(10000)
@@ -142,11 +139,10 @@ ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
 		.pos = Vec2f(5, -5),
 		.size = Vec2f(280, 25),
 		});
-	targetText.textRenderUnit.SetFontHeight(20);
-	targetText.textRenderUnit.SetFont(fonts[0]);
+	targetText.textRenderUnit.SetFontStyle(fontStyles.Find("default")->value);
 	targetText.textRenderUnit.SetLayoutOptions({
-		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Left,
-		.lineVerticalAlign = UI::TextLineVerticalAlign::Center,
+		.lineHorizontalAlign = HorizontalAlign::Left,
+		.lineVerticalAlign = VerticalAlign::Center,
 		});
 	targetText.SetMultilineInput(false);
 	targetText.textRenderUnit.SetCullingNode(&targetText);
@@ -166,11 +162,10 @@ ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
 		.pos = Vec2f(5, -5),
 		.size = Vec2f(280, 25),
 		});
-	replaceText.textRenderUnit.SetFontHeight(20);
-	replaceText.textRenderUnit.SetFont(fonts[0]);
+	replaceText.textRenderUnit.SetFontStyle(fontStyles.Find("default")->value);
 	replaceText.textRenderUnit.SetLayoutOptions({		
-		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Left,
-		.lineVerticalAlign = UI::TextLineVerticalAlign::Center,		
+		.lineHorizontalAlign = HorizontalAlign::Left,
+		.lineVerticalAlign = VerticalAlign::Center,		
 		});
 	replaceText.SetMultilineInput(false);
 	replaceText.textRenderUnit.SetCullingNode(&replaceText);
@@ -183,16 +178,25 @@ ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
 		.pivot = Vec2f(0),
 		.size = Vec2f(80, 35),
 		});
-	replaceButton.textRenderUnit.SetText("Replace");
-	replaceButton.textRenderUnit.SetFontHeight(12);
-	replaceButton.textRenderUnit.SetFont(fonts[0]);
+	replaceButton.SetText("Replace");
+	replaceButton.textRenderUnit.SetFontStyle(fontStyles.Find("small")->value);
 	replaceButton.textRenderUnit.SetLayoutOptions({
-		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Center,
-		.lineVerticalAlign = UI::TextLineVerticalAlign::Center,
+		.lineHorizontalAlign = HorizontalAlign::Center,
+		.lineVerticalAlign = VerticalAlign::Center,
 		});
-	replaceButton.pressedEventCallback = [&](auto event) {		
+	replaceButton.pressedEventCallback = [&](const UI::ButtonBase::PressedEvent& event) {		
+		StringUTF8 text = target.GetText();
+	
+		auto it = StringParsing::Find(text, targetText.GetText());
+		uintMem offset = (byte*)it.Ptr() - text.Buffer();
 
-		Disable();
+		if (!it.IsNull())
+		{
+			text.EraseSubString(offset, targetText.GetText().CharacterCount());
+			text.Insert(offset, replaceText.GetText());
+			target.SetText(text);
+			Disable();
+		}
 		};
 
 	cancelButton.SetParent(&mainPanel);
@@ -202,14 +206,13 @@ ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
 		.pivot = Vec2f(0),
 		.size = Vec2f(80, 35),
 		});
-	cancelButton.textRenderUnit.SetText("Cancel");
-	cancelButton.textRenderUnit.SetFontHeight(12);
-	cancelButton.textRenderUnit.SetFont(fonts[0]);
+	cancelButton.SetText("Cancel");
+	cancelButton.textRenderUnit.SetFontStyle(fontStyles.Find("small")->value);
 	cancelButton.textRenderUnit.SetLayoutOptions({
-		.lineHorizontalAlign = UI::TextLineHorizontalAlign::Center,
-		.lineVerticalAlign = UI::TextLineVerticalAlign::Center,
+		.lineHorizontalAlign = HorizontalAlign::Center,
+		.lineVerticalAlign = VerticalAlign::Center,
 		});
-	cancelButton.pressedEventCallback = [&](auto event) {
+	cancelButton.pressedEventCallback = [&](const UI::ButtonBase::PressedEvent& event) {
 		Disable();
 		};	
 }

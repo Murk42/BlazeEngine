@@ -1,7 +1,11 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/StringView.h"
 
 namespace Blaze
-{
+{	
+	class ReadStream;
+	class WriteStream;
+
 	void SetupSailReadIO(sail_io* io, ReadStream& stream);
 	void SetupSailWriteIO(sail_io* io, WriteStream& stream);	
 

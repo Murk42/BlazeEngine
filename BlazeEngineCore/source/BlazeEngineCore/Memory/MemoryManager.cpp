@@ -1,5 +1,8 @@
 #include "pch.h"
-#include "BlazeEngineCore/Utilities/Timing.h"
+#include "BlazeEngineCore/Memory/MemoryManager.h"
+#include "BlazeEngineCore/BlazeEngineCoreContext.h"
+#include "BlazeEngineCore/DataStructures/ListImpl.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineCore/Utilities/StringParsing.h"
 
 namespace Blaze::Memory
@@ -9,7 +12,7 @@ namespace Blaze::Memory
 	void AddListener(MemoryListener* listener)
 	{
 		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
-		blazeEngineCoreContext.memoryListeners.AddBack(listener);
+		blazeEngineCoreContext.memoryListeners.AddFront(listener);
 	}
 	void RemoveListener(MemoryListener* listener)
 	{
@@ -81,7 +84,7 @@ namespace Blaze::Memory
 
 		if (ptr == nullptr)
 		{
-			BLAZE_ENGINE_CORE_ERROR("Malloc failed with " + StringParsing::Convert(size + sizeof(AllocationHeader)) + " bytes");
+			BLAZE_ENGINE_CORE_ERROR("Malloc failed with {} bytes", size + sizeof(AllocationHeader));
 			return nullptr;
 		}
 

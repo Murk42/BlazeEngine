@@ -3,7 +3,7 @@
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
 #include "BlazeEngineGraphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
 
-#include "BlazeEngineGraphics/Files/shaders.h"
+#include "BlazeEngineGraphics/Shaders/Shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -13,32 +13,26 @@ namespace Blaze::Graphics::OpenGL
 	Line2DRenderer_OpenGL::Line2DRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext)		
 		: graphicsContext(graphicsContext)
 	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert;
-		vert.ShaderSource(StringView((const char*)line2d_vert_file, line2d_vert_size));
-		vert.CompileShader();
-
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;
-		frag.ShaderSource(StringView((const char*)line2d_frag_file, line2d_frag_size));
-		frag.CompileShader();
-		 
+		auto vert = OpenGLWrapper::VertexShader(ShaderSources::line2d_vert);
+		auto frag = OpenGLWrapper::FragmentShader(ShaderSources::line2d_frag);				
 		program.LinkShaders({ &vert, &frag });		
 
 		vb.Allocate(nullptr, VertexBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapAccessFlags::Write, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapType::None);
 
 		va.EnableVertexAttribute(0);
-		va.SetVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 0);
+		va.SetFloatVertexAttributeFormat(0, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, 0);
 		va.SetVertexAttributeBuffer(0, &vb, sizeof(Line2DRenderCache_OpenGL::Vertex), 0);
 		va.EnableVertexAttribute(1);
-		va.SetVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 8);
+		va.SetFloatVertexAttributeFormat(1, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, 8);
 		va.SetVertexAttributeBuffer(1, &vb, sizeof(Line2DRenderCache_OpenGL::Vertex), 0);
 		va.EnableVertexAttribute(2);
-		va.SetVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 2, false, 16);
+		va.SetFloatVertexAttributeFormat(2, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 2, 16);
 		va.SetVertexAttributeBuffer(2, &vb, sizeof(Line2DRenderCache_OpenGL::Vertex), 0);
 		va.EnableVertexAttribute(3);
-		va.SetVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 4, false, 24);
+		va.SetFloatVertexAttributeFormat(3, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 4, 24);
 		va.SetVertexAttributeBuffer(3, &vb, sizeof(Line2DRenderCache_OpenGL::Vertex), 0);
 		va.EnableVertexAttribute(4);
-		va.SetVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float, 1, false, 40);
+		va.SetFloatVertexAttributeFormat(4, Blaze::Graphics::OpenGLWrapper::FloatVertexAttributeType::Float, 1, 40);
 		va.SetVertexAttributeBuffer(4, &vb, sizeof(Line2DRenderCache_OpenGL::Vertex), 0);
 	}	
 	void Line2DRenderer_OpenGL::CreateCache(const Array<Line2DRenderData_OpenGL>& renderData, Line2DRenderCache_OpenGL& cache)
@@ -103,10 +97,7 @@ namespace Blaze::Graphics::OpenGL
 			uintMem count = renderCache.vertices.Count() % VectexBufferVertexCount;
 
 			void* vbMap = vb.MapBufferRange(0, VertexBufferSize, Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::InvalidateBuffer | Blaze::Graphics::OpenGLWrapper::GraphicsBufferMapOptions::ExplicitFlush);
-
-			GLenum err = glGetError();
-			if (err != GL_NO_ERROR)
-				Debug::Breakpoint();
+			
 			memcpy(vbMap, renderCache.vertices.Ptr() + offset, sizeof(Line2DRenderCache_OpenGL::Vertex) * count);
 			vb.FlushBufferRange(0, sizeof(Line2DRenderCache_OpenGL::Vertex) * count);
 			vb.UnmapBuffer();			

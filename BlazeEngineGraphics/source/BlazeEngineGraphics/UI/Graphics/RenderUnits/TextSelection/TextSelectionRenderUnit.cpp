@@ -1,17 +1,26 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnit.h"
+#include "BlazeEngineCore/DataStructures/Rect.h"
 
 namespace Blaze::UI
 {
+	static float Clamp(float value, float min, float max)
+	{
+		if (value < min)
+			return min;
+		if (value > max)
+			return max;
+		return value;
+	}
 	static inline Rectf InscribeRect(const Rectf& smaller, const Rectf& bigger)
 	{
 		Vec2f smallerPos1 = smaller.pos;
 		Vec2f smallerPos2 = smaller.pos + smaller.size;
 		Vec2f biggerPos2 = bigger.pos + bigger.size;
-		smallerPos1.x = std::clamp(smallerPos1.x, bigger.x, biggerPos2.x);
-		smallerPos2.x = std::clamp(smallerPos2.x, bigger.x, biggerPos2.x);
-		smallerPos1.y = std::clamp(smallerPos1.y, bigger.y, biggerPos2.y);
-		smallerPos2.y = std::clamp(smallerPos2.y, bigger.y, biggerPos2.y);
+		smallerPos1.x = Clamp(smallerPos1.x, bigger.x, biggerPos2.x);
+		smallerPos2.x = Clamp(smallerPos2.x, bigger.x, biggerPos2.x);
+		smallerPos1.y = Clamp(smallerPos1.y, bigger.y, biggerPos2.y);
+		smallerPos2.y = Clamp(smallerPos2.y, bigger.y, biggerPos2.y);
 		return Rectf(smallerPos1, smallerPos2 - smallerPos1);
 	}
 	static bool RectIntersect(Rectf r1, Rectf r2)
@@ -34,8 +43,8 @@ namespace Blaze::UI
 		return out;		
 	}
 	
-	TextSelectionRenderUnit::TextSelectionRenderUnit(TextRenderUnitBase& textRenderUnit)
-		: TextSelectionRenderUnitBase("TexturedRectRenderer"), textRenderUnit(textRenderUnit), selectionBegin(0), selectionEnd(0),
+	TextSelectionRenderUnit::TextSelectionRenderUnit(TextSelection& selection, TextRenderUnitBase& textRenderUnit)
+		: TextSelectionRenderUnitBase(selection, "TexturedRectRenderer"), textRenderUnit(textRenderUnit), 
 		renderDataDirty(false), lineIndex(0), renderData()
 	{
 		renderData.blend = 1;
@@ -45,11 +54,13 @@ namespace Blaze::UI
 		renderData.uv1 = Vec2f(0, 0);
 		renderData.uv2 = Vec2f(0, 0);
 						
-		textRenderUnit.renderDataUpdatedEventDispatcher.AddHandler(*this);
+		selection.selectionChangedEventDispatcher.AddHandler<&TextSelectionRenderUnit::SelectionChangedEvent>(*this);
+		textRenderUnit.renderDataUpdatedEventDispatcher.AddHandler<&TextSelectionRenderUnit::RenderDataUpdatedEvent>(*this);
 	}
 	TextSelectionRenderUnit::~TextSelectionRenderUnit()
 	{	
-		textRenderUnit.renderDataUpdatedEventDispatcher.RemoveHandler(*this);
+		selection.selectionChangedEventDispatcher.RemoveHandler<&TextSelectionRenderUnit::SelectionChangedEvent>(*this);
+		textRenderUnit.renderDataUpdatedEventDispatcher.RemoveHandler<&TextSelectionRenderUnit::RenderDataUpdatedEvent>(*this);
 	}
 	void TextSelectionRenderUnit::BeginStream()
 	{		
@@ -68,16 +79,9 @@ namespace Blaze::UI
 
 		return &renderData;
 	}
-	bool TextSelectionRenderUnit::CleanData()
-	{
-		if (!textRenderUnit.CleanData())
-			return false;		
-
-		return true;
-	}
 	bool TextSelectionRenderUnit::CleanRenderData()
-	{
-		CleanData();
+	{		
+		textRenderUnit.CleanData();
 
 		if (!renderDataDirty)
 			return false;
@@ -86,10 +90,14 @@ namespace Blaze::UI
 
 		lineSelections.Clear();
 
-		uintMem characterCount = textRenderUnit.GetCharacterData().Count();
+		if (selection.GetHead() == selection.GetTail())
+			return true;
 
-		if (selectionEnd == 0 || selectionBegin >= selectionEnd || selectionBegin >= characterCount)
-			return true;		
+		if (textRenderUnit.textContainer.CharacterCount() != selection.textContainer.CharacterCount())
+		{
+			BLAZE_ENGINE_GRAPHICS_ERROR("Preparing a text selection render unit for rendering with a text render unit and a text selection that have text containers with different character counts");			
+			return true;
+		}
 
 		auto& characterData = textRenderUnit.GetCharacterData();
 
@@ -103,14 +111,18 @@ namespace Blaze::UI
 		Vec2f up = Vec2f(-sin, cos);
 		auto& linesData = textRenderUnit.GetLineData();
 
-		const float selectionVerticalOffset = -(textRenderUnit.GetPixelFontHeight() * 0.05f);
-		const float selectionHeight = textRenderUnit.GetPixelFontHeight() * 0.9f;
+		const float selectionVerticalOffset = -(textRenderUnit.GetFontStyle()->fontPixelHeight* 0.05f);
+		const float selectionHeight = textRenderUnit.GetFontStyle()->fontPixelHeight * 0.9f;
 
 		//Rect of the culling node. The size will be (0, 0) if the culling node is nullptr or the rotations arent the same
 		const Rectf cullingRect = GetCullingRect(textRenderUnit.GetCullingTransform(), finalTransform.position, finalTransform.scale, finalTransform.rotation, right, up);
 
-		uintMem lineBegin = characterData[selectionBegin].lineIndex;
-		uintMem lineEnd = characterData[selectionEnd - 1].lineIndex + 1;
+		const uintMem selectionBegin = selection.GetBeginning();
+		const uintMem selectionEnd = selection.GetEnd();
+
+		const uintMem lineBegin = characterData[selectionBegin].lineIndex;
+		const uintMem lineEnd = characterData[selectionEnd - 1].lineIndex + 1;
+
 		for (uintMem lineIndex = lineBegin; lineIndex != lineEnd; ++lineIndex)
 		{
 			auto& line = linesData[lineIndex];
@@ -158,63 +170,12 @@ namespace Blaze::UI
 		}
 
 		return true;
-	}
-	void TextSelectionRenderUnit::SetSelection(uintMem begin, uintMem end)
+	}	
+	void TextSelectionRenderUnit::SelectionChangedEvent(const TextSelection::SelectionChangedEvent& event)
 	{
-		end = std::min(end, textRenderUnit.GetCharacterData().Count() - 1);
-		begin = std::min(begin, end);				
-
-		if (begin == end)
-			begin = end = 0;
-		
-		selectionBegin = begin;
-		selectionEnd = end;
-		renderDataDirty = true;		
-	}
-	void TextSelectionRenderUnit::SetSelectionBegin(uintMem begin)
-	{
-		begin = std::min(begin, selectionEnd);		
-
-		if (begin == selectionEnd)				
-			begin = selectionEnd = 0;		
-		
-		selectionBegin = begin;
-		renderDataDirty = true;		
-	}
-	void TextSelectionRenderUnit::SetSelectionEnd(uintMem end)
-	{
-		end = std::min(end, textRenderUnit.GetCharacterData().Count() - 1);		
-
-		if (end == selectionBegin)
-			end = selectionBegin = 0;
-
-		selectionEnd = end;
 		renderDataDirty = true;
-	}	
-	void TextSelectionRenderUnit::ClearSelection()
-	{	
-		if (selectionBegin != selectionEnd)
-			renderDataDirty = true;				
-
-		selectionBegin = 0;
-		selectionEnd = 0;
 	}
-	uintMem TextSelectionRenderUnit::GetSelectionBegin()
-	{
-		CleanData();
-		return selectionBegin; 
-	}
-	uintMem TextSelectionRenderUnit::GetSelectionEnd()
-	{
-		CleanData();
-		return selectionEnd; 
-	}
-	bool TextSelectionRenderUnit::IsSelectionEmpty() 
-	{
-		CleanData();
-		return selectionBegin == selectionEnd; 
-	}	
-	void TextSelectionRenderUnit::OnEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event)
+	void TextSelectionRenderUnit::RenderDataUpdatedEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event)
 	{
 		renderDataDirty = true;
 	}

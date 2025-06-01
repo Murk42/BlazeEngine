@@ -10,16 +10,12 @@
 				<Variable Name="j" InitialValue="0" />				
 
 				<Size>count</Size>
-				<Loop Condition="j!=bucketCount">					
-					
+				<Loop Condition="j!=bucketCount">										
 					<Exec>it = buckets[j].head</Exec>
-					<If Condition="it != nullptr">
-					<Loop Condition="it->next == nullptr">						
-						<Item> it->pair </Item>
-						<Exec>it = it->next</Exec>
-					</Loop>
-					</If>
-					
+					<Loop Condition="it != nullptr">						
+						<Item Name="[{it->pair.key}]"> it->pair.value </Item>												
+						<Exec>it = it->next</Exec>							
+					</Loop>					
 					<Exec>++j</Exec>
 				</Loop>
 			</CustomListItems>

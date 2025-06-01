@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "BlazeEngineCore/BlazeEngineCoreContext.h"
+#include "BlazeEngineCore/File/File.h"
+#include "BlazeEngineCore/DataStructures/DualListImpl.h"
+#include "BlazeEngineCore/DataStructures/String.h"
 
 namespace Blaze
 {
@@ -29,12 +32,8 @@ namespace Blaze
 
 	BlazeEngineCoreContext::BlazeEngineCoreContext()
 	{
-		if (logAllocationsToFile)
-		{
-			if (!std::filesystem::exists("logs"))
-				std::filesystem::create_directories("logs");
-			memoryLogFile.Open("logs/memory.txt", FileAccessPermission::Write);
-		}
+		if (logAllocationsToFile)					
+			memoryLogFile.Open("logs/memory.txt", FileAccessPermission::Write, FileOpenParameters{ .openOption = FileOpenOptions::CreateNew});
 
 		atexit(SaveMemoryLog);
 	}

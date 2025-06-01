@@ -1,4 +1,12 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngine/BlazeEngineDefines.h"
+#include "BlazeEngineCore/DataStructures/StringView.h"
+#include "BlazeEngineCore/DataStructures/Set.h"
+#include "BlazeEngineCore/DataStructures/Array.h"
+#include "BlazeEngineCore/DataStructures/ArrayView.h"
+#include "BlazeEngineCore/DataStructures/Map.h"
+#include <concepts>
 
 namespace Blaze::ECS
 {

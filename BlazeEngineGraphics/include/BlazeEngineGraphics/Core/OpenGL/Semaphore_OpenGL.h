@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 
 namespace Blaze::Graphics::OpenGL
 {

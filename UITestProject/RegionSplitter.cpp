@@ -608,7 +608,7 @@ void HorizontalWeightedFillLayout::RemoveAllHandlers()
 	for (auto& nodeData : nodesData)
 	{
 		nodeData.node.transformUpdatedEventDispatcher.RemoveHandler<&HorizontalWeightedFillLayout::NodeTransformUpdatedEvent>(*this);
-		nodeData.node.enabledStateUpdatedEventDispatcher.RemoveHandler<&HorizontalWeightedFillLayout::NodeEnabledStateUpdated>(*this);
+		nodeData.node.enabledStateChangedEventDispatcher.RemoveHandler<&HorizontalWeightedFillLayout::NodeEnabledStateUpdated>(*this);
 	}
 }
 void HorizontalWeightedFillLayout::AddAllHandlers()
@@ -616,7 +616,7 @@ void HorizontalWeightedFillLayout::AddAllHandlers()
 	for (auto& nodeData : nodesData)
 	{
 		nodeData.node.transformUpdatedEventDispatcher.AddHandler<&HorizontalWeightedFillLayout::NodeTransformUpdatedEvent>(*this);
-		nodeData.node.enabledStateUpdatedEventDispatcher.AddHandler<&HorizontalWeightedFillLayout::NodeEnabledStateUpdated>(*this);
+		nodeData.node.enabledStateChangedEventDispatcher.AddHandler<&HorizontalWeightedFillLayout::NodeEnabledStateUpdated>(*this);
 	}
 
 	nodesData.First().node.surroundingNodeTreeChangedEventDispatcher.AddHandler<&HorizontalWeightedFillLayout::FirstNodeSurroundingNodeTreeChangedEvent>(*this);
@@ -629,7 +629,7 @@ void HorizontalWeightedFillLayout::SwapHandlers(HorizontalWeightedFillLayout& ot
 	for (auto& nodeData : nodesData)
 	{
 		nodeData.node.transformUpdatedEventDispatcher.SwapHandlers<&HorizontalWeightedFillLayout::NodeTransformUpdatedEvent>(other, *this);
-		nodeData.node.enabledStateUpdatedEventDispatcher.SwapHandlers<&HorizontalWeightedFillLayout::NodeEnabledStateUpdated>(other, *this);
+		nodeData.node.enabledStateChangedEventDispatcher.SwapHandlers<&HorizontalWeightedFillLayout::NodeEnabledStateUpdated>(other, *this);
 	}
 
 	nodesData.First().node.surroundingNodeTreeChangedEventDispatcher.SwapHandlers<&HorizontalWeightedFillLayout::FirstNodeSurroundingNodeTreeChangedEvent>(other, *this);
@@ -752,7 +752,7 @@ void HorizontalWeightedFillLayout::NodeTransformUpdatedEvent(const UI::Node::Tra
 		event.node.SetTransform(transform);
 	}
 }
-void HorizontalWeightedFillLayout::NodeEnabledStateUpdated(const UI::Node::EnabledStateUpdatedEvent& event)
+void HorizontalWeightedFillLayout::NodeEnabledStateUpdated(const UI::Node::EnabledStateChangedEvent& event)
 {
 	MarkLayoutDirty();
 }

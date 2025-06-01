@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngineCore/Memory/Allocator.h"
+#include <concepts>
 
 namespace Blaze
 {

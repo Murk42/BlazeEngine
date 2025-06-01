@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
-#include "BlazeEngineGraphics/Core/OpenGL/RenderWindow_OpenGL.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngine/ExecuteOnMainThread.h"
+#include "BlazeEngineGraphics/Core/OpenGL/RenderWindow_OpenGL.h"
 
 #include "BlazeEngine/Console/Console.h"
-
+#include <GL/glew.h>
+#include <SDL3/SDL_video.h>
 
 #include <Windows.h>
 #undef max
@@ -55,12 +57,12 @@ namespace Blaze::Graphics::OpenGL
 		default: _severity = "Unknown"; break;
 		}		
 		
-		decltype(&Debug::Logger::LogError) logFunc;
+		decltype(&Debug::Logger::LogError<>) logFunc;
 		switch (type)
 		{
 		case GL_DEBUG_TYPE_ERROR:               
 		default:
-			logFunc = Debug::Logger::LogError; 
+			logFunc = Debug::Logger::LogError<>; 
 			break;
 		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: 
 		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
@@ -70,10 +72,10 @@ namespace Blaze::Graphics::OpenGL
 		case GL_DEBUG_TYPE_PUSH_GROUP:        
 		case GL_DEBUG_TYPE_POP_GROUP:         
 			return;
-			logFunc = Debug::Logger::LogWarning; 
+			logFunc = Debug::Logger::LogWarning<>; 
 			break;
 		case GL_DEBUG_TYPE_MARKER:            
-			logFunc = Debug::Logger::LogDebug; 
+			logFunc = Debug::Logger::LogDebug<>; 
 			break;
 		}
 
@@ -272,48 +274,48 @@ namespace Blaze::Graphics::OpenGL
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, properties.majorVersion))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to " + StringParsing::Convert(properties.majorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.majorVersion, GetSDLError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, properties.minorVersion))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to " + StringParsing::Convert(properties.minorVersion) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.minorVersion, GetSDLError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_ACCELERTED_VISUAL to 1. SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_ACCELERTED_VISUAL to 1. SDL_Error() returnd: \"{}\"", GetSDLError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, _contextFlags))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_FLAGS to " + GetOpenGLContextFlagsString(_contextFlags) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_FLAGS to {}.SDL_Error() returnd: \"{}\"", GetOpenGLContextFlagsString(_contextFlags), GetSDLError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, _profileType))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to " + GetOpenGLProfileTypeString(_profileType) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to {}.SDL_Error() returnd: \"{}\"", GetOpenGLProfileTypeString(_profileType), GetSDLError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _releaseBehaviour))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_RELEASE_BEHAVIOR to " + GetOpenGLReleaseBehaviourString(_releaseBehaviour) + ".SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_RELEASE_BEHAVIOR to {}.SDL_Error() returnd: \"{}\"", GetOpenGLReleaseBehaviourString(_releaseBehaviour), GetSDLError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, properties.depthBufferBitCount))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_DEPTH_SIZE to " + StringParsing::Convert(properties.depthBufferBitCount) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_DEPTH_SIZE to {}. SDL_Error() returnd: \"{}\"", properties.depthBufferBitCount, GetSDLError());
 			return false;
 		}
 		if (!SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, properties.stencilBufferBitCount))
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_STENCIL_SIZE to " + StringParsing::Convert(properties.stencilBufferBitCount) + ". SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to set OpenGL context attribute SDL_GL_STENCIL_SIZE to . SDL_Error() returnd: \"{}\"", properties.stencilBufferBitCount, GetSDLError());
 			return false;
 		}
 
@@ -405,7 +407,7 @@ namespace Blaze::Graphics::OpenGL
 
 		if (context == nullptr)
 		{
-			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to create OpenGL context. SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("Failed to create OpenGL context. SDL_Error() returnd: \"{}\"", GetSDLError());
 			return false;
 
 		}
@@ -498,7 +500,7 @@ namespace Blaze::Graphics::OpenGL
 		if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &finalMajorVersion))
 		{
 			if (finalMajorVersion != properties.majorVersion)
-				BLAZE_ENGINE_GRAPHICS_WARNING("Asked for OpenGL Major Version " + StringParsing::Convert(properties.majorVersion) + " got " + StringParsing::Convert(finalMajorVersion));
+				BLAZE_ENGINE_GRAPHICS_WARNING("Asked for OpenGL Major Version {} got {}", properties.majorVersion, finalMajorVersion);
 			properties.majorVersion = finalMajorVersion;
 		}
 		else
@@ -508,7 +510,7 @@ namespace Blaze::Graphics::OpenGL
 		if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &finalMinorVersion))
 		{
 			if (finalMinorVersion != properties.minorVersion)
-				BLAZE_ENGINE_GRAPHICS_WARNING("Asked for OpenGL Minor Version " + StringParsing::Convert(properties.minorVersion) + " got " + StringParsing::Convert(finalMinorVersion));
+				BLAZE_ENGINE_GRAPHICS_WARNING("Asked for OpenGL Minor Version {} got {}", properties.minorVersion, finalMinorVersion);
 			properties.minorVersion = finalMinorVersion;
 		}
 		else
@@ -519,11 +521,11 @@ namespace Blaze::Graphics::OpenGL
 		{
 			if (finalDepthSize != properties.depthBufferBitCount)
 				if (finalDepthSize == 0)
-					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for " + StringParsing::Convert(properties.depthBufferBitCount) + "-bit depth buffer, got no depth buffer");
+					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for {}-bit depth buffer, got no depth buffer", properties.depthBufferBitCount);
 				else if (properties.depthBufferBitCount == 0)
-					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for no depth buffer, got " + StringParsing::Convert(finalDepthSize) + "-bit depth buffer");
+					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for no depth buffer, got {}-bit depth buffer", finalDepthSize);
 				else
-					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for " + StringParsing::Convert(properties.depthBufferBitCount) + "-bit depth buffer, got " + StringParsing::Convert(finalDepthSize) + "-bit");
+					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for {}-bit depth buffer, got {}-bit", properties.depthBufferBitCount, finalDepthSize);
 			properties.depthBufferBitCount = finalDepthSize;
 		}
 		else
@@ -534,19 +536,19 @@ namespace Blaze::Graphics::OpenGL
 		{
 			if (finalStencilSize != properties.stencilBufferBitCount)
 				if (finalStencilSize == 0)
-					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for " + StringParsing::Convert(properties.stencilBufferBitCount) + "-bit stencil buffer, got no stencil buffer");
+					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for {}-bit stencil buffer, got no stencil buffer", properties.stencilBufferBitCount);
 				else if (properties.stencilBufferBitCount == 0)
-					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for no stencil buffer, got " + StringParsing::Convert(finalStencilSize) + "-bit stencil buffer");
+					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for no stencil buffer, got {}-bit stencil buffer", finalStencilSize);
 				else
-					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for " + StringParsing::Convert(properties.stencilBufferBitCount) + "-bit stencil buffer, got " + StringParsing::Convert(finalStencilSize) + "-bit");
+					BLAZE_ENGINE_GRAPHICS_WARNING("Asked for {}-bit stencil buffer, got {}-bit", properties.stencilBufferBitCount, finalStencilSize);
 			properties.stencilBufferBitCount = finalStencilSize;
 		}
 		else
-			BLAZE_ENGINE_GRAPHICS_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_STENCIL_SIZE. SDL returned error: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_STENCIL_SIZE. SDL returned error: \"{}\"", GetSDLError());
 
 		String contextFlagsText = GetContextFlagsText(finalContextFlags);
 		if (!contextFlagsText.Empty()) contextFlagsText = " (" + contextFlagsText + ")";
-		BLAZE_ENGINE_GRAPHICS_INFO("Created OpenGL context " + StringParsing::Convert(properties.majorVersion) + "." + StringParsing::Convert(properties.minorVersion) + " " + profileName + " profile" + contextFlagsText);
+		BLAZE_ENGINE_GRAPHICS_INFO("Created OpenGL context {}.{} {} profile ", properties.majorVersion, properties.minorVersion, profileName, contextFlagsText);
 
 		return true;
 	}
@@ -556,7 +558,7 @@ namespace Blaze::Graphics::OpenGL
 	{
 	}
 	GraphicsContext_OpenGL::GraphicsContext_OpenGL(const GraphicsContextProperties_OpenGL& _properties) :
-		activeWindowHandle(nullptr), properties(_properties), SDLOpenGLContext(nullptr)
+		activeWindowHandle(nullptr), properties(_properties), SDLOpenGLContext(nullptr), initWindow(nullptr)
 	{
 		if (!SetOpenGLContextAttributes(_properties))
 			return;
@@ -610,12 +612,12 @@ namespace Blaze::Graphics::OpenGL
 		renderWindow.GetWindow().windowDestroyedEventDispatcher.AddHandler<&GraphicsContext_OpenGL::ActiveWindowDestroyed>(*this);
 
 		if (SDL_GL_MakeCurrent((SDL_Window*)activeWindowHandle, (SDL_GLContext)SDLOpenGLContext) == false)
-			BLAZE_ENGINE_GRAPHICS_FATAL("SDL_GL_MakeCurrent() failed. SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", GetSDLError());
 	}
 	void GraphicsContext_OpenGL::ActiveWindowDestroyed(const Window::WindowDestroyedEvent& event)
 	{
 		activeWindowHandle = initWindow;
 		if (SDL_GL_MakeCurrent((SDL_Window*)activeWindowHandle, (SDL_GLContext)SDLOpenGLContext) == false)
-			BLAZE_ENGINE_GRAPHICS_FATAL("SDL_GL_MakeCurrent() failed. SDL_Error() returned: \"" + GetSDLError() + "\"");
+			BLAZE_ENGINE_GRAPHICS_FATAL("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", GetSDLError());
 	}
 }

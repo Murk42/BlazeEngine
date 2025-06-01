@@ -773,26 +773,5 @@ namespace Blaze
 			bucket->tail = node;
 
 		bucket->head = node;
-	}
-
-	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	Set<Value, Hasher, Allocator>::Iterator begin(Set<Value, Hasher, Allocator>& set)
-	{
-		return set.FirstIterator();
-	}
-	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	Set<Value, Hasher, Allocator>::ConstIterator begin(const Set<Value, Hasher, Allocator>& set)
-	{
-		return set.FirstIterator();
-	}
-	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	Set<Value, Hasher, Allocator>::Iterator end(Set<Value, Hasher, Allocator>& set)
-	{
-		return set.BehindIterator();
-	}
-	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	Set<Value, Hasher, Allocator>::ConstIterator end(const Set<Value, Hasher, Allocator>& set)
-	{
-		return set.BehindIterator();
-	}
+	}	
 }

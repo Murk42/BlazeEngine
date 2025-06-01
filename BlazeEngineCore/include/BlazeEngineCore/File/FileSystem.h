@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngineCore/File/Path.h"
+#include "BlazeEngineCore/Utilities/TimePoint.h"
 
 namespace Blaze
 {

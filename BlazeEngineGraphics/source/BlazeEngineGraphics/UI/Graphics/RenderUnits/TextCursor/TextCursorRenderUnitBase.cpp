@@ -3,8 +3,8 @@
 
 namespace Blaze::UI
 {
-	TextCursorRenderUnitBase::TextCursorRenderUnitBase(StringView rendererName)
-		: RenderUnit(rendererName)
+	TextCursorRenderUnitBase::TextCursorRenderUnitBase(TextCursor& cursor, StringView rendererName)
+		: RenderUnit(rendererName), cursor(cursor)
 	{
 	}
 }

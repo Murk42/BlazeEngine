@@ -4,6 +4,7 @@
 #pragma warning( disable : 26451)
 #pragma warning( push )
 #pragma warning( disable : 4244)
+
 #include <gcem/gcem.hpp>
 #pragma warning( pop ) 
 #pragma warning( pop ) 

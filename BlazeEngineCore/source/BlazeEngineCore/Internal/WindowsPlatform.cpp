@@ -1,6 +1,7 @@
 #include "pch.h"
+
 #include <Windows.h>
-#include "BlazeEngineCore/Utilities/StringParsing.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze::Windows
 {
@@ -18,7 +19,7 @@ namespace Blaze::Windows
 			function();
 		}
 	};
-	String GetErrorString(DWORD error, uint recursionIndex)
+	String GetErrorString(uint32 error, uint recursionIndex)
 	{
 		LPSTR errorString;
 		auto res = FormatMessageA(
@@ -30,22 +31,19 @@ namespace Blaze::Windows
 		{
 			DWORD lastError = GetLastError();
 
-			if (recursionIndex > 8)
-			{				
-				String value = GetErrorString(lastError, recursionIndex + 1);
-				Debug::Logger::LogError("Windows API", "FormatMessageA returned \"" + value + "\"");
-			}
+			if (recursionIndex > 8)							
+				Debug::Logger::LogError("Windows API", "FormatMessageA returned \"{}\"", GetErrorString(lastError, recursionIndex + 1));
 			else
-				Debug::Logger::LogError("Windows API", "FormatMessageA returned error code " + StringParsing::Convert((uint32)lastError) + ". Blaze::Windows::GetErrorString recursion limit reached");
+				Debug::Logger::LogError("Windows API", "FormatMessageA returned error code {}. Blaze::Windows::GetErrorString recursion limit reached", lastError);
 
-			return "error code " + StringParsing::Convert((uint32)error);
+			return Format("error code {}", error);
 		}
 
 		if (errorString == nullptr)
 		{
 			BLAZE_ENGINE_CORE_ERROR("FormatMessageA passed a empyt string pointer");
 
-			return "error code " + StringParsing::Convert((uint32)error);
+			return Format("error code {}", error);
 		}
 
 		String out = String(errorString, res - 2); //-1 is to ignore the '\r\n' character

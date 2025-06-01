@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/Map.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {
@@ -756,26 +758,5 @@ namespace Blaze
 			bucket->tail = node;
 
 		bucket->head = node;
-	}
-
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
-	Map<Key, Value, Hasher, Allocator>::Iterator begin(Map<Key, Value, Hasher, Allocator>& map)
-	{
-		return map.FirstIterator();
-	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
-	Map<Key, Value, Hasher, Allocator>::ConstIterator begin(const Map<Key, Value, Hasher, Allocator>& map)
-	{
-		return map.FirstIterator();
-	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
-	Map<Key, Value, Hasher, Allocator>::Iterator end(Map<Key, Value, Hasher, Allocator>& map)
-	{
-		return map.BehindIterator();
-	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
-	Map<Key, Value, Hasher, Allocator>::ConstIterator end(const Map<Key, Value, Hasher, Allocator>& map)
-	{
-		return map.BehindIterator();
-	}
+	}	
 }

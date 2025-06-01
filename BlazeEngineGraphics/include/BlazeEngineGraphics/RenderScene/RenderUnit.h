@@ -1,4 +1,7 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/DataStructures/StringView.h"
+#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/RenderStructure/RenderStream.h"
 
 namespace Blaze::Graphics

@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/List.h"
 
 namespace Blaze
 {
@@ -21,6 +22,14 @@ namespace Blaze
 	inline bool ListIterator<List>::IsNull() const
 	{
 		return node == nullptr;
+	}
+	template<typename List>
+	inline auto ListIterator<List>::Ptr() const -> ValueType*
+	{
+		if (node == nullptr)
+			return nullptr;
+
+		return &node->value;
 	}
 	template<typename List>
 	inline ListIterator<List>& ListIterator<List>::operator++()
@@ -104,24 +113,20 @@ namespace Blaze
 
 	template<typename T, AllocatorType Allocator> 
 	inline List<T, Allocator>::List()
-		: first(nullptr), last(nullptr), count(0)
+		: first(nullptr)
 	{
-	}	
+	}
 	template<typename T, AllocatorType Allocator>	
 	inline List<T, Allocator>::List(const List& other) requires std::is_copy_constructible_v<T>
-		: first(nullptr), last(nullptr), count(0)
+		: first(nullptr)
 	{	
 		CopyUnsafe(other);
 	}
 	template<typename T, AllocatorType Allocator>
 	inline List<T, Allocator>::List(List&& list) noexcept
 	{
-		first = list.first;
-		last = list.last;
-		count = list.count;
-		list.first = nullptr;
-		list.last = nullptr;
-		list.count = 0;
+		first = list.first;		
+		list.first = nullptr;		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline List<T, Allocator>::~List()
@@ -131,7 +136,7 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void List<T, Allocator>::Clear()
 	{
-		if (count == 0)
+		if (first == nullptr)
 			return;
 
 		Node* it = first;
@@ -151,19 +156,12 @@ namespace Blaze
 			it = next;
 		}
 
-		count = 0;
-		first = 0;
-		last = 0;
+		first = 0;		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline bool List<T, Allocator>::Empty() const
 	{
-		return count == 0;
-	}
-	template<typename T, AllocatorType Allocator>
-	inline uintMem List<T, Allocator>::Count() const
-	{
-		return count;
+		return first == nullptr;
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires std::constructible_from<T, Args...>
@@ -180,28 +178,7 @@ namespace Blaze
 		prev->next = node;
 		std::construct_at(node, next, std::forward<Args>(args)...);
 
-		if (next == nullptr)
-			last = node;
-
-		++count;
 		return Iterator(node);
-	}
-	template<typename T, AllocatorType Allocator>
-	template<typename ... Args> requires std::constructible_from<T, Args...>
-	inline List<T, Allocator>::template Iterator List<T, Allocator>::AddBack(Args&& ... args)
-	{
-		if (count == 0)
-			AddFront(std::forward<Args>(args)...);
-		else
-		{
-			last->next = (Node*)allocator.Allocate(sizeof(Node));
-			std::construct_at(last->next, nullptr, std::forward<Args>(args)...);
-
-			last = last->next;
-			++count;
-		}
-
-		return Iterator(last);
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ... Args> requires std::constructible_from<T, Args...>
@@ -212,18 +189,13 @@ namespace Blaze
 		first = (Node*)allocator.Allocate(sizeof(Node));
 		std::construct_at(first, second, std::forward<Args>(args)...);
 
-		++count;
-
-		if (count == 1)
-			last = first;
-
 		return Iterator(first);
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void List<T, Allocator>::EraseAfter(const Iterator& it)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
+		if (first == nullptr)
 		{
 			BLAZE_ENGINE_CORE_ERROR("Erasing from an empty list");
 			return;
@@ -257,23 +229,13 @@ namespace Blaze
 		std::destroy_at(node);
 		allocator.Free(node);
 
-		prev->next = next;
-
-		if (next == nullptr)
-			last = prev;
-		--count;
-
-		if (count == 0)
-		{
-			first = nullptr;
-			last = nullptr;
-		}		
+		prev->next = next;		
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void List<T, Allocator>::EraseFirst()
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
+		if (first == nullptr)
 		{
 			BLAZE_ENGINE_CORE_ERROR("Erasing from an empty list");
 			return;
@@ -290,18 +252,7 @@ namespace Blaze
 		std::destroy_at(node);
 		allocator.Free(node);
 
-		first = next;
-		--count;
-
-		if (count == 0)
-		{
-			first = nullptr;
-			last = nullptr;
-		}
-		else if (count == 1)
-		{
-			last = first;
-		}		
+		first = next;	
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
@@ -370,62 +321,19 @@ namespace Blaze
 		}		
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void List<T, Allocator>::AppendBack(const List& list)
-	{
-		for (const auto& el : list)
-			AddBack(el);
-	}
-	template<typename T, AllocatorType Allocator>
-	inline void List<T, Allocator>::AppendBack(List&& list)
-	{
-		if (list.count == 0)
-		{
-			first = list.first;
-			last = list.last;
-			count = list.count;
-		}
-		else
-		{
-			this->last->next = list.first;
-			this->last = list.last;
-			this->count += list.count;
-		}
+	inline List<T, Allocator> List<T, Allocator>::SplitAfter(const Iterator& it)
+	{		
+		List<T, Allocator> out;
+		out.first = it.node->next;
 
-		list.first = nullptr;
-		list.last = nullptr;
-		list.count = 0;
-	}
-	template<typename T, AllocatorType Allocator>
-	inline void Blaze::List<T, Allocator>::AppendFront(const List& list)
-	{
-		for (const auto& el : list)
-			AddFront(el);
-	}
-	template<typename T, AllocatorType Allocator>
-	inline void Blaze::List<T, Allocator>::AppendFront(List&& list)
-	{
-		if (list.count == 0)
-		{
-			first = list.first;
-			last = list.last;
-			count = list.count;
-		}
-		else
-		{
-			list.last->next = this->first;
-			this->first = list.first;
-			this->count += list.count;
-		}
-
-		list.first = nullptr;
-		list.last = nullptr;
-		list.count = 0;
+		it.node->next = nullptr;		
+		return out;
 	}
 	template<typename T, AllocatorType Allocator>
 	inline T& List<T, Allocator>::First()
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
+		if (first == nullptr)
 			BLAZE_ENGINE_CORE_FATAL("List is empty");
 #endif
 		return first->value;
@@ -434,28 +342,10 @@ namespace Blaze
 	inline const T& List<T, Allocator>::First() const
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
+		if (first == nullptr)
 			BLAZE_ENGINE_CORE_FATAL("List is empty");
 #endif
 		return first->value;
-	}
-	template<typename T, AllocatorType Allocator>
-	inline T& List<T, Allocator>::Last()
-	{
-#ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
-			BLAZE_ENGINE_CORE_FATAL("List is empty");
-#endif
-		return last->value;
-	}
-	template<typename T, AllocatorType Allocator>
-	inline const T& List<T, Allocator>::Last() const
-	{
-#ifdef BLAZE_INVALID_ITERATOR_CHECK
-		if (count == 0)
-			BLAZE_ENGINE_CORE_FATAL("List is empty");
-#endif
-		return last->value;
 	}
 	template<typename T, AllocatorType Allocator>
 	inline List<T, Allocator>::Iterator List<T, Allocator>::FirstIterator()
@@ -466,26 +356,6 @@ namespace Blaze
 	inline List<T, Allocator>::ConstIterator List<T, Allocator>::FirstIterator() const
 	{
 		return ConstIterator(first);
-	}
-	template<typename T, AllocatorType Allocator>
-	inline List<T, Allocator>::Iterator List<T, Allocator>::LastIterator()
-	{
-		return Iterator(last);
-	}
-	template<typename T, AllocatorType Allocator>
-	inline List<T, Allocator>::ConstIterator List<T, Allocator>::LastIterator() const
-	{
-		return ConstIterator(last);
-	}
-	template<typename T, AllocatorType Allocator>
-	inline List<T, Allocator>::Iterator List<T, Allocator>::AheadIterator()
-	{
-		return Iterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	inline List<T, Allocator>::ConstIterator List<T, Allocator>::AheadIterator() const
-	{
-		return ConstIterator();
 	}
 	template<typename T, AllocatorType Allocator>
 	inline List<T, Allocator>::Iterator List<T, Allocator>::BehindIterator()
@@ -510,12 +380,8 @@ namespace Blaze
 	inline List<T, Allocator>& List<T, Allocator>::operator=(List&& other) noexcept
 	{
 		Clear();
-		first = other.first;
-		last = other.last;
-		count = other.count;
-		other.first = nullptr;
-		other.last = nullptr;
-		other.count = 0;
+		first = other.first;		
+		other.first = nullptr;		
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
@@ -527,7 +393,7 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void List<T, Allocator>::CopyUnsafe(const List& other)
 	{
-		if (other.count == 0)
+		if (other.first == nullptr)
 			return;
 
 		first = (Node*)allocator.Allocate(sizeof(Node));
@@ -545,29 +411,5 @@ namespace Blaze
 
 			std::construct_at(itDst, nullptr, (const T&)*itSrc);
 		}
-
-		last = itDst;
-		count = other.count;
-	}
-
-	template<typename T, AllocatorType Allocator>
-	List<T, Allocator>::Iterator begin(List<T, Allocator>& list)
-	{
-		return list.FirstIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	List<T, Allocator>::ConstIterator begin(const List<T, Allocator>& list)
-	{
-		return list.FirstIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	List<T, Allocator>::Iterator end(List<T, Allocator>& list)
-	{
-		return list.BehindIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	List<T, Allocator>::ConstIterator end(const List<T, Allocator>& list)
-	{
-		return list.BehindIterator();
-	}
+	}	
 }

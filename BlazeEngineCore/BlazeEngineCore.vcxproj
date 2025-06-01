@@ -101,6 +101,7 @@
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgAutoLink>false</VcpkgAutoLink>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -110,6 +111,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +131,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +154,7 @@
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib />
     <PostBuildEvent />
@@ -160,6 +164,7 @@
     <ClCompile />
     <ClCompile>
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib />
     <PostBuildEvent />
@@ -169,7 +174,6 @@
     <ClCompile Include="source\BlazeEngineCore\DataStructures\Buffer.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\Color.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\String.cpp" />
-    <ClCompile Include="source\BlazeEngineCore\DataStructures\StringHash.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\StringUTF8.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Debug\Breakpoint.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Debug\Callstack.cpp" />
@@ -204,6 +208,7 @@
     <ClInclude Include="include\BlazeEngineCore\BlazeEngineCore.h" />
     <ClInclude Include="include\BlazeEngineCore\BlazeEngineCoreContext.h" />
     <ClInclude Include="include\BlazeEngineCore\BlazeEngineCoreDefines.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\Align.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Array.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\ArrayIterator.h" />
@@ -227,7 +232,6 @@
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Set.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\SetImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\String.h" />
-    <ClInclude Include="include\BlazeEngineCore\DataStructures\StringHash.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringUTF8.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringView.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\StringViewImpl.h" />
@@ -236,6 +240,7 @@
     <ClInclude Include="include\BlazeEngineCore\Event\EventDispatcherImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\Event\EventHandlerData.h" />
     <ClInclude Include="include\BlazeEngineCore\Event\EventHandlerDataImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\Format\Format.h" />
     <ClInclude Include="include\BlazeEngineCore\Types\Template.h" />
     <ClInclude Include="include\BlazeEngineCore\Types\TemplateGroup.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Tuple.h" />

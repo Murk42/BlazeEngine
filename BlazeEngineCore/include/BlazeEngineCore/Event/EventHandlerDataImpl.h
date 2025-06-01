@@ -96,7 +96,7 @@ namespace Blaze
 		return *this;
 	}	
 	template<typename T>
-	static void StaticFunctionInvokingFunction(void* function, const T& event)
+	inline void EventHandlerData<T>::StaticFunctionInvokingFunction(void* function, const T& event)
 	{
 		((void(*)(const T&))function)(event);
 	}

@@ -1,18 +1,6 @@
 #pragma once
 #define BLAZE_ENGINE_CORE
 
-#pragma region PCH
-#include <type_traits>
-#include <utility>
-#include <functional>
-#include <memory>
-#include <cstdio>
-#include <filesystem>
-#include <concepts>
-#include <array>
-#include <string_view>
-#include <mutex>
-
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 #include "BlazeEngineCore/Memory/Allocator.h"
@@ -22,7 +10,6 @@
 #include "BlazeEngineCore/DataStructures/StringUTF8.h"
 #include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
 #include "BlazeEngineCore/DataStructures/UnicodeChar.h"
-
 
 #include "BlazeEngineCore/File/Path.h"
 #include "BlazeEngineCore/File/Stream/Stream.h"
@@ -40,8 +27,6 @@
 #include "BlazeEngineCore/File/Stream/FileStream.h"
 #include "BlazeEngineCore/File/Stream/BufferStream.h"
 #include "BlazeEngineCore/File/File.h"
-
-#include "BlazeEngineCore/DataStructures/StringHash.h"
 
 #include "BlazeEngineCore/DataStructures/Array.h"
 #include "BlazeEngineCore/DataStructures/ArrayView.h"
@@ -66,8 +51,6 @@
 #include "BlazeEngineCore/Memory/MallocAllocator.h"
 #include "BlazeEngineCore/Memory/MemoryListener.h"
 
-#pragma endregion
-
 #include "BlazeEngineCore/Types/Template.h"
 #include "BlazeEngineCore/Types/TemplateGroup.h"
 #include "BlazeEngineCore/Types/TypeTraits.h"
@@ -79,6 +62,7 @@
 #include "BlazeEngineCore/DataStructures/HandleImpl.h"
 #include "BlazeEngineCore/DataStructures/HybridArray.h"
 #include "BlazeEngineCore/DataStructures/Rect.h"
+#include "BlazeEngineCore/DataStructures/Align.h"
 #include "BlazeEngineCore/DataStructures/Tuple.h"
 #include "BlazeEngineCore/DataStructures/UnorderedArray.h"
 #include "BlazeEngineCore/DataStructures/UnorderedArrayImpl.h"

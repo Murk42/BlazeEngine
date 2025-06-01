@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "BlazeEngineCore/Threading/Thread.h"
+#include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/DataStructures/String.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include "BlazeEngineCore/Internal/WindowsPlatform.h"
@@ -39,7 +42,7 @@ namespace Blaze
 			return false;
 		else
 		{
-			Debug::Logger::LogError("WinAPI", "WaitForSingleObject failed with error \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("WinAPI", "WaitForSingleObject failed with error \"{}\"", Windows::GetErrorString(GetLastError()));
 			return false;
 		}
 #endif
@@ -54,7 +57,7 @@ namespace Blaze
 		DWORD exitCode = 0;
 		if (GetExitCodeThread(handle, &exitCode) == 0)
 		{
-			Debug::Logger::LogError("WinAPI", "GetExitCodeThread failed with error \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("WinAPI", "GetExitCodeThread failed with error \"{}\"", Windows::GetErrorString(GetLastError()));
 			return false;
 		}
 		if (exitCode == STILL_ACTIVE)
@@ -72,7 +75,7 @@ namespace Blaze
 		DWORD exitCode = 0;
 		if (GetExitCodeThread(handle, &exitCode) == 0)
 		{
-			Debug::Logger::LogError("WinAPI", "GetExitCodeThread failed with error \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("WinAPI", "GetExitCodeThread failed with error \"{}\"", Windows::GetErrorString(GetLastError()));
 			return false;
 		}
 		if (exitCode == STILL_ACTIVE)
@@ -110,7 +113,7 @@ namespace Blaze
 
 		if (handle == NULL)
 		{
-			Debug::Logger::LogError("WinAPI", "CreateThread failed with error \"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("WinAPI", "CreateThread failed with error \"{}\"", Windows::GetErrorString(GetLastError()));
 			return;
 		}
 #endif					

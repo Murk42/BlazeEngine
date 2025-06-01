@@ -3,24 +3,17 @@
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
 
 namespace Blaze::UI
-{
+{	
+	class TextSelection;
+
 	class BLAZE_GRAPHICS_API TextSelectionRenderUnitBase :
 		public Graphics::RenderUnit
 	{
 	public:
-		TextSelectionRenderUnitBase(StringView rendererName);
+		TextSelection& selection;
 
-		virtual bool CleanData() = 0;
+		TextSelectionRenderUnitBase(TextSelection& selection, StringView rendererName);
+
 		virtual bool CleanRenderData() = 0;
-
-		virtual void SetSelection(uintMem begin, uintMem end) = 0;
-		virtual void SetSelectionBegin(uintMem begin) = 0;
-		virtual void SetSelectionEnd(uintMem end) = 0;
-
-		virtual void ClearSelection() = 0;
-
-		virtual uintMem GetSelectionBegin() = 0;
-		virtual uintMem GetSelectionEnd() = 0;
-		virtual bool IsSelectionEmpty() = 0;
 	};
 }

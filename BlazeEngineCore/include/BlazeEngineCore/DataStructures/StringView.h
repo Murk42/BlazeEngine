@@ -6,6 +6,7 @@ namespace Blaze
 	class String;
 	class StringViewUTF8;
 	class StringUTF8;
+	class StringIterator;
 
 	class BLAZE_CORE_API StringViewIterator
 	{
@@ -68,8 +69,11 @@ namespace Blaze
 		constexpr bool Empty() const { return count == 0; }
 		inline uint32 Hash() const;
 		constexpr uintMem CountOf(char ch) const;
+		//The returned pointer might not be null-terminated
 		constexpr const char* Ptr() const { return ptr; }
+		//Does not include the null-terminating character
 		constexpr uintMem Count() const { return count; }
+
 		inline String SubString(uintMem start, uintMem count) const;
 		
 		constexpr const char& First() const;
@@ -89,4 +93,19 @@ namespace Blaze
 		template<size_t C>
 		constexpr StringView& operator=(const char(&arr)[C]);
 	};		
+}
+ 
+#include <string_view>
+
+namespace std
+{
+	template <>
+	struct hash<Blaze::StringView>
+	{
+		inline size_t operator()(const Blaze::StringView& k) const;
+	};
+	inline size_t hash<Blaze::StringView>::operator()(const Blaze::StringView& k) const
+	{
+		return hash<string_view>()(string_view(k.Ptr(), k.Count()));
+	}
 }

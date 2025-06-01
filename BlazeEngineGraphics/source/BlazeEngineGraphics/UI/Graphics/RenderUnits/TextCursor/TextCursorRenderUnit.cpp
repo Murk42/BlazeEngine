@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnit.h"
+#include "BlazeEngineCore/Utilities\TimeInterval.h"
+#include "BlazeEngineCore/DataStructures/Rect.h"
 
 namespace Blaze::UI
 {
@@ -42,10 +44,12 @@ namespace Blaze::UI
 		return out;
 	}
 	
-	TextCursorRenderUnit::TextCursorRenderUnit(TextRenderUnitBase& textRenderUnit) :
-		TextCursorRenderUnitBase("TexturedRectRenderer"), textRenderUnit(textRenderUnit), cursorCharacterIndex(0), renderDataDirty(false), rendered(true), shown(false)
+	TextCursorRenderUnit::TextCursorRenderUnit(TextCursor& cursor, TextRenderUnitBase& textRenderUnit) :
+		TextCursorRenderUnitBase(cursor, "TexturedRectRenderer"), textRenderUnit(textRenderUnit), 
+		renderDataDirty(false), rendered(true), shown(false)
 	{		
-		textRenderUnit.renderDataUpdatedEventDispatcher.AddHandler(*this);
+		textRenderUnit.renderDataUpdatedEventDispatcher.AddHandler<&TextCursorRenderUnit::TextRenderDataUpdatedEvent>(*this);
+		cursor.cursorMovedEventDispatcher.AddHandler<&TextCursorRenderUnit::CursorMovedEvent>(*this);
 
 		renderData.blend = 1;
 		renderData.color = 0xffffffff;
@@ -56,7 +60,8 @@ namespace Blaze::UI
 	}
 	TextCursorRenderUnit::~TextCursorRenderUnit()
 	{
-		textRenderUnit.renderDataUpdatedEventDispatcher.RemoveHandler(*this);
+		textRenderUnit.renderDataUpdatedEventDispatcher.RemoveHandler<&TextCursorRenderUnit::TextRenderDataUpdatedEvent>(*this);
+		cursor.cursorMovedEventDispatcher.RemoveHandler<&TextCursorRenderUnit::CursorMovedEvent>(*this);
 	}
 	void TextCursorRenderUnit::BeginStream()
 	{		
@@ -72,37 +77,40 @@ namespace Blaze::UI
 
 		return &renderData;
 	}
-	bool TextCursorRenderUnit::CleanData()
+	void TextCursorRenderUnit::HideCursor()
 	{
-		if (!textRenderUnit.CleanData())
-			return false;
-
-		ValidateCursorPos();
-
-		return true;
+		shown = false;
 	}
-	bool TextCursorRenderUnit::CleanRenderData()
+	void TextCursorRenderUnit::ShowCursor()
 	{
-		CleanData();
+		shown = true;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
+	}	
+	bool TextCursorRenderUnit::CleanRenderData()
+	{				
+		textRenderUnit.CleanRenderData();
 
 		if (!renderDataDirty)
 			return false;
 
 		renderDataDirty = false;
-	
-		auto& characterData = textRenderUnit.GetCharacterData();		
-		
-		if (cursorCharacterIndex >= characterData.Count() && !characterData.Empty())
+
+		if (!shown)		
+			return true;
+
+		if (textRenderUnit.textContainer.CharacterCount() != cursor.selection.textContainer.CharacterCount())
 		{
+			BLAZE_ENGINE_GRAPHICS_ERROR("Preparing a text cursor render unit for rendering with a text render unit and text cursor that have text containers with different character counts");
 			culled = true;
 			return true;
 		}
+			
+		auto& characterData = textRenderUnit.GetCharacterData();		
+		auto& linesData = textRenderUnit.GetLineData();		
+		auto& line = linesData[characterData[cursor.GetCursorPos()].lineIndex];
+		uintMem cursorLineCharacterIndex = cursor.GetCursorPos() - line.firstCharacterIndex;
 
-		auto& linesData = textRenderUnit.GetLineData();
-		auto& line = linesData[characterData[cursorCharacterIndex].lineIndex];		
-		uintMem cursorLineCharacterIndex = cursorCharacterIndex - line.firstCharacterIndex;
-
-		Vec2f cursorSize = Vec2f(0.05f, 0.8f) * textRenderUnit.GetPixelFontHeight();
+		Vec2f cursorSize = Vec2f(0.05f, 0.8f) * textRenderUnit.GetFontStyle()->fontPixelHeight;
 		cursorSize = Vec2f(std::max(std::round(cursorSize.x), 1.0f), std::max(std::round(cursorSize.y), 1.0f));
 		Rectf rect{ Vec2f(0, line.pos.y), cursorSize };
 
@@ -114,12 +122,12 @@ namespace Blaze::UI
 		else if (cursorLineCharacterIndex == 0)
 		{
 			//The cursor is ahead of all characters in the line
-			rect.pos.x = characterData[cursorCharacterIndex].pos.x - cursorSize.x;
+			rect.pos.x = characterData[cursor.GetCursorPos()].pos.x - cursorSize.x;
 		}
 		else
 		{
 			//The cursor is behind all characters in the line
-			rect.pos.x = characterData[cursorCharacterIndex - 1].pos.x + characterData[cursorCharacterIndex - 1].size.x;
+			rect.pos.x = characterData[cursor.GetCursorPos() - 1].pos.x + characterData[cursor.GetCursorPos() - 1].size.x;
 		}		
 
 		auto textFinalTransform = textRenderUnit.GetFinalTransform();
@@ -150,142 +158,12 @@ namespace Blaze::UI
 
 		return true;
 	}	
-	void TextCursorRenderUnit::SetCursorPosBeforeCharacter(uintMem characterIndex)
+	void TextCursorRenderUnit::CursorMovedEvent(const TextCursor::CursorMovedEvent& event)
 	{
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		if (characterIndex != 0 && characterIndex >= characterData.Count())
-		{
-			SetCursorPosToEnd();
-			return;
-		}
-
-		cursorCharacterIndex = characterIndex;
+		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 		renderDataDirty = true;
-		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
 	}
-	void TextCursorRenderUnit::SetCursorPosAfterCharacter(uintMem characterIndex)
-	{		
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		++characterIndex;
-		if (characterIndex >= characterData.Count())
-		{
-			SetCursorPosToEnd();
-			return;
-		}
-
-		cursorCharacterIndex = characterIndex;
-		renderDataDirty = true;
-		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
-	}
-	void TextCursorRenderUnit::SetCursorPosToBeginning()
-	{
-		SetCursorPosBeforeCharacter(0);		
-	}
-	void TextCursorRenderUnit::SetCursorPosToBeginningOfLine(uintMem characterIndex)
-	{
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		if (characterIndex >= characterData.Count())
-		{
-			SetCursorPosToBeginning();
-			return;
-		}
-
-		auto& lineData = textRenderUnit.GetLineData();
-		auto& line = lineData[characterData[characterIndex].lineIndex];
-
-		cursorCharacterIndex = line.firstCharacterIndex;
-		renderDataDirty = true;
-		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
-	}
-	void TextCursorRenderUnit::SetCursorPosToEnd()
-	{
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		if (characterData.Empty())
-			SetCursorPosBeforeCharacter(0);
-		else
-			SetCursorPosBeforeCharacter(characterData.Count() - 1);					
-	}
-	void TextCursorRenderUnit::SetCursorPosToEndOfLine(uintMem characterIndex)
-	{
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		if (characterIndex >= characterData.Count())
-		{
-			SetCursorPosToEnd();
-			return;
-		}
-
-		auto& lineData = textRenderUnit.GetLineData();
-		auto& line = lineData[characterData[characterIndex].lineIndex];
-
-		cursorCharacterIndex = line.firstCharacterIndex + line.characterCount - 1;
-		renderDataDirty = true;
-		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
-	}
-	bool TextCursorRenderUnit::AdvanceCursor()
-	{
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		if (cursorCharacterIndex == characterData.Count() - 1)
-			return false;
-
-		++cursorCharacterIndex;
-		renderDataDirty = true;
-		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
-
-		return true;
-	}
-	bool TextCursorRenderUnit::RetreatCursor()
-	{		
-		CleanData();
-
-		if (cursorCharacterIndex == 0)
-			return false;
-
-		--cursorCharacterIndex;
-		renderDataDirty = true;
-		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
-
-		return true;
-	}	
-	uintMem TextCursorRenderUnit::GetIndexOfCharacterAfterCursor()
-	{
-		CleanData();
-
-		return cursorCharacterIndex;		
-	}
-	bool TextCursorRenderUnit::IsCursorAtEnd()
-	{
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		return cursorCharacterIndex == characterData.Count() - 1;		
-	}
-	bool TextCursorRenderUnit::IsCursorAtBeggining()
-	{
-		CleanData();
-
-		return cursorCharacterIndex == 0;
-	}
-	void TextCursorRenderUnit::ValidateCursorPos()
-	{
-		auto& characterData = textRenderUnit.GetCharacterData();
-
-		cursorCharacterIndex = std::min(cursorCharacterIndex, characterData.Count());
-	}
-	void TextCursorRenderUnit::HideCursor()
-	{
-		shown = false;
-	}
-	void TextCursorRenderUnit::ShowCursor()
-	{
-		shown = true;
-		lastTimeCursorSet = TimePoint::GetCurrentWorldTime();
-	}	
-	void TextCursorRenderUnit::OnEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event)
+	void TextCursorRenderUnit::TextRenderDataUpdatedEvent(const TextRenderUnitBase::RenderDataUpdatedEvent& event)
 	{						
 		renderDataDirty = true;
 	}

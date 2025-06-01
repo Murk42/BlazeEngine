@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineCore/Debug/Result.h"
+#include "BlazeEngineCore/DataStructures/ArrayImpl.h"
 
 namespace Blaze
 {	

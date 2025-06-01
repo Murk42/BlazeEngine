@@ -1,13 +1,12 @@
 #version 450 
 
-layout(location = 0) in uint i_sign;
-layout(location = 1) in vec4 i_fillColor;
-layout(location = 2) in vec4 i_borderColor;
-layout(location = 3) in vec2 i_p1;
-layout(location = 4) in vec2 i_p2;
-layout(location = 5) in vec2 i_p3;
-layout(location = 6) in float i_borderWidth;
-layout(location = 7) in float i_cornerRadius;
+layout(location = 0) in vec4 i_fillColor;
+layout(location = 1) in vec4 i_borderColor;
+layout(location = 2) in vec2 i_p1;
+layout(location = 3) in vec2 i_p2;
+layout(location = 4) in vec2 i_p3;
+layout(location = 5) in float i_borderWidth;
+layout(location = 6) in float i_cornerRadius;
 
 layout(location = 0) uniform mat4 u_MVP;
 
@@ -22,7 +21,7 @@ out float frag_cornerRadius;
 
 void main()
 {	
-	vec4 selector = vec4(i_sign == 0, i_sign == 1, i_sign == 2, i_sign == 3);
+	vec4 selector = vec4(gl_VertexID == 0, gl_VertexID == 1, gl_VertexID == 2, gl_VertexID == 3);
 	vec2 pos = vec2(
 		dot(selector, vec4(i_p1.x, i_p2.x, i_p3.x, i_p2.x + i_p3.x - i_p1.x)),
 		dot(selector, vec4(i_p1.y, i_p2.y, i_p3.y, i_p2.y + i_p3.y - i_p1.y))

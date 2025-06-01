@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineCore/Debug/Log.h"
-#include "BlazeEngineCore/Utilities/StringParsing.h"
+#include "BlazeEngineCore/Format/Format.h"
+#include "BlazeEngineCore/BlazeEngineCoreContext.h"
 
 namespace Blaze::Debug
 {
@@ -41,14 +42,37 @@ namespace Blaze::Debug
 
 		StringUTF8 out = "[" + timeStr + "] [" + typeStr + "] [" + source + "] " + message;
 
-		return out;
+		return FormatUTF8("[{}] [{}] [{}] {}", timeStr, typeStr, source, message);
 	}
 	StringUTF8 Log::ToStringVerbose() const
 	{
 		StringUTF8 string = ToString() + "\n\n";
 
-		for (auto& frame : callstack)		
-			string += frame.FilePath().FileName() + ": " + StringParsing::Convert(frame.FileLine()) + " 0x" + StringParsing::Convert((size_t)frame.Address(), 16) + " " + frame.LocationName() + "\n";		
+
+		uintMem maxWidth = 4;
+		for (auto& frame : callstack)
+		{
+			StringUTF8 fileName = frame.FilePath().FileName();
+			if (fileName.Empty())
+				fileName = "Unknown";
+			maxWidth = std::max(fileName.CharacterCount(), maxWidth);
+		}
+
+		string += FormatUTF8(FormatUTF8("|-{{:-^{}}}-|--------|----------\n", maxWidth), "");
+		string += FormatUTF8(FormatUTF8("| {{: ^{}}} |  Line  | Function \n", maxWidth), "File");
+		string += FormatUTF8(FormatUTF8("|-{{:-^{}}}-|--------|----------\n", maxWidth), "");
+
+		StringUTF8 formatString = FormatUTF8("| {{:^{}}} | {{:>6}} | {{}}\n", maxWidth);
+
+		for (auto& frame : callstack)
+		{
+			StringUTF8 path = frame.FilePath().FileName();
+			if (path.Empty())
+				path = "Unknown";
+			string += FormatUTF8(formatString, path, frame.FileLine(), frame.LocationName());
+		}
+
+		string += FormatUTF8(FormatUTF8("|-{{:-^{}}}-|--------|----------\n", maxWidth), "");
 
 		return string;
 	}

@@ -199,4 +199,25 @@ namespace Blaze
 		size_t count;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
 	};		
+
+	template<typename T, AllocatorType Allocator>
+	VirtualList<T, Allocator>::Iterator begin(VirtualList<T, Allocator>& map)
+	{
+		return map.FirstIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	VirtualList<T, Allocator>::ConstIterator begin(const VirtualList<T, Allocator>& map)
+	{
+		return map.FirstIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	VirtualList<T, Allocator>::Iterator end(VirtualList<T, Allocator>& map)
+	{
+		return map.BehindIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	VirtualList<T, Allocator>::ConstIterator end(const VirtualList<T, Allocator>& map)
+	{
+		return map.BehindIterator();
+	}
 }

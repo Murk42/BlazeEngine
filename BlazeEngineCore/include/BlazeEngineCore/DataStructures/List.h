@@ -1,4 +1,8 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Memory/Allocator.h"
+#include <type_traits>
+#include <concepts>
 
 namespace Blaze
 {			
@@ -56,6 +60,7 @@ namespace Blaze
 		ListIterator(const T& i);		
 		
 		bool IsNull() const;		
+		ValueType* Ptr() const;
 
 		ListIterator& operator++();
 		ListIterator operator++(int);
@@ -111,13 +116,10 @@ namespace Blaze
 		~List();
 
 		void Clear();
-		bool Empty() const;		
-		uintMem Count() const;
+		bool Empty() const;
 
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddAfter(const Iterator& it, Args&& ... args);
-		template<typename ... Args> requires std::constructible_from<T, Args...>
-		Iterator AddBack(Args&& ... args);
 		template<typename ... Args> requires std::constructible_from<T, Args...>
 		Iterator AddFront(Args&& ... args);
 
@@ -128,16 +130,11 @@ namespace Blaze
 		template<typename C> requires std::invocable<C, T&>&& std::same_as<std::invoke_result_t<C, T&>, bool>
 		void EraseOne(const C& function);
 
-		void AppendBack(const List& list);
-		void AppendBack(List&& list);
-		void AppendFront(const List& list);
-		void AppendFront(List&& list);		
+		List SplitAfter(const Iterator& it);
 
 		T& First();
 		const T& First() const;
-		T& Last();
-		const T& Last() const;		
-		
+
 		/*
 			Returns an iterator pointing to the first element in the list. If the list is empty returns a null list iterator.
 		*/
@@ -146,22 +143,6 @@ namespace Blaze
 			Returns an iterator pointing to the first element in the list. If the list is empty returns a null list iterator.
 		*/
 		ConstIterator FirstIterator() const;		
-		/*
-			Returns an iterator pointing to the last element in the list. If the list is empty returns a null list iterator.
-		*/
-		Iterator LastIterator();		
-		/*
-			Returns an iterator pointing to the last element in the list. If the list is empty returns a null list iterator.
-		*/
-		ConstIterator LastIterator() const;
-		/*
-			Returns a null iterator always.
-		*/
-		Iterator AheadIterator();
-		/*
-			Returns a null iterator always.
-		*/
-		ConstIterator AheadIterator() const;
 		/*
 			Returns a null iterator always.
 		*/
@@ -193,8 +174,27 @@ namespace Blaze
 		void CopyUnsafe(const List& other);
 
 		Node* first;
-		Node* last;
-		size_t count;		
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
 	};
+
+	template<typename T, AllocatorType Allocator>
+	List<T, Allocator>::Iterator begin(List<T, Allocator>& list)
+	{
+		return list.FirstIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	List<T, Allocator>::ConstIterator begin(const List<T, Allocator>& list)
+	{
+		return list.FirstIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	List<T, Allocator>::Iterator end(List<T, Allocator>& list)
+	{
+		return list.BehindIterator();
+	}
+	template<typename T, AllocatorType Allocator>
+	List<T, Allocator>::ConstIterator end(const List<T, Allocator>& list)
+	{
+		return list.BehindIterator();
+	}
 }

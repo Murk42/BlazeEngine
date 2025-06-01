@@ -1,8 +1,8 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
-#include "BLazeEngineCore/Debug/Log.h"
-#include "BlazeEngineCore/DataStructures/Array.h"
 #include "BlazeEngineCore/DataStructures/ArrayView.h"
+#include "BlazeEngineCore/DataStructures/Array.h"
+#include "BLazeEngineCore/Debug/Log.h"
 
 namespace Blaze
 {	
@@ -43,7 +43,7 @@ namespace Blaze
 		Result& operator=(const Result&);
 		Result& operator=(Result&&) noexcept;
 	private:				
-		Array<Debug::Log> logs;		
+		Array<Debug::Log, DefaultAllocator> logs;		
 		Debug::LogType highestLogType;		
 
 	};

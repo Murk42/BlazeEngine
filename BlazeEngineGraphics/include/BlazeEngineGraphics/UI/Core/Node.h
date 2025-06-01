@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/Event/EventDispatcher.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/UI/Core/NodeDataMap.h"
 #include "BlazeEngineGraphics/UI/Core/NodeTransform.h"
@@ -20,7 +21,7 @@ namespace Blaze::UI
 		{
 			Node& node;			
 		};		
-		struct EnabledStateUpdatedEvent
+		struct EnabledStateChangedEvent
 		{
 			Node& node;			
 		};
@@ -47,12 +48,16 @@ namespace Blaze::UI
 		
 		EventDispatcher<TransformUpdatedEvent> transformUpdatedEventDispatcher;
 		EventDispatcher<FinalTransformUpdatedEvent> finalTransformUpdatedEventDispatcher;
-		EventDispatcher<EnabledStateUpdatedEvent> enabledStateUpdatedEventDispatcher;
+		EventDispatcher<EnabledStateChangedEvent> enabledStateChangedEventDispatcher;
 		EventDispatcher<SurroundingNodeTreeChangedEvent> surroundingNodeTreeChangedEventDispatcher;
 
 		Node();
 		virtual ~Node();		
 
+		/*
+			\returns Value greater than 0 if the node is mouseHitStatus and blocks further hits, less than 0 if it is mouseHitStatus 
+			and doesn't block further hits and 0 if it is not mouseHitStatus.
+		*/
 		virtual int HitTest(Vec2f screenPosition);		
 
 		void SetParent(Node* parent);

@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 
 namespace Blaze::Graphics::Dynamic
 {

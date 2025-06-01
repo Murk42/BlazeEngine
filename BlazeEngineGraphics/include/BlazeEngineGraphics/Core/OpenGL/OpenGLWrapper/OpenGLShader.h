@@ -1,4 +1,7 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/StringView.h"
+#include "BlazeEngineCore/File/Path.h"
+#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
@@ -6,21 +9,16 @@ namespace Blaze::Graphics::OpenGLWrapper
 	class BLAZE_GRAPHICS_API Shader
 	{
 		uint id;
-		ShaderState state;
 	public:
 		Shader(ShaderType type);
 		Shader(const Shader&) = delete;
 		Shader(Shader&&) noexcept;
 		Shader(ShaderType type, const Path& path);
+		Shader(ShaderType type, StringView source);
 		~Shader();
 
-		void Load(const Path& path);
-
-		void ShaderSource(StringView source);
-		void CompileShader();
-		String GetCompilationLog();
-
-		inline ShaderState GetState() const { return state; }
+		bool Load(const Path& path);
+		bool Load(StringView source);		
 
 		Shader& operator=(const Shader&) = delete;
 		Shader& operator=(Shader&&) noexcept;
@@ -33,6 +31,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 	public:
 		VertexShader() : Shader(ShaderType::VertexShader) { }
 		VertexShader(const Path& path) : Shader(ShaderType::VertexShader, path) { }
+		VertexShader(StringView source) : Shader(ShaderType::VertexShader, source) {}
 	};
 
 	class FragmentShader : public Shader
@@ -40,6 +39,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 	public:
 		FragmentShader() : Shader(ShaderType::FragmentShader) { }
 		FragmentShader(const Path& path) : Shader(ShaderType::FragmentShader, path) { }
+		FragmentShader(StringView source) : Shader(ShaderType::FragmentShader, source) {}
 	};
 
 	class GeometryShader : public Shader
@@ -47,6 +47,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 	public:
 		GeometryShader() : Shader(ShaderType::GeometryShader) { }
 		GeometryShader(const Path& path) : Shader(ShaderType::GeometryShader, path) { }
+		GeometryShader(StringView source) : Shader(ShaderType::GeometryShader, source) {}
 	};
 
 	class TessellationControlShader : public Shader
@@ -54,6 +55,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 	public:
 		TessellationControlShader() : Shader(ShaderType::TessellationControlShader) { }
 		TessellationControlShader(const Path& path) : Shader(ShaderType::TessellationControlShader, path) { }
+		TessellationControlShader(StringView source) : Shader(ShaderType::TessellationControlShader, source) {}
 	};
 
 	class TessellationEvaluationShader : public Shader
@@ -61,6 +63,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 	public:
 		TessellationEvaluationShader() : Shader(ShaderType::TessellationEvaluationShader) { }
 		TessellationEvaluationShader(const Path& path) : Shader(ShaderType::TessellationEvaluationShader, path) { }
+		TessellationEvaluationShader(StringView source) : Shader(ShaderType::TessellationEvaluationShader, source) {}
 	};
 
 	class ComputeShader : public Shader
@@ -68,5 +71,6 @@ namespace Blaze::Graphics::OpenGLWrapper
 	public:
 		ComputeShader() : Shader(ShaderType::ComputeShader) { }
 		ComputeShader(const Path& path) : Shader(ShaderType::ComputeShader, path) { }
+		ComputeShader(StringView source) : Shader(ShaderType::ComputeShader, source) {}
 	};
 }

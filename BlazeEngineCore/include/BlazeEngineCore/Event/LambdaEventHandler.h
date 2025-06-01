@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngineCore/Event/EventHandler.h"
+#include <functional>
 
 namespace Blaze
 {

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineCore/Utilities/TimePoint.h"
+#include <chrono>
 
 namespace Blaze
 {	

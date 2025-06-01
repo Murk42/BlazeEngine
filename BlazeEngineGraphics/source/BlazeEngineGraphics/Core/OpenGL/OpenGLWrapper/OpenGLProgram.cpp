@@ -1,21 +1,27 @@
 #include "pch.h"
+#include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/Debug/LoggerListener.h"
+#include "BlazeEngineCore/DataStructures/Buffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
 	ShaderProgram::ShaderProgram()
-		: id(0), state(ShaderProgramState::Invalid), maxUniformBlockNameLenght(0), maxUniformNameLenght(0)
+		: id(0), state(ShaderProgramState::Invalid)
 	{
 		id = glCreateProgram();		
 	}
+	ShaderProgram::ShaderProgram(uint id)
+		: id(0), state(ShaderProgramState::Invalid)
+	{
+	}
 	ShaderProgram::ShaderProgram(ShaderProgram&& p) noexcept
-		: id(p.id), state(p.state), maxUniformBlockNameLenght(p.maxUniformBlockNameLenght), maxUniformNameLenght(p.maxUniformNameLenght)
+		: id(p.id), state(p.state)
 	{
 		p.id = 0;
-		p.state = ShaderProgramState::Invalid;
-		p.maxUniformBlockNameLenght = 0;
-		p.maxUniformNameLenght = 0;
+		p.state = ShaderProgramState::Invalid;		
 	}
 	ShaderProgram::~ShaderProgram()
 	{
@@ -56,30 +62,22 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 			BLAZE_ENGINE_GRAPHICS_WARNING("Failed to compile shader program with message:\n" + message);
 			return;
-		}
-
-		int lenght = 0;
-		glGetProgramiv(id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &lenght);		
-
-		maxUniformNameLenght = lenght;
-		glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_MAX_NAME_LENGTH, &lenght);		
-
-		maxUniformBlockNameLenght = lenght;
+		}			
 
 		state = ShaderProgramState::SuccesfullyLinked;		
 	}
 
-	void ShaderProgram::LinkShaders(const std::initializer_list<Shader*>& shaders)
+	void ShaderProgram::LinkShaders(ArrayView<Shader&> shaders)
 	{
 		Debug::LoggerListener ll;
 
 		for (auto& s : shaders)		
-			AttachShader(*s);		
+			AttachShader(s);		
 
 		LinkProgram();
 
 		for (auto& s : shaders)
-			DetachShader(*s);		
+			DetachShader(s);		
 	}
 
 	uint ShaderProgram::GetUniformCount() const
@@ -96,18 +94,20 @@ namespace Blaze::Graphics::OpenGLWrapper
 	}
 
 	void ShaderProgram::GetUniformData(uint index, String& name, uint& uniformSize, UniformType& uniformType) const
-	{
-		char* ptr = new char[maxUniformNameLenght];
-		int lenght = 0;
+	{		
+		int maxUniformNameLength = 0;
+		glGetProgramiv(id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);		
+		Buffer buffer(maxUniformNameLength);
+
+		int length = 0;
 		int size = 0;
 		uint type = 0;
 
-		glGetActiveUniform(id, index, maxUniformNameLenght, &lenght, &size, &type, ptr);
+		glGetActiveUniform(id, index, maxUniformNameLength, &length, &size, &type, (char*)buffer.Ptr());
 		
-		name = std::move(String(ptr, maxUniformNameLenght));
-		delete[] ptr;
+		name = StringView((char*)buffer.Ptr(), length);
 		uniformSize = size;
-		uniformType = (UniformType)type;
+		uniformType = MapOpenGLUniformType(type);
 	}
 
 	uint ShaderProgram::GetUniformBlockCount() const
@@ -117,15 +117,17 @@ namespace Blaze::Graphics::OpenGLWrapper
 		return uniformBlockCount;
 	}
 
-	void ShaderProgram::GetUniformBlockData(uint index, int& location, String& name, uint& uniformBlockSize, std::vector<int>& memberIndicies) const
+	void ShaderProgram::GetUniformBlockData(uint index, int& location, String& name, uint& uniformBlockSize, Array<int>& memberIndicies) const
 	{
-		char* ptr = new char[maxUniformBlockNameLenght];
+		int maxUniformNameLength = 0;		
+		glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_MAX_NAME_LENGTH, &maxUniformNameLength);
+		Buffer buffer(maxUniformNameLength);
+		
 		int length = 0;
 
-		glGetActiveUniformBlockName(id, index, maxUniformBlockNameLenght, &length, ptr);		
+		glGetActiveUniformBlockName(id, index, maxUniformNameLength, &length, (char*)buffer.Ptr());
 
-		name = std::move(String(ptr, length));
-		delete[] ptr;		
+		name = StringView((char*)buffer.Ptr(), length);
 
 		constexpr const unsigned props1[]{ GL_NUM_ACTIVE_VARIABLES, GL_BUFFER_DATA_SIZE };
 		constexpr const unsigned props2[]{ GL_ACTIVE_VARIABLES };
@@ -137,8 +139,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		glGetProgramResourceiv(id, GL_UNIFORM_BLOCK, index, 2, props1, 2, &length, (int*)&v1);		
 
-		memberIndicies.resize(v1.uniformBlockVariableCount);
-		glGetProgramResourceiv(id, GL_UNIFORM_BLOCK, index, 1, props2, v1.uniformBlockVariableCount, &length, memberIndicies.data());		
+		memberIndicies.Resize(v1.uniformBlockVariableCount);
+		glGetProgramResourceiv(id, GL_UNIFORM_BLOCK, index, 1, props2, v1.uniformBlockVariableCount, &length, memberIndicies.Ptr());		
 
 		uniformBlockSize = v1.uniformBlockSize;		
 	}
@@ -164,7 +166,7 @@ namespace Blaze::Graphics::OpenGLWrapper
 		name = std::move(String(ptr, v2.uniformBlockVariableNameLenght));
 		delete[] ptr;
 		size = v2.uniformBlockVariableSize;
-		type = (UniformType)v2.uniformBlockVariableType;
+		type = MapOpenGLUniformType(v2.uniformBlockVariableType);
 		offset = v2.uniformBlockVariableOffset;		
 	}
 
@@ -173,69 +175,82 @@ namespace Blaze::Graphics::OpenGLWrapper
 		glUniformBlockBinding(id, location, binding);
 	}
 
-	void ShaderProgram::SetUniform(int location, const int& value) const
+	void ShaderProgram::SetUniform(int location, const int& value)
 	{
 		glProgramUniform1i(id, location, value);
 	}
-	void ShaderProgram::SetUniform(int location, const uint& value) const
+	void ShaderProgram::SetUniform(int location, const uint& value)
 	{
 		glProgramUniform1ui(id, location, value);
 	}
-	void ShaderProgram::SetUniform(int location, const float& value) const
+	void ShaderProgram::SetUniform(int location, const float& value)
 	{
 		glProgramUniform1f(id, location, value);
 	}
-	void ShaderProgram::SetUniform(int location, const double& value) const
+	void ShaderProgram::SetUniform(int location, const double& value)
 	{
 		glProgramUniform1d(id, location, value);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec2i& value) const
+	void ShaderProgram::SetUniform(int location, const Vec2i& value)
 	{
 		glProgramUniform2i(id, location, value.x, value.y);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec2f& value) const
+	void ShaderProgram::SetUniform(int location, const Vec2f& value)
 	{
 		glProgramUniform2f(id, location, value.x, value.y);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec2d& value) const
+	void ShaderProgram::SetUniform(int location, const Vec2d& value)
 	{
 		glProgramUniform2d(id, location, value.x, value.y);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec3i& value) const
+	void ShaderProgram::SetUniform(int location, const Vec3i& value)
 	{
 		glProgramUniform3i(id, location, value.x, value.y, value.z);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec3f& value) const
+	void ShaderProgram::SetUniform(int location, const Vec3f& value)
 	{
 		glProgramUniform3f(id, location, value.x, value.y, value.z);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec3d& value) const
+	void ShaderProgram::SetUniform(int location, const Vec3d& value)
 	{
 		glProgramUniform3d(id, location, value.x, value.y, value.z);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec4i& value) const
+	void ShaderProgram::SetUniform(int location, const Vec4i& value)
 	{
 		glProgramUniform4i(id, location, value.x, value.y, value.z, value.w);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec4f& value) const
+	void ShaderProgram::SetUniform(int location, const Vec4f& value)
 	{
 		glProgramUniform4f(id, location, value.x, value.y, value.z, value.w);
 	}
-	void ShaderProgram::SetUniform(int location, const Vec4d& value) const
+	void ShaderProgram::SetUniform(int location, const Vec4d& value)
 	{
 		glProgramUniform4d(id, location, value.x, value.y, value.z, value.w);
 	}
-	void ShaderProgram::SetUniform(int location, const Mat2f& value) const
+	void ShaderProgram::SetUniform(int location, const Mat2f& value)
 	{
 		glProgramUniformMatrix2fv(id, location, 1, true, (float*)&value);
 	}
-	void ShaderProgram::SetUniform(int location, const Mat3f& value) const
+	void ShaderProgram::SetUniform(int location, const Mat3f& value)
 	{
 		glProgramUniformMatrix3fv(id, location, 1, true, (float*)&value);
 	}
-	void ShaderProgram::SetUniform(int location, const Mat4f& value) const
+	void ShaderProgram::SetUniform(int location, const Mat4f& value)
 	{
 		glProgramUniformMatrix4fv(id, location, 1, true, (float*)&value);
+	}
+
+	uint ShaderProgram::ReleaseHandleOwnership()
+	{
+		uint _id = id;
+		id = 0;
+		return _id;
+	}
+
+	void ShaderProgram::Release()
+	{
+		glDeleteProgram(id);
+		id = 0;
 	}
 
 	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& p) noexcept
@@ -248,12 +263,6 @@ namespace Blaze::Graphics::OpenGLWrapper
 
 		state = p.state;
 		p.state = ShaderProgramState::Invalid;
-
-		maxUniformBlockNameLenght = p.maxUniformBlockNameLenght;
-		p.maxUniformBlockNameLenght = 0;
-
-		maxUniformNameLenght = p.maxUniformNameLenght;
-		p.maxUniformNameLenght = 0;
 
 		return *this;
 	}

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/ImageRenderUnit.h"
+#include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 
 namespace Blaze::UI
 {
@@ -18,13 +19,13 @@ namespace Blaze::UI
 			.alpha = 1,
 			})
 	{
-		node->finalTransformUpdatedEventDispatcher.AddHandler(*this);
-		node->transformUpdatedEventDispatcher.AddHandler(*this);
+		node->finalTransformUpdatedEventDispatcher.AddHandler<&ImageRenderUnit::FinalTransformUpdatedEvent>(*this);
+		node->transformUpdatedEventDispatcher.AddHandler<&ImageRenderUnit::TransformUpdatedEvent>(*this);
 	}
 	ImageRenderUnit::~ImageRenderUnit()
 	{
-		node->finalTransformUpdatedEventDispatcher.RemoveHandler(*this);
-		node->transformUpdatedEventDispatcher.RemoveHandler(*this);
+		node->finalTransformUpdatedEventDispatcher.RemoveHandler<&ImageRenderUnit::FinalTransformUpdatedEvent>(*this);
+		node->transformUpdatedEventDispatcher.RemoveHandler<&ImageRenderUnit::TransformUpdatedEvent>(*this);
 	}
 	void ImageRenderUnit::BeginStream()
 	{				
@@ -91,7 +92,7 @@ namespace Blaze::UI
 		renderDataDirty = true;
 		this->layout = layout;		
 	}
-	void ImageRenderUnit::OnEvent(const Node::TransformUpdatedEvent& event)
+	void ImageRenderUnit::TransformUpdatedEvent(const Node::TransformUpdatedEvent& event)
 	{
 		if (rd.texture == nullptr)
 			return;
@@ -113,7 +114,7 @@ namespace Blaze::UI
 
 		node->SetTransform(transform);
 	}
-	void ImageRenderUnit::OnEvent(const Node::FinalTransformUpdatedEvent& event)
+	void ImageRenderUnit::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
 	{				
 		renderDataDirty = true;
 	}

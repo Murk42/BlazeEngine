@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
@@ -220,16 +221,38 @@ namespace Blaze::Graphics::OpenGLWrapper
 	{
 		R, G, B, A, One, Zero
 	};
-	enum class VertexAttributeType
+	enum class IntegerVertexAttributeType
 	{
 		Int8,
-		Uint8,
 		Int16,
-		Uint16,
 		Int32,
+		Uint8,
+		Uint16,
+		Uint32,		
+	};
+	enum class FloatVertexAttributeType
+	{
+		Int8,
+		Int16,
+		Int32,
+		Uint8,
+		Uint16,
 		Uint32,
+		Half,
 		Float,
-		Double
+		Double,
+	};
+	enum class PackedVertexAttributeType
+	{
+		Int_2_10_10_10_Rev,
+		Uint_2_10_10_10_Rev,
+		Uint_10F_11F_11F_Rev
+	};
+	enum class BGRAVertexAttributeType
+	{
+		Uint8,
+		Int_2_10_10_10_Rev,
+		Uint_2_10_10_10_Rev
 	};
 	enum class FramebufferAttachment
 	{
@@ -257,22 +280,115 @@ namespace Blaze::Graphics::OpenGLWrapper
 		TessellationControlShader = 36488,
 		TessellationEvaluationShader = 36487,
 		ComputeShader = 37305,
-	};
-	enum class ShaderState
-	{
-		Invalid,
-		UnsuccesfullyCompiled,
-		SuccesfullyCompiled,
-	};
+	};	
 	enum class UniformType
 	{
-		Mat4 = 35676,
-		Mat3 = 35675,
-		Mat2 = 35674,
-		Vec4 = 35666,
-		Vec3 = 35665,
-		Vec2 = 35664,
-		Sampler2D = 35678,
+		Float,
+		Vec2f,
+		Vec3f,
+		Vec4f,
+		Double,
+		Vec2d,
+		Vec3d,
+		Vec4d,
+		Int,
+		Vec2i,
+		Vec3i,
+		Vec4i,
+		UnsignedInt,
+		Vec2u,
+		Vec3u,
+		Vec4u,
+		Bool,
+		BoolVec2,
+		BoolVec3,
+		BoolVec4,
+		Mat2f,
+		Mat3f,
+		Mat4f,
+		Mat2x3f,
+		Mat2x4f,
+		Mat3x2f,
+		Mat3x4f,
+		Mat4x2f,
+		Mat4x3f,
+		Mat2d,
+		Mat3d,
+		Mat4d,
+		Mat2x3d,
+		Mat2x4d,
+		Mat3x2d,
+		Mat3x4d,
+		Mat4x2d,
+		Mat4x3d,
+		Sampler1D,
+		Sampler2D,
+		Sampler3D,
+		SamplerCube,
+		Sampler1DShadow,
+		Sampler2DShadow,
+		Sampler1DArray,
+		Sampler2DArray,
+		Sampler1DArrayShadow,
+		Sampler2DArrayShadow,
+		Sampler2DMultisample,
+		Sampler2DMultisampleArray,
+		SamplerCubeShadow,
+		SamplerBuffer,
+		Sampler2DRect,
+		Sampler2DRectShadow,
+		IntSampler1D,
+		IntSampler2D,
+		IntSampler3D,
+		IntSamplerCube,
+		IntSampler1DArray,
+		IntSampler2DArray,
+		IntSampler2DMultisample,
+		IntSampler2DMultisampleArray,
+		IntSamplerBuffer,
+		IntSampler2DRect,
+		UnsignedIntSampler1D,
+		UnsignedIntSampler2D,
+		UnsignedIntSampler3D,
+		UnsignedIntSamplerCube,
+		UnsignedIntSampler1DArray,
+		UnsignedIntSampler2DArray,
+		UnsignedIntSampler2DMultisample,
+		UnsignedIntSampler2DMultisampleArray,
+		UnsignedIntSamplerBuffer,
+		UnsignedIntSampler2DRect,
+		Image1D,
+		Image2D,
+		Image3D,
+		Image2DRect,
+		ImageCube,
+		ImageBuffer,
+		Image1DArray,
+		Image2DArray,
+		Image2DMultisample,
+		Image2DMultisampleArray,
+		IntImage1D,
+		IntImage2D,
+		IntImage3D,
+		IntImage2DRect,
+		IntImageCube,
+		IntImageBuffer,
+		IntImage1DArray,
+		IntImage2DArray,
+		IntImage2DMultisample,
+		IntImage2DMultisampleArray,
+		UnsignedIntImage1D,
+		UnsignedIntImage2D,
+		UnsignedIntImage3D,
+		UnsignedIntImage2DRect,
+		UnsignedIntImageCube,
+		UnsignedIntImageBuffer,
+		UnsignedIntImage1DArray,
+		UnsignedIntImage2DArray,
+		UnsignedIntImage2DMultisample,
+		UnsignedIntImage2DMultisampleArray,
+		UnsignedIntAtomicCounter,
+		Invalid
 	};
 	enum class ShaderProgramState
 	{

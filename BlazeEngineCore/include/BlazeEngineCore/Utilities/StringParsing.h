@@ -1,10 +1,10 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/StringView.h"
 #include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/DataStructures/StringView.h"
 #include "BlazeEngineCore/DataStructures/StringUTF8.h"
 #include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
 #include "BlazeEngineCore/DataStructures/Array.h"
-#include "BlazeEngineCore/DataStructures/ArrayImpl.h"
+#include "BlazeEngineCore/Debug/Result.h"
 
 namespace Blaze::StringParsing
 {
@@ -90,6 +90,8 @@ namespace Blaze::StringParsing
 	//the character <ch>. If there is no occurrence of <ch>, array with <value> as the only element
 	//is returned. If the string is empty an empty array is returned
 	BLAZE_CORE_API Array<StringViewUTF8> Split(StringViewUTF8 value, UnicodeChar ch);
+
+	BLAZE_CORE_API StringViewUTF8Iterator Find(StringViewUTF8 value, StringViewUTF8 target);
 
 	enum class FloatStringFormat
 	{

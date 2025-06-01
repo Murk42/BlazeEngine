@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Core/Node.h"
+#include "BlazeEngineCore/Math/Shapes.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineGraphics/UI/Core/Screen.h"
 #include "BlazeEngineGraphics/UI/Core/NodeTreeIterator.h"
 
@@ -303,7 +305,7 @@ namespace Blaze::UI
 		{
 			parentEnabled = newParentEnabled;
 
-			enabledStateUpdatedEventDispatcher.Call({ .node = *this });
+			enabledStateChangedEventDispatcher.Call({ .node = *this });
 
 			for (auto& child : GetChildren())
 				child.PropagateEnabledState();
@@ -318,7 +320,7 @@ namespace Blaze::UI
 
 		parentEnabled = newParentEnabled;
 
-		enabledStateUpdatedEventDispatcher.Call({ *this });
+		enabledStateChangedEventDispatcher.Call({ *this });
 
 		for (auto& child : GetChildren())
 			child.PropagateEnabledState();

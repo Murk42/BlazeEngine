@@ -1,52 +1,5 @@
 #pragma once
-#include <type_traits>
-#include <utility>
-#include <functional>
-#include <memory>
-#include <cstdio>
-#include <filesystem>
-#include <concepts>
-#include <array>
-#include <string_view>
-#include <mutex>
-
-#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
-
-#include "BlazeEngineCore/Memory/Allocator.h"
-
-#include "BlazeEngineCore/DataStructures/String.h"
-#include "BlazeEngineCore/DataStructures/StringView.h"
-#include "BlazeEngineCore/DataStructures/StringUTF8.h"
-#include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
-#include "BlazeEngineCore/DataStructures/UnicodeChar.h"
-
-#include "BlazeEngineCore/File/Path.h"
-#include "BlazeEngineCore/File/Stream/Stream.h"
-
-#include "BlazeEngineCore/Utilities/TimeInterval.h"
-#include "BlazeEngineCore/Utilities/TimePoint.h"
-
-#include "BlazeEngineCore/Debug/Breakpoint.h"
-#include "BlazeEngineCore/Debug/Callstack.h"
-#include "BlazeEngineCore/Debug/Log.h"
-#include "BlazeEngineCore/Debug/Result.h"
-#include "BlazeEngineCore/Debug/Logger.h"
-#include "BlazeEngineCore/Debug/LoggerListener.h"
-
-
-#include "BlazeEngineCore/File/Stream/FileStream.h"
-#include "BlazeEngineCore/File/Stream/BufferStream.h"
-#include "BlazeEngineCore/File/File.h"
-
-#include "BlazeEngineCore/DataStructures/StringHash.h"
-
-#include "BlazeEngineCore/DataStructures/Array.h"
-#include "BlazeEngineCore/DataStructures/ArrayView.h"
-#include "BlazeEngineCore/DataStructures/Hash.h"
-#include "BlazeEngineCore/DataStructures/List.h"
-#include "BlazeEngineCore/DataStructures/DualList.h"
-#include "BlazeEngineCore/DataStructures/Map.h"
-#include "BlazeEngineCore/DataStructures/Set.h"
+#include <format>
 
 #include "BlazeEngineCore/DataStructures/StringViewImpl.h"
 #include "BlazeEngineCore/DataStructures/StringViewUTF8Impl.h"
@@ -56,11 +9,7 @@
 #include "BlazeEngineCore/DataStructures/DualListImpl.h"
 #include "BlazeEngineCore/DataStructures/MapImpl.h"
 #include "BlazeEngineCore/DataStructures/SetImpl.h"
-
-#include "BlazeEngineCore/Utilities/TimeIntervalImpl.h"
-#include "BlazeEngineCore/Utilities/TimePointImpl.h"
-
-#include "BlazeEngineCore/Memory/MallocAllocator.h"
-#include "BlazeEngineCore/Memory/MemoryListener.h"
-
-#include "BlazeEngineCore/BlazeEngineCoreContext.h"
+#include "BlazeEngineCore/DataStructures/VirtualListImpl.h"
+#include "BlazeEngineCore/DataStructures/VirtualMapImpl.h"
+#include "BlazeEngineCore/Event/EventDispatcherImpl.h"
+#include "BlazeEngineCore/Event/EventHandlerDataImpl.h"

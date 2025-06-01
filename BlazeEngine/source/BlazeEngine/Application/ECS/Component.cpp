@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "BlazeEngineCore/Memory/MemoryManager.h"
 #include "BlazeEngine/Application/ECS/Component.h"
 #include "BlazeEngine/Application/ECS/Entity.h"
 #include "BlazeEngine/Application/ECS/Scene.h"
@@ -386,97 +387,4 @@ namespace Blaze::ECS
 
 		return index;
 	}
-
-	//ComponentGroup::ComponentGroup()
-	//	: data(nullptr), stateSize(0), count(0)
-	//{
-	//}
-	//ComponentGroup::~ComponentGroup()
-	//{
-	//	Clear();
-	//}
-	//
-	//Result ComponentGroup::SetupTypes(std::initializer_list<ComponentTypeData*> componentsTypeData, const ComponentTypeRegistry* registry)
-	//{
-	//	this->count = componentsTypeData.size();
-	//	this->stateSize = ((registry->GetAllTypesData().size() + 7) >> 3);
-	//
-	//	size_t size = stateSize + sizeof(Component*) * count;
-	//
-	//	data = Memory::Allocate(size);
-	//
-	//	memset(data, 0, size);
-	//	for (auto typeIndex : typeIndicies)
-	//	{
-	//		if (typeIndex >= typeCount)
-	//		{
-	//			Clear();
-	//			return BLAZE_ENGINE_CORE_ERROR("Invalid type index: " + StringParsing::Convert(typeIndex).value);
-	//		}
-	//
-	//		size_t stateOffset = typeIndex >> 3;
-	//		char stateMask = 1 << (typeIndex & 7);
-	//		*((char*)data + stateOffset) |= stateMask;
-	//	}
-	//
-	//	return Result();
-	//}
-	//void ComponentGroup::Clear()
-	//{
-	//	Memory::Free(data);
-	//	data = nullptr;
-	//	stateSize = 0;
-	//}
-	//
-	//Result ComponentGroup::SetComponent(Component* component)
-	//{
-	//	if (component == nullptr)
-	//		return BLAZE_ENGINE_CORE_ERROR("Component is nullptr");
-	//
-	//	if (data == nullptr)
-	//		return BLAZE_ENGINE_CORE_ERROR("ComponentGroup is empty, cant set components");
-	//
-	//	auto typeIndex = component->GetTypeData()->Index();
-	//	size_t index = CountOnes((byte*)data, typeIndex);
-	//
-	//	((Component**)((char*)data + stateSize))[index] = component;
-	//
-	//	return Result();
-	//}
-	//
-	//size_t ComponentGroup::Count() const
-	//{
-	//	return count;
-	//}
-	//
-	//bool ComponentGroup::HasComponent(uint typeIndex) const
-	//{
-	//	size_t stateOffset = typeIndex >> 3;
-	//	unsigned char stateMask = 1 << (typeIndex & 7);
-	//
-	//	return (bool)(*((char*)data + stateOffset) & stateMask);
-	//}
-	//Component* ComponentGroup::GetComponent(uint typeIndex) const
-	//{
-	//	if (HasComponent(typeIndex))
-	//	{
-	//		size_t index = CountOnes((byte*)data, typeIndex);
-	//		return ((Component**)((char*)data + stateSize))[index];
-	//	}
-	//	else
-	//		return nullptr;
-	//}
-	//
-	//Component** ComponentGroup::begin() const
-	//{
-	//	return ((Component**)((char*)data + stateSize));
-	//}
-	//Component** ComponentGroup::end() const
-	//{
-	//	return ((Component**)((char*)data + stateSize)) + count;
-	//}
-	//const ComponentTypeRegistry& Component::GetRegistry() const
-	//{
-	//	return entity->GetScene()->GetManager()->GetRegistry();
-	//}
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/Rect.h"
 #include "BlazeEngineGraphics/Renderers/TexturedRectRenderer.h"
 #include "BlazeEngineGraphics/RenderScene/RenderUnit.h"
 #include "BlazeEngineGraphics/UI/Core/Node.h"
@@ -15,9 +16,7 @@ namespace Blaze::UI
 	};
 
 	class ImageRenderUnit :
-		public Graphics::RenderUnit,
-		private EventHandler<Node::TransformUpdatedEvent>,
-		private EventHandler<Node::FinalTransformUpdatedEvent>
+		public Graphics::RenderUnit		
 	{
 	public:
 		ImageRenderUnit(Node* node);
@@ -33,7 +32,7 @@ namespace Blaze::UI
 		void SetAlphaMultiplier(float alpha);
 		void SetImageLayout(ImageLayout layout);
 
-		inline Graphics::OpenGLWrapper::Texture2D* GetTexture() const { return rd.texture; }
+		inline const Graphics::OpenGLWrapper::Texture2D* GetTexture() const { return rd.texture; }
 		inline Rectf GetSourceRect() const { return Rectf(uv1, uv2 - uv1); }
 		inline ColorRGBAf GetBlendColor() const { return rd.color; }
 		inline float GetBlendFactor() const { return rd.blend; }
@@ -49,8 +48,8 @@ namespace Blaze::UI
 
 		Graphics::TexturedRectRenderData rd;
 
-		void OnEvent(const Node::TransformUpdatedEvent& event) override;
-		void OnEvent(const Node::FinalTransformUpdatedEvent& event) override;
+		void TransformUpdatedEvent(const Node::TransformUpdatedEvent& event);
+		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
 
 		//Cleans renderData if it is dirty, if not does nothing
 		void CleanRenderData();

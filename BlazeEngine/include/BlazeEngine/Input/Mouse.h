@@ -11,9 +11,10 @@ namespace Blaze::Mouse
 {
 	enum class MouseButton : uint8
 	{
-		Left = 0,
-		Right = 1,
-		Middle = 2,
+		Left,
+		Right,
+		Middle,
+		Other
 	};
 	enum class ScrollDirection
 	{

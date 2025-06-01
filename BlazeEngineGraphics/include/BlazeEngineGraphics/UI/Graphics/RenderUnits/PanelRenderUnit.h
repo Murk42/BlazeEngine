@@ -7,8 +7,7 @@
 namespace Blaze::UI
 {	
 	class BLAZE_GRAPHICS_API PanelRenderUnit :
-		public Graphics::RenderUnit,
-		private EventHandler<Node::FinalTransformUpdatedEvent>
+		public Graphics::RenderUnit
 	{
 	public:
 		PanelRenderUnit(Node* node);
@@ -32,6 +31,6 @@ namespace Blaze::UI
 		Node* node;
 		bool rendered : 1;		
 
-		void OnEvent(const Node::FinalTransformUpdatedEvent& event);
+		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
 	};
 }

@@ -1,4 +1,6 @@
 #include "pch.h"
+#include "BlazeEngineCore/DataStructures/StringView.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngine/Internal/Libraries/FreeType.h"
 
 #include "freetype/freetype.h"

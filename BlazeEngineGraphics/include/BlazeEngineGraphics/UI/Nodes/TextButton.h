@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngineGraphics/UI/Common/ButtonBase.h"
+#include "BlazeEngineGraphics/UI/Common/StringUTF8TextContainer.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/PanelRenderUnit.h"
 #include "BlazeEngineGraphics/RenderScene/RenderObject.h"
@@ -8,22 +9,23 @@ namespace Blaze::UI::Nodes
 {		
 	class BLAZE_GRAPHICS_API TextButton :
 		public ButtonBase,
-		public Graphics::RenderObject,
-		EventHandler<ButtonBase::PressableFlagChangedEvent>
+		public Graphics::RenderObject
 	{
-	public:
-		PanelRenderUnit panelRenderUnit;
-		TextRenderUnit textRenderUnit;
-
+	public:		
 		TextButton();
 		~TextButton() override;		
 		
+		void SetText(StringViewUTF8 text);
 		void SetNormalColor(ColorRGBAf panelColor);
 		void SetHighlightedColor(ColorRGBAf panelColor);
 		void SetPressedColor(ColorRGBAf panelColor);
 
 		Graphics::RenderUnit* GetRenderUnit(uint index) override;
+
+		inline StringViewUTF8 GetText() const { return textContainer.GetString(); }
 	private:						
+		StringUTF8TextContainer textContainer;		
+
 		bool hovered : 1;
 
 		ColorRGBAf normalPanelColor = 0x333333ff;
@@ -36,11 +38,12 @@ namespace Blaze::UI::Nodes
 
 		void UpdatePanelColor();
 		
-		void OnEvent(const MouseEnterEvent& event) override;
-		void OnEvent(const MouseExitEvent& event) override;
-		void OnEvent(const MouseButtonDownEvent& event) override;
-		void OnEvent(const MouseButtonUpEvent& event) override;		
-		void OnEvent(const DeselectedEvent& event) override;		
-		void OnEvent(const PressableFlagChangedEvent& event) override;
+		void MouseHitStatusChangedEvent(const InputNode::MouseHitStatusChangedEvent& event);		
+		void MouseButtonDownEvent(const InputNode::MouseButtonDownEvent& event);
+		void MouseButtonUpEvent(const InputNode::MouseButtonUpEvent& event);		
+		void PressableFlagChangedEvent(const ButtonBase::PressableFlagChangedEvent& event);
+	public:
+		PanelRenderUnit panelRenderUnit;
+		TextRenderUnit textRenderUnit;
 	};
 }

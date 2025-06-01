@@ -1,4 +1,7 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include <concepts>
+#include <tuple>
 
 namespace Blaze
 {

@@ -11,12 +11,12 @@ namespace Blaze
 	{
 	}
 	constexpr StringViewUTF8Iterator::StringViewUTF8Iterator(const StringViewUTF8Iterator& i)
-		: ptr(i.ptr), value(i.value)
+		: ptr(i.ptr)
 	{
 	}
-	constexpr StringViewUTF8Iterator::StringViewUTF8Iterator(const void* ptr, uintMem size)
-		: ptr(ptr), value(ptr, size)
-	{
+	constexpr StringViewUTF8Iterator::StringViewUTF8Iterator(const void* buffer)
+		: ptr(buffer)
+	{	
 	}
 	constexpr bool StringViewUTF8Iterator::IsNull() const
 	{
@@ -26,86 +26,85 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Accessing a null iterator");
+			return UnicodeChar();
+		}
 #endif
-		return value;
+		return UnicodeChar(ptr, DetermineSize());
 	}
 	constexpr const void* StringViewUTF8Iterator::Ptr() const
 	{
 		return ptr;
 	}
+	constexpr uintMem StringViewUTF8Iterator::DetermineSize() const
+	{
+		if ((((char*)ptr)[0] & 0b10000000) == 0)
+			return 1;		
+		if ((((char*)ptr)[0] & 0b11100000) == 0b11000000)
+			return 2;		
+		if ((((char*)ptr)[0] & 0b11110000) == 0b11100000)
+			return 3;		
+		if ((((char*)ptr)[0] & 0b11111000) == 0b11110000)
+			return 4;
+
+		BLAZE_ENGINE_CORE_FATAL("Invalid UTF-8 character sequence");
+
+		return 0;
+	}	
 	constexpr UnicodeChar StringViewUTF8Iterator::operator*() const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			BLAZE_ENGINE_CORE_FATAL("Dereferencing a null iterator");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Accessing a null iterator");
+			return UnicodeChar();
+		}
 #endif
 		return ToUnicode();
 	}
-	constexpr StringViewUTF8Iterator StringViewUTF8Iterator::operator++()
+	constexpr StringViewUTF8Iterator& StringViewUTF8Iterator::operator++()
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
-#endif
-
-		StringViewUTF8Iterator old = *this;
-		if ((*(uint8*)ptr) >> 3 == 0b11110)
-			ptr = (byte*)ptr + 4;
-		else if ((*(uint8*)ptr) >> 4 == 0b1110)
-			ptr = (byte*)ptr + 3;
-		else if ((*(uint8*)ptr) >> 5 == 0b110)
-			ptr = (byte*)ptr + 2;
-		else
-			ptr = (byte*)ptr + 1;
-		value = UnicodeChar(ptr, 4);
-		return old;
-	}
-	constexpr StringViewUTF8Iterator& StringViewUTF8Iterator::operator++(int)
-	{
-#ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
-			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
-#endif
-
-		if (((*(uint8*)ptr) >> 6) == 0)
-			ptr = (byte*)ptr + 1;
-		else if (((*(uint8*)((byte*)ptr + 1)) >> 4) == 0)
-			ptr = (byte*)ptr + 2;
-		else if (((*(uint8*)((byte*)ptr + 2)) >> 2) == 0)
-			ptr = (byte*)ptr + 3;
-		else if (((*(uint8*)((byte*)ptr + 3)) >> 5) == 0)
-			ptr = (byte*)ptr + 4;
-		value = UnicodeChar(ptr, 4);
+		{
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");			
+			return *this;
+		}
+#endif		
+		ptr = (byte*)ptr + DetermineSize();
 		return *this;
 	}
-	constexpr StringViewUTF8Iterator StringViewUTF8Iterator::operator--()
+	constexpr StringViewUTF8Iterator StringViewUTF8Iterator::operator++(int)
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
-			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Incrementing a null iterator");
+			return StringViewUTF8Iterator();			
+		}
 #endif
-
 		StringViewUTF8Iterator old = *this;
-		if ((*((byte*)ptr - 1) & 0b10000000) == 0)
-			ptr = (byte*)ptr - 1;
-		else if ((*((byte*)ptr - 2) & 0b10000000) == 0)
-			ptr = (byte*)ptr - 2;
-		else if ((*((byte*)ptr - 3) & 0b10000000) == 0)
-			ptr = (byte*)ptr - 3;
-		else if ((*((byte*)ptr - 4) & 0b10000000) == 0)
-			ptr = (byte*)ptr - 4;
-		value = UnicodeChar(ptr, 4);
-		return old;
+		ptr = (byte*)ptr + DetermineSize();
+		return old;		
 	}
-	constexpr StringViewUTF8Iterator& StringViewUTF8Iterator::operator--(int)
+	constexpr StringViewUTF8Iterator& StringViewUTF8Iterator::Decrement(const StringViewUTF8& string)
+	{
+		return Decrement(string.FirstIterator());
+	}
+	inline constexpr StringViewUTF8Iterator& StringViewUTF8Iterator::Decrement(const StringViewUTF8Iterator& firstCharacterIterator)
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if (ptr == nullptr)
+		{
 			BLAZE_ENGINE_CORE_FATAL("Decrementing a null iterator");
+			return *this;
+		}
 #endif
 
-		if ((*((byte*)ptr - 1) & 0b10000000) == 0)
+		if (ptr == firstCharacterIterator.Ptr())
+			ptr = (byte*)ptr - 1;
+		else if ((*((byte*)ptr - 1) & 0b10000000) == 0)
 			ptr = (byte*)ptr - 1;
 		else if ((*((byte*)ptr - 2) & 0b10000000) == 0)
 			ptr = (byte*)ptr - 2;
@@ -113,7 +112,9 @@ namespace Blaze
 			ptr = (byte*)ptr - 3;
 		else if ((*((byte*)ptr - 4) & 0b10000000) == 0)
 			ptr = (byte*)ptr - 4;
-		value = UnicodeChar(ptr, 4);
+		else
+			BLAZE_ENGINE_CORE_FATAL("Invalid UTF-8 character sequence");
+
 		return *this;
 	}
 	constexpr bool StringViewUTF8Iterator::operator==(const StringViewUTF8Iterator& i) const
@@ -128,7 +129,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
+		{
 			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
+			return false;
+		}
 #endif
 
 		return ptr < i.ptr;
@@ -137,7 +141,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
+		{
 			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
+			return false;
+		}
 #endif
 
 		return ptr > i.ptr;
@@ -146,7 +153,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
+		{
 			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
+			return false;
+		}
 #endif
 
 		return ptr <= i.ptr;
@@ -155,7 +165,10 @@ namespace Blaze
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
 		if ((ptr == nullptr) != (i.ptr == nullptr))
+		{
 			BLAZE_ENGINE_CORE_FATAL("Comparing a null iterator");
+			return false;
+		}
 #endif
 
 		return ptr >= i.ptr;
@@ -163,7 +176,6 @@ namespace Blaze
 	constexpr StringViewUTF8Iterator& StringViewUTF8Iterator::operator=(const StringViewUTF8Iterator& i)
 	{
 		ptr = i.ptr;
-		value = i.value;
 		return *this;
 	}
 
@@ -185,56 +197,55 @@ namespace Blaze
 		if (!other.Empty())
 		{
 			buffer = other.Ptr();
-			bufferSize = other.Count() + 1;
-			characterCount = other.Count();
+			bufferSize = other.Count();
+
+			CalculateCharacterCount();
 		}
 	}
 	inline StringViewUTF8::StringViewUTF8(const String& other)
-		: buffer(nullptr), bufferSize(0), characterCount(0)		
+		: StringViewUTF8(StringView(other))
 	{
-		if (!other.Empty())
-		{
-			buffer = other.Ptr();
-			bufferSize = other.Count() + 1;
-			characterCount = other.Count();
-		}
 	}	
-	inline StringViewUTF8::StringViewUTF8(const void* ptr, uintMem size)
-		: buffer(nullptr), bufferSize(0), characterCount(0)
-	{
-		if (ptr != 0 && size != 0)		
-		{
-			if (((char*)ptr)[size] != '\0')
-				BLAZE_ENGINE_CORE_ERROR("Passing a not null-terminate string to StringViewUTF8");
-
-			buffer = ptr;
-			bufferSize = size + 1;
-			for (auto it = FirstIterator(); it != BehindIterator(); ++it, ++characterCount);
-		}
+	constexpr StringViewUTF8::StringViewUTF8(const void* ptr, uintMem size)
+		: StringViewUTF8(StringView((const char*)ptr, size))
+	{		
 	}
-	inline StringViewUTF8::StringViewUTF8(const char* ptr, uintMem count)
-		: buffer(nullptr), bufferSize(0), characterCount(0)
-	{
-		if (ptr != nullptr && count != 0)
-		{
-			if (((char*)ptr)[count] != '\0')
-				BLAZE_ENGINE_CORE_ERROR("Passing a not null-terminate string to StringViewUTF8");
-
-			buffer = ptr;
-			bufferSize = count + 1;
-			for (auto it = FirstIterator(); it != BehindIterator(); ++it, ++characterCount);
-		}
-	}
-	inline StringViewUTF8::StringViewUTF8(StringViewUTF8Iterator begin, StringViewUTF8Iterator end)
+	constexpr StringViewUTF8::StringViewUTF8(StringViewUTF8Iterator begin, StringViewUTF8Iterator end)
 		: buffer(nullptr), bufferSize(0), characterCount(0)
 	{
 		if (begin != end && begin.Ptr() != nullptr && end.Ptr() != nullptr)
 		{
-			buffer = begin.Ptr();
-			bufferSize = (byte*)end.ptr - (byte*)begin.ptr;
+			bufferSize = (byte*)end.Ptr() - (byte*)begin.Ptr();
+			if (*end.Decrement(begin) == '\0')
+				--bufferSize;
 
-			for (auto it = FirstIterator(); it != BehindIterator(); ++it, ++characterCount);
+			if (bufferSize == 0)
+				return;
+
+			buffer = begin.Ptr();
+
+
+			CalculateCharacterCount();
 		}
+	}
+	template<uintMem C>
+	constexpr StringViewUTF8::StringViewUTF8(const char(&arr)[C])
+		: buffer(nullptr), bufferSize(0), characterCount(0)
+	{
+		if constexpr (C != 0)
+		{
+			if (arr[C - 1] == '\0')
+				if (C == 1)
+					return;
+				else
+					bufferSize = C - 1;				
+			else			
+				bufferSize = C;			
+
+			buffer = arr;
+
+			CalculateCharacterCount();
+		}		
 	}
 	constexpr void StringViewUTF8::Clear()
 	{
@@ -242,21 +253,40 @@ namespace Blaze
 		bufferSize = 0;
 		characterCount = 0;
 	}
-	inline StringUTF8 StringViewUTF8::SubString(uintMem start, uintMem count) const
+	constexpr StringViewUTF8 StringViewUTF8::SubString(uintMem start, intMem count) const
 	{
-		auto b = FirstIterator();
-		for (uintMem i = 0; i != start; ++i, ++b);
-		auto e = b;
-		for (uintMem i = 0; i != count; ++i, ++e);
+		if (count == 0)
+			return StringViewUTF8();
 
-		return StringUTF8(b.ptr, (char*)e.ptr - (char*)b.ptr);
+		const uintMem characterCount = CharacterCount();
+		if (start > characterCount || start + count > characterCount)
+		{
+			BLAZE_ENGINE_CORE_FATAL("Accesing a string outside its bounds");
+			return StringViewUTF8();
+		}
+
+		if (count < 0)
+			count = CharacterCount() + count;
+
+		auto begin = FirstIterator();
+		for (uintMem i = 0; i != start; ++i, ++begin);
+		auto end = begin;  
+		for (uintMem i = 0; i != count; ++i, ++end);
+
+		return StringViewUTF8(begin, end);
+	}
+	constexpr StringViewUTF8 StringViewUTF8::SubString(StringViewUTF8Iterator begin, intMem count) const
+	{
+		auto end = begin;
+		for (uintMem i = 0; i != count; ++i, ++end);
+
+		return StringViewUTF8(begin, end);
 	}
 	constexpr bool StringViewUTF8::Empty() const { return bufferSize == 0; }
 	inline uint32 StringViewUTF8::Hash() const
 	{
 		return static_cast<uint32>(std::hash<StringViewUTF8>()(*this));
 	}
-
 	constexpr const void* StringViewUTF8::Buffer() const { return buffer; }
 	constexpr uintMem StringViewUTF8::BufferSize() const { return bufferSize; }
 	constexpr uintMem StringViewUTF8::CharacterCount() const { return characterCount; }
@@ -264,35 +294,61 @@ namespace Blaze
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (bufferSize == 0)
-			BLAZE_ENGINE_CORE_FATAL("String is empty");
+		{
+			BLAZE_ENGINE_CORE_FATAL("Accessing a empty string");
+			return UnicodeChar();
+		}
 #endif
 		return UnicodeChar(buffer, bufferSize);
+	}
+	constexpr UnicodeChar StringViewUTF8::Last() const
+	{
+#ifdef BLAZE_INVALID_ITERATOR_CHECK
+		if (bufferSize == 0)
+		{
+			BLAZE_ENGINE_CORE_FATAL("Accessing a empty string");
+			return UnicodeChar();
+		}
+#endif
+
+		return StringViewUTF8Iterator((byte*)buffer + bufferSize).Decrement(*this).ToUnicode();
 	}
 	constexpr StringViewUTF8Iterator StringViewUTF8::FirstIterator() const
 	{		
 		if (buffer == nullptr)
-			return StringViewUTF8Iterator(nullptr, 0);
-		return StringViewUTF8Iterator(buffer, bufferSize - 1);
-	}	
+			return StringViewUTF8Iterator();
+		return StringViewUTF8Iterator(buffer);
+	}
+	constexpr StringViewUTF8Iterator StringViewUTF8::LastIterator() const
+	{
+		if (buffer == nullptr)
+			return StringViewUTF8Iterator();
+		return StringViewUTF8Iterator((byte*)buffer + bufferSize).Decrement(*this);
+	}
+	constexpr StringViewUTF8Iterator StringViewUTF8::AheadIterator() const
+	{
+		if (buffer == nullptr)
+			return StringViewUTF8Iterator();
+		return StringViewUTF8Iterator((byte*)buffer).Decrement(*this);
+	}
 	constexpr StringViewUTF8Iterator StringViewUTF8::BehindIterator() const
 	{		
 		if (buffer == nullptr)
-			return StringViewUTF8Iterator(nullptr, 0);
-		return StringViewUTF8Iterator((byte*)buffer + bufferSize - 1, 0);
+			return StringViewUTF8Iterator();
+		return StringViewUTF8Iterator((byte*)buffer + bufferSize);
 	}
 	constexpr bool StringViewUTF8::operator==(const StringViewUTF8& s) const
 	{
-		if (bufferSize != s.bufferSize)
-			return false;
+		if (buffer == nullptr && s.Buffer() == nullptr)
+			return true;
+		if (buffer == nullptr || s.Buffer() == nullptr || bufferSize != s.BufferSize())
+			return false;		
 
 		return memcmp(buffer, s.buffer, bufferSize) == 0;
 	}
 	constexpr bool StringViewUTF8::operator!=(const StringViewUTF8& s) const
 	{
-		if (bufferSize != s.bufferSize)
-			return true;
-
-		return memcmp(buffer, s.buffer, bufferSize) != 0;
+		return !(*this == s);
 	}
 	constexpr StringViewUTF8& StringViewUTF8::operator=(const StringViewUTF8& other)
 	{
@@ -311,15 +367,30 @@ namespace Blaze
 	constexpr StringViewUTF8& StringViewUTF8::operator=(const StringView& other)
 	{
 		buffer = other.Ptr();
-		characterCount = other.Count();
-		bufferSize = characterCount + 1;
+		bufferSize = characterCount;
+		CalculateCharacterCount();
 		return *this;
 	}
 	inline StringViewUTF8& StringViewUTF8::operator=(const String& other)
 	{
 		buffer = other.Ptr();
-		characterCount = other.Count();
-		bufferSize = characterCount + 1;
+		bufferSize = characterCount;
+		CalculateCharacterCount();
+		return *this;
+	}
+	constexpr void StringViewUTF8::CalculateCharacterCount()
+	{
+		for (auto it = FirstIterator(); it != BehindIterator(); ++it, ++characterCount);
+	}
+	template<size_t C>
+	constexpr StringViewUTF8& StringViewUTF8::operator=(const char(&arr)[C])
+	{
+		if constexpr (C != 0)
+		{ 
+			buffer = arr;
+			bufferSize = C;
+			CalculateCharacterCount();			
+		}
 		return *this;
 	}
 

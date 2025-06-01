@@ -1,9 +1,9 @@
 #pragma once
 #include "BlazeEngineCore/DataStructures/Array.h"
 #include "BlazeEngineCore/DataStructures/ArrayView.h"
-#include "BlazeEngineCore/DataStructures/ArrayIterator.h"
 #include "BlazeEngineCore/DataStructures/ArrayViewImpl.h"
 #include "BlazeEngineCore/DataStructures/ArrayIteratorImpl.h"
+#include "BLazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {	
@@ -864,26 +864,5 @@ namespace Blaze
 			return nullptr;
 
 		return (StoredType*)allocator.Allocate(reserved * sizeof(StoredType));
-	}
-
-	template<typename T, AllocatorType Allocator>
-	Array<T, Allocator>::Iterator begin(Array<T, Allocator>& arr)
-	{
-		return arr.FirstIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	Array<T, Allocator>::ConstIterator begin(const Array<T, Allocator>& arr)
-	{
-		return arr.FirstIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	Array<T, Allocator>::Iterator end(Array<T, Allocator>& arr)
-	{
-		return arr.BehindIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	Array<T, Allocator>::ConstIterator end(const Array<T, Allocator>& arr)
-	{
-		return arr.BehindIterator();
 	}	
 }

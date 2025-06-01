@@ -1,15 +1,15 @@
 #pragma once
-#include "BlazeEngineCore/BlazeEngineCore.h"
+#include <format>
 
-#include <mutex>
-#include "BlazeEngine/BlazeEngineDefines.h"
-#include "BlazeEngine/Window/Window.h"
-#include "BlazeEngine/Window/Window.h"
-#include "BlazeEngine/Resources/Font/Font.h"
-#include "BlazeEngine/Resources/Bitmap/Bitmap.h"
-
-#include "GL/glew.h"
-#include "SDL3/SDL.h"
-//#include "vulkan/vulkan.h"
-
-#include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
+#include "BlazeEngineCore/DataStructures/StringViewImpl.h"
+#include "BlazeEngineCore/DataStructures/StringViewUTF8Impl.h"
+#include "BlazeEngineCore/DataStructures/UnicodeCharImpl.h"
+#include "BlazeEngineCore/DataStructures/ArrayImpl.h"
+#include "BlazeEngineCore/DataStructures/ListImpl.h"
+#include "BlazeEngineCore/DataStructures/DualListImpl.h"
+#include "BlazeEngineCore/DataStructures/MapImpl.h"
+#include "BlazeEngineCore/DataStructures/SetImpl.h"
+#include "BlazeEngineCore/DataStructures/VirtualListImpl.h"
+#include "BlazeEngineCore/DataStructures/VirtualMapImpl.h"
+#include "BlazeEngineCore/Event/EventDispatcherImpl.h"
+#include "BlazeEngineCore/Event/EventHandlerDataImpl.h"

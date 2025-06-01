@@ -219,14 +219,6 @@ private:
 };
 
 */
-enum class VerticalAlign
-{
-	Top, Center, Bottom
-};
-enum class HorizontalAlign
-{
-	Left, Center, Right
-};
 
 class HorizontalWeightedFillLayout
 {
@@ -243,7 +235,7 @@ public:
 	~HorizontalWeightedFillLayout();
 	
 	void SetNodes(ArrayView<NodeSetupData> nodes);
-	void SetLayoutChildrenVerticalAlign(VerticalAlign verticalAlign);		
+	void SetLayoutChildrenVerticalAlign(VerticalAlign verticalAlign);
 
 	uintMem GetNodeCount() const;
 	UI::Node& GetNode(uintMem index) const;
@@ -274,9 +266,11 @@ private:
 
 	void ParentTransformUpdatedEvent(const UI::Node::TransformUpdatedEvent& event);
 	void NodeTransformUpdatedEvent(const UI::Node::TransformUpdatedEvent& event);
-	void NodeEnabledStateUpdated(const UI::Node::EnabledStateUpdatedEvent& event);
+	void NodeEnabledStateUpdated(const UI::Node::EnabledStateChangedEvent& event);
 	void FirstNodeSurroundingNodeTreeChangedEvent(const UI::Node::SurroundingNodeTreeChangedEvent& event);	
 };
+
+//HorizontalArrayLayout
 
 class ChildWidthBinding
 {

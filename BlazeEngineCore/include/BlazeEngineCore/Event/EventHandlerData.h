@@ -31,7 +31,7 @@ namespace Blaze
 		constexpr bool operator!=(const EventHandlerData& other) const;
 
 		constexpr EventHandlerData& operator=(const EventHandlerData& other);
-	private:
+	private:		
 		static void StaticFunctionInvokingFunction(void* function, const T& event);
 		template<auto MemberFunctionPointer> requires std::same_as<MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunctionPointer)>, TemplateGroup<const T&>>
 		static void MemberFunctionInvokingFunction(void* object, const T& event);		

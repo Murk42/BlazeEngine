@@ -1,5 +1,7 @@
 #include "pch.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
+#include <GL/glew.h>
 
 namespace Blaze::Graphics::OpenGLWrapper
 {

@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include <type_traits>
 
 namespace Blaze
 {

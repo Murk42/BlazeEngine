@@ -1,24 +1,34 @@
 #pragma once
+#include "BlazeEngineGraphics/RenderScene/RenderObject.h"
 #include "BlazeEngineGraphics/UI/Common/SelectableTextBase.h"
+#include "BlazeEngineGraphics/UI/Common/TextSelection.h"
+#include "BlazeEngineGraphics/UI/Common/StringUTF8TextContainer.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnit.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnit.h"
 
 namespace Blaze::UI::Nodes
 {
 	class BLAZE_GRAPHICS_API SelectableText :
-		public SelectableTextBase
+		public SelectableTextBase,
+		public Graphics::RenderObject
 	{
 	public:
-		TextRenderUnit textRenderUnit;
-		TextSelectionRenderUnit textSelectionRenderUnit;		
-		TextCursorRenderUnit textCursorRenderUnit;
 
 		SelectableText();
-		
-		Graphics::RenderUnit* GetRenderUnit(uint index) override;
-	private:
-		StringUTF8 GetTextSubString(uintMem begin, uintMem end) override;
+		~SelectableText();
 
+		void SetText(StringViewUTF8 text);
+
+		inline StringViewUTF8 GetText() const { return textContainer.GetString(); }
+		
+		Graphics::RenderUnit* GetRenderUnit(uint index) override;	
+	private:
+		StringUTF8TextContainer textContainer;
+		TextSelection selection;		
+	
+		void MouseHitStatusChangedEvent(const InputNode::MouseHitStatusChangedEvent& event);
+	public:
+		TextRenderUnit textRenderUnit;
+		TextSelectionRenderUnit textSelectionRenderUnit;
 	};
 }

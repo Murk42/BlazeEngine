@@ -1,6 +1,7 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/VirtualMap.h"
+#include "BlazeEngineCore/DataStructures/String.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
-#include "BlazeEngineCore/BlazeEngineCore.h"
 
 namespace Blaze::UI
 {

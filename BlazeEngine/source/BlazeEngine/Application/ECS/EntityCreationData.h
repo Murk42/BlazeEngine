@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/ArrayView.h"
+#include "BlazeEngineCore/DataStructures/List.h"
 
 namespace Blaze::ECS
 {

@@ -1,11 +1,17 @@
 #pragma once
-#include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 #include "BlazeEngineCore/Types/TypeTraits.h"
+#include "BlazeEngineCore/Memory/Allocator.h"
+#include "BlazeEngineCore/DataStructures/ArrayIterator.h"
+#include <initializer_list>
 
 namespace Blaze
 {		
 	template<typename T>
 	class ArrayIterator;
+
+	template<typename, AllocatorType>
+	class Array;
 
 	template<typename T>
 	class BLAZE_CORE_API ArrayView
@@ -70,4 +76,15 @@ namespace Blaze
 		const StoredType* ptr;
 		uintMem count;
 	};			
+
+	template<typename T>
+	inline constexpr ArrayView<T>::Iterator begin(const ArrayView<T>& arr)
+	{
+		return arr.FirstIterator();
+	}
+	template<typename T>
+	inline constexpr ArrayView<T>::Iterator end(const ArrayView<T>& arr)
+	{
+		return arr.BehindIterator();
+	}
 }

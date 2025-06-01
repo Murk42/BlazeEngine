@@ -4,6 +4,7 @@
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 #include "BlazeEngineGraphics/Core/OpenGL/Debug_OpenGL.h"
+#include <GL/glew.h>
 
 namespace Blaze::Graphics::OpenGL
 {	
@@ -61,15 +62,15 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void Framebuffer_OpenGL::SetBufferOutputs(const std::initializer_list<int>& outputs)
 	{
-		std::vector<GLenum> values;
-		values.resize(outputs.size());
+		Array<GLenum> values;
+		values.Resize(outputs.size());
 		for (int i = 0; i < outputs.size(); ++i)
 			if (outputs.begin()[i] == -1)
 				values[i] = GL_NONE;
 			else
 				values[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + outputs.begin()[i]);
 
-		glNamedFramebufferDrawBuffers(id, static_cast<GLsizei>(outputs.size()), values.data());
+		glNamedFramebufferDrawBuffers(id, values.Count(), values.Ptr());
 	}
 	Framebuffer_OpenGL& Framebuffer_OpenGL::operator=(Framebuffer_OpenGL&& fb) noexcept
 	{

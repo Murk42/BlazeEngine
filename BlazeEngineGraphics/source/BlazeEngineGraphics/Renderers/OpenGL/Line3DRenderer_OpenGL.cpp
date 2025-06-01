@@ -2,7 +2,7 @@
 #include "BlazeEngineGraphics/Renderers/OpenGL/Line3DRenderer_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
-#include "BlazeEngineGraphics/Files/shaders.h"
+#include "BlazeEngineGraphics/Shaders/Shaders.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -17,14 +17,8 @@ namespace Blaze::Graphics::OpenGL
 	Line3DRenderer_OpenGL::Line3DRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferLineCapacity)
 		: graphicsContext(graphicsContext), bufferInstanceCapacity(bufferLineCapacity)
 	{
-		Blaze::Graphics::OpenGLWrapper::VertexShader vert;// { "assets/shaders/OpenGL/line3d.vert" };
-		vert.ShaderSource(StringView((const char*)line3d_vert_file, line3d_vert_size));
-		vert.CompileShader();
-
-		Blaze::Graphics::OpenGLWrapper::FragmentShader frag;// { "assets/shaders/OpenGL/line3d.frag" };
-		frag.ShaderSource(StringView((const char*)line3d_frag_file, line3d_frag_size));
-		frag.CompileShader();
-
+		auto vert = OpenGLWrapper::VertexShader(ShaderSources::line3d_vert);
+		auto frag = OpenGLWrapper::FragmentShader(ShaderSources::line3d_frag);
 		program.LinkShaders({ &vert, &frag });
 
 		instanceBuffer.Allocate(nullptr, sizeof(Line3DInstance) * bufferLineCapacity,
@@ -33,19 +27,19 @@ namespace Blaze::Graphics::OpenGL
 		);		
 
 		vertexArray.EnableVertexAttribute(0);
-		vertexArray.SetVertexAttributeFormat(0, OpenGLWrapper::VertexAttributeType::Float, 4, false, offsetof(Line3DInstance, color));
+		vertexArray.SetFloatVertexAttributeFormat(0, OpenGLWrapper::FloatVertexAttributeType::Float, 4, offsetof(Line3DInstance, color));
 		vertexArray.SetVertexAttributeBuffer(0, &instanceBuffer, sizeof(Line3DInstance), 0);
 		vertexArray.SetVertexAttributeDivisor(0, 1);
 		vertexArray.EnableVertexAttribute(1);
-		vertexArray.SetVertexAttributeFormat(1, OpenGLWrapper::VertexAttributeType::Float, 3, false, offsetof(Line3DInstance, p1));
+		vertexArray.SetFloatVertexAttributeFormat(1, OpenGLWrapper::FloatVertexAttributeType::Float, 3, offsetof(Line3DInstance, p1));
 		vertexArray.SetVertexAttributeBuffer(1, &instanceBuffer, sizeof(Line3DInstance), 0);
 		vertexArray.SetVertexAttributeDivisor(1, 1);
 		vertexArray.EnableVertexAttribute(2);
-		vertexArray.SetVertexAttributeFormat(2, OpenGLWrapper::VertexAttributeType::Float, 3, false, offsetof(Line3DInstance, p2));
+		vertexArray.SetFloatVertexAttributeFormat(2, OpenGLWrapper::FloatVertexAttributeType::Float, 3, offsetof(Line3DInstance, p2));
 		vertexArray.SetVertexAttributeBuffer(2, &instanceBuffer, sizeof(Line3DInstance), 0);
 		vertexArray.SetVertexAttributeDivisor(2, 1);
 		vertexArray.EnableVertexAttribute(3);
-		vertexArray.SetVertexAttributeFormat(3, OpenGLWrapper::VertexAttributeType::Float, 1, false, offsetof(Line3DInstance, width));
+		vertexArray.SetFloatVertexAttributeFormat(3, OpenGLWrapper::FloatVertexAttributeType::Float, 1, offsetof(Line3DInstance, width));
 		vertexArray.SetVertexAttributeBuffer(3, &instanceBuffer, sizeof(Line3DInstance), 0);
 		vertexArray.SetVertexAttributeDivisor(3, 1);
 	}

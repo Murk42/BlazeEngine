@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngineCore/BlazeEngineCore.h"
+#include "BlazeEngineCore/DataStructures/Color.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"

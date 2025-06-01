@@ -1,6 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/Math/Vector.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
-#include "BlazeEngineCore/BlazeEngineCore.h"
 
 namespace Blaze::UI
 {

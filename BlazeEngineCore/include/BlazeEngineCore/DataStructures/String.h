@@ -135,9 +135,9 @@ namespace Blaze
 	String operator+(const char(&left)[C], const String& right);
 
 	template<uintMem C>
-	inline String::String(const char(&arr)[C])
-		: String(arr, C - 1)
-	{
+	inline String::String(const char(&arr)[C])		
+		: String(StringView(arr))
+	{		
 	}
 	template<uintMem C>
 	inline String& String::operator+=(const char(&arr)[C])
@@ -153,21 +153,36 @@ namespace Blaze
 	template<uintMem C>
 	String operator+(const StringView& left, const char(&right)[C])
 	{
-		return left + StringView(right, C - 1);
+		return left + StringView(right);
 	}
 	template<uintMem C>
 	String operator+(const char(&left)[C], const StringView& right)
 	{
-		return StringView(left, C - 1) + right;
+		return StringView(left) + right;
 	}
 	template<uintMem C>
 	String operator+(const String& left, const char(&right)[C])
 	{
-		return StringView(left) + StringView(right, C - 1);
+		return StringView(left) + StringView(right);
 	}
 	template<uintMem C>
 	String operator+(const char(&left)[C], const String& right)
 	{
-		return StringView(left, C - 1) + StringView(right);
+		return StringView(left) + StringView(right);
 	}
+}
+
+#include <string_view>
+
+namespace std
+{
+	template <>
+	struct hash<Blaze::String>
+	{
+		inline size_t operator()(const Blaze::String& k) const;
+	};
+	inline size_t hash<Blaze::String>::operator()(const Blaze::String& k) const
+	{
+		return hash<string_view>()(string_view(k.Ptr(), k.Count()));
+	}	
 }

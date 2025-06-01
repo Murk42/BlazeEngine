@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "BlazeEngineCore/Debug/Callstack.h"
 #include "BlazeEngineCore/Memory/MemoryManager.h"
+#include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
+#include "BlazeEngineCore/DataStructures/StringView.h"
 
 #define BOOST_STACKTRACE_USE_WINDBG_CACHED
 #include <boost/stacktrace/stacktrace.hpp>	

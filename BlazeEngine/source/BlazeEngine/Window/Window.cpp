@@ -2,9 +2,10 @@
 #include "BlazeEngine/Window/Window.h"
 #include "BlazeEngine/Internal/BlazeEngineContext.h"
 #include "BlazeEngine/Internal/Libraries/SDL.h"
+#include "BlazeEngine/Internal/Libraries/SDLConversions.h"
 
 #include <Windows.h>
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_video.h>
 
 namespace Blaze
 {		
@@ -274,19 +275,16 @@ namespace Blaze
 		switch (graphicsAPI)
 		{
 		case Blaze::WindowGraphicsAPI::OpenGL: {
-			{
-				std::lock_guard lk{ mutex };
+			std::lock_guard lk{ mutex };
+			
+			SDL_GL_SwapWindow((SDL_Window*)handle);
 
-				SDL_GL_SwapWindow((SDL_Window*)handle);		
+			if (resizeState == 1)
+				resizeState = 2;
 
-				if (resizeState == 1)									
-					resizeState = 2;	
+			resizeCV.notify_one();
 
-				resizeCV.notify_one();
-
-				waitForSwapBuffersOnResize = true;
-			}
-
+			waitForSwapBuffersOnResize = true;
 			break;
 		}
 		case Blaze::WindowGraphicsAPI::Vulkan:
@@ -617,6 +615,22 @@ namespace Blaze
 
 		SDL_DestroySurface(surface);
 	}
+	void Window::Flash(WindowFlashOperation flashOperation)
+	{
+		if (handle == nullptr)
+			BLAZE_ENGINE_CORE_FATAL("Window handle is nullptr");
+
+		SDL_FlashOperation _flashOperation = SDL_FLASH_BRIEFLY;
+		switch (flashOperation)
+		{
+		case Blaze::WindowFlashOperation::FlashBriefly: _flashOperation = SDL_FLASH_BRIEFLY; break;
+		case Blaze::WindowFlashOperation::CancelFlash: _flashOperation = SDL_FLASH_CANCEL; break;
+		case Blaze::WindowFlashOperation::FlashUntilFocused: _flashOperation = SDL_FLASH_UNTIL_FOCUSED; break;			
+		}
+
+		if (!SDL_FlashWindow((SDL_Window*)handle, _flashOperation))
+			BLAZE_ENGINE_ERROR("SDL_FlashWindow failed. SDL returned error: \"{}\"", GetSDLError());
+	}
 	Vec2f Window::GetMousePos() const
 	{
 		if (handle == nullptr)
@@ -729,6 +743,16 @@ namespace Blaze
 
 		if (!SDL_RaiseWindow((SDL_Window*)handle))
 			BLAZE_ENGINE_ERROR("SDL_RaiseWindow failed. SDL returned error: \"" + GetSDLError() + "\"");
+	}
+	void Window::SetDisplayModeForFullscreen(const Display::DisplayMode& displayMode)
+	{
+		if (handle == nullptr)
+			BLAZE_ENGINE_CORE_FATAL("Window handle is nullptr");
+
+		SDL_DisplayMode _displayMode = BlazeToSDL_DisplayMode(displayMode);
+
+		if (!SDL_SetWindowFullscreenMode((SDL_Window*)handle, &_displayMode))
+			BLAZE_ENGINE_ERROR("SDL_SetWindowFullscreenMode failed. SDL returned error: \"" + GetSDLError() + "\"");
 	}
 	Display::DisplayID Window::GetDisplayIndex()
 	{		

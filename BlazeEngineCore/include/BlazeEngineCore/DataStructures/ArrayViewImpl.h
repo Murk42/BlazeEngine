@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngineCore/DataStructures/ArrayView.h"
 #include "BlazeEngineCore/DataStructures/ArrayIterator.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {
@@ -204,15 +205,5 @@ namespace Blaze
 		count = array.Count();
 
 		return *this;
-	}
-	template<typename T>
-	inline constexpr ArrayView<T>::Iterator begin(const ArrayView<T>& arr)
-	{
-		return arr.FirstIterator();
-	}
-	template<typename T>
-	inline constexpr ArrayView<T>::Iterator end(const ArrayView<T>& arr)
-	{
-		return arr.BehindIterator();
-	}
+	}	
 }

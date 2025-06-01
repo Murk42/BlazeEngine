@@ -2,6 +2,7 @@
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLRenderbuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 #include "BlazeEngineGraphics/Core/OpenGL/Debug_OpenGL.h"
+#include <GL/glew.h>
 
 namespace Blaze::Graphics::OpenGLWrapper
 {

@@ -7,94 +7,78 @@ namespace Blaze::UI::Nodes
 {			
 	EditableText::EditableText() :
 		EditableTextBase(textRenderUnit, textSelectionRenderUnit, textCursorRenderUnit),
-		textRenderUnit(this), textSelectionRenderUnit(textRenderUnit), textCursorRenderUnit(textRenderUnit),
-		selected(false), emptyColor(0x555555ff), selectedColor(0xf5f5f5ff), unselectedColor(0xd0d0d0ff), emptyText("Enter text")
+		textRenderUnit(textContainerReference, this), cursor(selection), selection(textContainer), textSelectionRenderUnit(selection, textRenderUnit), textCursorRenderUnit(cursor, textRenderUnit),
+		emptyColor(0x555555ff), selectedColor(0xf5f5f5ff), unselectedColor(0xd0d0d0ff), emptyTextContainer("Enter text"), textContainerReference(emptyTextContainer)
 	{
-		UpdateTextRenderUnit();
-	}
-	void EditableText::SetText(StringViewUTF8 text)
-	{
-		this->text = text;
+		textRenderUnit.SetTextColor(emptyColor);
 
-		UpdateTextRenderUnit();
+		mouseHitStatusChangedEventDispatcher.AddHandler<&EditableText::MouseHitStatusChangedEvent>(*this);
+		pressableFlagChangedEventDispatcher.AddHandler<&EditableText::PressableFlagChangedEvent>(*this);
+		selectedStateChangedEventDispatcher.AddHandler<&EditableText::SelectedStateChangedEvent>(*this);
 	}
-	void EditableText::SetEmptyText(StringViewUTF8 text)
+	EditableText::~EditableText()
 	{
-		emptyText = text;
-
-		UpdateTextRenderUnit();
+		mouseHitStatusChangedEventDispatcher.RemoveHandler<&EditableText::MouseHitStatusChangedEvent>(*this);
+		pressableFlagChangedEventDispatcher.RemoveHandler<&EditableText::PressableFlagChangedEvent>(*this);
+		selectedStateChangedEventDispatcher.RemoveHandler<&EditableText::SelectedStateChangedEvent>(*this);
 	}
+	void EditableText::SetText(StringViewUTF8 newText)
+	{
+		auto old = textContainer.SwapStrings(newText);		
+		
+		UpdateDisplayedText();
+	}
+	void EditableText::SetEmptyText(StringViewUTF8 newEmptyText)
+	{
+		emptyTextContainer.SetString(newEmptyText);
+	}	
 	Graphics::RenderUnit* EditableText::GetRenderUnit(uint index)
-	{
+	{		
 		switch (index)
-		{
-		case 0:
-			return &textRenderUnit;
-		case 1:
-			return &textSelectionRenderUnit;
-		case 2:
-			return &textCursorRenderUnit;
-		default:
-			return nullptr;
+		{		
+		case 0: return &textRenderUnit;
+		case 1: return &textSelectionRenderUnit;
+		case 2: return &textCursorRenderUnit;
+		default: return nullptr;
 		}
 	}
-	void EditableText::EraseTextSubString(uintMem begin, uintMem count)
+	void EditableText::MouseHitStatusChangedEvent(const InputNode::MouseHitStatusChangedEvent& event)
 	{
-		text.EraseSubString(begin, count);
-		textRenderUnit.SetText(text);
-		textEdited = true;
-		textChangedEventDispatcher.Call({ this, text });
+		UpdateCursorType();
 	}
-	void EditableText::InsertStringIntoText(uintMem index, StringViewUTF8 string)
+	void EditableText::PressableFlagChangedEvent(const ButtonBase::PressableFlagChangedEvent& event)
 	{
-		text.InsertString(index, string);
-		textRenderUnit.SetText(text);
-		textEdited = true;
-		textChangedEventDispatcher.Call({ this, text });
+		UpdateCursorType();
 	}
-	StringUTF8 EditableText::GetTextSubString(uintMem begin, uintMem end)
+	void EditableText::SelectedStateChangedEvent(const InputNode::SelectedStateChangedEvent& event)
 	{
-		return text.SubString(begin, end - begin);
+		UpdateDisplayedText();
 	}
-	void EditableText::UpdateTextRenderUnit()
+	void EditableText::UpdateCursorType()
 	{
-		if (selected)
+		if (GetMouseHitStatus() == 0)
+			Input::SetCursorType(Input::CursorType::Default);
+		else if (IsPressable())
+			Input::SetCursorType(Input::CursorType::Text);
+		else
+			Input::SetCursorType(Input::CursorType::NotAllowed);
+	}
+	void EditableText::UpdateDisplayedText()
+	{
+		if (IsSelected())
 		{
-			//Set focused text
-			textRenderUnit.SetText(text);
+			textContainerReference.SetContainer(textContainer);
 			textRenderUnit.SetTextColor(selectedColor);
-		}
-		else if (text.Empty())
-		{			
-			//Set empty text
-			textRenderUnit.SetText(emptyText);			
-			textSelectionRenderUnit.ClearSelection();			
-			textRenderUnit.SetTextColor(emptyColor);
 		}
 		else
 		{
-			//Set unfocused text		
-			textRenderUnit.SetText(text);
-			textRenderUnit.SetTextColor(unselectedColor);
+			if (textContainer.CharacterCount() == 0)
+			{
+				textContainerReference.SetContainer(emptyTextContainer);
+				textRenderUnit.SetTextColor(emptyColor);
+			}
+			else
+				textRenderUnit.SetTextColor(unselectedColor);
 		}
-	}
-	void EditableText::OnEvent(const SelectedEvent& event)
-	{
-		selected = true;
-		textCursorRenderUnit.ShowCursor();
-		UpdateTextRenderUnit();
-
-		EditableTextBase::OnEvent(event);
-	}
-	void EditableText::OnEvent(const DeselectedEvent& event)
-	{
-		selected = false;
-		EditableTextBase::OnEvent(event);
-
-		textCursorRenderUnit.HideCursor();
-		UpdateTextRenderUnit();
-
-		if (textEdited)
-			textEnteredEventDispatcher.Call({ this, text });
 	}
 }

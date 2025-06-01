@@ -1,4 +1,7 @@
 #include "pch.h"
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {

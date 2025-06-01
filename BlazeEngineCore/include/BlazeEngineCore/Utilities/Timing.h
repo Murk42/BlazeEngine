@@ -2,6 +2,7 @@
 #include "BlazeEngineCore/DataStructures/Map.h"
 #include "BlazeEngineCore/DataStructures/String.h"
 #include "BlazeEngineCore/Utilities/TimePoint.h"
+#include "BlazeEngineCore/Utilities/TimeInterval.h"
 
 namespace Blaze
 {

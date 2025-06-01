@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGLWrapper

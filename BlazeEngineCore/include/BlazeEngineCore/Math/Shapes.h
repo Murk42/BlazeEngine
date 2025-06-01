@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/Math/Vector.h"
+#include "BlazeEngineCore/Math/Matrix.h"
 
 namespace Blaze::Math::Shapes
 {
@@ -202,24 +204,26 @@ namespace Blaze::Math::Shapes
 		}
 	};
 
-	template<typename T, size_t VertexCount>
+	template<typename T, uintMem _VertexCount>
 	class Polygon2D
 	{
 	public:		
-		std::array<Vec2<T>, VertexCount> points;
+		static constexpr uintMem VertexCount = _VertexCount;
+		Vec2<T> points[VertexCount];
 
 		constexpr Polygon2D()
 			: points({ })
 		{
 		}
-		constexpr Polygon2D(const std::array<Vec2<T>, VertexCount>& points)
-			: points(points)
+		constexpr Polygon2D(const Vec2<T> (&points)[VertexCount])
 		{
+			for (uintMem i = 0; i < VertexCount; ++i)
+				this->points[i] = points[i];
 		}
-		constexpr Polygon2D(Vec2<T>* points)
-			: points(points)
+		constexpr Polygon2D(Vec2<T>* points)			
 		{
-
+			for (uintMem i = 0; i < VertexCount; ++i)
+				this->points[i] = points[i];
 		}
 	};
 
@@ -231,7 +235,7 @@ namespace Blaze::Math::Shapes
 			: Polygon2D<T, 4>()
 		{
 		}
-		constexpr Quad2D(const std::array<Vec2<T>, 4>& points)
+		constexpr Quad2D(const Vec2<T> (&points)[4])
 			: Polygon2D<T, 4>(points)
 		{
 		}

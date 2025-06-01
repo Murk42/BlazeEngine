@@ -14,11 +14,11 @@ namespace Blaze::UI
 			.borderColor = 0x222222ff,
 			})
 	{		
-		node->finalTransformUpdatedEventDispatcher.AddHandler(*this);
+		node->finalTransformUpdatedEventDispatcher.AddHandler<&PanelRenderUnit::FinalTransformUpdatedEvent>(*this);
 	}
 	PanelRenderUnit::~PanelRenderUnit()
 	{
-		node->finalTransformUpdatedEventDispatcher.RemoveHandler(*this);
+		node->finalTransformUpdatedEventDispatcher.RemoveHandler<&PanelRenderUnit::FinalTransformUpdatedEvent>(*this);
 	}
 	void PanelRenderUnit::BeginStream()
 	{
@@ -50,7 +50,7 @@ namespace Blaze::UI
 	{
 		rd.borderWidth = width;
 	}
-	void PanelRenderUnit::OnEvent(const Node::FinalTransformUpdatedEvent& event)
+	void PanelRenderUnit::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
 	{
 		auto finalTransform = node->GetFinalTransform();
 		rd.pos = finalTransform.position;

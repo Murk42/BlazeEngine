@@ -1,5 +1,8 @@
 #pragma once
+#include "BlazeEngineCore/Debug/Result.h"
+#include "BlazeEngine/Resources/Bitmap/Bitmap.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
+#include <GL/glew.h>
 
 namespace Blaze::Graphics::OpenGLWrapper
 {
@@ -19,7 +22,10 @@ namespace Blaze::Graphics::OpenGLWrapper
 	TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapColorFormat format, Result& result);
 	BitmapColorFormat MapInternalTexturePixelFormat(TextureInternalPixelFormat format, Result& result);
 
-	GLenum OpenGLVertexAttributeType(VertexAttributeType type, Result& result);
+	GLenum ConvertToOpenGLEnum(IntegerVertexAttributeType type);
+	GLenum ConvertToOpenGLEnum(FloatVertexAttributeType type);
+	GLenum ConvertToOpenGLEnum(PackedVertexAttributeType type);	
+	GLenum ConvertToOpenGLEnum(BGRAVertexAttributeType type);
 
 	GLenum OpenGLFramebufferAttachment(FramebufferAttachment attachment, Result& result);
 	FramebufferStatus MapFramebufferStatus(GLenum status, Result& result);
@@ -27,6 +33,8 @@ namespace Blaze::Graphics::OpenGLWrapper
 	GLenum OpenGLBufferMappingAccess(GraphicsBufferMapAccessFlags mapping, Result& result);	
 	GLenum OpenGLBufferMappingType(GraphicsBufferMapType type, Result& result);
 	GLenum OpenGLBufferMappingOptions(GraphicsBufferMapOptions options, Result& result);
+
+	UniformType MapOpenGLUniformType(GLenum value);
 
 	enum class GraphicsBufferUseType
 	{

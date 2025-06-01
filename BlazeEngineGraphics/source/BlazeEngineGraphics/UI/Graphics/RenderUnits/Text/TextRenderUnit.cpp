@@ -1,4 +1,8 @@
 #include "pch.h"
+#include "BlazeEngineCore/DataStructures/Rect.h"
+#include "BlazeEngineCore/DataStructures/ArrayImpl.h"
+#include "BlazeEngine/Resources/Font/Font.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
 #include <numeric>
 
@@ -18,7 +22,7 @@ namespace Blaze::UI
 			return min;
 		return value;
 	}
-	static void InscribeRectWithUV(Rectf& rect, Rectf& uvRect, const Rectf& cullingRect)
+	static void InscribeRectWithUV(Rectf& rect, Vec2f& uv1, Vec2f& uv2, const Rectf& cullingRect)
 	{
 		float percentLeft = 0;
 		float percentRight = 1;
@@ -35,9 +39,11 @@ namespace Blaze::UI
 			percentUp = Clamp((cullingRect.y + cullingRect.h - rect.pos.y) / rect.size.y, 0, 1);
 
 		rect.pos += Vec2f(percentLeft, percentDown) * rect.size;
-		rect.size *= Vec2f(percentRight - percentLeft, percentUp - percentDown);
-		uvRect.pos += Vec2f(percentLeft, percentDown) * uvRect.size;
-		uvRect.size *= Vec2f(percentRight - percentLeft, percentUp - percentDown);
+		rect.size *= Vec2f(percentRight - percentLeft, percentUp - percentDown);	
+
+		Vec2f uvSize = uv2 - uv1;
+		uv1 = uv1 +  Vec2f(percentLeft, percentDown) * uvSize;
+		uv2 = uv1 + Vec2f(percentRight, percentUp) * uvSize;
 	}
 	//Returns the rect of the culling node in transformSpace of the given transform
 	static Rectf GetCullingRect(Node* cullingNode, Vec2f position, float scale, float rotation, Vec2f right, Vec2f up)
@@ -62,17 +68,6 @@ namespace Blaze::UI
 		}
 		else
 			return Rectf();
-	}
-	static bool GetUVRect(const UnicodeChar& ch, Graphics::AtlasData* atlasData, Rectf& rect)
-	{
-		auto it = atlasData->uvs.Find(ch);
-
-		if (it.IsNull())
-			return false;
-
-		rect.pos = it->value.uv1;
-		rect.size = it->value.uv2 - it->value.uv1;
-		return true;
 	}
 
 	static uintMem FindWordStart(Array<TextRenderUnitBase::CharacterData>& characters, uintMem i)
@@ -101,17 +96,18 @@ namespace Blaze::UI
 		//TODO scale characters and lines
 	}
 	
-	TextRenderUnit::TextRenderUnit(Node* node)
-		: TextRenderUnitBase("ColoredCharacterRenderer"), node(node), characterIndex(0), cullingNode(nullptr), font(nullptr), fontAtlasesData(nullptr),
-		layoutOptions({ }), pixelFontHeight(0), renderDataDirty(false)
+	TextRenderUnit::TextRenderUnit(TextContainerBase& textContainer, Node* node)
+		: TextRenderUnitBase(textContainer, "ColoredCharacterRenderer"), node(node), characterIndex(0), cullingNode(nullptr), fontStyle(nullptr), layoutOptions({ }), renderDataDirty(false)
 	{
-		node->transformUpdatedEventDispatcher.AddHandler(*this);
-		node->finalTransformUpdatedEventDispatcher.AddHandler(*this);
+		node->transformUpdatedEventDispatcher.AddHandler<&TextRenderUnit::TransformUpdatedEvent>(*this);
+		node->finalTransformUpdatedEventDispatcher.AddHandler<&TextRenderUnit::FinalTransformUpdatedEvent>(*this);
+		textContainer.textUpdatedEventDispatcher.AddHandler<&TextRenderUnit::TextUpdatedEvent>(*this);
 	}
 	TextRenderUnit::~TextRenderUnit()
 	{
-		node->transformUpdatedEventDispatcher.RemoveHandler(*this);
-		node->finalTransformUpdatedEventDispatcher.RemoveHandler(*this);
+		node->transformUpdatedEventDispatcher.RemoveHandler<&TextRenderUnit::TransformUpdatedEvent>(*this);
+		node->finalTransformUpdatedEventDispatcher.RemoveHandler<&TextRenderUnit::FinalTransformUpdatedEvent>(*this);
+		textContainer.textUpdatedEventDispatcher.RemoveHandler<&TextRenderUnit::TextUpdatedEvent>(*this);
 	}
 	NodeFinalTransform TextRenderUnit::GetFinalTransform()
 	{
@@ -158,7 +154,7 @@ namespace Blaze::UI
 		
 		float textWidth = GetTextBoundingWidth(lineData);
 		if (textWidth > transform.size.x)
-			ManageHorizontalUnderfittedOptions(layoutOptions.horizontallyUnderfittedOption, layoutOptions.wrappedLineAdvance * pixelFontHeight, textWidth, transform.size.x, lineData, characterData);
+			ManageHorizontalUnderfittedOptions(layoutOptions.horizontallyUnderfittedOption, layoutOptions.wrappedLineAdvance * fontStyle->fontPixelHeight, textWidth, transform.size.x, lineData, characterData);
 		else
 			ManageHorizontalOverfittedOptions(layoutOptions.horizontallyOverfittedOption, textWidth, transform.size.x, lineData, characterData);						
 
@@ -205,6 +201,9 @@ namespace Blaze::UI
 
 		characterRenderData.Clear();
 
+		if (fontStyle == nullptr)
+			return true;
+
 		const auto finalTransform = node->GetFinalTransform();
 		const Vec2f finalPosition = finalTransform.position;
 		const float finalScale = finalTransform.scale;
@@ -215,32 +214,28 @@ namespace Blaze::UI
 		const Vec2f right = Vec2f(cos, sin);
 		const Vec2f up = Vec2f(-sin, cos);
 
-		const uint finalFontHeight = (uint)std::round(pixelFontHeight * finalScale);
-		Graphics::AtlasData* const  atlasData = fontAtlasesData == nullptr ? nullptr : fontAtlasesData->GetAtlasData(finalFontHeight);
-
-		if (atlasData == nullptr)
-			return true;
+		const uint finalFontHeight = (uint)std::round(fontStyle->fontPixelHeight * finalScale);				
 
 		const Rectf cullingRect = GetCullingRect(cullingNode, finalPosition, finalScale, finalRotation, right, up);
 
 		const bool axisAligned = abs(cos) == 1 || abs(sin) == 1;
 		const Vec2f renderOffset = axisAligned ? Vec2f(std::ceil(finalPosition.x), std::ceil(finalPosition.y)) : finalPosition;
 
-		characterRenderData.Resize(characterData.Count() - 1);
+		characterRenderData.Resize(characterData.Count());
 
 		this->renderData.blend = 1.0f;
 		this->renderData.alpha = 1.0f;
-		this->renderData.texture = &atlasData->atlas;
+		this->renderData.texture = &fontStyle->atlas.GetTexture();
 
 		auto it = characterColors.FirstIterator();
-		for (uintMem i = 0; i < characterData.Count() - 1; ++i)
+		for (uintMem i = 0; i < characterData.Count(); ++i)
 		{
 			auto& renderData = characterRenderData[i];
 			auto& data = characterData[i];
-
+						
 			renderData.isCulled = false;
 
-			Rect rect = Rectf(data.pos, data.size);
+			Rectf rect = Rectf(data.pos, data.size);
 			rect.x = std::round(rect.x);
 			rect.y = std::round(rect.y);
 			rect.w = std::round(rect.w);
@@ -252,22 +247,22 @@ namespace Blaze::UI
 				continue;
 			}
 
-			Rect uvRect = Rectf();
+			Vec2f uv1, uv2;
 
-			if (!GetUVRect(data.character, atlasData, uvRect))
+			if (!fontStyle->atlas.GetCharacterUV(data.character, uv1, uv2))
 			{
 				renderData.isCulled = true;
 				continue;
 			}
 
 			if (cullingRect.size != Vec2f())
-				InscribeRectWithUV(rect, uvRect, cullingRect);
+				InscribeRectWithUV(rect, uv1, uv2, cullingRect);
 
 			renderData.pos = renderOffset + (right * rect.pos.x + up * rect.pos.y) * finalScale;
 			renderData.right = right * rect.size.x * finalScale;
 			renderData.up = up * rect.size.y * finalScale;
-			renderData.uv1 = uvRect.pos;
-			renderData.uv2 = uvRect.pos + uvRect.size;
+			renderData.uv1 = uv1;
+			renderData.uv2 = uv2;
 			renderData.color = it.IsNull() ? 0xffffffff : *it;			
 
 			if (!characterColors.Empty() && it != characterColors.LastIterator())
@@ -278,14 +273,9 @@ namespace Blaze::UI
 
 		return true;		
 	}
-	void TextRenderUnit::SetText(const StringViewUTF8& textRenderUnit)
-	{
-		this->text = textRenderUnit;
-		node->MarkTransformDirty();
-	}
 	void TextRenderUnit::SetTextColor(ColorRGBAf color)
 	{
-		characterColors = { color };
+		characterColors = Array<ColorRGBAf>{ color };
 		renderDataDirty = true;
 	}
 	void TextRenderUnit::SetTextCharactersColor(const ArrayView<ColorRGBAf>& colors)
@@ -293,15 +283,9 @@ namespace Blaze::UI
 		characterColors = colors;
 		renderDataDirty = true;
 	}
-	void TextRenderUnit::SetFont(Font& font)
+	void TextRenderUnit::SetFontStyle(const FontStyle& style)
 	{
-		this->font = &font;
-		fontAtlasesData = Graphics::FontAtlasesData::RetrieveFromFont(font);
-		node->MarkTransformDirty();
-	}
-	void TextRenderUnit::SetFontHeight(uint pixelFontHeight)
-	{
-		this->pixelFontHeight = pixelFontHeight;
+		fontStyle = &style;
 		node->MarkTransformDirty();
 	}
 	void TextRenderUnit::SetLayoutOptions(TextLayoutOptions layoutOptions)
@@ -355,18 +339,24 @@ namespace Blaze::UI
 		lineData.Clear();
 		characterData.Clear();		
 
-		const float lineHeight = std::round(0.9f * pixelFontHeight);
-		const float lineAdvance = std::round(layoutOptions.lineAdvance * pixelFontHeight);
-		const float wrappedLineAdvance = std::round(layoutOptions.wrappedLineAdvance * pixelFontHeight);
+		if (fontStyle == nullptr)
+		{
+			BLAZE_ENGINE_GRAPHICS_ERROR(" Text font style not set");
+			return;
+		}
+		
+		const float lineHeight = std::round(0.9f * fontStyle->fontPixelHeight);
+		const float lineAdvance = std::round(layoutOptions.lineAdvance * fontStyle->fontPixelHeight);
+		const float wrappedLineAdvance = std::round(layoutOptions.wrappedLineAdvance * fontStyle->fontPixelHeight);
 
 		bool hasPrevChar = false;
 		UnicodeChar prevCharacter = '\0';
 		LineData* line = nullptr;		
 		uintMem lineIndex = 0;
-		Vec2f cursor = Vec2f(0, -std::round(0.6f * pixelFontHeight));		
-
-		const auto& fontMetrics = (font == nullptr ? nullptr : font->GetMetrics(pixelFontHeight));		
+		Vec2f cursor = Vec2f(0, -std::round(0.6f * fontStyle->fontPixelHeight));
+		
 		const auto transform = node->GetTransform();
+
 		const bool wrapLines = 
 			layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::WordWrapSpread ||
 			layoutOptions.horizontallyUnderfittedOption == TextHorizontallyUnderfittedOptions::WordWrap || 
@@ -511,9 +501,9 @@ namespace Blaze::UI
 			Vec2f offset;
 			Vec2f size;
 			float advance;
-			FontGlyphMetrics metrics;
+			Font::GlyphMetrics metrics;
 
-			bool hasMetrics = (fontMetrics == nullptr ? false : fontMetrics->GetGlyphMetrics(character, metrics));
+			bool hasMetrics = fontStyle->font.GetGlyphMetrics(fontStyle->fontPixelHeight, character, metrics);
 			Vec2f kerning;
 
 			if (hasMetrics)
@@ -524,7 +514,7 @@ namespace Blaze::UI
 				
 				if (hasPrevChar)
 				{
-					kerning = fontMetrics->GetGlyphKerning(prevCharacter, character);
+					kerning = fontStyle->font.GetGlyphKerning(fontStyle->fontPixelHeight, prevCharacter, character);
 					offset += kerning;
 					advance += kerning.x;
 				}
@@ -535,8 +525,8 @@ namespace Blaze::UI
 			else
 			{
 				offset = Vec2f();
-				size = Vec2f(std::round(0.3f * pixelFontHeight), 0.0f);
-				advance = pixelFontHeight * 0.35f;
+				size = Vec2f(std::round(0.3f * fontStyle->fontPixelHeight), 0.0f);
+				advance = fontStyle->fontPixelHeight * 0.35f;
 			}
 
 
@@ -567,22 +557,15 @@ namespace Blaze::UI
 			prevCharacter = character;						
 		};
 
-		characterData.Resize(text.CharacterCount() + 1);
+		characterData.Resize(textContainer.CharacterCount() + 1);
 		StartNewLine(0, 0);
 
 		uintMem i = 0;
-		for (auto it = text.FirstIterator(); it != text.BehindIterator(); ++it, ++i)
-		{
-			uintMem j = i;
-			AddCharacter(it.ToUnicode(), j);
-
-			for (uint l = j; l < i; ++l)
-				--it;
-
-			i = j;
-		}
+		for (; i != textContainer.CharacterCount(); ++i)		
+			AddCharacter(textContainer.GetSubString(i, 1).First(), i);
+		
 		AddCharacter('\0', i);
-		EndLine(text.CharacterCount());
+		EndLine(textContainer.CharacterCount());
 	}
 	float TextRenderUnit::GetTextBoundingWidth(Array<LineData>& lineData)
 	{
@@ -624,7 +607,7 @@ namespace Blaze::UI
 			textWidth = GetTextBoundingWidth(lineData);
 			break;
 		default:
-			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyUnderfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextHorizontallyUnderfittedOptions enum value. The integer value was: {}", (uint)horizontallyUnderfittedOption);
 			break;
 		}
 	}
@@ -644,7 +627,7 @@ namespace Blaze::UI
 			SpreadWords(lineData, characterData, textWidth, boundingWidth);
 			break;
 		default:
-			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)horizontallyOverfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextHorizontallyOverfittedOptions enum value. The integer value was: {}", (uint)horizontallyOverfittedOption);
 			break;
 		}
 	}	
@@ -663,7 +646,7 @@ namespace Blaze::UI
 			break;
 		}
 		default:
-			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyUnderfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextVerticallyUnderfittedOptions enum value. The integer value was: {}", (uint)verticallyUnderfittedOption);
 			break;
 		}
 	}
@@ -679,43 +662,49 @@ namespace Blaze::UI
 		case TextVerticallyOverfittedOptions::SpreadLines:
 			break;		
 		default:
-			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextVerticallyOverfittedOptions enum value. The integer value was: " + StringParsing::Convert((uint)verticallyOverfittedOption));
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextVerticallyOverfittedOptions enum value. The integer value was: {}", (uint)verticallyOverfittedOption);
 			break;
 		}
 	}	
-	float TextRenderUnit::GetLinesVerticalOffset(TextLineVerticalAlign align, float textHeight, float boundingHeight)
+	float TextRenderUnit::GetLinesVerticalOffset(VerticalAlign align, float textHeight, float boundingHeight)
 	{
 		switch (align)
 		{
-		default:
-			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextLineVerticalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
-		case TextLineVerticalAlign::Top:
+		case VerticalAlign::Top:
 			return boundingHeight;
-		case TextLineVerticalAlign::Bottom:
+		case VerticalAlign::Bottom:
 			return textHeight;
-		case TextLineVerticalAlign::Center:
+		case VerticalAlign::Center:
 			return (boundingHeight + textHeight) / 2;
+		default:
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid VerticalAlign enum value. The integer value was: {}", (uint)align);
+			return boundingHeight;
 		}
 	}
-	float TextRenderUnit::GetLineHorizontalOffset(TextLineHorizontalAlign align, float lineWidth, float boundingWidth)
+	float TextRenderUnit::GetLineHorizontalOffset(HorizontalAlign align, float lineWidth, float boundingWidth)
 	{
 		switch (align)
 		{
-		default:
-			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid TextLineHorizontalAlign enum value. The integer value was: " + StringParsing::Convert((uint)align));
-		case TextLineHorizontalAlign::Left:
+		case HorizontalAlign::Left:
 			return 0;			
-		case TextLineHorizontalAlign::Right:
+		case HorizontalAlign::Right:
 			return boundingWidth - lineWidth;			
-		case TextLineHorizontalAlign::Center:
+		case HorizontalAlign::Center:
 			return (boundingWidth - lineWidth) / 2;
+		default:
+			BLAZE_ENGINE_GRAPHICS_ERROR("Invalid HorizontalAlign enum value. The integer value was: {}", (uint)align);
+			return 0;
 		}
 	}
-	void TextRenderUnit::OnEvent(const Node::TransformUpdatedEvent& event)
+	void TextRenderUnit::TextUpdatedEvent(const TextContainerBase::TextUpdatedEvent& event)
+	{
+		node->MarkTransformDirty();
+	}
+	void TextRenderUnit::TransformUpdatedEvent(const Node::TransformUpdatedEvent& event)
 	{
 		dataDirty = true;
 	}
-	void TextRenderUnit::OnEvent(const Node::FinalTransformUpdatedEvent& event)
+	void TextRenderUnit::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
 	{
 		renderDataDirty = true;
 	}	

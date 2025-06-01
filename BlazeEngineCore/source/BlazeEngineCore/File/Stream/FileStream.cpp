@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "BlazeEngineCore/File/Stream/FileStream.h"
-
+#include "BlazeEngineCore/DataStructures/StringUTF8.h"
+#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
+#include <Windows.h>
 #include "BlazeEngineCore/Internal/WindowsPlatform.h"
 #else
 #pragma error
@@ -42,7 +45,7 @@ namespace Blaze
 		BOOL result = CloseHandle(file);
 
 		if (result == 0)
-			Debug::Logger::LogError("Windows API", "CloseHandle failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "CloseHandle failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));
 
 		file = nullptr;		
 #else
@@ -61,7 +64,7 @@ namespace Blaze
 		BOOL result = FlushFileBuffers(file);
 
 		if (result == 0)
-			Debug::Logger::LogError("Windows API", "FlushFileBuffers failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");		
+			Debug::Logger::LogError("Windows API", "FlushFileBuffers failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));		
 #else
 #pragma error
 #endif
@@ -81,7 +84,7 @@ namespace Blaze
 
 		if (result == 0)
 		{
-			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));
 			return false;
 		}
 
@@ -105,7 +108,7 @@ namespace Blaze
 
 		if (result == 0)
 		{
-			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error: \"{}\"", Windows::GetErrorString(GetLastError()));
 			return false;
 		}
 
@@ -129,7 +132,7 @@ namespace Blaze
 
 		if (result == 0)
 		{
-			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));
 			return false;
 		}
 
@@ -153,7 +156,7 @@ namespace Blaze
 		BOOL result = SetFilePointerEx(file, nullPosition, &position, FILE_CURRENT);
 
 		if (result == 0)
-			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "SetFilePointerEx failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));
 
 		return (uintMem)position.QuadPart;
 #else
@@ -174,7 +177,7 @@ namespace Blaze
 
 		if (result == 0)
 		{
-			Debug::Logger::LogError("Windows API", "GetFileSizeEx failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "GetFileSizeEx failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));
 
 			return 0;
 		}
@@ -205,7 +208,7 @@ namespace Blaze
 
 		if (result == 0)
 		{
-			Debug::Logger::LogError("Windows API", "WriteFile failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "WriteFile failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));
 			return 0;
 		}
 
@@ -237,7 +240,7 @@ namespace Blaze
 		BOOL result = ReadFile(GetHandle(), ptr, static_cast<DWORD>(byteCount), &bytesRead, nullptr);
 
 		if (result == 0)
-			Debug::Logger::LogError("Windows API", "ReadFile failed with error :\"" + Windows::GetErrorString(GetLastError()) + "\"");
+			Debug::Logger::LogError("Windows API", "ReadFile failed with error :\"{}\"", Windows::GetErrorString(GetLastError()));
 
 		return bytesRead;
 #else

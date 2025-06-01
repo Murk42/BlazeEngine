@@ -1,4 +1,12 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/DataStructures/Map.h"
+#include "BlazeEngineCore/DataStructures/List.h"
+#include "BlazeEngineCore/DataStructures/DualList.h"
+#include "BlazeEngineCore/DataStructures/Array.h"
+#include "BlazeEngineCore/Memory/MemoryListener.h"
+#include "BlazeEngineCore/File/File.h"
+#include <mutex>
 
 namespace Blaze
 {

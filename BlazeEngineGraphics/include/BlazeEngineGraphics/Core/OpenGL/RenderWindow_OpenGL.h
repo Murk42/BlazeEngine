@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngineCore/BlazeEngineCore.h"
 #include "BlazeEngineCore/Event/EventHandler.h"
 #include "BlazeEngine/Window/Window.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"

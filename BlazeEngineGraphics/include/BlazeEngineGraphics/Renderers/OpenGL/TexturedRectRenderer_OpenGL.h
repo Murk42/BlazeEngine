@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/List.h"
 #include "BlazeEngineGraphics/Renderers/TexturedRectRenderer.h"
 #include "BlazeEngineGraphics/RenderStructure/StreamRenderer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
@@ -28,11 +29,6 @@ namespace Blaze::Graphics::OpenGL
 		
 		StringView GetRendererName() const override { return "TexturedRectRenderer_OpenGL"; }
 	private:				
-		struct Vertex
-		{
-			uint8 sign;
-		};
-
 		struct Instance
 		{
 			Vec4f color;
@@ -53,7 +49,6 @@ namespace Blaze::Graphics::OpenGL
 		GraphicsContext_OpenGL& graphicsContext;
 		Blaze::Graphics::OpenGLWrapper::ShaderProgram program; 
 		Blaze::Graphics::OpenGLWrapper::ImmutableMappedGraphicsBuffer instanceBuffer;
-		Blaze::Graphics::OpenGLWrapper::ImmutableStaticGraphicsBuffer vertexBuffer;
 		Blaze::Graphics::OpenGLWrapper::VertexArray va;
 
 		friend class TexturedRectRenderCache_OpenGL;
@@ -65,11 +60,10 @@ namespace Blaze::Graphics::OpenGL
 		void CreateNew(TexturedRectRenderer_OpenGL& renderer, const Array<TexturedRectRenderData>& renderData);		
 	private:		
 		using Instance = TexturedRectRenderer_OpenGL::Instance;
-		using Vertex = TexturedRectRenderer_OpenGL::Vertex;
 
 		struct Group
 		{
-			OpenGLWrapper::Texture2D* textures[TexturedRectRenderer_OpenGL::DrawCallTextureCount];
+			const OpenGLWrapper::Texture2D* textures[TexturedRectRenderer_OpenGL::DrawCallTextureCount];
 			Instance instances[TexturedRectRenderer_OpenGL::InstanceBufferInstanceCount];
 			uint instanceCount;
 		};

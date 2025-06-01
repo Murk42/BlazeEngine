@@ -1,4 +1,5 @@
 #pragma once
+#include "BlazeEngineCore/DataStructures/Tuple.h"
 #include "BlazeEngine/Application/ECS/Entity.h"
 
 namespace Blaze::ECS

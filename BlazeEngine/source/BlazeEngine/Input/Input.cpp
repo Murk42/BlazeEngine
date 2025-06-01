@@ -29,6 +29,37 @@ namespace Blaze
 
 	namespace Input
 	{		
+		static SDL_SystemCursor ConvertToSDL(CursorType value)
+		{
+			switch (value)
+			{
+			case Blaze::Input::CursorType::Default:		return SDL_SYSTEM_CURSOR_DEFAULT;
+			case Blaze::Input::CursorType::Text:		return SDL_SYSTEM_CURSOR_TEXT;
+			case Blaze::Input::CursorType::Wait:		return SDL_SYSTEM_CURSOR_WAIT;
+			case Blaze::Input::CursorType::Crosshair:	return SDL_SYSTEM_CURSOR_CROSSHAIR;
+			case Blaze::Input::CursorType::Progress:	return SDL_SYSTEM_CURSOR_PROGRESS;
+			case Blaze::Input::CursorType::NotAllowed:	return SDL_SYSTEM_CURSOR_NOT_ALLOWED;
+			case Blaze::Input::CursorType::Move:		return SDL_SYSTEM_CURSOR_MOVE;
+			case Blaze::Input::CursorType::Pointer:		return SDL_SYSTEM_CURSOR_POINTER;
+			case Blaze::Input::CursorType::ResizeNWSE:	return SDL_SYSTEM_CURSOR_NWSE_RESIZE;
+			case Blaze::Input::CursorType::ResizeNESW:	return SDL_SYSTEM_CURSOR_NESW_RESIZE;
+			case Blaze::Input::CursorType::ResizeNW:	return SDL_SYSTEM_CURSOR_NW_RESIZE;
+			case Blaze::Input::CursorType::ResizeNS:	return SDL_SYSTEM_CURSOR_NS_RESIZE;
+			case Blaze::Input::CursorType::ResizeNE:	return SDL_SYSTEM_CURSOR_NE_RESIZE;
+			case Blaze::Input::CursorType::ResizeSE:	return SDL_SYSTEM_CURSOR_SE_RESIZE;
+			case Blaze::Input::CursorType::ResizeSW:	return SDL_SYSTEM_CURSOR_SW_RESIZE;
+			case Blaze::Input::CursorType::ResizeEW:	return SDL_SYSTEM_CURSOR_EW_RESIZE;
+			case Blaze::Input::CursorType::ResizeN:		return SDL_SYSTEM_CURSOR_N_RESIZE;
+			case Blaze::Input::CursorType::ResizeW:		return SDL_SYSTEM_CURSOR_W_RESIZE;
+			case Blaze::Input::CursorType::ResizeS:		return SDL_SYSTEM_CURSOR_S_RESIZE;
+			case Blaze::Input::CursorType::ResizeE:		return SDL_SYSTEM_CURSOR_E_RESIZE;
+			case Blaze::Input::CursorType::CursorCount:				
+			default:
+				BLAZE_ENGINE_FATAL("Invalid CursorType value");
+				return SDL_SYSTEM_CURSOR_DEFAULT;
+				break;
+			}						
+		}
 		EventDispatcher<InputPreUpdateEvent>& GetInputPreUpdateEventDispatcher()
 		{
 			return blazeEngineContext.inputPreUpdateEventDispatcher;
@@ -63,7 +94,7 @@ namespace Blaze
 			auto& cursor = blazeEngineContext.cursors[(uint)type];
 
 			if (cursor == nullptr)
-				cursor = SDL_CreateSystemCursor((SDL_SystemCursor)type);
+				cursor = SDL_CreateSystemCursor(ConvertToSDL(type));
 
 			SDL_SetCursor(cursor);
 		}

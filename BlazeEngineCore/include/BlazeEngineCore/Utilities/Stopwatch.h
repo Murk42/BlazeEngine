@@ -1,4 +1,6 @@
 #pragma once
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include <chrono>
 
 namespace Blaze
 {

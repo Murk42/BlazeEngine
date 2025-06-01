@@ -3,8 +3,8 @@
 
 namespace Blaze::UI
 {
-	TextSelectionRenderUnitBase::TextSelectionRenderUnitBase(StringView rendererName) :
-		RenderUnit(rendererName)
+	TextSelectionRenderUnitBase::TextSelectionRenderUnitBase(TextSelection& selection, StringView rendererName) :
+		RenderUnit(rendererName), selection(selection)
 	{
 	}
 }

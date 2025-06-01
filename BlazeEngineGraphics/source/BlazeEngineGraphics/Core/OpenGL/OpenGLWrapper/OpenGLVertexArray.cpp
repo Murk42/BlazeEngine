@@ -3,6 +3,8 @@
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 #include "BlazeEngineGraphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 
+#include <GL/glew.h>
+
 namespace Blaze::Graphics::OpenGLWrapper
 {
     template<typename T>
@@ -30,17 +32,18 @@ namespace Blaze::Graphics::OpenGLWrapper
         if (id != 0)        
             glDeleteVertexArrays(1, &id);
     }    
-
+    void VertexArray::SetIndexBuffer(GraphicsBuffer& buffer)
+    {
+        glVertexArrayElementBuffer(id, buffer.GetHandle());        
+    }
     void VertexArray::EnableVertexAttribute(uint index)
     {
         glEnableVertexArrayAttrib(id, index);        
     }
-
     void VertexArray::DisableVertexAttribute(uint index)
     {
         glDisableVertexArrayAttrib(id, index);        
     }
-
     void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uintMem stride, uintMem offset)
     {
         if (buffer != nullptr)
@@ -48,61 +51,51 @@ namespace Blaze::Graphics::OpenGLWrapper
         else
             glVertexArrayVertexBuffer(id, index, 0, offset, stride);
     }
-
-    void VertexArray::SetVertexAttributeFormat(uint index, VertexAttributeType type, uintMem count, bool normalised, uintMem offset)
+    void VertexArray::SetIntegerVertexAttributeFormat(uint index, IntegerVertexAttributeType type, uintMem count, uintMem offset)
     {
-        Result result;
-        auto attributeType = OpenGLVertexAttributeType(type, result);
-        if (result) return;
-
-        switch (type)
-        {
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Int8:
-            glVertexArrayAttribIFormat(id, index, static_cast<GLint>(count), attributeType, offset);
-            break;
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint8:
-            glVertexArrayAttribIFormat(id, index, static_cast<GLint>(count), attributeType, offset);
-            break;
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Int16:
-            glVertexArrayAttribIFormat(id, index, static_cast<GLint>(count), attributeType, offset);
-            break;
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint16:
-            glVertexArrayAttribIFormat(id, index, static_cast<GLint>(count), attributeType, offset);
-            break;
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Int32:
-            glVertexArrayAttribIFormat(id, index, static_cast<GLint>(count), attributeType, offset);
-            break;
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Uint32:
-            glVertexArrayAttribIFormat(id, index, static_cast<GLint>(count), attributeType, offset);
-            break;
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Float:
-            glVertexArrayAttribFormat(id, index, static_cast<GLint>(count), attributeType, normalised, offset);
-            break;
-        case Blaze::Graphics::OpenGLWrapper::VertexAttributeType::Double:
-            glVertexArrayAttribLFormat(id, index, static_cast<GLint>(count), attributeType, offset);
-            break;        
-        }        
+        GLenum _type = ConvertToOpenGLEnum(type);
+        glVertexArrayAttribIFormat(id, index, count, _type, offset);
     }
-
+    void VertexArray::SetDoubleVertexAttributeFormat(uint index, uintMem count, uintMem offset)
+    {        
+        glVertexArrayAttribLFormat(id, index, count, GL_DOUBLE, offset);
+    }
+    void VertexArray::SetFloatVertexAttributeFormat(uint index, FloatVertexAttributeType type, uintMem count, uintMem offset)
+    {
+        GLenum _type = ConvertToOpenGLEnum(type);
+        glVertexArrayAttribFormat(id, index, count, _type, false, offset);
+    }
+    void VertexArray::SetFloatVertexAttributeAsNormalizedFormat(uint index, IntegerVertexAttributeType type, uintMem count, uintMem offset)
+    {
+        GLenum _type = ConvertToOpenGLEnum(type);
+        glVertexArrayAttribFormat(id, index, count, _type, true, offset);
+    }
+    void VertexArray::SetFloatVertexAttributeAsPackedFormat(uint index, PackedVertexAttributeType type, uintMem count, uintMem offset)
+    {
+        GLenum _type = ConvertToOpenGLEnum(type);
+        glVertexArrayAttribFormat(id, index, 4, _type, true, offset);
+    }
+    void VertexArray::SetFloatVertexAttributeAsBGRAFormat(uint index, BGRAVertexAttributeType type, uintMem count, uintMem offset)
+    {
+        GLenum _type = ConvertToOpenGLEnum(type);
+        glVertexArrayAttribFormat(id, index, GL_BGRA, _type, true, offset);
+    }    
     void VertexArray::SetVertexAttributeDivisor(uint index, uint divisor)
     {
         glVertexArrayBindingDivisor(id, index, divisor);        
     }
-
     void VertexArray::Swap(VertexArray& other)
     {
         uint temp = id;
         id = other.id;
         other.id = temp;        
     }
-
     uint VertexArray::ReleaseHandleOwnership()
     {
         uint id = this->id;
         this->id = 0;
         return id;
     }
-
     void VertexArray::Release()
     {
         if (id != 0)
@@ -111,13 +104,6 @@ namespace Blaze::Graphics::OpenGLWrapper
             id = 0;
         }
     }
-
-
-    void VertexArray::SetIndexBuffer(GraphicsBuffer& buffer)
-    {
-        glVertexArrayElementBuffer(id, buffer.GetHandle());        
-    }
-
     VertexArray& VertexArray::operator=(VertexArray&& va) noexcept
     {
         if (id != 0)

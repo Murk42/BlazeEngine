@@ -46,3 +46,5 @@ namespace Blaze
 		friend class TimePoint;
 	};
 }
+
+#include "BlazeEngineCore/Utilities/TimeIntervalImpl.h"
