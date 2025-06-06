@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/UI/Input/InputManager.h"
 #include "BlazeEngineCore/Debug/Logger.h"
+#include "BlazeEngineCore/DataStructures/List.h"
 #include "BlazeEngine/Input/Input.h"
 #include <ranges>
 
@@ -58,9 +59,9 @@ namespace Blaze::UI
 	}
 	InputManager& InputManager::CreateScreenInputManager(Screen& screen)
 	{
-		auto [it, inserted] = screen.dataMap.map.Insert<InputManager>("InputManager", screen);
+		auto [it, inserted, inputManager] = screen.dataMap.map.Insert<InputManager>("InputManager", screen);
 		
-		return *it.GetValue<InputManager>();
+		return *inputManager;
 	}		
 	InputManager::InputManager(Screen& screen)
 		: selectedNode(nullptr), screen(screen), blockingNode(0)

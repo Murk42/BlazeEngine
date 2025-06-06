@@ -1,5 +1,6 @@
 #pragma once
 #include "EventDispatcher.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
 {	
@@ -19,7 +20,7 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void EventDispatcher<T, Allocator>::AddHandler(const EventHandlerData<T>& handlerData)
 	{
-		if (handlerData.IsEmpty())
+		if (handlerData.Empty())
 		{
 			BLAZE_ENGINE_CORE_ERROR("Trying to add empty handler data");
 			return;

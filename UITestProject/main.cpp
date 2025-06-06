@@ -3,7 +3,7 @@
 
 CLIENT_API void Setup()
 {		
-
+	ResourceManager resourceManager;
 
 	Debug::Logger::AddOutputFile("log.txt");
 	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{						
@@ -31,7 +31,7 @@ CLIENT_API void Setup()
 	fontStyles.Insert("large", UI::FontStyle(fonts[1], 32, CharacterSet::ASCIICharacterSet()));
 	fontStyles.Insert("small", UI::FontStyle(fonts[0], 12, CharacterSet::ASCIICharacterSet()));
 
-	MainScreen mainScreen;
+	MainScreen mainScreen(resourceManager);
 	mainScreen.SetWindow(&window);
 
 	UIRenderPipeline.SetScreen(&mainScreen);	
@@ -57,6 +57,7 @@ CLIENT_API void Setup()
 
 	while (true)
 	{
+		resourceManager.HandleResourceLoadedCallbacks();
 		Input::Update();
 
 		if (Keyboard::GetFrameKeyState(Keyboard::Key::F4).pressed && Keyboard::GetFrameKeyState(Keyboard::Key::LALT).pressed)

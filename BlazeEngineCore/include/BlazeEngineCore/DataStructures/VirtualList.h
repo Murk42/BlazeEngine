@@ -91,10 +91,8 @@ namespace Blaze
 
 		template<typename, AllocatorType>
 		friend class ::Blaze::VirtualList;
-	private:				
-
+	private:
 		NodeBase* nodeBase;
-
 	};
 
 	template<typename Value, typename ValueBase>

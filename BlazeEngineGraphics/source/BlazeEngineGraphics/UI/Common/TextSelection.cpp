@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngineGraphics/BlazeEngineGraphicsDefines.h"
 #include "BlazeEngineGraphics/UI/Common/TextSelection.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze::UI
 {

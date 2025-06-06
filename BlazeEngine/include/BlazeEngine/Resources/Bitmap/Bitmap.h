@@ -72,11 +72,12 @@ namespace Blaze
 		Bitmap(const BitmapView& bitmapView, uintMem newStride);
 		~Bitmap();				
 
-		void Load(Path path, bool flipVertically = false);				
-		void Save(Path path);
-
-		void Serialize(WriteStream& stream) const;
-		void Deserialize(ReadStream& stream);
+		bool Load(Path path, bool flipVertically = false);
+		bool Load(ReadStream& stream, bool flipVertically = false);
+		bool LoadWithMIME(ReadStream& stream, StringUTF8 imageMIMEType, bool flipVertically = false);
+		bool LoadWithExtension(ReadStream& stream, StringUTF8 extension, bool flipVertically = false);
+		bool Save(Path path);
+		bool Save(WriteStream& stream, StringUTF8 imageType);
 				
 		void Create(Vec2u size, BitmapColorFormat format, BitmapColorComponentType type, const void* pixels, uintMem stride = 0, bool flipVertically = false);
 

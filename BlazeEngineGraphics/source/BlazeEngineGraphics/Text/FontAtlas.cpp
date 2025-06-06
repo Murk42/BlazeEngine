@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngine/Resources/Font/FontGlyphRenderer.h"
 #include "BlazeEngine/Resources/Font/CharacterSet.h"
 #include "BlazeEngine/Resources/Font/Font.h"

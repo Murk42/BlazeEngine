@@ -14,9 +14,8 @@ namespace Blaze
 		~Thread();
 				
 		template<typename ... Args, typename F> requires std::invocable<F, Args...> && std::same_as<std::invoke_result_t<F, Args...>, uint>
-		void Run(const F& func, Args&& ... parameters);
-		//template<typename ... Args, typename F> requires std::invocable<F, Args...> && std::same_as<std::invoke_result_t<F, Args...>, uint> && std::copyable<F>
-		//void Run(const F& func, Args&& ... parameters);
+		void Run(const F& func, Args&& ... parameters);		
+		void Run(unsigned long(*func)(void*), void* userData);
 
 		//The timeout is in seconds, returns false if the timeout period elapsed, returns true if the thread has finished
 		bool WaitToFinish(float timeout) const;
@@ -46,14 +45,7 @@ namespace Blaze
 		template<typename F, typename ... Args> requires std::invocable<F, Args...> && std::same_as<std::invoke_result_t<F, Args...>, uint>
 		static unsigned long ThreadFunction(void* data);
 	};
-	//template<typename ... Args, typename F> requires std::invocable<F, Args...> && std::same_as<std::invoke_result_t<F, Args...>, uint> && std::copyable<F>
-	//inline void Thread::Run(const F& func, Args&& ... args)
-	//{
-	//	ThreadTask<F, Args...>* task = new ThreadTask<F, Args...>();
-	//	task->function = func;
-	//	task->args = std::make_tuple<Args...>(std::forward<Args>(args)...);
-	//	RunImpl(&ThreadFunction<F, Args...>, task);
-	//}
+
 	template<typename ... Args, typename F> requires std::invocable<F, Args...> && std::same_as<std::invoke_result_t<F, Args...>, uint>
 	inline void Thread::Run(const F& func, Args&& ... args)
 	{				

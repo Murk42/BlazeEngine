@@ -316,6 +316,9 @@ namespace Blaze::Graphics::OpenGL
 			}			
 
 			return true;			
+		default:
+			BLAZE_ENGINE_GRAPHICS_FATAL("Invalid WindowSwapInterval enum value");
+			return false;
 		}
 	}
 

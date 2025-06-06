@@ -1,4 +1,6 @@
 #pragma once
+#ifndef STRING_VIEW
+#define STRING_VIEW
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 
 namespace Blaze
@@ -24,11 +26,11 @@ namespace Blaze
 		constexpr StringViewIterator& operator++(int);
 		constexpr StringViewIterator operator--();
 		constexpr StringViewIterator& operator--(int);
-		
-		constexpr StringViewIterator operator+(const intMem& value) const;		
+
+		constexpr StringViewIterator operator+(const intMem& value) const;
 		constexpr StringViewIterator operator-(const intMem& value) const;
-		
-		constexpr StringViewIterator& operator+=(const intMem& value);		
+
+		constexpr StringViewIterator& operator+=(const intMem& value);
 		constexpr StringViewIterator& operator-=(const intMem& value);
 
 		constexpr uintMem operator-(const StringViewIterator& other);
@@ -56,8 +58,8 @@ namespace Blaze
 		uintMem count;
 	public:
 		constexpr StringView();
-		constexpr StringView(const StringView& other);		
-		inline StringView(const String& other);		
+		constexpr StringView(const StringView& other);
+		inline StringView(const String& other);
 		constexpr StringView(const char* ptr, uintMem count);
 		constexpr StringView(const char* begin, const char* end);
 		constexpr StringView(StringViewIterator begin, StringViewIterator end);
@@ -75,26 +77,27 @@ namespace Blaze
 		constexpr uintMem Count() const { return count; }
 
 		inline String SubString(uintMem start, uintMem count) const;
-		
+
 		constexpr const char& First() const;
 		constexpr const char& Last() const;
-		constexpr StringViewIterator FirstIterator() const;		
-		constexpr StringViewIterator LastIterator() const;		
-		constexpr StringViewIterator AheadIterator() const;		
+		constexpr StringViewIterator FirstIterator() const;
+		constexpr StringViewIterator LastIterator() const;
+		constexpr StringViewIterator AheadIterator() const;
 		constexpr StringViewIterator BehindIterator() const;
 
 		constexpr const char& operator[](uintMem index) const { return ptr[index]; }
 
-		constexpr bool operator==(const StringView& s) const;				
-		constexpr bool operator!=(const StringView& s) const;				
+		constexpr bool operator==(const StringView& s) const;
+		constexpr bool operator!=(const StringView& s) const;
 
 		constexpr StringView& operator= (const StringView& other);
-		inline StringView& operator= (const String& other);		
+		inline StringView& operator= (const String& other);
 		template<size_t C>
 		constexpr StringView& operator=(const char(&arr)[C]);
-	};		
+	};
+
 }
- 
+
 #include <string_view>
 
 namespace std
@@ -102,10 +105,10 @@ namespace std
 	template <>
 	struct hash<Blaze::StringView>
 	{
-		inline size_t operator()(const Blaze::StringView& k) const;
-	};
-	inline size_t hash<Blaze::StringView>::operator()(const Blaze::StringView& k) const
-	{
-		return hash<string_view>()(string_view(k.Ptr(), k.Count()));
-	}
+		inline size_t operator()(const Blaze::StringView& k) const
+		{
+			return hash<string_view>()(string_view(k.Ptr(), k.Count()));
+		}
+	};	
 }
+#endif

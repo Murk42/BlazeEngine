@@ -6,17 +6,46 @@
 
 namespace Blaze
 {
-	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
+	template<HashableType Key, typename Base, typename Hasher, AllocatorType Allocator>
 	class VirtualMap;
 
-	template<typename T1, typename T2>
-	concept IsConvertibleToVirtualMapIterator =
-		std::same_as<std::remove_const_t<typename T2::template VirtualMapType>, std::remove_const_t<typename T1::template VirtualMapType>> &&
-		(!(std::is_const_v<typename T1::template VirtualMapType> && !std::is_const_v<typename T2::template VirtualMapType>));
+	template<HashableType Key, typename Base>
+	struct BLAZE_CORE_API VirtualMapNodeBase
+	{
+		using KeyType = Key;
+		using BaseType = Base;
+		
+		VirtualMapNodeBase* next;
+		VirtualMapNodeBase* prev;
+		Key key;
 
-	template<typename T1, typename T2>
-	concept IsComparableToVirtualMapIterator =
-		std::same_as<std::remove_const_t<typename T2::template VirtualMapType>, std::remove_const_t<typename T1::template VirtualMapType>>;
+		template<typename _Key>
+		VirtualMapNodeBase(VirtualMapNodeBase* prev, VirtualMapNodeBase* next, _Key&& key);
+		virtual ~VirtualMapNodeBase();
+	};
+
+	template<HashableType Key, typename Base, typename Derived> requires (std::derived_from<Derived, Base> || std::same_as<Base, void>) && (!std::is_final_v<Derived>)
+	struct BLAZE_CORE_API VirtualMapNode : public VirtualMapNodeBase<Key, Base>, public Derived
+	{
+		using DerivedType = Derived;
+
+		template<typename _Key, typename ... Args> requires std::constructible_from<Derived, Args...>
+		VirtualMapNode(VirtualMapNodeBase<Key, Base>* prev, VirtualMapNodeBase<Key, Base>* next, _Key&& key, Args&& ... args);
+		~VirtualMapNode() override;
+	};
+
+	template<HashableType Key, typename Base>
+	struct VirtualMapData
+	{
+		struct Bucket
+		{
+			VirtualMapNodeBase<Key, Base>* head;
+			VirtualMapNodeBase<Key, Base>* tail;
+		};
+
+		Bucket* begin;
+		Bucket* end;
+	};
 
 	/*
 	* -----------VirtualMapIterator-----------
@@ -48,59 +77,48 @@ namespace Blaze
 
 		No other macros change the map iterator behaviour
 	*/
-	template<typename VirtualMap>
+	template<typename NodeBase>
 	class BLAZE_CORE_API VirtualMapIterator
 	{
-	public:		
-		using VirtualMapType = VirtualMap;				
+	public:
+		using NodeBaseType = NodeBase;
+		using VirtualMapConstIterator = VirtualMapIterator<const NodeBase>;
+		using KeyType = typename NodeBase::template KeyType;
+		using BaseType = typename NodeBase::template BaseType;
+		template<typename T>
+		using MatchConst = std::conditional_t<std::is_const_v<NodeBase>, const T, T>;
 
-		VirtualMapIterator();
-		template<IsConvertibleToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
-		VirtualMapIterator(const T&);		
+		VirtualMapIterator();		
+		VirtualMapIterator(const VirtualMapIterator& other);
+		VirtualMapIterator(const VirtualMapConstIterator& other) requires (!std::is_const_v<VirtualMapIterator>);
+		VirtualMapIterator(MatchConst<VirtualMapData<KeyType, BaseType>>& virtualMapData, typename VirtualMapData<KeyType, BaseType>::template Bucket* bucket, NodeBase* nodeBase);
 
 		bool IsNull() const;
+
+		template<typename Derived>
+		MatchConst<Derived>* GetValue() const requires std::derived_from<Derived, BaseType> || std::same_as<BaseType, void>;
+		const KeyType& GetKey() const;		
 
 		VirtualMapIterator& operator++();
 		VirtualMapIterator operator++(int);
 		VirtualMapIterator& operator--();
 		VirtualMapIterator operator--(int);
-
-		//Returns the value that the iterator is pointing to. If the asked type does not match the stored value nullptr is returned. If 
-		//the iterator isn't pointing to any data nullptr is returned
-		template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
-		Value* GetValue() requires !std::is_const_v<VirtualMap>;
-		//Returns the value that the iterator is pointing to. If the asked type does not match the stored value nullptr is returned. If 
-		//the iterator isn't pointing to any data nullptr is returned
-		template<typename Value> requires InsertableToVirtualMap<Value, typename VirtualMap::template ValueBaseType>
-		const Value* GetValue() const;
-		//Returns the key that the iterator is pointing to. If the iterator isn't pointing to any data nullptr is returned				
-		const typename VirtualMap::template KeyType* GetKey() const;
-
-		template<IsComparableToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
-		bool operator==(const T&) const;
-		template<IsComparableToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
-		bool operator!=(const T&) const;
-
-		template<IsConvertibleToVirtualMapIterator<VirtualMapIterator<VirtualMap>> T>
-		VirtualMapIterator& operator=(const T&);
+				
+		bool operator==(const VirtualMapIterator& other) const;
+		bool operator==(const VirtualMapConstIterator& other) const requires (!std::is_const_v<VirtualMapIterator>);
+		bool operator!=(const VirtualMapIterator& other) const;
+		bool operator!=(const VirtualMapConstIterator& other) const requires (!std::is_const_v<VirtualMapIterator>);
+		
+		VirtualMapIterator& operator=(const VirtualMapIterator& other);
+		VirtualMapIterator& operator=(const VirtualMapConstIterator& other) requires (!std::is_const_v<VirtualMapIterator>);
 
 		template<HashableType, typename, typename, AllocatorType>
-		friend class ::Blaze::VirtualMap;
-
-		template<typename>
-		friend class ::Blaze::VirtualMapIterator;		
-	private:
-		using VirtualMapNodeHeader = std::conditional_t<std::is_const_v<VirtualMap>, const typename VirtualMap::template NodeHeader, typename VirtualMap::template NodeHeader>;
-		using VirtualMapBucket = std::conditional_t<std::is_const_v<VirtualMap>, const typename VirtualMap::template Bucket, typename VirtualMap::template Bucket>;
-
-		VirtualMap* map;
-		VirtualMapNodeHeader* nodeHeader;
-
-		VirtualMapIterator(VirtualMapNodeHeader* nodeHeader, VirtualMap* map);
-	};		
-
-	template<typename Value, typename ValueBase>
-	concept InsertableToVirtualMap = std::derived_from<Value, ValueBase> || std::same_as<ValueBase, void>;
+		friend class VirtualMap;
+	private:	
+		MatchConst<VirtualMapData<KeyType, BaseType>>* mapData;
+		typename VirtualMapData<KeyType, BaseType>::template Bucket* bucket;
+		NodeBase* nodeBase;
+	};			
 
 	/*
 		Virtual map class.
@@ -120,22 +138,25 @@ namespace Blaze
 
 		No other macros change the map behaviour
 	*/
-	template<HashableType Key, typename ValueBase = void, typename Hasher = ::Blaze::Hash<Key>, AllocatorType Allocator = Blaze::DefaultAllocator>
-	class BLAZE_CORE_API VirtualMap
+	template<HashableType Key, typename Base = void, typename Hasher = ::Blaze::Hash<Key>, AllocatorType Allocator = Blaze::DefaultAllocator>
+	class BLAZE_CORE_API VirtualMap : private VirtualMapData<Key, Base>
 	{
 	public:
 		using KeyType = Key;
-		using ValueBaseType = ValueBase;
+		using BaseType = Base;
 		using HasherType = Hasher;
 		using AllocatorType = Allocator;
+		using NodeBaseType = VirtualMapNodeBase<Key, Base>;
 		
-		using Iterator = VirtualMapIterator<VirtualMap>;
-		using ConstIterator = VirtualMapIterator<const VirtualMap>;
+		using Iterator = VirtualMapIterator<NodeBaseType>;
+		using ConstIterator = VirtualMapIterator<const NodeBaseType>;
 		
+		template<typename Derived>
 		struct InsertResult
 		{
 			Iterator iterator;
 			bool inserted;
+			Derived* value;
 		};
 
 		VirtualMap();		
@@ -165,12 +186,10 @@ namespace Blaze
 			Returns a iterator that points to the (key, value) pair. A null iterator is returned if there already was a value
 			with the same key.
 		*/
-		template<typename Value, bool Replace = false, typename _Key, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key>&& std::constructible_from<Value, Args...>
-		InsertResult Insert(_Key&& key, Args&& ... args);
+		template<typename Derived, bool Replace = false, typename _Key, typename ... Args> requires (std::derived_from<Derived, Base> || std::same_as<Base, void>) && std::constructible_from<Key, _Key>&& std::constructible_from<Derived, Args...>
+		InsertResult<Derived> Insert(_Key&& key, Args&& ... args);
 		bool Erase(const Key& key);
 		bool Erase(const Iterator& iterator);
-
-		uintMem Count() const;
 
 		/*
 			Returns an iterator pointing to the first element in the map. If the map is empty returns a null map iterator.
@@ -208,38 +227,9 @@ namespace Blaze
 		VirtualMap& operator=(const VirtualMap&) = delete;
 		VirtualMap& operator=(VirtualMap&&) noexcept;
 
-	private:
-		struct NodeHeader
-		{
-			uintMem hash;
-			NodeHeader* next;
-			NodeHeader* prev;
-#ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
-			uintMem iteratorCount;
-#endif			
-			Key key;
+	private:		
+		using Bucket = typename VirtualMapData<Key, Base>::template Bucket;
 
-			NodeHeader(NodeHeader* prev, NodeHeader* next, uintMem hash, Key&& key);
-			virtual ~NodeHeader();
-		};
-		template<typename Value> requires InsertableToVirtualMap<Value, ValueBase>
-		struct Node : public NodeHeader
-		{
-			Value value;
-
-			template<typename ... Args> requires std::constructible_from<Value, Args...>
-			Node(NodeHeader* prev, NodeHeader* next, uintMem hash, Key&& key, Args&& ... args);
-			~Node() override;
-		};
-		struct Bucket
-		{
-			NodeHeader* head;
-			NodeHeader* tail;
-		};
-
-		uintMem bucketCount;
-		Bucket* buckets;
-		uintMem count;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;		
 
 		static uintMem Hash(const Key& key);
@@ -247,7 +237,7 @@ namespace Blaze
 		Bucket* GetBucketFromHash(uintMem hash) const;
 
 		//Wont check if hashMod is smaller than bucketCount
-		Bucket* GetBucketFromHashModUnsafe(uintMem hashMod) const;
+		Bucket* GetBucketFromHashModUnsafe(uintMem hash) const;
 
 		Iterator FindWithHint(const Key& key, uintMem hash);
 		ConstIterator FindWithHint(const Key& key, uintMem hash) const;
@@ -256,15 +246,15 @@ namespace Blaze
 		Iterator FindWithHintUnsafe(const Key& key, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Key& key, Bucket* bucket) const;
 
-		template<bool Replace, typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
-		InsertResult InsertWithHint(_Key&& key, uintMem hash, Args&& ... args);
+		template<bool Replace, typename _Key, typename Derived, typename ... Args> requires (std::derived_from<Derived, Base> || std::same_as<Base, void>) && std::constructible_from<Key, _Key> && std::constructible_from<Derived, Args...>
+		InsertResult<Derived> InsertWithHint(_Key&& key, uintMem hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
-		template<bool Replace, typename _Key, typename Value, typename ... Args> requires InsertableToVirtualMap<Value, ValueBase> && std::constructible_from<Key, _Key> && std::constructible_from<Value, Args...>
-		InsertResult InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uintMem hash, Args&& ... args);
+		template<bool Replace, typename _Key, typename Derived, typename ... Args> requires (std::derived_from<Derived, Base> || std::same_as<Base, void>) && std::constructible_from<Key, _Key> && std::constructible_from<Derived, Args...>
+		InsertResult<Derived>InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uintMem hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
-		void EraseNodeUnsafe(Bucket* bucket, NodeHeader* node);
+		void EraseNodeUnsafe(Bucket* bucket, VirtualMapNodeBase<Key, BaseType>* node);
 
 		void CheckForRehash();
 		void Rehash(uintMem newBucketCount);
@@ -276,36 +266,33 @@ namespace Blaze
 		static void RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize);
 
 		//Wont check if bucket or node is nullptr
-		static void RemoveNodeFromSpotUnsafe(NodeHeader* node, Bucket* bucket);
+		static void RemoveNodeFromSpotUnsafe(VirtualMapNodeBase<Key, BaseType>* node, Bucket* bucket);
 
 		//Wont check if oldBucket, newBucket or node is nullptr
 		//static void MoveNodeUnsafe(Node* node, Bucket* oldBucket, Bucket* newBucket);
 
 		//Wont check if node or bucket is nullptr or change old node neighbour pointers acordingly
-		static void MoveNodeToBeginingUnsafe(NodeHeader* node, Bucket* bucket);
-
-		template<typename>
-		friend class VirtualMapIterator;
+		static void MoveNodeToBeginingUnsafe(VirtualMapNodeBase<Key, BaseType>* node, Bucket* bucket);
 	};		
 
-	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	VirtualMap<Key, ValueBase, Hasher, Allocator>::Iterator begin(VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	template<HashableType Key, typename Base, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, Base, Hasher, Allocator>::Iterator begin(VirtualMap<Key, Base, Hasher, Allocator>& map)
 	{
 		return map.FirstIterator();
 	}
-	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	VirtualMap<Key, ValueBase, Hasher, Allocator>::ConstIterator begin(const VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	template<HashableType Key, typename Base, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, Base, Hasher, Allocator>::ConstIterator begin(const VirtualMap<Key, Base, Hasher, Allocator>& map)
 	{
 		return map.FirstIterator();
 	}
-	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	VirtualMap<Key, ValueBase, Hasher, Allocator>::Iterator end(VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	template<HashableType Key, typename Base, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, Base, Hasher, Allocator>::Iterator end(VirtualMap<Key, Base, Hasher, Allocator>& map)
 	{
 		return map.BehindIterator();
 	}
-	template<HashableType Key, typename ValueBase, typename Hasher, AllocatorType Allocator>
-	VirtualMap<Key, ValueBase, Hasher, Allocator>::ConstIterator end(const VirtualMap<Key, ValueBase, Hasher, Allocator>& map)
+	template<HashableType Key, typename Base, typename Hasher, AllocatorType Allocator>
+	VirtualMap<Key, Base, Hasher, Allocator>::ConstIterator end(const VirtualMap<Key, Base, Hasher, Allocator>& map)
 	{
 		return map.BehindIterator();
-	}
+	}			
 }

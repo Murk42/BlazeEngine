@@ -229,7 +229,7 @@ namespace Blaze
 	}
 	Font Font::LoadDefault()
 	{
-		BufferReadStream stream{
+		BufferViewStream stream{
 			(void*)consolaFile, consolaFileSize
 		};		
 

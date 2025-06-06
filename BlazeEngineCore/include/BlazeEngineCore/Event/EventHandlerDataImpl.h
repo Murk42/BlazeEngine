@@ -7,12 +7,12 @@ namespace Blaze
 {
 	template<typename T>
 	inline constexpr EventHandlerData<T>::EventHandlerData()
-		: ptr(nullptr), invokingFunction(nullptr)
+		: data(nullptr), invokingFunction(nullptr)
 	{
 	}
 	template<typename T>
 	inline constexpr EventHandlerData<T>::EventHandlerData(const EventHandlerData& other)
-		: ptr(other.ptr), invokingFunction(other.invokingFunction)
+		: data(other.data), invokingFunction(other.invokingFunction)
 	{
 	}
 	template<typename T>
@@ -26,6 +26,11 @@ namespace Blaze
 		Set(function);
 	}
 	template<typename T>
+	inline constexpr EventHandlerData<T>::EventHandlerData(void(*function)(const T&, void*), void* userData)
+	{
+		Set(function, userData);
+	}
+	template<typename T>
 	template<auto MemberFunctionPointer> requires std::same_as<MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunctionPointer)>, TemplateGroup<const T&>>
 	inline constexpr EventHandlerData<T>::EventHandlerData(MemberFunctionPointerTypeClassType<decltype(MemberFunctionPointer)>& handlerObject)
 	{
@@ -35,7 +40,7 @@ namespace Blaze
 	inline constexpr void EventHandlerData<T>::Set(EventHandler<T>& handlerObject)
 	{
 		invokingFunction = MemberFunctionInvokingFunction<&EventHandler<T>::OnEvent>;
-		ptr = &handlerObject;
+		data = &handlerObject;
 	}
 	template<typename T>
 	inline constexpr void EventHandlerData<T>::Set(void(*function)(const T&))
@@ -47,62 +52,69 @@ namespace Blaze
 		}
 
 		invokingFunction = StaticFunctionInvokingFunction;
-		ptr = function;
+		data = function;
+	}
+	template<typename T>
+	inline constexpr void EventHandlerData<T>::Set(void(*function)(const T&, void*), void* userData)
+	{
+		if (function == nullptr)
+		{
+			BLAZE_ENGINE_CORE_ERROR("Trying to set a static function but its pointer is nullptr");
+			return;
+		}
+
+		invokingFunction = function;
+		data = userData;
 	}
 	template<typename T>
 	template<auto MemberFunctionPointer> requires std::same_as<MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunctionPointer)>, TemplateGroup<const T&>>
 	inline constexpr void EventHandlerData<T>::Set(MemberFunctionPointerTypeClassType<decltype(MemberFunctionPointer)>& handlerObject)
 	{
 		invokingFunction = MemberFunctionInvokingFunction<MemberFunctionPointer>;
-		ptr = &handlerObject;
+		data = &handlerObject;
 	}	
 	template<typename T>
-	inline void EventHandlerData<T>::Clear()
+	inline constexpr void EventHandlerData<T>::Clear()
 	{
 		invokingFunction = nullptr;
-		ptr = nullptr;
+		data = nullptr;
 	}
 	template<typename T>
-	inline bool EventHandlerData<T>::IsEmpty() const
+	inline constexpr bool EventHandlerData<T>::Empty() const
 	{
-		return ptr == nullptr;
+		return data == nullptr;
 	}
 	template<typename T>
-	inline void EventHandlerData<T>::Invoke(const T& event) const
+	inline constexpr void EventHandlerData<T>::Invoke(const T& event) const
 	{
-		if (ptr == nullptr)
-		{
-			BLAZE_ENGINE_CORE_ERROR("Trying to invoke a event handler but the ptr is nullptr");
-			return;
-		}
-
-		invokingFunction(ptr, event);
+		if (invokingFunction != nullptr)
+			invokingFunction(event, data);
 	}
 	template<typename T>
 	inline constexpr bool EventHandlerData<T>::operator==(const EventHandlerData& other) const
 	{
-		return ptr == other.ptr && invokingFunction == other.invokingFunction;
+		return data == other.data && invokingFunction == other.invokingFunction;
 	}
 	template<typename T>
 	inline constexpr bool EventHandlerData<T>::operator!=(const EventHandlerData& other) const
 	{
-		return ptr != other.ptr || invokingFunction != other.invokingFunction;
+		return data != other.data || invokingFunction != other.invokingFunction;
 	}
 	template<typename T>
 	inline constexpr EventHandlerData<T>& EventHandlerData<T>::operator=(const EventHandlerData& other)
 	{
-		ptr = other.ptr;
+		data = other.data;
 		invokingFunction = other.invokingFunction;
 		return *this;
-	}	
-	template<typename T>
-	inline void EventHandlerData<T>::StaticFunctionInvokingFunction(void* function, const T& event)
-	{
-		((void(*)(const T&))function)(event);
 	}
 	template<typename T>
+	inline void EventHandlerData<T>::StaticFunctionInvokingFunction(const T& event, void* function)
+	{
+		((void(*)(const T&))function)(event);
+	}	
+	template<typename T>
 	template<auto MemberFunctionPointer> requires std::same_as<MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunctionPointer)>, TemplateGroup<const T&>>
-	inline void EventHandlerData<T>::MemberFunctionInvokingFunction(void* object, const T& event)
+	inline void EventHandlerData<T>::MemberFunctionInvokingFunction(const T& event, void* object)
 	{		
 		using Class = MemberFunctionPointerTypeClassType<decltype(MemberFunctionPointer)>;
 		((*(Class*)object).*MemberFunctionPointer)(event);

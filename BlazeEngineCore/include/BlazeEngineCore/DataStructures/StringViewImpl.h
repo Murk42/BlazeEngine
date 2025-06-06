@@ -1,9 +1,9 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/DataStructures/StringView.h"
 #include "BlazeEngineCore/Debug/Logger.h"
 
 namespace Blaze
-{
+{	
 	constexpr StringViewIterator::StringViewIterator()
 		: ptr(nullptr)
 	{
@@ -19,7 +19,7 @@ namespace Blaze
 	constexpr bool StringViewIterator::IsNull() const
 	{
 		return ptr == nullptr;
-	}	
+	}
 	constexpr const char* StringViewIterator::Ptr() const
 	{
 		return ptr;
@@ -73,20 +73,20 @@ namespace Blaze
 
 		--ptr;
 		return *this;
-	}	
+	}
 	constexpr StringViewIterator StringViewIterator::operator+(const intMem& value) const
 	{
 		return StringViewIterator(ptr + value);
-	}	
+	}
 	constexpr StringViewIterator StringViewIterator::operator-(const intMem& value) const
 	{
 		return StringViewIterator(ptr - value);
-	}	
+	}
 	constexpr StringViewIterator& StringViewIterator::operator+=(const intMem& value)
 	{
 		ptr += value;
 		return *this;
-	}	
+	}
 	constexpr StringViewIterator& StringViewIterator::operator-=(const intMem& value)
 	{
 		ptr -= value;
@@ -161,7 +161,7 @@ namespace Blaze
 	inline StringView::StringView(const String& other)
 		: ptr(other.Ptr()), count(other.Count())
 	{
-	}	
+	}
 	constexpr StringView::StringView(const char* ptr, uintMem count)
 		: ptr(nullptr), count(0)
 	{
@@ -187,7 +187,7 @@ namespace Blaze
 	{
 		if (begin != end && begin != nullptr && end != nullptr)
 		{
-			count = end - begin;			
+			count = end - begin;
 			if (end[-1] == '\0')
 				--count;
 
@@ -200,7 +200,7 @@ namespace Blaze
 	inline constexpr StringView::StringView(StringViewIterator begin, StringViewIterator end)
 		: StringView(begin.Ptr(), end.Ptr())
 	{
-		
+
 	}
 	template<size_t C>
 	constexpr StringView::StringView(const char(&arr)[C])
@@ -211,14 +211,14 @@ namespace Blaze
 			if (arr[C - 1] == '\0')
 				if (C == 1)
 					return;
-				else				
-					count = C - 1;				
-			else			
-				count = C;			
+				else
+					count = C - 1;
+			else
+				count = C;
 
 			ptr = arr;
 		}
-	}	
+	}
 	inline uint32 StringView::Hash() const
 	{
 		return static_cast<uint32>(std::hash<StringView>()(*this));
@@ -269,7 +269,7 @@ namespace Blaze
 		return StringViewIterator(ptr - 1);
 	}
 	constexpr StringViewIterator StringView::BehindIterator() const
-	{		
+	{
 		return StringViewIterator(ptr + count);
 	}
 	constexpr bool StringView::operator==(const StringView& s) const
@@ -319,10 +319,10 @@ namespace Blaze
 	inline StringView& StringView::operator=(const String& other)
 	{
 		return operator=(StringView(other));
-	}	
+	}
 	template<size_t C>
 	constexpr StringView& StringView::operator=(const char(&arr)[C])
 	{
-		return operator=(StringView(arr));				
+		return operator=(StringView(arr));
 	}
 }

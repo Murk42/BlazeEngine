@@ -23,7 +23,7 @@ namespace Blaze
         template<>
         void Write<>(StringViewUTF8 text)
         {           
-            consoleOutputStream.Write(text.Buffer(), text.BufferSize() - 1);            
+            consoleOutputStream.Write(text.Buffer(), text.BufferSize());            
         }                
         
         StringUTF8 Read()

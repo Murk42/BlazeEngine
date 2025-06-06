@@ -1,12 +1,8 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/ArrayView.h"
 #include "BlazeEngineCore/DataStructures/Buffer.h"
-#include "BlazeEngineCore/DataStructures/Array.h"
 #include "BlazeEngineCore/DataStructures/Map.h"
-#include "BlazeEngineCore/DataStructures/VirtualMap.h"
-#include "BlazeEngineCore/DataStructures/String.h"
+#include "BlazeEngineCore/File/Path.h"
 #include "BlazeEngine/Resources/Bitmap/Bitmap.h"
-#include "BlazeEngine/Application/ResourceSystem/Resource.h"
 #include <functional>
 
 namespace Blaze

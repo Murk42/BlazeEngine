@@ -48,9 +48,6 @@
     <ClInclude Include="include\BlazeEngine\Window\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Resources\Bitmap\SailClasses.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\BlazeEngine\Resources\Font\rectpack2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -168,9 +165,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Console\Console.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Bitmap\SailClasses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Internal\Libraries\sail.cpp">

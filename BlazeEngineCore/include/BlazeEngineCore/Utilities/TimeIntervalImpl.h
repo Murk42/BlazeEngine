@@ -23,7 +23,7 @@ namespace Blaze
 		else if (seconds == -std::numeric_limits<double>::infinity())
 			*this = NegativeInfinity();
 		else
-			value = seconds * 1e9;
+			value = static_cast<int64>(seconds * 1e9);
 
 		return *this;
 	}

@@ -83,26 +83,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>BlazeEngineCore-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <VcpkgConfiguration>Debug</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
-  </PropertyGroup>
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <VcpkgConfiguration>Release</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
-  </PropertyGroup>
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <VcpkgConfiguration>Debug</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
-  </PropertyGroup>
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgConfiguration>Release</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
-  </PropertyGroup>
-  <PropertyGroup Label="Vcpkg">
-    <VcpkgEnableManifest>true</VcpkgEnableManifest>
-    <VcpkgAutoLink>false</VcpkgAutoLink>
-  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Label="Vcpkg" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <ConformanceMode>true</ConformanceMode>
@@ -170,6 +155,7 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngineCore\Resource\ResourceManager.cpp" />
     <ClCompile Include="source\BlazeEngineCore\BlazeEngineCoreContext.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\Buffer.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\Color.cpp" />
@@ -194,6 +180,8 @@
     <ClCompile Include="source\BlazeEngineCore\Memory\MemoryListener.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Memory\MemoryManager.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Memory\VirtualAllocator.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Threading\ThreadGroup.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Threading\ThreadPool.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\Stopwatch.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\StringParsing.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Threading\Thread.cpp" />
@@ -241,6 +229,12 @@
     <ClInclude Include="include\BlazeEngineCore\Event\EventHandlerData.h" />
     <ClInclude Include="include\BlazeEngineCore\Event\EventHandlerDataImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\Format\Format.h" />
+    <ClInclude Include="include\BlazeEngineCore\Resource\DefaultResourceStorage.h" />
+    <ClInclude Include="include\BlazeEngineCore\Resource\Resource.h" />
+    <ClInclude Include="include\BlazeEngineCore\Resource\ResourceManager.h" />
+    <ClInclude Include="include\BlazeEngineCore\Resource\ResourceStorage.h" />
+    <ClInclude Include="include\BlazeEngineCore\Threading\ThreadGroup.h" />
+    <ClInclude Include="include\BlazeEngineCore\Threading\ThreadPool.h" />
     <ClInclude Include="include\BlazeEngineCore\Types\Template.h" />
     <ClInclude Include="include\BlazeEngineCore\Types\TemplateGroup.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Tuple.h" />

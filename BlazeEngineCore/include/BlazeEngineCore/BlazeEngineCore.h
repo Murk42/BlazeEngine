@@ -93,6 +93,13 @@
 #include "BlazeEngineCore/Utilities/StringParsing.h"
 
 #include "BlazeEngineCore/Threading/Thread.h"
+#include "BlazeEngineCore/Threading/ThreadGroup.h"
+#include "BlazeEngineCore/Threading/ThreadPool.h"
 
 #include "BlazeEngineCore/Memory/MemoryManager.h"
 #include "BlazeEngineCore/Memory/VirtualAllocator.h"
+
+#include "BlazeEngineCore/Resource/Resource.h"
+#include "BlazeEngineCore/Resource/ResourceManager.h"
+#include "BlazeEngineCore/Resource/DefaultResourceStorage.h"
+#include "BlazeEngineCore/Resource/ResourceManager.h"

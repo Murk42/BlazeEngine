@@ -415,13 +415,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\Vulkan\compileShaders.bat">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="assets\shaders\Vulkan\line2d.frag" />
-    <None Include="assets\shaders\Vulkan\line2d.vert" />
-    <None Include="assets\shaders\Vulkan\line2d.frag.spv" />
-    <None Include="assets\shaders\Vulkan\line2d.vert.spv" />
     <None Include="vcpkg.json" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert" />

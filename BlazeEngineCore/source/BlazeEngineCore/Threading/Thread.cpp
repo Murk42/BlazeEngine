@@ -31,10 +31,15 @@ namespace Blaze
 #endif
 	}	
 
+	void Thread::Run(unsigned long(*func)(void*), void* userData)
+	{
+		RunImpl(func, userData);
+	}
+
 	bool Thread::WaitToFinish(float timeout) const
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS				
-		DWORD result = WaitForSingleObject(handle, static_cast<DWORD>(timeout * 1000.0f));
+		DWORD result = WaitForSingleObject(handle, timeout == FLT_MAX ? INFINITE : static_cast<DWORD>(timeout * 1000.0f));
 
 		if (result == WAIT_OBJECT_0)
 			return true;
@@ -95,7 +100,7 @@ namespace Blaze
 		t.handle = nullptr;
 		return *this;
 	}	
-	void Thread::RunImpl(unsigned long(*function)(void*), void* task)
+	void Thread::RunImpl(unsigned long(*function)(void*), void* data)
 	{	
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (handle != NULL)
@@ -109,7 +114,7 @@ namespace Blaze
 			CloseHandle(handle);
 		}
 		
-		handle = CreateThread(NULL, 0, function, task, 0, NULL);
+		handle = CreateThread(NULL, 0, function, data, 0, NULL);
 
 		if (handle == NULL)
 		{

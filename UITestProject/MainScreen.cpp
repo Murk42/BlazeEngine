@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "MainScreen.h"
+#include "Internet.h"
 
 Array<Font> fonts;
 Map<String, UI::FontStyle> fontStyles;
 
-MainScreen::MainScreen()	
-	: Screen(nullptr), replaceTextMenu(editableText)
-{
+MainScreen::MainScreen(ResourceManager& resourceManager)
+	: Screen(nullptr), resourceManager(resourceManager), replaceTextMenu(editableText)
+{	
 	explanationPanel.SetParent(this);
 	explanationPanel.SetTransform({
 		.pos = Vec2f(5, -5),
@@ -41,15 +42,10 @@ MainScreen::MainScreen()
 		.horizontallyUnderfittedOption = UI::TextHorizontallyUnderfittedOptions::WordWrapSpread
 		});
 	explanationText.textRenderUnit.SetCullingNode(&explanationPanel);
-				
-	texture.Load("assets/images/Mountains.jpg", Graphics::OpenGLWrapper::Texture2DSettings{
-		.min = Graphics::OpenGLWrapper::TextureSampling::Linear,
-		.mip = Graphics::OpenGLWrapper::TextureSampling::Linear,		
-		.textureLevelCount = 1
-		});
-	image.SetTexture(&texture);
+					
+	image.SetTexture(nullptr);
 	image.SetSourceRect(Vec2f(0, 0), Vec2f(1, 1));		
-	image.SetImageLayout(UI::ImageLayout::Stretch);
+	image.SetImageLayout(UI::ImageLayout::Fit);
 	image.SetParent(&explanationPanel);
 	image.SetTransform({
 		.pos = Vec2f(5, 0),
@@ -57,6 +53,19 @@ MainScreen::MainScreen()
 		.pivot = Vec2f(0.0f, 1.0f),
 		.size = Vec2f(500, 333),		
 		});		
+
+	this->LoadAPOD();
+	
+	reloadImageTextButton.SetParent(&image);
+	reloadImageTextButton.SetTransform({
+		.pos = Vec2f(5, 0),
+		.parentPivot = Vec2f(1.0f, 1.0f),
+		.pivot = Vec2f(0.0f, 1.0f),
+		.size = Vec2f(200, 50)
+		});	
+	reloadImageTextButton.textRenderUnit.SetFontStyle(fontStyles.Find("default")->value);
+	reloadImageTextButton.SetText("Reload");
+	reloadImageTextButton.pressedEventCallback = [&](auto event) { this->LoadAPOD(); };
 	
 	editableText.SetParent(&explanationPanel);
 	editableText.SetTransform({
@@ -103,6 +112,31 @@ MainScreen::MainScreen()
 	replaceTextMenu.SetParent(this);
 	replaceTextMenu.Disable();
 
+}
+
+void MainScreen::LoadAPOD()
+{
+
+	static std::mutex mutex;
+	resourceManager.LoadResourceAsync<Bitmap>("APOD", [&](Resource<Bitmap>& resource) {
+		Bitmap bitmap = ::LoadAPOD();
+
+		std::unique_lock lk{ mutex };
+		resource = std::move(bitmap);
+		},
+		[&](Resource<Bitmap>& resource) {						
+			image.SetTexture(nullptr);
+
+			APODTexture = Graphics::OpenGLWrapper::Texture2D();
+			APODTexture.Create(*resource.Get(), Blaze::Graphics::OpenGLWrapper::Texture2DSettings{
+				.min = Blaze::Graphics::OpenGLWrapper::TextureSampling::Linear,
+				.mag = Blaze::Graphics::OpenGLWrapper::TextureSampling::Linear,
+				.mip = Blaze::Graphics::OpenGLWrapper::TextureSampling::Linear,
+				.textureLevelCount = 1
+				});
+
+			image.SetTexture(&APODTexture);
+		});
 }
 
 ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
@@ -218,5 +252,47 @@ ReplaceTextMenu::ReplaceTextMenu(UI::Nodes::EditableText& target)
 }
 
 ReplaceTextMenu::~ReplaceTextMenu()
+{
+}
+
+Slider::Slider()
+	: labelRenderUnit(labelTextContainer, this), valueRenderUnit(valueTextContainer, this), barRenderUnit(this), sliderRenderUnit(this)
+{	
+}
+
+void Slider::SetBarColor(ColorRGBAf color)
+{
+}
+
+void Slider::SetSliderColor(ColorRGBAf color)
+{
+}
+
+Graphics::RenderUnit* Slider::GetRenderUnit(uint index)
+{
+	return nullptr;
+}
+
+void Slider::SetLabel(StringViewUTF8 label)
+{
+}
+
+void Slider::SetLabelFontStyle(const UI::FontStyle& fontStyle)
+{
+}
+
+void Slider::SetLabelColor(ColorRGBAf color)
+{
+}
+
+void Slider::SetValue(float value)
+{
+}
+
+void Slider::SetValueFontStyle(const UI::FontStyle& fontStyle)
+{
+}
+
+void Slider::SetValueColor(ColorRGBAf color)
 {
 }

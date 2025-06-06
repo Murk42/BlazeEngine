@@ -3,11 +3,8 @@
 
 namespace Blaze
 {
-	class BufferView;
-
 	class BLAZE_CORE_API Buffer
 	{
-		void* ptr;
 	public:
 		Buffer();
 		Buffer(const Buffer&) = delete;
@@ -26,5 +23,7 @@ namespace Blaze
 
 		Buffer& operator=(const Buffer&) = delete;
 		Buffer& operator=(Buffer&&) noexcept;		
+	private:
+		void* ptr;
 	};
 }

@@ -170,11 +170,6 @@
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\basicMesh.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line3d.vert" />
-    <None Include="assets\shaders\Vulkan\compileShaders.bat" />
-    <None Include="assets\shaders\Vulkan\line2d.frag" />
-    <None Include="assets\shaders\Vulkan\line2d.frag.spv" />
-    <None Include="assets\shaders\Vulkan\line2d.vert" />
-    <None Include="assets\shaders\Vulkan\line2d.vert.spv" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.frag" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\line2d.vert" />
     <None Include="source\BlazeEngineGraphics\Shaders\OpenGL\panel.frag" />
@@ -260,24 +255,22 @@
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
   </PropertyGroup>
-  <PropertyGroup Label="Vcpkg">
-    <VcpkgEnableManifest>true</VcpkgEnableManifest>
-  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" />
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <VcpkgConfiguration>Debug</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
+    <VcpkgAdditionalInstallOptions>
+    </VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <VcpkgConfiguration>Release</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
+    <VcpkgAdditionalInstallOptions>
+    </VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <VcpkgConfiguration>Debug</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
+    <VcpkgAdditionalInstallOptions>
+    </VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgConfiguration>Release</VcpkgConfiguration>
-    <VcpkgAdditionalInstallOptions>--clean-after-build</VcpkgAdditionalInstallOptions>
+    <VcpkgAdditionalInstallOptions>
+    </VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -296,7 +289,7 @@
     <Lib>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib</AdditionalDependencies>
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent />
@@ -359,7 +352,7 @@
     <Lib>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32d.lib;OpenGL32.Lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;OpenGL32.Lib</AdditionalDependencies>
     </Lib>
     <PostBuildEvent />
     <PreBuildEvent />

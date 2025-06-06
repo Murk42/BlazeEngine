@@ -136,7 +136,7 @@ namespace Blaze
 
 	template<uintMem C>
 	inline String::String(const char(&arr)[C])		
-		: String(StringView(arr))
+		: String(arr, arr[C - 1] == '\0' ? C - 1 : C)
 	{		
 	}
 	template<uintMem C>
@@ -179,10 +179,9 @@ namespace std
 	template <>
 	struct hash<Blaze::String>
 	{
-		inline size_t operator()(const Blaze::String& k) const;
+		inline size_t operator()(const Blaze::String& k) const
+		{
+			return hash<string_view>()(string_view(k.Ptr(), k.Count()));
+		}
 	};
-	inline size_t hash<Blaze::String>::operator()(const Blaze::String& k) const
-	{
-		return hash<string_view>()(string_view(k.Ptr(), k.Count()));
-	}	
 }
