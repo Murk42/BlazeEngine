@@ -41,7 +41,7 @@ namespace Blaze
 		*/
 		Array(const Array& other) requires std::copy_constructible<StoredType>;
 		/*
-			Move-constructs the array from another array. The new array will move each element individually.			
+			Move-constructs the array from another array
 		*/
 		Array(Array&& other) noexcept;
 		/*
@@ -54,7 +54,7 @@ namespace Blaze
 			copy each element individually. If either of the iterators in null an empty array is created. This 
 			constructor is only available if the value type is copy-constructible or is a reference type.
 		*/
-		Array(Iterator begin, Iterator end);
+		Array(Iterator begin, Iterator end) requires std::copy_constructible<StoredType>;
 		/*
 			Constructs an array with 'count' elements. The elements are constructed by calling the 
 			'constructFunction' function. The function should take a pointer to the element and the index of the
@@ -405,7 +405,7 @@ namespace Blaze
 		*/
 		Array& operator=(const Array& other) requires std::copy_constructible<StoredType> && std::assignable_from<StoredType&, const StoredType&>;
 		/*
-			Move-assigns the array from another array. The new array will move each element individually.
+			Move-assigns the array from another array
 
 			\param other - the array to move from
 			\return Reference to the current array

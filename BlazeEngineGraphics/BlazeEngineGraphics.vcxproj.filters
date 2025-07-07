@@ -75,9 +75,6 @@
     <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\Text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\TextButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderPipelines\OpenGL\UIRenderPipeline_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,37 +102,7 @@
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\ImageRenderUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\EditableText.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Nodes\SelectableText.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\SelectableTextBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\Line3DRenderer_OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnitBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnitBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnitBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\EditableTextBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngineGraphics\UI\Graphics\RenderUnits\PanelRenderUnit.cpp">
@@ -171,19 +138,28 @@
     <ClCompile Include="source\BlazeEngineGraphics\Renderers\OpenGL\BasicMeshRenderer_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\StringUTF8TextContainer.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\Text\TextContainer\StringUTF8TextContainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\TextCursor.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\Text\TextContainer\TextContainerReference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\TextSelection.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\RenderScene\RenderUnits\StaticTextRenderUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\UI\Common\TextContainerReference.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\Text\TextContainer\StyledTextContainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngineGraphics\Text\FontAtlas.cpp">
+    <ClCompile Include="source\BlazeEngineGraphics\Text\Core\FontGlyphRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\Text\Core\FontAtlas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\Text\Core\TextLayoutCacheBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngineGraphics\Text\TextLayoutCache\DefaultTextLayoutCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -299,16 +275,10 @@
     <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\Text.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\TextButton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderPipelines\OpenGL\UIRenderPipeline_OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\PanelRenderUnit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\UI\Input\InputManager.h">
@@ -329,37 +299,10 @@
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\TexturedRectRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\Text\FontAtlas.h">
+    <ClInclude Include="include\BlazeEngineGraphics\Text\Core\FontAtlas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\PanelRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\EditableText.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\EditableTextBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\Text\TextRenderUnitBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextSelection\TextSelectionRenderUnitBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Graphics\RenderUnits\TextCursor\TextCursorRenderUnitBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Nodes\SelectableText.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\SelectableTextBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\BlazeEngineGraphics\Core\OpenGL\Debug_OpenGL.h">
@@ -398,19 +341,34 @@
     <ClInclude Include="include\BlazeEngineGraphics\Renderers\OpenGL\BasicMeshRenderer_OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\TextCursor.h">
+    <ClInclude Include="include\BlazeEngineGraphics\Text\Core\TextContainerBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\TextContainerBase.h">
+    <ClInclude Include="include\BlazeEngineGraphics\Text\TextContainer\StringUTF8TextContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\StringUTF8TextContainer.h">
+    <ClInclude Include="include\BlazeEngineGraphics\Text\TextContainer\TextContainerReference.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\TextSelection.h">
+    <ClInclude Include="include\BlazeEngineGraphics\RenderScene\RenderUnits\StaticTextRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngineGraphics\UI\Common\TextContainerReference.h">
+    <ClInclude Include="include\BlazeEngineGraphics\Text\Core\TextStyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\Text\TextContainer\StyledTextContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\Text\TextLayoutCache\DefaultTextLayoutCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\Text\Core\TextLayoutCacheBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngineGraphics\Text\Core\rectpack2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngineGraphics\Text\Core\FontGlyphRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

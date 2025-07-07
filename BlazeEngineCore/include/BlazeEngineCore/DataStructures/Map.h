@@ -7,7 +7,16 @@
 
 namespace Blaze
 {
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<typename Key>
+	concept MapKeyType = !std::is_reference_v<Key> && std::equality_comparable<Key> || std::is_reference_v<Key>;
+
+	template<typename Hasher, typename Key>
+	concept MapHasherType = std::is_reference_v<Key> && HasherOf<Hasher, std::remove_reference_t<Key>*> || !std::is_reference_v<Key> && HasherOf<Hasher, Key>;
+
+	template<typename Key> requires Hashable<std::conditional_t<std::is_reference_v<Key>, std::remove_reference_t<Key>*, Key>>
+	using MapDefaultHasher = Hash<std::conditional_t<std::is_reference_v<Key>, std::remove_reference_t<Key>*, Key>>;
+
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	class Map;
 
 	template<typename Key, typename Value>
@@ -92,11 +101,11 @@ namespace Blaze
 		template<IsConvertibleToMapIterator<MapIterator<Map>> T>
 		MapIterator& operator=(const T&);
 		
-		template<typename, typename, typename, AllocatorType>
+		template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 		friend class ::Blaze::Map;
 
 		template<typename>
-		friend class ::Blaze::MapIterator;
+		friend class MapIterator;
 	private:		
 		using MapNode = std::conditional_t<std::is_const_v<Map>, const typename Map::template Node, typename Map::template Node>;
 		using MapBucket = std::conditional_t<std::is_const_v<Map>, const typename Map::template Bucket, typename Map::template Bucket>;
@@ -105,7 +114,7 @@ namespace Blaze
 		MapNode* node;
 
 		MapIterator(MapNode* node, Map* map);
-	};
+	};	
 
 	/*
 		Basic map class
@@ -123,7 +132,7 @@ namespace Blaze
 
 		No other macros change the map behaviour
 	*/
-	template<typename Key, typename Value, typename Hasher = ::Blaze::Hash<Key>, AllocatorType Allocator = Blaze::DefaultAllocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher = MapDefaultHasher<Key>, AllocatorType Allocator = Blaze::DefaultAllocator>
 	class BLAZE_CORE_API Map
 	{
 	public:		
@@ -235,10 +244,11 @@ namespace Blaze
 		uintMem count;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
 
+		static bool CompareKeys(const Key& key1, const Key& key2);
+		static uintMem Hash(const Key& key);
+
 		//Wont free previous contents
 		void CopyUnsafe(const Map& other);
-
-		static uintMem Hash(const Key& key);
 
 		Bucket* GetBucketFromHash(uintMem hash) const;
 
@@ -284,22 +294,22 @@ namespace Blaze
 		friend class MapIterator;
 	};
 
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	Map<Key, Value, Hasher, Allocator>::Iterator begin(Map<Key, Value, Hasher, Allocator>& map)
 	{
 		return map.FirstIterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	Map<Key, Value, Hasher, Allocator>::ConstIterator begin(const Map<Key, Value, Hasher, Allocator>& map)
 	{
 		return map.FirstIterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	Map<Key, Value, Hasher, Allocator>::Iterator end(Map<Key, Value, Hasher, Allocator>& map)
 	{
 		return map.BehindIterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	Map<Key, Value, Hasher, Allocator>::ConstIterator end(const Map<Key, Value, Hasher, Allocator>& map)
 	{
 		return map.BehindIterator();

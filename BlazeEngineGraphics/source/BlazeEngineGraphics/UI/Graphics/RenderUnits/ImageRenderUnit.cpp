@@ -8,7 +8,7 @@ namespace Blaze::UI
 		: RenderUnit("TexturedRectRenderer"), node(node), rendered(true), renderDataDirty(false), layout(ImageLayout::Stretch), 
 		uv1(0, 0), uv2(1, 1), 
 		rd({
-			.texture = nullptr,
+			.texture = { },
 			.uv1 = Vec2f(0, 0),
 			.uv2 = Vec2f(1, 1),
 			.pos = Vec2f(0, 0),
@@ -42,7 +42,7 @@ namespace Blaze::UI
 
 		return &rd;
 	}
-	void ImageRenderUnit::SetTexture(Graphics::OpenGLWrapper::Texture2D* texture)
+	void ImageRenderUnit::SetTexture(ResourceBaseRef texture)
 	{
 		if (texture == rd.texture)
 			return;
@@ -94,11 +94,11 @@ namespace Blaze::UI
 	}
 	void ImageRenderUnit::TransformUpdatedEvent(const Node::TransformUpdatedEvent& event)
 	{
-		if (rd.texture == nullptr)
-			return;
+		if (rd.texture)
+			return;		
 
-		NodeTransform transform = node->GetTransform();
-		Vec2f textureSize = (uv2 - uv1) * (Vec2f)rd.texture->GetSize();
+		NodeTransform transform = node->GetTransform();		
+		Vec2f textureSize = (uv2 - uv1) * (Vec2f)rd.texture.Get<Graphics::OpenGLWrapper::Texture2D>().GetSize();
 
 		switch (layout)
 		{
@@ -143,10 +143,10 @@ namespace Blaze::UI
 		{
 		case ImageLayout::Fit: {
 
-			if (rd.texture == nullptr)
+			if (rd.texture)
 				break;
 
-			Vec2f textureSize = (Vec2f)rd.texture->GetSize();
+			Vec2f textureSize = (Vec2f)rd.texture.Get<Graphics::OpenGLWrapper::Texture2D>().GetSize();
 			sourceRect.size *= textureSize;
 			sourceRect.pos *= textureSize;
 			float frameRatio = size.y / size.x;
@@ -174,10 +174,10 @@ namespace Blaze::UI
 		}						
 		case ImageLayout::Fill: {
 
-			if (rd.texture == nullptr)
+			if (rd.texture)
 				break;
 
-			Vec2f textureSize = (Vec2f)rd.texture->GetSize();
+			Vec2f textureSize = (Vec2f)rd.texture.Get<Graphics::OpenGLWrapper::Texture2D>().GetSize();
 
 			sourceRect.size *= textureSize;
 			sourceRect.pos *= textureSize;

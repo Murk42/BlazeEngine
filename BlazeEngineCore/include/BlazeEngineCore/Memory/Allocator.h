@@ -4,11 +4,7 @@
 
 namespace Blaze
 {
-#ifdef BLAZE_COMPILER_MSVC
-#define BLAZE_ALLOCATOR_ATTRIBUTE [[msvc::no_unique_address]]
-#else
 #define BLAZE_ALLOCATOR_ATTRIBUTE [[no_unique_address]]
-#endif
 		
 	class BLAZE_CORE_API DefaultAllocator
 	{	

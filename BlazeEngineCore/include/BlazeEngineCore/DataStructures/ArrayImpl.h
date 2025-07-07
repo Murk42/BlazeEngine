@@ -33,7 +33,7 @@ namespace Blaze
 		CopyConstructUnsafe(other.Ptr(), other.Count());
 	}
 	template<typename T, AllocatorType Allocator>
-	inline Array<T, Allocator>::Array(Iterator begin, Iterator end)
+	inline Array<T, Allocator>::Array(Iterator begin, Iterator end) requires std::copy_constructible<StoredType>
 		: ptr(nullptr), count(0), reserved(0)
 	{
 		if (begin.IsNull() || end.IsNull())
@@ -227,12 +227,12 @@ namespace Blaze
 	template<typename ...Args> requires std::constructible_from<T, Args...>
 	inline auto Array<T, Allocator>::AddAt(Iterator it, Args && ...args) -> Iterator requires std::move_constructible<StoredType>
 	{
-		return AddAt(it.ptr - ptr, std::forward<Args>(args)...);
+		return AddAt(it.Ptr() - ptr, std::forward<Args>(args)...);
 	}
 	template<typename T, AllocatorType Allocator>	
 	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::move_constructible<StoredType>
 	{		
-		Insert(it.ptr - ptr, array);
+		Insert(it.Ptr() - ptr, array);
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::Insert(uintMem index, ArrayView<T> array)  requires std::move_constructible<StoredType>
@@ -272,7 +272,7 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator> Array<T, Allocator>::Split(Iterator it)
 	{
-		return Split(it.ptr - ptr);
+		return Split(it.Ptr() - ptr);
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator> Array<T, Allocator>::Split(uintMem index)
@@ -367,7 +367,7 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::EraseAt(Iterator it) requires std::is_move_assignable_v<StoredType> || std::is_move_constructible_v<StoredType>
 	{
-		EraseAt(it.ptr - ptr);
+		EraseAt(it.Ptr() - ptr);
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::Append(const Array& other) requires std::copy_constructible<StoredType>

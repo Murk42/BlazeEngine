@@ -235,7 +235,7 @@
     <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Font\CharacterSet.h" />
     <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h" />
-    <ClInclude Include="include\BlazeEngine\Resources\Font\FontGlyphRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\Resources\Font\FontFace.h" />
     <ClInclude Include="include\BlazeEngine\Window\Display.h" />
     <ClInclude Include="include\BlazeEngine\Window\Window.h" />
     <ClInclude Include="include\BlazeEngine\Input\Input.h" />
@@ -249,7 +249,6 @@
     <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDLConversions.h" />
     <ClInclude Include="source\BlazeEngine\Internal\ThreadEventStack.h" />
     <ClInclude Include="source\BlazeEngine\Internal\ThreadTaskQueue.h" />
-    <ClInclude Include="source\BlazeEngine\Resources\Font\rectpack2D.h" />
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -274,7 +273,7 @@
     <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Font\CharacterSet.cpp" />
     <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp" />
-    <ClCompile Include="source\BlazeEngine\Resources\Font\FontGlyphRenderer.cpp" />
+    <ClCompile Include="source\BlazeEngine\Resources\Font\FontFace.cpp" />
     <ClCompile Include="source\BlazeEngine\Window\Display.cpp" />
     <ClCompile Include="source\BlazeEngine\Window\Window.cpp" />
     <ClCompile Include="source\BlazeEngine\Console\Console.cpp" />

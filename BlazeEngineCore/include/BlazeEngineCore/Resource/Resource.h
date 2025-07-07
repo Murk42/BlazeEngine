@@ -1,114 +1,104 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
 #include "BlazeEngineCore/DataStructures/Hash.h"
+#include "BlazeEngineCore/Debug/Logger.h"
 #include <atomic>
 
 namespace Blaze
 {
-	template<typename T>
-	class BLAZE_CORE_API Resource
+	class BLAZE_CORE_API ResourceBase
 	{
 	public:
-		template<typename ... Args>
-		Resource(Args&& ... args) requires std::constructible_from<T, Args...>;
-		Resource(T&& resource) requires std::move_constructible<T>;
-		Resource(Resource&& other) requires std::move_constructible<T>;
+		ResourceBase();
+		virtual ~ResourceBase();
 
 		bool IsLoaded() const;
+		void WaitToLoad() const;
 
-		T& WaitToLoad();
-		T* Get();
-		const T* Get() const;
+		void IncreaseReferenceCount();
+		void DecreaseReferenceCount();
+		inline uintMem GetReferenceCount() const;
+	protected:
+		void MarkAsLoaded();
 
-		Resource<T>& operator=(const T&) = delete;
-		Resource<T>& operator=(T&& resource) noexcept;
-		Resource<T>& operator=(const Resource<T>&) = delete;
-		Resource<T>& operator=(Resource<T>&& other) noexcept;
+		virtual void DestructResource() = 0;
+	private:
+		uint32 referenceCount;
+		std::atomic_flag loaded;
+	};
+
+	template<typename T>
+	class BLAZE_CORE_API Resource : public ResourceBase
+	{
+	public:
+		using Type = T;
+
+		template<typename ... Args>
+		void LoadResource(Args&& ... args) requires std::constructible_from<T, Args...>;
+
+		T& Get();
+		const T& Get() const;
+
+		T* operator->();
+		const T* operator->() const;
 
 		static uint64 GetTypeId()
 		{
 			volatile auto file = __FILE__;
-			volatile auto line = __LINE__;			
+			volatile auto line = __LINE__;
 			return (uint64)&GetTypeId;
 		}
 	private:
-		std::atomic_flag loaded;
-		T resource;
+		struct alignas(alignof(T)) ResourceMemory
+		{
+			byte bytes[sizeof(T)];
+		};
+		ResourceMemory resourceMemory;
+
+		void DestructResource() override;
 	};	
+
 	template<typename T>
 	template<typename ...Args>
-	inline Resource<T>::Resource(Args&& ...args) requires std::constructible_from<T, Args...>
-		: resource(std::forward<Args>(args)...)
+	inline void Resource<T>::LoadResource(Args&& ...args) requires std::constructible_from<T, Args...>
 	{
-		loaded.test_and_set();
-	}
-	template<typename T>
-	inline Resource<T>::Resource(T&& resource) requires std::move_constructible<T>
-		: resource(std::move(resource)) 
-	{ 
-		loaded.test_and_set(); 
-	}
-	template<typename T>
-	inline Resource<T>::Resource(Resource&& other) requires std::move_constructible<T>
-		: resource(std::move(resource)) 
-	{ 
-		if (other.loaded.test())
+		if (IsLoaded())
 		{
-			loaded.test_and_set();
-			other.loaded.clear();
+			BLAZE_ENGINE_CORE_ERROR("Trying to load an already loaded resource");
+			return;
 		}
-		else
-			loaded.clear();
+		
+		std::construct_at<T>((T*)&resourceMemory, std::forward<Args>(args)...);
+
+		MarkAsLoaded();
 	}
 	template<typename T>
-	inline bool Resource<T>::IsLoaded() const
+	inline T& Resource<T>::Get()
+	{				
+		WaitToLoad();
+		return *(T*)&resourceMemory;
+	}
+	template<typename T>
+	inline const T& Resource<T>::Get() const
 	{
-		return loaded.test();
+		WaitToLoad();
+		return *(T*)&resourceMemory;
 	}
 	template<typename T>
-	inline T& Resource<T>::WaitToLoad()
-	{		
-		loaded.wait(false);
-		return resource;
-	}
-	template<typename T>
-	inline T* Resource<T>::Get()
+	inline T* Resource<T>::operator->()
 	{
-		if (loaded.test())		
-			return &resource;
-
-		return nullptr;
+		WaitToLoad();
+		return *(T*)&resourceMemory;
 	}
 	template<typename T>
-	inline const T* Resource<T>::Get() const
+	inline const T* Resource<T>::operator->() const
 	{
-		if (loaded.test())
-			return &resource;
-
-		return nullptr;
+		WaitToLoad();
+		return *(T*)&resourceMemory;
 	}
 	template<typename T>
-	inline Resource<T>& Resource<T>::operator=(T&& resource) noexcept
+	inline void Resource<T>::DestructResource()
 	{
-		this->resource = std::move(resource);
-
-		loaded.test_and_set();
-		loaded.notify_all();
-
-		return *this;
-	}
-	template<typename T>
-	inline Resource<T>& Resource<T>::operator=(Resource<T>&& other) noexcept
-	{
-		resource = std::move(other.resource);
-
-		if (other.loaded.test())
-		{
-			loaded.test_and_set();
-			loaded.notify_all();
-			other.loaded.clear();
-		}
-		return *this;
-	}
-
+		std::destroy_at<T>((T*)&resourceMemory);
+	}	
 }

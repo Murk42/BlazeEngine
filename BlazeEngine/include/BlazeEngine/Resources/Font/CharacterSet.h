@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngineCore/DataStructures/UnicodeChar.h"
 #include "BlazeEngineCore/DataStructures/Array.h"
+#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze
 {

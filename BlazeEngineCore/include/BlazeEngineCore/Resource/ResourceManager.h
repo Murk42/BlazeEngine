@@ -10,24 +10,32 @@ namespace Blaze
 	{
 	public:
 		template<typename T>
-		using LoadFunction = void(*)(Resource<T>& resource, void*);
+		using LoadFunction = void(*)(ResourceRef<T> resource, void*);
 		template<typename T>
-		using ResourceLoadedCallback = void(*)(Resource<T>& resource, void*);
+		using ResourceLoadedCallback = void(*)(ResourceRef<T> resource, void*);
 
 		ResourceManager();
 
-		template<typename T, std::invocable<Resource<T>&> Callable>
-		Resource<T>& LoadResourceAsync(StringView name, Callable loadFunction);
+		template<typename T, std::invocable<ResourceRef<T>> Callable>
+		ResourceRef<T> LoadResourceAsync(StringView name, Callable loadFunction);
 		template<typename T>
-		Resource<T>& LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* userData);
+		ResourceRef<T> LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* userData);
 
-		template<typename T, std::invocable<Resource<T>&> Callable, std::invocable<Resource<T>&> ResourceLoadedCallable>
-		Resource<T>& LoadResourceAsync(StringView name, Callable loadFunction, ResourceLoadedCallable resourceLoadedCallback);
+		template<typename T, std::invocable<ResourceRef<T>> Callable, std::invocable<ResourceRef<T>> ResourceLoadedCallable>
+		ResourceRef<T> LoadResourceAsync(StringView name, Callable loadFunction, ResourceLoadedCallable resourceLoadedCallback);
 		template<typename T>
-		Resource<T>& LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* userData, ResourceLoadedCallback<T> resourceLoadedCallback, void* resourceLoadedCallbackUserData);
+		ResourceRef<T> LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* userData, ResourceLoadedCallback<T> resourceLoadedCallback, void* resourceLoadedCallbackUserData);
+
+		template<typename T, typename ... Args> requires std::constructible_from<T, Args...>
+		ResourceRef<T> LoadResource(StringView name, Args&& ... args);
 
 		template<typename T>
-		Resource<T>* GetResource(StringView name);
+		ResourceRef<T> GetResource(StringView name);
+
+		//template<typename T>
+		//void UnloadResource(StringView name);
+		//template<typename T>
+		//void UnloadResource(Resource<T>& resourceBase);
 
 		void HandleResourceLoadedCallbacks();
 	private:
@@ -47,17 +55,17 @@ namespace Blaze
 		Array<ResourceLoadedCallbackData> resourceLoadedCallbacks;
 
 		template<typename T>
-		Resource<T>& AllocateResource(StringView name);
+		ResourceRef<T> AllocateResource(StringView name);
 	};
 
-	template<typename T, std::invocable<Resource<T>&> Callable>
-	inline Resource<T>& ResourceManager::LoadResourceAsync(StringView name, Callable loadFunction)
+	template<typename T, std::invocable<ResourceRef<T>> Callable>
+	inline ResourceRef<T> ResourceManager::LoadResourceAsync(StringView name, Callable loadFunction)
 	{	
-		Resource<T>& resource = AllocateResource<T>(name);
+		ResourceRef<T> resource = AllocateResource<T>(name);
 
 		struct ThreadData
 		{
-			Resource<T>& resource;
+			ResourceRef<T> resource;
 			Callable loadFunction;
 		};
 
@@ -70,20 +78,20 @@ namespace Blaze
 			ThreadData threadData = std::move(*(ThreadData*)userData);
 			delete (ThreadData*)userData;
 
-			threadData.loadFunction(threadData.resource);
+			threadData.loadFunction(std::move(threadData.resource));
 
 			}, threadData);
 
 		return resource;
 	}
 	template<typename T>
-	inline Resource<T>& ResourceManager::LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* loadFunctionUserData)
+	inline ResourceRef<T> ResourceManager::LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* loadFunctionUserData)
 	{		
-		Resource<T>& resource = AllocateResource<T>(name);
+		ResourceRef<T> resource = AllocateResource<T>(name);
 
 		struct ThreadData
 		{			
-			Resource<T>& resource;
+			ResourceRef<T> resource;
 			LoadFunction<T> loadFunction;
 			void* loadFunctionUserData;
 		};
@@ -98,21 +106,21 @@ namespace Blaze
 			ThreadData threadData = *(ThreadData*)userData;
 			delete (ThreadData*)userData;
 
-			threadData.loadFunction(threadData.resource, threadData.loadFunctionUserData);
+			threadData.loadFunction(std::move(threadData.resource), threadData.loadFunctionUserData);
 
 			}, threadData);
 
 		return resource;
 	}
-	template<typename T, std::invocable<Resource<T>&> Callable, std::invocable<Resource<T>&> ResourceLoadedCallable>
-	Resource<T>& ResourceManager::LoadResourceAsync(StringView name, Callable loadFunction, ResourceLoadedCallable resourceLoadedCallback)
+	template<typename T, std::invocable<ResourceRef<T>> Callable, std::invocable<ResourceRef<T>> ResourceLoadedCallable>
+	ResourceRef<T> ResourceManager::LoadResourceAsync(StringView name, Callable loadFunction, ResourceLoadedCallable resourceLoadedCallback)
 	{
-		Resource<T>& resource = AllocateResource<T>(name);
+		ResourceRef<T> resource = AllocateResource<T>(name);
 
 		struct ThreadData
 		{
 			ResourceManager& resourceManager;
-			Resource<T>& resource;
+			ResourceRef<T> resource;
 
 			Callable loadFunction;
 			ResourceLoadedCallable* resourceLoadedCallback;
@@ -135,7 +143,7 @@ namespace Blaze
 				ResourceLoadedCallable callback = std::move(*(ResourceLoadedCallable*)callbackPtr);
 				delete (ResourceLoadedCallable*)callbackPtr;
 
-				callback(*(Resource<T>*)resource);			
+				callback(*(ResourceRef<T>*)resource);			
 				};
 
 			ResourceLoadedCallbackData resourceLoadedCallbackData{
@@ -154,14 +162,14 @@ namespace Blaze
 		return resource;
 	}
 	template<typename T>
-	inline Resource<T>& ResourceManager::LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* loadFunctionUserData, ResourceLoadedCallback<T> resourceLoadedCallback, void* resourceLoadedCallbackUserData)
+	inline ResourceRef<T> ResourceManager::LoadResourceAsync(StringView name, LoadFunction<T> loadFunction, void* loadFunctionUserData, ResourceLoadedCallback<T> resourceLoadedCallback, void* resourceLoadedCallbackUserData)
 	{
-		Resource<T>& resource = AllocateResource<T>(name);
+		ResourceRef<T> resource = AllocateResource<T>(name);
 
 		struct ThreadData
 		{
 			ResourceManager& resourceManager;
-			Resource<T>& resource;
+			ResourceRef<T> resource;
 
 			LoadFunction<T> loadFunction;
 			void* loadFunctionUserData;
@@ -186,7 +194,7 @@ namespace Blaze
 			threadData.loadFunction(threadData.resource, threadData.userData);
 
 			auto CallCallbackFunction = [](void* resource, void* callback, void* userData) {
-				((ResourceLoadedCallback<T>)callback)(*(Resource<T>*)resource, userData);
+				((ResourceLoadedCallback<T>)callback)(*(ResourceRef<T>*)resource, userData);
 				};
 
 			ResourceLoadedCallbackData resourceLoadedCallbackData{
@@ -203,22 +211,29 @@ namespace Blaze
 
 		return resource;
 	}
+	template<typename T, typename ...Args> requires std::constructible_from<T, Args...>
+	inline ResourceRef<T> ResourceManager::LoadResource(StringView name, Args && ...args)
+	{
+		ResourceRef<T> resource = AllocateResource<T>(name);
+		resource.GetResource().LoadResource(std::forward<Args>(args)...);
+		return resource;
+	}
 	template<typename T>
-	inline Resource<T>* ResourceManager::GetResource(StringView name)
+	inline ResourceRef<T> ResourceManager::GetResource(StringView name)
 	{
 		uint64 typeID = Resource<T>::GetTypeId();
 
 		auto it = resourceStorages.Find(typeID);
 
 		if (it.IsNull())		
-			return nullptr;					
+			return ResourceRef<T>();
 
 		ResourceStorage<T>* resourceStorage = it.GetValue<ResourceStorage<T>>();
 		
 		return resourceStorage->GetResource(name);
 	}	
 	template<typename T>
-	inline Resource<T>& ResourceManager::AllocateResource(StringView name)
+	inline ResourceRef<T> ResourceManager::AllocateResource(StringView name)
 	{
 		uint64 typeID = Resource<T>::GetTypeId();
 
@@ -235,11 +250,7 @@ namespace Blaze
 		else
 			resourceStorage = it.GetValue<ResourceStorage<T>>();
 
-		auto& resource = resourceStorage->CreateResource(name);
-
-		resource = Resource<T>();
-
-		return resource;
+		return resourceStorage->CreateResource(name);
 	}
 
 }

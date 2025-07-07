@@ -203,18 +203,18 @@ namespace Blaze
 
 	}
 
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Map()
 		: buckets(nullptr), bucketCount(0), count(0)
 	{		
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Map(const Map& other)
 		: buckets(nullptr), bucketCount(0), count(0)
 	{
 		CopyUnsafe(other);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Map(Map&& other) noexcept
 		: bucketCount(other.bucketCount), buckets(other.buckets), count(other.count)
 	{
@@ -222,19 +222,19 @@ namespace Blaze
 		other.buckets = nullptr;
 		other.count = 0;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Map(const std::initializer_list<MapPairType>& other)
 		: buckets(nullptr), bucketCount(0), count(0)
 	{
 		for (const auto& el : other)
 			Insert(el.key, el.value);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::~Map()
 	{
 		Clear();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::Clear()
 	{
 		Bucket* begin = buckets;
@@ -262,17 +262,22 @@ namespace Blaze
 		bucketCount = 0;
 		count = 0;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
+	inline bool Map<Key, Value, Hasher, Allocator>::Empty() const
+	{
+		return count == 0;
+	}
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::Find(const Key& key)
 	{
 		return FindWithHint(key, Hash(key));
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::Find(const Key& key) const
 	{
 		return ConstIterator(FindWithHint(key, Hash(key)));
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline bool  Map<Key, Value, Hasher, Allocator>::Contains(const Key& key) const
 	{
 		uintMem hash = Hash(key);
@@ -286,7 +291,7 @@ namespace Blaze
 		if (node == nullptr)
 			return false;
 
-		while (node->pair.key != key)
+		while (!CompareKeys(node->pair.key, key))
 		{
 			node = node->next;
 
@@ -296,13 +301,13 @@ namespace Blaze
 
 		return true;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	template<typename ... Args> requires std::constructible_from<Value, Args...>
 	inline Map<Key, Value, Hasher, Allocator>::InsertResult Map<Key, Value, Hasher, Allocator>::Insert(const Key& key, Args&& ... args)
 	{
 		return InsertWithHint(key, Hash(key), std::forward<Args>(args)...);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::Erase(const Key& key)
 	{
 		Bucket* bucket = GetBucketFromHash(Hash(key));
@@ -323,7 +328,7 @@ namespace Blaze
 
 		EraseNodeUnsafe(bucket, it.node);		
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::Erase(const Iterator& iterator)
 	{
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
@@ -344,12 +349,12 @@ namespace Blaze
 
 		EraseNodeUnsafe(bucket, iterator.node);		
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline uintMem Map<Key, Value, Hasher, Allocator>::Count() const
 	{
 		return count;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::FirstIterator()
 	{
 		if (bucketCount != 0)			
@@ -359,7 +364,7 @@ namespace Blaze
 
 		return Iterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::FirstIterator() const
 	{
 		for (uintMem i = 0; i < bucketCount; ++i)
@@ -368,7 +373,7 @@ namespace Blaze
 
 		return ConstIterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::LastIterator()
 	{
 		if (bucketCount == 0)
@@ -378,7 +383,7 @@ namespace Blaze
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].tail, this);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::LastIterator() const
 	{
 		if (bucketCount == 0)
@@ -388,27 +393,27 @@ namespace Blaze
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].tail, this);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::AheadIterator()
 	{
 		return Iterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::AheadIterator() const
 	{
 		return ConstIterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::BehindIterator()
 	{
 		return Iterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::BehindIterator() const
 	{
 		return ConstIterator();
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>& Map<Key, Value, Hasher, Allocator>::operator=(const Map& other)
 	{
 		Clear();
@@ -417,7 +422,7 @@ namespace Blaze
 
 		return *this;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>& Map<Key, Value, Hasher, Allocator>::operator=(Map&& other) noexcept
 	{
 		Clear();
@@ -430,7 +435,7 @@ namespace Blaze
 		other.count = 0;
 		return *this;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	template<typename ... Args> requires std::constructible_from<Value, Args...>
 	inline Map<Key, Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, Key&& key, Args&& ... args)
 		: prev(prev), next(next), hash(hash), pair(std::move(key), std::forward<Args>(args)...)
@@ -439,7 +444,23 @@ namespace Blaze
 #endif		
 	{
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
+	bool Map<Key, Value, Hasher, Allocator>::CompareKeys(const Key& key1, const Key& key2)
+	{
+		if constexpr (std::is_reference_v<Key>)
+			return &key1 == &key2; //TODO hasher can be any hasher, but here it needs to hash Key* type not Key
+		else
+			return key1 == key2;
+	}
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
+	inline uintMem Map<Key, Value, Hasher, Allocator>::Hash(const Key& key)
+	{
+		if constexpr (std::is_reference_v<Key>)
+			return Hasher::Compute(&key); //TODO hasher can be any hasher, but here it needs to hash Key* type not Key
+		else
+			return Hasher::Compute(key);
+	}
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::CopyUnsafe(const Map& other)
 	{
 		bucketCount = other.bucketCount;
@@ -479,13 +500,8 @@ namespace Blaze
 
 			itDst->tail = nodeDst;
 		}
-	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
-	inline uintMem Map<Key, Value, Hasher, Allocator>::Hash(const Key& key)
-	{
-		return Hasher::Compute(key);
-	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	}	
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Bucket* Map<Key, Value, Hasher, Allocator>::GetBucketFromHash(uintMem hash) const
 	{
 		if (bucketCount == 0)
@@ -493,12 +509,12 @@ namespace Blaze
 
 		return GetBucketFromHashModUnsafe(hash % bucketCount);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Bucket* Map<Key, Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uintMem hashMod) const
 	{
 		return &buckets[hashMod];
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash)
 	{
 		auto* bucket = GetBucketFromHash(hash);
@@ -508,7 +524,7 @@ namespace Blaze
 
 		return FindWithHintUnsafe(key, bucket);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash) const
 	{
 		auto* bucket = GetBucketFromHash(hash);
@@ -518,7 +534,7 @@ namespace Blaze
 
 		return FindWithHintUnsafe(key, bucket);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::FindWithHintUnsafe(const Key& key, Bucket* bucket)
 	{
 		Node* node = bucket->head;
@@ -526,7 +542,7 @@ namespace Blaze
 		if (node == nullptr)
 			return Iterator();
 
-		while (node->pair.key != key)
+		while (!CompareKeys(node->pair.key, key))
 		{
 			node = node->next;
 
@@ -536,7 +552,7 @@ namespace Blaze
 
 		return Iterator(node, this);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::FindWithHintUnsafe(const Key& key, Bucket* bucket) const
 	{
 		Node* node = bucket->head;
@@ -544,7 +560,7 @@ namespace Blaze
 		if (node == nullptr)
 			return ConstIterator();
 
-		while (node->pair.key != key)
+		while (!CompareKeys(node->pair.key, key))
 		{
 			node = node->next;
 
@@ -554,7 +570,7 @@ namespace Blaze
 
 		return ConstIterator(node, this);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	template<typename ... Args> requires  std::constructible_from<Value, Args...>
 	inline Map<Key, Value, Hasher, Allocator>::InsertResult Map<Key, Value, Hasher, Allocator>::InsertWithHint(const Key& key, uintMem hash, Args&& ... args)
 	{
@@ -571,7 +587,7 @@ namespace Blaze
 
 		return InsertWithHintUnsafe(key, bucket, hash, std::forward<Args>(args)...);
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	template<typename ... Args> requires std::constructible_from<Value, Args...>
 	inline Map<Key, Value, Hasher, Allocator>::InsertResult Map<Key, Value, Hasher, Allocator>::InsertWithHintUnsafe(const Key& key, Bucket* bucket, uintMem hash, Args&& ... args)
 	{
@@ -598,7 +614,7 @@ namespace Blaze
 			{		
 				//if constexpr (!Replace)
 				{
-					if (node->pair.key == key)
+					if (CompareKeys(node->pair.key, key))
 						return { Iterator(node, this), false };
 				}
 				//else
@@ -630,7 +646,7 @@ namespace Blaze
 
 		return { Iterator(node, this), true };
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::EraseNodeUnsafe(Bucket* bucket, Node* node)
 	{
 		RemoveNodeFromSpotUnsafe(node, bucket);
@@ -644,7 +660,7 @@ namespace Blaze
 		allocator.Free(node);
 		--count;		
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::CheckForRehash()
 	{
 		static constexpr float max_load_factor = 1.0f;
@@ -667,7 +683,7 @@ namespace Blaze
 		}
 		
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::Rehash(uintMem newBucketCount)
 	{
 		Bucket* old = buckets;
@@ -683,7 +699,7 @@ namespace Blaze
 		allocator.Free(old);
 		bucketCount = newBucketCount;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::AllocateEmptyUnsafe()
 	{
 		bucketCount = 8;
@@ -691,7 +707,7 @@ namespace Blaze
 		memset(buckets, 0, sizeof(Bucket) * bucketCount);
 		count = 0;
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::RehashBucketUnsafe(Bucket* bucket, Bucket* bucketArray, uintMem bucketArraySize)
 	{
 		Node* node = bucket->head;
@@ -708,7 +724,7 @@ namespace Blaze
 			node = next;
 		}		
 	}
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::RemoveNodeFromSpotUnsafe(Node* node, Bucket* bucket)
 	{
 		if (node->prev)
@@ -745,7 +761,7 @@ namespace Blaze
 
 		}
 	}	
-	template<typename Key, typename Value, typename Hasher, AllocatorType Allocator>
+	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	inline void Map<Key, Value, Hasher, Allocator>::MoveNodeToBeginingUnsafe(Node* node, Bucket* bucket)
 	{
 		Node* head = bucket->head;

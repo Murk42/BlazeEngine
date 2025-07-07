@@ -155,6 +155,7 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngineCore\Resource\Resource.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Resource\ResourceManager.cpp" />
     <ClCompile Include="source\BlazeEngineCore\BlazeEngineCoreContext.cpp" />
     <ClCompile Include="source\BlazeEngineCore\DataStructures\Buffer.cpp" />
@@ -180,6 +181,7 @@
     <ClCompile Include="source\BlazeEngineCore\Memory\MemoryListener.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Memory\MemoryManager.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Memory\VirtualAllocator.cpp" />
+    <ClCompile Include="source\BlazeEngineCore\Resource\ResourceRef.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Threading\ThreadGroup.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Threading\ThreadPool.cpp" />
     <ClCompile Include="source\BlazeEngineCore\Utilities\Stopwatch.cpp" />
@@ -216,6 +218,8 @@
     <ClInclude Include="include\BlazeEngineCore\DataStructures\ListImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Map.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\MapImpl.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\RawArray.h" />
+    <ClInclude Include="include\BlazeEngineCore\DataStructures\RawArrayImpl.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Rect.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\Set.h" />
     <ClInclude Include="include\BlazeEngineCore\DataStructures\SetImpl.h" />
@@ -232,6 +236,7 @@
     <ClInclude Include="include\BlazeEngineCore\Resource\DefaultResourceStorage.h" />
     <ClInclude Include="include\BlazeEngineCore\Resource\Resource.h" />
     <ClInclude Include="include\BlazeEngineCore\Resource\ResourceManager.h" />
+    <ClInclude Include="include\BlazeEngineCore\Resource\ResourceRef.h" />
     <ClInclude Include="include\BlazeEngineCore\Resource\ResourceStorage.h" />
     <ClInclude Include="include\BlazeEngineCore\Threading\ThreadGroup.h" />
     <ClInclude Include="include\BlazeEngineCore\Threading\ThreadPool.h" />
@@ -477,6 +482,7 @@
     <Natvis Include="BlazeEngineArrayViewDebugView.natvis" />
     <Natvis Include="BlazeEngineMapDebugView.natvis" />
     <Natvis Include="BlazeEngineArrayDebugView.natvis" />
+    <Natvis Include="BlazeEngineResourceRefDebugView.natvis" />
     <Natvis Include="BlazeEngineSetDebugView.natvis" />
     <Natvis Include="BlazeEngineStringDebugView.natvis" />
     <Natvis Include="BlazeEngineStringUTF8DebugView.natvis" />

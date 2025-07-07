@@ -25,5 +25,5 @@ namespace Blaze
 		Buffer& operator=(Buffer&&) noexcept;		
 	private:
 		void* ptr;
-	};
+	};	
 }

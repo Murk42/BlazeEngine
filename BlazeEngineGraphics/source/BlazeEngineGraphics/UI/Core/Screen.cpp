@@ -38,12 +38,14 @@ namespace Blaze::UI
 
 		if (window != nullptr)
 		{
-			auto transform = GetTransform();
-			transform.size = (Vec2f)window->GetSize();
-			SetTransform(transform);
-
 			if (resizeWithWindow)
+			{
+				auto transform = GetTransform();
+				transform.size = (Vec2f)window->GetSize();
+				SetTransform(transform);
+
 				window->windowResizedEventDispatcher.AddHandler(*this);
+			}
 		}
 
 		screenWindowChangedEventDispatcher.Call({ .oldWindow = old, .screen = *this });

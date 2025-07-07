@@ -44,19 +44,31 @@ namespace Blaze
 
 		constexpr Vector operator-() const requires std::is_signed_v<T> { return Vector(-x, -y); }
 
-		constexpr Vector operator+(const Vector<T, 2>& b) const { return Vector(x + b.x, y + b.y); }
-		constexpr Vector operator-(const Vector<T, 2>& b) const { return Vector(x - b.x, y - b.y); }
-		constexpr Vector operator*(const Vector<T, 2>& v) const { return Vector(x * v.x, y * v.y); }
-		constexpr Vector operator/(const Vector<T, 2>& v) const { return Vector(x / v.x, y / v.y); }
-		constexpr Vector operator*(const T& v) const { return Vector(x * v, y * v); }
-		constexpr Vector operator/(const T& v) const { return Vector(x / v, y / v); }
-		 
-		constexpr Vector& operator+= (const Vector<T, 2>& v) { x += v.x; y += v.y; return *this; }
-		constexpr Vector& operator-= (const Vector<T, 2>& v) { x -= v.x; y -= v.y; return *this; }
-		constexpr Vector& operator*= (const Vector<T, 2>& v) { x *= v.x; y *= v.y; return *this; }
-		constexpr Vector& operator/= (const Vector<T, 2>& v) { x /= v.x; y /= v.y; return *this; }
-		constexpr Vector& operator*= (const T& v) { x *= v; y *= v; return *this; }
-		constexpr Vector& operator/= (const T& v) { x /= v; y /= v; return *this; }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 + v2 } -> std::convertible_to<T>; }
+		constexpr Vector operator+(const Vector<T2, 2>& b) const { return Vector(x + b.x, y + b.y); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 - v2 } -> std::convertible_to<T>; }
+		constexpr Vector operator-(const Vector<T2, 2>& b) const { return Vector(x - b.x, y - b.y); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1* v2 } -> std::convertible_to<T>; }
+		constexpr Vector operator*(const Vector<T2, 2>& v) const { return Vector(x * v.x, y * v.y); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 } -> std::convertible_to<T>; }
+		constexpr Vector operator/(const Vector<T2, 2>& v) const { return Vector(x / v.x, y / v.y); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 * v2 } -> std::convertible_to<T>; }
+		constexpr Vector operator*(const T2& v) const { return Vector(x * v, y * v); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 } -> std::convertible_to<T>; }
+		constexpr Vector operator/(const T2& v) const { return Vector(x / v, y / v); }
+		
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 + v2 } -> std::convertible_to<T>; }
+		constexpr Vector& operator+= (const Vector<T2, 2>& v) { x += v.x; y += v.y; return *this; }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 + v2 } -> std::convertible_to<T>; }
+		constexpr Vector& operator-= (const Vector<T2, 2>& v) { x -= v.x; y -= v.y; return *this; }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1* v2 } -> std::convertible_to<T>; }
+		constexpr Vector& operator*= (const Vector<T2, 2>& v) { x *= v.x; y *= v.y; return *this; }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 } -> std::convertible_to<T>; }
+		constexpr Vector& operator/= (const Vector<T2, 2>& v) { x /= v.x; y /= v.y; return *this; }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1* v2 } -> std::convertible_to<T>; }
+		constexpr Vector& operator*= (const T2& v) { x *= v; y *= v; return *this; }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 } -> std::convertible_to<T>; }
+		constexpr Vector& operator/= (const T2& v) { x /= v; y /= v; return *this; }
 
 		constexpr bool operator== (const Vector<T, 2>& v) const { return x == v.x && y == v.y; }
 		constexpr bool operator!= (const Vector<T, 2>& v) const { return x != v.x || y != v.y; }		
@@ -108,7 +120,15 @@ namespace Blaze
 	template<typename T> 
 	using Vec2 = Vector<T, 2>;
 	using Vec2i = Vec2<int>;
+	using Vec2i8 = Vec2<int8>;
+	using Vec2i16 = Vec2<int16>;
+	using Vec2i32 = Vec2<int32>;
+	using Vec2i64 = Vec2<int64>;
 	using Vec2u = Vec2<unsigned>;
+	using Vec2u8 = Vec2<uint8>;
+	using Vec2u16 = Vec2<uint16>;
+	using Vec2u32 = Vec2<uint32>;
+	using Vec2u64 = Vec2<uint64>;
 	using Vec2f = Vec2<float>;
 	using Vec2d = Vec2<double>;	
 

@@ -1,55 +1,76 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/Buffer.h"
-#include "BlazeEngineCore/DataStructures/Map.h"
-#include "BlazeEngineCore/File/Path.h"
-#include "BlazeEngine/Resources/Bitmap/Bitmap.h"
-#include <functional>
+#include "BlazeEngineCore/Resource/ResourceRef.h"
+#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze
 {
-	class FontGlyphRenderer;
-	class CharacterSet;
+	class File;	
 
 	class BLAZE_API Font
 	{
-	public:		
-		using CreateAtlasCallback = std::function<void(Vec2u)>;
-		using CopyBitmapCallback = std::function<void(UnicodeChar, Vec2u, BitmapView)>;
-
-		//Glyph metric data expressed in EMs (relative unit)
-		//Multiple each number by the point size of the font to get its final point size (absolute unit)
-		//Each point is equal to 0.352778mm so use the display parameters to find the wanted pixel size.
-		struct GlyphMetrics
-		{
-			float horizontalAdvance;
-			float verticalAdvance;
-			Vec2f offset;
-			Vec2f size;
-		};		
-
+	public:
+		/*
+			Constructs a empty font that is considered invalid
+		*/
 		Font();
-		Font(Font&& other) noexcept;		
+		/*
+			Moves an another font to this one
+		*/
+		Font(Font&& other) noexcept;
+		/*
+			Constructs a new font object by taking ownership of the new internal handle and by referencing its
+			data source
+
+			\param handle - the internal object handle
+		*/
+		Font(void* handle);
+		/*
+			Loads the font from afile. If everything is read successfully the font is 
+			considered valid
+
+			\param path - the path to the file
+		*/
 		Font(const Path& path);
 		~Font();
 
-		void Clear();		
+		/*
+			Clears the font. After this the font is empty and is considered invalid
+		*/
+		void Clear();
 
-		void Load(const Path& path);
-		void Load(ReadStream& readStream);
+		/*
+			Loads the font by reading data from the file. If everything is read successfully the font is 
+			considered valid. The old font data is cleared
 
-		Vec2f GetGlyphKerning(uint fontPixelHeight, UnicodeChar left, UnicodeChar right) const;
-		bool GetGlyphMetrics(uint fontPixelHeight, UnicodeChar character, GlyphMetrics& data) const;
+			\param file - the file that stores the font data
+		*/
+		bool Load(const Path& path);
 
-		Map<UnicodeChar, Bitmap> CreateGlyphBitmaps(uint fontPixelHeight, const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer) const;
-		bool CreateAtlas(uint fontPixelHeight, const CharacterSet& characterSet, FontGlyphRenderer& glyphRenderer, const CreateAtlasCallback& createAtlasCallback, const CopyBitmapCallback& copyBitmapCallback) const;
+		/*
+			\returns True if the font is valid, false otherwise		
+		*/
+		bool IsValidFont() const;
+		/*
+			\returns The number of faces in the font. Zero is returned if the font isn't valid
+		*/
+		uintMem GetFaceCount() const;
 		
-		inline void* GetHandle() const { return ptr; }
+		/*
+			Disowns the handle and returns it. The font wont be referencing its source anymore
 
-		Font& operator=(Font&& other) noexcept;		
+			\returns The handle to its internal object
+		*/
+		void* ReleaseHandleOwnership();
+		/*
+			\returns The handle to the internal object
+		*/
+		void* GetHandle() const;		
 
-		static Font LoadDefault();
+		/*
+			Moves an another font to this one
+		*/
+		Font& operator=(Font&& other) noexcept;
 	private:
-		Buffer memory;
 		void* ptr;
-	};
+	};	
 }	

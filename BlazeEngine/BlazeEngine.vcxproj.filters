@@ -36,9 +36,6 @@
     <ClInclude Include="include\BlazeEngine\Application\ECS\System.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Application\ResourceSystem\Resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngine\Input\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -46,9 +43,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Window\Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Resources\Font\rectpack2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\BlazeEngine\Application\ECS\EntityCreationData.h">
@@ -114,7 +108,7 @@
     <ClInclude Include="include\BlazeEngine\Resources\Font\CharacterSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Resources\Font\FontGlyphRenderer.h">
+    <ClInclude Include="include\BlazeEngine\Resources\Font\FontFace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -179,9 +173,6 @@
     <ClCompile Include="source\BlazeEngine\Console\ConsoleOutputStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Application\ResourceSystem\Resource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\ExecuteOnMainThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -197,7 +188,7 @@
     <ClCompile Include="source\BlazeEngine\Resources\Font\CharacterSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Font\FontGlyphRenderer.cpp">
+    <ClCompile Include="source\BlazeEngine\Resources\Font\FontFace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

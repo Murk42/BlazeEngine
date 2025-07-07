@@ -23,7 +23,7 @@ namespace Blaze::Graphics::OpenGL
 			TextureDivision td;
 			td.counter = 0;
 
-			auto it = textures.Insert(rd.texture, std::move(td)).iterator;
+			auto it = textures.Insert(rd.texture.TryGet<OpenGLWrapper::Texture2D>(), std::move(td)).iterator;
 			++it->value.counter;
 		}
 
@@ -32,7 +32,7 @@ namespace Blaze::Graphics::OpenGL
 
 		for (auto& rd : renderData)
 		{
-			auto it = textures.Find(rd.texture);
+			auto it = textures.Find(rd.texture.TryGet<OpenGLWrapper::Texture2D>());
 
 			Instance instance{
 				.color = rd.color,
@@ -236,15 +236,17 @@ namespace Blaze::Graphics::OpenGL
 				//
 				int textureIndex = 0;
 
-				if (rd->texture == nullptr)
+				auto* texture = rd->texture.TryGet<OpenGLWrapper::Texture2D>();
+
+				if (texture == nullptr)
 					textureIndex = -1;
 				else
 					for (; textureIndex < DrawCallTextureCount; ++textureIndex)
-						if (textures[textureIndex] == rd->texture)
+						if (textures[textureIndex] == texture)
 							break;
 						else if (textures[textureIndex] == nullptr)
 						{
-							textures[textureIndex] = rd->texture;
+							textures[textureIndex] = texture;
 							break;
 						}
 
@@ -256,8 +258,8 @@ namespace Blaze::Graphics::OpenGL
 				.p1 = rd->pos,
 				.p2 = rd->pos + rd->right,
 				.p3 = rd->pos + rd->up,
-				.uv1 = rd->uv1,
-				.uv2 = rd->uv2,
+				.uv1 = Vec2f(rd->uv1.x, rd->uv2.y),
+				.uv2 = Vec2f(rd->uv2.x, rd->uv1.y),
 				.blend = rd->blend,
 				.alpha = rd->alpha,
 				.textureIndex = (float)textureIndex,

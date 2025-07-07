@@ -3,8 +3,6 @@
 
 #include "BlazeEngineGraphics/Core/Dynamic/GraphicsContext.h"
 
-#include "BlazeEngineGraphics/Text/FontAtlas.h"
-
 #ifdef GRAPHICS_OPENGL
 #include "BlazeEngineGraphics/Core/OpenGL/Framebuffer_OpenGL.h"
 #include "BlazeEngineGraphics/Core/OpenGL/GraphicsContext_OpenGL.h"
@@ -40,6 +38,9 @@
 #include "BlazeEngineGraphics/Renderers/Vulkan/Line2DRenderer_Vulkan.h"
 #endif
 
+//Text
+#include "BlazeEngineGraphics/Text/Core/FontAtlas.h"
+#include "BlazeEngineGraphics/Text/Core/FontGlyphRenderer.h"
 
 //UI
 #include "BlazeEngineGraphics/UI/Core/NodeDataMap.h"
@@ -56,12 +57,6 @@
 #endif
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/ImageRenderUnit.h"
 #include "BlazeEngineGraphics/UI/Graphics/RenderUnits/PanelRenderUnit.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnit.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/Text/TextRenderUnitBase.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnit.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextCursor/TextCursorRenderUnitBase.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnit.h"
-#include "BlazeEngineGraphics/UI/Graphics/RenderUnits/TextSelection/TextSelectionRenderUnitBase.h"
 
 //---UI Input
 #include "BlazeEngineGraphics/UI/Input/InputManager.h"
@@ -71,6 +66,6 @@
 #include "BlazeEngineGraphics/UI/Nodes/Panel.h"
 #include "BlazeEngineGraphics/UI/Nodes/Image.h"
 #include "BlazeEngineGraphics/UI/Nodes/Text.h"
-#include "BlazeEngineGraphics/UI/Nodes/TextButton.h"
-#include "BlazeEngineGraphics/UI/Nodes/EditableText.h"
-#include "BlazeEngineGraphics/UI/Nodes/SelectableText.h"
+//#include "BlazeEngineGraphics/UI/Nodes/TextButton.h"
+//#include "BlazeEngineGraphics/UI/Nodes/EditableText.h"
+//#include "BlazeEngineGraphics/UI/Nodes/SelectableText.h"
