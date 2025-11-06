@@ -7,8 +7,7 @@
 
 #include "BlazeEngine/Console/Console.h"
 #include "BlazeEngineCore/Debug/Logger.h"
-#include "BlazeEngineCore/DataStructures/StringViewUTF8Impl.h"
-#include "BlazeEngineCore/File/Stream/BufferStream.h"
+#include "BlazeEngineCore/Common/BufferStream.h"
 
 using namespace Blaze;
 
@@ -31,14 +30,14 @@ std::string GetImageURL()
 
 	if (!result)
 	{
-		auto err = result.error();
-		Debug::Logger::LogError("Client", "HTTP error: {}\n", httplib::to_string(err));
+		auto err = httplib::to_string(result.error());
+		Debug::Logger::LogError("Client", Format("HTTP error: {}\n", StringView(err.data(), err.size())));
 		return { };
 	}
 
 	if (result->status != httplib::StatusCode::OK_200)
 	{
-		Debug::Logger::LogError("Client", "HTTP status {} \"{}\"\n", result->status, result->reason);
+		Debug::Logger::LogError("Client", Format("HTTP status {} \"{}\"\n", result->status, StringView(result->reason.data(), result->reason.size())));
 		return { };
 	}
 
@@ -46,7 +45,7 @@ std::string GetImageURL()
 	return json[0]["url"];
 }
 
-static bool GetImageData(const std::string& imageURL, WriteStream& stream, StringUTF8& imageMIMEType)
+static bool GetImageData(const std::string& imageURL, WriteStream& stream, u8String& imageMIMEType)
 {
 	std::string domain = extractDomain(imageURL);
 	std::string path = imageURL.substr(domain.size());
@@ -60,14 +59,14 @@ static bool GetImageData(const std::string& imageURL, WriteStream& stream, Strin
 
 	if (!result)
 	{
-		auto err = result.error();
-		Debug::Logger::LogError("Client", "HTTP error: {}\n", httplib::to_string(err));
+		auto err = httplib::to_string(result.error());
+		Debug::Logger::LogError("Client", Format("HTTP error: {}\n", StringView(err.data(), err.size())));
 		return false;
 	}
 
 	if (result->status != httplib::StatusCode::OK_200)
 	{
-		Debug::Logger::LogError("Client", "HTTP status {} \"{}\"\n", result->status, result->reason);
+		Debug::Logger::LogError("Client", Format("HTTP status {} \"{}\"\n", result->status, StringView(result->reason.data(), result->reason.size())));
 		return false;
 	}
 
@@ -75,11 +74,11 @@ static bool GetImageData(const std::string& imageURL, WriteStream& stream, Strin
 
 	if (contentTypeIt == result->headers.end())
 	{
-		Debug::Logger::LogError("Client", "The HTTP response doesn't have a \"Content-Type\" header");
+		Debug::Logger::LogError("Client", Format("The HTTP response doesn't have a \"Content-Type\" header"));
 		return false;
 	}
 
-	imageMIMEType = StringViewUTF8(contentTypeIt->second.data(), contentTypeIt->second.size());
+	imageMIMEType = u8StringView(contentTypeIt->second.data(), contentTypeIt->second.size());
 
 	return true;
 }
@@ -92,7 +91,7 @@ Blaze::Bitmap LoadAPOD()
 		return {};
 
 	BufferStream stream;
-	StringUTF8 imageMIMEType;
+	u8String imageMIMEType;
 
 	if (!GetImageData(imageURL, stream, imageMIMEType))
 		return {};
@@ -106,5 +105,5 @@ Blaze::Bitmap LoadAPOD()
 	if (!bitmap.LoadWithMIME(stream, imageMIMEType, true))
 		return {};
 
-	return bitmap;	
+	return bitmap;
 }

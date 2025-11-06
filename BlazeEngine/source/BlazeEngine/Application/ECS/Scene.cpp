@@ -7,7 +7,7 @@
 
 namespace Blaze::ECS
 {
-	Scene::Scene()	
+	Scene::Scene()
 		: registry(ComponentTypeRegistry::NewRegistry())
 	{
 	}
@@ -29,18 +29,18 @@ namespace Blaze::ECS
 			auto& typeData = allTypes[i];
 
 			void* systemRaw = Memory::Allocate(typeData.SystemSize());
-			systems[i] = (System*)((uint8*)systemRaw + typeData.SystemBaseOffset());			
+			systems[i] = (System*)((uint8*)systemRaw + typeData.SystemBaseOffset());
 
 			containers[i].SetTypeData(allTypes[i]);
 
 			systemCreationData.scene = this;
-			systemCreationData.typeData = &allTypes[i];			
+			systemCreationData.typeData = &allTypes[i];
 
-			allTypes[i].ConstructSystem(systems[i]);			
+			allTypes[i].ConstructSystem(systems[i]);
 
 			systemCreationData.scene = nullptr;
-			systemCreationData.typeData = nullptr;			
-		}				
+			systemCreationData.typeData = nullptr;
+		}
 	}
 	void Scene::Clear()
 	{
@@ -61,27 +61,27 @@ namespace Blaze::ECS
 			types[i].DestructSystemDirect(systemRaw);
 			Memory::Free(systemRaw);
 		}
-		
+
 		registry = ComponentTypeRegistry::NewRegistry();
 		entities.Clear();
 	}
 	Entity* Scene::Create(ArrayView<const ComponentTypeData*> typesData)
-	{		
+	{
 		auto* entity = CreateEntity(typesData);
 		AllocateComponents();
 
 		for (uintMem i = 0; i < typesData.Count(); ++i)
-		{			
+		{
 			Component* component = GetCurrentComponent();
 
-			typesData[i]->Construct(component);			
+			typesData[i]->Construct(component);
 		}
 
 		FinishEntityCreation();
 
 		return entity;
 	}
-	
+
 	void Scene::Destroy(Entity* entity)
 	{
 		if (entity == nullptr)
@@ -89,7 +89,7 @@ namespace Blaze::ECS
 
 		if (entity->scene != this)
 		{
-			BLAZE_ENGINE_ERROR("BlazeEngine", "Trying to delete a entity from a scene that it doesn't belong to.");
+			BLAZE_LOG_ERROR("Trying to delete a entity from a scene that it doesn't belong to.");
 			return;
 		}
 
@@ -105,11 +105,11 @@ namespace Blaze::ECS
 
 		entities.Last()->arrayIndex = entity->arrayIndex;
 		entities[entity->arrayIndex] = entities.Last();
-		entities.EraseLast();		
+		entities.EraseLast();
 
 		std::destroy_at(entity);
 
-		Memory::Free(entity);		
+		Memory::Free(entity);
 	}
 	void Scene::UpdateSystem(const ComponentTypeData& typeData)
 	{
@@ -128,13 +128,13 @@ namespace Blaze::ECS
 				system->Update(component);
 
 			system->PostUpdate();
-		}		
+		}
 	}
 
 	System* Scene::GetSystem(const ComponentTypeData& typeData)
 	{
 		return GetSystem(typeData.Index());
-	}	
+	}
 	System* Scene::GetSystem(uintMem index)
 	{
 		return systems[index];
@@ -150,36 +150,36 @@ namespace Blaze::ECS
 
 
 	Entity* Scene::CreateEntity(ArrayView<const ComponentTypeData*> typesData)
-	{		
+	{
 		currentEntityCreationData = &*entityCreationData.AddFront();
 		currentEntityCreationData->scene = this;
 		currentEntityCreationData->typesData = typesData;
 		currentEntityCreationData->systems = systems.Ptr();
 
-		Entity* entity = (Entity*)Memory::Allocate(sizeof(Entity) + (sizeof(Component*) + sizeof(ComponentTypeData*)) * typesData.Count());		
+		Entity* entity = (Entity*)Memory::Allocate(sizeof(Entity) + (sizeof(Component*) + sizeof(ComponentTypeData*)) * typesData.Count());
 		std::construct_at(entity);
 		entity->arrayIndex = entities.Count();
-		entities.AddBack(entity);			
+		entities.AddBack(entity);
 
 		currentEntityCreationData->currentTypeData = GetEntityComponentsTypeData(entity);
-		currentEntityCreationData->currentEntity = entity;		
+		currentEntityCreationData->currentEntity = entity;
 
 		auto componentData = GetEntityComponentsTypeData(entity);
 
 		for (uintMem i = 0; i < typesData.Count(); ++i)
-		{			
+		{
 			componentData[i] = typesData[i];
 		}
 
 		return entity;
 	}
 	ECS::Component** Scene::AllocateComponents()
-	{		
+	{
 		auto typesData = currentEntityCreationData->typesData;
 		auto components = GetEntityComponents(currentEntityCreationData->currentEntity);
 
 		for (uintMem i = 0; i < typesData.Count(); ++i)
-			components[i] = containers[typesData[i]->Index()].Allocate();		
+			components[i] = containers[typesData[i]->Index()].Allocate();
 
 		return components;
 	}
@@ -191,7 +191,7 @@ namespace Blaze::ECS
 		return components[currentEntityCreationData->currentTypeData - componentsTypeData];
 	}
 	void Scene::FinishEntityCreation()
-	{		
+	{
 		auto entity = currentEntityCreationData->currentEntity;
 		auto componentsTypeData = GetEntityComponentsTypeData(currentEntityCreationData->currentEntity);
 		auto components = GetEntityComponents(currentEntityCreationData->currentEntity);
@@ -199,12 +199,12 @@ namespace Blaze::ECS
 		uintMem componentCount = entity->componentCount;
 		for (uintMem i = 0; i < componentCount; ++i)
 			systems[componentsTypeData[i]->Index()]->Created(components[i]);
-		
-		entityCreationData.EraseFirst();		
+
+		entityCreationData.EraseFirst();
 
 		if (entityCreationData.Empty())
 			currentEntityCreationData = nullptr;
 		else
 			currentEntityCreationData = &entityCreationData.First();
-	}	
+	}
 }

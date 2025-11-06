@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{9980a9fd-0cf9-428e-b206-745cf7089742}</ProjectGuid>
+    <RootNamespace>BlazeEngineUI</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineDebugProperties.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineDebugProperties.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>BlazeEngineUI-static-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>BlazeEngineUI-static-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;$(SolutionDir)BlazeEngineGraphics\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <TreatOutputAsContent>
+      </TreatOutputAsContent>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;$(SolutionDir)BlazeEngineGraphics\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <TreatOutputAsContent>
+      </TreatOutputAsContent>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;$(SolutionDir)BlazeEngineGraphics\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <TreatOutputAsContent>
+      </TreatOutputAsContent>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;$(SolutionDir)BlazeEngineGraphics\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <TreatOutputAsContent>
+      </TreatOutputAsContent>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="include\BlazeEngine\BlazeEngineUI.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Common\ButtonBase.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\PanelButton.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\Slider.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\FontAtlas.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\FontGlyphRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Core\Node.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Core\NodeDataMap.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Core\NodeFinalTransform.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Core\NodeTransform.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Core\NodeTreeIterator.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Core\NodeTreeView.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Core\Screen.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderNode.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderSystem.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\StaticTextRenderUnit.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\UIRenderContext.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\UIRenderUnit.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\EmptyNode.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\Image.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\Panel.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\Label.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Common\CharacterSet.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\Font.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\FontFace.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Input\InputManager.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Input\InputNode.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextShaping\TextShaping.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextShaping\WrappedTextShaping.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextStyle.h" />
+    <ClInclude Include="source\BlazeEngine\External\rectpack2D\best_bin_finder.h" />
+    <ClInclude Include="source\BlazeEngine\External\rectpack2D\empty_spaces.h" />
+    <ClInclude Include="source\BlazeEngine\External\rectpack2D\empty_space_allocators.h" />
+    <ClInclude Include="source\BlazeEngine\External\rectpack2D\finders_interface.h" />
+    <ClInclude Include="source\BlazeEngine\External\rectpack2D\insert_and_split.h" />
+    <ClInclude Include="source\BlazeEngine\External\rectpack2D\rectpack2D.h" />
+    <ClInclude Include="source\BlazeEngine\External\rectpack2D\rect_structs.h" />
+    <ClInclude Include="source\BlazeEngine\UI\Files\Consola.h" />
+    <ClInclude Include="source\pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\BlazeEngine\UI\Common\ButtonBase.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\PanelButton.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\Slider.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\FontAtlas.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\FontGlyphRenderer.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Core\Node.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Core\NodeDataMap.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Core\NodeFinalTransform.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Core\NodeTransform.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeIterator.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeView.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Core\Screen.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderSystem.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\StaticTextRenderUnit.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Input\InputManager.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Input\InputNode.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\EmptyNode.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\Image.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Files\Consola.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\Panel.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Common\CharacterSet.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\Font.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\FontFace.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\Label.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextShaping\TextShaping.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextShaping\WrappedTextShaping.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextStyle.cpp" />
+    <ClCompile Include="source\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="source\BlazeEngine\UI\Files\Consola.ttf" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

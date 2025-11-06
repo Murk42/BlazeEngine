@@ -1,17 +1,16 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
-#include "BlazeEngineCore/DataStructures/Rect.h"
-#include "BlazeEngineCore/DataStructures/Array.h"
-#include "BlazeEngineCore/DataStructures/StringViewUTF8.h"
+#include "BlazeEngineCore/Common/Rect.h"
+#include "BlazeEngineCore/Container/Array.h"
+#include "BlazeEngineCore/String/String.h"
 #include "BlazeEngineCore/Math/Vector.h"
-#include "BlazeEngine/BlazeEngineDefines.h"
 
 namespace Blaze::Display
 {
 	using DisplayID = uint32;
 
 	enum class DisplayPixelFormat
-	{		
+	{
 		Unknown = 0,
 		Index1LSB = 0x11100100u,
 		Index1MSB = 0x11200100u,
@@ -91,7 +90,7 @@ namespace Blaze::Display
 
 	struct DisplayData
 	{
-		StringUTF8 name;
+		u8String name;
 		/*
 			There's a difference between this and <currentMode> when a window is fullscreen and has changed the resolution. In that case this
 			value is the previous native display mode, and not the current display mode.
@@ -122,14 +121,14 @@ namespace Blaze::Display
 			ContentScaleChanged
 		};
 		DisplayID displayID;
-		uint64 timeNS;		
+		uint64 timeNS;
 	};
 
 	Array<DisplayID> GetDisplays();
 	DisplayData GetDisplayData(DisplayID id);
 
 	DisplayID GetPrimaryDisplay();
-	StringViewUTF8 GetDisplayName(DisplayID id);
+	u8StringView GetDisplayName(DisplayID id);
 	Rectf GetDisplayRect(DisplayID id);
 	Array<DisplayID> GetDisplays();
 	Array<DisplayMode> GetFullscreenDisplayModes(DisplayID id);
@@ -146,7 +145,7 @@ namespace Blaze::Display
 	*/
 	DisplayMode GetDesktopDisplayMode(DisplayID id);
 
-	/*	
+	/*
 		The available display modes are scanned and `closest` is filled in with the
 		closest mode matching the requested mode and returned. The mode format and
 		refresh rate default to the desktop mode if they are set to 0. The modes

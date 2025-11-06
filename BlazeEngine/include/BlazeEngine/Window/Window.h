@@ -1,19 +1,17 @@
 #pragma once
-#include <BlazeEngineCore/BlazeEngineCoreDefines.h>
-#include <BlazeEngineCore/DataStructures/StringUTF8.h>
-#include <BlazeEngineCore/DataStructures/StringViewUTF8.h>
-#include <BlazeEngineCore/Math/Vector.h>
-#include <BlazeEngine/BlazeEngineDefines.h>
-#include <BlazeEngine/Window/Display.h>
-#include <BlazeEngine/Resources/Bitmap/Bitmap.h>
-#include <BlazeEngineCore/Event/EventDispatcher.h>
-#include <BlazeEngine/Input/Keyboard.h>
-#include <BlazeEngine/Input/Mouse.h>
+#include "BlazeEngineCore/BlazeEngineCoreDefines.h"
+#include "BlazeEngineCore/Math/Vector.h"
+#include "BlazeEngineCore/String/String.h"
+#include "BlazeEngine/Window/Display.h"
+#include "BlazeEngine/Common/Bitmap.h"
+#include "BlazeEngine/Input/Input.h"
+#include "BlazeEngineCore/Event/EventDispatcher.h"
 #include <mutex>
 
 namespace Blaze
-{	
+{
 	class Window;
+	class BlazeEngineContext;
 
 	enum class WindowGraphicsAPI
 	{
@@ -46,7 +44,7 @@ namespace Blaze
 		bool alwaysOnTop : 1             = false;
 		bool utilityWindow : 1           = false;
 		Window* parentWindow                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   = nullptr;
-		StringUTF8 title                 = StringUTF8();
+		u8String title                 = u8String();
 		Vec2i pos                        = Vec2i(INT_MAX, INT_MAX);
 		Vec2u size                       = Vec2u(960, 540);
 		WindowPresentMode presentMode       = WindowPresentMode::Normal;
@@ -55,7 +53,7 @@ namespace Blaze
 
 	class BLAZE_API Window
 	{
-	public:		
+	public:
 		struct WindowResizedEvent        { Window& window; uint64 timeNS; Vec2u size; };
 		struct WindowMovedEvent          { Window& window; uint64 timeNS; Vec2i pos;  };
 		struct WindowMinimizedEvent      { Window& window; uint64 timeNS; };
@@ -66,7 +64,7 @@ namespace Blaze
 		struct WindowMouseEnterEvent     { Window& window; uint64 timeNS; };
 		struct WindowMouseLeaveEvent     { Window& window; uint64 timeNS; };
 		struct WindowDisplayChangedEvent { Window& window; uint64 timeNS; Display::DisplayID displayID; }; //The displayID is the id of the new display
-		struct WindowDestroyedEvent      { Window& window; uint64 timeNS; };	
+		struct WindowDestroyedEvent      { Window& window; uint64 timeNS; };
 
 		EventDispatcher<WindowResizedEvent>                windowResizedEventDispatcher;
 		EventDispatcher<WindowMovedEvent>                  windowMovedEventDispatcher;
@@ -79,27 +77,29 @@ namespace Blaze
 		EventDispatcher<WindowMouseLeaveEvent>             windowMouseLeaveEventDispatcher;
 		EventDispatcher<WindowDisplayChangedEvent>         windowDisplayChangedEventDispatcher;
 		EventDispatcher<WindowDestroyedEvent>              windowDestroyedEventDispatcher;
-		EventDispatcher<Keyboard::KeyDownEvent>            keyDownEventDispatcher;
-		EventDispatcher<Keyboard::KeyUpEvent>              keyUpEventDispatcher;
-		EventDispatcher<Keyboard::TextInputEvent>          textInputEventDispatcher;
-		EventDispatcher<Mouse::MouseButtonDownEvent>       mouseButtonDownEventDispatcher;
-		EventDispatcher<Mouse::MouseButtonUpEvent>         mouseButtonUpEventDispatcher;
-		EventDispatcher<Mouse::MouseMotionEvent>           mouseMotionEventDispatcher;
-		EventDispatcher<Mouse::MouseScrollEvent>           mouseScrollEventDispatcher;
-		
+		EventDispatcher<Input::KeyDownEvent>               keyDownEventDispatcher;
+		EventDispatcher<Input::KeyUpEvent>                 keyUpEventDispatcher;
+		EventDispatcher<Input::TextInputEvent>             textInputEventDispatcher;
+		EventDispatcher<Input::MouseButtonDownEvent>       mouseButtonDownEventDispatcher;
+		EventDispatcher<Input::MouseButtonUpEvent>         mouseButtonUpEventDispatcher;
+		EventDispatcher<Input::MouseMotionEvent>           mouseMotionEventDispatcher;
+		EventDispatcher<Input::MouseScrollEvent>           mouseScrollEventDispatcher;
+
 		Window();
 		Window(const Window&) = delete;
 		Window(Window&&) noexcept;
 		Window(const WindowCreateOptions& createOptions);
+		Window(const WindowCreateOptions& createOptions, BlazeEngineContext* context);
+		Window(void* handle, WindowGraphicsAPI graphicsAPI, BlazeEngineContext* context);
 		~Window();
 
-		void Destroy();		
+		void Destroy();
 		void SwapBuffers(); //TODO change to Present()
 
 		//Window basic properties
 
-		StringUTF8 GetTitle() const;
-		void SetTitle(StringViewUTF8 title);
+		u8String GetTitle() const;
+		void SetTitle(u8StringView title);
 		Vec2i GetPos() const;
 		void SetPos(Vec2i pos);
 		Vec2u GetSize() const;
@@ -115,21 +115,21 @@ namespace Blaze
 		void SetFocusableFlag(bool focusable);
 		bool GetAlwaysOnTopFlag() const;
 		void SetAlwaysOnTopFlag(bool alwaysOnTop);
-		bool GetUtilityWindowFlag() const; //Readonly, set at creation time
-		
+		bool GetUtilityWindowFlag() const; //Read-only, set at creation time
+
 		//Window graphical properties
 
 		bool GetBorderlessFlag() const;
 		void SetBorderlessFlag(bool borderless);
 		bool GetHiddenFlag() const;
 		void SetHiddenFlag(bool hidden);
-		bool GetTransparentFlag() const; //Readonly		
-		bool GetHighPixelDensityFlag() const; //Readonly
+		bool GetTransparentFlag() const; //Read-only
+		bool GetHighPixelDensityFlag() const; //Read-only
 		WindowPresentMode GetWindowPresentMode() const;
 		void SetWindowPresentMode(WindowPresentMode presentMode);
-		WindowGraphicsAPI GetGraphicsAPI() const; //Readonly, set at creation time
+		WindowGraphicsAPI GetGraphicsAPI() const; //Read-only, set at creation time
 		void GetMinAndMaxAspectRatio(float& min, float& max);
-		void SetMinAndMaxAspectRatio(float min, float max);		
+		void SetMinAndMaxAspectRatio(float min, float max);
 		float GetOpacity() const;
 		void SetOpacity(float opacity);
 		Vec2u GetMinimumSize() const;
@@ -143,15 +143,15 @@ namespace Blaze
 		//Window input properties
 
 		Vec2f GetMousePos() const;
-		Recti GetMouseConfinmentRectangle() const;
-		void SetMouseConfinmentRectangle(Recti rect);
+		Recti GetMouseConfinementRectangle() const;
+		void SetMouseConfinementRectangle(Recti rect);
 		bool GetRelativeMouseModeFlag() const;
 		void SetRelativeMouseModeFlag(bool enabled);
 		bool GetKeyboardGrabFlag() const;
-		void SetKeyboardGrabFlag(bool grab);			
-				
+		void SetKeyboardGrabFlag(bool grab);
+
 		Window* GetParentWindow() const;
-		Vec2f GetWindowMonitorDimensions() const;	
+		Vec2f GetWindowMonitorDimensions() const;
 		void Raise();
 
 		void SetDisplayModeForFullscreen(const Display::DisplayMode& displayMode);
@@ -159,41 +159,20 @@ namespace Blaze
 
 		//GetFullscreenMode() const;
 		//SetFullscreenMode();
-		//GetWindowVideoDisplayIndex() const ;		
+		//GetWindowVideoDisplayIndex() const ;
 
+		void* ReleaseHandle();
 		inline void* GetHandle() const { return handle; }
-		inline bool IsNullWindow() const { return handle == nullptr; }		
+		inline BlazeEngineContext* GetBlazeEngineContext() const { return context; }
 
 		Window& operator=(const Window&) = delete;
 		Window& operator=(Window&&) noexcept;
-
-		static Window* GetWindowFromHandle(void* handle);
-
-		static EventDispatcherInterface<WindowResizedEvent>     GetGlobalWindowResizedEventDispatcher();
-		static EventDispatcherInterface<WindowMovedEvent>       GetGlobalWindowMovedEventDispatcher();
-		static EventDispatcherInterface<WindowMinimizedEvent>   GetGlobalWindowMinimizedEventDispatcher();
-		static EventDispatcherInterface<WindowMaximizedEvent>   GetGlobalWindowMaximizedEventDispatcher();
-		static EventDispatcherInterface<WindowFocusGainedEvent> GetGlobalWindowFocusGainedEventDispatcher();
-		static EventDispatcherInterface<WindowFocusLostEvent>   GetGlobalWindowFocusLostEventDispatcher();
-		static EventDispatcherInterface<WindowCloseEvent>       GetGlobalWindowCloseEventDispatcher();
-		static EventDispatcherInterface<WindowMouseEnterEvent>  GetGlobalWindowMouseEnterEventDispatcher();
-		static EventDispatcherInterface<WindowMouseLeaveEvent>  GetGlobalWindowMouseLeaveEventDispatcher();
-		static EventDispatcherInterface<WindowDestroyedEvent>   GetGlobalWindowDestroyedEventDispatcher();
-private:		
+	private:
+		BlazeEngineContext* context;
 		WindowGraphicsAPI graphicsAPI;
-		std::mutex mutex;
-
 		void* handle;
-		std::condition_variable resizeCV;		
-		int resizeState;
-		bool waitForSwapBuffersOnResize;
 
-		Vec2i pos;
-		Vec2u size;
-				
-		void HandleMovedEvent(const WindowMovedEvent& event);
-		void HandleResizeEvent(const WindowResizedEvent& event);
-
-		friend class BlazeEngineContext;
+		void MoveDispatchers(Window& other);
+		static void HandleEvents(void*, void*);
 	};
 }

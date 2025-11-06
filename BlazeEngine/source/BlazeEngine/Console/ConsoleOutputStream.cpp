@@ -7,7 +7,7 @@ namespace Blaze
 {
 	uintMem ConsoleOutputStream::Write(const void* ptr, uintMem byteCount)
 	{
-		std::cout.write((const char*)ptr, byteCount);		
+		std::cout.write((const char*)ptr, byteCount);
 		return byteCount;
 	}
 	bool ConsoleOutputStream::MovePosition(intMem offset)

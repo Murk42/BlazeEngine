@@ -1,11 +1,10 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
-#include "BlazeEngine/BlazeEngineDefines.h"
-#include "BlazeEngineCore/DataStructures/StringView.h"
-#include "BlazeEngineCore/DataStructures/Set.h"
-#include "BlazeEngineCore/DataStructures/Array.h"
-#include "BlazeEngineCore/DataStructures/ArrayView.h"
-#include "BlazeEngineCore/DataStructures/Map.h"
+#include "BlazeEngineCore/String/StringView.h"
+#include "BlazeEngineCore/Container/Set.h"
+#include "BlazeEngineCore/Container/Array.h"
+#include "BlazeEngineCore/Container/ArrayView.h"
+#include "BlazeEngineCore/Container/Map.h"
 #include <concepts>
 
 namespace Blaze::ECS
@@ -20,12 +19,12 @@ namespace Blaze::ECS
 
 	template<typename T>
 	concept IsSystem = requires {
-		std::derived_from<T, System>;
+		IsDerivedFrom<T, System>;
 	};
 
 	template<typename T>
 	concept IsComponent =  requires {
-		std::derived_from<T, Component>;
+		IsDerivedFrom<T, Component>;
 		T();									
 		T::typeName;
 		IsSystem<typename T::System>;		

@@ -1,7 +1,6 @@
 #pragma once
 #include "BlazeEngineCore/BlazeEngineCoreDefines.h"
-#include "BlazeEngineCore/File/Stream/Stream.h"
-#include "BlazeEngine/BlazeEngineDefines.h"
+#include "BlazeEngineCore/Common/Stream.h"
 
 namespace Blaze
 {

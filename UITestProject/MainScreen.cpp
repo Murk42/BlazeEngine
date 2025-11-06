@@ -1,27 +1,29 @@
 #include "pch.h"
 #include "MainScreen.h"
-#include "Internet.h"
+#include "SDL3/SDL.h"
 
-MainScreen::MainScreen(ResourceManager& resourceManager)
-	: Screen(nullptr), resourceManager(resourceManager)
+MainScreen::MainScreen(Window* window, ResourceManager& resourceManager)
+	: Screen(window)
 {
-	auto fontFace = resourceManager.GetResource<FontFace>("default");
+	button.SetPressedEventCallback([&](auto event) {
+		sliders2.SetEnabledFlag(!sliders2.IsEnabled());
+		sliders4.SetEnabledFlag(!sliders4.IsEnabled());
+		});
+}
 
-	TextStyle style;
-	style.baselineOffset = 0;
-	style.color = ColorRGBA(255, 255, 255, 255);
-	style.fontFace = fontFace;
-	style.fontSize = 64;
-	style.strikeThrough = false;
-	style.underline = false;
+LabeledSlider::LabeledSlider()
+{
+	SetTransform({ .size = { 200, 30 } });
+	slider.SetParent(this);
+	slider.SetTransform({ .parentPivot = { 0, 0.5 }, .pivot = { 0, 0.5 }, .size = { 200, 10 } });
 
-	this->textStyle = resourceManager.LoadResource<TextStyle>("", style);
+	label.SetParent(&slider);
+	label.SetTransform({ .pos = { 5, 5}, .parentPivot = {0, 1}, .pivot = {0, 0}});
+}
 
-	FontGlyphRenderers::AntialiasedFontGlyphRenderer glyphRenderer;
-	atlas = resourceManager.LoadResource<FontAtlas>("", FontAtlas(style, fontFace->GetAllGlyphsInidices(), glyphRenderer, resourceManager));
-
-	Map<FontAtlasIdentifier, const FontAtlas&> atlases;
-	atlases.Insert(style, *atlas);
-	text.SetParent(this);	
-	text.SetText("Ovo je tekst za testiranje!\nIma vise linija\nfi fl ffi ffl th st ct", { }, FLT_MAX, textStyle, atlases );
+LabeledSlider::LabeledSlider(Node& parent, u8StringView label, const UI::FontAtlas& atlas)
+	: LabeledSlider()
+{
+	SetParent(&parent);
+	this->label.BuildText(label, atlas);
 }

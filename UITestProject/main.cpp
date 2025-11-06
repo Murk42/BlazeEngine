@@ -1,90 +1,157 @@
 #include "pch.h"
 #include "MainScreen.h"
 
-static ResourceRef<FontFace> LoadFontFace(ResourceManager& resourceManager)
+class Application;
+
+class ApplicationLayer
 {
-	Path path = "assets/fonts/Rekalgera-Regular.otf";
-	Font font(path);
+public:
+	virtual bool Update() { return false; }
+	virtual void Render() {}
+private:
+};
 
-	for (uintMem i = 0; i < font.GetFaceCount(); ++i)
+class Application
+{
+public:
+	~Application()
 	{
-		FontFace fontFace(path, i);
+		for (auto& layer : applicationLayers)
+			delete layer;
+	}
+	template<typename T, typename ... Args>
+	void AddLayer(Args&& ... args)
+	{
+		applicationLayers.AddFront(new T(std::forward<Args>(args)...));
+	}
 
-		if (!fontFace.IsBold() && !fontFace.IsItalic())
+	void Run()
+	{
+		while (true)
 		{
-			return resourceManager.LoadResource<FontFace>("default", std::move(fontFace));
-			break;
+			bool exit = false;
+
+			for (auto& layer : applicationLayers)
+				exit |= !layer->Update();
+
+			if (exit)
+				break;
+
+			for (auto& layer : applicationLayers)
+				layer->Render();
 		}
-	}	
+	}
+private:
+	List<ApplicationLayer*> applicationLayers;
+};
 
-	return ResourceRef<FontFace>();
-}
+template<auto MemberFunction>
+class EventMemberFunctionTie
+{
+public:
+	using Arguments = MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunction)>;
+	using EventType = RemoveCVRef<typename Arguments::template TypeAtIndex<0>>;
+	using ClassType = MemberFunctionPointerTypeClassType<decltype(MemberFunction)>;
 
-CLIENT_API void Setup()
-{		
-	Debug::Logger::AddOutputFile("log.txt");
+	EventMemberFunctionTie(EventDispatcher<EventType>& dispatcher, ClassType& object)
+		: dispatcher(dispatcher), object(object)
+	{
+		dispatcher.AddHandler<MemberFunction>(object);
+	}
+	~EventMemberFunctionTie()
+	{
+		dispatcher.RemoveHandler<MemberFunction>(object);
+	}
+private:
+	EventDispatcher<EventType>& dispatcher;
+	ClassType& object;
+};
+#define EVENT_MEMBER_FUNCTION(className, name, dispatcher) EventMemberFunctionTie<&className::name> name##Handler{ dispatcher, *this };
 
+class MainApplicationLayer : public ApplicationLayer
+{
+public:
 	ResourceManager resourceManager;
-	auto marlboroFontFace = LoadFontFace(resourceManager);
 
-	//resourceManager.LoadResource<Font>("Malboro", resourceManager.LoadResource<File>("assets/fonts/Marlboro.ttf", "assets/fonts/Marlboro.ttf", FileAccessPermission::Read));
-	//resourceManager.LoadResource<Font>("Vogue", resourceManager.LoadResource<File>("assets/fonts/Vogue.ttf", "assets/fonts/Vogue.ttf", FileAccessPermission::Read));
-	//resourceManager.LoadResource<Font>("African", resourceManager.LoadResource<File>("assets/fonts/african.ttf", "assets/fonts/african.ttf", FileAccessPermission::Read));
-		
-
-	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ Graphics::OpenGL::GraphicsContextProperties_OpenGL{						
-		} };
-	Graphics::OpenGL::RenderWindow_OpenGL renderWindow{ graphicsContext, WindowCreateOptions{			
-		.hidden = true,
-		.title = "UI test"
-	}};
-	graphicsContext.SetActiveRenderWindow(renderWindow);
-	auto& window = renderWindow.GetWindow();
-	bool windowClosed = false;
+	Graphics::OpenGL::GraphicsContext_OpenGL graphicsContext{ { } };
+	Graphics::OpenGL::RenderWindow_OpenGL window{ graphicsContext, WindowCreateOptions{.hidden = true, .title = "UI test" }, };
 
 	Graphics::OpenGL::TexturedRectRenderer_OpenGL texturedRectRenderer{ graphicsContext };
-	Graphics::OpenGL::ColoredCharacterRenderer_OpenGL coloredCharacterRenderer{ graphicsContext };
 	Graphics::OpenGL::PanelRenderer_OpenGL panelRenderer{ graphicsContext };
+	Graphics::RendererRegistry rendererRegistry;
 
-	Graphics::OpenGL::UIRenderPipeline_OpenGL UIRenderPipeline{ texturedRectRenderer, coloredCharacterRenderer, panelRenderer };			
+	UI::RenderSystem UIRenderSystem;
+	MainScreen mainScreen{ &window, resourceManager};
 
-	MainScreen mainScreen(resourceManager);
-	mainScreen.SetWindow(&window);
+	bool shouldExit = false;
 
-	UIRenderPipeline.SetScreen(&mainScreen);	
-
-	LambdaEventHandler<Window::WindowResizedEvent> windowResizedEventHandler{
-		[&](const Window::WindowResizedEvent& event) {			
-		
-			graphicsContext.Flush();
-			graphicsContext.SetRenderArea(Vec2i(), event.size);			
-		} };
-	LambdaEventHandler<Window::WindowCloseEvent> windowCloseEventHandler{
-		[&](const Window::WindowCloseEvent& event) {
-			windowClosed = true;
-		} };
-	window.windowResizedEventDispatcher.AddHandler(windowResizedEventHandler);
-	window.windowCloseEventDispatcher.AddHandler(windowCloseEventHandler);
-	windowResizedEventHandler.OnEvent({ .window = window, .size = window.GetSize() });
-	window.SetHiddenFlag(false);
-
-	while (true)
+	MainApplicationLayer()
 	{
-		resourceManager.HandleResourceLoadedCallbacks();
+		rendererRegistry.RegisterRenderer(&texturedRectRenderer);
+		rendererRegistry.RegisterRenderer(&panelRenderer);
+
+		UIRenderSystem.SetRendererRegistry(rendererRegistry);
+		UIRenderSystem.SetScreen(&mainScreen);
+
+		Bitmap bm;
+		bm.Load("assets/images/icon.png");
+		window.SetIcon(bm);
+
+		window.SetHiddenFlag(false);
+
+		struct A
+		{
+			int a;
+			float b;
+			double c;
+		};
+
+
+	}
+	~MainApplicationLayer()
+	{
+	}
+
+	bool Update() override
+	{
 		Input::Update();
 
-		if (Keyboard::GetFrameKeyState(Keyboard::Key::F4).pressed && Keyboard::GetFrameKeyState(Keyboard::Key::LALT).pressed)
-			break;
+		if (Input::GetKeyFrameState(Input::Key::F4).down && Input::GetKeyFrameState(Input::Key::LALT).down)
+		{
+			shouldExit = true;
+		}
 
-		if (windowClosed)
-			break;
-		
-		graphicsContext.ClearTarget();
-		
-		for (auto& node : mainScreen.GetTree())
-			node.CleanFinalTransform();
-		UIRenderPipeline.Render(renderWindow.GetSize());
-		
-		window.SwapBuffers();
+		if (Input::GetKeyFrameState(Input::Key::F11).pressed)
+		{
+			if (window.GetWindowPresentMode() == WindowPresentMode::Fullscreen)
+				window.SetWindowPresentMode(WindowPresentMode::Normal);
+			else
+				window.SetWindowPresentMode(WindowPresentMode::Fullscreen);
+		}
+
+		return !shouldExit;
 	}
+	void Render() override
+	{
+		window.ClearRenderBuffers();
+
+		UIRenderSystem.Render(window.GetSize());
+
+		window.Present();
+	}
+
+	void WindowClosed(const Window::WindowCloseEvent& event)
+	{
+		shouldExit = true;
+	}
+	EVENT_MEMBER_FUNCTION(MainApplicationLayer, WindowClosed, window.windowCloseEventDispatcher)
+};
+
+CLIENT_API void Setup()
+{
+	Debug::Logger::AddOutputFile("log.txt");
+
+	Application app;
+	app.AddLayer<MainApplicationLayer>();
+	app.Run();
 }

@@ -1,6 +1,0 @@
-[03/09/24 16:49:49] [INFO] [Blaze Engine] Successfully initialized SDL 2.26.5
-[03/09/24 16:49:49] [INFO] [Blaze Engine] Successfully initialized FreeType 2.12.1
-[03/09/24 16:49:49] [INFO] [Blaze Engine] Successfully initialized sail 0.9.1
-[03/09/24 16:49:51] [INFO] [Blaze Engine] Successfully initialized glew 2.1.0
-[03/09/24 16:49:51] [INFO] [Blaze Engine] Created OpenGL context 4.6 core profile
-[03/09/24 16:50:00] [WARNING] [Blaze Graphics API] Fence timeout

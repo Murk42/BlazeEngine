@@ -1,31 +1,29 @@
 #include "pch.h"
 #include "BlazeEngineCore/Debug/Logger.h"
 #include "BlazeEngine/Window/Display.h"
-#include "BlazeEngine/Internal/Libraries/SDL.h"
-#include "BlazeEngine/Internal/Libraries/SDLConversions.h"
-
-#include <SDL3/SDL.h>
+#include "external/SDL/SDL.h"
+#include "external/SDL/SDLConversions.h"
 
 namespace Blaze::Display
-{		
+{
 	DisplayID GetPrimaryDisplay()
 	{
-		return SDL_GetPrimaryDisplay();		
+		return SDL_GetPrimaryDisplay();
 	}
-	StringViewUTF8 GetDisplayName(DisplayID id)
+	u8StringView GetDisplayName(DisplayID id)
 	{
 		const char* ptr = SDL_GetDisplayName(id);
 
 		if (ptr == nullptr)
-			return StringViewUTF8();
+			return u8StringView();
 		else
-			return StringViewUTF8(ptr, strlen(ptr));
+			return u8StringView(ptr, strlen(ptr));
 	}
-	Rectf GetDisplayRect(DisplayID id)	
+	Rectf GetDisplayRect(DisplayID id)
 	{
 		SDL_Rect rect;
 		if (!SDL_GetDisplayBounds(id, &rect))
-			BLAZE_ENGINE_ERROR("SDL_GetDisplayBounds failed. SDL returned error: \"" + GetSDLError() + "\"");
+			BLAZE_LOG_ERROR("SDL_GetDisplayBounds failed. SDL returned error: \"" + GetSDLError() + "\"");
 
 		return Rectf(rect.x, rect.y, rect.w, rect.h);
 	}
@@ -42,18 +40,18 @@ namespace Blaze::Display
 	}
 	DisplayData GetDisplayData(DisplayID id)
 	{
-		DisplayMode currentDisplayMode = SDLToBlaze_DisplayMode(*SDL_GetCurrentDisplayMode(id));		
+		DisplayMode currentDisplayMode = SDLToBlaze_DisplayMode(*SDL_GetCurrentDisplayMode(id));
 
 		return {
 			.name = GetDisplayName(id),
 			.desktopMode = SDLToBlaze_DisplayMode(*SDL_GetDesktopDisplayMode(id)),
 			.currentMode = SDLToBlaze_DisplayMode(*SDL_GetCurrentDisplayMode(id)),
 			.fullscreenDisplayModes = GetFullscreenDisplayModes(id),
-			.rect = GetDisplayRect(id),			
+			.rect = GetDisplayRect(id),
 			.currentOrientation = SDLToBlaze_DisplayOrientation(SDL_GetCurrentDisplayOrientation(id)),
 			.naturalOrientation = SDLToBlaze_DisplayOrientation(SDL_GetNaturalDisplayOrientation(id)),
 			.contentScale = SDL_GetDisplayContentScale(id),
-		};		
+		};
 	}
 	Array<DisplayMode> GetFullscreenDisplayModes(DisplayID id)
 	{
@@ -62,15 +60,15 @@ namespace Blaze::Display
 
 		if (displayModesPtr == nullptr)
 		{
-			BLAZE_ENGINE_ERROR("SDL_GetFullscreenDisplayModes failed. SDL returned error: \"" + GetSDLError() + "\"");
+			BLAZE_LOG_ERROR("SDL_GetFullscreenDisplayModes failed. SDL returned error: \"" + GetSDLError() + "\"");
 			return Array<DisplayMode>();
 		}
 
-		Array<DisplayMode> displayModes((uintMem)count);		
-		
+		Array<DisplayMode> displayModes((uintMem)count);
+
 		for (uintMem i = 0; i < count; ++i)
 			displayModes[i] = SDLToBlaze_DisplayMode(*displayModesPtr[i]);
-		
+
 		SDL_free(displayModesPtr);
 
 		return displayModes;
@@ -81,7 +79,7 @@ namespace Blaze::Display
 
 		if (ptr == nullptr)
 		{
-			BLAZE_ENGINE_ERROR("SDL_GetCurrentDisplayMode failed. SDL returned error: \"" + GetSDLError() + "\"");
+			BLAZE_LOG_ERROR("SDL_GetCurrentDisplayMode failed. SDL returned error: \"" + GetSDLError() + "\"");
 			return DisplayMode();
 		}
 
@@ -93,7 +91,7 @@ namespace Blaze::Display
 
 		if (ptr == nullptr)
 		{
-			BLAZE_ENGINE_ERROR("SDL_GetDesktopDisplayMode failed. SDL returned error: \"" + GetSDLError() + "\"");
+			BLAZE_LOG_ERROR("SDL_GetDesktopDisplayMode failed. SDL returned error: \"" + GetSDLError() + "\"");
 			return DisplayMode();
 		}
 
@@ -104,14 +102,14 @@ namespace Blaze::Display
 		SDL_DisplayMode displayModeSDL;
 		if (!SDL_GetClosestFullscreenDisplayMode(id, (int)size.x, (int)size.y, refreshRate, includeHighPixelDensityModes, &displayModeSDL))
 		{
-			BLAZE_ENGINE_ERROR("SDL_GetClosestFullscreenDisplayMode failed. SDL returned error: \"" + GetSDLError() + "\"");
+			BLAZE_LOG_ERROR("SDL_GetClosestFullscreenDisplayMode failed. SDL returned error: \"" + GetSDLError() + "\"");
 			return DisplayMode();
 		}
-		
-		return SDLToBlaze_DisplayMode(displayModeSDL);		
+
+		return SDLToBlaze_DisplayMode(displayModeSDL);
 	}
 	DisplayOrientation GetNaturalDisplayOrientation(DisplayID id)
-	{		
+	{
 		return SDLToBlaze_DisplayOrientation(SDL_GetNaturalDisplayOrientation(id));
 	}
 	DisplayOrientation GetCurrentDisplayOrientation(DisplayID id)
@@ -120,6 +118,6 @@ namespace Blaze::Display
 	}
 	float GetDisplayContentScale(DisplayID id)
 	{
-		return SDL_GetDisplayContentScale(id);		
+		return SDL_GetDisplayContentScale(id);
 	}
 }

@@ -6,8 +6,10 @@
 
 #include "EntityCreationData.h"
 
+#include <bit>
+
 namespace Blaze::ECS
-{				
+{
 	//extern ComponentTypeData emptyComponenTypeData;
 
 	Component::Component()
@@ -16,7 +18,7 @@ namespace Blaze::ECS
 		if (currentEntityCreationData->scene != nullptr)
 		{
 			entity = currentEntityCreationData->currentEntity;
-			system = currentEntityCreationData->systems[(*currentEntityCreationData->currentTypeData)->Index()];			
+			system = currentEntityCreationData->systems[(*currentEntityCreationData->currentTypeData)->Index()];
 			++currentEntityCreationData->currentTypeData;
 		}
 	}
@@ -26,8 +28,8 @@ namespace Blaze::ECS
 		if (system == nullptr)
 			return false;
 
-		return system->GetTypeData(typeData);		
-	}	
+		return system->GetTypeData(typeData);
+	}
 
 	uintMem ComponentContainer::BucketHeader::MarkNew()
 	{
@@ -36,14 +38,14 @@ namespace Blaze::ECS
 
 		flags |= mask;
 
-		return index;		
-	}	
+		return index;
+	}
 	void ComponentContainer::BucketHeader::Unmark(uintMem index)
 	{
 		FlagType mask = FlagType(1) << index;
 
 		if ((flags & mask) == 0)
-			BLAZE_ENGINE_ERROR("Trying to free a element in a HybridArray that wasn't allocated yet");
+			BLAZE_LOG_ERROR("Trying to free a element in a HybridArray that wasn't allocated yet");
 
 		flags ^= mask;
 	}
@@ -67,7 +69,7 @@ namespace Blaze::ECS
 		uintMem byteOffset = (byte*)element - (byte*)bucket - sizeof(BucketHeader);
 
 		if (byteOffset % elementSize != 0)
-			BLAZE_ENGINE_ERROR("Invalid component pointer");
+			BLAZE_LOG_ERROR("Invalid component pointer");
 
 		index = byteOffset / elementSize;
 	}
@@ -130,7 +132,7 @@ namespace Blaze::ECS
 			else
 				component = (Component*)((byte*)LastInBucket(buckets[bucketIndex]) + typeData->BaseOffset());
 		}
-		else			
+		else
 			component = (Component*)((byte*)buckets[bucketIndex] + sizeof(BucketHeader) + index * elementSize + sizeof(ElementHeader) + typeData->BaseOffset());
 	}
 
@@ -153,7 +155,7 @@ namespace Blaze::ECS
 				break;
 
 		if (i == bucketCount)
-			BLAZE_ENGINE_ERROR("Trying to free a invalid pointer");
+			BLAZE_LOG_ERROR("Trying to free a invalid pointer");
 
 		--bucketCount;
 		--nonFullBucketCount;
@@ -193,12 +195,12 @@ namespace Blaze::ECS
 	{
 		if (typeData.IsNone())
 		{
-			BLAZE_ENGINE_CORE_ERROR("Trying to set type data to none");
+			BLAZE_LOG_ERROR("Trying to set type data to none");
 			return;
 		}
 
 		this->typeData = &typeData;
-		elementSize = typeData.Size() + sizeof(ElementHeader);		
+		elementSize = typeData.Size() + sizeof(ElementHeader);
 	}
 	Component* ComponentContainer::Create()
 	{
@@ -235,10 +237,10 @@ namespace Blaze::ECS
 		return component;
 	}
 	void ComponentContainer::Destroy(Component* component)
-	{		
+	{
 		typeData->Destruct(component);
 
-		Free(component);		
+		Free(component);
 	}
 	void ComponentContainer::Free(Component* component)
 	{
@@ -247,9 +249,9 @@ namespace Blaze::ECS
 
 		GetComponentLocation(component, bucket, index);
 
-		bucket->Unmark(index);		
-		
-		--elementCount;		
+		bucket->Unmark(index);
+
+		--elementCount;
 
 		if (bucket->IsEmpty())
 		{
@@ -259,12 +261,12 @@ namespace Blaze::ECS
 	}
 	void ComponentContainer::Clear()
 	{
-		for (auto el : *this)		
+		for (auto el : *this)
 			typeData->Destruct(el);
 
 		for (uintMem i = 0; i < bucketCount; ++i)
 			FreeBucket(buckets[i]);
-				
+
 		delete[] buckets;
 
 		elementCount = 0;
@@ -381,7 +383,7 @@ namespace Blaze::ECS
 			buffer += 1;
 			endBitIndex -= 8;
 		}
-	
+
 		uint8 mask = (1 << endBitIndex) - 1;
 		index += std::popcount<uint8>((*(uint8*)buffer) & mask);
 

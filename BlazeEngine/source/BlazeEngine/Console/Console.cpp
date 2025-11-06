@@ -1,49 +1,24 @@
 #include "pch.h"
 #include "BlazeEngine/Console/Console.h"
-#include "BlazeEngine/Internal/BlazeEngineContext.h"
 #include <string>
 #include <codecvt>
 #include <iostream>
 
 namespace Blaze
-{    
-    TimingResult InitializeConsole()
-    {        
-        Timing timing{ "Console" };
-        Debug::Logger::AddOutputToConsole();
-        return timing.GetTimingResult();
-    }
-    void TerminateConsole()
-    {   
-        Debug::Logger::RemoveOutputFromConsole();
-    }
-
+{
     namespace Console
-    {    
-        template<>
-        void Write<>(StringViewUTF8 text)
-        {           
-            consoleOutputStream.Write(text.Buffer(), text.BufferSize());            
-        }                
-        
-        StringUTF8 Read()
-        {
-            std::wstring input;
-            std::getline(std::wcin, input);
-            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            auto temp = converter.to_bytes(input);
-            return StringUTF8((const void*)temp.data(), temp.size());
-        }
-    }
-    namespace Debug::Logger
     {
-        void AddOutputToConsole()
+        template<>
+        void Write<>(u8StringView text)
         {
-            AddOutputStream(consoleOutputStream);
+            std::cout << std::string_view(reinterpret_cast<const char*>(text.Ptr()), text.Count());
         }
-        void RemoveOutputFromConsole()
+
+        u8String Read()
         {
-            RemoveOutputStream(consoleOutputStream);            
+            std::string input;
+            std::getline(std::cin, input);
+            return u8String(input.data(), input.size());
         }
     }
 }

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="Blaze::Range&lt;*&gt;">
+		<DisplayString Optional="true">{{ count={ _end - _begin } }</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple" Optional="true">{{ count={ _end - _begin } }</Item>
+
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="Test">
+				<Variable Name="it" InitialValue="_begin" />
+				<Loop>
+					<Break Condition="it == _end" />
+					<Item>*it</Item>
+					<Exec>++it</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::Array&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[reserved]" ExcludeView="simple">reserved</Item>
+			<ArrayItems>
+				<Size>count</Size>
+				<ValuePointer>ptr</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::Map&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[bucketCount]" ExcludeView="simple">bucketCount</Item>
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
+				<Variable Name="it" InitialValue="(Node*)nullptr" />
+				<Variable Name="j" InitialValue="0" />
+
+				<Size>count</Size>
+				<Loop Condition="j!=bucketCount">
+					<Exec>it = buckets[j].head</Exec>
+					<Loop Condition="it != nullptr">
+						<Item Name="[{it->pair.key}]"> it->pair.value </Item>
+						<Exec>it = it->next</Exec>
+					</Loop>
+					<Exec>++j</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::ResourceRef&lt;*&gt;">
+		<DisplayString Condition="resourceBase == nullptr">{{ null }}</DisplayString>
+		<DisplayString Condition="resourceBase != nullptr &amp;&amp; !resourceBase->loaded._Storage._Storage._Value">{{ not loaded yet }}</DisplayString>
+		<DisplayString Condition="resourceBase != nullptr &amp;&amp; resourceBase->loaded._Storage._Storage._Value">{{ { (*($T1*)&amp;((Resource&lt;$T1&gt;*)resourceBase)->resourceMemory) }, reference count = { resourceBase->referenceCount }}}</DisplayString>
+		<Expand>
+			<Item Name="loaded" ExcludeView="simple" Condition="resourceBase != nullptr">(bool)resourceBase->loaded._Storage._Storage._Value</Item>
+			<Item Name="resource" ExcludeView="simple" Condition="resourceBase != nullptr &amp;&amp; resourceBase->loaded._Storage._Storage._Value">*($T1*)&amp;((Resource&lt;$T1&gt;*)resourceBase)->resourceMemory</Item>
+			<Item Name="resource count" ExcludeView="simple" Condition="resourceBase != nullptr">resourceBase->referenceCount</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::Set&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[bucketCount]" ExcludeView="simple">bucketCount</Item>
+
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
+				<Variable Name="it" InitialValue="(Node*)nullptr" />
+				<Variable Name="j" InitialValue="0" />
+
+				<Size>count</Size>
+				<Loop Condition="j!=bucketCount">
+
+					<Exec>it = buckets[j].head</Exec>
+					<If Condition="it != nullptr">
+						<Loop Condition="it->next == nullptr">
+							<Item> it->value </Item>
+							<Exec>it = it->next</Exec>
+						</Loop>
+					</If>
+
+					<Exec>++j</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char, *&gt;">
+		<DisplayString>{ ptr, [count]s }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char8_t, *&gt;">
+		<DisplayString>{ ptr, [count]s8 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s8</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char16_t, *&gt;">
+		<DisplayString>{ ptr, [count]su }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]su</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char32_t, *&gt;">
+		<DisplayString>{ ptr, [count]s32 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s32</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char&gt;">
+		<DisplayString>{ ptr, [count]s }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char8_t&gt;">
+		<DisplayString>{ ptr, [count]s8 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s8</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char16_t&gt;">
+		<DisplayString>{ ptr, [count]su }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]su</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char32_t&gt;">
+		<DisplayString>{ ptr, [count]s32 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s32</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::UnicodeChar">
+		<DisplayString>'{ &amp;value, [1]s32b }' ({ value })</DisplayString>
+	</Type>
+</AutoVisualizer>

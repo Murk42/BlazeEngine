@@ -24,10 +24,7 @@
     <ClCompile Include="MainScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RegionSplitter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Internet.cpp">
+    <ClCompile Include="LayoutControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,21 +35,19 @@
     <ClInclude Include="MainScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RegionSplitter.h">
+    <ClInclude Include="LayoutControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Internet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="assets\images\Mountains.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fonts\african.ttf" />
     <Font Include="assets\fonts\Marlboro.ttf" />
     <Font Include="assets\fonts\Vogue.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BlazeProjectPropertySheet.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="log.txt" />
   </ItemGroup>
 </Project>

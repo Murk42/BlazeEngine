@@ -96,7 +96,7 @@ namespace Blaze::ECS
 
 		if (!inserted)
 		{
-			BLAZE_ENGINE_WARNING("Trying to register a type but there is a type with the same name already registered");
+			BLAZE_LOG_WARNING("Trying to register a type but there is a type with the same name already registered");
 			return;
 		}
 

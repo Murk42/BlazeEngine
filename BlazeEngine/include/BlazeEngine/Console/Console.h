@@ -1,24 +1,23 @@
 #pragma once
-#include "BlazeEngineCore/Format/Format.h"
-#include "BlazeEngine/BlazeEngineDefines.h"
+#include "BlazeEngineCore/Common/Format.h"
 
 namespace Blaze
 {
 	namespace Console
 	{
-		template<Formatable ... Args>
-		void Write(StringViewUTF8 text, const Args& ... args);
+		template<Formattable<char8_t> ... Args>
+		void Write(u8StringView text, const Args& ... args);
 
 		template<>
-		BLAZE_API void Write<>(StringViewUTF8 text);
+		BLAZE_API void Write<>(u8StringView text);
 
-		BLAZE_API StringUTF8 Read();
+		BLAZE_API u8String Read();
 
-		template<Formatable ...Args>
-		void Write(StringViewUTF8 text, const Args & ...args)
+		template<Formattable<char8_t> ...Args>
+		void Write(u8StringView text, const Args & ...args)
 		{
-			Write(FormatUTF8(text, args...));
-		}		
+			Write(Format(text, args...));
+		}
 	}
 
 	namespace Debug::Logger

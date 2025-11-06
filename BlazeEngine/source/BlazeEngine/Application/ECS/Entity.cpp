@@ -134,7 +134,7 @@ namespace Blaze::ECS
 	{
 		if (index > componentCount)
 		{									
-			BLAZE_ENGINE_ERROR("Component index out of range. Index value was: ", index);
+			BLAZE_LOG_ERROR("Component index out of range. Index value was: ", index);
 			return nullptr;
 		}
 
@@ -144,7 +144,7 @@ namespace Blaze::ECS
 	{
 		if (index > componentCount)
 		{
-			BLAZE_ENGINE_ERROR("Component index out of range. Index value was: {}", index);
+			BLAZE_LOG_ERROR("Component index out of range. Index value was: {}", index);
 			return nullptr;
 		}
 

@@ -54,69 +54,48 @@
     <ClInclude Include="source\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\Libraries\FreeType.h">
+    <ClInclude Include="source\external\SDL\SDL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\BlazeEngineContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\BlazeEngineDefines.h">
+    <ClInclude Include="include\BlazeEngine\BlazeEngineContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Console\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Resources\Font\Font.h">
+    <ClInclude Include="include\BlazeEngine\Common\ThreadTaskQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Resources\Bitmap\Bitmap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\ThreadTaskQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\ThreadEventStack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\Libraries\sail.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Files\Consola.h">
+    <ClInclude Include="include\BlazeEngine\Common\ThreadEventStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Console\ConsoleOutputStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\ExecuteOnMainThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Input\Keyboard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Input\Mouse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\BlazeEngine\Window\Display.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BlazeEngine\Internal\Libraries\SDLConversions.h">
+    <ClInclude Include="source\external\SDL\SDLConversions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Resources\Font\CharacterSet.h">
+    <ClInclude Include="include\BlazeEngine\Common\Bitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Resources\Font\FontFace.h">
+    <ClInclude Include="source\external\sail\sail.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\external\sail\sail.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngine\Platform\Windows\Windows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Application\ClientAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\BlazeEngine\Input\Input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Bitmap\Bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Window\Window.cpp">
@@ -146,56 +125,35 @@
     <ClCompile Include="source\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\FreeType.cpp">
+    <ClCompile Include="source\external\SDL\SDL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\Libraries.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\BlazeEngineContext.cpp">
+    <ClCompile Include="source\BlazeEngine\BlazeEngineContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Console\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\sail.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Font\Font.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Files\Consola.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\Console\ConsoleOutputStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\ExecuteOnMainThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Input\Keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Window\Display.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Internal\Libraries\SDLConversions.cpp">
+    <ClCompile Include="source\external\SDL\SDLConversions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Font\CharacterSet.cpp">
+    <ClCompile Include="source\BlazeEngine\Common\Bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Resources\Font\FontFace.cpp">
+    <ClCompile Include="source\external\sail\sail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="source\BlazeEngine\Files\Consola.ttf" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="vcpkg.json" />
+    <ClCompile Include="source\external\sail\sail.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Platform\Windows\Windows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,7 +1,9 @@
 #include "pch.h"
-#include "BlazeEngineCore/Threading/Thread.h"
-#include "BlazeEngine/Internal/BlazeEngineContext.h"
-#include "BlazeEngine/Internal/Libraries/SDL.h"
+#include "BlazeEngine/Core/Threading/Thread.h"
+#include "BlazeEngine/BlazeEngineContext.h"
+#include "external/SDL/SDL.h"
+//#include "external/FreeType/FreeType.h"
+#include "external/Sail/Sail.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include <Windows.h>
@@ -21,135 +23,131 @@ static void(*AddLoggerOutputFiles)();
 
 namespace Blaze
 {
-
-	TimingResult InitializeConsole();
-	void TerminateConsole();	
-
-	TimingResult InitializeLibraries();
-	void TerminateLibraries();
-
-	TimingResult InitializeInput();
-	void TerminateInput();
-
-	static void ReportSubTiming(TimingResult& result, uintMem indent)
+	static Timing InitializeLibraries()
 	{
-		String indentString;
-		indentString.Resize(indent * 4, ' ');
-		BLAZE_ENGINE_CORE_INFO("{} {} - {:.4}s", indentString, result.name, result.time.ToSeconds());
+		Timing timing{ "Engine libraries" };
 
-		for (auto& subResult : result.nodes)
-			ReportSubTiming(subResult.value, indent + 1);
+
+
+		timing.AddNode(InitializeSDL());
+		//timing.AddNode(InitializeFreeType());
+		timing.AddNode(InitializeSail());
+
+		return timing;
+	}
+	static void TerminateLibraries()
+	{
+		TerminateSail();
+		//TerminateFreeType();
+		TerminateSDL();
 	}
 
-	static void ReportTiming(Timing& timing)
+	static unsigned ClientThreadFunction(uint32 clientThreadFinishedSDLEventIdentifier)
 	{
-		auto result = timing.GetTimingResult();
-		BLAZE_ENGINE_CORE_INFO("{} initialization took {:.4}s", result.name, result.time.ToSeconds());
-
-		for (auto& subResult : result.nodes)
-			ReportSubTiming(subResult.value, 1);
-	}
-
-
-	static void InitializeBlaze()
-	{
-		Timing timing{ "Blaze engine" };
-
-#ifdef BLAZE_STATIC
-		AddLoggerOutputFiles();
-#else
-		if (AddLoggerOutputFiles != nullptr)
-			AddLoggerOutputFiles();
-#endif
-			
-		timing.AddNode(InitializeConsole());
-		timing.AddNode(InitializeLibraries());
-		timing.AddNode(InitializeInput());
-
-		//ReportTiming(timing);
-
-		blazeEngineContext.blazeInitTimings = timing.GetTimingResult();
-	}
-	static void TerminateBlaze()
-	{
-		TerminateInput();
-		TerminateLibraries();
-		TerminateConsole();				
-	}
-
-	static unsigned RunSetupOnThread()
-	{
-		struct ThreadExitReporter
-		{
-			~ThreadExitReporter()
-			{
-				Blaze::PostSDLClientThreadExitEvent();				
-			}
-		};
-
-		ThreadExitReporter threadExitReporter;
 		Setup();
+
+		SDL_Event event;
+		SDL_zero(event);
+		event.type = clientThreadFinishedSDLEventIdentifier;
+		SDL_PushEvent(&event);
 
 		return 0;
 	}
 
-	static void EmptyFunc()
+#ifdef BLAZE_PLATFORM_WINDOWS
+	static int BlazeMain(int nCmdShow)
+#endif
 	{
+		ConsoleOutputStream consoleOutputStream;
+		Debug::Logger::AddOutputStream(consoleOutputStream);
 
-	}
+		auto initializationTimings = InitializeLibraries();
 
-	static StringView GetSDLError()
-	{
-		const char* ptr = SDL_GetError();
-		uintMem len = strlen(ptr);
-		return StringView(ptr, len);
-	}
+		//This scope is here to ensure `blazeEngineContext` is destroyed before the libraries are terminated
+		{
+			uint32 mainThreadSDLEventIdentifier = SDL_RegisterEvents(1);
 
-	static int BlazeMain()
-	{
+#ifdef BLAZE_PLATFORM_WINDOWS
+			bool separateClientThreadMode = true;
+#else
+			bool separateClientThreadMode = false;
+#endif
+
+			BlazeEngineContext blazeEngineContext(BlazeEngineContextInitializationParameters{
+				.initializationTimings = std::move(initializationTimings),
+				.mainThreadSDLEventIdentifier = mainThreadSDLEventIdentifier ,
+				.separateClientThreadMode = separateClientThreadMode,
+				.nCmdShow = nCmdShow
+				});
+			Blaze::blazeEngineContext = &blazeEngineContext;
+
 #ifndef BLAZE_STATIC
 #ifdef BLAZE_PLATFORM_WINDOWS
-		HMODULE applicationModule = GetModuleHandleA(NULL);
+			HMODULE applicationModule = GetModuleHandleA(NULL);
 
-		if (applicationModule == nullptr)
-			return 1;
+			if (applicationModule == nullptr)
+				return 1;
 
-		Setup = (void(*)())GetProcAddress(applicationModule, "Setup");
-		AddLoggerOutputFiles = (void(*)())GetProcAddress(applicationModule, "AddLoggerOutputFiles");
+			Setup = (void(*)())GetProcAddress(applicationModule, "Setup");
+			AddLoggerOutputFiles = (void(*)())GetProcAddress(applicationModule, "AddLoggerOutputFiles");
 
-		if (AddLoggerOutputFiles == nullptr)
-			AddLoggerOutputFiles = EmptyFunc;
+			if (AddLoggerOutputFiles == nullptr)
+				AddLoggerOutputFiles = []() {};
 
-		if (Setup == nullptr)
-			return 1;
-#else
-#error unsuported platform
-#endif
-#endif		
-
-		if (blazeEngineContext.createClientThread)
-		{
-			Thread clientThread;
-			clientThread.Run(&RunSetupOnThread);
-
-			while (!blazeEngineContext.clientThreadExited.test())
+			if (Setup == nullptr)
 			{
-				SDL_Event event;
-				if (SDL_WaitEvent(&event) == 0)
-					Debug::Logger::LogError("SDL", "SDL_WaitEvent failed, SDL returned error: \"" + GetSDLError() + "\"");
-
-				blazeEngineContext.ExecuteMainThreadTask();
+				BLAZE_LOG_ERROR("Could not find Setup function in application");
+				return 1;
 			}
 
-			if (!clientThread.WaitToFinish(5.0f))
-				BLAZE_ENGINE_CORE_WARNING("Client thread didnt finish 5 seconds after notifying the main thread that it is exiting");
+			if (AddLoggerOutputFiles != nullptr)
+				AddLoggerOutputFiles();
+#endif
+#else
+			AddLoggerOutputFiles();
+
+#endif
+
+			if (separateClientThreadMode)
+			{
+				uint32 clientThreadFinishedSDLEventIdentifier = SDL_RegisterEvents(1);;
+
+				Thread clientThread;
+				clientThread.Run(&ClientThreadFunction, clientThreadFinishedSDLEventIdentifier);
+
+				bool exitEventLoop = false;
+				while (!exitEventLoop)
+				{
+					SDL_Event event;
+					if (SDL_WaitEvent(&event) == 0)
+						Debug::Logger::LogError("SDL", "SDL_WaitEvent failed, SDL returned error: \"" + GetSDLError() + "\"");
+
+					if (event.type == mainThreadSDLEventIdentifier)
+					{
+						auto function = (void(*)(void*))event.user.data1;
+
+						if (function != nullptr)
+							function(event.user.data2);
+					}
+					else if (event.type == clientThreadFinishedSDLEventIdentifier)
+						exitEventLoop = true;
+				}
+
+				if (!clientThread.WaitToFinish(5.0f))
+					BLAZE_LOG_WARNING("Client thread didn't exit 5 seconds after notifying the main thread that it is exiting");
+			}
+			else
+				Setup();
+
+			SDL_Event event;
+			while (SDL_PollEvent(&event));
+
 		}
-		else		
-			Setup();	
-				
-		SDL_Event event;
-		while (SDL_PollEvent(&event));
-			
+
+		TerminateLibraries();
+
+		Debug::Logger::RemoveOutputStream(consoleOutputStream);
+
 		return 0;
 	}
 }
@@ -157,38 +155,18 @@ namespace Blaze
 #ifdef BLAZE_PLATFORM_WINDOWS
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-	Blaze::InitializeBlaze();
-
-	Blaze::blazeEngineContext.nCmdShow = nCmdShow;
-
-	int ret = Blaze::BlazeMain();
-
-	Blaze::TerminateBlaze();
-
-	return ret;
+	return Blaze::BlazeMain(nCmdShow);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nCmdShow)
 {
-	Blaze::InitializeBlaze();
-
-	Blaze::blazeEngineContext.nCmdShow = nCmdShow;
-
-	int ret = Blaze::BlazeMain();
-
-	Blaze::TerminateBlaze();
-
-	return ret;
+	return Blaze::BlazeMain(nCmdShow);
 }
 #endif
 
 int main(int argc, char* argv[])
 {
-	Blaze::InitializeBlaze();
-
-	int ret = Blaze::BlazeMain();
-
-	Blaze::TerminateBlaze();
-
-	return ret;
+#ifdef BLAZE_PLATFORM_WINDOWS
+	return Blaze::BlazeMain(SW_SHOWNORMAL);
+#endif
 }

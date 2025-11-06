@@ -92,7 +92,7 @@ namespace Blaze::ECS
 
 		if (!registry.GetComponentTypeData<C>(typeData))
 		{
-			BLAZE_ENGINE_ERROR("Component type is not in registry");
+			BLAZE_LOG_ERROR("Component type is not in registry");
 			return;
 		}
 
@@ -105,7 +105,7 @@ namespace Blaze::ECS
 		const ComponentTypeData* typeData;
 
 		if (!registry.GetComponentTypeData<C>(typeData))
-			BLAZE_ENGINE_CORE_ERROR("Component type is not in registry");
+			BLAZE_LOG_ERROR("Component type is not in registry");
 		
 		return (typename C::template System*)GetSystem(*typeData);
 	}
@@ -116,7 +116,7 @@ namespace Blaze::ECS
 		const ComponentTypeData* typeData;
 
 		if (!registry.GetComponentTypeData<C>(typeData))
-			BLAZE_ENGINE_CORE_ERROR("Component type is not in registry");
+			BLAZE_LOG_ERROR("Component type is not in registry");
 
 		return GetComponents(*typeData);
 	}	
@@ -125,7 +125,7 @@ namespace Blaze::ECS
 	inline void Scene::SetTypeData(const ComponentTypeData*& ptr)
 	{
 		if (!registry.GetComponentTypeData<C>(ptr))
-			BLAZE_ENGINE_CORE_ERROR("Registry doesnt contain the component type");
+			BLAZE_LOG_ERROR("Registry doesnt contain the component type");
 	}
 
 	template<typename ... C> requires (IsComponent<C> && ...)

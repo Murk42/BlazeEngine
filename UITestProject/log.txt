@@ -1,2 +1,2 @@
-[01/01/70 01:06:35] [INFO] [Blaze Engine Graphics] Successfully initialized glew 2.2.0
-[01/01/70 01:06:35] [INFO] [Blaze Engine Graphics] Created OpenGL context 4.6 core profile 
+[<color=WHITE> INFO  <color/>] () Blaze Engine: <color=green>Successfully<color/> initialized glew 2.2.0
+[<color=WHITE> INFO  <color/>] () Blaze Engine: <color=green>Successfully created OpenGL context 4.6 core profile 

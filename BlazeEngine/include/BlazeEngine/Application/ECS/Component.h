@@ -1,43 +1,42 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/Constexpr.h"
+#include "BlazeEngineCore/String/FixedString.h"
 #include "BlazeEngineCore/Debug/Logger.h"
-#include "BlazeEngine/BlazeEngineDefines.h"
 #include "BlazeEngine/Application/ECS/ComponentTypeRegistry.h"
 #include "BlazeEngine/Application/ECS/System.h"
 
 namespace Blaze::ECS
-{			
-	template<Constexpr::FixedString ... Tags>
+{
+	template<FixedString ... Tags>
 	struct TagGroup
 	{
 		static constexpr uintMem Size = 0;
 		static constexpr std::array<StringView, 0> tags;
 
-		template<Constexpr::FixedString ... NewTags>
+		template<FixedString ... NewTags>
 		using Concat = TagGroup<NewTags...>;
 		template<typename G>
 		using Combine = G;
-	};			
-	template<Constexpr::FixedString Tag, Constexpr::FixedString Tag2, Constexpr::FixedString ... Tags>
+	};
+	template<FixedString Tag, FixedString Tag2, FixedString ... Tags>
 	struct TagGroup<Tag, Tag2, Tags...>
 	{
 		static constexpr uintMem Size = 2 + sizeof...(Tags);
 
-		template<Constexpr::FixedString ... NewTags>
+		template<FixedString ... NewTags>
 		using Concat = TagGroup<Tag, Tag2, Tags..., NewTags...>;
 		template<typename G>
 		using Combine = typename G::template Concat<Tag, Tag2, Tags...>;
 		using Next = TagGroup<Tag2, Tags...>;
 
 		static constexpr StringView tag = Tag;
-		static constexpr std::array<StringView, Size> tags = Constexpr::ConcatArray(std::array<StringView, 1>({ Tag }), Next::tags);
+		static constexpr std::array<StringView, Size> tags = ConcatArray(std::array<StringView, 1>({ Tag }), Next::tags);
 	};
-	template<Constexpr::FixedString Tag>
+	template<FixedString Tag>
 	struct TagGroup<Tag>
-	{	
+	{
 		static constexpr uintMem Size = 1;
 
-		template<Constexpr::FixedString ... NewTags>
+		template<FixedString ... NewTags>
 		using Concat = TagGroup<Tag, NewTags...>;
 		template<typename G>
 		using Combine = typename G::template Concat<Tag>;
@@ -54,40 +53,40 @@ namespace Blaze::ECS
 	};
 	template<typename T>
 	concept DerivesComponent = requires {
-		std::derived_from<T, Component>;
+		IsDerivedFrom<T, Component>;
 	};
 
-	class Entity;	
+	class Entity;
 
 #define COMPONENT(name, systemName)											\
 	static constexpr StringView typeName = #name;							\
-	using System = systemName;													
+	using System = systemName;
 
 #define COMPONENT_ADD_TYPE_TAGS(...) using TypeTags = TypeTags::Concat<__VA_ARGS__>;
 
 	class BLAZE_API Component
-	{				
+	{
 		Entity* entity;
 		System* system;
 	public:
-		Component();	
+		Component();
 		Component(const Component&) = delete;
-		
+
 		bool GetTypeData(const ComponentTypeData*& typeData) const;
 		inline System* GetSystem() const { return system; }
-		inline Entity* GetEntity() const { return entity; }		
+		inline Entity* GetEntity() const { return entity; }
 
 		template<typename T>
 		inline T* Cast()
 		{
 			const ComponentTypeData* typeData;
 			if (!GetTypeData(typeData))
-				BLAZE_ENGINE_CORE_ERROR("Component has to type data");
+				BLAZE_LOG_ERROR("Component has to type data");
 
-			if (typeData->GetTypeName() != T::typeName)				
-				BLAZE_ENGINE_CORE_ERROR("Invalid component cast");
+			if (typeData->GetTypeName() != T::typeName)
+				BLAZE_LOG_ERROR("Invalid component cast");
 
-			return (T*)this;					
+			return (T*)this;
 		}
 
 		Component& operator=(const Component&) = delete;
@@ -118,13 +117,13 @@ namespace Blaze::ECS
 		};
 
 		struct BucketHeader
-		{		
+		{
 			FlagType flags;
-		
+
 			uintMem MarkNew();
 			void Unmark(uintMem index);
 
-			bool IsFull();			
+			bool IsFull();
 			bool IsEmpty();
 		};
 
@@ -183,7 +182,7 @@ namespace Blaze::ECS
 			Iterator operator++(int);
 			Iterator& operator--();
 			Iterator operator--(int);
-			
+
 			bool operator==(const Iterator& other) const;
 			bool operator!=(const Iterator& other) const;
 
@@ -199,5 +198,5 @@ namespace Blaze::ECS
 		Iterator end() const;
 
 		friend class Iterator;
-	};	
+	};
 }

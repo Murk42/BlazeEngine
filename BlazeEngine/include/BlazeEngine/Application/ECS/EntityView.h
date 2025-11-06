@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngineCore/DataStructures/Tuple.h"
+#include "BlazeEngineCore/Common/Tuple.h"
 #include "BlazeEngine/Application/ECS/Entity.h"
 
 namespace Blaze::ECS
@@ -24,7 +24,7 @@ namespace Blaze::ECS
 			return entity; 
 		}
 
-		template<typename C> requires (TemplateGroup<Cs...>::template HasType<C>)
+		template<typename C> requires (TypeGroup<Cs...>::template HasType<C>)
 		C* GetComponent()
 		{
 			return components.GetValueByType<C*>();
