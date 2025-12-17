@@ -2,7 +2,7 @@
 #include "BlazeEngine/Core/Threading/ThreadPool.h"
 
 namespace Blaze
-{	
+{
 	ThreadPool::ThreadPool()
 		: exit(false)
 	{
@@ -21,7 +21,7 @@ namespace Blaze
 	}
 
 	void ThreadPool::AllocateThreads(uintMem threadCount)
-	{		
+	{
 		threads.Resize(threadCount);
 		for (auto& thread : threads)
 			thread.Run(ThreadFunc, (void*)this);
@@ -52,7 +52,7 @@ namespace Blaze
 			count += thread.WaitToFinish(timeout) ? 1 : 0;
 		return count;
 	}
-	unsigned long ThreadPool::ThreadFunc(void* userData)
+	int ThreadPool::ThreadFunc(void* userData)
 	{
 		ThreadPool& threadPool = *(ThreadPool*)userData;
 

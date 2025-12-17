@@ -29,9 +29,7 @@ namespace Blaze
 		{
 			if (string[i] == '<')
 			{
-#ifdef BLAZE_PLATFORM_WINDOWS
-				WriteConsoleA(handle, (const char*)ptr + printBegin, printEnd - printBegin, NULL, NULL);
-#endif
+				WriteWithoutStyle((const char*)ptr + printBegin, printEnd - printBegin);
 
 				uintMem j = string.Find(">", i);
 
@@ -53,10 +51,15 @@ namespace Blaze
 				++printEnd;
 		}
 
-#ifdef BLAZE_PLATFORM_WINDOWS
-			WriteConsoleA(handle, (const char*)ptr + printBegin, printEnd - printBegin, NULL, NULL);
-#endif
+		WriteWithoutStyle((const char*)ptr + printBegin, printEnd - printBegin);
 
+		return byteCount;
+	}
+	uintMem ConsoleOutputStream::WriteWithoutStyle(const void* ptr, uintMem byteCount)
+	{
+#ifdef BLAZE_PLATFORM_WINDOWS
+		WriteConsoleA(handle, (const char*)ptr, byteCount, NULL, NULL);
+#endif
 		return byteCount;
 	}
 	bool ConsoleOutputStream::MovePosition(intMem offset)

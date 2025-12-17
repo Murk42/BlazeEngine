@@ -18,10 +18,15 @@ namespace Blaze::Debug::Logger
 		blazeEngineCoreContext.loggerListeners.EraseOne([=](auto other) { return other == listener; });
 	}
 
-	void AddOutputStream(WriteStream& stream, bool acceptsStyledText)
+	void AddOutputStream(StyledWriteStream& stream)
 	{
 		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
-		blazeEngineCoreContext.loggerOutputStreams.AddBack(BlazeEngineCoreContext::LoggerOutputStreamData({ &stream, acceptsStyledText}));
+		blazeEngineCoreContext.loggerOutputStreams.AddBack(BlazeEngineCoreContext::LoggerOutputStreamData({ &stream, true}));
+	}
+	void AddOutputStream(WriteStream& stream)
+	{
+		std::lock_guard lk{ blazeEngineCoreContext.contextMutex };
+		blazeEngineCoreContext.loggerOutputStreams.AddBack(BlazeEngineCoreContext::LoggerOutputStreamData({ &stream, false }));
 	}
 	void RemoveOutputStream(WriteStream& stream)
 	{
@@ -102,7 +107,14 @@ namespace Blaze::Debug::Logger
 	static void WriteToOutput_Unsafe(u8StringView string, bool styledText = false)
 	{
 		for (auto& stream : blazeEngineCoreContext.loggerOutputStreams)
-			if (stream.acceptsStyledText || !styledText)
+			if (stream.isStyledWriteStream)
+			{
+				if (styledText)
+					stream.writeStream->Write(string.Ptr(), string.Count());
+				else
+					((StyledWriteStream*)stream.writeStream)->WriteWithoutStyle(string.Ptr(), string.Count());
+			}
+			else if (!styledText)
 				stream.writeStream->Write(string.Ptr(), string.Count());
 			else
 				PassToStreamWithoutStyle(string, stream.writeStream, stream.insideStyleTag);
@@ -154,9 +166,9 @@ namespace Blaze::Debug::Logger
 			FormatInto<char>(typeFormatted, 7, "{^7}", type);
 
 			WriteToOutput_Unsafe("[");
-			WriteToOutput_Unsafe(typeStyleTag);
+			WriteToOutput_Unsafe(typeStyleTag, true);
 			WriteToOutput_Unsafe(typeFormatted);
-			WriteToOutput_Unsafe("<color/>] ");
+			WriteToOutput_Unsafe("<color/>] ", true);
 			WriteToOutput_Unsafe("(");
 			WriteToOutput_Unsafe(time);
 			WriteToOutput_Unsafe(") ");
@@ -165,7 +177,7 @@ namespace Blaze::Debug::Logger
 			WriteToOutput_Unsafe(log.GetMessage(), styledText);
 			WriteToOutput_Unsafe("\n");
 
-			if (static_cast<uint64>(log.GetType() & blazeEngineCoreContext.logCallstackPrintMask) != 0)
+			if (static_cast<uint64>(log.GetType() & blazeEngineCoreContext.logCallstackPrintMask) != 0 && !log.GetCallstack().Empty())
 			{
 				auto& callstack = log.GetCallstack();
 				for (auto& frame : callstack)
@@ -195,8 +207,8 @@ namespace Blaze::Debug::Logger
 			}
 
 			for (auto& stream : blazeEngineCoreContext.loggerOutputStreams)
-				if (stream.acceptsStyledText)
-					static_cast<StyledOutputStream*>(stream.writeStream)->ResetStyle();
+				if (stream.isStyledWriteStream)
+					static_cast<StyledWriteStream*>(stream.writeStream)->ResetStyle();
 		}
 
 		if (static_cast<uint64>(log.GetType() & blazeEngineCoreContext.logBreakpointMask) != 0)

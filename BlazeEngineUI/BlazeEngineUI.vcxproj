@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -83,7 +83,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
-    <TargetName>BlazeEngineUI-static-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
@@ -92,7 +91,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
-    <TargetName>BlazeEngineUI-static-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgAutoLink>false</VcpkgAutoLink>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -189,6 +190,8 @@
   <ItemGroup>
     <ClInclude Include="include\BlazeEngine\BlazeEngineUI.h" />
     <ClInclude Include="include\BlazeEngine\UI\Common\ButtonBase.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Common\System.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Input\InputEvents.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\PanelButton.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Slider.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\FontAtlas.h" />
@@ -201,12 +204,12 @@
     <ClInclude Include="include\BlazeEngine\UI\Core\NodeTreeView.h" />
     <ClInclude Include="include\BlazeEngine\UI\Core\Screen.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderNode.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderSystem.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\GraphicsSubSystem.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\StaticTextRenderUnit.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\UIRenderContext.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\UIRenderUnit.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderContext.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnit.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\EmptyNode.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Image.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Panel.h" />
@@ -214,11 +217,12 @@
     <ClInclude Include="include\BlazeEngine\UI\Common\CharacterSet.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\Font.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\FontFace.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Input\InputManager.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Input\InputSubSystem.h" />
     <ClInclude Include="include\BlazeEngine\UI\Input\InputNode.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextShaping\TextShaping.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextShaping\WrappedTextShaping.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextStyle.h" />
+    <ClInclude Include="include\BlazeEngine\UI\UIContext.h" />
     <ClInclude Include="source\BlazeEngine\External\rectpack2D\best_bin_finder.h" />
     <ClInclude Include="source\BlazeEngine\External\rectpack2D\empty_spaces.h" />
     <ClInclude Include="source\BlazeEngine\External\rectpack2D\empty_space_allocators.h" />
@@ -231,6 +235,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\BlazeEngine\UI\Common\ButtonBase.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Common\System.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Input\InputSubSystem.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\PanelButton.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Slider.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\FontAtlas.cpp" />
@@ -242,11 +248,10 @@
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeIterator.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeView.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\Screen.cpp" />
-    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderSystem.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsManager.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\StaticTextRenderUnit.cpp" />
-    <ClCompile Include="source\BlazeEngine\UI\Input\InputManager.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Input\InputNode.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\EmptyNode.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Image.cpp" />

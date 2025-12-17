@@ -9,7 +9,10 @@ namespace Blaze::UI
 	public:
 		VirtualMap<String> map;
 
-		void SetTypeName(const String& name);
-		String GetTypeName() const;
+		void SetName(StringView name);
+		StringView GetName() const;
+
+		void SetTypeName(StringView typeName);
+		StringView GetTypeName() const;
 	};
 }

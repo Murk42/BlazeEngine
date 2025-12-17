@@ -81,29 +81,48 @@ namespace Blaze::Debug
 	};
 
 
+	Callstack::Callstack()
+		: frames(nullptr), frameCount(0)
+	{
+	}
 	Callstack::Callstack(uint skip, uint max_depth)
 		: frames(nullptr), frameCount(0)
 	{
-		using Stacktrace = boost::stacktrace::basic_stacktrace<StacktraceAllocator<boost::stacktrace::frame>>;
-
-		auto stacktrace = Stacktrace(skip + 2, max_depth);
-
-		frames = (StackFrame*)Memory::Allocate(sizeof(StackFrame) * stacktrace.size());
-
-		for (uint i = 0; i < stacktrace.size(); ++i)
+		try
 		{
-			auto sourceFile = stacktrace[i].source_file();
-			auto name = stacktrace[i].name();
+			using Stacktrace = boost::stacktrace::basic_stacktrace<StacktraceAllocator<boost::stacktrace::frame>>;
 
-			std::construct_at(&frames[i], StackFrame(
-				StringView(sourceFile.data(), sourceFile.size()),
-				stacktrace[i].source_line(),
-				stacktrace[i].address(),
-				StringView(name.data(), name.size())
-			));
+			auto stacktrace = Stacktrace(skip + 2, max_depth);
+
+			frames = (StackFrame*)Memory::Allocate(sizeof(StackFrame) * stacktrace.size());
+
+			for (uint i = 0; i < stacktrace.size(); ++i)
+			{
+				auto sourceFile = stacktrace[i].source_file();
+				auto name = stacktrace[i].name();
+
+				std::construct_at(&frames[i], StackFrame(
+					StringView(sourceFile.data(), sourceFile.size()),
+					stacktrace[i].source_line(),
+					stacktrace[i].address(),
+					StringView(name.data(), name.size())
+				));
+			}
+
+			frameCount = stacktrace.size();
 		}
-
-		frameCount = stacktrace.size();
+		catch (std::exception exception)
+		{
+			Logger::ProcessLog(Log(LogType::Error, "Blaze Engine", Format("Failed to capture callstack. Exception thrown: {}", exception.what()), { }));
+			frameCount = 0;
+			frames = nullptr;
+		}
+		catch (...)
+		{
+			Logger::ProcessLog(Log(LogType::Error, "Blaze Engine", "Failed to capture callstack. Unknown exception thrown", { }));
+			frameCount = 0;
+			frames = nullptr;
+		}
 	}
 
 	Callstack::Callstack(const Callstack& other)

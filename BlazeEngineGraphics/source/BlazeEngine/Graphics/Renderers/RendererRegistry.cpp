@@ -3,27 +3,21 @@
 
 namespace Blaze::Graphics
 {
-	RendererBase* RendererRegistry::RegisterRenderer(RendererBase* renderer, StringView name)
+	RendererRegistry::RendererRegistry(ArrayView<RendererBase&> renderers)
+		: RendererRegistry()
 	{
-		Key key{ renderer->GetTypeID(), name };
+		for (auto& renderer : renderers)
+			RegisterRenderer(renderer);
+	}
+	void RendererRegistry::RegisterRenderer(RendererBase& renderer, StringView name)
+	{
+		Key key{ renderer.GetTypeID(), name };
 		auto it = renderers.Find(key);
 
 		if (!it.IsNull())
-		{
-			RendererBase* old = it->value;
+			renderers.Erase(it);
 
-			if (renderer == nullptr)
-				renderers.Erase(it);
-			else
-				it->value = renderer;
-
-			return old;
-		}
-		else
-		{
-			renderers.Insert(key, renderer);
-			return nullptr;
-		}
+		renderers.Insert(key, renderer);
 	}
 	RendererBase* RendererRegistry::GetRenderer(uint64 type, const StringView& name) const
 	{
@@ -31,7 +25,7 @@ namespace Blaze::Graphics
 		auto it = renderers.Find(key);
 
 		if (!it.IsNull())
-			return it->value;
+			return &it->value;
 		else
 			return nullptr;
 	}

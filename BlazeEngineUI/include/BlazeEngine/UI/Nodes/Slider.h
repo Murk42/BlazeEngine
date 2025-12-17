@@ -30,9 +30,8 @@ namespace Blaze::UI::Nodes
 		EventDispatcher<ValueChangedEvent> valueChangedEventDispatcher;
 
 		Slider();
+		Slider(Node& parent, const NodeTransform& transform = { }, float value = 0, Vec2f handleSize = { 30, 12 }, float trackThickness = 1.0f, const Style& style = {});
 		~Slider();
-
-		int HitTest(Vec2f screenPosition) override;
 
 		void SetStyle(const Style& style);
 		void SetStepCount(uint32 stepCount);
@@ -43,8 +42,8 @@ namespace Blaze::UI::Nodes
 		inline float GetStepCount() const { return value; }
 		inline float GetValue() const { return value; }
 
-		void PreRender(const UIRenderContext& renderContext) override;
-		UIRenderUnitBase* GetRenderUnit(uintMem index) override;
+		void PreRender(const RenderContext& renderContext) override;
+		RenderUnitBase* GetRenderUnit(uintMem index) override;
 	private:
 		PanelRenderUnit handleRenderUnit;
 		PanelRenderUnit trackRenderUnit;
@@ -55,7 +54,7 @@ namespace Blaze::UI::Nodes
 		ColorRGBAf handleFillColor;
 		ColorRGBAf handleBorderColor;
 
-		bool highlighted;
+		bool highlighted : 1;
 
 		uint32 stepCount;
 		float value;
@@ -63,14 +62,16 @@ namespace Blaze::UI::Nodes
 		Vec2f handleSize;
 		float trackThickness;
 
-		float pressedOffset;
+		float draggingMouseOffset;
 
 		void UpdateColor();
+		void UpdateCursor();
+
+		bool HitTestHandle(Vec2f mouseScreenPos);
 
 		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
-		void MouseHitStatusChangedEvent(const MouseHitStatusChangedEvent& event);
-		void MouseButtonDownEvent(const InputNode::MouseButtonDownEvent& event);
+		void MouseHitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event);
 		void PressedStateChangedEvent(const PressedStateChangedEvent& event);
-		void MouseMotionEvent(const MouseMotionEvent& event);
+		void MouseMotionEvent(const UIMouseMotionEvent& event);
 	};
 }

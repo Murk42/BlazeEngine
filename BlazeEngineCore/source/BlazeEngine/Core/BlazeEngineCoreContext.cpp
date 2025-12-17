@@ -37,7 +37,7 @@ namespace Blaze
 
 		atexit(SaveMemoryLog);
 
-		Debug::Logger::AddOutputStream(consoleOutputStream, true);
+		Debug::Logger::AddOutputStream(consoleOutputStream);
 
 		LARGE_INTEGER _tickFrequency;
 		QueryPerformanceFrequency(&_tickFrequency);

@@ -12,6 +12,21 @@ namespace Blaze::UI
 	class BLAZE_API Node
 	{
 	public:
+		enum class HitStatus : uint8
+		{
+			NotHit = 0,
+			HitBlocking = 1,
+			HitNotBlocking = 2,
+		};
+		struct TransformDirtyEvent
+		{
+			Node& node;
+		};
+		struct TransformFilterEvent
+		{
+			Node& node;
+			NodeTransform& transform;
+		};
 		struct TransformUpdatedEvent
 		{
 			Node& node;
@@ -45,7 +60,9 @@ namespace Blaze::UI
 		};
 		NodeDataMap dataMap;
 
+		EventDispatcher<TransformDirtyEvent> transformDirtyEventDispatcher;
 		EventDispatcher<TransformUpdatedEvent> transformUpdatedEventDispatcher;
+		EventDispatcher<TransformFilterEvent> transformFilterEventDispatcher;
 		EventDispatcher<FinalTransformUpdatedEvent> finalTransformUpdatedEventDispatcher;
 		EventDispatcher<EnabledStateChangedEvent> enabledStateChangedEventDispatcher;
 		EventDispatcher<SurroundingNodeTreeChangedEvent> surroundingNodeTreeChangedEventDispatcher;
@@ -55,10 +72,9 @@ namespace Blaze::UI
 		virtual ~Node();
 
 		/*
-			\returns Value greater than 0 if the node is hit and blocks further hits, less than 0 if it is hit
-			and doesn't block further hits and 0 if it is not hit.
+			\returns Hit test value indicating if the node was hit at the given position in screen node coordinates.
 		*/
-		virtual int HitTest(Vec2f screenPosition);
+		virtual HitStatus HitTest(Vec2f screenNodePosition);
 
 		void SetParent(Node* parent);
 		/*
@@ -78,17 +94,9 @@ namespace Blaze::UI
 		*/
 		void MarkTransformDirty();
 		/*
-			Marks the node final transform as dirty. Because of this, finalTransformUpdatedEventDispatcher is
-			guaranteed to be called before the next access to the node final transform.
-		*/
-		void MarkFinalTransformDirty();
-		/*
 			Same as GetTransform() but doesn't return anything.
 		*/
 		void CleanTransform();
-		/*
-			Same as GetFinalTransform() but doesn't return anything.
-		*/
 		void CleanFinalTransform();
 
 		void SetEnabledFlag(bool newEnabledFlag);
@@ -110,20 +118,21 @@ namespace Blaze::UI
 			the parent node enabled state. Not same as IsEnabled().
 		*/
 		inline bool GetNodeEnabledFlag() const { return enabledFlag; }
-		inline bool IsTransformDirty() const { return transformChanged; }
-		inline bool IsFinalTransformDirty() const { return finalTransformChanged; }
+		inline bool GetTransformDirtyFlag() const { return transformDirty; }
 
 		NodeTreeView GetTree();
 		/*
 			If the transform is dirty calls the transformUpdatedEventDispatcher and cleans the transform.
 			\returns The latest set transform
 		*/
+		bool GetTransform(NodeTransform& transform);
 		NodeTransform GetTransform();
 		/*
 			If the final transform is dirty calls the finalTransformUpdatedEventDispatcher and cleans the
 			final transform. If the transform (not final) is dirty, then it is cleaned.
 			\returns The calculated final transform.
 		*/
+		bool GetFinalTransform(NodeFinalTransform& transform);
 		NodeFinalTransform GetFinalTransform();
 	private:
 		Screen* screen;
@@ -139,19 +148,9 @@ namespace Blaze::UI
 		bool enabled : 1; //Stores weather this node is enabled, accounting for parent nodes
 		bool enabledFlag : 1; //Stores weather this nodes enabled flag is on or off
 
-		bool finalTransformChanged : 1;
-		bool transformChanged : 1;
-		bool enabledStateChanged : 1; //Used to tell wether the event dispatcher should be notified after the enabled state has changed
-
-		bool deferChanges : 1;
-
-		bool containsDeferredEnabledFlag : 1;
-		bool containsDeferredTransform : 1;
-		bool containsDeferredParent : 1;
-
-		bool deferredEnabledFlag : 1;
-		NodeTransform deferredTransform;
-		Node* deferredParent;
+		bool transformDirty : 1;
+		bool finalTransformDirty : 1;
+		bool isFilteringTransform;
 
 		//The parent transformDirty should be checked if it is true and updated accordingly
 		static NodeFinalTransform CalculateFinalTransform(const NodeTransform& transform, const NodeFinalTransform& parentFinalTransform);
@@ -162,8 +161,7 @@ namespace Blaze::UI
 		void PropagateEnabledState();
 		void PropagateEnabledStateEvent();
 
-		void StartDeferPeriod();
-		void EndDeferPeriod();
+		void MarkFinalTransformDirtyDownwards();
 
 		static bool AreNodesOnSameLevel(Node* a, Node* b);
 

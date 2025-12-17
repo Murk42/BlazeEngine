@@ -175,13 +175,13 @@ namespace Blaze::UI::Layout
 	class VerticalArrayLayoutNode : public UI::Nodes::EmptyNode
 	{
 	public:
-		VerticalArrayLayoutNode(UI::Node& parent, float distance = 5.0f, HorizontalAlign horizontalAlign = HorizontalAlign::Center);
+		VerticalArrayLayoutNode(UI::Node& parent, const NodeTransform& transform, float distance = 5.0f, Align childNodesAlignment = Align::TopLeft);
 		~VerticalArrayLayoutNode();
 
-		void SetNodesHorizontalAlign(HorizontalAlign horizontalAlign);
-		void SetNodesDistance(float distance);
+		void SetChildNodesAlign(Align childNodesAlignment);
+		void SetChildNodesDistance(float distance);
 
-		HorizontalAlign GetNodesHorizontalAlign() const;
+		Align GetChildNodesAlign() const;
 		float GetNodesDistance() const;
 	private:
 		struct NodeData
@@ -189,7 +189,7 @@ namespace Blaze::UI::Layout
 			float offset;
 		};
 
-		HorizontalAlign horizontalAlign;
+		Align childNodesAlignment;
 		float distance;
 		Array<NodeData> nodesData;
 		bool layoutDirty;
@@ -199,7 +199,7 @@ namespace Blaze::UI::Layout
 
 		void SurroungingTreeChanged(const SurroundingNodeTreeChangedEvent& event);
 		void TransformUpdated(const TransformUpdatedEvent& event);
-		void ChildTransformUpdated(const TransformUpdatedEvent& event);
+		void FilterChildTransform(const TransformFilterEvent& event);
 		void ChildEnabledStateUpdated(const EnabledStateChangedEvent& event);
 	};
 
@@ -207,28 +207,28 @@ namespace Blaze::UI::Layout
 	{
 	public:
 		ParentTransformBinding();
-		ParentTransformBinding(UI::Node* child);
+		ParentTransformBinding(UI::Node* node);
 		virtual ~ParentTransformBinding();
 
-		void SetChild(UI::Node* child);
+		void SetNode(UI::Node* child);
 
-		inline UI::Node* GetChild() const { return child; }
+		inline UI::Node* GetNode() const { return node; }
 
 	protected:
 		virtual void ApplyTransformToChild() = 0;
 	private:
-		UI::Node* child;
+		UI::Node* node;
 
 		void ChildSurroungingTreeChanged(const UI::Node::SurroundingNodeTreeChangedEvent& event);
 		void ParentTransformChanged(const UI::Node::TransformUpdatedEvent& event);
-		void ChildTransformChanged(const UI::Node::TransformUpdatedEvent& event);
+		void ChildTransformFilter(const UI::Node::TransformFilterEvent& event);
 	};
 
 	class ParentWidthBinding : public ParentTransformBinding
 	{
 	public:
 		ParentWidthBinding() = default;
-		ParentWidthBinding(UI::Node* child);
+		ParentWidthBinding(UI::Node* node);
 	private:
 		void ApplyTransformToChild() override;
 	};
@@ -237,7 +237,7 @@ namespace Blaze::UI::Layout
 	{
 	public:
 		ParentHeightBinding() = default;
-		ParentHeightBinding(UI::Node* child);
+		ParentHeightBinding(UI::Node* node);
 	private:
 		void ApplyTransformToChild() override;
 	};
@@ -246,7 +246,7 @@ namespace Blaze::UI::Layout
 	{
 	public:
 		ParentSizeBinding() = default;
-		ParentSizeBinding(UI::Node* child);
+		ParentSizeBinding(UI::Node* node);
 	private:
 		void ApplyTransformToChild() override;
 	};
@@ -258,23 +258,32 @@ namespace Blaze::UI::Layout
 		DivisionNode(Node& parent);
 		virtual ~DivisionNode();
 	protected:
-		virtual Array<NodeTransform> CalculateChildTransforms() = 0;
+		virtual void FilterChildTransform(Node& child) = 0;
 	private:
-		Array<NodeTransform> transforms;
-		bool transformsDirty;
-
 		void SurroungingTreeChanged(const SurroundingNodeTreeChangedEvent& event);
 		void TransformChanged(const TransformUpdatedEvent& event);
-		void ChildTransformChanged(const TransformUpdatedEvent& event);
+		void ChildTransformFilter(const TransformFilterEvent& event);
 	};
 
 	class HorizontalDivisonNode : public DivisionNode
 	{
 	public:
-		HorizontalDivisonNode(float firstNodeHeight);
-		HorizontalDivisonNode(Node& parent, float firstNodeHeight);
+		HorizontalDivisonNode(Node& parent, uintMem flexibleNodeIndex, bool topToDownOrder = true);
 	private:
-		float firstNodeHeight;
-		Array<NodeTransform> CalculateChildTransforms() override;
+		uintMem flexibleNodeIndex;
+		bool topToDownOrder;
+
+		void FilterChildTransform(Node& child) override;
+	};
+
+	class VerticalDivisonNode : public DivisionNode
+	{
+	public:
+		VerticalDivisonNode(Node& parent, uintMem flexibleNodeIndex, bool leftToRightOrder = true);
+	private:
+		uintMem flexibleNodeIndex;
+		bool leftToRightOrder;
+
+		void FilterChildTransform(Node& child) override;
 	};
 }

@@ -122,6 +122,7 @@ namespace Blaze::Display
 		};
 		DisplayID displayID;
 		uint64 timeNS;
+		Type type;
 	};
 
 	Array<DisplayID> GetDisplays();

@@ -9,6 +9,6 @@ namespace Blaze::UI::Nodes
 		EmptyNode();
 		EmptyNode(Node& node, const NodeTransform& transform);
 
-		int HitTest(Vec2f pos) override;
+		HitStatus HitTest(Vec2f pos) override;
 	};
 }

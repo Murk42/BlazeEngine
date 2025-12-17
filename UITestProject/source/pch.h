@@ -7,3 +7,8 @@
 #include "BlazeEngine/BlazeEngineUI.h"
 
 using namespace Blaze;
+namespace Blaze::Graphics
+{
+	using namespace OpenGL;
+}
+#include "EventMemberFunctionTie.h"

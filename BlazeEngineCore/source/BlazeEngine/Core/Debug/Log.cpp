@@ -19,8 +19,8 @@ namespace Blaze::Debug
 		type(log.type),	source(std::move(log.source)), message(std::move(log.message))
 	{
 	}
-	Log::Log(LogType type, u8StringView source, u8StringView message) :
-		threadID(GetThisThreadID()), callstack(),
+	Log::Log(LogType type, u8StringView source, u8StringView message, Callstack callstack) :
+		threadID(GetThisThreadID()), callstack(std::move(callstack)),
 		type(type),	source(std::move(source)), message(std::move(message))
 	{
 	}

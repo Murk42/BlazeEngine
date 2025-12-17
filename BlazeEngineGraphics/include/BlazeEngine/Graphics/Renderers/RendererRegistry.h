@@ -12,29 +12,18 @@ namespace Blaze::Graphics
 		RendererRegistry() = default;
 		RendererRegistry(const RendererRegistry& other) = default;
 		RendererRegistry(RendererRegistry&& other) noexcept = default;
+		RendererRegistry(ArrayView<RendererBase&> renderers);
+		template<IsDerivedFrom<RendererBase> ... R>
+		RendererRegistry(R& ... renderers);
 
-		template<IsBaseOf<RendererBase> T>
-		T* RegisterRenderer(RendererBase* renderer, StringView name)
-		{
-			return static_cast<T*>(RegisterRenderer(renderer, name));
-		}
-		template<IsBaseOf<RendererBase> T>
-		T* RegisterRenderer(T* renderer)
-		{
-			return static_cast<T*>(RegisterRenderer(renderer, { }));
-		}
-		RendererBase* RegisterRenderer(RendererBase* renderer, StringView name);
+		template<IsDerivedFrom<RendererBase> T>
+		void RegisterRenderer(T& renderer, StringView name = { });
+		void RegisterRenderer(RendererBase& renderer, StringView name = { });
 
-		template<IsBaseOf<RendererBase> T>
-		T* GetRenderer(const StringView& name) const
-		{
-			return GetRenderer(RendererBase::GetTypeID<T>(), name);
-		}
-		template<IsBaseOf<RendererBase> T>
-		T* GetRenderer() const
-		{
-			return GetRenderer(RendererBase::GetTypeID<T>(), { });
-		}
+		template<IsDerivedFrom<RendererBase> T>
+		T* GetRenderer(const StringView& name) const;
+		template<IsDerivedFrom<RendererBase> T>
+		T* GetRenderer() const;
 		RendererBase* GetRenderer(uint64 type, const StringView& name) const;
 
 		RendererRegistry& operator=(const RendererRegistry& other) = default;
@@ -50,6 +39,28 @@ namespace Blaze::Graphics
 			bool operator==(const Key& other) const;
 			bool operator!=(const Key& other) const;
 		};
-		Map<Key, RendererBase*> renderers;
+		Map<Key, RendererBase&> renderers;
 	};
+
+	template<IsDerivedFrom<RendererBase> ... R>
+	inline RendererRegistry::RendererRegistry(R& ... renderers)
+		: RendererRegistry()
+	{
+		(RegisterRenderer(renderers), ...);
+	}
+	template<IsDerivedFrom<RendererBase> T>
+	inline void RendererRegistry::RegisterRenderer(T& renderer, StringView name)
+	{
+		RegisterRenderer(static_cast<RendererBase&>(renderer), name);
+	}
+	template<IsDerivedFrom<RendererBase> T>
+	inline T* RendererRegistry::GetRenderer(const StringView& name) const
+	{
+		return dynamic_cast<T*>(GetRenderer(RendererBase::GetTypeID<T>(), name));
+	}
+	template<IsDerivedFrom<RendererBase> T>
+	inline T* RendererRegistry::GetRenderer() const
+	{
+		return dynamic_cast<T*>(GetRenderer(RendererBase::GetTypeID<T>(), { }));
+	}
 }

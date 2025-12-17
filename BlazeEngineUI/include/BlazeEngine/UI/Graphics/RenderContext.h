@@ -3,7 +3,7 @@
 
 namespace Blaze::UI
 {
-	class UIRenderContext : public Graphics::RenderContext
+	class RenderContext : public Graphics::RenderContext
 	{
 	public:
 	};

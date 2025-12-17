@@ -5,6 +5,10 @@
 
 namespace Blaze::UI
 {
+	StaticTextRenderUnit::StaticTextRenderUnit()
+		: position(0, 0), right(0, 1), color(0xf5f5f5ff)
+	{
+	}
 	void StaticTextRenderUnit::Clear()
 	{
 		atlas = {};
@@ -110,7 +114,7 @@ namespace Blaze::UI
 		auto shapedText = TextShaping::ShapeTextWrapped(convertedString.FirstIterator(), convertedString.BehindIterator(), shapingContext);
 		return CopyRenderData(shapedText, fontSize, atlas);
 	}
-	void StaticTextRenderUnit::Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const UIRenderContext& renderContext)
+	void StaticTextRenderUnit::Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const RenderContext& renderContext)
 	{
 		Vec2f up = { -right.y, right.x };
 		Vec2f roundedPos = Math::Floor(position);
@@ -124,8 +128,8 @@ namespace Blaze::UI
 				.pos = roundedPos + glyph.offset,
 				.right = right * glyph.size.x,
 				.up = up * glyph.size.y,
-				.color = 0xffffffff,
-				.blend = 0.0f,
+				.color = color,
+				.blend = 1.0f,
 				.alpha = 1.0f,
 				}, renderContext);
 		}

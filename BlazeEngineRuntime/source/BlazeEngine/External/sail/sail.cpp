@@ -16,7 +16,11 @@ namespace Blaze
 		if (level == SAIL_LOG_LEVEL_INFO || level == SAIL_LOG_LEVEL_DEBUG)
 			return;
 
-		int size = _vscprintf(format, args);
+		// Copy args for _vscprintf
+		va_list argsCopy1;
+		va_copy(argsCopy1, args);
+		int size = _vscprintf(format, argsCopy1);
+		va_end(argsCopy1);
 
 		String message;
 
@@ -24,27 +28,33 @@ namespace Blaze
 			BLAZE_LOG_ERROR("Failed to format sail log");
 		else
 		{
-			message.Resize(size);
-			if (vsprintf_s(message.Ptr(), message.Count() + 1, format, args) <= 0)
+			message.Resize(size, ' ');
+			// Copy args for vsprintf_s
+			va_list argsCopy2;
+			va_copy(argsCopy2, args);
+			if (vsprintf_s(message.Ptr(), size + 1, format, argsCopy2) <= 0)
 				BLAZE_LOG_ERROR("Failed to format sail log");
+			va_end(argsCopy2);
 		}
 
 		StringView levelString;
-		auto logFunc = Debug::Logger::LogError;
+		Debug::LogType logType;
 
 		switch (level)
 		{
-		case SAIL_LOG_LEVEL_SILENCE: logFunc = Debug::Logger::LogInfo;levelString = "SILENCE"; break;
-		case SAIL_LOG_LEVEL_ERROR:   logFunc = Debug::Logger::LogError;levelString = "ERROR"; break;
-		case SAIL_LOG_LEVEL_WARNING: logFunc = Debug::Logger::LogWarning;levelString = "WARNING"; break;
-		case SAIL_LOG_LEVEL_INFO:    logFunc = Debug::Logger::LogInfo;levelString = "INFO"; break;
-		case SAIL_LOG_LEVEL_MESSAGE: logFunc = Debug::Logger::LogInfo;levelString = "MESSAGE"; break;
-		case SAIL_LOG_LEVEL_DEBUG:   logFunc = Debug::Logger::LogDebug;levelString = "DEBUG"; break;
-		case SAIL_LOG_LEVEL_TRACE:   logFunc = Debug::Logger::LogDebug;levelString = "TRACE"; break;
+		case SAIL_LOG_LEVEL_SILENCE: logType = Debug::LogType::Info;   levelString = "SILENCE"; break;
+		case SAIL_LOG_LEVEL_ERROR:   logType = Debug::LogType::Error;  levelString = "ERROR"; break;
+		case SAIL_LOG_LEVEL_WARNING: logType = Debug::LogType::Warning;levelString = "WARNING"; break;
+		case SAIL_LOG_LEVEL_INFO:    logType = Debug::LogType::Info;   levelString = "INFO"; break;
+		case SAIL_LOG_LEVEL_MESSAGE: logType = Debug::LogType::Info;   levelString = "MESSAGE"; break;
+		case SAIL_LOG_LEVEL_DEBUG:   logType = Debug::LogType::Debug;  levelString = "DEBUG"; break;
+		case SAIL_LOG_LEVEL_TRACE:   logType = Debug::LogType::Debug;  levelString = "TRACE"; break;
 		default: levelString = "UNKNOWN"; break;
 		}
 
-		logFunc("sail", Format(u8"sail ({}, line {}) level {}: \"{}\"", Path(StringView(file, strlen(file))).FileName(), line, levelString, message), false);
+		Debug::Log log{ logType, "sail", Format(u8"sail ({}, line {}) level {}: \"{}\"", Path(StringView(file, strlen(file))).FileName(), line, levelString, message)};
+
+		Debug::Logger::ProcessLog(log);
 	}
 
 	void sail_SetupReadIO(sail_io* io, ReadStream& stream)
@@ -247,7 +257,7 @@ namespace Blaze
 			node = node->next;
 		}
 
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized sail " SAIL_VERSION_STRING ". Available image formats: {}", StringView(", ").Join(imageFormats));
+		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized sail " SAIL_VERSION_STRING " ({.1f}ms). Available image formats : {}", timing.GetTimingResult().time.GetSeconds() * 1000.0, StringView(", ").Join(imageFormats));
 
 		return timing.GetTimingResult();
 	}

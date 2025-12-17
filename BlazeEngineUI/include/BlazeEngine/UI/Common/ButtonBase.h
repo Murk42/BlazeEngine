@@ -16,6 +16,7 @@ namespace Blaze::UI
 		struct PressedStateChangedEvent
 		{
 			ButtonBase& button;
+			Input::MouseID mouseID;
 		};
 		struct PressedEvent
 		{
@@ -27,31 +28,23 @@ namespace Blaze::UI
 		ButtonBase();
 		~ButtonBase();
 
-		int HitTest(Vec2f screenPos) override;
-
 		void SetPressedEventCallback(const std::function<void(const PressedEvent&)>& callback);
 		void SetPressableFlag(bool pressable);
-		/*
-			Unpresses the node
 
-			\param quiet   if 'quiet' is true and the node is pressed no PressedEvent event will be dispatched,
-			otherwise if 'quiet' is false the node is pressed a PressedEvent will be dispatcher
-		*/
-		void Unpress(bool quiet);
-		/*
-			"Presses" the node, basically simulates the node being pressed. Calls the PressedEvent callback
-		*/
-		void Press();
-
-		inline bool IsPressed() const { return pressed; }
+		inline bool IsPressed() const { return pressingMouseID.IsValid(); }
+		inline Input::MouseID GetPressingMouseID() const { return pressingMouseID; }
 		inline bool IsPressable() const { return pressable; }
 	protected:
-		void MouseButtonDownEvent(const MouseButtonDownEvent& event);
-		void MouseButtonUpEvent(const MouseButtonUpEvent& event);
+		void MouseButtonDownEvent(const UIMouseButtonDownEvent& event);
+		void MouseButtonUpEvent(const UIMouseButtonUpEvent& event);
 		void SelectedStateChangedEvent(const SelectedStateChangedEvent& event);
+		void HitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event);
 	private:
-		bool pressed : 1;
 		bool pressable : 1;
+		bool hovered : 1;
+		Input::MouseID pressingMouseID;
 		std::function<void(const PressedEvent&)> pressedEventCallback;
+
+		void Unpress(bool runPressedEventCallback);
 	};
 }

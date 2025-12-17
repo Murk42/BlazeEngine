@@ -239,7 +239,7 @@ namespace Blaze
 		}
 #endif
 
-		NodeBase* prev = it.node;
+		NodeBase* prev = it.nodeBase;
 		NodeBase* node = prev->next;
 
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
@@ -305,14 +305,14 @@ namespace Blaze
 		NodeBase* prev = first;
 		NodeBase* curr = prev->next;
 
-		if (function(first->value))
+		if (function(first->valueBase))
 			EraseFirst();
 
 		while (curr != nullptr)
 		{
 			NodeBase* next = curr->next;
 
-			if (function(curr->value))
+			if (function(curr->valueBase))
 			{
 				EraseAfter(Iterator(prev));
 
@@ -338,7 +338,7 @@ namespace Blaze
 		NodeBase* prev = first;
 		NodeBase* curr = prev->next;
 
-		if (function(first->value))
+		if (function(first->valueBase))
 		{
 			EraseFirst();
 			return;
@@ -346,7 +346,7 @@ namespace Blaze
 
 		while (curr != nullptr)
 		{
-			if (function(curr->value))
+			if (function(curr->valueBase))
 			{
 				EraseAfter(Iterator(prev));
 				return;

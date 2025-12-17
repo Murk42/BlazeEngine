@@ -7,9 +7,9 @@
 namespace Blaze::Graphics::OpenGL
 {
 	RenderWindow_OpenGL::RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, WindowCreateOptions windowOptions, RenderWindowOptions_OpenGL options)
-		: Window(graphicsContext.CreateWindow(windowOptions)), graphicsContext(graphicsContext), framebuffer(*this), options(options)
+		: Window(graphicsContext.CreateWindow(windowOptions)), graphicsContext(&graphicsContext), framebuffer(*this), options(options)
 	{
-		windowResizedEventDispatcher.AddHandler<&RenderWindow_OpenGL::Resized>(*this);
+		resizedEventDispatcher.AddHandler<&RenderWindow_OpenGL::Resized>(*this);
 
 		framebuffer.framebuffer.size = GetSize();
 
@@ -20,14 +20,16 @@ namespace Blaze::Graphics::OpenGL
 			graphicsContext.SetRenderArea(Vec2i(), framebuffer.framebuffer.size);
 
 	}
-
 	RenderWindow_OpenGL::~RenderWindow_OpenGL()
 	{
-		windowResizedEventDispatcher.RemoveHandler<&RenderWindow_OpenGL::Resized>(*this);
-
-		graphicsContext.RetrieveWindow(*this);
+		Destroy();
 	}
-
+	void RenderWindow_OpenGL::Destroy()
+	{
+		resizedEventDispatcher.RemoveHandler<&RenderWindow_OpenGL::Resized>(*this);
+		graphicsContext->RetrieveWindow(*this);
+		this->Window::Destroy();
+	}
 	RenderWindowFramebuffer_OpenGL& RenderWindow_OpenGL::AcquireNextFramebuffer(Semaphore_OpenGL* semaphore)
 	{
 		return this->framebuffer;
@@ -46,36 +48,38 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void RenderWindow_OpenGL::ClearRenderBuffers()
 	{
-		if (graphicsContext.GetActiveWindowHandle() != GetHandle())
+		if (graphicsContext->GetActiveWindowHandle() != GetHandle())
 			BLAZE_LOG_ERROR("Clearing render buffers of a RenderWindow_OpenGL that is not the active window in its GraphicsContext_OpenGL");
 		else
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 	void RenderWindow_OpenGL::ClearRenderColorBuffer()
 	{
-		if (graphicsContext.GetActiveWindowHandle() != GetHandle())
+		if (graphicsContext->GetActiveWindowHandle() != GetHandle())
 			BLAZE_LOG_ERROR("Clearing render buffers of a RenderWindow_OpenGL that is not the active window in its GraphicsContext_OpenGL");
 		else
 			glClear(GL_COLOR_BUFFER_BIT);
 	}
 	void RenderWindow_OpenGL::ClearRenderDepthBuffer()
 	{
-		if (graphicsContext.GetActiveWindowHandle() != GetHandle())
+		if (graphicsContext->GetActiveWindowHandle() != GetHandle())
 			BLAZE_LOG_ERROR("Clearing render buffers of a RenderWindow_OpenGL that is not the active window in its GraphicsContext_OpenGL");
 		else
 			glClear(GL_DEPTH_BUFFER_BIT);
 	}
 	void RenderWindow_OpenGL::ClearRenderStencilBuffer()
 	{
-		if (graphicsContext.GetActiveWindowHandle() != GetHandle())
+		if (graphicsContext->GetActiveWindowHandle() != GetHandle())
 			BLAZE_LOG_ERROR("Clearing render buffers of a RenderWindow_OpenGL that is not the active window in its GraphicsContext_OpenGL");
 		else
 			glClear(GL_STENCIL_BUFFER_BIT);
 	}
-	void RenderWindow_OpenGL::Resized(const Window::WindowResizedEvent& event)
+	void RenderWindow_OpenGL::Resized(const Window::ResizedEvent& event)
 	{
-		if (options.changeViewportAsWindowResizes && graphicsContext.GetActiveWindowHandle() == GetHandle())
-			graphicsContext.SetRenderArea(Vec2i(), event.size);
+		graphicsContext->MakeContextActive();
+
+		if (options.changeViewportAsWindowResizes && graphicsContext->GetActiveWindowHandle() == GetHandle())
+			graphicsContext->SetRenderArea(Vec2i(), event.size);
 
 		framebuffer.framebuffer.size = event.size;
 	}

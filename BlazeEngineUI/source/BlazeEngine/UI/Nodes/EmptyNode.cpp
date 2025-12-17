@@ -10,11 +10,11 @@ namespace Blaze::UI::Nodes
 	EmptyNode::EmptyNode(Node& node, const NodeTransform& transform)
 		: EmptyNode()
 	{
-		SetParent(&node);
 		SetTransform(transform);
+		SetParent(&node);
 	}
-	int EmptyNode::HitTest(Vec2f pos)
+	Node::HitStatus EmptyNode::HitTest(Vec2f pos)
 	{
-		return 0;
+		return HitStatus::NotHit;
 	}
 }

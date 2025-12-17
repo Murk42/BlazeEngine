@@ -1,14 +1,15 @@
 #include "pch.h"
-#include "BlazeEngine/UI/Graphics/RenderSystem.h"
+#include "BlazeEngine/UI/Graphics/GraphicsSubSystem.h"
 #include "BlazeEngine/Core/Container/Set.h"
+#include "BlazeEngine/Core/Common/Rect.h"
 #include "BlazeEngine/Core/Container/Map.h"
 
 #include "BlazeEngine/UI/Graphics/RenderNode.h"
 
 namespace Blaze::UI
 {
-	using RenderItem = RenderSystem::RenderItem;
-	using RenderGroup = RenderSystem::RenderGroup;
+	using RenderItem = GraphicsSubSystem::RenderItem;
+	using RenderGroup = GraphicsSubSystem::RenderGroup;
 
 	class UISimpleRenderQueue
 	{
@@ -47,7 +48,7 @@ namespace Blaze::UI
 				}
 			}
 
-			//for (auto& child : renderSystem->screen->GetChildren())
+			//for (auto& child : graphicsSubSystem->screen->GetChildren())
 			//	_GetRenderOrder(child, arr);
 
 			return arr;
@@ -59,10 +60,10 @@ namespace Blaze::UI
 
 		}
 
-		void CreateRenderQueue(RenderSystem& renderSystem, Array<RenderItem>& renderQueue, Array<RenderGroup>& renderGroups)
+		void CreateRenderQueue(GraphicsSubSystem& graphicsSubSystem, Array<RenderItem>& renderQueue, Array<RenderGroup>& renderGroups)
 		{
 			renderGroups.Clear();
-			renderQueue = GetRenderOrder(*renderSystem.GetScreen());
+			renderQueue = GetRenderOrder(*graphicsSubSystem.GetScreen());
 
 			if (renderQueue.Empty())
 				return;
@@ -75,7 +76,7 @@ namespace Blaze::UI
 			for (auto renderItem : renderQueue)
 			{
 				oldRenderer = renderer;
-				renderer = renderSystem.GetRendererRegistry().GetRenderer(renderItem.renderUnit.GetRequiredRendererTypeID(), renderItem.renderUnit.GetRequiredRendererName());
+				renderer = graphicsSubSystem.GetRendererRegistry().GetRenderer(renderItem.renderUnit.GetRequiredRendererTypeID(), renderItem.renderUnit.GetRequiredRendererName());
 
 				if (renderer == nullptr)
 				{
@@ -114,7 +115,7 @@ namespace Blaze::UI
 			Map<Graphics::RendererBase*, Array<RenderItem>> subGroups;
 		};
 
-		RenderSystem* renderSystem;
+		GraphicsSubSystem* graphicsSubSystem;
 
 		bool RectIntersect(Rectf r1, Rectf r2)
 		{
@@ -263,12 +264,12 @@ namespace Blaze::UI
 			//		}
 			//}
 		}
-		Array<NodeRenderPreGroup> CreatePreGroups(RenderSystem& renderSystem, const Array<Node>& renderOrder)
+		Array<NodeRenderPreGroup> CreatePreGroups(GraphicsSubSystem& graphicsSubSystem, const Array<Node>& renderOrder)
 		{
 			Array<NodeRenderPreGroup> preGroups;
 			preGroups.ReserveExactly(renderOrder.Count());
 
-			Set<UIRenderUnitBase*> usedRenderUnits;
+			Set<RenderUnitBase*> usedRenderUnits;
 
 			for (auto& el : renderOrder)
 			{
@@ -284,7 +285,7 @@ namespace Blaze::UI
 						{
 							auto& preGroup = *preGroups.AddBack();
 							usedRenderUnits.Insert(renderUnit);
-							auto renderer = renderSystem.GetRendererRegistry().GetRenderer(renderUnit->GetRequiredRendererTypeID(), renderUnit->GetRequiredRendererName());
+							auto renderer = graphicsSubSystem.GetRendererRegistry().GetRenderer(renderUnit->GetRequiredRendererTypeID(), renderUnit->GetRequiredRendererName());
 							auto& nodes = preGroup.subGroups.Insert(renderer).iterator->value;
 							nodes.AddBack(RenderItem{ *renderUnit, node.node });
 						}
@@ -337,14 +338,14 @@ namespace Blaze::UI
 		}
 
 	public:
-		void CreateRenderQueue(RenderSystem& renderSystem, Array<RenderItem>& renderQueue, Array<RenderGroup>& renderGroups)
+		void CreateRenderQueue(GraphicsSubSystem& graphicsSubSystem, Array<RenderItem>& renderQueue, Array<RenderGroup>& renderGroups)
 		{
 			renderGroups.Clear();
-			auto renderOrder = GetRenderOrder(renderSystem.GetScreen());
+			auto renderOrder = GetRenderOrder(graphicsSubSystem.GetScreen());
 
 			PromoteNodes(renderOrder);
 
-			auto preGroups = CreatePreGroups(renderSystem, renderOrder);
+			auto preGroups = CreatePreGroups(graphicsSubSystem, renderOrder);
 
 			CombinePreGroups(preGroups);
 
@@ -352,36 +353,36 @@ namespace Blaze::UI
 		}
 	};
 
-	RenderSystem::RenderSystem()
+	GraphicsSubSystem::GraphicsSubSystem()
 		: screen(nullptr), recreateRenderQueue(false)
 	{
 	}
 
-	RenderSystem::RenderSystem(Graphics::RendererRegistry rendererRegistry) :
+	GraphicsSubSystem::GraphicsSubSystem(Graphics::RendererRegistry rendererRegistry) :
 		rendererRegistry(rendererRegistry), screen(nullptr), recreateRenderQueue(false)
 	{
 	}
-	RenderSystem::~RenderSystem()
+	GraphicsSubSystem::~GraphicsSubSystem()
 	{
 		if (screen != nullptr)
 		{
-			screen->nodeTreeChangedEventDispatcher.RemoveHandler<&RenderSystem::NodeTreeChanged>(*this);
-			screen->screenDestructionEventDispatcher.RemoveHandler<&RenderSystem::ScreenDestroyed>(*this);
+			screen->treeChangedEventDispatcher.RemoveHandler<&GraphicsSubSystem::NodeTreeChanged>(*this);
+			screen->destructionEventDispatcher.RemoveHandler<&GraphicsSubSystem::ScreenDestroyed>(*this);
 		}
 	}
-	void RenderSystem::SetRendererRegistry(Graphics::RendererRegistry newRegistry)
+	void GraphicsSubSystem::SetRendererRegistry(Graphics::RendererRegistry newRegistry)
 	{
 		rendererRegistry = std::move(newRegistry);
 	}
-	void RenderSystem::SetScreen(UI::Screen* newScreen)
+	void GraphicsSubSystem::SetScreen(UI::Screen* newScreen)
 	{
 		if (screen != nullptr)
 		{
-			screen->nodeTreeChangedEventDispatcher.RemoveHandler<&RenderSystem::NodeTreeChanged>(*this);
-			screen->screenDestructionEventDispatcher.RemoveHandler<&RenderSystem::ScreenDestroyed>(*this);
+			screen->treeChangedEventDispatcher.RemoveHandler<&GraphicsSubSystem::NodeTreeChanged>(*this);
+			screen->destructionEventDispatcher.RemoveHandler<&GraphicsSubSystem::ScreenDestroyed>(*this);
 
 			for (auto& node : screen->GetTree())
-				node.enabledStateChangedEventDispatcher.RemoveHandler<&RenderSystem::ChildEnabledStateUpdated>(*this);
+				node.enabledStateChangedEventDispatcher.RemoveHandler<&GraphicsSubSystem::ChildEnabledStateUpdated>(*this);
 		}
 
 		screen = newScreen;
@@ -389,10 +390,10 @@ namespace Blaze::UI
 		if (screen != nullptr)
 		{
 			for (auto& node : screen->GetTree())
-				node.enabledStateChangedEventDispatcher.AddHandler<&RenderSystem::ChildEnabledStateUpdated>(*this);
+				node.enabledStateChangedEventDispatcher.AddHandler<&GraphicsSubSystem::ChildEnabledStateUpdated>(*this);
 
-			screen->nodeTreeChangedEventDispatcher.AddHandler<&RenderSystem::NodeTreeChanged>(*this);
-			screen->screenDestructionEventDispatcher.AddHandler<&RenderSystem::ScreenDestroyed>(*this);
+			screen->treeChangedEventDispatcher.AddHandler<&GraphicsSubSystem::NodeTreeChanged>(*this);
+			screen->destructionEventDispatcher.AddHandler<&GraphicsSubSystem::ScreenDestroyed>(*this);
 
 			recreateRenderQueue = true;
 		}
@@ -402,7 +403,7 @@ namespace Blaze::UI
 			renderGroups.Clear();
 		}
 	}
-	void RenderSystem::Render(const Graphics::RenderContext& renderContext)
+	void GraphicsSubSystem::Render(const Graphics::RenderContext& renderContext)
 	{
 		if (screen == nullptr)
 			return;
@@ -410,11 +411,11 @@ namespace Blaze::UI
 		if (recreateRenderQueue)
 			RecreateRenderQueue();
 
-		UIRenderContext uiRenderContext{ renderContext };
+		RenderContext RenderContext{ renderContext };
 
 		for (auto& node : screen->GetTree())
 			if (RenderNode* renderNode = dynamic_cast<RenderNode*>(&node))
-				renderNode->PreRender(uiRenderContext);
+				renderNode->PreRender(RenderContext);
 
 		RenderItem* it = renderQueue.Ptr();
 		for (auto& group : renderGroups)
@@ -422,14 +423,14 @@ namespace Blaze::UI
 			group.renderer.StartRender(renderContext);
 
 			for (uintMem i = 0; i < group.count; ++i)
-				it[i].renderUnit.Render(it[i].node, group.renderer, uiRenderContext);
+				it[i].renderUnit.Render(it[i].node, group.renderer, RenderContext);
 
 			group.renderer.EndRender(renderContext);
 
 			it += group.count;
 		}
 	}
-	void RenderSystem::RecreateRenderQueue()
+	void GraphicsSubSystem::RecreateRenderQueue()
 	{
 		UISimpleRenderQueue rq;
 
@@ -437,20 +438,20 @@ namespace Blaze::UI
 
 		recreateRenderQueue = false;
 	}
-	void RenderSystem::NodeTreeChanged(const UI::NodeTreeChangedEvent& event)
+	void GraphicsSubSystem::NodeTreeChanged(const Screen::TreeChangedEvent& event)
 	{
-		if (event.type == NodeTreeChangedEvent::Type::NodeAdded)
-			event.node.enabledStateChangedEventDispatcher.AddHandler<&RenderSystem::ChildEnabledStateUpdated>(*this);
-		else if (event.type == NodeTreeChangedEvent::Type::NodeRemoved)
-			event.node.enabledStateChangedEventDispatcher.RemoveHandler<&RenderSystem::ChildEnabledStateUpdated>(*this);
+		if (event.type == Screen::TreeChangedEvent::Type::NodeAdded)
+			event.node.enabledStateChangedEventDispatcher.AddHandler<&GraphicsSubSystem::ChildEnabledStateUpdated>(*this);
+		else if (event.type == Screen::TreeChangedEvent::Type::NodeRemoved)
+			event.node.enabledStateChangedEventDispatcher.RemoveHandler<&GraphicsSubSystem::ChildEnabledStateUpdated>(*this);
 
 		recreateRenderQueue = true;
 	}
-	void RenderSystem::ScreenDestroyed(const UI::ScreenDestructionEvent& event)
+	void GraphicsSubSystem::ScreenDestroyed(const Screen::DestructionEvent& event)
 	{
 		SetScreen(nullptr);
 	}
-	void RenderSystem::ChildEnabledStateUpdated(const UI::Node::EnabledStateChangedEvent& event)
+	void GraphicsSubSystem::ChildEnabledStateUpdated(const Node::EnabledStateChangedEvent& event)
 	{
 		recreateRenderQueue = true;
 	}

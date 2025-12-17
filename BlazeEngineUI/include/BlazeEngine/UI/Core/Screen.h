@@ -1,50 +1,37 @@
 #pragma once
-#include "BlazeEngine/Runtime/Window.h"
 #include "BlazeEngine/UI/Core/Node.h"
 
 namespace Blaze::UI
 {
-	struct NodeTreeChangedEvent
-	{
-		enum class Type
-		{
-			NodeAdded,
-			NodeRemoved,
-			NodeMoved
-		};
-
-		Type type;
-		Node& node;
-		Node* oldParent;
-	};
-	struct ScreenDestructionEvent
-	{
-		Screen& screen;
-	};
-	struct ScreenWindowChangedEvent
-	{
-		Window* oldWindow;
-		Screen& screen;
-	};
-
 	class BLAZE_API Screen :
-		public Node,
-		private EventHandler<Window::WindowResizedEvent>
+		public Node
 	{
 	public:
-		EventDispatcher<ScreenDestructionEvent> screenDestructionEventDispatcher;
-		EventDispatcher<ScreenWindowChangedEvent> screenWindowChangedEventDispatcher;
-		EventDispatcher<NodeTreeChangedEvent> nodeTreeChangedEventDispatcher;
+		struct TreeChangedEvent
+		{
+			enum class Type
+			{
+				NodeAdded,
+				NodeRemoved,
+				NodeMoved
+			};
 
-		Screen(Window* window, bool resizeWithWindow = true);
+			Type type;
+			Node& node;
+			Node* oldParent;
+		};
+		struct DestructionEvent
+		{
+			Screen& screen;
+		};
+
+		EventDispatcher<DestructionEvent> destructionEventDispatcher;
+		EventDispatcher<TreeChangedEvent> treeChangedEventDispatcher;
+
+		Screen();
 		virtual ~Screen();
 
-		void SetWindow(Window* window, bool resizeWithWindow = true);
-
-		inline Window* GetWindow() const { return window; }
+		HitStatus HitTest(Vec2f screenPos) override;
 	private:
-		Window* window;
-
-		void OnEvent(const Window::WindowResizedEvent& event) override;
 	};
 }

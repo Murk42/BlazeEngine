@@ -31,7 +31,8 @@ namespace Blaze::Debug
 	class BLAZE_API Callstack
 	{
 	public:
-		Callstack(uint skip = 1, uint max_depth = UINT_MAX);
+		Callstack();
+		Callstack(uint skip, uint max_depth = UINT_MAX);
 		Callstack(const Callstack&);
 		Callstack(Callstack&&) noexcept;
 		~Callstack();

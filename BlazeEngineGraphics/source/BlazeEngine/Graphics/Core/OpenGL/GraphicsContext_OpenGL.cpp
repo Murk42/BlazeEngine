@@ -20,6 +20,7 @@ namespace Blaze::Windows
 
 namespace Blaze::Graphics::OpenGL
 {
+	std::mutex glewMutex;
 	bool glewInitialized = false;
 
 	static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -32,7 +33,7 @@ namespace Blaze::Graphics::OpenGL
 		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   _source = "Window System"; break;
 		case GL_DEBUG_SOURCE_SHADER_COMPILER: _source = "Shader Compiler"; break;
 		case GL_DEBUG_SOURCE_THIRD_PARTY:     _source = "Third Party"; break;
-		case GL_DEBUG_SOURCE_APPLICATION:     _source = "Application"; break;
+		case GL_DEBUG_SOURCE_APPLICATION:     _source = "App"; break;
 		case GL_DEBUG_SOURCE_OTHER:           _source = "Other"; break;
 		default: _source = "Unknown"; break;
 		}
@@ -269,48 +270,48 @@ namespace Blaze::Graphics::OpenGL
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, properties.majorVersion))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.majorVersion, SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.majorVersion, SDL_GetError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, properties.minorVersion))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.minorVersion, SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.minorVersion, SDL_GetError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_ACCELERTED_VISUAL to 1. SDL_Error() returnd: \"{}\"", SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_ACCELERTED_VISUAL to 1. SDL_Error() returnd: \"{}\"", SDL_GetError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, _contextFlags))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_FLAGS to {}.SDL_Error() returnd: \"{}\"", GetOpenGLContextFlagsString(_contextFlags), SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_FLAGS to {}.SDL_Error() returnd: \"{}\"", GetOpenGLContextFlagsString(_contextFlags), SDL_GetError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, _profileType))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to {}.SDL_Error() returnd: \"{}\"", GetOpenGLProfileTypeString(_profileType), SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to {}.SDL_Error() returnd: \"{}\"", GetOpenGLProfileTypeString(_profileType), SDL_GetError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _releaseBehaviour))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_CONTEXT_RELEASE_BEHAVIOR to {}.SDL_Error() returnd: \"{}\"", GetOpenGLReleaseBehaviourString(_releaseBehaviour), SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_RELEASE_BEHAVIOR to {}.SDL_Error() returnd: \"{}\"", GetOpenGLReleaseBehaviourString(_releaseBehaviour), SDL_GetError());
 			return false;
 		}
 
 		if (!SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, properties.depthBufferBitCount))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_DEPTH_SIZE to {}. SDL_Error() returnd: \"{}\"", properties.depthBufferBitCount, SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_DEPTH_SIZE to {}. SDL_Error() returnd: \"{}\"", properties.depthBufferBitCount, SDL_GetError());
 			return false;
 		}
 		if (!SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, properties.stencilBufferBitCount))
 		{
-			BLAZE_LOG_FATAL("Failed to set OpenGL context attribute SDL_GL_STENCIL_SIZE to . SDL_Error() returnd: \"{}\"", properties.stencilBufferBitCount, SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_STENCIL_SIZE to . SDL_Error() returnd: \"{}\"", properties.stencilBufferBitCount, SDL_GetError());
 			return false;
 		}
 
@@ -372,16 +373,14 @@ namespace Blaze::Graphics::OpenGL
 			void*& windowHandle;
 		} parameters{ props, windowHandle };
 
-		blazeEngineContext->ExecuteOnMainThread([](void* userData) {
-			Parameters* params = (Parameters*)userData;
+		if (!SDL_RunOnMainThread([](void* userData) { ((Parameters*)userData)->windowHandle = SDL_CreateWindowWithProperties(((Parameters*)userData)->properties); }, &parameters, true))
+			BLAZE_LOG_ERROR("SDL_RunOnMainThread failed. SDL returned error: \"" + SDL_GetError() + "\"");
 
-			params->windowHandle = SDL_CreateWindowWithProperties(params->properties);
-			}, &parameters, 1000);
 		SDL_DestroyProperties(props);
 
 		if (windowHandle == nullptr)
 		{
-			BLAZE_LOG_FATAL("Failed to create a SDL window. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Failed to create a SDL window. SDL returned error: \"" + SDL_GetError() + "\"");
 			return false;
 		}
 
@@ -389,7 +388,8 @@ namespace Blaze::Graphics::OpenGL
 	}
 	static void DestroyInitWindow(void* windowHandle)
 	{
-		blazeEngineContext->ExecuteOnMainThread([](void* userData) { SDL_DestroyWindow((SDL_Window*)userData); }, windowHandle, 1000);
+		if (!SDL_RunOnMainThread([](void* userData) { SDL_DestroyWindow((SDL_Window*)userData); }, windowHandle, true))
+			BLAZE_LOG_ERROR("SDL_RunOnMainThread failed. SDL returned error: \"" + SDL_GetError() + "\"");
 	}
 	//This funciton should be run on the main thread, but if it is run on the main thread all OpenGL functions should do the same, which is a problem.
 	//There seems not to be a problem running this on a non-main thread, so this should be done.
@@ -399,7 +399,7 @@ namespace Blaze::Graphics::OpenGL
 
 		if (context == nullptr)
 		{
-			BLAZE_LOG_FATAL("Failed to create OpenGL context. SDL_Error() returnd: \"{}\"", SDL_GetError());
+			BLAZE_LOG_ERROR("Failed to create OpenGL context. SDL_Error() returnd: \"{}\"", SDL_GetError());
 			return false;
 
 		}
@@ -418,6 +418,8 @@ namespace Blaze::Graphics::OpenGL
 	}
 	static bool InitializeGLEW()
 	{
+		std::lock_guard lg{ glewMutex };
+
 		if (!glewInitialized)
 		{
 			glewExperimental = true;
@@ -425,7 +427,7 @@ namespace Blaze::Graphics::OpenGL
 
 			if (err != GLEW_OK)
 			{
-				BLAZE_LOG_FATAL("Failed to initialize GLEW. glewGetErrorString() returned: \"" + GetGlewError(err) + "\"");
+				BLAZE_LOG_ERROR("Failed to initialize GLEW. glewGetErrorString() returned: \"" + GetGlewError(err) + "\"");
 				return false;
 			}
 			else
@@ -585,23 +587,41 @@ namespace Blaze::Graphics::OpenGL
 	{
 		SDL_GL_DestroyContext((SDL_GLContext)SDLOpenGLContext);
 		SDLOpenGLContext = nullptr;
+
+		initWindow.Destroy();
+	}
+	void GraphicsContext_OpenGL::MakeContextActive()
+	{
+		if (SDL_GL_MakeCurrent((SDL_Window*)activeWindowHandle, (SDL_GLContext)SDLOpenGLContext) == false)
+			BLAZE_LOG_ERROR("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", SDL_GetError());
 	}
 	void GraphicsContext_OpenGL::SetActiveRenderWindow(RenderWindow_OpenGL& renderWindow)
 	{
+		if (activeWindowHandle == renderWindow.GetHandle())
+			return;
+
 		if (activeWindowHandle != nullptr)
 		{
-			Window* activeWindow = blazeEngineContext->GetWindowFromHandle(activeWindowHandle);
+			auto context = BlazeEngineContext::GetEngineContext();
+			if (context == nullptr)
+			{
+				BLAZE_LOG_ERROR("Calling SetActiveRenderWindow but the engine context is not valid");
+			}
+			else
+			{
+				Window* activeWindow = context->GetWindowFromHandle(activeWindowHandle);
 
-			if (activeWindow != nullptr)
-				activeWindow->windowDestroyedEventDispatcher.RemoveHandler<&GraphicsContext_OpenGL::ActiveWindowDestroyed>(*this);
+				if (activeWindow != nullptr)
+					activeWindow->destructionEventDispatcher.RemoveHandler<&GraphicsContext_OpenGL::ActiveWindowDestroyed>(*this);
+			}
 		}
 
 		activeWindowHandle = renderWindow.GetHandle();
 
-		renderWindow.windowDestroyedEventDispatcher.AddHandler<&GraphicsContext_OpenGL::ActiveWindowDestroyed>(*this);
+		renderWindow.destructionEventDispatcher.AddHandler<&GraphicsContext_OpenGL::ActiveWindowDestroyed>(*this);
 
 		if (SDL_GL_MakeCurrent((SDL_Window*)activeWindowHandle, (SDL_GLContext)SDLOpenGLContext) == false)
-			BLAZE_LOG_FATAL("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", SDL_GetError());
+			BLAZE_LOG_ERROR("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", SDL_GetError());
 	}
 	Window GraphicsContext_OpenGL::CreateWindow(const WindowCreateOptions& options)
 	{
@@ -611,7 +631,6 @@ namespace Blaze::Graphics::OpenGL
 			_options.graphicsAPI = WindowGraphicsAPI::OpenGL;
 			return Window(_options);
 		}
-
 
 		initWindow.SetResizableFlag(options.resizable);
 		initWindow.SetBorderlessFlag(options.borderless);
@@ -633,10 +652,10 @@ namespace Blaze::Graphics::OpenGL
 		else
 			window.Destroy();
 	}
-	void GraphicsContext_OpenGL::ActiveWindowDestroyed(const Window::WindowDestroyedEvent& event)
+	void GraphicsContext_OpenGL::ActiveWindowDestroyed(const Window::DestructionEvent& event)
 	{
 		activeWindowHandle = initWindow.GetHandle();
 		if (SDL_GL_MakeCurrent((SDL_Window*)activeWindowHandle, (SDL_GLContext)SDLOpenGLContext) == false)
-			BLAZE_LOG_FATAL("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", SDL_GetError());
+			BLAZE_LOG_ERROR("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", SDL_GetError());
 	}
 }

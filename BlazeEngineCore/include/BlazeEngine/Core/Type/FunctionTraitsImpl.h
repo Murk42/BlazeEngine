@@ -13,4 +13,14 @@ namespace Blaze::Internal
 		using ClassType = C;
 		using ArgumentTypes = TypeGroup<A...>;
 	};
+
+	template<typename T>
+	struct FunctionParameters;
+
+	template<typename R, typename ... A>
+	struct FunctionParameters<R(*)(A...)>
+	{
+		using ReturnType = R;
+		using ArgumentTypes = TypeGroup<A...>;
+	};
 }

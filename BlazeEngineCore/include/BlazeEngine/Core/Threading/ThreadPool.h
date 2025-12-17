@@ -34,6 +34,6 @@ namespace Blaze
 		std::condition_variable cv;
 		std::mutex mutex;
 
-		static unsigned long ThreadFunc(void* userData);
+		static int ThreadFunc(void* userData);
 	};
 }

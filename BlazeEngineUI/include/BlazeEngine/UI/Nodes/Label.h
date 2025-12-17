@@ -9,21 +9,30 @@ namespace Blaze::UI::Nodes
 	{
 	public:
 		Label();
-		Label(Node& parent, const NodeTransform& transform, u8StringView string, const FontAtlas& atlas, float fontSize = 0.0f);
+		Label(Node& parent, const NodeTransform& transform);
+		Label(Node& parent, const NodeTransform& transform, u8StringView string, const FontAtlas& atlas, ColorRGBAf color = 0xf5f5f5ff, float fontSize = 0.0f);
 		~Label();
 
 		void ClearText();
 		void BuildText(u8StringView string, const FontAtlas& atlas, float fontSize = 0.0f);
 		void BuildWrappedText(u8StringView string, const FontAtlas& atlas, float wrapWidth, float fontSize = 0.0f);
+		void SetColor(ColorRGBAf color);
+		inline ColorRGBAf GetColor() const { return renderUnit.color; }
+		
+		void SetBlocksHitTestFlag(bool blocksHitTest);
+		inline bool GetBlocksHitTestFlag(bool blocksHitTest) { return blocksHitTest; }
 
-		void PreRender(const UIRenderContext& renderContext) override;
-		UIRenderUnitBase* GetRenderUnit(uintMem index) override;
+		void PreRender(const RenderContext& renderContext) override;
+		RenderUnitBase* GetRenderUnit(uintMem index) override;
+
+		HitStatus HitTest(Vec2f screenPosition) override;
 	private:
 		StaticTextRenderUnit renderUnit;
 		Vec2f textSize;
 		bool renderDataDirty;
+		bool blocksHitTest;
 
-		void TransformUpdatedEvent(const Node::TransformUpdatedEvent& event);
+		void TransformFilterEvent(const Node::TransformFilterEvent& event);
 		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
 	};
 }

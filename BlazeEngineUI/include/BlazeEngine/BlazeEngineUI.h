@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BlazeEngine/UI/Common/CharacterSet.h"
+#include "BlazeEngine/UI/Common/ButtonBase.h"
+#include "BlazeEngine/UI/Common/System.h"
 
 #include "BlazeEngine/UI/Core/NodeDataMap.h"
 #include "BlazeEngine/UI/Core/NodeTransform.h"
@@ -16,13 +18,13 @@
 #include "BlazeEngine/UI/Text/FontGlyphRenderer.h"
 
 #include "BlazeEngine/UI/Graphics/RenderNode.h"
-#include "BlazeEngine/UI/Graphics/RenderSystem.h"
-#include "BlazeEngine/UI/Graphics/UIRenderContext.h"
-#include "BlazeEngine/UI/Graphics/UIRenderUnit.h"
+#include "BlazeEngine/UI/Graphics/GraphicsSubSystem.h"
+#include "BlazeEngine/UI/Graphics/RenderContext.h"
+#include "BlazeEngine/UI/Graphics/RenderUnit.h"
 
 #include "BlazeEngine/UI/Graphics/RenderUnits/ImageRenderUnit.h"
 
-#include "BlazeEngine/UI/Input/InputManager.h"
+#include "BlazeEngine/UI/Input/InputSubSystem.h"
 #include "BlazeEngine/UI/Input/InputNode.h"
 
 #include "BlazeEngine/UI/Nodes/EmptyNode.h"

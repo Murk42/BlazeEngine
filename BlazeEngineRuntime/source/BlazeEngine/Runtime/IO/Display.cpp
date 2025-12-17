@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
-#include "BlazeEngine/Runtime/Display.h"
 #include "BlazeEngine/External/SDL/SDL.h"
 #include "BlazeEngine/External/SDL/SDLConversions.h"
+#include "BlazeEngine/Runtime/IO/Display.h"
 
 namespace Blaze::Display
 {

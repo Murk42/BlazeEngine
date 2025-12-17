@@ -7,10 +7,13 @@ namespace Blaze::UI
 	class BLAZE_API NodeTreeIterator
 	{
 	public:
+		using difference_type = std::ptrdiff_t;
+		using value_type = Node;
+
 		NodeTreeIterator();
 		NodeTreeIterator(const NodeTreeIterator& other);
 		//Constructs a iterator pointing to the first node in the tree in which <node> is found
-		NodeTreeIterator(Node* node);
+		NodeTreeIterator(Node* node, bool ahead, bool behind);
 
 		Node* Ptr() const;
 		bool IsNull() const;
@@ -28,9 +31,10 @@ namespace Blaze::UI
 
 		operator bool() const;
 
-		NodeTreeIterator operator=(const NodeTreeIterator& other);
+		NodeTreeIterator& operator=(const NodeTreeIterator& other);
 	private:
 		Node* ptr;
-
+		bool ahead : 1;
+		bool behind : 1;
 	};
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.7.34024.191
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11217.181 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlazeEngineCore", "BlazeEngineCore\BlazeEngineCore.vcxproj", "{D3AF4E35-1D93-4A5F-B070-A0A6DD18A31B}"
 EndProject
@@ -35,8 +35,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Property Sheets", "Property
 		BlazeEngineDebugProperties.props = BlazeEngineDebugProperties.props
 		BlazeEngineDefaultProperties.props = BlazeEngineDefaultProperties.props
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlazeEngineCoreTests", "BlazeEngineCoreTests\BlazeEngineCoreTests.vcxproj", "{BA877045-E41A-9883-7F05-1C1FCCCC4A7A}"
 	ProjectSection(ProjectDependencies) = postProject

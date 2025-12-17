@@ -52,12 +52,6 @@ namespace Blaze
 	template<typename Derived, typename Base>
 	concept IsDerivedFrom = IsBaseOf<Base, Derived>;
 
-
-	// Checks if a type is a final class (cannot be inherited from)
-	template<typename T>
-	concept IsFinal = __is_final(T);
-
-    // Checks if T can be constructed from Args...
     template<typename T, typename... Args>
     concept IsConstructibleFrom = requires(Args&&... args) {
         T{static_cast<Args&&>(args)...};
@@ -66,4 +60,41 @@ namespace Blaze
     concept IsConvertibleTo = requires(From&& from) {
         { static_cast<To>(static_cast<From&&>(from)) } -> SameAs<To>;
     };
+
+	template<typename Left, typename Right>
+	concept IsAssignableFrom = requires(Left left, Right && right) {
+		{ left = static_cast<Right&&>(right) };
+	};
+
+#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+	template<typename T>
+	concept IsFinal = __is_final(T);
+	template<typename T>
+	concept IsTriviallyCopyable= __is_trivially_copyable(T);
+	template<typename T, typename ... Args>
+	concept IsTriviallyConstructible = __is_trivially_constructible(T, Args...);
+	template<typename T>
+	concept IsTriviallyDestructible = __is_trivially_destructible(T);
+	template<typename T>
+	concept HasVirtualDestructor = __has_virtual_destructor(T);
+#else
+	// If we reach here, the compiler doesn't expose the usual builtin.
+	// We can't reliably reimplement the standard trait in portable, standard C++,
+	// so fail loudly so the user can add a compiler-specific branch.
+
+	// (sizeof(T) > 0) is used to keep SFINAE friendliness
+
+	template<typename T>
+	concept IsFinal = = (sizeof(T) > 0) && false;
+	template<typename T>
+	concept IsTriviallyCopyable = (sizeof(T) > 0) && false;
+	template<typename T, typename ... Args>
+	concept IsTriviallyConstructible = (sizeof(T) > 0) && false;
+	template<typename T>
+	concept IsTriviallyDestructible = (sizeof(T) > 0) && false;
+	template<typename T>
+	concept HasVirtualDestructor = (sizeof(T) > 0) && false;
+
+	static_assert("Your compiler doesn't support type trait builtins. ");
+#endif
 }

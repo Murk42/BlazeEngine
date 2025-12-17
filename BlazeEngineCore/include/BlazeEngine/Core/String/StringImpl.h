@@ -167,7 +167,7 @@ namespace Blaze
 		}
 
 		Char* old = ptr;
-		ptr = (Char*)allocator.Allocate((count + 1) * sizeof(Char));
+		ptr = (Char*)allocator.Allocate((newBufferSize + 1) * sizeof(Char));
 
 		if (count == 0)
 		{
@@ -189,8 +189,8 @@ namespace Blaze
 		allocator.Free(old);
 
 		//Add a null-terminating character
-		ptr[count] = '\0';
 		count = newBufferSize;
+		ptr[count] = '\0';
 	}
 	template<typename Char, AllocatorType Allocator>
 	inline void GenericString<Char, Allocator>::Append(GenericStringView<Char> other)

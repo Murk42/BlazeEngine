@@ -10,4 +10,8 @@ namespace Blaze
 	template<typename MemberFunctionPointerType>
 	using MemberFunctionPointerTypeArgumentTypes = typename Internal::MemberFunctionPointerParameters<MemberFunctionPointerType>::template ArgumentTypes;
 
+	template<typename FunctionPointerType>
+	using FunctionPointerTypeReturnType = typename Internal::FunctionParameters<FunctionPointerType>::template ReturnType;
+	template<typename FunctionPointerType>
+	using FunctionPointerTypeArgumentTypes = typename Internal::FunctionParameters<FunctionPointerType>::template ArgumentTypes;
 }

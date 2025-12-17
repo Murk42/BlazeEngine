@@ -1,32 +1,10 @@
 #pragma once
-#include "BlazeEngine/Core/Event/EventDispatcher.h"
-#include "BlazeEngine/Core/Math/Vector.h"
-#include "BlazeEngine/Core/String/String.h"
-
-namespace Blaze
-{
-    class Window;
-}
+#include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 
 namespace Blaze::Input
 {
-    struct InputPreUpdateEvent {};
-    struct InputPostUpdateEvent {};
-
-    BLAZE_API EventDispatcher<InputPreUpdateEvent>& GetInputPreUpdateEventDispatcher();
-    BLAZE_API EventDispatcher<InputPostUpdateEvent>& GetInputPostUpdateEventDispatcher();
-
-    BLAZE_API void Update();
-
-    BLAZE_API Vec2f GetFocusedWindowLastUpdateMousePos();
-    BLAZE_API Vec2f GetFocusedWindowLastUpdateMouseMovementSum();
-
-    BLAZE_API bool HasClipboardText();
-    BLAZE_API u8String GetClipboardText();
-    BLAZE_API void SetClipboardText(u8StringView text);
-
     //Key represents a physical button on the keyboard. It does not depent on the language
-//or keyboard type or the active/pressed key modifiers.
+    //or keyboard type or the active/pressed key modifiers.
     enum class Key : uint16
     {
         UNKNOWN = 0,
@@ -697,100 +675,52 @@ namespace Blaze::Input
         Flipped
     };
 
-    using KeyboardID = uint32;
-    using MouseID = uint32;
-
-    struct KeyDownEvent
+    struct KeyboardID
     {
-        Window* window;
-        uint64 timeNS;
-        KeyboardID keyboardID;
+    public:
+        using NumberIDType = uint32;
 
-        Key key;
-        KeyModifier modifier;
-        KeyCode keyCode;
+        KeyboardID(const KeyboardID& other) = default;
+        explicit KeyboardID(NumberIDType numberID) : numberID(numberID) {}
 
-        bool repeat;
-    };
-    struct KeyUpEvent
-    {
-        Window* window;
-        uint64 timeNS;
-        KeyboardID keyboardID;
+        inline bool IsValid() const { return numberID != invalidNumberID; }
+        inline NumberIDType GetNumberID() const { return numberID; }
 
-        Key key;
-        KeyModifier modifier;
-        KeyCode keyCode;
-    };
-    struct TextInputEvent
-    {
-        Window* window;
-        uint64 timeNS;
+        inline uint64 Hash() const { return numberID; }
 
-        u8String string;
-    };
-    struct MouseButtonDownEvent
-    {
-        Window* window;
-        uint64 timeNS;
-        MouseID mouseID;
+        bool operator==(const KeyboardID& other) const = default;
+        bool operator!=(const KeyboardID& other) const = default;
 
-        MouseButton button;
-        uint combo; //number of consecutive clicks
-        Vec2f pos; //position in window coordinates
-    };
-    struct MouseButtonUpEvent
-    {
-        Window* window;
-        uint64 timeNS;
-        MouseID mouseID;
+        KeyboardID& operator=(const KeyboardID& other) = default;
 
-        MouseButton button;
-        uint combo; //number of consecutive clicks
-        Vec2f pos; //position in window coordinates
-    };
-    struct MouseMotionEvent
-    {
-        Window* window;
-        uint64 timeNS;
-        MouseID mouseID;
-
-        Vec2f delta;
-        Vec2f pos; //position in window coordinates
-    };
-    struct MouseScrollEvent
-    {
-        Window* window;
-        uint64 timeNS;
-        MouseID mouseID;
-
-        Vec2f amount;
-        ScrollDirection direction;
-        Vec2f pos; //position in window coordinates
+        static KeyboardID Invalid() { return KeyboardID(invalidNumberID); }
+    private:
+        static constexpr NumberIDType invalidNumberID = UINT32_MAX;
+        NumberIDType numberID;
     };
 
-    struct KeyFrameState
+    struct MouseID
     {
-        //This value is true if the key was pressed at least once between two Input::Update() calls
-        bool pressed;
-        //This value is true if the key was released at least once between two Input::Update() calls
-        bool released;
-        //This value is true if the key was down at one point between two Input::Update() calls
-        bool down;
-        //This value is true if the key was up at one point between two Input::Update() calls
-        bool up;
-    };
-    struct MouseButtonFrameState
-    {
-        uint8 combo;
-        //This value is true if the key was pressed at least once between two Input::Update() calls
-        bool pressed;
-        //This value is true if the key was released at least once between two Input::Update() calls
-        bool released;
-        //This value is true if the key was down at one point between two Input::Update() calls
-        bool down;
-        //This value is true if the key was up at one point between two Input::Update() calls
-        bool up;
+    public:
+        using NumberIDType = uint32;
+
+        MouseID(const MouseID& other) = default;
+        explicit MouseID(NumberIDType numberID) : numberID(numberID) { }
+
+        inline bool IsValid() const { return numberID != invalidNumberID; }
+        inline NumberIDType GetNumberID() const { return numberID; }
+
+        inline uint64 Hash() const { return numberID; }
+
+        bool operator==(const MouseID& other) const = default;
+        bool operator!=(const MouseID& other) const = default;
+
+        MouseID& operator=(const MouseID& other) = default;
+
+        static MouseID Invalid() { return MouseID(invalidNumberID); }
+    private:
+        static constexpr NumberIDType invalidNumberID = UINT32_MAX;
+        NumberIDType numberID;
     };
 
     enum class CursorType
@@ -818,32 +748,27 @@ namespace Blaze::Input
         CursorCount
     };
 
-    BLAZE_API KeyCode GetKeyCode(Key key, KeyModifier modifier);
-    BLAZE_API StringView GetKeyName(KeyCode keyCode);
-
-    /*
-        Returns key state between two Input::Update() calls. By using this function an application wont be
-        able to register multiple key presses or releases between two Input::Update() calls, they can
-        register only if they happened at least once. For full control over key presses and releases use
-        event handling to handle key states.
-
-        \param key - the key whose state to get
-        \return A KeyFrameState structure with information about the state of the key between two Input::Update()
-        calls
-    */
-    BLAZE_API KeyFrameState GetKeyFrameState(Key key);
-    /*
-        Returns mouse button state between two Input::Update() calls. By using this function an application
-        wont be able to register multiple key presses or releases between two Input::Update() calls, they
-        can register only if they happened at least once. For full control over mouse button presses and
-        releases use event handling.
-
-        \param button - the mouse button whose state to retrieve
-        \return A MouseButtonFrameState structure with information about the state of the key between two
-        Input::Update() calls
-    */
-    BLAZE_API MouseButtonFrameState GetMouseButtonFrameState(MouseButton button);
-
-    BLAZE_API void SetCursorType(CursorType type);
-    BLAZE_API void ShowCursor(bool show);
+    struct KeyFrameState
+    {
+        //This value is true if the key was pressed at least once between two Input::Update() calls
+        bool pressed;
+        //This value is true if the key was released at least once between two Input::Update() calls
+        bool released;
+        //This value is true if the key was down at one point between two Input::Update() calls
+        bool down;
+        //This value is true if the key was up at one point between two Input::Update() calls
+        bool up;
+    };
+    struct MouseButtonFrameState
+    {
+        uint8 combo;
+        //This value is true if the key was pressed at least once between two Input::Update() calls
+        bool pressed;
+        //This value is true if the key was released at least once between two Input::Update() calls
+        bool released;
+        //This value is true if the key was down at one point between two Input::Update() calls
+        bool down;
+        //This value is true if the key was up at one point between two Input::Update() calls
+        bool up;
+    };
 }

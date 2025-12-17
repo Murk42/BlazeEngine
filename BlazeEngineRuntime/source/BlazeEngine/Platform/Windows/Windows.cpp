@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Platform/Windows/Windows.h"
-#include "BlazeEngine/Runtime/Window.h"
+#include "BlazeEngine/Runtime/IO/Window.h"
 #include <Windows.h>
 #include <SDL3/SDL.h>
 

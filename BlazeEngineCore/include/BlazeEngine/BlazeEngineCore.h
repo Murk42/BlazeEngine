@@ -8,6 +8,8 @@
 #include "BlazeEngine/Core/Common/Buffer.h"
 #include "BlazeEngine/Core/Common/BufferStream.h"
 #include "BlazeEngine/Core/Common/Color.h"
+
+#include "BlazeEngine/Core/Common/EventQueue.h"
 #include "BlazeEngine/Core/Common/Format.h"
 #include "BlazeEngine/Core/Common/Handle.h"
 #include "BlazeEngine/Core/Common/HandleImpl.h"
@@ -100,6 +102,10 @@
 #include "BlazeEngine/Core/Time/TimePoint.h"
 #include "BlazeEngine/Core/Time/Timing.h"
 
+#include "BlazeEngine/Core/Type/FunctionTraits.h"
+#include "BlazeEngine/Core/Type/IntegerTraits.h"
+#include "BlazeEngine/Core/Type/IteratorTraits.h"
 #include "BlazeEngine/Core/Type/TypeGroup.h"
 #include "BlazeEngine/Core/Type/TypeTraits.h"
 #include "BlazeEngine/Core/Type/TypeTraitsImpl.h"
+#include "BlazeEngine/Core/Type/Variant.h"

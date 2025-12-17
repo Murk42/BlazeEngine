@@ -197,22 +197,6 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glBindTexture(GL_TEXTURE_2D, obj == nullptr ? 0 : obj->GetHandle());
 	}
-	//void GraphicsContext_OpenGL::SelectTexture(Texture2DArray* obj)
-	//{
-	//	glBindTexture(GL_TEXTURE_2D_ARRAY, obj == nullptr ? 0 : obj->GetHandle());
-	//}
-	//void GraphicsContext_OpenGL::SelectTexture(TextureCubemap* obj)
-	//{
-	//	glBindTexture(GL_TEXTURE_CUBE_MAP, obj == nullptr ? 0 : obj->GetHandle());
-	//}
-	//void GraphicsContext_OpenGL::SelectTexture(Texture3D* obj)
-	//{
-	//	glBindTexture(GL_TEXTURE_3D, obj == nullptr ? 0 : obj->GetHandle());
-	//}
-	//void GraphicsContext_OpenGL::SelectTexture(TextureBuffer* obj)
-	//{
-	//	glBindTexture(GL_TEXTURE_BUFFER, obj == nullptr ? 0 : obj->GetHandle());
-	//}
 	void GraphicsContext_OpenGL::SelectVertexBuffer(const GraphicsBuffer* obj)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, obj == nullptr ? 0 : obj->GetHandle());

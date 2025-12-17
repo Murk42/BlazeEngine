@@ -10,7 +10,7 @@ namespace Blaze::UI
 	PanelRenderUnit::~PanelRenderUnit()
 	{
 	}
-	void PanelRenderUnit::Render(const Node& node, Graphics::PanelRenderer& renderer, const UIRenderContext& renderContext)
+	void PanelRenderUnit::Render(const Node& node, Graphics::PanelRenderer& renderer, const RenderContext& renderContext)
  	{
 		renderer.Render(Graphics::PanelRenderData{
 			.pos = pos,

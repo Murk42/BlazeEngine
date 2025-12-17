@@ -48,7 +48,7 @@
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderSystem.h">
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\GraphicsSubSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.h">
@@ -57,10 +57,10 @@
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\UIRenderContext.h">
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\UIRenderUnit.h">
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Nodes\EmptyNode.h">
@@ -84,7 +84,7 @@
     <ClInclude Include="include\BlazeEngine\UI\Text\FontFace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Input\InputManager.h">
+    <ClInclude Include="include\BlazeEngine\UI\Input\InputSubSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Input\InputNode.h">
@@ -138,6 +138,15 @@
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Slider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\UIContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Common\System.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Input\InputEvents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pch.cpp">
@@ -167,16 +176,13 @@
     <ClCompile Include="source\BlazeEngine\UI\Core\Screen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderSystem.cpp">
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\UI\Input\InputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Input\InputNode.cpp">
@@ -228,6 +234,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Slider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Input\InputSubSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Common\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -38,7 +38,7 @@ namespace Blaze
 		constexpr Tuple(Tuple&& tuple) noexcept = default;
 
 		template<typename First, typename... Rest> requires (sizeof...(Rest) + 1 == sizeof...(T))
-		constexpr Tuple(First&& first, Rest&&... rest)
+			constexpr Tuple(First&& first, Rest&&... rest)
 			: value(std::forward<First>(first)), nextTuple(std::forward<Rest>(rest)...)
 		{
 		}
@@ -64,12 +64,12 @@ namespace Blaze
 				return nextTuple.GetValueByIndex<index - 1>();
 		}
 		template<typename S>
-		[[nodiscard]] constexpr S& GetValueByType()
+		[[nodiscard]] constexpr S& GetValueByType() noexcept
 		{
 			return GetValueByIndex<TypeGroup::template IndexOfType<S>>();
 		}
 		template<typename S>
-		[[nodiscard]] constexpr const S& GetValueByType() const
+		[[nodiscard]] constexpr const S& GetValueByType() const noexcept
 		{
 			return GetValueByIndex<TypeGroup::template IndexOfType<S>>();
 		}
@@ -77,7 +77,7 @@ namespace Blaze
 		template<typename F, uintMem indexOffset = 0>
 		constexpr void ForEach(F&& func)
 		{
-			func.template operator()<indexOffset>(value);
+			func.template operator() < indexOffset > (value);
 			nextTuple.template ForEach<F, indexOffset + 1>(std::forward<F>(func));
 		}
 
@@ -107,12 +107,12 @@ namespace Blaze
 		}
 
 		template<size_t index>
-		[[nodiscard]] constexpr auto& GetValueByIndex()
+		[[nodiscard]] constexpr auto& GetValueByIndex() noexcept
 		{
 			static_assert("Index out of bounds");
 		}
 		template<size_t index>
-		[[nodiscard]] constexpr const auto& GetValueByIndex() const
+		[[nodiscard]] constexpr const auto& GetValueByIndex() const noexcept
 		{
 			static_assert("Index out of bounds");
 		}
@@ -121,26 +121,5 @@ namespace Blaze
 	template<typename... T>
 	Tuple(T&&...) -> Tuple<std::decay_t<T>...>;
 
-    template <size_t I, typename... T>
-    constexpr decltype(auto) get(Tuple<T...>& tuple)
-	{
-        return tuple.template GetValueByIndex<I>();
-    }
-    template <size_t I, typename... T>
-    constexpr decltype(auto) get(const Tuple<T...>& tuple)
-	{
-        return tuple.template GetValueByIndex<I>();
-    }
-}
 
-namespace std
-{
-    template<typename... T>
-    struct tuple_size<Blaze::Tuple<T...>> : std::integral_constant<size_t, sizeof...(T)> {};
-
-    template<size_t I, typename... T>
-    struct tuple_element<I, Blaze::Tuple<T...>>
-	{
-        using type = typename Blaze::TypeGroup<T...>::template TypeAtIndex<I>;
-    };
 }

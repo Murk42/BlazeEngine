@@ -2,16 +2,17 @@
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/String/String.h"
-#include "BlazeEngine/Runtime/Display.h"
+#include "BlazeEngine/Core/Common/EventQueue.h"
+#include "BlazeEngine/Core/Type/Variant.h"
+#include "BlazeEngine/Runtime/IO/Display.h"
 #include "BlazeEngine/Common/Bitmap.h"
-#include "BlazeEngine/Runtime/Input.h"
+#include "BlazeEngine/Runtime/IO/InputEvents.h"
 #include "BlazeEngine/Core/Event/EventDispatcher.h"
-#include <mutex>
+#include <condition_variable>
 
 namespace Blaze
 {
 	class Window;
-	class BlazeEngineContext;
 
 	enum class WindowGraphicsAPI
 	{
@@ -51,49 +52,62 @@ namespace Blaze
 		WindowGraphicsAPI graphicsAPI = WindowGraphicsAPI::None;
 	};
 
+	class WindowMouseCaptureHandle
+	{
+	public:
+		WindowMouseCaptureHandle();
+		WindowMouseCaptureHandle(WindowMouseCaptureHandle&& other) noexcept;
+		~WindowMouseCaptureHandle();
+
+		bool IsCapturingMouse();
+		bool ReleaseMouseCapture();
+
+		WindowMouseCaptureHandle& operator=(WindowMouseCaptureHandle&& other) noexcept;
+	private:
+		Window* window;
+
+		WindowMouseCaptureHandle(Window& window);
+
+		friend class Window;
+	};
+
 	class BLAZE_API Window
 	{
 	public:
-		struct WindowResizedEvent        { Window& window; uint64 timeNS; Vec2u size; };
-		struct WindowMovedEvent          { Window& window; uint64 timeNS; Vec2i pos;  };
-		struct WindowMinimizedEvent      { Window& window; uint64 timeNS; };
-		struct WindowMaximizedEvent      { Window& window; uint64 timeNS; };
-		struct WindowFocusGainedEvent    { Window& window; uint64 timeNS; };
-		struct WindowFocusLostEvent      { Window& window; uint64 timeNS; };
-		struct WindowCloseEvent          { Window& window; uint64 timeNS; };
-		struct WindowMouseEnterEvent     { Window& window; uint64 timeNS; };
-		struct WindowMouseLeaveEvent     { Window& window; uint64 timeNS; };
-		struct WindowDisplayChangedEvent { Window& window; uint64 timeNS; Display::DisplayID displayID; }; //The displayID is the id of the new display
-		struct WindowDestroyedEvent      { Window& window; uint64 timeNS; };
+		struct ResizedEvent        { Window& window; uint64 timeNS; Vec2u size;                      };
+		struct MovedEvent          { Window& window; uint64 timeNS; Vec2i pos;                       };
+		struct MinimizedEvent      { Window& window; uint64 timeNS;                                  };
+		struct MaximizedEvent      { Window& window; uint64 timeNS;                                  };
+		struct FocusGainedEvent    { Window& window; uint64 timeNS;                                  };
+		struct FocusLostEvent      { Window& window; uint64 timeNS;                                  };
+		struct CloseEvent          { Window& window; uint64 timeNS;                                  };
+		struct MouseEnterEvent     { Window& window; uint64 timeNS;                                  };
+		struct MouseLeaveEvent     { Window& window; uint64 timeNS;                                  };
+		struct DisplayChangedEvent { Window& window; uint64 timeNS; Display::DisplayID newDisplayID; };
+		struct DestructionEvent    { Window& window; uint64 timeNS;                                  };
 
-		EventDispatcher<WindowResizedEvent>                windowResizedEventDispatcher;
-		EventDispatcher<WindowMovedEvent>                  windowMovedEventDispatcher;
-		EventDispatcher<WindowMinimizedEvent>              windowMinimizedEventDispatcher;
-		EventDispatcher<WindowMaximizedEvent>              windowMaximizedEventDispatcher;
-		EventDispatcher<WindowFocusGainedEvent>            windowFocusGainedEventDispatcher;
-		EventDispatcher<WindowFocusLostEvent>              windowFocusLostEventDispatcher;
-		EventDispatcher<WindowCloseEvent>                  windowCloseEventDispatcher;
-		EventDispatcher<WindowMouseEnterEvent>             windowMouseEnterEventDispatcher;
-		EventDispatcher<WindowMouseLeaveEvent>             windowMouseLeaveEventDispatcher;
-		EventDispatcher<WindowDisplayChangedEvent>         windowDisplayChangedEventDispatcher;
-		EventDispatcher<WindowDestroyedEvent>              windowDestroyedEventDispatcher;
-		EventDispatcher<Input::KeyDownEvent>               keyDownEventDispatcher;
-		EventDispatcher<Input::KeyUpEvent>                 keyUpEventDispatcher;
-		EventDispatcher<Input::TextInputEvent>             textInputEventDispatcher;
-		EventDispatcher<Input::MouseButtonDownEvent>       mouseButtonDownEventDispatcher;
-		EventDispatcher<Input::MouseButtonUpEvent>         mouseButtonUpEventDispatcher;
-		EventDispatcher<Input::MouseMotionEvent>           mouseMotionEventDispatcher;
-		EventDispatcher<Input::MouseScrollEvent>           mouseScrollEventDispatcher;
+		EventDispatcher<ResizedEvent>                resizedEventDispatcher;
+		EventDispatcher<MovedEvent>                  movedEventDispatcher;
+		EventDispatcher<MinimizedEvent>              minimizedEventDispatcher;
+		EventDispatcher<MaximizedEvent>              maximizedEventDispatcher;
+		EventDispatcher<FocusGainedEvent>            focusGainedEventDispatcher;
+		EventDispatcher<FocusLostEvent>              focusLostEventDispatcher;
+		EventDispatcher<CloseEvent>                  closeEventDispatcher;
+		EventDispatcher<MouseEnterEvent>             mouseEnterEventDispatcher;
+		EventDispatcher<MouseLeaveEvent>             mouseLeaveEventDispatcher;
+		EventDispatcher<DisplayChangedEvent>         displayChangedEventDispatcher;
+		EventDispatcher<DestructionEvent>            destructionEventDispatcher;
+
+		using GenericWindowEvent = Variant<ResizedEvent, MovedEvent, MinimizedEvent, MaximizedEvent, FocusGainedEvent, FocusLostEvent, CloseEvent, MouseEnterEvent, MouseLeaveEvent, DisplayChangedEvent>;
 
 		Window();
 		Window(const Window&) = delete;
 		Window(Window&&) noexcept;
 		Window(const WindowCreateOptions& createOptions);
-		Window(const WindowCreateOptions& createOptions, BlazeEngineContext* context);
-		Window(void* handle, WindowGraphicsAPI graphicsAPI, BlazeEngineContext* context);
-		~Window();
+		Window(void* handle, WindowGraphicsAPI graphicsAPI);
+		virtual ~Window();
 
-		void Destroy();
+		virtual void Destroy();
 
 		//Window basic properties
 
@@ -104,7 +118,7 @@ namespace Blaze
 		Vec2u GetSize() const;
 		void SetSize(Vec2u size);
 
-		//Window behaviour properties
+		//Window behavior properties
 
 		bool GetResizableFlag() const;
 		void SetResizableFlag(bool resizable);
@@ -141,7 +155,9 @@ namespace Blaze
 
 		//Window input properties
 
-		Vec2f GetMousePos() const;
+		bool CaptureMouse(WindowMouseCaptureHandle& mouseCaptureHandle);
+		bool IsMouseCaptured() const;
+		bool GetDefaultMousePos(Vec2f& mousePos) const;
 		Recti GetMouseConfinementRectangle() const;
 		void SetMouseConfinementRectangle(Recti rect);
 		bool GetRelativeMouseModeFlag() const;
@@ -153,25 +169,31 @@ namespace Blaze
 		Vec2u GetWindowMonitorDimensions() const;
 		void Raise();
 
-		void SetDisplayModeForFullscreen(const Display::DisplayMode& displayMode);
+		void SetDisplayModeForFullScreen(const Display::DisplayMode& displayMode);
 		Display::DisplayID GetDisplayIndex();
 
-		//GetFullscreenMode() const;
-		//SetFullscreenMode();
-		//GetWindowVideoDisplayIndex() const ;
+		bool ProcessInputEvent(Input::GenericInputEvent& event);
+		bool HasInputEvents() const;
+		void AddInputEvent(const Input::GenericInputEvent& event);
+		void AddWindowEvent(const GenericWindowEvent& event);
 
 		void* ReleaseHandle();
 		inline void* GetHandle() const { return handle; }
-		inline BlazeEngineContext* GetBlazeEngineContext() const { return context; }
 
 		Window& operator=(const Window&) = delete;
 		Window& operator=(Window&&) noexcept;
 	private:
-		BlazeEngineContext* context;
+		using InternalEvent = Variant<Input::GenericInputEvent, GenericWindowEvent>;
+
+		EventQueue<InternalEvent> eventQueue;
 		WindowGraphicsAPI graphicsAPI;
 		void* handle;
 
+		WindowMouseCaptureHandle* currentMouseCaptureHandle;
+
 		void MoveDispatchers(Window& other);
-		static void HandleEvents(void*, void*);
+		void HandleWindowEvent(const GenericWindowEvent& event);
+
+		friend class WindowMouseCaptureHandle;
 	};
 }

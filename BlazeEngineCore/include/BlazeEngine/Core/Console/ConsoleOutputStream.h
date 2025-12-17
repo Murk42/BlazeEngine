@@ -4,13 +4,14 @@
 
 namespace Blaze
 {
-	class BLAZE_API ConsoleOutputStream : public StyledOutputStream
+	class BLAZE_API ConsoleOutputStream : public StyledWriteStream
 	{
 	public:
 		ConsoleOutputStream();
 		~ConsoleOutputStream();
 
 		uintMem Write(const void* ptr, uintMem byteCount) override;
+		uintMem WriteWithoutStyle(const void* ptr, uintMem byteCount) override;
 		bool MovePosition(intMem offset) override;
 		bool SetPosition(uintMem offset) override;
 		bool SetPositionFromEnd(intMem offset) override;

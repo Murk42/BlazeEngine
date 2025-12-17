@@ -9,19 +9,24 @@ namespace Blaze::UI::Nodes
 		dataMap.SetTypeName("Label");
 
 		finalTransformUpdatedEventDispatcher.AddHandler<&Label::FinalTransformUpdatedEvent>(*this);
-		transformUpdatedEventDispatcher.AddHandler<&Label::TransformUpdatedEvent>(*this);
+		transformFilterEventDispatcher.AddHandler<&Label::TransformFilterEvent>(*this);
 	}
-	Label::Label(Node& parent, const NodeTransform& transform, u8StringView string, const FontAtlas& atlas, float fontSize)
+	Label::Label(Node& parent, const NodeTransform& transform)
 		: Label()
 	{
-		SetParent(&parent);
 		SetTransform(transform);
+		SetParent(&parent);
+	}
+	Label::Label(Node& parent, const NodeTransform& transform, u8StringView string, const FontAtlas& atlas, ColorRGBAf color, float fontSize)
+		: Label(parent, transform)
+	{
 		BuildText(string, atlas, fontSize);
+		SetColor(color);
 	}
 	Label::~Label()
 	{
 		finalTransformUpdatedEventDispatcher.RemoveHandler<&Label::FinalTransformUpdatedEvent>(*this);
-		transformUpdatedEventDispatcher.RemoveHandler<&Label::TransformUpdatedEvent>(*this);
+		transformFilterEventDispatcher.RemoveHandler<&Label::TransformFilterEvent>(*this);
 	}
 	void Label::ClearText()
 	{
@@ -48,7 +53,15 @@ namespace Blaze::UI::Nodes
 		renderDataDirty = true;
 		MarkTransformDirty();
 	}
-	void Label::PreRender(const UIRenderContext& renderContext)
+	void Label::SetColor(ColorRGBAf color)
+	{
+		renderUnit.color = color;
+	}
+	void Label::SetBlocksHitTestFlag(bool blocksHitTest)
+	{
+		this->blocksHitTest = blocksHitTest;
+	}
+	void Label::PreRender(const RenderContext& renderContext)
 	{
 		CleanFinalTransform();
 
@@ -61,19 +74,27 @@ namespace Blaze::UI::Nodes
 		renderUnit.position = transform.position + Vec2f(0, textSize.y);
 		renderUnit.right = { Math::Cos(transform.rotation), Math::Sin(transform.rotation) };
 	}
-	UIRenderUnitBase* Label::GetRenderUnit(uintMem index)
+	RenderUnitBase* Label::GetRenderUnit(uintMem index)
 	{
 		return index == 0 ? &renderUnit : nullptr;
 	}
-	void Label::TransformUpdatedEvent(const Node::TransformUpdatedEvent& event)
+	auto Label::HitTest(Vec2f screenPosition) -> HitStatus
 	{
-		auto transform = GetTransform();
-
-		if (transform.size != textSize)
-		{
-			transform.size = textSize;
-			SetTransform(transform);
-		}
+		HitStatus hitStatus = Node::HitTest(screenPosition);
+		if (blocksHitTest)
+			if (hitStatus != HitStatus::NotHit)
+				return HitStatus::HitBlocking;
+			else
+				return HitStatus::NotHit;
+		else
+			if (hitStatus != HitStatus::NotHit)
+				return HitStatus::HitNotBlocking;
+			else
+				return HitStatus::NotHit;
+	}
+	void Label::TransformFilterEvent(const Node::TransformFilterEvent& event)
+	{
+		event.transform.size = textSize;
 	}
 	void Label::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
 	{

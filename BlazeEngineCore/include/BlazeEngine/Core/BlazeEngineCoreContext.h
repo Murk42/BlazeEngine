@@ -35,7 +35,7 @@ namespace Blaze
 		struct LoggerOutputStreamData
 		{
 			WriteStream* writeStream;
-			bool acceptsStyledText;
+			bool isStyledWriteStream;
 			bool insideStyleTag;
 		};
 		struct LoggerOutputFileData

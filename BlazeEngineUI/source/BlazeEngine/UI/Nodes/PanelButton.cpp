@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Nodes/PanelButton.h"
+#include "BlazeEngine/Runtime/IO/Input.h"
 
 namespace Blaze::UI::Nodes
 {
@@ -21,9 +22,9 @@ namespace Blaze::UI::Nodes
 	PanelButton::PanelButton(Node& parent, const NodeTransform& transform, const Style& style)
 		: PanelButton()
 	{
-		SetParent(&parent);
-		SetTransform(transform);
 		SetStyle(style);
+		SetTransform(transform);
+		SetParent(&parent);
 	}
 	PanelButton::~PanelButton()
 	{
@@ -35,6 +36,8 @@ namespace Blaze::UI::Nodes
 	{
 		fillColor = style.panelStyle.fillColor;
 		borderColor = style.panelStyle.borderColor;
+		renderUnit.cornerRadius = style.panelStyle.cornerRadius;
+		renderUnit.borderWidth = style.panelStyle.borderWidth;
 		highlightTint = style.highlightTint;
 		pressedTint = style.pressedTint;
 		UpdateColor();
@@ -52,7 +55,7 @@ namespace Blaze::UI::Nodes
 			.pressedTint = pressedTint
 		};
 	}
-	void PanelButton::PreRender(const UIRenderContext& renderContext)
+	void PanelButton::PreRender(const RenderContext& renderContext)
 	{
 		CleanFinalTransform();
 
@@ -61,9 +64,12 @@ namespace Blaze::UI::Nodes
 
 		renderUnitDirty = false;
 
-		GetFinalTransform().GetRectVectors(renderUnit.pos, renderUnit.right, renderUnit.up);
+		NodeFinalTransform transform = GetFinalTransform();
+		renderUnit.pos = transform.position;
+		renderUnit.right = transform.Right() * transform.size.x;
+		renderUnit.up= transform.Up() * transform.size.y;
 	}
-	UIRenderUnitBase* PanelButton::GetRenderUnit(uintMem index)
+	RenderUnitBase* PanelButton::GetRenderUnit(uintMem index)
 	{
 		return index == 0 ? &renderUnit : nullptr;
 	}
@@ -97,12 +103,13 @@ namespace Blaze::UI::Nodes
 	{
 		renderUnitDirty = true;
 	}
-	void PanelButton::MouseHitStatusChangedEvent(const InputNode::MouseHitStatusChangedEvent& event)
+	void PanelButton::MouseHitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event)
 	{
-		highlighted = event.newHitStatus > 0;
+		highlighted = event.newHitStatus != Node::HitStatus::NotHit;
+
 		UpdateColor();
 
-		if (event.newHitStatus > 0)
+		if (event.newHitStatus != Node::HitStatus::HitBlocking)
 			Input::SetCursorType(Input::CursorType::Pointer);
 		else
 			Input::SetCursorType(Input::CursorType::Default);

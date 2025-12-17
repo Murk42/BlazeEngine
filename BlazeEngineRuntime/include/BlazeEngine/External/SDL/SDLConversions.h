@@ -1,8 +1,8 @@
 #pragma once
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_mouse.h>
-#include "BlazeEngine/Runtime/Display.h"
-#include "BlazeEngine/Runtime/Input.h"
+#include "BlazeEngine/Runtime/IO/Display.h"
+#include "BlazeEngine/Runtime/IO/Input.h"
 
 namespace Blaze
 {

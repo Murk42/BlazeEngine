@@ -23,7 +23,7 @@ namespace Blaze::Debug
 		Log();
 		Log(const Log& log);
 		Log(Log&&) noexcept;
-		Log(LogType type, u8StringView source, u8StringView message);
+		Log(LogType type, u8StringView source, u8StringView message, Callstack callstack = Callstack(0));
 
 		inline LogType GetType() const { return type; }
 		inline u8StringView GetSource() const { return source; }

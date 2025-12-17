@@ -1,11 +1,11 @@
 #pragma once
 #include "BlazeEngine/Core/Common/Rect.h"
 #include "BlazeEngine/Graphics/Renderers/PanelRenderer.h"
-#include "BlazeEngine/UI/Graphics/UIRenderUnit.h"
+#include "BlazeEngine/UI/Graphics/RenderUnit.h"
 
 namespace Blaze::UI
 {
-	class BLAZE_API PanelRenderUnit : public UIRenderUnit<Graphics::PanelRenderer>
+	class BLAZE_API PanelRenderUnit : public RenderUnit<Graphics::PanelRenderer>
 	{
 	public:
 		Vec2f pos, right, up;
@@ -17,6 +17,6 @@ namespace Blaze::UI
 		PanelRenderUnit();
 		~PanelRenderUnit();
 
-		void Render(const Node& node, Graphics::PanelRenderer& renderer, const UIRenderContext& renderContext) override;
+		void Render(const Node& node, Graphics::PanelRenderer& renderer, const RenderContext& renderContext) override;
 	};
 }

@@ -1,28 +1,26 @@
 #include "pch.h"
-#include "BlazeEngine/Runtime/Input.h"
+#include "BlazeEngine/Runtime/IO/Input.h"
 #include "BlazeEngine/UI/Common/ButtonBase.h"
-#include "BlazeEngine/UI/Input/InputManager.h"
+#include "BlazeEngine/UI/Input/InputSubSystem.h"
 
 namespace Blaze::UI
 {
 	ButtonBase::ButtonBase()
-		: pressed(false), pressable(true)
+		: pressingMouseID(UINT32_MAX), pressable(true)
 	{
 		//SetMouseMotionReportPolicy(MouseMotionReportPolicy::ReportWhileSelected);
 
 		mouseButtonDownEventDispatcher.AddHandler<&ButtonBase::MouseButtonDownEvent>(*this);
 		mouseButtonUpEventDispatcher.AddHandler<&ButtonBase::MouseButtonUpEvent>(*this);
 		selectedStateChangedEventDispatcher.AddHandler<&ButtonBase::SelectedStateChangedEvent>(*this);
+		mouseHitStatusChangedEventDispatcher.AddHandler<&ButtonBase::HitStatusChangedEvent>(*this);
 	}
 	ButtonBase::~ButtonBase()
 	{
 		mouseButtonDownEventDispatcher.RemoveHandler<&ButtonBase::MouseButtonDownEvent>(*this);
 		mouseButtonUpEventDispatcher.RemoveHandler<&ButtonBase::MouseButtonUpEvent>(*this);
 		selectedStateChangedEventDispatcher.RemoveHandler<&ButtonBase::SelectedStateChangedEvent>(*this);
-	}
-	int ButtonBase::HitTest(Vec2f screenPos)
-	{
-		return Node::HitTest(screenPos) > 0 ? 2 : 0;
+		mouseHitStatusChangedEventDispatcher.RemoveHandler<&ButtonBase::HitStatusChangedEvent>(*this);
 	}
 	void ButtonBase::SetPressedEventCallback(const std::function<void(const PressedEvent&)>& callback)
 	{
@@ -34,66 +32,50 @@ namespace Blaze::UI
 		{
 			this->pressable = pressable;
 
-			if (!pressable && pressed)
-			{
-				pressed = false;
-				pressableFlagChangedEventDispatcher.Call({ *this });
-			}
+			if (!pressable && pressingMouseID.IsValid())
+				Unpress(false);
 		}
 	}
-	void ButtonBase::Unpress(bool quiet)
+	void ButtonBase::MouseButtonDownEvent(const UIMouseButtonDownEvent& event)
 	{
-		if (pressed)
-		{
-			pressed = false;
-
-			if (!quiet)
-				if (pressedEventCallback)
-					pressedEventCallback({ *this });
-
-			pressedStateChangedEventDispatcher.Call({ *this });
-		}
-	}
-	void ButtonBase::Press()
-	{
-		if (!pressable)
-		{
-			pressed = true;
-
-			pressedStateChangedEventDispatcher.Call({ *this });
-		}
-	}
-	void ButtonBase::MouseButtonDownEvent(const InputNode::MouseButtonDownEvent& event)
-	{
-		if (event.button != Input::MouseButton::Left || GetMouseHitStatus() != 2)
+		if (event.button != Input::MouseButton::Left || pressingMouseID.IsValid())
 			return;
 
 		if (pressable)
 		{
-			pressed = true;
-			pressedStateChangedEventDispatcher.Call({ *this });
+			pressingMouseID = event.mouseID;
+			pressedStateChangedEventDispatcher.Call({ *this, pressingMouseID });
+			CaptureMouse(event.mouseID);
 		}
 
 		Select();
 	}
-	void ButtonBase::MouseButtonUpEvent(const InputNode::MouseButtonUpEvent& event)
+	void ButtonBase::MouseButtonUpEvent(const UIMouseButtonUpEvent& event)
 	{
 		if (event.button != Input::MouseButton::Left)
 			return;
 
-		if (pressed)
-			if (pressedEventCallback)
-				pressedEventCallback({ *this });
-
-		if (pressed)
-		{
-			pressed = false;
-			pressedStateChangedEventDispatcher.Call({ *this });
-		}
+		if (event.mouseID == pressingMouseID)
+			Unpress(hovered);
 	}
 	void ButtonBase::SelectedStateChangedEvent(const InputNode::SelectedStateChangedEvent& event)
 	{
 		if (!IsSelected())
 			Unpress(true);
+	}
+	void ButtonBase::HitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event)
+	{
+		hovered = event.newHitStatus != HitStatus::NotHit;
+	}
+	void ButtonBase::Unpress(bool runPressedEventCallback)
+	{
+		if (runPressedEventCallback && pressedEventCallback)
+			pressedEventCallback({ *this });
+
+		Input::MouseID oldMouseID = pressingMouseID;
+		pressingMouseID = Input::MouseID::Invalid();
+
+		ReleaseMouse(oldMouseID);
+		pressedStateChangedEventDispatcher.Call({ *this, oldMouseID });
 	}
 }

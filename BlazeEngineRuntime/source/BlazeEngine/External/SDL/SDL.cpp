@@ -33,14 +33,11 @@ namespace Blaze
 
 		SDL_SetMainReady();
 
-		if (SDL_InitSubSystem(SDL_INIT_VIDEO) == false)
-			BLAZE_LOG_FATAL("Failed to initialize the SDL library. SDL returned error: \"" + SDL_GetError() + "\"");
-
-		if (SDL_InitSubSystem(SDL_INIT_EVENTS) == false)
+		if (SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS) == false)
 			BLAZE_LOG_FATAL("Failed to initialize the SDL library. SDL returned error: \"" + SDL_GetError() + "\"");
 
 		int version = SDL_GetVersion();
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized SDL {}.{}.{}", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
+		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized SDL {}.{}.{} ({.1f}ms)", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version), timing.GetTimingResult().time.GetSeconds() * 1000.0);
 
 		return timing.GetTimingResult();
 	}

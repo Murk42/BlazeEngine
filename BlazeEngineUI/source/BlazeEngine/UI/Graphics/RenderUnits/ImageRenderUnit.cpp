@@ -9,7 +9,7 @@ namespace Blaze::UI
 	ImageRenderUnit::~ImageRenderUnit()
 	{
 	}
-	void ImageRenderUnit::Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const UIRenderContext& renderContext)
+	void ImageRenderUnit::Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const RenderContext& renderContext)
 	{
 		renderer.Render(Graphics::TexturedRectRenderData{
 			.texture = texture,

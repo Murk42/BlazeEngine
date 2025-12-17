@@ -4,22 +4,18 @@
 namespace Blaze::UI::Nodes
 {
 	Panel::Panel()
-		: renderUnitDirty(true)
 	{
 		dataMap.SetTypeName("Panel");
-
-		finalTransformUpdatedEventDispatcher.AddHandler<&Panel::OnEvent>(*this);
 	}
 	Panel::Panel(Node& parent, const NodeTransform& transform, const Style& style)
 		: Panel()
 	{
-		SetParent(&parent);
-		SetTransform(transform);
 		SetStyle(style);
+		SetTransform(transform);
+		SetParent(&parent);
 	}
 	Panel::~Panel()
 	{
-		finalTransformUpdatedEventDispatcher.RemoveHandler<&Panel::OnEvent>(*this);
 	}
 	void Panel::SetStyle(const Panel::Style& style)
 	{
@@ -37,25 +33,17 @@ namespace Blaze::UI::Nodes
 			.cornerRadius = renderUnit.cornerRadius
 		};
 	}
-	void Panel::PreRender(const UIRenderContext& renderContext)
+	void Panel::PreRender(const RenderContext& renderContext)
 	{
-		CleanFinalTransform();
-
-		if (!renderUnitDirty)
-			return;
-
-		renderUnitDirty = false;
-
-		GetFinalTransform().GetRectVectors(renderUnit.pos, renderUnit.right, renderUnit.up);
+		auto finalTransform = GetFinalTransform();
+		renderUnit.pos = finalTransform.position;
+		renderUnit.right = finalTransform.Right() * finalTransform.size.x;
+		renderUnit.up = finalTransform.Up() * finalTransform.size.y;
 	}
-	UIRenderUnitBase* Panel::GetRenderUnit(uintMem index)
+	RenderUnitBase* Panel::GetRenderUnit(uintMem index)
 	{
 		if (index == 0)
 			return &renderUnit;
 		return nullptr;
-	}
-	void Panel::OnEvent(const Node::FinalTransformUpdatedEvent& event)
-	{
-		renderUnitDirty = true;
 	}
 }

@@ -1,11 +1,11 @@
 #pragma once
 #include "BlazeEngine/Core/Common/Rect.h"
 #include "BlazeEngine/Graphics/Renderers/TexturedRectRenderer.h"
-#include "BlazeEngine/UI/Graphics/UIRenderUnit.h"
+#include "BlazeEngine/UI/Graphics/RenderUnit.h"
 
 namespace Blaze::UI
 {
-	class BLAZE_API ImageRenderUnit : public UIRenderUnit<Graphics::TexturedRectRenderer>
+	class BLAZE_API ImageRenderUnit : public RenderUnit<Graphics::TexturedRectRenderer>
 	{
 	public:
 		Vec2f pos, right, up;
@@ -18,6 +18,6 @@ namespace Blaze::UI
 		ImageRenderUnit();
 		~ImageRenderUnit();
 
-		void Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const UIRenderContext& renderContext) override;
+		void Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const RenderContext& renderContext) override;
 	};
 }

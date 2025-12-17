@@ -22,8 +22,8 @@ namespace Blaze::UI::Nodes
 		void SetStyle(const Style& style);
 		Style GetStyle() const;
 
-		void PreRender(const UIRenderContext& renderContext) override;
-		UIRenderUnitBase* GetRenderUnit(uintMem index) override;
+		void PreRender(const RenderContext& renderContext) override;
+		RenderUnitBase* GetRenderUnit(uintMem index) override;
 	private:
 		PanelRenderUnit renderUnit;
 		bool renderUnitDirty;
@@ -38,7 +38,7 @@ namespace Blaze::UI::Nodes
 		void UpdateColor();
 
 		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
-		void MouseHitStatusChangedEvent(const MouseHitStatusChangedEvent& event);
+		void MouseHitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event);
 		void PressedStateChangedEvent(const PressedStateChangedEvent& event);
 	};
 }

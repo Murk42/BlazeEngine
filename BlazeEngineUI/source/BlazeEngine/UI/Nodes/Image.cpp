@@ -5,6 +5,93 @@
 
 namespace Blaze::UI::Nodes
 {
+	struct LayoutedImage
+	{
+		Vec2f renderPos;
+		Vec2f renderSize;
+		Vec2f uv1;
+		Vec2f uv2;
+	};
+	static LayoutedImage ApplyImageLayout(ImageLayout layout, const NodeFinalTransform& transform, Vec2f uv1, Vec2f uv2, Vec2f textureSize)
+	{
+		Rectf finalSourceRect{ uv1, uv2 - uv1 };
+
+		LayoutedImage out;
+		out.renderPos = transform.position;
+		out.renderSize = transform.size;
+
+		switch (layout)
+		{
+		case ImageLayout::Fit: {
+			finalSourceRect.size *= textureSize;
+			finalSourceRect.pos *= textureSize;
+
+			float frameRatio = transform.size.y / transform.size.x;
+			float textureRatio = finalSourceRect.h / finalSourceRect.w;
+
+			if (frameRatio < textureRatio)
+			{
+				float newWidth = transform.size.y / textureRatio;
+
+				out.renderPos += transform.Right() * (transform.size.x - newWidth) / 2;
+				out.renderSize.x = newWidth;
+			}
+			else
+			{
+				float newHeight = textureRatio * transform.size.x;
+
+				out.renderPos += transform.Up() * (transform.size.y - newHeight) / 2;
+				out.renderSize.y = newHeight;
+			}
+
+			finalSourceRect.size /= textureSize;
+			finalSourceRect.pos /= textureSize;
+
+			break;
+		}
+		case ImageLayout::Fill: {
+			finalSourceRect.size *= textureSize;
+			finalSourceRect.pos *= textureSize;
+
+			float frameRatio = transform.size.y / transform.size.x;
+			float textureRatio = finalSourceRect.h / finalSourceRect.w;
+
+			if (frameRatio < textureRatio)
+			{
+				float newHeight = frameRatio * finalSourceRect.w;
+
+				finalSourceRect.y += (finalSourceRect.h - newHeight) / 2;
+				finalSourceRect.h = newHeight;
+			}
+			else
+			{
+				float newWidth = finalSourceRect.h / frameRatio;
+
+				finalSourceRect.x += (finalSourceRect.w - newWidth) / 2;
+				finalSourceRect.w = newWidth;
+			}
+
+			finalSourceRect.size /= textureSize;
+			finalSourceRect.pos /= textureSize;
+
+			break;
+		}
+		case ImageLayout::KeepWidth:
+			//TODO implement this
+			break;
+		case ImageLayout::KeepHeight:
+			//TODO implement this
+			break;
+		case ImageLayout::Stretch:
+		default:
+			break;
+		}
+
+		out.uv1 = finalSourceRect.pos;
+		out.uv2 = finalSourceRect.pos + finalSourceRect.size;
+
+		return out;
+	}
 	Image::Image()
 		: renderUnitDirty(true), imageLayout(ImageLayout::Fit), uv1(0), uv2(1)
 	{
@@ -15,10 +102,10 @@ namespace Blaze::UI::Nodes
 	Image::Image(Node& parent, const NodeTransform& transform, ResourceBaseRef texture, Vec2f uv1, Vec2f uv2, const Style& style)
 		: Image()
 	{
-		SetParent(&parent);
-		SetTransform(transform);
-		SetTexture(texture, uv1, uv2);
 		SetStyle(style);
+		SetTexture(texture, uv1, uv2);
+		SetTransform(transform);
+		SetParent(&parent);
 	}
 	Image::~Image()
 	{
@@ -48,109 +135,25 @@ namespace Blaze::UI::Nodes
 		style.layout = imageLayout;
 		return style;
 	}
-	void Image::PreRender(const UIRenderContext& renderContext)
+	void Image::PreRender(const RenderContext& renderContext)
 	{
-		CleanFinalTransform();
+		NodeFinalTransform transform = GetFinalTransform();
 
 		if (!renderUnitDirty)
 			return;
 
 		renderUnitDirty = false;
 
-		auto transform = GetFinalTransform();
+		Vec2f textureSize = (Vec2f)renderUnit.texture.Get<Graphics::OpenGL::Texture2D>().GetSize();
+		auto [renderPos, renderSize, renderUV1, renderUV2] = ApplyImageLayout(imageLayout, transform, uv1, uv2, textureSize);
 
-		Vec2f& pos = transform.position;
-		Vec2f& size = transform.size;
-		float& rotation = transform.rotation;
-
-		const float cos = Math::Cos(rotation);
-		const float sin = Math::Sin(rotation);
-		const Vec2f right = Vec2f(cos, sin);
-		const Vec2f up = Vec2f(-sin, cos);
-
-		Rectf finalSourceRect = { uv1, uv2 - uv1 };
-
-		switch (imageLayout)
-		{
-		case ImageLayout::Fit: {
-
-			if (!renderUnit.texture)
-				break;
-
-			Vec2f textureSize = (Vec2f)renderUnit.texture.Get<Graphics::OpenGL::Texture2D>().GetSize();
-			finalSourceRect.size *= textureSize;
-			finalSourceRect.pos *= textureSize;
-
-			float frameRatio = size.y / size.x;
-			float textureRatio = finalSourceRect.h / finalSourceRect.w;
-
-			if (frameRatio < textureRatio)
-			{
-				float newWidth = size.y / textureRatio;
-
-				pos += right * (size.x - newWidth) / 2;
-				size.x = newWidth;
-			}
-			else
-			{
-				float newHeight = textureRatio * size.x;
-
-				pos += up * (size.y - newHeight) / 2;
-				size.y = newHeight;
-			}
-
-			finalSourceRect.size /= textureSize;
-			finalSourceRect.pos /= textureSize;
-
-			break;
-		}
-		case ImageLayout::Fill: {
-
-			if (!renderUnit.texture)
-				break;
-
-			Vec2f textureSize = (Vec2f)renderUnit.texture.Get<Graphics::OpenGL::Texture2D>().GetSize();
-
-			finalSourceRect.size *= textureSize;
-			finalSourceRect.pos *= textureSize;
-
-			float frameRatio = size.y / size.x;
-			float textureRatio = finalSourceRect.h / finalSourceRect.w;
-
-			if (frameRatio < textureRatio)
-			{
-				float newHeight = frameRatio * finalSourceRect.w;
-
-				finalSourceRect.y += (finalSourceRect.h - newHeight) / 2;
-				finalSourceRect.h = newHeight;
-			}
-			else
-			{
-				float newWidth = finalSourceRect.h / frameRatio;
-
-				finalSourceRect.x += (finalSourceRect.w - newWidth) / 2;
-				finalSourceRect.w = newWidth;
-			}
-
-			finalSourceRect.size /= textureSize;
-			finalSourceRect.pos /= textureSize;
-
-			break;
-		}
-		case ImageLayout::Stretch:
-		case ImageLayout::KeepWidth:
-		case ImageLayout::KeepHeight:
-		default:
-			break;
-		}
-
-		renderUnit.uv1 = finalSourceRect.pos;
-		renderUnit.uv2 = finalSourceRect.pos + finalSourceRect.size;
-		renderUnit.pos = pos;
-		renderUnit.right = right * size.x;
-		renderUnit.up = up * size.y;
+		renderUnit.uv1 = renderUV1;
+		renderUnit.uv2 = renderUV2;
+		renderUnit.pos = renderPos;
+		renderUnit.right = transform.right * renderSize.x;
+		renderUnit.up = Vec2f(-transform.right.y, transform.right.x) * renderSize.y;
 	}
-	UIRenderUnitBase* Image::GetRenderUnit(uintMem index)
+	RenderUnitBase* Image::GetRenderUnit(uintMem index)
 	{
 		return index == 0 ? &renderUnit : nullptr;
 	}

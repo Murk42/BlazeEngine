@@ -3,8 +3,8 @@
 
 namespace Blaze::UI
 {
-	Screen::Screen(Window* window, bool resizeWithWindow)
-		: Node(), window(nullptr)
+	Screen::Screen()
+		: Node()
 	{
 		SetTransform({
 			.pos = Vec2f(0.0f, 0.0f),
@@ -14,47 +14,15 @@ namespace Blaze::UI
 			.scale = 1.0f,
 			.rotation = 0.0f,
 			});
-
-		SetWindow(window, resizeWithWindow);
 	}
 	Screen::~Screen()
 	{
 		dataMap.map.Clear();
 
-		screenDestructionEventDispatcher.Call({ *this });
-
-		if (window != nullptr)
-			window->windowResizedEventDispatcher.RemoveHandler(*this);
+		destructionEventDispatcher.Call({ *this });
 	}
-	void Screen::SetWindow(Window* window, bool resizeWithWindow)
+	Node::HitStatus Screen::HitTest(Vec2f screenPos)
 	{
-		if (window == this->window)
-			return;
-
-		Window* old = this->window;
-		this->window = window;
-
-		if (old != nullptr)
-			old->windowResizedEventDispatcher.RemoveHandler(*this);
-
-		if (window != nullptr)
-		{
-			if (resizeWithWindow)
-			{
-				auto transform = GetTransform();
-				transform.size = (Vec2f)window->GetSize();
-				SetTransform(transform);
-
-				window->windowResizedEventDispatcher.AddHandler(*this);
-			}
-		}
-
-		screenWindowChangedEventDispatcher.Call({ .oldWindow = old, .screen = *this });
-	}
-	void Screen::OnEvent(const Window::WindowResizedEvent& event)
-	{
-		auto transform = GetTransform();
-		transform.size = (Vec2f)event.size;
-		SetTransform(transform);
+		return HitStatus::NotHit;
 	}
 }

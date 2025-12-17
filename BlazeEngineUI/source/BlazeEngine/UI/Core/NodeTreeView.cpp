@@ -22,22 +22,25 @@ namespace Blaze::UI
 	}
 	NodeTreeIterator NodeTreeView::AheadIterator() const
 	{
-		return NodeTreeIterator();
+		return NodeTreeIterator(root, true, false);
 	}
 	NodeTreeIterator NodeTreeView::FirstIterator() const
 	{
-		return NodeTreeIterator(root);
+		return NodeTreeIterator(root, false, false);
 	}
 	NodeTreeIterator NodeTreeView::LastIterator() const
 	{
 		auto it = root;
 		while (!it->GetChildren().Empty())
 			it = &it->GetChildren().Last();		
-		return NodeTreeIterator(it);
+		return NodeTreeIterator(it, false, false);
 	}
 	NodeTreeIterator NodeTreeView::BehindIterator() const
 	{
-		return NodeTreeIterator();
+		auto it = root;
+		while (!it->GetChildren().Empty())
+			it = &it->GetChildren().Last();
+		return NodeTreeIterator(it, false, true);
 	}
 	NodeTreeView& NodeTreeView::operator=(const NodeTreeView& other)
 	{

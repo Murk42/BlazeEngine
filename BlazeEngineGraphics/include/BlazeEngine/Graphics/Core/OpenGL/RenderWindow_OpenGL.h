@@ -1,6 +1,6 @@
 #pragma once
 #include "BlazeEngine/Core/Event/EventHandler.h"
-#include "BlazeEngine/Runtime/Window.h"
+#include "BlazeEngine/Runtime/IO/Window.h"
 #include "RenderWindowFramebuffer_OpenGL.h"
 
 namespace Blaze::Graphics::OpenGL
@@ -28,10 +28,12 @@ namespace Blaze::Graphics::OpenGL
 		/*Parity*/RenderWindow_OpenGL(GraphicsContext_OpenGL& graphicsContext, WindowCreateOptions windowOptions, RenderWindowOptions_OpenGL options = { });
 		/*Parity*/~RenderWindow_OpenGL();
 
+		void Destroy() override;
+
 		/*Parity*/RenderWindowFramebuffer_OpenGL& AcquireNextFramebuffer(Semaphore_OpenGL* semaphore);
 		/*Parity*/void PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, ArrayView<Semaphore_OpenGL*> waitSemaphores);
 
-		/*Parity*/inline GraphicsContext_OpenGL& GetGraphicsContext() { return graphicsContext; }
+		/*Parity*/inline GraphicsContext_OpenGL& GetGraphicsContext() { return *graphicsContext; }
 
 		void Present();
 
@@ -42,8 +44,8 @@ namespace Blaze::Graphics::OpenGL
 	private:
 		RenderWindowOptions_OpenGL options;
 		RenderWindowFramebuffer_OpenGL framebuffer;
-		GraphicsContext_OpenGL& graphicsContext;
+		GraphicsContext_OpenGL* graphicsContext;
 
-		void Resized(const Window::WindowResizedEvent& event);
+		void Resized(const Window::ResizedEvent& event);
 	};
 }

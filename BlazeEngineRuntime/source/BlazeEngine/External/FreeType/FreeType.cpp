@@ -29,7 +29,7 @@ namespace Blaze
 		if (auto error = FT_Init_FreeType(&freeTypeLibrary))
 			BLAZE_LOG_FATAL("Failed to initialize the FreeType libary. FT_Error_String returned \"" + GetFTError(error) + "\"");
 
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized FreeType " STRINGIZE(FREETYPE_MAJOR) "." STRINGIZE(FREETYPE_MINOR) "." STRINGIZE(FREETYPE_PATCH));
+		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized FreeType " STRINGIZE(FREETYPE_MAJOR) "." STRINGIZE(FREETYPE_MINOR) "." STRINGIZE(FREETYPE_PATCH) " ({.1f}ms)", timing.GetTimingResult().time.GetSeconds() * 1000.0);
 
 		return timing;
 	}

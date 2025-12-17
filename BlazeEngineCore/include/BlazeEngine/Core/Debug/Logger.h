@@ -6,6 +6,7 @@ namespace Blaze
 {
 	class Path;
 	class WriteStream;
+	class StyledWriteStream;
 }
 
 namespace Blaze::Debug
@@ -19,7 +20,8 @@ namespace Blaze::Debug::Logger
 	BLAZE_API void AddLoggerListener(Debug::LoggerListener* listener);
 	BLAZE_API void RemoveLoggerListener(Debug::LoggerListener* listener);
 
-	BLAZE_API void AddOutputStream(WriteStream& stream, bool acceptsStyledText = false);
+	BLAZE_API void AddOutputStream(StyledWriteStream& stream);
+	BLAZE_API void AddOutputStream(WriteStream& stream);
 	BLAZE_API void RemoveOutputStream(WriteStream& stream);
 	BLAZE_API void AddOutputFile(const Path& path);
 	BLAZE_API void RemoveOutputFile(const Path& path);

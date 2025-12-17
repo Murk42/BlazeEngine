@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "BlazeEngine/Runtime/Window.h"
-#include "BlazeEngine/Runtime/BlazeEngineContext.h"
+#include "BlazeEngine/Runtime/IO/Window.h"
+#include "BlazeEngine/Runtime/BlazeEngineContextInternal.h"
 #include "BlazeEngine/Platform/Windows/Windows.h"
 #include "BlazeEngine/External/SDL/SDL.h"
 #include "BlazeEngine/External/SDL/SDLConversions.h"
@@ -9,14 +9,21 @@
 
 namespace Blaze
 {
-	Window::Window(const WindowCreateOptions& createOptions)
-		: Window(createOptions, blazeEngineContext)
-	{
 
-	}
-	Window::Window(const WindowCreateOptions& createOptions, BlazeEngineContext* context)
-		: graphicsAPI(WindowGraphicsAPI::None), handle(nullptr), context(context)
+	Window::Window()
+		: handle(nullptr), graphicsAPI(WindowGraphicsAPI::None), currentMouseCaptureHandle(nullptr)
 	{
+	}
+	Window::Window(const WindowCreateOptions& createOptions)
+		: Window()
+	{
+		auto context = BlazeEngineContextInternal::GetEngineContext();
+		if (context == nullptr)
+		{
+			BLAZE_LOG_ERROR("Trying to create a window but the engine context is not valid");
+			return;
+		}
+
 		bool fullscreen = false;
 		bool maximized = false;
 		bool minimized = false;
@@ -54,52 +61,51 @@ namespace Blaze
 		SDL_PropertiesID properties = SDL_CreateProperties();
 
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, createOptions.resizable) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, createOptions.borderless) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_MOUSE_GRABBED_BOOLEAN, createOptions.mouseGrabbed) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_MOUSE_GRABBED_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_MOUSE_GRABBED_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_FOCUSABLE_BOOLEAN, createOptions.focusable) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_FOCUSABLE_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_FOCUSABLE_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_HIDDEN_BOOLEAN, createOptions.hidden) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_HIDDEN_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_HIDDEN_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN, createOptions.transparent) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, createOptions.highPixelDensity) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN, createOptions.alwaysOnTop) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_UTILITY_BOOLEAN, createOptions.utilityWindow) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_UTILITY_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_UTILITY_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 
 		if (SDL_SetPointerProperty(properties, SDL_PROP_WINDOW_CREATE_PARENT_POINTER, createOptions.parentWindow == nullptr ? nullptr : createOptions.parentWindow->GetHandle()) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetPointerProperty with SDL_PROP_WINDOW_CREATE_PARENT_POINTER failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetPointerProperty with SDL_PROP_WINDOW_CREATE_PARENT_POINTER failed. SDL returned error: \"" + SDL_GetError() + "\"");
 
 		if (SDL_SetStringProperty(properties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, reinterpret_cast<const char*>(createOptions.title.Ptr())) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetStringProperty with SDL_PROP_WINDOW_CREATE_TITLE_STRING failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetStringProperty with SDL_PROP_WINDOW_CREATE_TITLE_STRING failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_X_NUMBER, pos.x) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_X_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_X_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_Y_NUMBER, pos.y) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_Y_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_Y_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, createOptions.size.x) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, createOptions.size.y) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetNumberProperty with SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER failed. SDL returned error: \"" + SDL_GetError() + "\"");
 
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, fullscreen) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, maximized) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_MINIMIZED_BOOLEAN, minimized) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_MINIMIZED_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_MINIMIZED_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_METAL_BOOLEAN, metal) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_METAL_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_METAL_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, opengl) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 		if (SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, vulkan) == false)
-			BLAZE_LOG_FATAL("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
-
+			BLAZE_LOG_ERROR("Calling SDL_SetBooleanProperty with SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN failed. SDL returned error: \"" + SDL_GetError() + "\"");
 
 		struct FunctionParams {
 			SDL_PropertiesID properties;
@@ -115,44 +121,46 @@ namespace Blaze
 			*((FunctionParams*)functionParams)->handle = SDL_CreateWindowWithProperties(((FunctionParams*)functionParams)->properties);
 			};
 
-		if (context == nullptr)
-			if (SDL_IsMainThread())
-				function(&functionParams);
-			else
-				BLAZE_LOG_FATAL("Creating a windows on a non-main thread");
-		else
-		{
-			uint64 timeoutMilliseconds = 2000;
-			if (!context->ExecuteOnMainThread(function, &functionParams, timeoutMilliseconds))
-				BLAZE_LOG_FATAL("Failed to create a SDL window on the main thread in {}ms", timeoutMilliseconds);
-		}
+		if (!SDL_RunOnMainThread(function, &functionParams, true))
+			BLAZE_LOG_ERROR("SDL_SetWindowTitle failed. SDL returned error: \"{}\"", SDL_GetError());
 
 		SDL_DestroyProperties(properties);
 
 		if (handle == nullptr)
-			BLAZE_LOG_FATAL("Failed to create a SDL window. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("Failed to create a SDL window. SDL returned error: \"" + SDL_GetError() + "\"");
 
 		context->RegisterWindow(*this);
 
 		graphicsAPI = createOptions.graphicsAPI;
 	}
-	Window::Window(void* handle, WindowGraphicsAPI graphicsAPI, BlazeEngineContext* context)
-		: handle(handle), graphicsAPI(graphicsAPI), context(context)
+	Window::Window(void* handle, WindowGraphicsAPI graphicsAPI)
+		: handle(handle), graphicsAPI(graphicsAPI), currentMouseCaptureHandle(nullptr)
 	{
-		if (context != nullptr)
-			context->RegisterWindow(*this);
-	}
-	Window::Window()
-		: handle(nullptr), graphicsAPI(WindowGraphicsAPI::None)
-	{
+		auto context = BlazeEngineContextInternal::GetEngineContext();
+		if (context == nullptr)
+		{
+			BLAZE_LOG_ERROR("Trying to create a window but the engine context is not valid");
+			return;
+		}
+
+		context->RegisterWindow(*this);
 	}
 	Window::Window(Window&& other) noexcept :
-		handle(other.handle), graphicsAPI(other.graphicsAPI), context(other.context)
+		handle(std::exchange(other.handle, nullptr)),
+		graphicsAPI(std::exchange(other.graphicsAPI, WindowGraphicsAPI::None)),
+		currentMouseCaptureHandle(std::exchange(other.currentMouseCaptureHandle, nullptr))
 	{
+		auto context = BlazeEngineContextInternal::GetEngineContext();
+		if (context == nullptr)
+		{
+			BLAZE_LOG_ERROR("Trying to create a window but the engine context is not valid");
+			return;
+		}
+
 		MoveDispatchers(other);
-		other.handle = nullptr;
-		other.graphicsAPI = WindowGraphicsAPI::None;
-		other.context = nullptr;
+
+		if (currentMouseCaptureHandle)
+			currentMouseCaptureHandle->window = this;
 
 		context->MoveWindow(*this);
 	}
@@ -165,24 +173,22 @@ namespace Blaze
 		if (handle == nullptr)
 			return;
 
-		windowDestroyedEventDispatcher.Call({ *this });
-
-
+		auto context = BlazeEngineContextInternal::GetEngineContext();
 		if (context == nullptr)
-			if (SDL_IsMainThread())
-				SDL_DestroyWindow((SDL_Window*)handle);
-			else
-				BLAZE_LOG_FATAL("Destroying a windows on a non-main thread");
-		else
 		{
-			context->UnregisterWindow(*this);
-
-			uint64 timeoutMilliseconds = 2000;
-			if (!context->ExecuteOnMainThread([](void* handle) -> void {
-				SDL_DestroyWindow((SDL_Window*)handle);
-				}, handle, timeoutMilliseconds))
-				BLAZE_LOG_FATAL("Failed to destroy a SDL window on the main thread in {}ms", timeoutMilliseconds);
+			BLAZE_LOG_ERROR("Trying to destroy a window but the engine context is not valid");
+			return;
 		}
+
+		if (currentMouseCaptureHandle != nullptr)
+			currentMouseCaptureHandle->ReleaseMouseCapture();
+
+		destructionEventDispatcher.Call({ *this });
+
+		context->UnregisterWindow(*this);
+
+		if (!SDL_RunOnMainThread([](void* userData) { SDL_DestroyWindow((SDL_Window*)userData); }, handle, true))\
+			BLAZE_LOG_ERROR("SDL_SetWindowTitle failed. SDL returned error: \"{}\"", SDL_GetError());
 
 		handle = nullptr;
 	}
@@ -528,27 +534,39 @@ namespace Blaze
 		if (!SDL_FlashWindow((SDL_Window*)handle, _flashOperation))
 			BLAZE_LOG_ERROR("SDL_FlashWindow failed. SDL returned error: \"{}\"", SDL_GetError());
 	}
-	Vec2f Window::GetMousePos() const
+	bool Window::CaptureMouse(WindowMouseCaptureHandle& newMouseCaptureHandle)
 	{
 		if (handle == nullptr)
+		{
 			BLAZE_LOG_FATAL("Window handle is nullptr");
-
-		float x, y;
-		int wx, wy, wh;
-
-		SDL_GetGlobalMouseState(&x, &y);
-
-		if (!SDL_GetWindowPosition((SDL_Window*)handle, &wx, &wy))
-		{
-			BLAZE_LOG_ERROR("SDL_GetWindowPosition failed. SDL returned error: \"" + SDL_GetError() + "\"");
-			return Vec2f();
+			return false;
 		}
-		if (!SDL_GetWindowSize((SDL_Window*)handle, nullptr, &wh))
+
+		if (currentMouseCaptureHandle != nullptr)
+			return false;
+
+		newMouseCaptureHandle = WindowMouseCaptureHandle(*this);
+
+		return true;
+	}
+	bool Window::IsMouseCaptured() const
+	{
+		return currentMouseCaptureHandle != nullptr;
+	}
+	bool Window::GetDefaultMousePos(Vec2f& mousePos) const
+	{
+		if (handle == nullptr)
 		{
-			BLAZE_LOG_ERROR("SDL_GetWindowSize failed. SDL returned error: \"" + SDL_GetError() + "\"");
-			return Vec2f();
+			BLAZE_LOG_FATAL("Window handle is nullptr");
+			return false;
 		}
-		return Vec2f(x - wx, wh - y + wy);
+
+		if (handle != SDL_GetMouseFocus())
+			return false;
+		
+		SDL_GetMouseState(&mousePos.x, &mousePos.y);
+		
+		return true;
 	}
 	Recti Window::GetMouseConfinementRectangle() const
 	{
@@ -611,6 +629,13 @@ namespace Blaze
 	}
 	Window* Window::GetParentWindow() const
 	{
+		auto context = BlazeEngineContextInternal::GetEngineContext();
+		if (context == nullptr)
+		{
+			BLAZE_LOG_ERROR("Trying to call GetParentWindow on a window but the engine context is not valid");
+			return nullptr;
+		}
+
 		if (handle == nullptr)
 			BLAZE_LOG_FATAL("Window handle is nullptr");
 
@@ -639,7 +664,7 @@ namespace Blaze
 		if (!SDL_RaiseWindow((SDL_Window*)handle))
 			BLAZE_LOG_ERROR("SDL_RaiseWindow failed. SDL returned error: \"" + SDL_GetError() + "\"");
 	}
-	void Window::SetDisplayModeForFullscreen(const Display::DisplayMode& displayMode)
+	void Window::SetDisplayModeForFullScreen(const Display::DisplayMode& displayMode)
 	{
 		if (handle == nullptr)
 			BLAZE_LOG_FATAL("Window handle is nullptr");
@@ -661,13 +686,45 @@ namespace Blaze
 
 		return id;
 	}
+	bool Window::ProcessInputEvent(Input::GenericInputEvent& inputEvent)
+	{
+		InternalEvent event;
+		while (eventQueue.GetEvent(event))
+		{
+			switch (event.GetValueType())
+			{
+			case InternalEvent::GetValueTypeOf<GenericWindowEvent>():
+				event.TryProcess<GenericWindowEvent>([&](const auto& windowEvent) { HandleWindowEvent(windowEvent); });
+				break;
+			case InternalEvent::GetValueTypeOf<Input::GenericInputEvent>():
+				event.TryGetValue(inputEvent);
+				return true;
+			default:
+				BLAZE_LOG_FATAL("Invalid event type in Window event queue");
+				break;
+			}
+		}
+
+		return false;
+	}
+	bool Window::HasInputEvents() const
+	{
+		return eventQueue.HasEvents();
+	}
+	void Window::AddInputEvent(const Input::GenericInputEvent& event)
+	{
+		eventQueue.AddEvent(event);
+	}
+	void Window::AddWindowEvent(const GenericWindowEvent& event)
+	{
+		eventQueue.AddEvent(event);
+	}
 	void* Window::ReleaseHandle()
 	{
 		void* _handle = handle;
 
 		handle = nullptr;
 		graphicsAPI = WindowGraphicsAPI::None;
-		context = nullptr;
 
 		return _handle;
 	}
@@ -675,34 +732,118 @@ namespace Blaze
 	{
 		Destroy();
 
-		MoveDispatchers(other);
-		handle = other.handle;
-		graphicsAPI = other.graphicsAPI;
-		context = other.context;
-		other.handle = nullptr;
-		other.graphicsAPI = WindowGraphicsAPI::None;
-		other.context = nullptr;
+		auto context = BlazeEngineContextInternal::GetEngineContext();
+		if (context == nullptr)
+		{
+			BLAZE_LOG_ERROR("Trying to create a window but the engine context is not valid");
+			return *this;
+		}
 
-		if (context != nullptr)
-			context->MoveWindow(*this);
+		handle = std::exchange(other.handle, nullptr);
+		graphicsAPI = std::exchange(other.graphicsAPI, WindowGraphicsAPI::None);
+		currentMouseCaptureHandle = std::exchange(other.currentMouseCaptureHandle, nullptr);
+
+		MoveDispatchers(other);
+
+		if (currentMouseCaptureHandle)
+			currentMouseCaptureHandle->window = this;
+
+		context->MoveWindow(*this);
 
 		return *this;
 	}
 	void Window::MoveDispatchers(Window& other)
 	{
-		windowResizedEventDispatcher = std::move(other.windowResizedEventDispatcher);
-		windowMovedEventDispatcher = std::move(other.windowMovedEventDispatcher);
-		windowMinimizedEventDispatcher = std::move(other.windowMinimizedEventDispatcher);
-		windowMaximizedEventDispatcher = std::move(other.windowMaximizedEventDispatcher);
-		windowFocusGainedEventDispatcher = std::move(other.windowFocusGainedEventDispatcher);
-		windowFocusLostEventDispatcher = std::move(other.windowFocusLostEventDispatcher);
-		windowCloseEventDispatcher = std::move(other.windowCloseEventDispatcher);
-		windowMouseEnterEventDispatcher = std::move(other.windowMouseEnterEventDispatcher);
-		windowMouseLeaveEventDispatcher = std::move(other.windowMouseLeaveEventDispatcher);
-		keyDownEventDispatcher = std::move(other.keyDownEventDispatcher);
-		keyUpEventDispatcher = std::move(other.keyUpEventDispatcher);
-		mouseMotionEventDispatcher = std::move(other.mouseMotionEventDispatcher);
-		mouseScrollEventDispatcher = std::move(other.mouseScrollEventDispatcher);
-		textInputEventDispatcher = std::move(other.textInputEventDispatcher);
+		resizedEventDispatcher = std::move(other.resizedEventDispatcher);
+		movedEventDispatcher = std::move(other.movedEventDispatcher);
+		minimizedEventDispatcher = std::move(other.minimizedEventDispatcher);
+		maximizedEventDispatcher = std::move(other.maximizedEventDispatcher);
+		focusGainedEventDispatcher = std::move(other.focusGainedEventDispatcher);
+		focusLostEventDispatcher = std::move(other.focusLostEventDispatcher);
+		closeEventDispatcher = std::move(other.closeEventDispatcher);
+		mouseEnterEventDispatcher = std::move(other.mouseEnterEventDispatcher);
+		mouseLeaveEventDispatcher = std::move(other.mouseLeaveEventDispatcher);
+		destructionEventDispatcher = std::move(other.destructionEventDispatcher);
+	}
+	void Window::HandleWindowEvent(const GenericWindowEvent& event)
+	{
+		switch (event.GetValueType())
+		{
+		case GenericWindowEvent::GetValueTypeOf<ResizedEvent>():     event.TryProcess<ResizedEvent>(    [&](const auto& e) { resizedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MovedEvent>():       event.TryProcess<MovedEvent>(      [&](const auto& e) { movedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MinimizedEvent>():   event.TryProcess<MinimizedEvent>(  [&](const auto& e) { minimizedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MaximizedEvent>():   event.TryProcess<MaximizedEvent>(  [&](const auto& e) { maximizedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<FocusGainedEvent>(): event.TryProcess<FocusGainedEvent>([&](const auto& e) { focusGainedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<FocusLostEvent>():   event.TryProcess<FocusLostEvent>(  [&](const auto& e) { focusLostEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<CloseEvent>():       event.TryProcess<CloseEvent>(      [&](const auto& e) { closeEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MouseEnterEvent>():  event.TryProcess<MouseEnterEvent>( [&](const auto& e) { mouseEnterEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MouseLeaveEvent>():  event.TryProcess<MouseLeaveEvent>( [&](const auto& e) { mouseLeaveEventDispatcher.Call(e); }); break;
+		default:
+			BLAZE_LOG_FATAL("Invalid GenericWindowEvent type in Window event queue");
+			break;
+		}
+	}
+	WindowMouseCaptureHandle::WindowMouseCaptureHandle()
+		: window(nullptr)
+	{
+	}
+	WindowMouseCaptureHandle::WindowMouseCaptureHandle(WindowMouseCaptureHandle&& other) noexcept
+		: window(std::exchange(other.window, nullptr))
+	{
+		if (window != nullptr)
+			window->currentMouseCaptureHandle = this;
+	}
+	WindowMouseCaptureHandle::~WindowMouseCaptureHandle()
+	{
+		ReleaseMouseCapture();
+	}
+	bool WindowMouseCaptureHandle::IsCapturingMouse()
+	{
+		return window != nullptr;
+	}
+	bool WindowMouseCaptureHandle::ReleaseMouseCapture()
+	{
+		if (window == nullptr)
+			return false;
+
+		window->currentMouseCaptureHandle = nullptr;
+
+		SDL_RunOnMainThread([](void* handle) {
+			if (!SDL_CaptureMouse(false))
+			{
+				BLAZE_LOG_ERROR("SDL_CaptureMouse failed. SDL returned error: \"" + SDL_GetError() + "\"");
+				return;
+			}
+			}, window->handle, true);
+		
+		return true;
+	}
+	WindowMouseCaptureHandle& WindowMouseCaptureHandle::operator=(WindowMouseCaptureHandle&& other) noexcept
+	{
+		window = std::exchange(other.window, nullptr);
+
+		if (window != nullptr)
+			window->currentMouseCaptureHandle = this;
+
+		return *this;
+	}
+	WindowMouseCaptureHandle::WindowMouseCaptureHandle(Window& window)
+		: window(&window)
+	{
+		window.currentMouseCaptureHandle = this;
+
+		SDL_RunOnMainThread([](void* handle) {
+			if (!SDL_RaiseWindow(static_cast<SDL_Window*>(handle)))
+			{
+				BLAZE_LOG_ERROR("SDL_RaiseWindow failed. SDL returned error: \"" + SDL_GetError() + "\"");
+				return;
+			}
+
+			if (!SDL_CaptureMouse(true))
+			{
+				BLAZE_LOG_ERROR("SDL_CaptureMouse failed. SDL returned error: \"" + SDL_GetError() + "\"");
+				return;
+			}
+			}, window.handle, true);
 	}
 }

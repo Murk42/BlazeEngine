@@ -18,10 +18,7 @@ namespace Blaze::UI
 		screen(nullptr), parent(nullptr), next(nullptr), prev(nullptr), children(),
 		transform(), finalTransform(),
 		enabled(true), enabledFlag(true),
-		finalTransformChanged(true), transformChanged(false), enabledStateChanged(false),
-		deferChanges(false),
-		containsDeferredEnabledFlag(false), containsDeferredTransform(false), containsDeferredParent(false),
-		deferredEnabledFlag(false), deferredTransform(), deferredParent(nullptr)
+		transformDirty(false), finalTransformDirty(true), isFilteringTransform(false)
 	{
 	}
 	Node::Node(Node& parent, const NodeTransform& transform)
@@ -32,46 +29,34 @@ namespace Blaze::UI
 	}
 	Node::~Node()
 	{
-		if (deferChanges)
-			BLAZE_LOG_FATAL("Destroying a node inside a event callback. Which is not supported.");
-
 		for (auto& child : children)
 			child.SetParent(nullptr);
 
 		SetParent(nullptr);
 
 	}
-	int Node::HitTest(Vec2f screenPosition)
+	Node::HitStatus Node::HitTest(Vec2f screenNodePosition)
 	{
 		auto finalTransform = GetFinalTransform();
 		Vec2f pos = finalTransform.position;
 		Vec2f size = finalTransform.size;
+
+		if (size.x == 0 || size.y == 0)
+			return HitStatus::NotHit;
+
 		float rot = finalTransform.rotation;
 		float cos = Math::Cos(rot);
 		float sin = Math::Sin(rot);
 		Vec2f right = Vec2f(cos, sin) * size.x;
 		Vec2f up = Vec2f(-sin, cos) * size.y;
 
-		if (size.x == 0 || size.y == 0)
-			return false;
+		if (Math::Shapes::Quad2Df({ Vec2f(), up, right + up, right }).IsInside(screenNodePosition - pos))
+			return HitStatus::HitBlocking;
 
-		return (bool)Math::Shapes::Quad2Df({ Vec2f(), up, right + up, right }).IsInside(screenPosition - pos);
+		return HitStatus::NotHit;
 	}
 	void Node::SetParent(Node* newParent)
 	{
-		if (deferChanges)
-		{
-			if (newParent == parent)
-				containsDeferredParent = false;
-			else
-			{
-				containsDeferredParent = true;
-				deferredParent = newParent;
-			}
-
-			return;
-		}
-
 		if (parent == newParent)
 			return;
 
@@ -122,10 +107,8 @@ namespace Blaze::UI
 
 		PropagateEnabledState();
 
-		StartDeferPeriod();
-
 		if (oldScreen != newScreen && oldScreen != nullptr)
-			oldScreen->nodeTreeChangedEventDispatcher.Call({ .type = NodeTreeChangedEvent::Type::NodeRemoved, .node = *this, .oldParent = oldParent });
+			oldScreen->treeChangedEventDispatcher.Call({ .type = Screen::TreeChangedEvent::Type::NodeRemoved, .node = *this, .oldParent = oldParent });
 
 		if (oldParent != nullptr)
 			oldParent->surroundingNodeTreeChangedEventDispatcher.Call({
@@ -150,110 +133,59 @@ namespace Blaze::UI
 		if (oldScreen != newScreen)
 		{
 			if (newScreen != nullptr)
-				newScreen->nodeTreeChangedEventDispatcher.Call({ .type = NodeTreeChangedEvent::Type::NodeAdded, .node = *this, .oldParent = oldParent });
+				newScreen->treeChangedEventDispatcher.Call({ .type = Screen::TreeChangedEvent::Type::NodeAdded, .node = *this, .oldParent = oldParent });
 
 			PropagateScreenChangeEvent(oldScreen);
 		}
 		else if (screen != nullptr)
-			screen->nodeTreeChangedEventDispatcher.Call({ .type = NodeTreeChangedEvent::Type::NodeMoved, .node = *this, .oldParent = oldParent });;
+			screen->treeChangedEventDispatcher.Call({ .type = Screen::TreeChangedEvent::Type::NodeMoved, .node = *this, .oldParent = oldParent });;
 
 		PropagateEnabledStateEvent();
-
-		EndDeferPeriod();
 	}
 	void Node::SetTransform(const NodeTransform& newTransform)
 	{
-		if (deferChanges)
+		if (isFilteringTransform)
+			transform = newTransform;
+		else
 		{
-			if (newTransform == transform)
-				containsDeferredTransform = false;
-			else
-			{
-				containsDeferredTransform = true;
-				deferredTransform = newTransform;
-			}
-		}
+			bool wasTransformDirty = transformDirty;
+			transformDirty = false;
 
-		if (transform != newTransform)
-		{
+			NodeTransform oldTransform = transform;
 			transform = newTransform;
 
-			MarkTransformDirty();
-			MarkFinalTransformDirty();
+			isFilteringTransform = true;
+			transformFilterEventDispatcher.Call({ *this, transform });
+			isFilteringTransform = false;
+
+			if (oldTransform != transform)
+			{
+				MarkFinalTransformDirtyDownwards();
+
+				if (!wasTransformDirty)
+					transformUpdatedEventDispatcher.Call({ *this });
+			}
 		}
 	}
 	void Node::MarkTransformDirty()
 	{
-		transformChanged = true;
-		MarkFinalTransformDirty();
-	}
-	void Node::MarkFinalTransformDirty()
-	{
-		if (!finalTransformChanged)
+		if (!isFilteringTransform)
 		{
-			finalTransformChanged = true;
+			bool wasTransformDirty = transformDirty;
+			transformDirty = true;
+			finalTransformDirty = true;
 
-			for (auto& child : GetChildren())
-				child.MarkFinalTransformDirty();
+			if (!wasTransformDirty)
+				transformUpdatedEventDispatcher.Call({ *this });
 		}
 	}
 	void Node::CleanTransform()
 	{
-		if (!transformChanged)
-			return;
-
-		transformChanged = false;
-
-		StartDeferPeriod();
-		transformUpdatedEventDispatcher.Call({ *this });
-		EndDeferPeriod();
-	}
-	void Node::CleanFinalTransform()
-	{
-		if (!finalTransformChanged)
-			return;
-
-		NodeFinalTransform parentFinalTransform;
-
-		if (parent != nullptr)
-		{
-			parent->CleanFinalTransform();
-			parentFinalTransform = parent->finalTransform;
-		}
-		else
-		{
-			parentFinalTransform = NodeFinalTransform{ .position = {}, .size = {}, .scale = 1.0f, .rotation = 0.0f };
-		}
-
-		CleanTransform();
-
-		NodeFinalTransform newFinalTransform = CalculateFinalTransform(transform, parentFinalTransform);
-
-		if (finalTransform != newFinalTransform)
-		{
-			finalTransformChanged = false;
-			finalTransform = newFinalTransform;
-
-			StartDeferPeriod();
-			finalTransformUpdatedEventDispatcher.Call({ .node = *this });
-			EndDeferPeriod();
-		}
+		if (transformDirty)
+			SetTransform(transform);
 	}
 	void Node::SetEnabledFlag(bool newEnabledFlag)
 	{
-		if (deferChanges)
-		{
-			if (newEnabledFlag == enabledFlag)
-				containsDeferredEnabledFlag = false;
-			else
-			{
-				deferredEnabledFlag = newEnabledFlag;
-				containsDeferredEnabledFlag = true;
-			}
-
-			return;
-		}
-
 		enabledFlag = newEnabledFlag;
 
 		PropagateEnabledState();
@@ -263,14 +195,31 @@ namespace Blaze::UI
 	{
 		return NodeTreeView(this);
 	}
+	bool Node::GetTransform(NodeTransform& transform)
+	{
+		bool wasDirty = transformDirty && !isFilteringTransform;
+		transform = GetTransform();
+		return wasDirty;
+	}
 	NodeTransform Node::GetTransform()
 	{
+		if (isFilteringTransform)
+			return transform;
+
 		CleanTransform();
+
 		return transform;
+	}
+	bool Node::GetFinalTransform(NodeFinalTransform& transform)
+	{
+		bool wasDirty = finalTransformDirty;
+		transform = GetFinalTransform();
+		return wasDirty;
 	}
 	NodeFinalTransform Node::GetFinalTransform()
 	{
 		CleanFinalTransform();
+
 		return finalTransform;
 	}
 	NodeFinalTransform Node::CalculateFinalTransform(const NodeTransform& transform, const NodeFinalTransform& parentFinalTransform)
@@ -296,7 +245,9 @@ namespace Blaze::UI
 			parentFinalTransform.position +
 			parentRight * parentRelativePos.x + parentUp * parentRelativePos.y;
 
-		if (std::abs(Math::Cos(newFinalTransform.rotation)) == 1 || std::abs(Math::Sin(newFinalTransform.rotation)) == 1)
+		newFinalTransform.right = { Math::Cos(newFinalTransform.rotation), Math::Sin(newFinalTransform.rotation) };
+
+		if (std::abs(newFinalTransform.right.x) == 1 || std::abs(newFinalTransform.right.y) == 1)
 		{
 			newFinalTransform.position.x = Math::Ceil(newFinalTransform.position.x);
 			newFinalTransform.position.y = Math::Ceil(newFinalTransform.position.y);
@@ -313,11 +264,6 @@ namespace Blaze::UI
 	}
 	void Node::PropagateScreenChangeEvent(Screen* oldScreen)
 	{
-		bool wasDeferPeriod = deferChanges;
-
-		if (!wasDeferPeriod)
-			StartDeferPeriod();
-
 		surroundingNodeTreeChangedEventDispatcher.Call({
 					.type = SurroundingNodeTreeChangedEvent::Type::ScreenChanged,
 					.node = *this,
@@ -326,9 +272,6 @@ namespace Blaze::UI
 
 		for (auto& child : GetChildren())
 			child.PropagateScreenChangeEvent(oldScreen);
-
-		if (!wasDeferPeriod)
-			EndDeferPeriod();
 	}
 	void Node::PropagateEnabledState()
 	{
@@ -337,7 +280,6 @@ namespace Blaze::UI
 		if (enabled != newEnabled)
 		{
 			enabled = newEnabled;
-			enabledStateChanged = true;
 
 			for (auto& child : GetChildren())
 				child.PropagateEnabledState();
@@ -345,46 +287,48 @@ namespace Blaze::UI
 	}
 	void Node::PropagateEnabledStateEvent()
 	{
-		if (enabledStateChanged)
+		enabledStateChangedEventDispatcher.Call({ .node = *this });
+
+		for (auto& child : GetChildren())
+			child.PropagateEnabledStateEvent();
+	}
+	void Node::MarkFinalTransformDirtyDownwards()
+	{
+		if (!finalTransformDirty)
 		{
-			enabledStateChanged = false;
-
-			bool wasDeferPeriod = deferChanges;
-
-			if (!wasDeferPeriod)
-				StartDeferPeriod();
-
-			enabledStateChangedEventDispatcher.Call({ .node = *this });
+			finalTransformDirty = true;
 
 			for (auto& child : GetChildren())
-				child.PropagateEnabledStateEvent();
-
-			if (!wasDeferPeriod)
-				EndDeferPeriod();
+				child.MarkFinalTransformDirtyDownwards();
 		}
 	}
-	void Node::StartDeferPeriod()
+	void Node::CleanFinalTransform()
 	{
-		deferChanges = true;
-	}
-	void Node::EndDeferPeriod()
-	{
-		deferChanges = false;
+		if (!finalTransformDirty)
+			return;
 
-		if (containsDeferredParent)
+		CleanTransform();
+
+		finalTransformDirty = false;
+
+		NodeFinalTransform parentFinalTransform;
+
+		if (parent != nullptr)
 		{
-			containsDeferredParent = false;
-			SetParent(deferredParent);
+			parent->CleanFinalTransform();
+			parentFinalTransform = parent->finalTransform;
 		}
-		if (containsDeferredTransform)
+		else
 		{
-			containsDeferredTransform = false;
-			SetTransform(deferredTransform);
+			parentFinalTransform = NodeFinalTransform{ .position = {}, .size = {}, .scale = 1.0f, .rotation = 0.0f };
 		}
-		if (containsDeferredEnabledFlag)
+
+		NodeFinalTransform newFinalTransform = CalculateFinalTransform(transform, parentFinalTransform);
+
+		if (finalTransform != newFinalTransform)
 		{
-			containsDeferredEnabledFlag = false;
-			SetEnabledFlag(deferredEnabledFlag);
+			finalTransform = newFinalTransform;
+			finalTransformUpdatedEventDispatcher.Call({ .node = *this });
 		}
 	}
 	bool Node::AreNodesOnSameLevel(Node* a, Node* b)

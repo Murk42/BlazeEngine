@@ -14,6 +14,7 @@ static Vec2f ConvertAlignToPivot(Align align)
 	case Blaze::Align::Left:        return Vec2f(0.0f, 0.5f);
 	case Blaze::Align::TopLeft:     return Vec2f(0.0f, 1.0f);
 	case Blaze::Align::Center:      return Vec2f(0.5f, 0.5f);
+	default: return Vec2f(0, 0);
 	}
 }
 static VerticalAlign GetVerticalAlignFromAlign(Align align)
@@ -32,6 +33,7 @@ static VerticalAlign GetVerticalAlignFromAlign(Align align)
 	case Blaze::Align::Bottom:
 	case Blaze::Align::BottomRight:
 		return VerticalAlign::Bottom;
+	default: return VerticalAlign::Top;
 	}
 }
 static float ConvertVerticalAlignToPivot(VerticalAlign align)
@@ -41,6 +43,7 @@ static float ConvertVerticalAlignToPivot(VerticalAlign align)
 	case VerticalAlign::Bottom:    return 0.0f;
 	case VerticalAlign::Center:    return 0.5f;
 	case VerticalAlign::Top:       return 1.0f;
+	default: return 0.0f;
 	}
 }
 static float ConvertHorizontalAlignToPivot(HorizontalAlign align)
@@ -50,6 +53,7 @@ static float ConvertHorizontalAlignToPivot(HorizontalAlign align)
 	case HorizontalAlign::Left:        return 0.0f;
 	case HorizontalAlign::Center:      return 0.5f;
 	case HorizontalAlign::Right:       return 1.0f;
+	default: return 0.0f;
 	}
 }
 /*
@@ -364,30 +368,32 @@ namespace Blaze::UI::Layout
 		}
 	}
 
-	VerticalArrayLayoutNode::VerticalArrayLayoutNode(UI::Node& parent, float distance, HorizontalAlign horizontalAlign)
-		: layoutDirty(false), horizontalAlign(HorizontalAlign::Center), distance(5)
+	VerticalArrayLayoutNode::VerticalArrayLayoutNode(UI::Node& parent, const NodeTransform& transform, float distance, Align childNodesAlignment)
+		: layoutDirty(false), childNodesAlignment(Align::TopLeft), distance(5)
 	{
+		SetTransform(transform);
 		SetParent(&parent);
+
 		surroundingNodeTreeChangedEventDispatcher.AddHandler<&VerticalArrayLayoutNode::SurroungingTreeChanged>(*this);
 		transformUpdatedEventDispatcher.AddHandler<&VerticalArrayLayoutNode::TransformUpdated>(*this);
 
-		SetNodesHorizontalAlign(horizontalAlign);
-		SetNodesDistance(distance);
+		SetChildNodesAlign(childNodesAlignment);
+		SetChildNodesDistance(distance);
 	}
 	VerticalArrayLayoutNode::~VerticalArrayLayoutNode()
 	{
 		surroundingNodeTreeChangedEventDispatcher.RemoveHandler<&VerticalArrayLayoutNode::SurroungingTreeChanged>(*this);
 		transformUpdatedEventDispatcher.RemoveHandler<&VerticalArrayLayoutNode::TransformUpdated>(*this);
 	}
-	void VerticalArrayLayoutNode::SetNodesHorizontalAlign(HorizontalAlign newHorizontalAlign)
+	void VerticalArrayLayoutNode::SetChildNodesAlign(Align newChildNodesAlignment)
 	{
-		if (horizontalAlign != newHorizontalAlign)
+		if (childNodesAlignment != newChildNodesAlignment)
 		{
-			horizontalAlign = newHorizontalAlign;
+			childNodesAlignment = newChildNodesAlignment;
 			MarkLayoutDirty();
 		}
 	}
-	void VerticalArrayLayoutNode::SetNodesDistance(float newDistance)
+	void VerticalArrayLayoutNode::SetChildNodesDistance(float newDistance)
 	{
 		if (distance != newDistance)
 		{
@@ -395,9 +401,9 @@ namespace Blaze::UI::Layout
 			MarkLayoutDirty();
 		}
 	}
-	HorizontalAlign VerticalArrayLayoutNode::GetNodesHorizontalAlign() const
+	Align VerticalArrayLayoutNode::GetChildNodesAlign() const
 	{
-		return horizontalAlign;
+		return childNodesAlignment;
 	}
 	float VerticalArrayLayoutNode::GetNodesDistance() const
 	{
@@ -407,20 +413,42 @@ namespace Blaze::UI::Layout
 	{
 		layoutDirty = false;
 
-		nodesData.Resize(GetChildren().Count());
+		if (GetChildren().Empty())
+			return;
 
-		float offset = 0;
+		float totalHeight = 0;
+		for (auto& child : GetChildren())
+			if (child.IsEnabled())
+				totalHeight += child.GetTransform().size.y + distance;
+
+		totalHeight -= distance;
+
+		const float verticalAlignPivot = ConvertVerticalAlignToPivot(GetVerticalAlignFromAlign(childNodesAlignment));
+
+		float offset = totalHeight;
 		uintMem i = 0;
 		for (auto& child : GetChildren())
 		{
 			if (child.IsEnabled())
 			{
-				nodesData[i].offset = offset;
-				offset += child.GetTransform().size.y + distance;
+				Vec2f pivot = ConvertAlignToPivot(childNodesAlignment);
+
+				auto transform = child.GetTransform();
+
+				transform.pos = Vec2f(0, offset - verticalAlignPivot * totalHeight);
+				transform.parentPivot = pivot;
+				transform.pivot = Vec2f(pivot.x, 1.0f);
+				transform.scale = 1.0f;
+				transform.rotation = 0.0f;
+
+				child.SetTransform(transform);
+
+				offset -= child.GetTransform().size.y + distance;
 			}
 
 			++i;
 		}
+
 	}
 	void VerticalArrayLayoutNode::MarkLayoutDirty()
 	{
@@ -432,43 +460,25 @@ namespace Blaze::UI::Layout
 	{
 		if (event.type == SurroundingNodeTreeChangedEvent::Type::ChildAdded)
 		{
-			event.node.transformUpdatedEventDispatcher.AddHandler<&VerticalArrayLayoutNode::ChildTransformUpdated>(*this);
+			event.node.transformFilterEventDispatcher.AddHandler<&VerticalArrayLayoutNode::FilterChildTransform>(*this);
 			event.node.enabledStateChangedEventDispatcher.AddHandler<&VerticalArrayLayoutNode::ChildEnabledStateUpdated>(*this);
-			layoutDirty = true;
+			MarkLayoutDirty();
 		}
 		else if (event.type == SurroundingNodeTreeChangedEvent::Type::ChildRemoved)
 		{
-			event.node.transformUpdatedEventDispatcher.RemoveHandler<&VerticalArrayLayoutNode::ChildTransformUpdated>(*this);
+			event.node.transformFilterEventDispatcher.RemoveHandler<&VerticalArrayLayoutNode::FilterChildTransform>(*this);
 			event.node.enabledStateChangedEventDispatcher.RemoveHandler<&VerticalArrayLayoutNode::ChildEnabledStateUpdated>(*this);
-			layoutDirty = true;
+			MarkLayoutDirty();
 		}
 	}
 	void VerticalArrayLayoutNode::TransformUpdated(const TransformUpdatedEvent& event)
 	{
-		MarkLayoutDirty();
+		//MarkLayoutDirty();
 	}
-	void VerticalArrayLayoutNode::ChildTransformUpdated(const UI::Node::TransformUpdatedEvent& event)
+	void VerticalArrayLayoutNode::FilterChildTransform(const TransformFilterEvent& event)
 	{
-		uintMem i = 0;
-		for (auto& child : GetChildren())
-			if (&child == &event.node)
-				break;
-			else
-				++i;
-
 		if (layoutDirty)
 			RecalculateLayout();
-
-		float horizontalPivot = ConvertHorizontalAlignToPivot(horizontalAlign);
-		auto nodeTransform = event.node.GetTransform();
-
-		nodeTransform.pos = Vec2f(0, nodesData[i].offset);
-		nodeTransform.parentPivot = Vec2f(horizontalPivot, 0);
-		nodeTransform.pivot = Vec2f(horizontalPivot, 0);
-		nodeTransform.scale = 1.0f;
-		nodeTransform.rotation = 0.0f;
-
-		event.node.SetTransform(nodeTransform);
 	}
 	void VerticalArrayLayoutNode::ChildEnabledStateUpdated(const UI::Node::EnabledStateChangedEvent& event)
 	{
@@ -476,47 +486,41 @@ namespace Blaze::UI::Layout
 	}
 
 	ParentTransformBinding::ParentTransformBinding()
-		: child(nullptr)
+		: node(nullptr)
 	{
 	}
-	ParentTransformBinding::ParentTransformBinding(UI::Node* child)
+	ParentTransformBinding::ParentTransformBinding(UI::Node* node)
 		: ParentTransformBinding()
 	{
- 		SetChild(child);
+ 		SetNode(node);
 	}
 	ParentTransformBinding::~ParentTransformBinding()
 	{
-		if (child != nullptr)
-		{
-			child->surroundingNodeTreeChangedEventDispatcher.RemoveHandler<&ParentTransformBinding::ChildSurroungingTreeChanged>(*this);
-			child->transformUpdatedEventDispatcher.RemoveHandler<&ParentTransformBinding::ChildTransformChanged>(*this);
-			if (auto parent = child->GetParent())
-				parent->transformUpdatedEventDispatcher.RemoveHandler<&ParentTransformBinding::ParentTransformChanged>(*this);
-		}
+		SetNode(nullptr);
 	}
-	void ParentTransformBinding::SetChild(UI::Node* newChild)
+	void ParentTransformBinding::SetNode(UI::Node* newNode)
 	{
-		if (child == newChild)
+		if (node == newNode)
 			return;
 
-		if (child != nullptr)
+		if (node != nullptr)
 		{
-			child->surroundingNodeTreeChangedEventDispatcher.RemoveHandler<&ParentTransformBinding::ChildSurroungingTreeChanged>(*this);
-			child->transformUpdatedEventDispatcher.RemoveHandler<&ParentTransformBinding::ChildTransformChanged>(*this);
-			if (auto parent = child->GetParent())
+			node->surroundingNodeTreeChangedEventDispatcher.RemoveHandler<&ParentTransformBinding::ChildSurroungingTreeChanged>(*this);
+			node->transformFilterEventDispatcher.RemoveHandler<&ParentTransformBinding::ChildTransformFilter>(*this);
+			if (auto parent = node->GetParent())
 				parent->transformUpdatedEventDispatcher.RemoveHandler<&ParentTransformBinding::ParentTransformChanged>(*this);
 		}
 
-		child = newChild;
+		node = newNode;
 
-		if (child != nullptr)
+		if (node != nullptr)
 		{
-			child->surroundingNodeTreeChangedEventDispatcher.AddHandler<&ParentTransformBinding::ChildSurroungingTreeChanged>(*this);
-			child->transformUpdatedEventDispatcher.AddHandler<&ParentTransformBinding::ChildTransformChanged>(*this);
-			if (auto parent = child->GetParent())
+			node->surroundingNodeTreeChangedEventDispatcher.AddHandler<&ParentTransformBinding::ChildSurroungingTreeChanged>(*this);
+			node->transformFilterEventDispatcher.AddHandler<&ParentTransformBinding::ChildTransformFilter>(*this);
+			if (auto parent = node->GetParent())
 				parent->transformUpdatedEventDispatcher.AddHandler<&ParentTransformBinding::ParentTransformChanged>(*this);
 
-			child->MarkTransformDirty();
+			node->MarkTransformDirty();
 		}
 	}
 	void ParentTransformBinding::ChildSurroungingTreeChanged(const UI::Node::SurroundingNodeTreeChangedEvent& event)
@@ -525,56 +529,58 @@ namespace Blaze::UI::Layout
 		{
 			if (auto parent = event.otherNode)
 				parent->transformUpdatedEventDispatcher.RemoveHandler<&ParentTransformBinding::ParentTransformChanged>(*this);
-			if (auto parent = child->GetParent())
+
+			if (auto parent = node->GetParent())
+			{
 				parent->transformUpdatedEventDispatcher.AddHandler<&ParentTransformBinding::ParentTransformChanged>(*this);
+				node->MarkTransformDirty();
+			}
 		}
 	}
 	void ParentTransformBinding::ParentTransformChanged(const UI::Node::TransformUpdatedEvent& event)
 	{
+		node->MarkTransformDirty();
+	}
+	void ParentTransformBinding::ChildTransformFilter(const UI::Node::TransformFilterEvent& event)
+	{
 		ApplyTransformToChild();
 	}
-	void ParentTransformBinding::ChildTransformChanged(const UI::Node::TransformUpdatedEvent& event)
-	{
-		if (child->GetParent() != nullptr)
-			ApplyTransformToChild();
-	}
 
-	ParentWidthBinding::ParentWidthBinding(UI::Node* child)
-		: ParentTransformBinding(child)
+	ParentWidthBinding::ParentWidthBinding(UI::Node* node)
+		: ParentTransformBinding(node)
 	{
 	}
 	void ParentWidthBinding::ApplyTransformToChild()
 	{
-		auto childTransform = GetChild()->GetTransform();
-		childTransform.size.x = GetChild()->GetParent()->GetTransform().size.x;
-		GetChild()->SetTransform(childTransform);
+		auto childTransform = GetNode()->GetTransform();
+		childTransform.size.x = GetNode()->GetParent()->GetTransform().size.x;
+		GetNode()->SetTransform(childTransform);
 	}
 
-	ParentHeightBinding::ParentHeightBinding(UI::Node* child)
-		: ParentTransformBinding(child)
+	ParentHeightBinding::ParentHeightBinding(UI::Node* node)
+		: ParentTransformBinding(node)
 	{
 	}
 	void ParentHeightBinding::ApplyTransformToChild()
 	{
-		auto childTransform = GetChild()->GetTransform();
-		childTransform.size.x = GetChild()->GetParent()->GetTransform().size.x;
-		GetChild()->SetTransform(childTransform);
+		auto childTransform = GetNode()->GetTransform();
+		childTransform.size.x = GetNode()->GetParent()->GetTransform().size.x;
+		GetNode()->SetTransform(childTransform);
 	}
 
-	ParentSizeBinding::ParentSizeBinding(UI::Node* child)
-		: ParentTransformBinding(child)
+	ParentSizeBinding::ParentSizeBinding(UI::Node* node)
+		: ParentTransformBinding(node)
 	{
 	}
 	void ParentSizeBinding::ApplyTransformToChild()
 	{
-		auto childTransform = GetChild()->GetTransform();
-		childTransform.size = GetChild()->GetParent()->GetTransform().size;
-		GetChild()->SetTransform(childTransform);
+		auto childTransform = GetNode()->GetTransform();
+		childTransform.size = GetNode()->GetParent()->GetTransform().size;
+		GetNode()->SetTransform(childTransform);
 	}
 
 
 	DivisionNode::DivisionNode()
-		: transformsDirty(true)
 	{
 		surroundingNodeTreeChangedEventDispatcher.AddHandler<&DivisionNode::SurroungingTreeChanged>(*this);
 		transformUpdatedEventDispatcher.AddHandler<&DivisionNode::TransformChanged>(*this);
@@ -583,6 +589,9 @@ namespace Blaze::UI::Layout
 		: DivisionNode()
 	{
 		SetParent(&parent);
+
+		for (auto& child : GetChildren())
+			child.MarkTransformDirty();
 	}
 	DivisionNode::~DivisionNode()
 	{
@@ -593,75 +602,132 @@ namespace Blaze::UI::Layout
 	{
 		if (event.type == SurroundingNodeTreeChangedEvent::Type::ChildAdded)
 		{
-			event.node.transformUpdatedEventDispatcher.AddHandler<&DivisionNode::ChildTransformChanged>(*this);
-			event.node.MarkTransformDirty();
+			event.node.transformFilterEventDispatcher.AddHandler<&DivisionNode::ChildTransformFilter>(*this);
+
+			for (auto& child : GetChildren())
+				child.MarkTransformDirty();
 		}
 		else if (event.type == SurroundingNodeTreeChangedEvent::Type::ChildRemoved)
 		{
-			event.node.transformUpdatedEventDispatcher.RemoveHandler<&DivisionNode::ChildTransformChanged>(*this);
+			event.node.transformFilterEventDispatcher.RemoveHandler<&DivisionNode::ChildTransformFilter>(*this);
+
+			for (auto& child : GetChildren())
+				child.MarkTransformDirty();
 		}
+
 	}
 	void DivisionNode::TransformChanged(const TransformUpdatedEvent& event)
 	{
-		uintMem i = 0;
 		for (auto& child : GetChildren())
 			child.MarkTransformDirty();
-
-		transformsDirty = true;
 	}
-	void DivisionNode::ChildTransformChanged(const TransformUpdatedEvent& event)
+	void DivisionNode::ChildTransformFilter(const TransformFilterEvent& event)
 	{
-		if (transformsDirty)
-		{
-			transforms = CalculateChildTransforms();
-			transformsDirty = false;
-		}
+		CleanTransform();
+		FilterChildTransform(event.node);
+	}
 
+	HorizontalDivisonNode::HorizontalDivisonNode(Node& parent, uintMem flexibleNodeIndex, bool topToDownOrder)
+		: DivisionNode(parent), flexibleNodeIndex(flexibleNodeIndex), topToDownOrder(topToDownOrder)
+	{
+	}
+	void HorizontalDivisonNode::FilterChildTransform(Node& child)
+	{
 		uintMem i = 0;
-		for (auto& child : GetChildren())
-			if (&child == &event.node)
+		for (auto& c : GetChildren())
+			if (&c == &child)
 				break;
 			else
 				++i;
 
-		if (i >= transforms.Count())
-			return;
-
-		event.node.SetTransform(transforms[i]);
-	}
-
-	HorizontalDivisonNode::HorizontalDivisonNode(float firstNodeHeight)
-		: firstNodeHeight(firstNodeHeight)
-	{
-	}
-	HorizontalDivisonNode::HorizontalDivisonNode(Node& parent, float firstNodeHeight)
-		: DivisionNode(parent), firstNodeHeight(firstNodeHeight)
-	{
-	}
-	Array<NodeTransform> HorizontalDivisonNode::CalculateChildTransforms()
-	{
 		auto transform = GetTransform();
+		auto children = GetChildren();
 
-		float secondNodeHeight = transform.size.y - firstNodeHeight;
+		float offset = 0.0f;
 
-		Array<NodeTransform> transforms{ 2 };
-		transforms[0] = NodeTransform{
-			.pos = Vec2f(0.0f, secondNodeHeight),
-			.parentPivot = Vec2f(0.0f, 0.0f),
-			.pivot = Vec2f(0.0f, 0.0f),
-			.size = Vec2f(transform.size.x, firstNodeHeight),
-			.scale = 1.0f,
-			.rotation = 0.0f
-		};
-		transforms[1] = NodeTransform{
-			.pos = Vec2f(0.0f, 0.0f),
-			.parentPivot = Vec2f(0.0f, 0.0f),
-			.pivot = Vec2f(0.0f, 0.0f),
-			.size = Vec2f(transform.size.x, secondNodeHeight),
-			.scale = 1.0f,
-			.rotation = 0.0f
-		};
+		for (uintMem j = 0; j < i; ++j)
+			offset += children[j].GetTransform().size.y;
 
-		return transforms;
+		if (topToDownOrder)
+			offset = -offset;
+
+		if (i == flexibleNodeIndex)
+		{
+			float totalFixedHeight = 0.0f;
+			for (uintMem j = 0; j < children.Count(); ++j)
+				if (j != flexibleNodeIndex)
+					totalFixedHeight += children[j].GetTransform().size.y;
+
+			child.SetTransform(NodeTransform{
+				.pos = Vec2f(0.0f, offset),
+				.parentPivot = Vec2f(0.0f, topToDownOrder ? 1.0f : 0.0f),
+				.pivot = Vec2f(0.0f, topToDownOrder ? 1.0f : 0.0f),
+				.size = Vec2f(transform.size.x, std::max(transform.size.y - totalFixedHeight, 0.0f)),
+				.scale = 1.0f,
+				.rotation = 0.0f
+				});
+		}
+		else
+		{
+			child.SetTransform(NodeTransform{
+				.pos = Vec2f(0.0f, offset),
+				.parentPivot = Vec2f(0.0f, topToDownOrder ? 1.0f : 0.0f),
+				.pivot = Vec2f(0.0f, topToDownOrder ? 1.0f : 0.0f),
+				.size = Vec2f(transform.size.x, children[i].GetTransform().size.y),
+				.scale = 1.0f,
+				.rotation = 0.0f
+				});
+		}
+	}
+	VerticalDivisonNode::VerticalDivisonNode(Node& parent, uintMem flexibleNodeIndex, bool leftToRightOrder)
+		: DivisionNode(parent), flexibleNodeIndex(flexibleNodeIndex), leftToRightOrder(leftToRightOrder)
+	{
+	}
+	void VerticalDivisonNode::FilterChildTransform(Node& child)
+	{
+		uintMem i = 0;
+		for (auto& c : GetChildren())
+			if (&c == &child)
+				break;
+			else
+				++i;
+
+		auto transform = GetTransform();
+		auto children = GetChildren();
+
+		float offset = 0.0f;
+		for (uintMem j = 0; j < i; ++j)
+			offset += children[j].GetTransform().size.x;
+
+		if (!leftToRightOrder)
+			offset = -offset;
+
+		if (i == flexibleNodeIndex)
+		{
+			float totalFixedWidth = 0.0f;
+			for (uintMem j = 0; j < children.Count(); ++j)
+				if (j != flexibleNodeIndex)
+					totalFixedWidth += children[j].GetTransform().size.x;
+
+			child.SetTransform(NodeTransform{
+				.pos = Vec2f(offset, 0.0f),
+				.parentPivot = Vec2f(leftToRightOrder ? 0.0f : 1.0f, 0.0f),
+				.pivot = Vec2f(leftToRightOrder ? 0.0f : 1.0f, 0.0f),
+				.size = Vec2f(std::max(transform.size.x - totalFixedWidth, 0.0f), transform.size.y),
+				.scale = 1.0f,
+				.rotation = 0.0f
+				});
+		}
+		else
+		{
+			child.SetTransform(NodeTransform{
+				.pos = Vec2f(offset, 0.0f),
+				.parentPivot = Vec2f(leftToRightOrder ? 0.0f : 1.0f, 0.0f),
+				.pivot = Vec2f(leftToRightOrder ? 0.0f : 1.0f, 0.0f),
+				.size = Vec2f(children[i].GetTransform().size.x, transform.size.y),
+				.scale = 1.0f,
+				.rotation = 0.0f
+				});
+		}
 	}
 }

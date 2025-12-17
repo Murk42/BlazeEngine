@@ -1,6 +1,6 @@
  #pragma once
 #include "BlazeEngine/Core/Common/Color.h"
-#include "BlazeEngine/Runtime/Window.h"
+#include "BlazeEngine/Runtime/IO/Window.h"
 #include "BlazeEngine/Graphics/Core/Dynamic/GraphicsContext.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
@@ -73,6 +73,7 @@ namespace Blaze::Graphics::OpenGL
 
 		GraphicsContext_OpenGL(const GraphicsContextProperties_OpenGL& properties);
 
+		void MakeContextActive();
 		void SetActiveRenderWindow(RenderWindow_OpenGL&);
 
 		inline void* GetActiveWindowHandle() const { return activeWindowHandle; }
@@ -149,6 +150,6 @@ namespace Blaze::Graphics::OpenGL
 		Window initWindow;
 		void* activeWindowHandle;
 
-		void ActiveWindowDestroyed(const Window::WindowDestroyedEvent& event);
+		void ActiveWindowDestroyed(const Window::DestructionEvent& event);
 	};
 }
