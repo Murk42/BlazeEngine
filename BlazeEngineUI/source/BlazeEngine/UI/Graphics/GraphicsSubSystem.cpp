@@ -408,6 +408,8 @@ namespace Blaze::UI
 		if (screen == nullptr)
 			return;
 
+		screen->Update();
+
 		if (recreateRenderQueue)
 			RecreateRenderQueue();
 

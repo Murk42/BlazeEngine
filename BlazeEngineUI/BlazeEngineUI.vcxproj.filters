@@ -176,7 +176,7 @@
     <ClCompile Include="source\BlazeEngine\UI\Core\Screen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsManager.cpp">
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsSubSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.cpp">

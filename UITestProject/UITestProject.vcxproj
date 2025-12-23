@@ -175,14 +175,11 @@
   <ItemGroup>
     <ClInclude Include="source\UIDebugLayer.h" />
     <ClInclude Include="source\MainAppRuntimeThread.h" />
-    <ClInclude Include="source\EventMemberFunctionTie.h" />
-    <ClInclude Include="source\LayoutControl.h" />
     <ClInclude Include="source\MainScreen.h" />
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\UIDebugLayer.cpp" />
-    <ClCompile Include="source\LayoutControl.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainAppRuntimeThread.cpp" />
     <ClCompile Include="source\MainScreen.cpp" />

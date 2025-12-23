@@ -248,7 +248,7 @@
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeIterator.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeView.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\Screen.cpp" />
-    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsManager.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsSubSystem.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\StaticTextRenderUnit.cpp" />

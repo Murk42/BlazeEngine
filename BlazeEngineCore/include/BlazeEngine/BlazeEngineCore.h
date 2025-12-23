@@ -59,6 +59,7 @@
 #include "BlazeEngine/Core/Event/EventHandler.h"
 #include "BlazeEngine/Core/Event/EventHandlerData.h"
 #include "BlazeEngine/Core/Event/EventHandlerDataImpl.h"
+#include "BlazeEngine/Core/Event/EventMemberFunctionTie.h"
 #include "BlazeEngine/Core/Event/LambdaEventHandler.h"
 #include "BlazeEngine/Core/Event/QueueEventDispatcher.h"
 

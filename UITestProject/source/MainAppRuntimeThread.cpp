@@ -81,5 +81,5 @@ MainAppRuntimeThread::MainAppRuntimeThread(App& app)
 }
 AppRuntimeThreadCreationData GetMainRuntimeThreadCreationData(App& app)
 {
-	return AppRuntimeThreadCreationData().SetRuntimeThreadData<MainAppRuntimeThread>(app);
+	return AppRuntimeThreadCreationData::New<MainAppRuntimeThread>(app);
 }

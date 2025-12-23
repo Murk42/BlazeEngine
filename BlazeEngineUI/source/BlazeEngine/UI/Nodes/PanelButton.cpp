@@ -57,8 +57,6 @@ namespace Blaze::UI::Nodes
 	}
 	void PanelButton::PreRender(const RenderContext& renderContext)
 	{
-		CleanFinalTransform();
-
 		if (!renderUnitDirty)
 			return;
 

@@ -138,8 +138,6 @@ namespace Blaze::UI::Nodes
 	}
 	void Slider::PreRender(const RenderContext& renderContext)
 	{
-		CleanFinalTransform();
-
 		if (!renderUnitDirty)
 			return;
 

@@ -18,15 +18,6 @@ namespace Blaze::UI
 			HitBlocking = 1,
 			HitNotBlocking = 2,
 		};
-		struct TransformDirtyEvent
-		{
-			Node& node;
-		};
-		struct TransformFilterEvent
-		{
-			Node& node;
-			NodeTransform& transform;
-		};
 		struct TransformUpdatedEvent
 		{
 			Node& node;
@@ -60,9 +51,7 @@ namespace Blaze::UI
 		};
 		NodeDataMap dataMap;
 
-		EventDispatcher<TransformDirtyEvent> transformDirtyEventDispatcher;
 		EventDispatcher<TransformUpdatedEvent> transformUpdatedEventDispatcher;
-		EventDispatcher<TransformFilterEvent> transformFilterEventDispatcher;
 		EventDispatcher<FinalTransformUpdatedEvent> finalTransformUpdatedEventDispatcher;
 		EventDispatcher<EnabledStateChangedEvent> enabledStateChangedEventDispatcher;
 		EventDispatcher<SurroundingNodeTreeChangedEvent> surroundingNodeTreeChangedEventDispatcher;
@@ -76,64 +65,40 @@ namespace Blaze::UI
 		*/
 		virtual HitStatus HitTest(Vec2f screenNodePosition);
 
+		Node* GetParent() const;
 		void SetParent(Node* parent);
+
+		void SetTransform(const NodeTransform& transform);
+		NodeTransform GetTransform() const;
+		void SetFinalTransform(const NodeFinalTransform& newFinalTransform);
+		NodeFinalTransform GetFinalTransform();
 		/*
 			Sets the transform and marks it as dirty
 		*/
-		void SetTransform(const NodeTransform& transform);
-		/*
-			Marks the node transform as dirty. Because of this, transformUpdatedEventDispatcher is guaranteed to
-			be called before the next access to the node transform. This doesn't mark the final transform as
-			dirty, because it will be if a new transform is set in the user event handler.
-
-			This is useful if the transform depends on something external that is relatively computationally
-			heavy (for example determining the size needed for text to fit). In this case the user can mark
-			the transform as dirty when the external thing changes, and then set the transform in the event
-			handler when the transform is actually needed. This way the transform is only calculated when
-			needed.
-		*/
 		void MarkTransformDirty();
-		/*
-			Same as GetTransform() but doesn't return anything.
-		*/
-		void CleanTransform();
-		void CleanFinalTransform();
+		bool GetTransformDirtyFlag() const;
+		void MarkFinalTransformDirty();
+		bool GetFinalTransformDirtyFlag() const;
 
+		void Disable();
+		void Enable();
 		void SetEnabledFlag(bool newEnabledFlag);
-		inline void Disable() { SetEnabledFlag(false); }
-		inline void Enable() { SetEnabledFlag(true); }
-
-		inline Node* GetParent() const { return parent; }
-		inline Node* GetNextNodeInTree() const { return next; }
-		inline Node* GetPreviousNodeInTree() const { return prev; }
-		inline ArrayView<Node&> GetChildren() const { return children; }
-		inline Screen* GetScreen() const { return screen; }
 		/*
-			\returns Returns if the node is enabled, accounting if the parent node is enabled or not. If the
-			parent node is not enabled neither will be this one. Not same as GetNodeEnabledFlag().
+			\returns If the node is enabled returns true, otherwise false. For a node to be enabled all of it's ancestors
+			must be enabled and its enabled flag must be set, otherwise it is disabled. Not same as GetNodeEnabledFlag().
 		*/
-		inline bool IsEnabled() const { return enabled; }
+		bool IsEnabled() const;
 		/*
-			\returns This returns if the enabled flag on this node is true or false, without being effected by
-			the parent node enabled state. Not same as IsEnabled().
+			\returns If the node enabled flag is set returns true, otherwise false. The nodes enabled state depends on 
+			the enabled flag and all of it's ancestors enabled states.
 		*/
-		inline bool GetNodeEnabledFlag() const { return enabledFlag; }
-		inline bool GetTransformDirtyFlag() const { return transformDirty; }
+		bool GetNodeEnabledFlag() const;
 
 		NodeTreeView GetTree();
-		/*
-			If the transform is dirty calls the transformUpdatedEventDispatcher and cleans the transform.
-			\returns The latest set transform
-		*/
-		bool GetTransform(NodeTransform& transform);
-		NodeTransform GetTransform();
-		/*
-			If the final transform is dirty calls the finalTransformUpdatedEventDispatcher and cleans the
-			final transform. If the transform (not final) is dirty, then it is cleaned.
-			\returns The calculated final transform.
-		*/
-		bool GetFinalTransform(NodeFinalTransform& transform);
-		NodeFinalTransform GetFinalTransform();
+		Node* GetNextNodeInTree() const;
+		Node* GetPreviousNodeInTree() const;
+		ArrayView<Node&> GetChildren() const;
+		Screen* GetScreen() const;
 	private:
 		Screen* screen;
 
@@ -150,10 +115,7 @@ namespace Blaze::UI
 
 		bool transformDirty : 1;
 		bool finalTransformDirty : 1;
-		bool isFilteringTransform;
 
-		//The parent transformDirty should be checked if it is true and updated accordingly
-		static NodeFinalTransform CalculateFinalTransform(const NodeTransform& transform, const NodeFinalTransform& parentFinalTransform);
 
 		void PropagateScreenChange(Screen* newScreen);
 		void PropagateScreenChangeEvent(Screen* oldScreen);
@@ -167,5 +129,20 @@ namespace Blaze::UI
 
 		//Guaranteed to return a non-nullptr value
 		static Node* GetNodeSubTreeTail(Node* node);
+
+		friend class Screen;
 	};
+
+	inline Node* Node::GetParent() const { return parent; }
+	inline NodeTransform Node::GetTransform() const { return transform; }
+	inline bool Node::GetTransformDirtyFlag() const { return transformDirty; }
+	inline bool Node::GetFinalTransformDirtyFlag() const { return finalTransformDirty; }
+	inline void Node::Disable() { SetEnabledFlag(false); }
+	inline void Node::Enable() { SetEnabledFlag(true); }
+	inline bool Node::IsEnabled() const { return enabled; }
+	inline bool Node::GetNodeEnabledFlag() const { return enabledFlag; }
+	inline Node* Node::GetNextNodeInTree() const { return next; }
+	inline Node* Node::GetPreviousNodeInTree() const { return prev; }
+	inline ArrayView<Node&> Node::GetChildren() const { return children; }
+	inline Screen* Node::GetScreen() const { return screen; }
 }

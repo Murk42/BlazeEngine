@@ -205,6 +205,7 @@
     <ClInclude Include="include\BlazeEngine\Core\Common\VirtualTuple.h" />
     <ClInclude Include="include\BlazeEngine\Core\Console\StyledOutputStream.h" />
     <ClInclude Include="include\BlazeEngine\Core\Container\Queue.h" />
+    <ClInclude Include="include\BlazeEngine\Core\Event\EventMemberFunctionTie.h" />
     <ClInclude Include="include\BlazeEngine\Core\Type\Variant.h" />
     <ClInclude Include="include\BlazeEngine\External\BlazeEngineCoreSTDInterface.h" />
     <ClInclude Include="include\BlazeEngine\BlazeEngineCore.h" />

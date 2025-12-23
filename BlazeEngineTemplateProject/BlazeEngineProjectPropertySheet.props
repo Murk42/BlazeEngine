@@ -13,11 +13,11 @@
       <AdditionalIncludeDirectories>$(BlazeDir)BlazeEngineGraphics\include;$(BlazeDir)BlazeEngineRuntime\include;$(BlazeDir)BlazeEngineCore\include;$(BlazeDir)BlazeEngineUI\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>BLAZE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GRAPHICS_OPENGL;BLAZE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(BlazeDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineRuntime\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngine\Graphics\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineUI\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BlazeDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineRuntime\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineUI\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineRuntime-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineUI-static-$(PlatformTarget)-$(Configuration).lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>

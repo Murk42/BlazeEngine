@@ -32,6 +32,8 @@ namespace Blaze::UI
 		virtual ~Screen();
 
 		HitStatus HitTest(Vec2f screenPos) override;
+
+		void Update();
 	private:
 	};
 }

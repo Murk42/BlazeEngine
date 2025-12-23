@@ -51,8 +51,6 @@ namespace Blaze::UI
 					if (!node.IsEnabled())
 						continue;
 
-					node.CleanFinalTransform();
-
 					Node::HitStatus newHit = node.HitTest(pos);
 
 					if (newHit != Node::HitStatus::NotHit)

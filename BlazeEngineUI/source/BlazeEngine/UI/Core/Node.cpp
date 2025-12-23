@@ -18,7 +18,7 @@ namespace Blaze::UI
 		screen(nullptr), parent(nullptr), next(nullptr), prev(nullptr), children(),
 		transform(), finalTransform(),
 		enabled(true), enabledFlag(true),
-		transformDirty(false), finalTransformDirty(true), isFilteringTransform(false)
+		transformDirty(false), finalTransformDirty(true)
 	{
 	}
 	Node::Node(Node& parent, const NodeTransform& transform)
@@ -103,7 +103,7 @@ namespace Blaze::UI
 			subTreeTail->next = nullptr;
 		}
 
-		MarkTransformDirty();
+		MarkFinalTransformDirty();
 
 		PropagateEnabledState();
 
@@ -144,45 +144,21 @@ namespace Blaze::UI
 	}
 	void Node::SetTransform(const NodeTransform& newTransform)
 	{
-		if (isFilteringTransform)
-			transform = newTransform;
-		else
-		{
-			bool wasTransformDirty = transformDirty;
-			transformDirty = false;
-
-			NodeTransform oldTransform = transform;
-			transform = newTransform;
-
-			isFilteringTransform = true;
-			transformFilterEventDispatcher.Call({ *this, transform });
-			isFilteringTransform = false;
-
-			if (oldTransform != transform)
-			{
-				MarkFinalTransformDirtyDownwards();
-
-				if (!wasTransformDirty)
-					transformUpdatedEventDispatcher.Call({ *this });
-			}
-		}
+		transform = newTransform;
+		transformDirty = true;
+	}
+	void Node::SetFinalTransform(const NodeFinalTransform& newFinalTransform)
+	{
+		finalTransform = newFinalTransform;
+		finalTransformDirty = true;
 	}
 	void Node::MarkTransformDirty()
 	{
-		if (!isFilteringTransform)
-		{
-			bool wasTransformDirty = transformDirty;
-			transformDirty = true;
-			finalTransformDirty = true;
-
-			if (!wasTransformDirty)
-				transformUpdatedEventDispatcher.Call({ *this });
-		}
+		transformDirty = true;
 	}
-	void Node::CleanTransform()
+	void Node::MarkFinalTransformDirty()
 	{
-		if (transformDirty)
-			SetTransform(transform);
+		finalTransformDirty = true;
 	}
 	void Node::SetEnabledFlag(bool newEnabledFlag)
 	{
@@ -195,65 +171,9 @@ namespace Blaze::UI
 	{
 		return NodeTreeView(this);
 	}
-	bool Node::GetTransform(NodeTransform& transform)
-	{
-		bool wasDirty = transformDirty && !isFilteringTransform;
-		transform = GetTransform();
-		return wasDirty;
-	}
-	NodeTransform Node::GetTransform()
-	{
-		if (isFilteringTransform)
-			return transform;
-
-		CleanTransform();
-
-		return transform;
-	}
-	bool Node::GetFinalTransform(NodeFinalTransform& transform)
-	{
-		bool wasDirty = finalTransformDirty;
-		transform = GetFinalTransform();
-		return wasDirty;
-	}
 	NodeFinalTransform Node::GetFinalTransform()
 	{
-		CleanFinalTransform();
-
 		return finalTransform;
-	}
-	NodeFinalTransform Node::CalculateFinalTransform(const NodeTransform& transform, const NodeFinalTransform& parentFinalTransform)
-	{
-		NodeFinalTransform newFinalTransform;
-
-		newFinalTransform.scale = parentFinalTransform.scale * transform.scale;
-		newFinalTransform.size = transform.size * parentFinalTransform.scale;
-		newFinalTransform.rotation = transform.rotation + parentFinalTransform.rotation;
-
-		Vec2f parentRelativeRight = { Math::Cos(transform.rotation), Math::Sin(transform.rotation) };
-		Vec2f parentRelativeUp = { -parentRelativeRight.y, parentRelativeRight.x };
-
-		Vec2f parentRight = { Math::Cos(parentFinalTransform.rotation), Math::Sin(parentFinalTransform.rotation) };
-		Vec2f parentUp = { -parentRight.y, parentRight.x };
-
-		Vec2f offset = -newFinalTransform.size * transform.pivot;
-		Vec2f parentRelativePos =
-			transform.parentPivot * parentFinalTransform.size + transform.pos * parentFinalTransform.scale +
-			parentRelativeRight * offset.x + parentRelativeUp * offset.y;
-
-		newFinalTransform.position =
-			parentFinalTransform.position +
-			parentRight * parentRelativePos.x + parentUp * parentRelativePos.y;
-
-		newFinalTransform.right = { Math::Cos(newFinalTransform.rotation), Math::Sin(newFinalTransform.rotation) };
-
-		if (std::abs(newFinalTransform.right.x) == 1 || std::abs(newFinalTransform.right.y) == 1)
-		{
-			newFinalTransform.position.x = Math::Ceil(newFinalTransform.position.x);
-			newFinalTransform.position.y = Math::Ceil(newFinalTransform.position.y);
-		}
-
-		return newFinalTransform;
 	}
 	void Node::PropagateScreenChange(Screen* newScreen)
 	{
@@ -300,35 +220,6 @@ namespace Blaze::UI
 
 			for (auto& child : GetChildren())
 				child.MarkFinalTransformDirtyDownwards();
-		}
-	}
-	void Node::CleanFinalTransform()
-	{
-		if (!finalTransformDirty)
-			return;
-
-		CleanTransform();
-
-		finalTransformDirty = false;
-
-		NodeFinalTransform parentFinalTransform;
-
-		if (parent != nullptr)
-		{
-			parent->CleanFinalTransform();
-			parentFinalTransform = parent->finalTransform;
-		}
-		else
-		{
-			parentFinalTransform = NodeFinalTransform{ .position = {}, .size = {}, .scale = 1.0f, .rotation = 0.0f };
-		}
-
-		NodeFinalTransform newFinalTransform = CalculateFinalTransform(transform, parentFinalTransform);
-
-		if (finalTransform != newFinalTransform)
-		{
-			finalTransform = newFinalTransform;
-			finalTransformUpdatedEventDispatcher.Call({ .node = *this });
 		}
 	}
 	bool Node::AreNodesOnSameLevel(Node* a, Node* b)

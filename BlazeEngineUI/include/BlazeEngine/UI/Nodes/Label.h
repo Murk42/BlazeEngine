@@ -32,7 +32,6 @@ namespace Blaze::UI::Nodes
 		bool renderDataDirty;
 		bool blocksHitTest;
 
-		void TransformFilterEvent(const Node::TransformFilterEvent& event);
 		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
 	};
 }

@@ -9,7 +9,6 @@ namespace Blaze::UI::Nodes
 		dataMap.SetTypeName("Label");
 
 		finalTransformUpdatedEventDispatcher.AddHandler<&Label::FinalTransformUpdatedEvent>(*this);
-		transformFilterEventDispatcher.AddHandler<&Label::TransformFilterEvent>(*this);
 	}
 	Label::Label(Node& parent, const NodeTransform& transform)
 		: Label()
@@ -26,7 +25,6 @@ namespace Blaze::UI::Nodes
 	Label::~Label()
 	{
 		finalTransformUpdatedEventDispatcher.RemoveHandler<&Label::FinalTransformUpdatedEvent>(*this);
-		transformFilterEventDispatcher.RemoveHandler<&Label::TransformFilterEvent>(*this);
 	}
 	void Label::ClearText()
 	{
@@ -41,8 +39,12 @@ namespace Blaze::UI::Nodes
 			fontSize = atlas.GetFontPixelHeight();
 
 		textSize = renderUnit.BuildText(string, fontSize, atlas);
+
 		renderDataDirty = true;
-		MarkTransformDirty();
+
+		auto transform = GetTransform();
+		transform.size = textSize;
+		SetTransform(transform);
 	}
 	void Label::BuildWrappedText(u8StringView string, const FontAtlas& atlas, float wrapWidth, float fontSize)
 	{
@@ -50,8 +52,12 @@ namespace Blaze::UI::Nodes
 			fontSize = atlas.GetFontPixelHeight();
 
 		textSize = renderUnit.BuildWrappedText(string, fontSize, atlas, wrapWidth);
+
 		renderDataDirty = true;
-		MarkTransformDirty();
+
+		auto transform = GetTransform();
+		transform.size = textSize;
+		SetTransform(transform);
 	}
 	void Label::SetColor(ColorRGBAf color)
 	{
@@ -63,8 +69,6 @@ namespace Blaze::UI::Nodes
 	}
 	void Label::PreRender(const RenderContext& renderContext)
 	{
-		CleanFinalTransform();
-
 		if (!renderDataDirty)
 			return;
 
@@ -91,10 +95,6 @@ namespace Blaze::UI::Nodes
 				return HitStatus::HitNotBlocking;
 			else
 				return HitStatus::NotHit;
-	}
-	void Label::TransformFilterEvent(const Node::TransformFilterEvent& event)
-	{
-		event.transform.size = textSize;
 	}
 	void Label::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
 	{

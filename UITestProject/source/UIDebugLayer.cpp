@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "UIDebugLayer.h"
-#include "LayoutControl.h"
 
 class UIDebugLayer;
 
@@ -11,7 +10,7 @@ public:
 	{
 	public:
 		UI::Nodes::PanelButton button;
-		UI::Layout::ParentSizeBinding buttonSizeBinding{ &button };
+		//UI::Layout::ParentSizeBinding buttonSizeBinding{ &button };
 
 		UI::Nodes::Label label;
 
@@ -37,10 +36,9 @@ public:
 	UI::Nodes::PanelButton toggleButton{ titleLabel, {.pos = {10, -5}, .parentPivot = {1, 0.5}, .pivot = {0, 0.5}, .size { 40, 40 }}, buttonPanelStyle };
 
 	UI::Nodes::EmptyNode HUD{ *this, {  } };
-	UI::Layout::ParentSizeBinding HUDParentSizeBinding{ &HUD };
 
-	UI::Nodes::Panel mouseInfoPanel{ HUD, {.pos = {3, -3}, .parentPivot = {0, 1}, .pivot = {0, 1}, .size = { 300, 100 }}, panelStyle };
-	UI::Nodes::Label mouseInfo{ mouseInfoPanel, {.pos = {3, -3}, .parentPivot = {0, 1}, .pivot = {0, 1}, .size = { 0, 0 }} };
+	UI::Nodes::Panel mouseInfoPanel{ *this, {.pos = {3, -3}, .parentPivot = {0, 1}, .pivot = {0, 1}, .size = { 300, 100 }}, panelStyle };
+	UI::Nodes::Label mouseInfo{ *this, {.pos = {3, -3}, .parentPivot = {0, 1}, .pivot = {0, 1}, .size = { 0, 0 }} };
 	//UI::Layout::ParentSizeBinding mouseInfoPanelSizeBinding{ &mouseInfoPanel };
 
 	ClientUIDebugScreen(ResourceManager& resourceManager)

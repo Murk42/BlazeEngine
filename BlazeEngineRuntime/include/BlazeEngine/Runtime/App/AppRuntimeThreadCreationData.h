@@ -20,14 +20,14 @@ namespace Blaze
 
 		void Clear();
 
-		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsBaseOf<T, AppRuntimeThread>
-		AppRuntimeThreadCreationData&& SetRuntimeThreadData(Args&& ... args);
-
 		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsBaseOf<T, AppLayer>
 		AppRuntimeThreadCreationData&& RegisterLayer(Args&& ... args);
 		AppRuntimeThreadCreationData&& RegisterLayer(AppLayerCreationData&& layerCreationData);
 
 		AppRuntimeThreadCreationData& operator=(AppRuntimeThreadCreationData&& other) noexcept;
+
+		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsBaseOf<T, AppRuntimeThread>
+		static AppRuntimeThreadCreationData New(Args&& ... args);
 	private:
 		struct ThreadArguments
 		{
@@ -45,12 +45,20 @@ namespace Blaze
 		friend class App;
 	};
 
-	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...>&& IsBaseOf<T, AppRuntimeThread>
-	inline AppRuntimeThreadCreationData&& AppRuntimeThreadCreationData::SetRuntimeThreadData(Args && ...args)
+	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsBaseOf<T, AppLayer>
+	inline AppRuntimeThreadCreationData&& AppRuntimeThreadCreationData::RegisterLayer(Args&& ... args)
 	{
-		runtimeThreadArguments = Handle<VirtualTupleBase>::CreateDerived<VirtualTuple<Args...>>(std::forward<Args>(args)...);
+		AppLayerCreationData creationData;
+		creationData.Initialize<T>(std::forward<Args>(args)...);
+		RegisterLayer(std::move(creationData));
+	}
+	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsBaseOf<T, AppRuntimeThread>
+	inline AppRuntimeThreadCreationData AppRuntimeThreadCreationData::New(Args && ...args)
+	{
+		AppRuntimeThreadCreationData creationData;
+		creationData.runtimeThreadArguments = Handle<VirtualTupleBase>::CreateDerived<VirtualTuple<Args...>>(std::forward<Args>(args)...);
 
-		threadFunction = [](void* userData) -> int {
+		creationData.threadFunction = [](void* userData) -> int {
 			AppRuntimeThreadCreationData& data = reinterpret_cast<ThreadArguments*>(userData)->creationData;
 			Tuple<Args...> arguments = std::move(*static_cast<Tuple<Args...>*>(static_cast<VirtualTuple<Args...>*>(data.runtimeThreadArguments.Ptr())));
 			Array<AppLayerCreationData> layerCreationData = std::move(data.layerCreationData);
@@ -70,13 +78,6 @@ namespace Blaze
 			return 0;
 			};
 
-		return std::move(*this);
-	}
-	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsBaseOf<T, AppLayer>
-	inline AppRuntimeThreadCreationData&& AppRuntimeThreadCreationData::RegisterLayer(Args&& ... args)
-	{
-		AppLayerCreationData creationData;
-		creationData.Initialize<T>(std::forward<Args>(args)...);
-		RegisterLayer(std::move(creationData));
+		return creationData;
 	}
 }

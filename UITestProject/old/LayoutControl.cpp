@@ -194,7 +194,6 @@ namespace Blaze::UI::Layout
 		if (nodesData.Empty())
 			return;
 
-
 		nodesData.First().node.surroundingNodeTreeChangedEventDispatcher.RemoveHandler<&HorizontalWeightedFillLayout::FirstNodeSurroundingNodeTreeChangedEvent>(*this);
 
 		if (auto parent = nodesData.First().node.GetParent())
