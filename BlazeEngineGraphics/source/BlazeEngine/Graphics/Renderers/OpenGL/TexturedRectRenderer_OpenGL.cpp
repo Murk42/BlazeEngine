@@ -24,7 +24,7 @@ namespace Blaze::Graphics::OpenGL
 		{
 			auto vert = OpenGL::VertexShader(ShaderSources::texturedRect_vert);
 			auto frag = OpenGL::FragmentShader(ShaderSources::texturedRect_frag);
-			SetShaderProgram(ShaderProgram{ { &vert, &frag } });
+			SetShaderProgram(ShaderProgram{ { vert, frag } });
 		}
 
 		va.EnableVertexAttribute(0);
@@ -70,7 +70,8 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void TexturedRectRenderer_OpenGL::StartRender(const RenderContext& context)
 	{
-		instanceCount = 0;
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
 	}
 	void TexturedRectRenderer_OpenGL::EndRender(const RenderContext& context)
 	{
@@ -128,8 +129,6 @@ namespace Blaze::Graphics::OpenGL
 
 		FlushBuffer(0, sizeof(Instance) * instanceCount);
 
-		graphicsContext.SelectProgram(&program);
-		graphicsContext.SelectVertexArray(&va);
 		program.SetUniform(0, Mat4f::OrthographicMatrix(0, (float)context.GetTargetSize().x, 0, (float)context.GetTargetSize().y, -1, 1));
 
 		for (uint i = 0; i < _countof(textures) && textures[i] != nullptr; ++i)

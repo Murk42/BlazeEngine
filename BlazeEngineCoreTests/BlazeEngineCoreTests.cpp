@@ -375,5 +375,25 @@ namespace BlazeEngineCoreTests
 				Logger::WriteMessage("\n");
 			}
 		}
+
+		TEST_METHOD(QueueTest)
+		{
+			Queue<int> queue;
+			
+			for (int i = 0; i < 47; ++i)
+				queue.Push(i);
+
+			for (int i = 0; i < 32; ++i)
+				if (i != queue.Pop())
+					Assert::Fail(L"Queue returned wrong element");
+
+			for (int i = 0; i < 15; ++i)
+				queue.Push(i);
+
+			for (int i = 0; i < 15; ++i)
+				queue.Pop();
+
+			queue.Clear();
+		}
 	};
 }

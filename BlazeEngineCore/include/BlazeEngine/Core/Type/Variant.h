@@ -119,9 +119,13 @@ namespace Blaze
 		if (type != GetValueTypeOf<T>())
 			return false;
 
-		callable(GetValueUnsafe<T>());
-
-		return true;
+		if constexpr (SameAs<std::invoke_result_t<Callable, const T&>, bool>)
+			return callable(GetValueUnsafe<T>());
+		else
+		{
+			callable(GetValueUnsafe<T>());
+			return true;
+		}
 	}
 	template<typename ...Ts>
 	template<OneOf<Ts...> T>

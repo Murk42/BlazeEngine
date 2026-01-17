@@ -14,7 +14,7 @@ namespace Blaze::UI
 		virtual void Render(const Node& node, Graphics::RendererBase& renderer, const RenderContext& renderContext) = 0;
 	};
 
-	template<IsBaseOf<Graphics::RendererBase> RendererType, FixedString name = "">
+	template<IsDerivedFrom<Graphics::RendererBase> RendererType, FixedString name = "">
 	class BLAZE_API RenderUnit : public RenderUnitBase
 	{
 	public:

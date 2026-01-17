@@ -217,6 +217,14 @@ namespace Blaze
 			.up = !down || released,
 		};
 	}
+	bool BlazeEngineContextInternal::GetKeyState(Input::Key key) const
+	{
+		return keysCurrentState[static_cast<uintMem>(key)].test();
+	}
+	bool BlazeEngineContextInternal::GetMouseButtonState(Input::MouseButton button) const
+	{
+		return mouseButtonsCurrentState[static_cast<uintMem>(button)].test();
+	}
 	void BlazeEngineContextInternal::ProcessEvents()
 	{
 		CopyInputState();
@@ -233,7 +241,7 @@ namespace Blaze
 	}
 	void BlazeEngineContextInternal::ResetInputState()
 	{
-		std::lock_guard lg{ inputCurrentFrameMutex };
+		std::lock_guard lg{ inputStateMutex };
 
 		mouseCurrentPos = Vec2f();
 		mouseCurrentFrameMovementSum = Vec2f();
@@ -248,7 +256,7 @@ namespace Blaze
 	}
 	void BlazeEngineContextInternal::CopyInputState()
 	{
-		std::lock_guard lg{ inputCurrentFrameMutex };
+		std::lock_guard lg{ inputStateMutex };
 
 		pressedKeysDuringLastFrame = pressedKeysDuringCurrentFrame;
 		releasedKeysDuringLastFrame = releasedKeysDuringCurrentFrame;
@@ -266,7 +274,7 @@ namespace Blaze
 		downKeysDuringCurrentFrame.reset();
 		releasedMouseButtonsDuringCurrentUpdate.reset();
 		pressedMouseButtonsDuringCurrentFrame.reset();
-		downKeysDuringCurrentFrame.reset();
+		downMouseButtonsDuringCurrentFrame.reset();
 		mouseCurrentFrameMovementSum = Vec2f();
 		mouseCurrentScrollSum = Vec2f();
 	}
@@ -343,7 +351,7 @@ namespace Blaze
 				break;
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				switch (event->wheel.direction)
 				{
 				case SDL_MOUSEWHEEL_NORMAL:
@@ -374,7 +382,7 @@ namespace Blaze
 				break;
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				mouseCurrentFrameMovementSum += Vec2f(event->motion.xrel, event->motion.yrel);
 			}
 
@@ -398,11 +406,12 @@ namespace Blaze
 			auto button = SDL_GetBlazeMouseButton(event->button.button);
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				downMouseButtonsDuringCurrentFrame.set((uintMem)button);
 				mouseButtonsComboDuringCurrentFrame[(uintMem)button] = std::max(mouseButtonsComboDuringCurrentFrame[(uintMem)button], event->button.clicks);
 				pressedMouseButtonsDuringCurrentFrame.set((uintMem)button);
 			}
+			mouseButtonsCurrentState[static_cast<uintMem>(button)].test_and_set();
 
 			Input::MouseButtonDownEvent _event{
 				.window = *window,
@@ -425,10 +434,11 @@ namespace Blaze
 			auto button = SDL_GetBlazeMouseButton(event->button.button);
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				downMouseButtonsDuringCurrentFrame.reset((uintMem)button);
 				releasedMouseButtonsDuringCurrentUpdate.set((uintMem)button);
 			}
+			mouseButtonsCurrentState[static_cast<uintMem>(button)].clear();
 
 			Input::MouseButtonUpEvent _event{
 				.window = *window,
@@ -449,11 +459,12 @@ namespace Blaze
 				break;
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 
 				downKeysDuringCurrentFrame.set(event->key.scancode);
 				pressedKeysDuringCurrentFrame.set(event->key.scancode);
 			}
+			keysCurrentState[static_cast<uintMem>(event->key.scancode)].test_and_set();
 
 			Input::KeyDownEvent _event{
 				.window = *window,
@@ -484,11 +495,12 @@ namespace Blaze
 			};
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 
 				releasedKeysDuringCurrentFrame.set(event->key.scancode);
 				downKeysDuringCurrentFrame.reset(event->key.scancode);
 			}
+			keysCurrentState[static_cast<uintMem>(event->key.scancode)].clear();
 
 			window->AddInputEvent(_event);
 			break;
@@ -642,7 +654,9 @@ namespace Blaze
 		}
 		case SDL_EVENT_WINDOW_EXPOSED:
 		{
-
+			break;
+		}
+		case SDL_EVENT_WINDOW_RESIZED: {
 			break;
 		}
 		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {

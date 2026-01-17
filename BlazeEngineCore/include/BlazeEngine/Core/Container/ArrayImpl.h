@@ -51,45 +51,33 @@ namespace Blaze
 	template<typename T, AllocatorType Allocator>
 	template<typename F> requires std::invocable<F, typename Array<T, Allocator>::StoredType*, uintMem>
 	inline Array<T, Allocator>::Array(uintMem count, const F& constructFunction)
-		: ptr(nullptr), count(count), reserved(count)
+		: Array()
 	{
-		if (count == 0)
-			return;
-
-		ptr = (StoredType*)allocator.Allocate(sizeof(StoredType) * count);
-
-		for (uintMem i = 0; i < count; ++i)
-			constructFunction(ptr + i, i);
+		ResizeWithFunction(count, constructFunction);
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ... Args> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, Args...>
 	inline Array<T, Allocator>::Array(uintMem count, Args&& ... args)
-		: ptr(nullptr), count(count), reserved(count)
+		: Array()
 	{
-		if (count == 0)
-			return;
-
-		ptr = (StoredType*)allocator.Allocate(sizeof(StoredType) * count);
-
-		for (uintMem i = 0; i < count; ++i)
-			std::construct_at(ptr + i, args...);
+		Resize(count, std::forward<Args>(args)...);
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2, uintMem S> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+	template<typename T2, uintMem S> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
 	inline Array<T, Allocator>::Array(const T2(&other)[S])
 		: ptr(nullptr), count(0), reserved(0)
 	{
 		CopyConstructUnsafe(other, S);
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+	template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
 	inline Array<T, Allocator>::Array(const std::initializer_list<T2>& other)
 		: ptr(nullptr), count(0), reserved(0)
 	{
 		CopyConstructUnsafe(other.begin(), other.size());
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+	template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
 	inline Array<T, Allocator>::Array(const T2* ptr, uintMem count)
 		: ptr(nullptr), count(0), reserved(0)
 	{
@@ -109,14 +97,14 @@ namespace Blaze
 		}
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2, AllocatorType Allocator2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+	template<typename T2, AllocatorType Allocator2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
 	inline Array<T, Allocator>::Array(const Array<T2, Allocator2>& other)
 		: ptr(nullptr), count(0), reserved(0)
 	{
 		CopyConstructUnsafe(other.ptr, other.count);
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+	template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
 	inline Array<T, Allocator>::Array(const ArrayView<T2>& other)
 		: ptr(nullptr), count(0), reserved(0)
 	{
@@ -160,10 +148,7 @@ namespace Blaze
 			for (uintMem i = 0; i < count; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i]));
 
-			if constexpr (IsReferenceType<T>)
-				std::construct_at(newPtr + count, &args...);
-			else
-				std::construct_at(newPtr + count, std::forward<Args>(args)...);
+			std::construct_at(newPtr + count, std::forward<Args>(args)...);
 
 			std::destroy_n(ptr, count);
 			allocator.Free(ptr);
@@ -171,10 +156,7 @@ namespace Blaze
 		}
 		else
 		{
-			if constexpr (IsReferenceType<T>)
-				std::construct_at(ptr + count, &args...);
-			else
-				std::construct_at(ptr + count, std::forward<Args>(args)...);
+			std::construct_at(ptr + count, std::forward<Args>(args)...);
 		}
 
 		++count;
@@ -539,10 +521,8 @@ namespace Blaze
 		if (i >= count)
 			BLAZE_LOG_FATAL("Invalid index");
 #endif
-		if constexpr (IsReferenceType<T>)
-			return ptr[i][0];
-		else
-			return ptr[i];
+
+		return ptr[i];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline const T& Array<T, Allocator>::operator[](uintMem i) const
@@ -591,10 +571,7 @@ namespace Blaze
 			BLAZE_LOG_FATAL("Array is empty");
 #endif
 
-		if constexpr (IsReferenceType<T>)
-			return ptr[0][0];
-		else
-			return ptr[0];
+		return ptr[0];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline const T& Array<T, Allocator>::First() const
@@ -604,10 +581,7 @@ namespace Blaze
 			BLAZE_LOG_FATAL("Array is empty");
 #endif
 
-		if constexpr (IsReferenceType<T>)
-			return ptr[0][0];
-		else
-			return ptr[0];
+		return ptr[0];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline T& Array<T, Allocator>::Last()
@@ -617,10 +591,7 @@ namespace Blaze
 			BLAZE_LOG_FATAL("Array is empty");
 #endif
 
-		if constexpr (IsReferenceType<T>)
-			return ptr[count - 1][0];
-		else
-			return ptr[count - 1];
+		return ptr[count - 1];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline const T& Array<T, Allocator>::Last() const
@@ -630,10 +601,7 @@ namespace Blaze
 			BLAZE_LOG_FATAL("Array is empty");
 #endif
 
-		if constexpr (IsReferenceType<T>)
-			return ptr[count - 1][0];
-		else
-			return ptr[count - 1];
+		return ptr[count - 1];
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator>::Iterator Array<T, Allocator>::GetIterator(uintMem index)
@@ -760,7 +728,7 @@ namespace Blaze
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2, AllocatorType Allocator2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
+	template<typename T2, AllocatorType Allocator2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType> && std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
 	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const Array<T2, Allocator2>& other)
 	{
 		CopyAssign(other.ptr, other.count);
@@ -768,7 +736,7 @@ namespace Blaze
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
+	template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>&& std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
 	inline Array<T, Allocator>& Array<T, Allocator>::operator=(const ArrayView<T2>& other)
 	{
 		CopyAssign(other.Ptr(), other.Count());
@@ -776,7 +744,7 @@ namespace Blaze
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+	template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
 	inline void Array<T, Allocator>::CopyConstructUnsafe(const T2* src, uintMem count)
 	{
 		if (count != 0)
@@ -801,7 +769,7 @@ namespace Blaze
 		}
 	}
 	template<typename T, AllocatorType Allocator>
-	template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
+	template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType> && std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
 	inline void Array<T, Allocator>::CopyAssign(const T2* src, uintMem newCount)
 	{
 		if (newCount != 0)

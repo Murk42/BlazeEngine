@@ -97,8 +97,10 @@ namespace Blaze::Graphics::OpenGL
 
 		void SetActiveTextureSlot(uint slot);
 
-		void BindUniformBuffer(const OpenGL::GraphicsBuffer& buffer, uint binding);
-		void BindUniformBufferRange(const OpenGL::GraphicsBuffer& buffer, uint binding, uint offset, uint size);
+		void BindUniformBuffer(const OpenGL::GraphicsBuffer& buffer, uint bindingPoint);
+		void BindUniformBufferRange(const OpenGL::GraphicsBuffer& buffer, uint bindingPoint, uint offset, uint size);
+		void SetShaderUniformBlockBindingPoint(const ShaderProgram& program, uintMem uniformBlockIndex, uint bindingPoint);
+
 		void SelectImage(uint slot, const OpenGL::Texture2D& texture, uint level, OpenGL::ImageAccess access, OpenGL::ImageFormat format);
 		void SelectImage(uint slot, const OpenGL::Texture1D& texture, uint level, OpenGL::ImageAccess access, OpenGL::ImageFormat format);
 

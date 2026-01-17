@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Type/TypeTraits.h"
+#include "BlazeEngine/Core/Container/ReferenceContainer.h"
 
 namespace Blaze
 {
@@ -25,7 +26,7 @@ namespace Blaze
 	{
 	public:
 		using ValueType = T;
-		using StoredType = Conditional<IsReferenceType<T>, RemoveReference<T>* const, T>;
+		using StoredType = Conditional<IsReferenceType<T>, const ReferenceContainer<RemoveReference<T>>, T>;
 
 		//STD compatibility
 		using value_type = T;
@@ -33,22 +34,14 @@ namespace Blaze
 
 		ArrayIterator();
 		ArrayIterator(const ArrayIterator& other);
-		/*
-			If T is not a reference type this constructor constructs a iterator from a pointer to the object. Otherwise this constructor
-			constructs a iterator from a pointer to a pointer to the object. The pointer passed should point to the memory where the the reference is stored.
-			The reference should be reinterpret_cast to a pointer and a pointer to that pointer passed to the function. This way the reference is reinterpreted as a pointer which
-			can be actually stored and changed.
-
-			\param ptr - pointer to the memory of the reference value.
-		*/
 		ArrayIterator(StoredType* ptr);
 		~ArrayIterator();
 
-		StoredType* Ptr() const;
+		RemoveReference<T>* Ptr() const;
 		bool IsNull() const;
 
 		T& operator*() const;
-		StoredType* operator->() const;
+		RemoveReference<T>* operator->() const;
 
 		ArrayIterator& operator++();
 		ArrayIterator operator++(int);
@@ -72,8 +65,8 @@ namespace Blaze
 		bool operator!=(const ArrayIterator& other) const;
 
 		operator ArrayIterator<const T>() const;
-		operator const StoredType*() const;
-		operator StoredType* () const requires (!IsConstType<T>);
+		operator const RemoveReference<T>* () const;
+		operator RemoveReference<T>* () const requires (!IsConstType<T>);
 
 		ArrayIterator& operator=(const ArrayIterator& other);
 	private:

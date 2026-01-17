@@ -243,14 +243,14 @@ namespace Blaze::UI::TextShaping
 		u32StringViewIterator end = textEnd;
 
 		TextUnitSeparationLevel separationLevel = shapingContext.GetExpectedSeparationLevel();
-		while (separationLevel != shapingContext.GetSmallestSeparationLevel() - 1)
+		while (separationLevel != static_cast<TextUnitSeparationLevel>(static_cast<uint32>(shapingContext.GetSmallestSeparationLevel()) - 1))
 		{
 			end = find_end_rounded_to_text_unit(textBegin, textEnd, separationLevel, shapingContext);
 
 			if (end != textBegin)
 				break;
 
-			separationLevel = TextUnitSeparationLevel(separationLevel - 1);
+			separationLevel = static_cast<TextUnitSeparationLevel>(static_cast<uint32>(separationLevel) - 1);
 		}
 
 		return end;

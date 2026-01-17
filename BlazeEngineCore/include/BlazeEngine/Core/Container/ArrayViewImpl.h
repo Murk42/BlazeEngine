@@ -119,10 +119,7 @@ namespace Blaze
 			BLAZE_LOG_FATAL("Array is empty");
 #endif
 
-		if constexpr (IsReferenceType<T>)
-			return ptr[0][0];
-		else
-			return ptr[0];
+		return ptr[0];
 	}
 	template<typename T>
 	inline const T& ArrayView<T>::Last() const
@@ -132,10 +129,7 @@ namespace Blaze
 			BLAZE_LOG_FATAL("Array is empty");
 #endif
 
-		if constexpr (IsReferenceType<T>)
-			return ptr[count - 1][0];
-		else
-			return ptr[count - 1];
+		return ptr[count - 1];
 	}
 	template<typename T>
 	inline ArrayView<T>::Iterator ArrayView<T>::GetIterator(uintMem index) const

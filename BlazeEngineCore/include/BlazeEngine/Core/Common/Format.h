@@ -78,16 +78,16 @@ namespace Blaze
 
 	template<typename T>
 	concept HasFormatFunctionWithSpecifiers =
-		requires(const T& value, StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<StringView>; } ||
-		requires(const T& value, u8StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<u8StringView>; } ||
-		requires(const T& value, u16StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<u16StringView>; } ||
-		requires(const T& value, u32StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<u32StringView>; };
+		requires(const T& value, StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<StringView>; } ||
+		requires(const T& value, u8StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<u8StringView>; } ||
+		requires(const T& value, u16StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<u16StringView>; } ||
+		requires(const T& value, u32StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<u32StringView>; };
 	template<typename T>
 	concept HasFormatFunction =
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<StringView>; } ||
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<u8StringView>; } ||
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<u16StringView>; } ||
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<u32StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<u8StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<u16StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<u32StringView>; } ||
 		HasFormatFunctionWithSpecifiers<T>;
 
 	template<HasFormatFunction T, typename Char>

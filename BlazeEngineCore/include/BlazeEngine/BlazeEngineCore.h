@@ -36,6 +36,8 @@
 #include "BlazeEngine/Core/Container/MapImpl.h"
 #include "BlazeEngine/Core/Container/RawArray.h"
 #include "BlazeEngine/Core/Container/RawArrayImpl.h"
+#include "BlazeEngine/Core/Container/ReferenceContainer.h"
+#include "BlazeEngine/Core/Container/ReferenceContainerImpl.h"
 #include "BlazeEngine/Core/Container/Set.h"
 #include "BlazeEngine/Core/Container/SetImpl.h"
 #include "BlazeEngine/Core/Container/UnorderedArray.h"

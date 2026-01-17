@@ -3,7 +3,7 @@
 
 namespace Blaze::UI::TextShaping
 {
-	enum TextUnitSeparationLevel
+	enum class TextUnitSeparationLevel
 	{
 		None = 0,
 		Codepoint = 1,

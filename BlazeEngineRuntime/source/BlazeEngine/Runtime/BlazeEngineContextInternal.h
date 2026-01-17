@@ -34,6 +34,8 @@ namespace Blaze
 		Vec2f GetMouseLastFrameScrollSum() const;
 		Input::KeyFrameState GetKeyFrameState(Input::Key key) const;
 		Input::MouseButtonFrameState GetMouseButtonFrameState(Input::MouseButton button) const;
+		bool GetKeyState(Input::Key key) const;
+		bool GetMouseButtonState(Input::MouseButton button) const;
 
 		void RegisterWindow(Window& window);
 		void UnregisterWindow(Window& window);
@@ -61,7 +63,7 @@ namespace Blaze
 		/*
 		------------------------------------ State-based/frame-based input handling ------------------------------------
 		*/
-		std::mutex inputCurrentFrameMutex;
+		mutable std::mutex inputStateMutex;
 
 		Vec2f mouseCurrentPos;
 		Vec2f mouseLastFramePos;
@@ -72,6 +74,7 @@ namespace Blaze
 
 		uint8 mouseButtonsComboDuringCurrentFrame[(uintMem)Input::MouseButton::COUNT];
 		uint8 mouseButtonsComboDuringLastFrame[(uintMem)Input::MouseButton::COUNT];
+		std::atomic_flag mouseButtonsCurrentState[(uintMem)Input::MouseButton::COUNT];
 		std::bitset<(uintMem)Input::MouseButton::COUNT> pressedMouseButtonsDuringCurrentFrame;
 		std::bitset<(uintMem)Input::MouseButton::COUNT> pressedMouseButtonsDuringLastFrame;
 		std::bitset<(uintMem)Input::MouseButton::COUNT> releasedMouseButtonsDuringCurrentUpdate;
@@ -79,6 +82,7 @@ namespace Blaze
 		std::bitset<(uintMem)Input::MouseButton::COUNT> downMouseButtonsDuringCurrentFrame;
 		std::bitset<(uintMem)Input::MouseButton::COUNT> downMouseButtonsDuringLastFrame;
 
+		std::atomic_flag keysCurrentState[(uintMem)Input::Key::COUNT];
 		std::bitset<(uintMem)Input::Key::COUNT> pressedKeysDuringCurrentFrame;
 		std::bitset<(uintMem)Input::Key::COUNT> pressedKeysDuringLastFrame;
 		std::bitset<(uintMem)Input::Key::COUNT> releasedKeysDuringCurrentFrame;

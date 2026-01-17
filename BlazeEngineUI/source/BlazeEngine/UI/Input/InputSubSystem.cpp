@@ -537,8 +537,11 @@ namespace Blaze::UI
 
 				blockingHit |= (hitData.hitStatus == Node::HitStatus::HitBlocking);
 			}
+
 			return blockingHit;
 		}
+		else
+			SelectNode(nullptr);
 
 		return false;
 	}

@@ -22,7 +22,7 @@ namespace Blaze::Graphics::OpenGL
 		{
 			auto vert = OpenGL::VertexShader(ShaderSources::panel_vert);
 			auto frag = OpenGL::FragmentShader(ShaderSources::panel_frag);
-			program = ShaderProgram({ &vert, &frag });
+			program = ShaderProgram({ vert, frag });
 		}
 
 		va.EnableVertexAttribute(0);

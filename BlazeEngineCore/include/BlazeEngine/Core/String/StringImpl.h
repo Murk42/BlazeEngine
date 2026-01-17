@@ -423,19 +423,19 @@ namespace Blaze
 		return GenericStringView<Char>(*this).Join(container);
 	}
 	template<typename Char, AllocatorType Allocator>
-	template<AllocatorType StringAllocator1, ConvertibleTo<GenericStringView<Char>> ... Args>
+	template<AllocatorType StringAllocator1, IsConvertibleTo<GenericStringView<Char>> ... Args>
 	inline GenericString<Char, StringAllocator1> GenericString<Char, Allocator>::Join(const Args& ... args)
 	{
 		return GenericStringView<Char>(*this).Join(args...);
 	}
 	template<typename Char, AllocatorType Allocator>
-	template<AllocatorType StringAllocator, ContainerType Container> requires ConvertibleTo<ContainerValueType<Container>, GenericStringView<Char>>
+	template<AllocatorType StringAllocator, ContainerType Container> requires IsConvertibleTo<ContainerValueType<Container>, GenericStringView<Char>>
 	inline GenericString<Char, StringAllocator> GenericString<Char, Allocator>::Concat(const Container& container)
 	{
 		return GenericStringView<Char>().Concat<StringAllocator, Container>(container);
 	}
 	template<typename Char, AllocatorType Allocator>
-	template<AllocatorType StringAllocator, ConvertibleTo<GenericStringView<Char>> ...Args>
+	template<AllocatorType StringAllocator, IsConvertibleTo<GenericStringView<Char>> ...Args>
 	inline GenericString<Char, StringAllocator> GenericString<Char, Allocator>::Concat(const Args & ...args)
 	{
 		return GenericStringView<Char>().Concat<StringAllocator, Args...>(args...);

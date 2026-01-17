@@ -59,12 +59,16 @@ namespace Blaze::Graphics::OpenGL
 		{
 		case GL_ALREADY_SIGNALED:
 			returnState = FenceReturnState::AlreadySignaled;
+			glDeleteSync((GLsync)id);
+			id = nullptr;
 			break;
 		case GL_TIMEOUT_EXPIRED:
 			returnState = FenceReturnState::TimeoutExpired;
 			break;
 		case GL_CONDITION_SATISFIED:
 			returnState = FenceReturnState::ConditionSatisfied;
+			glDeleteSync((GLsync)id);
+			id = nullptr;
 			break;
 		case GL_WAIT_FAILED:
 			returnState = FenceReturnState::Error;

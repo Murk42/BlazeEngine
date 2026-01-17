@@ -20,13 +20,13 @@ namespace Blaze
 
 		void Clear();
 
-		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsBaseOf<T, AppLayer>
+		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsDerivedFrom<T, AppLayer>
 		AppRuntimeThreadCreationData&& RegisterLayer(Args&& ... args);
 		AppRuntimeThreadCreationData&& RegisterLayer(AppLayerCreationData&& layerCreationData);
 
 		AppRuntimeThreadCreationData& operator=(AppRuntimeThreadCreationData&& other) noexcept;
 
-		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsBaseOf<T, AppRuntimeThread>
+		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsDerivedFrom<T, AppRuntimeThread>
 		static AppRuntimeThreadCreationData New(Args&& ... args);
 	private:
 		struct ThreadArguments
@@ -45,14 +45,14 @@ namespace Blaze
 		friend class App;
 	};
 
-	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsBaseOf<T, AppLayer>
+	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsDerivedFrom<T, AppLayer>
 	inline AppRuntimeThreadCreationData&& AppRuntimeThreadCreationData::RegisterLayer(Args&& ... args)
 	{
 		AppLayerCreationData creationData;
 		creationData.Initialize<T>(std::forward<Args>(args)...);
 		RegisterLayer(std::move(creationData));
 	}
-	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsBaseOf<T, AppRuntimeThread>
+	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsDerivedFrom<T, AppRuntimeThread>
 	inline AppRuntimeThreadCreationData AppRuntimeThreadCreationData::New(Args && ...args)
 	{
 		AppRuntimeThreadCreationData creationData;

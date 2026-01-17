@@ -12,6 +12,8 @@ namespace Blaze
 		EventQueue();
 		~EventQueue();
 
+		uintMem Count();
+
 		template<typename ... Args> requires IsConstructibleFrom<T, Args...>
 		void AddEvent(Args&& ... args);
 		bool GetEvent(T& event);
@@ -33,11 +35,18 @@ namespace Blaze
 	{
 	}
 	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>
+	inline uintMem EventQueue<T, Allocator>::Count() 
+	{
+		std::lock_guard lock{ mutex };
+		return queue.Count();
+	}
+	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>
 	template<typename ... Args> requires IsConstructibleFrom<T, Args...>
 	inline void EventQueue<T, Allocator>::AddEvent(Args&& ... args)
 	{
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard lock{ mutex } ;
 		queue.Push(std::forward<Args>(args)...);
+
 		cv.notify_one();
 	}
 	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>

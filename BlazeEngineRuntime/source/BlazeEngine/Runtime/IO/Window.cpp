@@ -769,15 +769,16 @@ namespace Blaze
 	{
 		switch (event.GetValueType())
 		{
-		case GenericWindowEvent::GetValueTypeOf<ResizedEvent>():     event.TryProcess<ResizedEvent>(    [&](const auto& e) { resizedEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<MovedEvent>():       event.TryProcess<MovedEvent>(      [&](const auto& e) { movedEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<MinimizedEvent>():   event.TryProcess<MinimizedEvent>(  [&](const auto& e) { minimizedEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<MaximizedEvent>():   event.TryProcess<MaximizedEvent>(  [&](const auto& e) { maximizedEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<FocusGainedEvent>(): event.TryProcess<FocusGainedEvent>([&](const auto& e) { focusGainedEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<FocusLostEvent>():   event.TryProcess<FocusLostEvent>(  [&](const auto& e) { focusLostEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<CloseEvent>():       event.TryProcess<CloseEvent>(      [&](const auto& e) { closeEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<MouseEnterEvent>():  event.TryProcess<MouseEnterEvent>( [&](const auto& e) { mouseEnterEventDispatcher.Call(e); }); break;
-		case GenericWindowEvent::GetValueTypeOf<MouseLeaveEvent>():  event.TryProcess<MouseLeaveEvent>( [&](const auto& e) { mouseLeaveEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<ResizedEvent>():         event.TryProcess<ResizedEvent>(    [&](const auto& e) { resizedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MovedEvent>():           event.TryProcess<MovedEvent>(      [&](const auto& e) { movedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MinimizedEvent>():       event.TryProcess<MinimizedEvent>(  [&](const auto& e) { minimizedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MaximizedEvent>():       event.TryProcess<MaximizedEvent>(  [&](const auto& e) { maximizedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<FocusGainedEvent>():     event.TryProcess<FocusGainedEvent>([&](const auto& e) { focusGainedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<FocusLostEvent>():       event.TryProcess<FocusLostEvent>(  [&](const auto& e) { focusLostEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<CloseEvent>():           event.TryProcess<CloseEvent>(      [&](const auto& e) { closeEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MouseEnterEvent>():      event.TryProcess<MouseEnterEvent>( [&](const auto& e) { mouseEnterEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MouseLeaveEvent>():      event.TryProcess<MouseLeaveEvent>( [&](const auto& e) { mouseLeaveEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<DisplayChangedEvent>():  event.TryProcess<DisplayChangedEvent>([&](const auto& e) { displayChangedEventDispatcher.Call(e); }); break;
 		default:
 			BLAZE_LOG_FATAL("Invalid GenericWindowEvent type in Window event queue");
 			break;
