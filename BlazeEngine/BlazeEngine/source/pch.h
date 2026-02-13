@@ -1,0 +1,13 @@
+#pragma once
+#include "BlazeEngine/BlazeEngineContext.h"
+#include <BlazeEngineCore/String/String.h>
+#include "BlazeEngineCore/String/UnicodeChar.h"
+#include "BlazeEngineCore/Container/Array.h"
+#include "BlazeEngineCore/Container/List.h"
+#include "BlazeEngineCore/Container/DualList.h"
+#include "BlazeEngineCore/Container/Map.h"
+#include "BlazeEngineCore/Container/Set.h"
+#include "BlazeEngineCore/Container/VirtualList.h"
+#include "BlazeEngineCore/Container/VirtualMap.h"
+#include "BlazeEngineCore/Event/EventDispatcher.h"
+#include "BlazeEngineCore/Event/EventHandlerData.h"

@@ -1,0 +1,1464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="Blaze::Range&lt;*&gt;">
+		<DisplayString Optional="true">{{ count={ _end - _begin } }</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple" Optional="true">{{ count={ _end - _begin } }</Item>
+
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="Test">
+				<Variable Name="it" InitialValue="_begin" />
+				<Loop>
+					<Break Condition="it == _end" />
+					<Item>*it</Item>
+					<Exec>++it</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::Array&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[reserved]" ExcludeView="simple">reserved</Item>
+			<ArrayItems>
+				<Size>count</Size>
+				<ValuePointer>ptr</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::Queue&lt;*&gt;">
+		<DisplayString>{{ count={ head >= tail ? end - head + tail - begin : tail - head } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">head >= tail ? end - head + tail - begin: tail - head</Item>
+			<Item Name="[reserved]" ExcludeView="simple">end - begin</Item>
+
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
+				<Variable Name="it" InitialValue="head"/>
+				<Variable Name="i" InitialValue="0" />
+
+				<Loop Condition="head != 0">
+					<Item Name="[{i}]"> *it</Item>
+					<Exec>it++</Exec>
+					<Exec>i++</Exec>
+
+					<If Condition="it == end">
+						<Exec>it = begin</Exec>
+					</If>
+					
+					<If Condition="it == tail">
+						<Break/>
+					</If>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::List&lt;*&gt;">
+		<DisplayString>{{ }}</DisplayString>
+		<Expand>
+
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
+				<Variable Name="it" InitialValue="first" />
+				<Variable Name="i" InitialValue="0" />
+
+				<Loop Condition="it != nullptr">
+					<Item Name="[{i}]"> it->value </Item>
+					<Exec>it = it->next</Exec>
+					<Exec>i++</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::Map&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[bucketCount]" ExcludeView="simple">bucketCount</Item>
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
+				<Variable Name="it" InitialValue="(Node*)nullptr" />
+				<Variable Name="j" InitialValue="0" />
+
+				<Size>count</Size>
+				<Loop Condition="j!=bucketCount">
+					<Exec>it = buckets[j].head</Exec>
+					<Loop Condition="it != nullptr">
+						<Item Name="[{it->pair.key}]"> it->pair.value </Item>
+						<Exec>it = it->next</Exec>
+					</Loop>
+					<Exec>++j</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::ResourceRef&lt;*&gt;">
+		<DisplayString Condition="resourceBase == nullptr">{{ null }}</DisplayString>
+		<DisplayString Condition="resourceBase != nullptr &amp;&amp; !resourceBase->loaded._Storage._Storage._Value">{{ not loaded yet }}</DisplayString>
+		<DisplayString Condition="resourceBase != nullptr &amp;&amp; resourceBase->loaded._Storage._Storage._Value">{{ { (*($T1*)&amp;((Resource&lt;$T1&gt;*)resourceBase)->resourceMemory) }, reference count = { resourceBase->referenceCount }}}</DisplayString>
+		<Expand>
+			<Item Name="loaded" ExcludeView="simple" Condition="resourceBase != nullptr">(bool)resourceBase->loaded._Storage._Storage._Value</Item>
+			<Item Name="resource" ExcludeView="simple" Condition="resourceBase != nullptr &amp;&amp; resourceBase->loaded._Storage._Storage._Value">*($T1*)&amp;((Resource&lt;$T1&gt;*)resourceBase)->resourceMemory</Item>
+			<Item Name="resource count" ExcludeView="simple" Condition="resourceBase != nullptr">resourceBase->referenceCount</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::Set&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[bucketCount]" ExcludeView="simple">bucketCount</Item>
+
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
+				<Variable Name="it" InitialValue="(Node*)nullptr" />
+				<Variable Name="j" InitialValue="0" />
+
+				<Size>count</Size>
+				<Loop Condition="j!=bucketCount">
+
+					<Exec>it = buckets[j].head</Exec>
+					<If Condition="it != nullptr">
+						<Loop Condition="it->next == nullptr">
+							<Item> it->value </Item>
+							<Exec>it = it->next</Exec>
+						</Loop>
+					</If>
+
+					<Exec>++j</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char, *&gt;">
+		<DisplayString>{ ptr, [count]s }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char8_t, *&gt;">
+		<DisplayString>{ ptr, [count]s8 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s8</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char16_t, *&gt;">
+		<DisplayString>{ ptr, [count]su }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]su</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericString&lt;char32_t, *&gt;">
+		<DisplayString>{ ptr, [count]s32 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s32</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char&gt;">
+		<DisplayString>{ ptr, [count]s }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char8_t&gt;">
+		<DisplayString>{ ptr, [count]s8 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s8</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char16_t&gt;">
+		<DisplayString>{ ptr, [count]su }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]su</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::GenericStringView&lt;char32_t&gt;">
+		<DisplayString>{ ptr, [count]s32 }</DisplayString>
+		<StringView>ptr, count</StringView>
+
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<Item Name="[string]" ExcludeView="simple">ptr, [count]s32</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Blaze::UnicodeChar">
+		<DisplayString>'{ &amp;value, [1]s32b }' ({ value })</DisplayString>
+	</Type>
+	
+	<Type Name="Blaze::Variant&lt;*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 26"><Expand><ExpandedItem>*reinterpret_cast&lt;$T27*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		<DisplayString Condition="type == 25">{"$T26", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 25"><Expand><ExpandedItem>*reinterpret_cast&lt;$T26*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		<DisplayString Condition="type == 25">{"$T26", sb}</DisplayString>
+		<DisplayString Condition="type == 26">{"$T27", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 25"><Expand><ExpandedItem>*reinterpret_cast&lt;$T26*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 26"><Expand><ExpandedItem>*reinterpret_cast&lt;$T27*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		<DisplayString Condition="type == 25">{"$T26", sb}</DisplayString>
+		<DisplayString Condition="type == 26">{"$T27", sb}</DisplayString>
+		<DisplayString Condition="type == 27">{"$T28", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 25"><Expand><ExpandedItem>*reinterpret_cast&lt;$T26*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 26"><Expand><ExpandedItem>*reinterpret_cast&lt;$T27*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 27"><Expand><ExpandedItem>*reinterpret_cast&lt;$T28*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		<DisplayString Condition="type == 25">{"$T26", sb}</DisplayString>
+		<DisplayString Condition="type == 26">{"$T27", sb}</DisplayString>
+		<DisplayString Condition="type == 27">{"$T28", sb}</DisplayString>
+		<DisplayString Condition="type == 28">{"$T29", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 25"><Expand><ExpandedItem>*reinterpret_cast&lt;$T26*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 26"><Expand><ExpandedItem>*reinterpret_cast&lt;$T27*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 27"><Expand><ExpandedItem>*reinterpret_cast&lt;$T28*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 28"><Expand><ExpandedItem>*reinterpret_cast&lt;$T29*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		<DisplayString Condition="type == 25">{"$T26", sb}</DisplayString>
+		<DisplayString Condition="type == 26">{"$T27", sb}</DisplayString>
+		<DisplayString Condition="type == 27">{"$T28", sb}</DisplayString>
+		<DisplayString Condition="type == 28">{"$T29", sb}</DisplayString>
+		<DisplayString Condition="type == 29">{"$T30", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 25"><Expand><ExpandedItem>*reinterpret_cast&lt;$T26*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 26"><Expand><ExpandedItem>*reinterpret_cast&lt;$T27*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 27"><Expand><ExpandedItem>*reinterpret_cast&lt;$T28*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 28"><Expand><ExpandedItem>*reinterpret_cast&lt;$T29*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 29"><Expand><ExpandedItem>*reinterpret_cast&lt;$T30*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+	</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		<DisplayString Condition="type == 25">{"$T26", sb}</DisplayString>
+		<DisplayString Condition="type == 26">{"$T27", sb}</DisplayString>
+		<DisplayString Condition="type == 27">{"$T28", sb}</DisplayString>
+		<DisplayString Condition="type == 28">{"$T29", sb}</DisplayString>
+		<DisplayString Condition="type == 29">{"$T30", sb}</DisplayString>
+		<DisplayString Condition="type == 30">{"$T31", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 25"><Expand><ExpandedItem>*reinterpret_cast&lt;$T26*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 26"><Expand><ExpandedItem>*reinterpret_cast&lt;$T27*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 27"><Expand><ExpandedItem>*reinterpret_cast&lt;$T28*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 28"><Expand><ExpandedItem>*reinterpret_cast&lt;$T29*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 29"><Expand><ExpandedItem>*reinterpret_cast&lt;$T30*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 30"><Expand><ExpandedItem>*reinterpret_cast&lt;$T31*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+	</Type>
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
+		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  2">{"$T3 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  3">{"$T4 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  4">{"$T5 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  5">{"$T6 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  6">{"$T7 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  7">{"$T8 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  8">{"$T9 ", sb}</DisplayString>
+		<DisplayString Condition="type ==  9">{"$T10", sb}</DisplayString>
+		<DisplayString Condition="type == 10">{"$T11", sb}</DisplayString>
+		<DisplayString Condition="type == 11">{"$T12", sb}</DisplayString>
+		<DisplayString Condition="type == 12">{"$T13", sb}</DisplayString>
+		<DisplayString Condition="type == 13">{"$T14", sb}</DisplayString>
+		<DisplayString Condition="type == 14">{"$T15", sb}</DisplayString>
+		<DisplayString Condition="type == 15">{"$T16", sb}</DisplayString>
+		<DisplayString Condition="type == 16">{"$T17", sb}</DisplayString>
+		<DisplayString Condition="type == 17">{"$T18", sb}</DisplayString>
+		<DisplayString Condition="type == 18">{"$T19", sb}</DisplayString>
+		<DisplayString Condition="type == 19">{"$T20", sb}</DisplayString>
+		<DisplayString Condition="type == 20">{"$T21", sb}</DisplayString>
+		<DisplayString Condition="type == 21">{"$T22", sb}</DisplayString>
+		<DisplayString Condition="type == 22">{"$T23", sb}</DisplayString>
+		<DisplayString Condition="type == 23">{"$T24", sb}</DisplayString>
+		<DisplayString Condition="type == 24">{"$T25", sb}</DisplayString>
+		<DisplayString Condition="type == 25">{"$T26", sb}</DisplayString>
+		<DisplayString Condition="type == 26">{"$T27", sb}</DisplayString>
+		<DisplayString Condition="type == 27">{"$T28", sb}</DisplayString>
+		<DisplayString Condition="type == 28">{"$T29", sb}</DisplayString>
+		<DisplayString Condition="type == 29">{"$T30", sb}</DisplayString>
+		<DisplayString Condition="type == 30">{"$T31", sb}</DisplayString>
+		<DisplayString Condition="type == 31">{"$T32", sb}</DisplayString>
+		
+		<Expand>
+			<Synthetic Name="value" Condition="type ==  0"><Expand><ExpandedItem>*reinterpret_cast&lt;$T1 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  1"><Expand><ExpandedItem>*reinterpret_cast&lt;$T2 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  2"><Expand><ExpandedItem>*reinterpret_cast&lt;$T3 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  3"><Expand><ExpandedItem>*reinterpret_cast&lt;$T4 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  5"><Expand><ExpandedItem>*reinterpret_cast&lt;$T6 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  6"><Expand><ExpandedItem>*reinterpret_cast&lt;$T7 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  7"><Expand><ExpandedItem>*reinterpret_cast&lt;$T8 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  8"><Expand><ExpandedItem>*reinterpret_cast&lt;$T9 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type ==  9"><Expand><ExpandedItem>*reinterpret_cast&lt;$T10*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 11"><Expand><ExpandedItem>*reinterpret_cast&lt;$T12*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 12"><Expand><ExpandedItem>*reinterpret_cast&lt;$T13*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 13"><Expand><ExpandedItem>*reinterpret_cast&lt;$T14*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 14"><Expand><ExpandedItem>*reinterpret_cast&lt;$T15*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 16"><Expand><ExpandedItem>*reinterpret_cast&lt;$T17*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 17"><Expand><ExpandedItem>*reinterpret_cast&lt;$T18*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 18"><Expand><ExpandedItem>*reinterpret_cast&lt;$T19*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 19"><Expand><ExpandedItem>*reinterpret_cast&lt;$T20*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 20"><Expand><ExpandedItem>*reinterpret_cast&lt;$T21*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 21"><Expand><ExpandedItem>*reinterpret_cast&lt;$T22*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 22"><Expand><ExpandedItem>*reinterpret_cast&lt;$T23*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 23"><Expand><ExpandedItem>*reinterpret_cast&lt;$T24*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 24"><Expand><ExpandedItem>*reinterpret_cast&lt;$T25*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 25"><Expand><ExpandedItem>*reinterpret_cast&lt;$T26*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 26"><Expand><ExpandedItem>*reinterpret_cast&lt;$T27*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 27"><Expand><ExpandedItem>*reinterpret_cast&lt;$T28*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 28"><Expand><ExpandedItem>*reinterpret_cast&lt;$T29*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 29"><Expand><ExpandedItem>*reinterpret_cast&lt;$T30*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 30"><Expand><ExpandedItem>*reinterpret_cast&lt;$T31*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+			<Synthetic Name="value" Condition="type == 31"><Expand><ExpandedItem>*reinterpret_cast&lt;$T32*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
+		</Expand>
+	</Type>
+</AutoVisualizer>
