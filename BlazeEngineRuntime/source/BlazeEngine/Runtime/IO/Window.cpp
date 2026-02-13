@@ -18,7 +18,7 @@ namespace Blaze
 	}
 
 	Window::Window()
-		: handle(nullptr), graphicsAPI(WindowGraphicsAPI::None)
+		: handle(nullptr), graphicsAPI(WindowGraphicsAPI::None), apparentWindowPos(0), apparentWindowSize(0), realWindowPos(0), realWindowSize(0)
 	{
 	}
 	Window::Window(const WindowCreateOptions& createOptions)
@@ -138,10 +138,19 @@ namespace Blaze
 
 		context->RegisterWindow(*this);
 
+		RunOnMainThread([&]()
+			{
+				SDL_GetWindowPosition((SDL_Window*)handle, &apparentWindowPos.x, &apparentWindowPos.y);
+				SDL_GetWindowSize((SDL_Window*)handle, (int*)&apparentWindowSize.x, (int*)&apparentWindowSize.y);
+
+				realWindowPos = apparentWindowPos;
+				realWindowSize = apparentWindowSize;
+			});
+
 		graphicsAPI = createOptions.graphicsAPI;
 	}
 	Window::Window(void* handle, WindowGraphicsAPI graphicsAPI)
-		: handle(handle), graphicsAPI(graphicsAPI)
+		: handle(handle), graphicsAPI(graphicsAPI), apparentWindowPos(0), apparentWindowSize(0), realWindowPos(0), realWindowSize(0)
 	{
 		auto context = BlazeEngineContextInternal::GetEngineContext();
 		if (context == nullptr)
@@ -151,6 +160,14 @@ namespace Blaze
 		}
 
 		context->RegisterWindow(*this);
+
+		RunOnMainThread([&]() {
+			SDL_GetWindowPosition((SDL_Window*)handle, &apparentWindowPos.x, &apparentWindowPos.y);
+			SDL_GetWindowSize((SDL_Window*)handle, (int*)&apparentWindowSize.x, (int*)&apparentWindowSize.y);
+
+			realWindowPos = apparentWindowPos;
+			realWindowSize = apparentWindowSize;
+			});
 	}
 	Window::Window(Window&& other) noexcept : Window()
 	{
