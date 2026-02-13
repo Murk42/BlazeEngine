@@ -109,17 +109,111 @@ namespace Blaze
 		template<size_t index>
 		[[nodiscard]] constexpr auto& GetValueByIndex() noexcept
 		{
-			static_assert("Index out of bounds");
+			static_assert(false, "Index out of bounds");
 		}
 		template<size_t index>
 		[[nodiscard]] constexpr const auto& GetValueByIndex() const noexcept
 		{
-			static_assert("Index out of bounds");
+			static_assert(false, "Index out of bounds");
 		}
 	};
 
 	template<typename... T>
 	Tuple(T&&...) -> Tuple<std::decay_t<T>...>;
 
+	template<typename... T>
+	struct std::tuple_size<Blaze::Tuple<T...>> : std::integral_constant<size_t, sizeof...(T)> {};
 
+	template<size_t I, typename... T>
+	struct std::tuple_element<I, Blaze::Tuple<T...>>
+	{
+		using type = typename Blaze::TypeGroup<T...>::template TypeAtIndex<I>;
+	};
+
+	template <size_t I, typename... T>
+	constexpr decltype(auto) get(Blaze::Tuple<T...>& tuple) noexcept
+	{
+		return tuple.template GetValueByIndex<I>();
+	}
+	template <size_t I, typename... T>
+	constexpr decltype(auto) get(Blaze::Tuple<T...>&& tuple) noexcept
+	{
+		return tuple.template GetValueByIndex<I>();
+	}
+	template <size_t I, typename... T>
+	constexpr decltype(auto) get(const Blaze::Tuple<T...>& tuple) noexcept
+	{
+		return tuple.template GetValueByIndex<I>();
+	}
+	template <typename T, typename... Ts>
+	constexpr decltype(auto) get(Blaze::Tuple<Ts...>& tuple) noexcept
+	{
+		return tuple.template GetValueByType<T>();
+	}
+	template <typename T, typename... Ts>
+	constexpr decltype(auto) get(Blaze::Tuple<Ts...>&& tuple) noexcept
+	{
+		return tuple.template GetValueByType<T>();
+	}
+	template <typename T, typename... Ts>
+	constexpr decltype(auto) get(const Blaze::Tuple<Ts...>& tuple) noexcept
+	{
+		return tuple.template GetValueByType<T>();
+	}
+
+	template <class _Ty, typename ... T, size_t... _Indices>
+	constexpr _Ty _Make_from_tuple_impl(Blaze::Tuple<T...>&& _Tpl, std::index_sequence<_Indices...>)
+	{
+		return _Ty(get<_Indices>(std::forward<Blaze::Tuple<T...>>(_Tpl))...);
+	}
+
+	template <class _Callable, typename ... T, size_t... _Indices>
+	constexpr decltype(auto) _Apply_impl(_Callable&& _Obj, Blaze::Tuple<T...>&& _Tpl, std::index_sequence<_Indices...>)
+	{
+		return std::invoke(std::forward<_Callable>(_Obj), get<_Indices>(std::forward<Blaze::Tuple<T...>>(_Tpl))...);
+	}
+	template<class _Ty, typename ... T> requires IsConstructibleFrom<_Ty, T...>
+	constexpr _Ty make_from_tuple(Blaze::Tuple<T...>&& _Tpl)
+	{
+		return _Make_from_tuple_impl<_Ty, T...>(std::forward<Blaze::Tuple<T...>>(_Tpl), std::make_index_sequence<sizeof ... (T)>{});
+	}
+	template <class _Callable, typename ... T>
+	constexpr decltype(auto) apply(_Callable&& _Obj, Blaze::Tuple<T...>&& _Tpl)
+	{
+		return _Apply_impl(_STD forward<_Callable>(_Obj), std::forward<Blaze::Tuple<T...>>(_Tpl), std::make_index_sequence<sizeof...(T)>{});
+	}
+}
+
+namespace std
+{
+	template <size_t I, typename... T>
+	constexpr decltype(auto) get(Blaze::Tuple<T...>& tuple) noexcept
+	{
+		return tuple.template GetValueByIndex<I>();
+	}
+	template <size_t I, typename... T>
+	constexpr decltype(auto) get(Blaze::Tuple<T...>&& tuple) noexcept
+	{
+		return tuple.template GetValueByIndex<I>();
+	}
+	template <size_t I, typename... T>
+	constexpr decltype(auto) get(const Blaze::Tuple<T...>& tuple) noexcept
+	{
+		return tuple.template GetValueByIndex<I>();
+	}
+	template <typename T, typename... Ts>
+	constexpr decltype(auto) get(Blaze::Tuple<Ts...>& tuple) noexcept
+	{
+		return tuple.template GetValueByType<T>();
+	}
+	template <typename T, typename... Ts>
+	constexpr decltype(auto) get(Blaze::Tuple<Ts...>&& tuple) noexcept
+	{
+		return tuple.template GetValueByType<T>();
+	}
+	template <typename T, typename... Ts>
+	constexpr decltype(auto) get(const Blaze::Tuple<Ts...>& tuple) noexcept
+	{
+		return tuple.template GetValueByType<T>();
+	}
 }

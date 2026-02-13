@@ -16,18 +16,13 @@ namespace Blaze
 		std::lock_guard lg{ mutex };
 		scheduledRuntimeThreadsForCreation.AddBack(std::move(runtimeThreadCreation));
 	}
-	void App::Run()
+	bool App::Update()
 	{
+		threads.EraseAll([](const Thread& thread) -> bool { return !thread.IsRunning(); });
+
 		ProcessScheduledRuntimeThreadsForCreation();
 
-		while (!threads.Empty())
-		{
-			Input::Update();
-
-			threads.EraseAll([](const Thread& thread) -> bool { return !thread.IsRunning(); });
-
-			ProcessScheduledRuntimeThreadsForCreation();
-		}
+		return !threads.Empty();
 	}
 	void App::ProcessScheduledRuntimeThreadsForCreation()
 	{
@@ -40,7 +35,11 @@ namespace Blaze
 		{
 			Thread& thread = *threads.AddFront();
 
-			runtimeThreadCreationData.InstantiateOnThread(thread);
+			if (!runtimeThreadCreationData.InstantiateOnThread(thread))
+			{
+				BLAZE_LOG_ERROR("Failed to instantiate thread");
+				continue;
+			}
 
 			thread.SetThreadName("AppRuntimeThread");
 		}

@@ -39,10 +39,12 @@ namespace Blaze::UI::Nodes
 		void SetHandleSize(Vec2f handleSize);
 		void SetTrackThickness(float thickness);
 
+		void SetValueChangedCallback(std::function<void(float value)> valueChangedCallback);
+
 		inline float GetStepCount() const { return value; }
 		inline float GetValue() const { return value; }
 
-		void PreRender(const RenderContext& renderContext) override;
+		bool PreRender(const RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
 	private:
 		PanelRenderUnit handleRenderUnit;
@@ -63,6 +65,8 @@ namespace Blaze::UI::Nodes
 		float trackThickness;
 
 		float draggingMouseOffset;
+
+		std::function<void(float value)> valueChangedCallback;
 
 		void UpdateColor();
 		void UpdateCursor();

@@ -42,8 +42,7 @@ namespace Blaze::UI
 		void Unselect();
 		void Select();
 		bool IsSelected() const;
-
-		void InvalidateHitStatus();
+		
 		bool CaptureMouse(Input::MouseID mouseID);
 		bool ReleaseMouse(Input::MouseID mouseID);
 	private:

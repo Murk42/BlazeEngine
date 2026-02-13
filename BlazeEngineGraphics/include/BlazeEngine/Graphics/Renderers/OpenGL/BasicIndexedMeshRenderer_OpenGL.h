@@ -1,10 +1,11 @@
 #pragma once
 #include "BlazeEngine/Graphics/Core/OpenGL/GraphicsContext_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/BasicIndexedMeshRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/OpenGL/BufferedRendererBase_OpenGL.h"
 
 namespace Blaze::Graphics::OpenGL
 {
-	class BLAZE_API BasicIndexedMeshRenderer_OpenGL : public BasicIndexedMeshRenderer
+	class BLAZE_API BasicIndexedMeshRenderer_OpenGL : public BasicIndexedMeshRenderer, public BufferedRendererBase_OpenGL
 	{
 	public:
 		BasicIndexedMeshRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, bool loadDefaultShaders = true);
@@ -19,15 +20,25 @@ namespace Blaze::Graphics::OpenGL
 
 		void Render(ArrayView<Vec3f> vertices, ArrayView<uint32> indices, Mat4f modelMatrix, ColorRGBAf color, const RenderContext& context) override;
 
-		void SetShaderProgram(Blaze::Graphics::OpenGL::ShaderProgram&& program);
+		void Flush(const RenderContext& context);
+
+		GraphicsContext_OpenGL& GetGraphicsContext() const override { return graphicsContext; }
 	private:
 		GraphicsContext_OpenGL& graphicsContext;
-		ShaderProgram program;
-
-		ImmutableStaticGraphicsBuffer buffer;
 		VertexArray va;
+		ImmutableMappedGraphicsBuffer meshDataBuffer;
+		void* meshDataMap;
+
+		uintMem vertexCount;
+		uintMem indexCount;
+		uintMem meshCount;
+
 		Fence fence;
 
+		bool rendering;
+
 		void WaitFence();
+
+		void CopySubMesh(ArrayView<Vec3f> vertices, ArrayView<uint32> indices);
 	};
 }

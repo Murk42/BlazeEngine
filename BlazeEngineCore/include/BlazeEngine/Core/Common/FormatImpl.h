@@ -416,6 +416,53 @@ namespace Blaze
 		Formatter<GenericStringView<SrcChar>, DstChar>::Format(GenericStringView<SrcChar>(string), context);
 	}
 
+	template<typename Char>
+	inline uintMem Formatter<bool, Char>::Parse(const bool& value, const FormatParseContext<Char>& parseContext)
+	{
+		uintMem start = 0;
+		GenericStringView<Char> string = parseContext.GetString();
+		start += this->ParseAlignment(GenericStringView<Char>(string.Ptr() + start, string.Count() - start), parseContext);
+		start += this->ParseWidth(GenericStringView<Char>(string.Ptr() + start, string.Count() - start), parseContext);
+		
+		uintMem convertedLength = value ? 4 : 5;
+		this->characterWidth = (convertedLength > this->characterWidth ? convertedLength : this->characterWidth);
+		return this->characterWidth;
+	}
+	template<typename Char>
+	inline void Formatter<bool, Char>::Format(const bool& value, FormatContext<Char>& context)
+	{
+		uintMem preFillCount = 0, postFillCount = 0;
+		
+		uintMem convertedLength = value ? 4 : 5;
+
+		if (this->align == 0)
+		{
+			preFillCount = 0;
+			postFillCount = this->characterWidth - convertedLength;
+		}
+		else if (this->align == 1)
+		{
+			preFillCount = this->characterWidth - convertedLength;
+			postFillCount = 0;
+		}
+		else if (this->align == 2)
+		{
+			preFillCount = (this->characterWidth - convertedLength) / 2;
+			postFillCount = this->characterWidth - convertedLength - preFillCount;
+		}
+
+		for (uintMem i = 0; i < preFillCount; ++i)
+			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+
+		if (value)
+			context.Write("true");
+		else
+			context.Write("false");
+
+		for (uintMem i = 0; i < postFillCount; ++i)
+			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+	}
+
 	template<typename Char> requires OneOf<Char, char, char8_t, char16_t, char32_t>
 	inline uintMem BaseIntegerFormatter<Char>::ParseFormatSpecifiers(const FormatParseContext<Char>& parseContext)
 	{

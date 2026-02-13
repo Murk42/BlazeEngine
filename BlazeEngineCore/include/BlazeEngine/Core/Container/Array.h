@@ -3,6 +3,8 @@
 #include "BlazeEngine/Core/Type/TypeTraits.h"
 #include "BlazeEngine/Core/Memory/Allocator.h"
 #include "BlazeEngine/Core/Container/ArrayIterator.h"
+
+#include "BlazeEngine/Core/Container/ReferenceContainer.h"
 #include <initializer_list>
 #include <concepts>
 
@@ -29,7 +31,7 @@ namespace Blaze
 		using Iterator = ArrayIterator<T>;
 		using ConstIterator = ArrayIterator<const T>;
 		using ValueType = T;
-		using StoredType = Conditional<IsReferenceType<T>, RemoveReference<T>*, T>;
+		using StoredType = Conditional<IsReferenceType<T>, ReferenceContainer<RemoveReference<T>>, T>;
 		using value_type = T;
 
 		/*
@@ -84,14 +86,14 @@ namespace Blaze
 			only available if the value type is constructible from the type T2 or the value type is a reference
 			type and T2 is a pointer to the type that is being referenced.
 		*/
-        template<typename T2, uintMem S> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+        template<typename T2, uintMem S> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
         explicit Array(const T2(&arr)[S]);
 		/*
 			Constructs an array from an initializer list. Each element is copied individually. This constructor
 			is only available if the value type is constructible from the type T2 or the value type is a
 			reference type and T2 is a pointer to the type that is being referenced.
 		*/
-        template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+        template<typename T2> requires IsConvertibleTo<const T2& , typename Array<T, Allocator>::StoredType>
         explicit Array(const std::initializer_list<T2>& arr);
 		/*
 			Constructs an array from a pointer to a range of elements. Each element is copied individually.	If
@@ -100,21 +102,21 @@ namespace Blaze
 			constructor is only available if the value type is constructible from the type T2 or the value type
 			is a reference type and T2 is a pointer to the type that is being referenced.
 		*/
-        template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+        template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
         Array(const T2* ptr, uintMem count);
 		/*
 			Constructs an array by converting elements from another array. This constructor is only available if
 			the value type is constructible from the type T2 or the value type is a reference type and T2 is a
 			pointer to the type that is being referenced.
 		*/
-        template<typename T2, AllocatorType Allocator2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+        template<typename T2, AllocatorType Allocator2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
         explicit Array(const Array<T2, Allocator2>& other);
 		/*
 			Constructs an array by converting elements from another array view. This constructor is only
 			available if the value type is constructible from the type T2 or the value type is a reference type
 			and T2 is a pointer to the type that is being referenced.
 		*/
-        template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+        template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
         explicit Array(const ArrayView<T2>& other);
 
 		~Array();
@@ -434,7 +436,7 @@ namespace Blaze
 			\param other - the array to copy from
 			\return Reference to the current array
 		*/
-		template<typename T2, AllocatorType Allocator2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::StoredType& , const T2&>
+		template<typename T2, AllocatorType Allocator2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType> && std::assignable_from<typename Array<T, Allocator>::StoredType& , const T2&>
 		Array& operator=(const Array<T2, Allocator2>& arr);
 		/*
 			Copy-assigns the array from another array view. The new array will convert each element individually.
@@ -442,7 +444,7 @@ namespace Blaze
 			\param other - the array to copy from
 			\return Reference to the current array
 		*/
-		template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
+		template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType> && std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
 		Array& operator=(const ArrayView<T2>& arr);
 
 		template<typename, AllocatorType>
@@ -462,7 +464,7 @@ namespace Blaze
 			\param src - start of the source array to copy from. Mustn't be nullptr
 			\param count - number of elements to copy
 		*/
-		template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>
+		template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType>
 		void CopyConstructUnsafe(const T2* src, uintMem count);
 		/*
 			If needed creates a new buffer to fit <count> elements in the new
@@ -475,7 +477,7 @@ namespace Blaze
 			\param src - start of the source array to copy from
 			\param count - number of elements to copy
 		*/
-		template<typename T2> requires IsConstructibleFrom<typename Array<T, Allocator>::StoredType, const T2&>&& std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
+		template<typename T2> requires IsConvertibleTo<const T2&, typename Array<T, Allocator>::StoredType> && std::assignable_from<typename Array<T, Allocator>::StoredType&, const T2&>
 		void CopyAssign(const T2* src, uintMem count);
 
 		/*
@@ -512,5 +514,4 @@ namespace Blaze
 		return arr.BehindIterator();
 	}
 }
-
 #include "BlazeEngine/Core/Container/ArrayImpl.h"

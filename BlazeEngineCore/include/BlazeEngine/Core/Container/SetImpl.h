@@ -360,57 +360,63 @@ namespace Blaze
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].head, this);
 
-		return Iterator();
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FirstIterator() const
 	{
 		if (bucketCount == 0)
-			return ConstIterator();
+			return { };
 
 		for (uintMem i = 0; i < bucketCount; ++i)
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].head, this);
+
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::LastIterator()
 	{
 		if (bucketCount == 0)
-			return Iterator();
+			return { };
 
 		for (uintMem i = bucketCount - 1; i >= 0; --i)
 			if (buckets[i].head != nullptr)
 				return Iterator(buckets[i].tail, this);
+
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::LastIterator() const
 	{
 		if (bucketCount == 0)
-			return ConstIterator();
+			return { };
 
 		for (uintMem i = bucketCount - 1; i >= 0; --i)
 			if (buckets[i].head != nullptr)
 				return ConstIterator(buckets[i].tail, this);
+
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::AheadIterator()
 	{
-		return Iterator();
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::AheadIterator() const
 	{
-		return ConstIterator();
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::BehindIterator()
 	{
-		return Iterator();
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::BehindIterator() const
 	{
-		return ConstIterator();
+		return { };
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
 	inline Set<Value, Hasher, Allocator>::operator Array<Value>() const

@@ -23,9 +23,9 @@ namespace Blaze
 	{
 	}
 	template<typename T>
-	inline auto ArrayIterator<T>::Ptr() const -> StoredType*
+	inline auto ArrayIterator<T>::Ptr() const -> RemoveReference<T>*
 	{
-		return ptr;
+		return &*ptr; //We dereference and then take the address to take into account when T is a reference type
 	}
 	template<typename T>
 	inline bool ArrayIterator<T>::IsNull() const
@@ -36,30 +36,27 @@ namespace Blaze
 	inline T& ArrayIterator<T>::operator*() const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Dereferencing a null iterator");
 #endif
 
-		if constexpr (IsReferenceType<T>)
-			return **ptr;
-		else
-			return *ptr;
+		return *ptr;
 	}
 	template<typename T>
-	inline auto ArrayIterator<T>::operator->() const -> StoredType*
+	inline RemoveReference<T>* ArrayIterator<T>::operator->() const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Dereferencing a null iterator");
 #endif
 
-		return ptr;
+		return &*ptr; //We dereference and then take the address to take into account when T is a reference type
 	}
 	template<typename T>
 	inline ArrayIterator<T>& ArrayIterator<T>::operator++()
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Incrementing a null iterator");
 #endif
 
@@ -77,7 +74,7 @@ namespace Blaze
 	inline ArrayIterator<T>& ArrayIterator<T>::operator--()
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Decrementing a null iterator");
 #endif
 
@@ -95,7 +92,7 @@ namespace Blaze
 	inline ArrayIterator<T> ArrayIterator<T>::operator+(intMem offset) const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Adding to a null iterator");
 #endif
 		return ArrayIterator(ptr + offset);
@@ -104,7 +101,7 @@ namespace Blaze
 	inline ArrayIterator<T> ArrayIterator<T>::operator-(intMem offset) const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Subtracting from a null iterator");
 #endif
 		return ArrayIterator(ptr - offset);
@@ -118,7 +115,7 @@ namespace Blaze
 	inline ArrayIterator<T>& ArrayIterator<T>::operator+=(intMem offset)
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Adding to a null iterator");
 #endif
 		ptr += offset;
@@ -129,7 +126,7 @@ namespace Blaze
 	inline ArrayIterator<T>& ArrayIterator<T>::operator-=(intMem offset)
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if (ptr == nullptr)
+		if (IsNull())
 			BLAZE_LOG_FATAL("Subtracting from a null iterator");
 #endif
 		ptr -= offset;
@@ -140,7 +137,7 @@ namespace Blaze
 	inline bool ArrayIterator<T>::operator>(const ArrayIterator& other) const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (other.ptr == nullptr))
+		if (IsNull() != other.IsNull())
 			BLAZE_LOG_FATAL("Comparing a null iterator");
 #endif
 
@@ -150,7 +147,7 @@ namespace Blaze
 	inline bool ArrayIterator<T>::operator>=(const ArrayIterator& other) const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (other.ptr == nullptr))
+		if (IsNull() != other.IsNull())
 			BLAZE_LOG_FATAL("Comparing a null iterator");
 #endif
 
@@ -160,7 +157,7 @@ namespace Blaze
 	inline bool ArrayIterator<T>::operator<(const ArrayIterator& other) const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (other.ptr == nullptr))
+		if (IsNull() != other.IsNull())
 			BLAZE_LOG_FATAL("Comparing a null iterator");
 #endif
 
@@ -170,7 +167,7 @@ namespace Blaze
 	inline bool ArrayIterator<T>::operator<=(const ArrayIterator& other) const
 	{
 #ifdef BLAZE_NULL_ITERATOR_CHECK
-		if ((ptr == nullptr) != (other.ptr == nullptr))
+		if (IsNull() != other.IsNull())
 			BLAZE_LOG_FATAL("Comparing a null iterator");
 #endif
 
@@ -192,14 +189,14 @@ namespace Blaze
 		return ArrayIterator<const T>(ptr);
 	}
 	template<typename T>
-	inline Blaze::ArrayIterator<T>::operator const StoredType*() const
+	inline Blaze::ArrayIterator<T>::operator const RemoveReference<T>* () const
 	{
-		return ptr;
+		return &*ptr;//We dereference and then take the address to take into account when T is a reference type;
 	}
 	template<typename T>
-	inline Blaze::ArrayIterator<T>::operator StoredType* () const requires (!IsConstType<T>)
+	inline Blaze::ArrayIterator<T>::operator RemoveReference<T>* () const requires (!IsConstType<T>)
 	{
-		return ptr;
+		return &*ptr; //We dereference and then take the address to take into account when T is a reference type
 	}
 	template<typename T>
 	inline ArrayIterator<T>& ArrayIterator<T>::operator=(const ArrayIterator& other)

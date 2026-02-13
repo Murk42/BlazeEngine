@@ -23,6 +23,6 @@ namespace Blaze::Graphics
 	public:
 		virtual void Render(const TexturedRectRenderData& data, const RenderContext& context) = 0;
 
-		uint64 GetTypeID() const { return RendererBase::GetTypeID<TexturedRectRenderer>(); }
+		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<TexturedRectRenderer>(); }
 	};
 }

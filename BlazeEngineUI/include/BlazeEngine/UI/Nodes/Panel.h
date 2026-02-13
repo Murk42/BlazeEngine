@@ -18,15 +18,21 @@ namespace Blaze::UI::Nodes
 		};
 
 		Panel();
-		Panel(Node& parent, const NodeTransform& transform, const Style& style);
+		Panel(Node& parent, const NodeTransform& transform, const Style& style = {});
 		~Panel();
 
 		void SetStyle(const Style& style);
 		Style GetStyle() const;
 
-		void PreRender(const RenderContext& renderContext) override;
+		void SetBlocksHitTestFlag(bool blocksHitTest);
+		inline bool GetBlocksHitTestFlag(bool blocksHitTest) { return blocksHitTest; }
+
+		bool PreRender(const RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
+
+		HitStatus HitTest(Vec2f screenPosition) override;
 	private:
 		PanelRenderUnit renderUnit;
+		bool blocksHitTest;
 	};
 }

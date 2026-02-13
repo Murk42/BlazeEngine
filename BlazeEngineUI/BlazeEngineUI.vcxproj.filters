@@ -75,7 +75,7 @@
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Label.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Common\CharacterSet.h">
+    <ClInclude Include="include\BlazeEngine\UI\Text\CharacterSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Text\Font.h">
@@ -91,9 +91,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\BlazeEngine\UI\Files\Consola.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Text\FontGlyphRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Text\FontAtlas.h">
@@ -147,6 +144,27 @@
     <ClInclude Include="include\BlazeEngine\UI\Input\InputEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Input\PointerData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\FontManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\TextRendererBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\AntialiasedTextRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngine\UI\Graphics\Shaders\Shaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\FontGlyphRasterizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pch.cpp">
@@ -176,7 +194,7 @@
     <ClCompile Include="source\BlazeEngine\UI\Core\Screen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsManager.cpp">
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsSubSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.cpp">
@@ -200,7 +218,7 @@
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Panel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\UI\Common\CharacterSet.cpp">
+    <ClCompile Include="source\BlazeEngine\UI\Text\CharacterSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Text\Font.cpp">
@@ -210,9 +228,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Text\FontAtlas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\UI\Text\FontGlyphRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Text\TextShaping\TextShaping.cpp">
@@ -227,9 +242,6 @@
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Label.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\UI\Text\TextStyle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Nodes\PanelButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -242,8 +254,27 @@
     <ClCompile Include="source\BlazeEngine\UI\Common\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Input\PointerData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\FontManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\FontGlyphRasterizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Font Include="source\BlazeEngine\UI\Files\Consola.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag" />
+    <None Include="source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert" />
   </ItemGroup>
 </Project>

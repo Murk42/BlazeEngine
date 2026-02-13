@@ -1,15 +1,34 @@
 #pragma once
 #include "BlazeEngine/Core/Common/Rect.h"
-#include "BlazeEngine/Graphics/Renderers/TexturedRectRenderer.h"
+#include "BlazeEngine/UI/Graphics/Renderers/TextRendererBase.h"
 #include "BlazeEngine/UI/Graphics/RenderUnit.h"
 #include "BlazeEngine/UI/Text/TextShaping/TextShaping.h"
 #include "BlazeEngine/UI/Text/FontAtlas.h"
+#include "BlazeEngine/UI/Text/FontManager.h"
 
 namespace Blaze::UI
 {
-	class BLAZE_API StaticTextRenderUnit : public RenderUnit<Graphics::TexturedRectRenderer>
+	class BLAZE_API StaticTextRenderUnit : public RenderUnit<Graphics::TextRendererBase>
 	{
 	public:
+		StaticTextRenderUnit();
+
+		Graphics::RendererTypeID GetRequiredRendererTypeID() const override;
+
+		void Clear();
+
+		Vec2f BuildText(u8StringView string, const FontManager::FontAtlasData& fontAtlasData);
+		Vec2f BuildWrappedText(u8StringView string, const FontManager::FontAtlasData& fontAtlasData, float wrapWidth);
+
+		void SetColor(ColorRGBAf color);
+		void SetTransform(Vec2f position, Vec2f right);
+		void SetTargetFontHeight(float fontHeight);
+
+		void Render(const Node& node, Graphics::TextRendererBase& renderer, const RenderContext& renderContext) override;
+
+		inline float GetTargetFontHeight() const { return targetFontHeight; }
+		inline float GetAtlasFontHeight() const { return atlasFontHeight; }
+	private:
 		struct GlyphRenderData
 		{
 			Blaze::Vec2f offset;
@@ -18,20 +37,18 @@ namespace Blaze::UI
 			Blaze::Vec2f uv2;
 		};
 
-		ColorRGBAf color;
-		Vec2f position;
-		Vec2f right;
+		Graphics::RendererTypeID rendererTypeID;
 		ResourceBaseRef atlas;
+		float atlasFontHeight;
 		Array<GlyphRenderData> glyphs;
 
-		StaticTextRenderUnit();
+		ColorRGBAf color;
 
-		void Clear();
+		Vec2f position;
+		Vec2f right;
 
-		Vec2f CopyRenderData(ArrayView<TextShaping::ShapedText> shapedText, float fontSize, const FontAtlas& atlas);
-		Vec2f BuildText(u8StringView string, float fontSize, const FontAtlas& atlas);
-		Vec2f BuildWrappedText(u8StringView string, float fontSize, const FontAtlas& atlas, float wrapWidth);
+		float targetFontHeight;
 
-		void Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const RenderContext& renderContext) override;
+		Vec2f CopyRenderData(ArrayView<TextShaping::ShapedText> shapedText, const FontFace& fontFace, const FontAtlas& fontAtlas);
 	};
 }

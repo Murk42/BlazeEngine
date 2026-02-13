@@ -2,7 +2,7 @@
 #include "BlazeEngine/Core/Debug/Logger.h"
 #include "BlazeEngine/UI/Text/FontFace.h"
 #include "BlazeEngine/UI/Text/FontAtlas.h"
-#include "BlazeEngine/UI/Text/FontGlyphRenderer.h"
+#include "BlazeEngine/UI/Text/FontGlyphRasterizer.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 
 #include "BlazeEngine/External/FreeType/FreeType.h"
@@ -15,7 +15,7 @@ namespace Blaze::UI
 	using CreateAtlasCallback = std::function<void(Vec2u)>;
 	using CopyBitmapCallback = std::function<void(uint32, Vec2u, BitmapView)>;
 
-	static bool CreateAtlas(const FontFace& face, float fontPixelHeight, ArrayView<uint32> glyphIndices, const FontGlyphRenderer& glyphRenderer, const CreateAtlasCallback& createAtlasCallback, const CopyBitmapCallback& copyBitmapCallback)
+	static bool CreateAtlas(const FontFace& face, float rasterFontHeight, ArrayView<uint32> glyphIndices, const FontGlyphRasterizer& glyphRasterizer, const CreateAtlasCallback& createAtlasCallback, const CopyBitmapCallback& copyBitmapCallback)
 	{
 		constexpr int glyphBitmapExtraPadding = 1;
 
@@ -33,7 +33,7 @@ namespace Blaze::UI
 		auto glyphAtlasRectIt = glyphAtlasRects.begin();
 		for (auto glyphIndex : glyphIndices)
 		{
-			Bitmap bitmap = glyphRenderer.Render(face, fontPixelHeight, glyphIndex);
+			Bitmap bitmap = glyphRasterizer.Render(face, rasterFontHeight, glyphIndex);
 
 			if (bitmap.Empty())
 				continue;
@@ -61,71 +61,67 @@ namespace Blaze::UI
 		return true;
 	}
 
-	FontAtlasIdentifier::FontAtlasIdentifier(const FontAtlasIdentifier& other)
-		: fontFace(other.fontFace), fontSize(other.fontSize)
+	FontAtlas::FontAtlas() : 
+		rasterFontHeight(0.0f), 
+		size({ })
 	{
 	}
-	FontAtlasIdentifier::FontAtlasIdentifier(const FontFace& fontFace, float fontSize)
-		: fontFace(&fontFace), fontSize(fontSize)
+	FontAtlas::FontAtlas(FontAtlas&& other) noexcept :
+		texture(std::move(other.texture)),
+		uvs(std::move(other.uvs)),
+		size(std::exchange(other.size, { })),
+		rasterFontHeight(std::exchange(other.rasterFontHeight, 0.0f))
 	{
 	}
-	uint64 FontAtlasIdentifier::Hash() const
+	FontAtlas::FontAtlas(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContextBase& graphicsContext, ResourceManager& resourceManager)
+		: FontAtlas()
 	{
-		return Blaze::Hash<float>().Compute(fontSize) ^ Blaze::Hash<const FontFace*>().Compute(fontFace);
+		Create(descriptor, graphicsContext, resourceManager);
 	}
-	bool FontAtlasIdentifier::operator==(const FontAtlasIdentifier& other) const
-	{
-		return fontSize == other.fontSize && fontFace == other.fontFace;
-	}
-	FontAtlasIdentifier& FontAtlasIdentifier::operator=(const FontAtlasIdentifier& other)
-	{
-		fontSize = other.fontSize;
-		fontFace = other.fontFace;
-
-		return *this;
-	}
-
-	FontAtlas::FontAtlas()
-		: fontFace(nullptr), fontPixelHeight(0.0f)
+	FontAtlas::~FontAtlas()
 	{
 	}
-	FontAtlas::FontAtlas(FontAtlas&& other) noexcept
-		: fontFace(other.fontFace), fontPixelHeight(other.fontPixelHeight), texture(std::move(other.texture)), uvs(std::move(other.uvs)), size(other.size)
+	void FontAtlas::Clear()
 	{
-		other.size = {};
-		other.fontFace = nullptr;
-		other.fontPixelHeight = 0.0f;
+		uvs.Clear();
 	}
-	FontAtlas::FontAtlas(const FontFace& fontFace, float fontPixelHeight, ArrayView<uint32> glyphIndices, const FontGlyphRenderer& glyphRenderer, ResourceManager& resourceManager)
-		: fontFace(&fontFace), fontPixelHeight(fontPixelHeight)
+	void FontAtlas::Create(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContextBase& graphicsContext, ResourceManager& resourceManager)
 	{
-		using namespace Graphics::OpenGL;
+		if (graphicsContext.GetImplementationName() == "OpenGL")
+		{
+			using namespace Graphics::OpenGL;
 
-		ResourceRef<Texture2D> texture;
-		auto CreateAtlasCallback = [&](Vec2u size) {
-			texture = resourceManager.LoadResource<Texture2D>("");
-			texture->Create(size, TextureInternalPixelFormat::R8, { .min = TextureSampling::Linear, .mag = TextureSampling::Linear, .mip = TextureSampling::Nearest, .textureLevelCount = 1 });
-			texture->SetSwizzle(TextureSwizzle::One, TextureSwizzle::One, TextureSwizzle::One, TextureSwizzle::R);
+			ResourceRef<Texture2D> texture;
+			auto CreateAtlasCallback = [&](Vec2u size) {
+				texture = resourceManager.LoadResource<Texture2D>("");
+				texture->Create(size, TextureInternalPixelFormat::R8, { .min = TextureSampling::Linear, .mag = TextureSampling::Linear, .mip = TextureSampling::Nearest, .textureLevelCount = 1 });
+				texture->SetSwizzle(TextureSwizzle::One, TextureSwizzle::One, TextureSwizzle::One, TextureSwizzle::R);
 
-			this->size = Vec2<uint16>(size);
-			};
+				this->size = Vec2<uint16>(size);
+				};
 
-		auto CopyBitmapCallback = [&](uint32 glyphIndex, Vec2u offset, BitmapView bm) {
-			Vec2u16 uv1 = Vec2u16(offset);
-			Vec2u16 uv2 = Vec2u16(offset + bm.GetSize());
+			auto CopyBitmapCallback = [&](uint32 glyphIndex, Vec2u offset, BitmapView bm) {
+				Vec2u16 uv1 = Vec2u16(offset);
+				Vec2u16 uv2 = Vec2u16(offset + bm.GetSize());
 
-			texture->SetPixels(offset, bm, 0);
-			uvs.Insert(glyphIndex, FontAtlas::UVRect({ uv1, uv2 }));
-			};
+				texture->SetPixels(offset, bm, 0);
+				uvs.Insert(glyphIndex, FontAtlas::UVRect({ uv1, uv2 }));
+				};
 
-		if (!CreateAtlas(fontFace, fontPixelHeight, glyphIndices, glyphRenderer, CreateAtlasCallback, CopyBitmapCallback))
-			BLAZE_LOG_WARNING("Failed to create font atlas");
+			if (!CreateAtlas(descriptor.fontFace, descriptor.rasterFontHeight, descriptor.glyphIndices, descriptor.glyphRasterizer, CreateAtlasCallback, CopyBitmapCallback))
+				BLAZE_LOG_WARNING("Failed to create font atlas");
 
-		this->texture = texture;
+			rasterFontHeight = descriptor.rasterFontHeight;
+			this->texture = texture;
+		}	
+		else
+		{
+			BLAZE_LOG_ERROR("Graphics context implementation not supported");
+		}
 	}
-	bool FontAtlas::GetGlyphUV(uint32 glypIndex, Vec2u16& uv1, Vec2u16& uv2) const
+	bool FontAtlas::GetGlyphUV(uint32 glyphIndex, Vec2u16& uv1, Vec2u16& uv2) const
 	{
-		auto it = uvs.Find(glypIndex);
+		auto it = uvs.Find(glyphIndex);
 		if (it.IsNull())
 			return false;
 
@@ -138,12 +134,8 @@ namespace Blaze::UI
 	{
 		texture = std::move(other.texture);
 		uvs = std::move(other.uvs);
-		size = std::move(other.size);
-		fontFace = other.fontFace;
-
-		other.fontFace = nullptr;
-		other.size = {};
-		other.fontPixelHeight = 0.0f;
+		size = std::exchange(other.size, { });
+		rasterFontHeight = std::exchange(other.rasterFontHeight, 0.0f);
 
 		return *this;
 	}

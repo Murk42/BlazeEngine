@@ -200,16 +200,6 @@ namespace Blaze
 	{
 		return arr.FirstIterator();
 	}
-	template<typename T, AllocatorType Allocator>
-	auto end(RawArray<T, Allocator>& arr)
-	{
-		return arr.BehindIterator();
-	}
-	template<typename T, AllocatorType Allocator>
-	auto end(const RawArray<T, Allocator>& arr)
-	{
-		return arr.BehindIterator();
-	}
 }
 
 #include "RawArrayImpl.h"

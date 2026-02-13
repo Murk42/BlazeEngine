@@ -12,7 +12,7 @@ namespace Blaze
 		
 		void RegisterRuntimeThread(AppRuntimeThreadCreationData&& runtimeThreadCreation);
 
-		void Run();
+		bool Update();
 	private:
 		DualList<Thread> threads;
 		Array<AppRuntimeThreadCreationData> scheduledRuntimeThreadsForCreation;

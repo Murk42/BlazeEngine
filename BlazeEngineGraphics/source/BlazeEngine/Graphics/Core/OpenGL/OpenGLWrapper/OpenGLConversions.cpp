@@ -165,6 +165,8 @@ namespace Blaze::Graphics::OpenGL
 		case TextureInternalPixelFormat::RGB32UI:			 return GL_RGB32UI;
 		case TextureInternalPixelFormat::RG32UI:				 return GL_RG32UI;
 		case TextureInternalPixelFormat::R32UI:				 return GL_R32UI;
+		case TextureInternalPixelFormat::SRGB24:             return GL_SRGB8;
+		case TextureInternalPixelFormat::SRGBA32:            return GL_SRGB8_ALPHA8;
 		case TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT16;
 		case TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT24;
 		case TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT32F;

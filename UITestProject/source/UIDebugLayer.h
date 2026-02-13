@@ -1,17 +1,16 @@
 #pragma once
-#include "BlazeEngine/Runtime/App/AppLayerCreationData.h"
 #include "BlazeEngine/UI/Common/System.h"
 
-class ClientUIDebugLayer : public AppLayer
+class UIDebugLayer : public AppLayer
 {
 public:
-	ClientUIDebugLayer(UI::System* UISystemToDebug);
-	~ClientUIDebugLayer();
+	UIDebugLayer(Graphics::GraphicsContextBase& graphicsContext, UI::System* UISystemToDebug);
+	~UIDebugLayer();
 
 	void SetUISystemToDebug(UI::System* newUISystemToDebug);
 
 	void Update() override;
-	bool OnEvent(const Input::GenericInputEvent& event, bool isProcessed);
+	Input::EventProcessedState OnEvent(const Input::GenericInputEvent& event, bool processed) override;
 	void Render() override;
 
 	void WindowChangedEvent(const UI::System::WindowChangedEvent& event);
@@ -20,4 +19,6 @@ private:
 	ResourceManager resourceManager;
 	UI::System* UISystemToDebug;
 	UI::System UISystem;
+
+	ResourceRef<UI::FontManager> fontManager{ resourceManager, "fontManager", resourceManager };
 };

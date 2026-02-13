@@ -16,6 +16,6 @@ namespace Blaze::Graphics
 
 		virtual void Render(ArrayView<Vec3f> vertices, ArrayView<uint32> indices, Mat4f modelMatrix, ColorRGBAf color, const RenderContext& context) = 0;
 
-		uint64 GetTypeID() const { return RendererBase::GetTypeID<BasicIndexedMeshRenderer>(); }
+		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<BasicIndexedMeshRenderer>(); }
 	};
 }

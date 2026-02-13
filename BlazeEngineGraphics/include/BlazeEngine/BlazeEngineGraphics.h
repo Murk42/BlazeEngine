@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BlazeEngine/Graphics/Core/Dynamic/GraphicsContext.h"
+#include "BlazeEngine/Graphics/Core/GraphicsContextBase.h"
 
 #ifdef GRAPHICS_OPENGL
 #include "BlazeEngine/Graphics/Core/OpenGL/Framebuffer_OpenGL.h"
@@ -23,6 +23,7 @@
 #include "BlazeEngine/Graphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/BasicIndexedMeshRenderer_OpenGL.h"
+#include "BlazeEngine/Graphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
 #endif
 
 #ifdef GRAPHICS_VULKAN

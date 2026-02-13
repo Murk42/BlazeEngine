@@ -43,12 +43,15 @@ namespace Blaze::Graphics::OpenGL
 		void SetUniform(int location, const uint& value);
 		void SetUniform(int location, const float& value);
 		void SetUniform(int location, const double& value);
+		void SetUniform(int location, const Vec2u& value);
 		void SetUniform(int location, const Vec2i& value);
 		void SetUniform(int location, const Vec2f& value);
 		void SetUniform(int location, const Vec2d& value);
+		void SetUniform(int location, const Vec3u& value);
 		void SetUniform(int location, const Vec3i& value);
 		void SetUniform(int location, const Vec3f& value);
 		void SetUniform(int location, const Vec3d& value);
+		void SetUniform(int location, const Vec4u& value);
 		void SetUniform(int location, const Vec4i& value);
 		void SetUniform(int location, const Vec4f& value);
 		void SetUniform(int location, const Vec4d& value);

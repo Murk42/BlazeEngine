@@ -1,15 +1,15 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Nodes/Label.h"
+#include "BlazeEngine/UI/Core/Screen.h"
 
 namespace Blaze::UI::Nodes
 {
 	Label::Label()
-		: renderDataDirty(false), textSize(0.0f)
+		: rendererTypeIDChanged(false), blocksHitTest(true), textBuildSize(0.0f), wrapWidth(FLT_MAX)
 	{
 		dataMap.SetTypeName("Label");
 
 		finalTransformUpdatedEventDispatcher.AddHandler<&Label::FinalTransformUpdatedEvent>(*this);
-		transformFilterEventDispatcher.AddHandler<&Label::TransformFilterEvent>(*this);
 	}
 	Label::Label(Node& parent, const NodeTransform& transform)
 		: Label()
@@ -17,62 +17,69 @@ namespace Blaze::UI::Nodes
 		SetTransform(transform);
 		SetParent(&parent);
 	}
-	Label::Label(Node& parent, const NodeTransform& transform, u8StringView string, const FontAtlas& atlas, ColorRGBAf color, float fontSize)
+	Label::Label(Node& parent, const NodeTransform& transform, const TextStyle& textStyle, u8String text)
 		: Label(parent, transform)
 	{
-		BuildText(string, atlas, fontSize);
-		SetColor(color);
+		SetTextStyle(textStyle);
+		SetText(text);
 	}
 	Label::~Label()
 	{
 		finalTransformUpdatedEventDispatcher.RemoveHandler<&Label::FinalTransformUpdatedEvent>(*this);
-		transformFilterEventDispatcher.RemoveHandler<&Label::TransformFilterEvent>(*this);
 	}
-	void Label::ClearText()
+	void Label::Clear()
 	{
-		textSize = Vec2f();
+		text.Clear();
+		textBuildSize = { 0.0f, 0.0f};
 		renderUnit.Clear();
-		renderDataDirty = true;
-		MarkTransformDirty();
-	}
-	void Label::BuildText(u8StringView string, const FontAtlas& atlas, float fontSize)
-	{
-		if (fontSize == 0.0f)
-			fontSize = atlas.GetFontPixelHeight();
 
-		textSize = renderUnit.BuildText(string, fontSize, atlas);
-		renderDataDirty = true;
-		MarkTransformDirty();
+		UpdateTransformSize();
 	}
-	void Label::BuildWrappedText(u8StringView string, const FontAtlas& atlas, float wrapWidth, float fontSize)
+	void Label::SetText(u8String text)
 	{
-		if (fontSize == 0.0f)
-			fontSize = atlas.GetFontPixelHeight();
+		this->text = std::move(text);
 
-		textSize = renderUnit.BuildWrappedText(string, fontSize, atlas, wrapWidth);
-		renderDataDirty = true;
-		MarkTransformDirty();
+		UpdateRenderUnit();
 	}
-	void Label::SetColor(ColorRGBAf color)
+	void Label::SetTextStyle(const TextStyle& newTextStyle)
 	{
-		renderUnit.color = color;
+		bool fontChanged = false;
+		bool fontHeightChanged = false;
+
+		if (newTextStyle.fontName != textStyle.fontName)
+			fontChanged = true;
+
+		if (newTextStyle.fontHeight != textStyle.fontHeight)
+			fontHeightChanged = true;
+
+		textStyle = newTextStyle;
+
+		if (fontChanged || fontHeightChanged)
+			UpdateRenderUnit();		
+
+		renderUnit.SetColor(textStyle.color);
+	}
+	void Label::SetWrapWidth(float newWrapWidth)
+	{
+		bool wrapWidthChanged = wrapWidth != newWrapWidth;
+
+		wrapWidth = newWrapWidth;
+
+		if (wrapWidthChanged)
+			UpdateRenderUnit();
 	}
 	void Label::SetBlocksHitTestFlag(bool blocksHitTest)
 	{
 		this->blocksHitTest = blocksHitTest;
 	}
-	void Label::PreRender(const RenderContext& renderContext)
+	bool Label::PreRender(const RenderContext& renderContext)
 	{
-		CleanFinalTransform();
+		bool returnValue = false;
 
-		if (!renderDataDirty)
-			return;
+		returnValue |= rendererTypeIDChanged;
+		rendererTypeIDChanged = false;
 
-		renderDataDirty = false;
-
-		auto transform = GetFinalTransform();
-		renderUnit.position = transform.position + Vec2f(0, textSize.y);
-		renderUnit.right = { Math::Cos(transform.rotation), Math::Sin(transform.rotation) };
+		return returnValue;
 	}
 	RenderUnitBase* Label::GetRenderUnit(uintMem index)
 	{
@@ -92,13 +99,88 @@ namespace Blaze::UI::Nodes
 			else
 				return HitStatus::NotHit;
 	}
-	void Label::TransformFilterEvent(const Node::TransformFilterEvent& event)
+	bool Label::GetFontAtlasData(FontManager::FontAtlasData& fontAtlasData) const
 	{
-		event.transform.size = textSize;
+		FontManager* fontManager = nullptr;
+
+		if (GetScreen() != nullptr)
+			fontManager = GetScreen()->resourceManager.GetResource<FontManager>("fontManager").GetValue();
+
+		if (fontManager == nullptr)
+		{
+			BLAZE_LOG_WARNING("There is no font manager assigned to the scene");
+			return false;
+		}
+
+		const auto& finalTransform = GetFinalTransform();
+
+		TextStyle finalTextStyle = textStyle;
+		finalTextStyle.fontHeight *= finalTransform.scale;
+		
+		if (!fontManager->GetFontAtlas(finalTextStyle, fontAtlasData))
+		{
+			BLAZE_LOG_WARNING("Couldn't find font atlas with font name: \"{}\"", finalTextStyle.fontName);
+			return false;
+		}
+
+		if (fontAtlasData.atlas == nullptr)
+		{
+			BLAZE_LOG_WARNING("Font manager returned a nullptr atlas");
+			return false;
+		}
+
+		if (fontAtlasData.fontFace == nullptr)
+		{
+			BLAZE_LOG_WARNING("Font manager returned a nullptr font face");
+			return false;
+		}
+
+		return true;
+	}
+	void Label::UpdateTransformSize()
+	{
+		auto transform = GetTransform();
+		transform.size = textBuildSize / renderUnit.GetAtlasFontHeight() * textStyle.fontHeight;
+		SetTransform(transform);
+	}
+	void Label::UpdateRenderUnitTransform()
+	{
+		const auto& finalTransform = GetFinalTransform();
+		Vec2f finalTextSize = textBuildSize / renderUnit.GetAtlasFontHeight() * renderUnit.GetTargetFontHeight();
+		renderUnit.SetTransform(finalTransform.position + finalTransform.Up() * finalTextSize.y, finalTransform.right);
+	}
+	void Label::UpdateRenderUnit()
+	{
+		if (text.Empty() || textStyle.fontHeight == 0 || textStyle.fontName.Empty())
+		{
+			renderUnit.Clear();
+			return;
+		}
+
+		FontManager::FontAtlasData atlasData;
+
+		if (!GetFontAtlasData(atlasData))
+		{
+			renderUnit.Clear();
+			return;
+		}
+		
+		const auto& finalTransform = GetFinalTransform();
+		renderUnit.SetTargetFontHeight(textStyle.fontHeight * finalTransform.scale);
+
+		rendererTypeIDChanged = atlasData.rendererTypeID != renderUnit.GetRequiredRendererTypeID();
+		textBuildSize = renderUnit.BuildWrappedText(text, atlasData, wrapWidth / textStyle.fontHeight * atlasData.atlas->GetRasterFontHeight());
+
+		UpdateTransformSize();
+		UpdateRenderUnitTransform();
 	}
 	void Label::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
 	{
-		renderDataDirty = true;
-	}
+		const auto& finalTransform = GetFinalTransform();
 
+		if (finalTransform.scale * textStyle.fontHeight != renderUnit.GetTargetFontHeight())
+			UpdateRenderUnit();
+		else
+			UpdateRenderUnitTransform();
+	}
 }

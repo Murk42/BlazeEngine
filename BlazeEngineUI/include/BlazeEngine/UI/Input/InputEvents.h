@@ -3,41 +3,41 @@
 
 namespace Blaze::UI
 {
-	class InputSubSystem;
+	class InputNode;
 
 	struct UIMouseButtonDownEvent : Input::MouseButtonDownEvent 
 	{ 
-		InputSubSystem& inputSubSystem; 
+		InputNode& node;
 	};
 	struct UIMouseButtonUpEvent : Input::MouseButtonUpEvent
 	{
-		InputSubSystem& inputSubSystem;
+		InputNode& node;
 	};
 	struct UIMouseMotionEvent : Input::MouseMotionEvent 
 	{ 
-		InputSubSystem& inputSubSystem;
+		InputNode& node;
 	};
 	struct UIMouseHitStatusChangedEvent
 	{
-		InputSubSystem& inputSubSystem;
+		InputNode& node;
 		Node::HitStatus oldHitStatus;
 		Node::HitStatus newHitStatus;
 	};
 	struct UIMouseScrollEvent : Input::MouseScrollEvent
 	{
-		InputSubSystem& inputSubSystem;
+		InputNode& node;
 	};
 	struct UIKeyDownEvent : Input::KeyDownEvent
 	{
-		InputSubSystem& inputSubSystem;
+		InputNode& node;
 	};
 	struct UIKeyUpEvent : Input::KeyUpEvent
 	{
-		InputSubSystem& inputSubSystem;
+		InputNode& node;
 	};
 	struct UITextInputEvent : Input::TextInputEvent
 	{
-		InputSubSystem& inputSubSystem;
+		InputNode& node;
 	};
 
 	using GenericUIInputEvent = Variant<UIKeyDownEvent, UIKeyUpEvent, UITextInputEvent, UIMouseButtonDownEvent, UIMouseButtonUpEvent, UIMouseMotionEvent, UIMouseScrollEvent>;

@@ -111,9 +111,11 @@ namespace Blaze::UI::Nodes
 			this->value = value;
 			renderUnitDirty = true;
 
+			if (valueChangedCallback)
+				valueChangedCallback(value);
 			valueChangedEventDispatcher.Call({ *this });
 
-			InvalidateHitStatus();
+			InvalidateHitTest();
 		}
 	}
 	void Slider::SetHandleSize(Vec2f handleSize)
@@ -126,7 +128,7 @@ namespace Blaze::UI::Nodes
 		this->handleSize = handleSize;
 		renderUnitDirty = true;
 
-		InvalidateHitStatus();
+		InvalidateHitTest();
 	}
 	void Slider::SetTrackThickness(float thickness)
 	{
@@ -136,12 +138,14 @@ namespace Blaze::UI::Nodes
 		trackThickness = thickness;
 		renderUnitDirty = true;
 	}
-	void Slider::PreRender(const RenderContext& renderContext)
+	void Slider::SetValueChangedCallback(std::function<void(float)> valueChangedCallback)
 	{
-		CleanFinalTransform();
-
+		this->valueChangedCallback = valueChangedCallback;
+	}
+	bool Slider::PreRender(const RenderContext& renderContext)
+	{
 		if (!renderUnitDirty)
-			return;
+			return false;
 
 		renderUnitDirty = false;
 
@@ -151,15 +155,19 @@ namespace Blaze::UI::Nodes
 
 		trackRenderUnit.pos = transform.position + Vec2f(0, (transform.size.y - trackThickness) / 2);
 		trackRenderUnit.right = right * transform.size.x;
-		trackRenderUnit.up = up * trackThickness;
+		trackRenderUnit.up = up * trackThickness * transform.scale;
 
-		if (handleSize.x < transform.size.x)
-			handleRenderUnit.pos = transform.position + right * (transform.size.x - handleSize.x) * value + up * (transform.size.y - handleSize.y) / 2;
+		Vec2f finalHandleSize = handleSize * transform.scale;
+
+		if (finalHandleSize.x < transform.size.x)
+			handleRenderUnit.pos = transform.position + right * (transform.size.x - finalHandleSize.x) * value + up * (transform.size.y - finalHandleSize.y) / 2;
 		else
-			handleRenderUnit.pos = transform.position + right * (transform.size.x - handleSize.x) * 0.5f + up * (transform.size.y - handleSize.y) / 2;
+			handleRenderUnit.pos = transform.position + right * (transform.size.x - finalHandleSize.x) * 0.5f + up * (transform.size.y - finalHandleSize.y) / 2;
 
-		handleRenderUnit.right = right * handleSize.x;
-		handleRenderUnit.up = up * handleSize.y;
+		handleRenderUnit.right = right * finalHandleSize.x;
+		handleRenderUnit.up = up * finalHandleSize.y;
+
+		return false;
 	}
 	RenderUnitBase* Slider::GetRenderUnit(uintMem index)
 	{
@@ -219,11 +227,10 @@ namespace Blaze::UI::Nodes
 			up.DotProduct(nodePosition),
 		};
 
-
 		Rectf handleHitbox;
 		handleHitbox.size = {
-			handleSize.x,
-			std::max(handleSize.y, trackThickness)
+			handleSize.x * transform.scale,
+			std::max(handleSize.y, trackThickness) * transform.scale
 		};
 		handleHitbox.pos = {
 			transform.size.x > handleHitbox.size.x ? (transform.size.x - handleHitbox.size.x) * value : (transform.size.x - handleHitbox.size.x) * 0.5f,
@@ -256,17 +263,14 @@ namespace Blaze::UI::Nodes
 			if (HitTestHandle(mousePos))
 			{
 				auto transform = GetFinalTransform();
-				Vec2f right = Vec2f(Math::Cos(transform.rotation), Math::Sin(transform.rotation));
-				draggingMouseOffset = right.DotProduct(mousePos - transform.position) - value * (transform.size.x - handleSize.x);
-
+				draggingMouseOffset = transform.Right().DotProduct(mousePos - transform.position) - value * (transform.size.x - handleSize.x * transform.scale);
 				UpdateCursor();
 			}
 			else
 			{
 				auto transform = GetFinalTransform();
-				Vec2f right = Vec2f(Math::Cos(transform.rotation), Math::Sin(transform.rotation));
-				float newValue = (right.DotProduct(mousePos - transform.position) - handleSize.x / 2) / (transform.size.x - handleSize.x);
-
+				float newValue = (transform.Right().DotProduct(mousePos - transform.position) - handleSize.x / 2 * transform.scale) / (transform.size.x - handleSize.x * transform.scale);
+				draggingMouseOffset = handleSize.x * transform.scale / 2;
 				SetValue(newValue);
 			}
 
@@ -288,8 +292,7 @@ namespace Blaze::UI::Nodes
 				SetValue(0.5);
 			else
 			{
-				Vec2f right = Vec2f(Math::Cos(transform.rotation), Math::Sin(transform.rotation));
-				float newValue = (right.DotProduct(event.pos - transform.position) - draggingMouseOffset) / (transform.size.x - handleSize.x);
+				float newValue = (transform.Right().DotProduct(event.pos - transform.position) - draggingMouseOffset) / (transform.size.x - handleSize.x * transform.scale);
 
 				SetValue(newValue);
 			}

@@ -20,7 +20,7 @@ namespace Blaze
 		virtual void Update() {}
 		virtual void Render() {}
 
-		virtual bool OnEvent(const Input::GenericInputEvent& event, bool isProcessed) { return false; }
+		virtual Input::EventProcessedState OnEvent(const Input::GenericInputEvent& event, bool processed) { return Input::EventProcessedState::NotProcessed; }
 
 		void ScheduleForDestruction();
 		bool IsScheduledForDesturction() const;

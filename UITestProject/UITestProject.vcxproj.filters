@@ -29,16 +29,16 @@
     <ClInclude Include="source\MainScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\LayoutControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\EventMemberFunctionTie.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainAppRuntimeThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\UIDebugLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ScreenManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UIDebugScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -52,14 +52,17 @@
     <ClCompile Include="source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\LayoutControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\MainAppRuntimeThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\UIDebugLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\UIDebugScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\scene.txt" />
   </ItemGroup>
 </Project>

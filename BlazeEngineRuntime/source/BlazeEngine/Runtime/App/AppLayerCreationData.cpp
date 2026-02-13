@@ -7,14 +7,21 @@ namespace Blaze
 		: constructFunction(nullptr)
 	{
 	}
-	bool AppLayerCreationData::CreateLayer(Array<Handle<AppLayer>>& layerStack) const
+	void AppLayerCreationData::Clear()
 	{
-		if (constructFunction != nullptr && !arguments.Empty())
+		constructFunction = nullptr;
+		arguments.Clear();
+	}
+	Handle<AppLayer> AppLayerCreationData::CreateLayer()
+	{
+		if (constructFunction != nullptr)
 		{
-			constructFunction(layerStack, *arguments);
-			return true;
+			Handle<AppLayer> layer = constructFunction(*arguments);
+
+			Clear();
+
+			return layer;
 		}
-		else
-			return false;
+		return { };
 	}
 }

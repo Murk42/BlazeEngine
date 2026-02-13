@@ -73,12 +73,12 @@ namespace Blaze
 		GenericString<Char, StringAllocator > UpperCase() const requires SameAs<Char, char>;
 		template<AllocatorType StringAllocator1 = Allocator, ContainerTypeOf<GenericStringView<Char>> Container>
 		GenericString<Char, StringAllocator1> Join(const Container& container);
-		template<AllocatorType StringAllocator1 = Allocator, ConvertibleTo<GenericStringView<Char>> ... Args>
+		template<AllocatorType StringAllocator1 = Allocator, IsConvertibleTo<GenericStringView<Char>> ... Args>
 		GenericString<Char, StringAllocator1> Join(const Args& ... args);
 
-		template<AllocatorType StringAllocator = Allocator, ContainerType Container> requires ConvertibleTo<ContainerValueType<Container>, GenericStringView<Char>>
+		template<AllocatorType StringAllocator = Allocator, ContainerType Container> requires IsConvertibleTo<ContainerValueType<Container>, GenericStringView<Char>>
 		static GenericString<Char, StringAllocator> Concat(const Container& container);
-		template<AllocatorType StringAllocator = Allocator, ConvertibleTo<GenericStringView<Char>> ... Args>
+		template<AllocatorType StringAllocator = Allocator, IsConvertibleTo<GenericStringView<Char>> ... Args>
 		static GenericString<Char, StringAllocator> Concat(const Args& ... args);
 
 		template<AllocatorType StringAllocator = Allocator>

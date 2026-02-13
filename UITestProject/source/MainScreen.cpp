@@ -1,25 +1,59 @@
 #include "pch.h"
 #include "MainScreen.h"
-#include "SDL3/SDL.h"
 
 MainScreen::MainScreen(ResourceManager& resourceManager)
-	: resourceManager(resourceManager)
+	: Screen(resourceManager), resourceManager(resourceManager)
+{
+	//slider.slider.SetValueChangedCallback([&](float value) {
+	//	auto textStyle = slider.label.GetTextStyle();		
+	//	textStyle.fontHeight = 20 * (1 + value * 2);
+	//	slider.label.SetTextStyle(textStyle);
+	//	});
+	//
+	//slider.label.SetWrapWidth(200);
+}
+
+LabeledSlider::LabeledSlider(Node& parent, const UI::NodeTransform& transform)
+	: EmptyNode(parent, transform)
 {
 }
 
-LabeledSlider::LabeledSlider()
+LabeledSlider::LabeledSlider(Node& parent, const UI::NodeTransform& transform, u8StringView labelText, const UI::TextStyle& textStyle, const Slider::Style& sliderStyle)
+	: LabeledSlider(parent, transform)
 {
-	SetTransform({ .size = { 200, 34 } });
 	slider.SetParent(this);
 	slider.SetTransform({ .pos = { 2, 2 }, .parentPivot = {0, 0}, .pivot = {0, 0}, .size = {196, 12} });
+	slider.SetStyle(sliderStyle);
 
-	label.SetParent(&slider);
-	label.SetTransform({ .pos = { 3, 3 }, .parentPivot = {0, 1}, .pivot = {0, 0}});
+	label.SetParent(this);
+	label.SetTransform({ .pos = { 3, -3 }, .parentPivot = {0, 1}, .pivot = {0, 1} });
+	label.SetText(labelText);
+	label.SetTextStyle(textStyle);
 }
 
-LabeledSlider::LabeledSlider(Node& parent, u8StringView label, const UI::FontAtlas& atlas)
-	: LabeledSlider()
+LabeledButton::LabeledButton()
 {
-	SetParent(&parent);
-	this->label.BuildText(label, atlas);
+	button.SetParent(this);
+	button.SetTransform({ .pos = { 0, 0 }, .parentPivot = {0.5, 0.5}, .pivot = {0.5, 0.5} });
+	label.SetParent(this);
+	label.SetTransform({ .pos = { 0, 3}, .parentPivot = {0.5, 0.5}, .pivot = {0.5, 0.5} });
+	label.SetBlocksHitTestFlag(false);
+}
+
+LabeledButton::LabeledButton(Node& parent, const UI::NodeTransform& transform)
+	: EmptyNode(parent, transform)
+{
+	button.SetParent(this);
+	button.SetTransform({ .pos = { 0, 0 }, .parentPivot = {0.5, 0.5}, .pivot = {0.5, 0.5}, .size = transform.size });
+	label.SetParent(this);
+	label.SetTransform({ .pos = { 0, 3}, .parentPivot = {0.5, 0.5}, .pivot = {0.5, 0.5} });
+	label.SetBlocksHitTestFlag(false);
+}
+
+LabeledButton::LabeledButton(Node& parent, const UI::NodeTransform& transform, u8StringView labelText, const UI::TextStyle& textStyle, const PanelButton::Style& buttonStyle)
+	: LabeledButton(parent, transform)
+{
+	button.SetStyle(buttonStyle);
+	label.SetText(labelText);
+	label.SetTextStyle(textStyle);
 }

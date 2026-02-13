@@ -11,4 +11,3 @@ namespace Blaze::Graphics
 {
 	using namespace OpenGL;
 }
-#include "EventMemberFunctionTie.h"

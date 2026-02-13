@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/String/String.h"
-#include "BlazeEngine/Runtime/IO/Types.h"
+#include "BlazeEngine/Runtime/IO/InputTypes.h"
 
 namespace Blaze::Input
 {
@@ -20,29 +20,11 @@ namespace Blaze::Input
     BLAZE_API KeyCode GetKeyCode(Key key, KeyModifier modifier);
     BLAZE_API StringView GetKeyName(KeyCode keyCode);
 
-    /*
-        Returns key state between two Input::Update() calls. By using this function an application wont be
-        able to register multiple key presses or releases between two Input::Update() calls, they can
-        register only if they happened at least once. For full control over key presses and releases use
-        event handling to handle key states.
 
-        \param key - the key whose state to get
-        \return A KeyFrameState structure with information about the state of the key between two Input::Update()
-        calls
-    */
-    BLAZE_API KeyFrameState GetKeyFrameState(Key key);
-    /*
-        Returns mouse button state between two Input::Update() calls. By using this function an application
-        wont be able to register multiple key presses or releases between two Input::Update() calls, they
-        can register only if they happened at least once. For full control over mouse button presses and
-        releases use event handling.
+    BLAZE_API bool GetKeyState(Key key);
+    BLAZE_API bool GetMouseButtonState(MouseButton button);
 
-        \param button - the mouse button whose state to retrieve
-        \return A MouseButtonFrameState structure with information about the state of the key between two
-        Input::Update() calls
-    */
-    BLAZE_API MouseButtonFrameState GetMouseButtonFrameState(MouseButton button);
-
+    BLAZE_API Array<MouseData> GetMice();
     BLAZE_API StringView GetMouseName(MouseID mouseID);
     BLAZE_API void SetCursorType(CursorType type);
     BLAZE_API void ShowCursor(bool show);

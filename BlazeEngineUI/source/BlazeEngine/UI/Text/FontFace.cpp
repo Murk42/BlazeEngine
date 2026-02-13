@@ -2,6 +2,7 @@
 #include "BlazeEngine/UI/Text/FontFace.h"
 #include "BlazeEngine/External/FreeType/FreeType.h"
 #include "BlazeEngine/UI/Files/Consola.h"
+#include "BlazeEngine/UI/Text/CharacterSet.h"
 
 namespace Blaze::UI
 {
@@ -66,14 +67,14 @@ namespace Blaze::UI
 	FontFaceDirection FontFace::GetDirection() const
 	{
 		return FontFaceDirection::Horizontal;
-	}
+	}	
 	Array<uint32> FontFace::GetAllGlyphsInidices() const
 	{
 		if (ptr == nullptr)
 			return { };
 
 		FT_Face face = (FT_Face)ptr;
-
+		
 		uint32 glyphIndex = 0;
 		uint i = FT_Get_First_Char(face, &glyphIndex);
 

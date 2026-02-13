@@ -7,14 +7,14 @@
 
 namespace Blaze
 {
-	bool sailLogsEnabled = true;
-	static void SailLogger(SailLogLevel level, const char* file, int line, const char* format, va_list args)
+	bool sailLogsEnabled = true; 
+	static bool SailLogger(SailLogLevel level, const char* file, int line, const char* format, va_list args)
 	{
 		if (!sailLogsEnabled)
-			return;
+			return true;
 
 		if (level == SAIL_LOG_LEVEL_INFO || level == SAIL_LOG_LEVEL_DEBUG)
-			return;
+			return true;
 
 		// Copy args for _vscprintf
 		va_list argsCopy1;
@@ -55,6 +55,8 @@ namespace Blaze
 		Debug::Log log{ logType, "sail", Format(u8"sail ({}, line {}) level {}: \"{}\"", Path(StringView(file, strlen(file))).FileName(), line, levelString, message)};
 
 		Debug::Logger::ProcessLog(log);
+
+		return true;
 	}
 
 	void sail_SetupReadIO(sail_io* io, ReadStream& stream)
@@ -242,7 +244,7 @@ namespace Blaze
 	TimingResult InitializeSail()
 	{
 		Timing timing{ "sail" };
-
+		
 		sail_set_logger(SailLogger);
 		sail_init_with_flags(SAIL_FLAG_PRELOAD_CODECS);
 

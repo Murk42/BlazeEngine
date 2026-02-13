@@ -10,19 +10,19 @@ namespace Blaze::UI
 	{
 	public:
 		virtual StringView GetRequiredRendererName() const = 0;
-		virtual uint64 GetRequiredRendererTypeID() const = 0;
+		virtual Graphics::RendererTypeID GetRequiredRendererTypeID() const = 0;
 		virtual void Render(const Node& node, Graphics::RendererBase& renderer, const RenderContext& renderContext) = 0;
 	};
 
-	template<IsBaseOf<Graphics::RendererBase> RendererType, FixedString name = "">
+	template<IsDerivedFrom<Graphics::RendererBase> RendererType, FixedString name = "">
 	class BLAZE_API RenderUnit : public RenderUnitBase
 	{
 	public:
-		StringView GetRequiredRendererName() const override final
+		StringView GetRequiredRendererName() const override
 		{
 			return name;
 		}
-		uint64 GetRequiredRendererTypeID() const override final
+		Graphics::RendererTypeID GetRequiredRendererTypeID() const override
 		{
 			return Graphics::RendererBase::GetTypeID<RendererType>();
 		}
@@ -36,11 +36,11 @@ namespace Blaze::UI
 	class BLAZE_API RenderUnit<Graphics::RendererBase, name> : public RenderUnitBase
 	{
 	public:
-		StringView GetRequiredRendererName() const override final
+		StringView GetRequiredRendererName() const override
 		{
 			return name;
 		}
-		uint64 GetRequiredRendererTypeID() const override final
+		Graphics::RendererTypeID GetRequiredRendererTypeID() const override
 		{
 			return 0;
 		}

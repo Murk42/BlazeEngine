@@ -3,26 +3,29 @@
 
 namespace Blaze::UI
 {
-	inline void SetScreenSize(Screen& screen, Vec2f size)
+	static void SetNodeSize(Node& node, Vec2f size)
 	{
-		NodeTransform transform{
-			.pos = { 0.0f, 0.0f},
-			.parentPivot = { 0.0f, 0.0f },
-			.pivot = { 0.0f, 0.0f },
-			.size = size,
-			.scale = 1.0f,
-			.rotation = 0.0f
-		};
+		NodeTransform transform = node.GetTransform();
+		
+		transform.size = size;
 
-		screen.SetTransform(transform);
+		node.SetTransform(transform);
+	}
+	static void SetNodeScale(Node& node, float scale)
+	{
+		NodeTransform transform = node.GetTransform();
+
+		transform.scale = scale;
+
+		node.SetTransform(transform);
 	}
 
-	System::System()
-		: window(nullptr), resizeScreenWithWindow(false)
+	System::System(Graphics::GraphicsContextBase& graphicsContext)
+		: window(nullptr), resizeScreenWithWindow(false), graphicsSubSystem(graphicsContext)
 	{
 	}
-	System::System(Graphics::RendererRegistry newRegistry, Window& newWindow, bool newResizeScreenWithWindow)
-		: System()
+	System::System(Graphics::GraphicsContextBase& graphicsContext, Graphics::RendererRegistry newRegistry, Window& newWindow, bool newResizeScreenWithWindow)
+		: System(graphicsContext)
 	{
 		SetWindow(&newWindow, newResizeScreenWithWindow);
 		SetRendererRegistry(newRegistry);
@@ -35,30 +38,54 @@ namespace Blaze::UI
 	void System::SetScreen(Handle<Screen>&& newScreen)
 	{
 		screen = std::move(newScreen);
+
+		if (!screen.Empty() && window != nullptr)
+		{
+			if (resizeScreenWithWindow)
+				SetNodeSize(*screen, Vec2f(window->GetSize()));
+
+			SetNodeScale(*screen, window->GetContentScale());
+		}
+
+		screen->Update();
+
 		inputSubSystem.SetScreen(screen);
 		graphicsSubSystem.SetScreen(screen);
-
-		if (resizeScreenWithWindow && !screen.Empty() && window != nullptr)
-			SetScreenSize(*screen, Vec2f(window->GetSize()));
 	}
 	void System::SetWindow(Window* newWindow, bool newResizeScreenWithWindow)
 	{
-		if (window != nullptr && resizeScreenWithWindow)
-			window->resizedEventDispatcher.RemoveHandler<&System::WindowResized>(*this);
+		if (window != nullptr)
+		{
+			if (resizeScreenWithWindow)
+				window->resizedEventDispatcher.RemoveHandler<&System::WindowResized>(*this);
+
+			window->contentScaleChangedEventDispatcher.RemoveHandler<&System::WindowContentScaleChanged>(*this);
+		}
 
 		resizeScreenWithWindow = newResizeScreenWithWindow;
 		window = newWindow;
+
+		if (window != nullptr)
+		{
+			if (resizeScreenWithWindow)
+			{
+				if (screen != nullptr)
+					SetNodeSize(*screen, Vec2f(window->GetSize()));
+
+				window->resizedEventDispatcher.AddHandler<&System::WindowResized>(*this);
+			}
+
+			window->contentScaleChangedEventDispatcher.AddHandler<&System::WindowContentScaleChanged>(*this);
+
+			if (screen != nullptr)
+				SetNodeScale(*screen, window->GetContentScale());
+		}
+	
+
 		inputSubSystem.SetWindow(window);
 
-		if (window != nullptr && resizeScreenWithWindow)
-		{
-			if (!screen.Empty())
-				SetScreenSize(*screen, Vec2f(window->GetSize()));
-
-			window->resizedEventDispatcher.AddHandler<&System::WindowResized>(*this);
-		}
-
 		windowChangedEventDispatcher.Call({ *this });
+
 	}
 	void System::SetRendererRegistry(Graphics::RendererRegistry newRegistry)
 	{
@@ -69,13 +96,21 @@ namespace Blaze::UI
 		if (window != nullptr)
 			graphicsSubSystem.Render(window->GetSize());
 	}
-	bool System::ProcessInputEvent(const Input::GenericInputEvent& event, bool isProcessed)
+	Input::EventProcessedState System::ProcessInputEvent(const Input::GenericInputEvent& event, bool processed)
 	{
-		return inputSubSystem.ProcessInputEvent(event, isProcessed);
+		if (auto result = inputSubSystem.ProcessInputEvent(event, processed))
+			return result;
+
+		return Input::EventProcessedState::NotProcessed;
 	}
 	void System::WindowResized(const Window::ResizedEvent& event)
 	{
 		if (!screen.Empty())
-			SetScreenSize(*screen, Vec2f(event.size));
+			SetNodeSize(*screen, Vec2f(event.size));
+	}
+	void System::WindowContentScaleChanged(const Window::ContentScaleChangedEvent& event)
+	{
+		if (screen != nullptr)
+			SetNodeScale(*screen, event.newContentScale);
 	}
 }

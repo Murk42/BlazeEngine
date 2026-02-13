@@ -92,16 +92,14 @@
       <AdditionalIncludeDirectories>%(ProjectDir)source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sail.lib;SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>
       </Command>
     </PostBuildEvent>
-    <ProjectReference>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -114,7 +112,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineUI\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -136,7 +133,7 @@
       <AdditionalIncludeDirectories>%(ProjectDir)source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sail.lib;SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -155,7 +152,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)BlazeEngineUI\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngine\build\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -173,16 +169,15 @@
     <None Include="BlazeProjectPropertySheet.props" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\ScreenManager.h" />
     <ClInclude Include="source\UIDebugLayer.h" />
     <ClInclude Include="source\MainAppRuntimeThread.h" />
-    <ClInclude Include="source\EventMemberFunctionTie.h" />
-    <ClInclude Include="source\LayoutControl.h" />
     <ClInclude Include="source\MainScreen.h" />
     <ClInclude Include="source\pch.h" />
+    <ClInclude Include="source\UIDebugScreen.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\UIDebugLayer.cpp" />
-    <ClCompile Include="source\LayoutControl.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainAppRuntimeThread.cpp" />
     <ClCompile Include="source\MainScreen.cpp" />
@@ -192,6 +187,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\UIDebugScreen.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\scene.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

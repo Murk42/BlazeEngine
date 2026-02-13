@@ -36,6 +36,8 @@
 #include "BlazeEngine/Core/Container/MapImpl.h"
 #include "BlazeEngine/Core/Container/RawArray.h"
 #include "BlazeEngine/Core/Container/RawArrayImpl.h"
+#include "BlazeEngine/Core/Container/ReferenceContainer.h"
+#include "BlazeEngine/Core/Container/ReferenceContainerImpl.h"
 #include "BlazeEngine/Core/Container/Set.h"
 #include "BlazeEngine/Core/Container/SetImpl.h"
 #include "BlazeEngine/Core/Container/UnorderedArray.h"
@@ -59,6 +61,7 @@
 #include "BlazeEngine/Core/Event/EventHandler.h"
 #include "BlazeEngine/Core/Event/EventHandlerData.h"
 #include "BlazeEngine/Core/Event/EventHandlerDataImpl.h"
+#include "BlazeEngine/Core/Event/EventMemberFunctionTie.h"
 #include "BlazeEngine/Core/Event/LambdaEventHandler.h"
 #include "BlazeEngine/Core/Event/QueueEventDispatcher.h"
 

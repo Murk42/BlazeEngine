@@ -183,7 +183,7 @@ namespace Blaze::Debug::Logger
 				for (auto& frame : callstack)
 				{
 					char formattedName[40];
-					FormatInto<char>(formattedName, _countof(formattedName), "{ <40}", frame.GetLocationName());
+					FormatInto<char>(formattedName, _countof(formattedName), "{ >40}", frame.GetLocationName());
 
 					char formattedAddress[18];
 					FormatInto<char>(formattedAddress, _countof(formattedAddress), "{#18x}", frame.Address());

@@ -11,18 +11,22 @@ namespace Blaze
 	{
 	public:
 		AppLayerCreationData();
-		AppLayerCreationData(const AppLayerCreationData& other) = delete;
 		AppLayerCreationData(AppLayerCreationData&& other) noexcept = default;
+
+		void Clear();
 
 		template<IsDerivedFrom<AppLayer> T, typename ... Args> requires IsConstructibleFrom<T, Args...>
 		void Initialize(Args&& ... args);
 
-		bool CreateLayer(Array<Handle<AppLayer>>& layerStack) const;
+		Handle<AppLayer> CreateLayer();
 
 		AppLayerCreationData& operator=(const AppLayerCreationData& other) = delete;
 		AppLayerCreationData& operator=(AppLayerCreationData&& other) noexcept = default;
+
+		template<IsDerivedFrom<AppLayer> T, typename ... Args> requires IsConstructibleFrom<T, Args...>
+		static AppLayerCreationData New(Args&& ... args);
 	private:
-		using LayerConstructFunction = void(*)(Array<Handle<AppLayer>>&, VirtualTupleBase& arguments);
+		using LayerConstructFunction = Handle<AppLayer>(*)(VirtualTupleBase& arguments);
 
 		LayerConstructFunction constructFunction;
 		Handle<VirtualTupleBase> arguments;
@@ -31,9 +35,16 @@ namespace Blaze
 	template<IsDerivedFrom<AppLayer> T, typename ...Args> requires IsConstructibleFrom<T, Args...>
 	inline void AppLayerCreationData::Initialize(Args&& ...args)
 	{
-		constructFunction = [](Array<Handle<AppLayer>>& stack, VirtualTupleBase& arguments) {
-			apply([&](auto&& ... args) { stack.AddBack(Handle<AppLayer>::CreateDerived<T>(std::forward<Args>(args)...)); }, std::move(static_cast<Tuple<Args...>&>(static_cast<VirtualTuple<Args...>&>(arguments))));
+		constructFunction = [](VirtualTupleBase& arguments) {
+			return apply([&](auto&& ... args) { return Handle<AppLayer>::CreateDerived<T>(std::forward<Args>(args)...); }, std::move(static_cast<Tuple<Args...>&>(static_cast<VirtualTuple<Args...>&>(arguments))));
 			};
 		arguments = Handle<VirtualTupleBase>::CreateDerived<VirtualTuple<Args...>>(std::forward<Args>(args)...);
+	}
+	template<IsDerivedFrom<AppLayer> T, typename ...Args> requires IsConstructibleFrom<T, Args...>
+	inline AppLayerCreationData AppLayerCreationData::New(Args && ...args)
+	{
+		AppLayerCreationData out;
+		out.Initialize<T>(std::forward<Args>(args)...);
+		return out;
 	}
 }

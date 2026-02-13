@@ -20,8 +20,8 @@ namespace Blaze::UI
 			UI::Node& node;
 		};
 
-		GraphicsSubSystem();
-		GraphicsSubSystem(Graphics::RendererRegistry rendererRegistry);
+		GraphicsSubSystem(Graphics::GraphicsContextBase& graphicsContext);
+		GraphicsSubSystem(Graphics::GraphicsContextBase& graphicsContext, Graphics::RendererRegistry rendererRegistry);
 		~GraphicsSubSystem();
 
 		void SetRendererRegistry(Graphics::RendererRegistry newRegistry);
@@ -33,6 +33,7 @@ namespace Blaze::UI
 
 		inline UI::Screen* GetScreen() const { return screen; }
 	private:
+		Graphics::GraphicsContextBase& graphicsContext;
 		Graphics::RendererRegistry rendererRegistry;
 		UI::Screen* screen;
 		bool recreateRenderQueue;
@@ -42,8 +43,8 @@ namespace Blaze::UI
 
 		void RecreateRenderQueue();
 
-		void NodeTreeChanged(const Screen::TreeChangedEvent& event);
+		void NodeTreeChanged(const Screen::ScreenTreeChangedEvent& event);
 		void ScreenDestroyed(const Screen::DestructionEvent& event);
-		void ChildEnabledStateUpdated(const UI::Node::EnabledStateChangedEvent& event);
+		void ChildEnabledStateUpdated(const UI::Node::NodeEnabledStateChangedEvent& event);
 	};
 }

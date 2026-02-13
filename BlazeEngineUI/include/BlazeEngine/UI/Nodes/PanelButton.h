@@ -12,17 +12,17 @@ namespace Blaze::UI::Nodes
 		struct Style
 		{
 			Panel::Style panelStyle = {};
-			ColorRGBAf highlightTint = ColorRGBAf(0.2f, 0.2f, 0.2f, 0.3f);
+			ColorRGBAf highlightTint = ColorRGBAf(0.2f, 0.2f, 0.2f, 0.4f);
 			ColorRGBAf pressedTint = ColorRGBAf(0.1f, 0.1f, 0.1f, 0.5f);
 		};
 		PanelButton();
-		PanelButton(Node& parent, const NodeTransform& transform, const Style& style);
+		PanelButton(Node& parent, const NodeTransform& transform, const Style& style = { });
 		~PanelButton();
 
 		void SetStyle(const Style& style);
 		Style GetStyle() const;
 
-		void PreRender(const RenderContext& renderContext) override;
+		bool PreRender(const RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
 	private:
 		PanelRenderUnit renderUnit;

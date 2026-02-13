@@ -151,10 +151,11 @@
     <ClInclude Include="include\BlazeEngine\Runtime\IO\Input.h" />
     <ClInclude Include="include\BlazeEngine\Runtime\IO\Display.h" />
     <ClInclude Include="include\BlazeEngine\Runtime\IO\InputEvents.h" />
-    <ClInclude Include="include\BlazeEngine\Runtime\IO\Types.h" />
+    <ClInclude Include="include\BlazeEngine\Runtime\IO\InputTypes.h" />
     <ClInclude Include="include\BlazeEngine\Runtime\App\AppLayer.h" />
     <ClInclude Include="include\BlazeEngine\Runtime\App\AppRuntimeThreadCreationData.h" />
     <ClInclude Include="include\BlazeEngine\Runtime\IO\Window.h" />
+    <ClInclude Include="include\BlazeEngine\Runtime\IO\WindowMouseCaptureHandle.h" />
     <ClInclude Include="source\BlazeEngine\Platform\Windows\Windows.h" />
     <ClInclude Include="include\BlazeEngine\External\Sail\sail.h" />
     <ClInclude Include="include\BlazeEngine\External\SDL\SDL.h" />

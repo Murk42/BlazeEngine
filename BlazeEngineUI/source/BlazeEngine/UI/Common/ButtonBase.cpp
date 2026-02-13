@@ -61,7 +61,7 @@ namespace Blaze::UI
 	void ButtonBase::SelectedStateChangedEvent(const InputNode::SelectedStateChangedEvent& event)
 	{
 		if (!IsSelected())
-			Unpress(true);
+			Unpress(false);
 	}
 	void ButtonBase::HitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event)
 	{

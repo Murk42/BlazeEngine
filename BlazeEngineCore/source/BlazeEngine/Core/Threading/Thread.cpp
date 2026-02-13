@@ -11,26 +11,6 @@
 
 namespace Blaze
 {
-#ifdef BLAZE_PLATFORM_WINDOWS
-	struct _beginthreadexFunctionRelayData
-	{
-		Thread::BasicThreadFunction function;
-		void* userData;
-
-		std::atomic_flag occupied;
-	};
-
-	static unsigned __stdcall _beginthreadexFunctionRelay(void* userData)
-	{
-		_beginthreadexFunctionRelayData* relayData = static_cast<_beginthreadexFunctionRelayData*>(userData);
-
-		relayData->occupied.clear();
-		relayData->occupied.notify_all();
-
-		_endthreadex(relayData->function(relayData->userData));
-		return 0;
-	}
-#endif
 	Thread::Thread()
 		: handle(nullptr)
 	{
@@ -96,7 +76,7 @@ namespace Blaze
 		return u16StringView(reinterpret_cast<char16_t*>(description), descriptionLength).ConvertToStringType<char8_t>();
 #endif
 	}
-	Thread::ThreadID Thread::Run(BasicThreadFunction function, void* userData)
+	bool Thread::Run(BasicThreadFunction function, void* userData)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (handle != NULL)
@@ -104,7 +84,7 @@ namespace Blaze
 			if (IsRunning())
 			{
 				BLAZE_LOG_ERROR("Run called on a running thread");
-				return 0;
+				return false;
 			}
 
 			CloseHandle(handle);
@@ -114,29 +94,47 @@ namespace Blaze
 		if (function == nullptr)
 		{
 			BLAZE_LOG_ERROR("Function pointer is nullptr");
-			return 0;
+			return false;
 		}
 
-		static thread_local _beginthreadexFunctionRelayData relayData{
-			nullptr, nullptr, ATOMIC_FLAG_INIT
+		struct FunctionRelayData
+		{
+			std::atomic_flag dataCopied;
+			Thread::BasicThreadFunction function;
+			void* userData;
 		};
 
-		relayData.occupied.test_and_set();
-		relayData.function = function;
-		relayData.userData = userData;
+		auto wrapperFunction = [](void* _relayData) -> unsigned /*__stdcall - isn't needed because non-capturing lambdas can implicitly be converted to such functions*/
+		{
+			FunctionRelayData* relayData = static_cast<FunctionRelayData*>(_relayData);
 
-		unsigned threadID;
-		handle = (void*)_beginthreadex(NULL, 0, _beginthreadexFunctionRelay, &relayData, 0, &threadID);
+			Thread::BasicThreadFunction function = relayData->function;
+			void* userData = relayData->userData;
+
+			relayData->dataCopied.test_and_set();
+			relayData->dataCopied.notify_all();
+
+			_endthreadex(function(userData));
+			return 0;
+		};
+
+		FunctionRelayData relayData{
+			.dataCopied = { },
+			.function = function,
+			.userData = userData
+		};
+
+		handle = (void*)_beginthreadex(NULL, 0, wrapperFunction, &relayData, 0, &id);
 
 		if (handle == NULL)
 		{
 			BLAZE_WINDOWS_ERROR("CreateThread failed with error \"{}\"", Windows::GetErrorString(GetLastError()));
-			return 0;
+			return false;
 		}
 
-		relayData.occupied.wait(true);
+		relayData.dataCopied.wait(false);
 
-		return static_cast<ThreadID>(threadID);
+		return true;		
 #endif
 	}
 	bool Thread::WaitToFinish(float timeout) const

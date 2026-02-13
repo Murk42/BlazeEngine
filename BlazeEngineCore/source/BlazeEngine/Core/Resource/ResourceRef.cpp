@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "BlazeEngine/Core/Resource/ResourceRef.h"
-#include "BlazeEngine/Core/Resource/Resource.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
 
 namespace Blaze
@@ -9,7 +8,6 @@ namespace Blaze
 		: resourceBase(nullptr)
 	{
 	}
-
 	ResourceBaseRef::ResourceBaseRef(ResourceBase& resource)
 		: resourceBase(&resource)
 	{
@@ -48,23 +46,13 @@ namespace Blaze
 	{
 		return Blaze::Hash<void*>().Compute(resourceBase);
 	}
+	ResourceBase* ResourceBaseRef::GetResource() const
+	{
+		return resourceBase;
+	}
 	ResourceBaseRef::operator bool() const
 	{
 		return resourceBase != nullptr;
-	}
-	ResourceBase& ResourceBaseRef::GetResourceBase()
-	{
-		if (resourceBase == nullptr)
-			BLAZE_LOG_FATAL("Accessing a null resource base reference");
-
-		return *resourceBase;
-	}
-	const ResourceBase& ResourceBaseRef::GetResourceBase() const
-	{
-		if (resourceBase == nullptr)
-			BLAZE_LOG_FATAL("Accessing a null resource base reference");
-
-		return *resourceBase;
 	}
 	bool ResourceBaseRef::operator==(const ResourceBaseRef& other) const
 	{

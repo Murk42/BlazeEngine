@@ -323,6 +323,7 @@ namespace Blaze
 			return false;
 		}
 
+
 		bitmap.Create(size, format, type, image->pixels, image->bytes_per_line, flipVertically);
 
 		return true;

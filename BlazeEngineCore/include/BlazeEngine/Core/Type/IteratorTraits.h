@@ -46,7 +46,7 @@ namespace Blaze
 	concept RandomAccessIterator =
 		requires(Iterator it, uintMem n) {
 			{ it += n } -> SameAs<Iterator&>;
-			{ it - it } -> ConvertibleTo<uintMem>;
+			{ it - it } -> IsConvertibleTo<uintMem>;
 			{ it[n] };
 	};
 

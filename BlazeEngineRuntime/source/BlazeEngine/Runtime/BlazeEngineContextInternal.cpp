@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Runtime/BlazeEngineContextInternal.h"
 #include "BlazeEngine/External/SDL/SDLConversions.h"
-//#include <SDL3/SDL_events.h>
-//#include <SDL3/SDL_mouse.h>
 #include "BlazeEngine/External/SDL/SDL.h"
 #include "BlazeEngine/External/FreeType/FreeType.h"
 #include "BlazeEngine/External/Sail/Sail.h"
@@ -36,7 +34,7 @@ namespace Blaze
 			InitializeFreeType();
 			InitializeSail();
 
-			blazeEngineContext = new BlazeEngineContextInternal(params);
+			new BlazeEngineContextInternal(params);
 			return true;
 		}
 		else
@@ -47,6 +45,7 @@ namespace Blaze
 		if (blazeEngineContext)
 		{
 			delete blazeEngineContext;
+			blazeEngineContext = nullptr;
 
 			TerminateSail();
 			TerminateFreeType();
@@ -62,6 +61,8 @@ namespace Blaze
 		previousEventFilter(nullptr), previousEventFilterUserData(nullptr)
 	{
 		ResetInputState();
+
+		blazeEngineContext = this;
 
 		SDL_GetEventFilter(&previousEventFilter, &previousEventFilterUserData);
 		SDL_SetEventFilter(SDLEventFilter, this);
@@ -217,6 +218,18 @@ namespace Blaze
 			.up = !down || released,
 		};
 	}
+	bool BlazeEngineContextInternal::GetKeyState(Input::Key key) const
+	{
+		return keysCurrentState[static_cast<uintMem>(key)].test();
+	}
+	bool BlazeEngineContextInternal::GetMouseButtonState(Input::MouseButton button) const
+	{
+		return mouseButtonsCurrentState[static_cast<uintMem>(button)].test();
+	}
+	Array<Input::MouseData> BlazeEngineContextInternal::GetMice()
+	{
+		return mice;
+	}
 	void BlazeEngineContextInternal::ProcessEvents()
 	{
 		CopyInputState();
@@ -233,7 +246,7 @@ namespace Blaze
 	}
 	void BlazeEngineContextInternal::ResetInputState()
 	{
-		std::lock_guard lg{ inputCurrentFrameMutex };
+		std::lock_guard lg{ inputStateMutex };
 
 		mouseCurrentPos = Vec2f();
 		mouseCurrentFrameMovementSum = Vec2f();
@@ -248,7 +261,7 @@ namespace Blaze
 	}
 	void BlazeEngineContextInternal::CopyInputState()
 	{
-		std::lock_guard lg{ inputCurrentFrameMutex };
+		std::lock_guard lg{ inputStateMutex };
 
 		pressedKeysDuringLastFrame = pressedKeysDuringCurrentFrame;
 		releasedKeysDuringLastFrame = releasedKeysDuringCurrentFrame;
@@ -266,7 +279,7 @@ namespace Blaze
 		downKeysDuringCurrentFrame.reset();
 		releasedMouseButtonsDuringCurrentUpdate.reset();
 		pressedMouseButtonsDuringCurrentFrame.reset();
-		downKeysDuringCurrentFrame.reset();
+		downMouseButtonsDuringCurrentFrame.reset();
 		mouseCurrentFrameMovementSum = Vec2f();
 		mouseCurrentScrollSum = Vec2f();
 	}
@@ -316,6 +329,30 @@ namespace Blaze
 	{
 		return blazeEngineContext;
 	}
+	void BlazeEngineContextInternal::UpdateMouseData(const Input::MouseData& data)
+	{
+		uintMem index = 0;
+		for (; index != mice.Count(); ++index)
+			if (mice[index].id == data.id)
+				break;
+
+		if (index == mice.Count())
+			mice.AddBack(data);
+		else
+			mice[index] = data;
+	}
+	void BlazeEngineContextInternal::EraseMouseData(Input::MouseID id)
+	{
+		uintMem index = 0;
+		for (; index != mice.Count(); ++index)
+			if (mice[index].id == id)
+				break;
+
+		if (index == mice.Count())
+			return;
+
+		mice.EraseAt(index);
+	}
 	void BlazeEngineContextInternal::ProcessEventQueue()
 	{
 		GlobalGenericEvent event;
@@ -324,7 +361,7 @@ namespace Blaze
 			switch (event.GetValueType())
 			{
 			case GlobalGenericEvent::GetValueTypeOf<Display::DisplayEvent>(): {
-				event.TryProcess<Display::DisplayEvent>([&](auto& event) {
+				event.TryProcess([&](const Display::DisplayEvent& event) {
 					displayEventDispatcher.Call(event);
 					});
 				break;
@@ -343,7 +380,7 @@ namespace Blaze
 				break;
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				switch (event->wheel.direction)
 				{
 				case SDL_MOUSEWHEEL_NORMAL:
@@ -358,11 +395,13 @@ namespace Blaze
 			Input::MouseScrollEvent _event{
 				.window = *window,
 				.timeNS = event->wheel.timestamp,
-				.mouseID = Input::MouseID(event->wheel.which),
+				.mouseID = Input::MouseID(0),//Input::MouseID(event->button.which),
 				.amount = { event->wheel.x, event->wheel.y },
 				.direction = event->wheel.direction == SDL_MOUSEWHEEL_NORMAL ? Input::ScrollDirection::Normal : Input::ScrollDirection::Flipped,
 				.pos = Vec2f(event->wheel.mouse_x, event->wheel.mouse_y)
 			};
+
+			UpdateMouseData({ _event.mouseID, _event.pos, window });
 
 			window->AddInputEvent(_event);
 			break;
@@ -374,17 +413,19 @@ namespace Blaze
 				break;
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				mouseCurrentFrameMovementSum += Vec2f(event->motion.xrel, event->motion.yrel);
 			}
 
 			Input::MouseMotionEvent _event{
 				.window = *window,
 				.timeNS = event->motion.timestamp,
-				.mouseID = Input::MouseID(event->motion.which),
-				.delta = { event->motion.xrel, -event->motion.yrel },
+				.mouseID = Input::MouseID(0),//Input::MouseID(event->button.which),
+				.delta = { event->motion.xrel, event->motion.yrel },
 				.pos = Vec2f(event->motion.x, event->motion.y)
 			};
+
+			UpdateMouseData({ _event.mouseID, _event.pos, window });
 
 			window->AddInputEvent(_event);
 			break;
@@ -398,20 +439,23 @@ namespace Blaze
 			auto button = SDL_GetBlazeMouseButton(event->button.button);
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				downMouseButtonsDuringCurrentFrame.set((uintMem)button);
 				mouseButtonsComboDuringCurrentFrame[(uintMem)button] = std::max(mouseButtonsComboDuringCurrentFrame[(uintMem)button], event->button.clicks);
 				pressedMouseButtonsDuringCurrentFrame.set((uintMem)button);
 			}
+			mouseButtonsCurrentState[static_cast<uintMem>(button)].test_and_set();
 
 			Input::MouseButtonDownEvent _event{
 				.window = *window,
 				.timeNS = event->button.timestamp,
-				.mouseID = Input::MouseID(event->button.which),
+				.mouseID = Input::MouseID(0),//Input::MouseID(event->button.which),
 				.button = button,
 				.combo = event->button.clicks,
 				.pos = Vec2f(event->button.x, event->button.y)
 			};
+
+			UpdateMouseData({ _event.mouseID, _event.pos, window });
 
 			window->AddInputEvent(_event);
 			break;
@@ -425,19 +469,22 @@ namespace Blaze
 			auto button = SDL_GetBlazeMouseButton(event->button.button);
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 				downMouseButtonsDuringCurrentFrame.reset((uintMem)button);
 				releasedMouseButtonsDuringCurrentUpdate.set((uintMem)button);
 			}
+			mouseButtonsCurrentState[static_cast<uintMem>(button)].clear();
 
 			Input::MouseButtonUpEvent _event{
 				.window = *window,
 				.timeNS = event->button.timestamp,
-				.mouseID = Input::MouseID(event->button.which),
+				.mouseID = Input::MouseID(0),//Input::MouseID(event->button.which), //SDL sometimes retrieved an unkown mouse id so for now we just set it to 0
 				.button = button,
 				.combo = event->button.clicks,
 				.pos = Vec2f(event->button.x, event->button.y)
 			};
+
+			UpdateMouseData({ _event.mouseID, _event.pos, window });
 
 			window->AddInputEvent(_event);
 			break;
@@ -449,11 +496,12 @@ namespace Blaze
 				break;
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 
 				downKeysDuringCurrentFrame.set(event->key.scancode);
 				pressedKeysDuringCurrentFrame.set(event->key.scancode);
 			}
+			keysCurrentState[static_cast<uintMem>(event->key.scancode)].test_and_set();
 
 			Input::KeyDownEvent _event{
 				.window = *window,
@@ -484,11 +532,12 @@ namespace Blaze
 			};
 
 			{
-				std::lock_guard lg{ inputCurrentFrameMutex };
+				std::lock_guard lg{ inputStateMutex };
 
 				releasedKeysDuringCurrentFrame.set(event->key.scancode);
 				downKeysDuringCurrentFrame.reset(event->key.scancode);
 			}
+			keysCurrentState[static_cast<uintMem>(event->key.scancode)].clear();
 
 			window->AddInputEvent(_event);
 			break;
@@ -595,7 +644,7 @@ namespace Blaze
 			else
 				displayEventDispatcher.Call(_event);
 			break;
-		}
+		} 
 		case SDL_EVENT_WINDOW_MOVED: {
 
 			Window* window = GetWindowFromWindowID(event->window.windowID);
@@ -642,7 +691,14 @@ namespace Blaze
 		}
 		case SDL_EVENT_WINDOW_EXPOSED:
 		{
+			Window* window = GetWindowFromWindowID(event->window.windowID);
 
+			if (window == nullptr)
+				break;
+
+			break;
+		}
+		case SDL_EVENT_WINDOW_RESIZED: {
 			break;
 		}
 		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
@@ -703,23 +759,34 @@ namespace Blaze
 			Window::CloseEvent _event{
 				.window = *window,
 				.timeNS = event->window.timestamp,
-			};
+			}; 
 
 			window->AddWindowEvent(_event);
 			break;
 		}
 		case SDL_EVENT_WINDOW_MOUSE_ENTER: {
 			Window* window = GetWindowFromWindowID(event->window.windowID);
-
+			 
 			if (window == nullptr)
 				break;
+		
+			Vec2f pos{ };
+			SDL_GetGlobalMouseState(&pos.x, &pos.y);
+			Vec2i windowPos{ };
+			SDL_GetWindowPosition(static_cast<SDL_Window*>(window->GetHandle()), &windowPos.x, &windowPos.y);
 
-			Window::MouseEnterEvent _event{
+			pos -= Vec2f(windowPos);
+
+			Input::MouseEntersWindowEvent _event{
 				.window = *window,
 				.timeNS = event->window.timestamp,
+				.mouseID = Input::MouseID(0),
+				.pos = pos
 			};
 
-			window->AddWindowEvent(_event);
+			UpdateMouseData({ _event.mouseID, _event.pos, window });
+			
+			window->AddInputEvent(_event);
 			break;
 		}
 		case SDL_EVENT_WINDOW_MOUSE_LEAVE: {
@@ -728,12 +795,19 @@ namespace Blaze
 			if (window == nullptr)
 				break;
 
-			Window::MouseLeaveEvent _event{
+			Vec2f pos{ };
+			SDL_GetMouseState(&pos.x, &pos.y);
+
+			Input::MouseLeavesWindowEvent _event{
 				.window = *window,
 				.timeNS = event->window.timestamp,
+				.mouseID = Input::MouseID(0),
+				.pos = pos
 			};
 
-			window->AddWindowEvent(_event);
+			EraseMouseData(_event.mouseID);
+
+			window->AddInputEvent(_event);
 			break;
 		}
 		case SDL_EVENT_WINDOW_DISPLAY_CHANGED: {
@@ -751,12 +825,26 @@ namespace Blaze
 			window->AddWindowEvent(_event);
 			break;
 		}
+		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED: {
+			Window* window = GetWindowFromWindowID(event->window.windowID);
+
+			if (window == nullptr)
+				break;
+
+			Window::ContentScaleChangedEvent _event{
+				.window = *window,
+				.newContentScale = window->GetContentScale()
+			};
+
+			window->AddWindowEvent(_event);
+			break;
+		}
 		}
 	}
 	bool BlazeEngineContextInternal::SDLEventFilter(void* userData, SDL_Event* event)
 	{
 		BlazeEngineContextInternal* context = static_cast<BlazeEngineContextInternal*>(userData);
-
+		 
 		if (context != blazeEngineContext)
 		{
 			BLAZE_LOG_ERROR("SDL event filter called with an invalid engine context. Ignoring event");

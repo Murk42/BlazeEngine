@@ -14,6 +14,8 @@ namespace Blaze::Graphics::OpenGL
 		void StartRender(const RenderContext& context) override;
 		void EndRender(const RenderContext& context) override;
 		void Render(const PanelRenderData& data, const RenderContext& context) override;
+
+		GraphicsContextBase& GetGraphicsContext() const { return graphicsContext; }
 	private:
 		GraphicsContext_OpenGL& graphicsContext;
 		VertexArray va;

@@ -10,9 +10,12 @@ CLIENT_API void Setup()
 	ResourceManager resourceManager;
 
 	App app;
-	
+
 	auto mainRuntimeThreadCreationData = GetMainRuntimeThreadCreationData(app);
 	app.RegisterRuntimeThread(std::move(mainRuntimeThreadCreationData));
 
-	app.Run();
+	while (app.Update())
+	{
+		Input::Update();
+	}
 }

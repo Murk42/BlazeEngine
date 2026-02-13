@@ -194,6 +194,10 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glProgramUniform1d(id, location, value);
 	}
+	void ShaderProgram::SetUniform(int location, const Vec2u& value)
+	{
+		glProgramUniform2ui(id, location, value.x, value.y);
+	}
 	void ShaderProgram::SetUniform(int location, const Vec2i& value)
 	{
 		glProgramUniform2i(id, location, value.x, value.y);
@@ -206,6 +210,10 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glProgramUniform2d(id, location, value.x, value.y);
 	}
+	void ShaderProgram::SetUniform(int location, const Vec3u& value)
+	{
+		glProgramUniform3ui(id, location, value.x, value.y, value.z);
+	}
 	void ShaderProgram::SetUniform(int location, const Vec3i& value)
 	{
 		glProgramUniform3i(id, location, value.x, value.y, value.z);
@@ -217,6 +225,10 @@ namespace Blaze::Graphics::OpenGL
 	void ShaderProgram::SetUniform(int location, const Vec3d& value)
 	{
 		glProgramUniform3d(id, location, value.x, value.y, value.z);
+	}
+	void ShaderProgram::SetUniform(int location, const Vec4u& value)
+	{
+		glProgramUniform4ui(id, location, value.x, value.y, value.z, value.w);
 	}
 	void ShaderProgram::SetUniform(int location, const Vec4i& value)
 	{

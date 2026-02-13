@@ -2,28 +2,27 @@
 #include "BlazeEngine/UI/Graphics/RenderUnits/StaticTextRenderUnit.h"
 #include "harfbuzz/hb-ft.h"
 #include "BlazeEngine/UI/Text/TextShaping/WrappedTextShaping.h"
+#include "BlazeEngine/UI/Text/FontAtlas.h"
 
 namespace Blaze::UI
 {
 	StaticTextRenderUnit::StaticTextRenderUnit()
-		: position(0, 0), right(0, 1), color(0xf5f5f5ff)
+		: rendererTypeID(UINT32_MAX), position(0, 0), right(0, 1), color(0xf5f5f5ff), atlasFontHeight(0.0f), targetFontHeight(0.0f)
 	{
 	}
 	void StaticTextRenderUnit::Clear()
 	{
 		atlas = {};
 		glyphs.Clear();
+		rendererTypeID = UINT32_MAX;
+		position = { 0, 0 };
+		right = { 0, 1 };
+		color = 0xf5f5f5ff;
+		atlasFontHeight = 0.0f;
+		targetFontHeight = 0.0f;
 	}
-	Vec2f StaticTextRenderUnit::CopyRenderData(ArrayView<TextShaping::ShapedText> shapedText, float fontSize, const FontAtlas& fontAtlas)
+	Vec2f StaticTextRenderUnit::CopyRenderData(ArrayView<TextShaping::ShapedText> shapedText, const FontFace& fontFace, const FontAtlas& fontAtlas)
 	{
-		if (fontAtlas.GetFontFace() == nullptr)
-		{
-			BLAZE_LOG_ERROR("Cannot copy render data with an empty font atlas.");
-			return Vec2f();
-		}
-
-		auto& fontFace = *fontAtlas.GetFontFace();
-
 		FT_Face fontFaceHandle = (FT_Face)fontFace.GetHandle();
 
 		uintMem glyphCount = 0;
@@ -32,9 +31,10 @@ namespace Blaze::UI
 
 		glyphs.Resize(glyphCount);
 		atlas = fontAtlas.GetTexture();
+		atlasFontHeight = fontAtlas.GetRasterFontHeight();
 
 		float maxWidth = 0.0f;
-		Vec2f advance{ 0, -fontSize };
+		Vec2f advance{ 0, -fontAtlas.GetRasterFontHeight()};
 		auto it = glyphs.Ptr();
 		for (const auto& line : shapedText)
 		{
@@ -71,63 +71,77 @@ namespace Blaze::UI
 			}
 
 			maxWidth = line.extent / 64 > maxWidth ? line.extent / 64 : maxWidth;
-			advance.y -= fontSize;
+			advance.y -= fontAtlas.GetRasterFontHeight();
 		}
 
-		return { maxWidth, shapedText.Count() * fontSize };
+		return { maxWidth, shapedText.Count() * fontAtlas.GetRasterFontHeight() };
 	}
-	Vec2f StaticTextRenderUnit::BuildText(u8StringView string, float fontSize, const FontAtlas& atlas)
+	Vec2f StaticTextRenderUnit::BuildText(u8StringView string, const FontManager::FontAtlasData& fontAtlasData)
 	{
-		if (atlas.GetFontFace() == nullptr)
-		{
-			BLAZE_LOG_ERROR("Cannot build text render data with an empty font atlas.");
-			return Vec2f();
-		}
-
-		auto& fontFace = *atlas.GetFontFace();
-
-		FT_Face fontFaceHandle = (FT_Face)fontFace.GetHandle();
-		FT_Set_Pixel_Sizes(fontFaceHandle, static_cast<FT_UInt>(fontSize), 0);
+		FT_Face fontFaceHandle = (FT_Face)fontAtlasData.fontFace->GetHandle();
+		FT_Set_Pixel_Sizes(fontFaceHandle, static_cast<FT_UInt>(fontAtlasData.atlas->GetRasterFontHeight()), 0);
 
 		u32String convertedString = string.ConvertToStringType<char32_t>();
-		TextShaping::ShapingContext shapingContext{ convertedString, fontFace };
+		TextShaping::ShapingContext shapingContext{ convertedString, *fontAtlasData.fontFace };
 
 		auto shapedText = TextShaping::ShapeText(convertedString.FirstIterator(), convertedString.BehindIterator(), shapingContext);
-		return CopyRenderData({ &shapedText, 1 }, fontSize, atlas);
+
+		rendererTypeID = fontAtlasData.rendererTypeID;
+
+		return CopyRenderData({ &shapedText, 1 }, *fontAtlasData.fontFace, *fontAtlasData.atlas);
 	}
-	Vec2f StaticTextRenderUnit::BuildWrappedText(u8StringView string, float fontSize, const FontAtlas& atlas, float wrapWidth)
+	Vec2f StaticTextRenderUnit::BuildWrappedText(u8StringView string, const FontManager::FontAtlasData& fontAtlasData, float wrapWidth)
 	{
-		if (atlas.GetFontFace() == nullptr)
-		{
-			BLAZE_LOG_ERROR("Cannot build text render data with an empty font atlas.");
-			return Vec2f();
-		}
-
-		auto& fontFace = *atlas.GetFontFace();
-
-		FT_Face fontFaceHandle = (FT_Face)fontFace.GetHandle();
-		FT_Set_Pixel_Sizes(fontFaceHandle, static_cast<FT_UInt>(fontSize), 0);
+		FT_Face fontFaceHandle = (FT_Face)fontAtlasData.fontFace->GetHandle();
+		FT_Set_Pixel_Sizes(fontFaceHandle, static_cast<FT_UInt>(fontAtlasData.atlas->GetRasterFontHeight()), 0);
 
 		u32String convertedString = string.ConvertToStringType<char32_t>();
-		TextShaping::WrappedTextShapingContext shapingContext{ convertedString, fontFace, static_cast<uint32>(wrapWidth * 64) };
+		wrapWidth *= 64;
+		uint32 wrapWidthUint = 0;
+		if (!isfinite(wrapWidth) || (wrapWidth > UINT32_MAX))
+			wrapWidthUint = UINT32_MAX;
+		else
+			wrapWidthUint = static_cast<uint32>(wrapWidth);
+		TextShaping::WrappedTextShapingContext shapingContext{ convertedString, *fontAtlasData.fontFace, wrapWidthUint };
 
 		auto shapedText = TextShaping::ShapeTextWrapped(convertedString.FirstIterator(), convertedString.BehindIterator(), shapingContext);
-		return CopyRenderData(shapedText, fontSize, atlas);
+
+		rendererTypeID = fontAtlasData.rendererTypeID;
+
+		return CopyRenderData(shapedText, *fontAtlasData.fontFace, *fontAtlasData.atlas);
 	}
-	void StaticTextRenderUnit::Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const RenderContext& renderContext)
+	void StaticTextRenderUnit::SetColor(ColorRGBAf newColor)
+	{
+		color = newColor;
+	}
+	void StaticTextRenderUnit::SetTransform(Vec2f newPosition, Vec2f newRight)
+	{
+		position = newPosition;
+		right = newRight;
+	}
+	void StaticTextRenderUnit::SetTargetFontHeight(float fontHeight)
+	{
+		targetFontHeight = fontHeight;
+	}
+	Graphics::RendererTypeID StaticTextRenderUnit::GetRequiredRendererTypeID() const
+	{
+		return rendererTypeID;
+	}
+	void StaticTextRenderUnit::Render(const Node& node, Graphics::TextRendererBase& renderer, const RenderContext& renderContext)
 	{
 		Vec2f up = { -right.y, right.x };
 		Vec2f roundedPos = Math::Floor(position);
 
+		float scale = targetFontHeight / atlasFontHeight;
 		for (auto& glyph : glyphs)
 		{
 			renderer.Render({
 				.texture = atlas,
 				.uv1 = glyph.uv1,
 				.uv2 = glyph.uv2,
-				.pos = roundedPos + glyph.offset,
-				.right = right * glyph.size.x,
-				.up = up * glyph.size.y,
+				.pos = roundedPos + (right * glyph.offset.x + up * glyph.offset.y) * scale,
+				.right = right * glyph.size.x * scale,
+				.up = up * glyph.size.y * scale,
 				.color = color,
 				.blend = 1.0f,
 				.alpha = 1.0f,

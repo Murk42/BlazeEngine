@@ -29,23 +29,27 @@
 	</Type>
 
 	<Type Name="Blaze::Queue&lt;*&gt;">
-		<DisplayString>{{ count={ head > tail ? end - head + tail - ptr : tail - head } }}</DisplayString>
+		<DisplayString>{{ count={ head >= tail ? end - head + tail - begin : tail - head } }}</DisplayString>
 		<Expand>
-			<Item Name="[count]" ExcludeView="simple">head > tail ? end - head + tail - ptr : tail - head</Item>
-			<Item Name="[reserved]" ExcludeView="simple">end - ptr</Item>
+			<Item Name="[count]" ExcludeView="simple">head >= tail ? end - head + tail - begin: tail - head</Item>
+			<Item Name="[reserved]" ExcludeView="simple">end - begin</Item>
 
 			<CustomListItems MaxItemsPerView="5000" ExcludeView="simple">
-				<Variable Name="it" InitialValue="head" />
+				<Variable Name="it" InitialValue="head"/>
 				<Variable Name="i" InitialValue="0" />
 
-				<Loop Condition="it != tail">
-					<If Condition="it == end">
-						<Exec>it = head</Exec>
-					</If>
-					
+				<Loop Condition="head != 0">
 					<Item Name="[{i}]"> *it</Item>
 					<Exec>it++</Exec>
 					<Exec>i++</Exec>
+
+					<If Condition="it == end">
+						<Exec>it = begin</Exec>
+					</If>
+					
+					<If Condition="it == tail">
+						<Break/>
+					</If>
 				</Loop>
 			</CustomListItems>
 		</Expand>
@@ -272,7 +276,7 @@
 			<Synthetic Name="value" Condition="type ==  4"><Expand><ExpandedItem>*reinterpret_cast&lt;$T5 *&gt;(buffer)</ExpandedItem></Expand></Synthetic>
 		</Expand>
 </Type>
-	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*&gt;">
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*&gt;">
 		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
 		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
 		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
@@ -411,7 +415,7 @@
 			<Synthetic Name="value" Condition="type == 10"><Expand><ExpandedItem>*reinterpret_cast&lt;$T11*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
 		</Expand>
 </Type>
-	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*&gt;">
 		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
 		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
 		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>
@@ -577,7 +581,7 @@
 			<Synthetic Name="value" Condition="type == 15"><Expand><ExpandedItem>*reinterpret_cast&lt;$T16*&gt;(buffer)</ExpandedItem></Expand></Synthetic>
 		</Expand>
 </Type>
-	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
+	<Type Name="Blaze::Variant&lt;*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*&gt;">
 		<DisplayString Condition="type &gt;= Types::Size ">empty</DisplayString>
 		<DisplayString Condition="type ==  0">{"$T1 ", sb}</DisplayString>
 		<DisplayString Condition="type ==  1">{"$T2 ", sb}</DisplayString>

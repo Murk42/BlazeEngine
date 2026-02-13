@@ -2,7 +2,7 @@
 #include "BlazeEngine/Core/String/String.h"
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/Type/Variant.h"
-#include "BlazeEngine/Runtime/IO/Types.h"
+#include "BlazeEngine/Runtime/IO/InputTypes.h"
 
 namespace Blaze
 {
@@ -10,7 +10,32 @@ namespace Blaze
 }
 
 namespace Blaze::Input
-{
+{    
+    struct EventProcessedState
+    {
+        enum State
+        {
+            NotProcessed,
+            Processed,
+            Consumed
+        } value;
+
+        constexpr EventProcessedState() : value(NotProcessed) { }
+        constexpr EventProcessedState(const EventProcessedState&) = default;
+        constexpr EventProcessedState(const State& value) : value(value) {}
+        
+        constexpr bool operator==(const EventProcessedState&) const = default;
+        constexpr bool operator!=(const EventProcessedState&) const = default;
+        constexpr bool operator==(const State& value) const { return this->value == value; }
+        constexpr bool operator!=(const State& value) const { return this->value != value; }
+
+        constexpr explicit operator bool() const { return value != EventProcessedState::NotProcessed; }
+        constexpr operator State() const { return value; }
+
+        constexpr EventProcessedState& operator=(const EventProcessedState&) = default;
+        constexpr EventProcessedState& operator=(const State& value) { this->value = value; return *this; }
+    };
+
     struct KeyDownEvent
     {
         Window& window;
@@ -79,8 +104,21 @@ namespace Blaze::Input
         ScrollDirection direction;
         Vec2f pos; //position in window coordinates
     };
+    struct MouseEntersWindowEvent 
+    {
+        Window& window; 
+        uint64 timeNS; 
+        Input::MouseID mouseID; 
 
-    using GenericInputEvent = Variant<KeyDownEvent, KeyUpEvent, TextInputEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMotionEvent, MouseScrollEvent>;
+        Vec2f pos; 
+    };
+    struct MouseLeavesWindowEvent 
+    { 
+        Window& window; 
+        uint64 timeNS; 
+        Input::MouseID mouseID; 
+        Vec2f pos; 
+    };
 
-    
+    using GenericInputEvent = Variant<KeyDownEvent, KeyUpEvent, TextInputEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMotionEvent, MouseScrollEvent, MouseEntersWindowEvent, MouseLeavesWindowEvent>;
 }

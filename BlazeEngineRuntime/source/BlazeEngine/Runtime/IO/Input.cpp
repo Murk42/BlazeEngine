@@ -33,25 +33,35 @@ namespace Blaze::Input
 		else
 			return StringView(ptr, SDL_strlen(ptr));
 	}
-	KeyFrameState GetKeyFrameState(Key key)
+	bool GetKeyState(Key key)
 	{
 		if (auto context = BlazeEngineContextInternal::GetEngineContext())
-			return context->GetKeyFrameState(key);
+			return context->GetKeyState(key);
 		else
 		{
 			BLAZE_LOG_FATAL("Calling a function dependent on the engine context, but its not initialized");
 			return { };
 		}
 	}
-	MouseButtonFrameState GetMouseButtonFrameState(MouseButton button)
+	bool GetMouseButtonState(MouseButton button)
 	{
 		if (auto context = BlazeEngineContextInternal::GetEngineContext())
-			return context->GetMouseButtonFrameState(button);
+			return context->GetMouseButtonState(button);
 		else
 		{
 			BLAZE_LOG_FATAL("Calling a function dependent on the engine context, but its not initialized");
 			return { };
 		}
+	}	
+	 Array<MouseData> GetMice()
+	{
+		 if (auto context = BlazeEngineContextInternal::GetEngineContext())
+			 return context->GetMice();
+		 else
+		 {
+			 BLAZE_LOG_FATAL("Calling a function dependent on the engine context, but its not initialized");
+			 return { };
+		 }
 	}
 
 	StringView GetMouseName(MouseID mouseID)

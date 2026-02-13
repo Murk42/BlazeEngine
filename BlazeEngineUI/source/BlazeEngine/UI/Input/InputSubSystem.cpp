@@ -1,207 +1,10 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Input/InputSubSystem.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
-#include <ranges>
+#include "BlazeEngine/UI/Input/PointerData.h"
 
 namespace Blaze::UI
 {
-	PointerData::PointerData(InputSubSystem& inputSubSystem, Vec2f pos)
-		: capturingNode(nullptr), pos(pos), inputSubSystem(inputSubSystem)
-	{
-		UpdateHitNodes();
-	}
-	PointerData::~PointerData()
-	{
-		//Notify all that were hit but aren't no more
-		for (auto& hitVal : hitData)
-			if (hitVal.hitStatus != Node::HitStatus::NotHit)
-				if (InputNode* inputNode = dynamic_cast<InputNode*>(&hitVal.node))
-					inputNode->mouseHitStatusChangedEventDispatcher.Call({
-						.inputSubSystem = inputSubSystem,
-						.oldHitStatus = hitVal.hitStatus,
-						.newHitStatus = Node::HitStatus::NotHit
-						});
-	}
-	void PointerData::Move(Vec2f newPos)
-	{
-		pos = newPos;
-		UpdateHitNodes();
-	}
-	void PointerData::UpdateHitNodes()
-	{
-		Array<NodeHitData> oldHitData = std::move(hitData);
-
-		if (Screen* screen = inputSubSystem.GetScreen())
-		{
-			if (capturingNode != nullptr)
-			{
-				Node::HitStatus newHitStatus = capturingNode->HitTest(pos);
-
-				if (hitData.Count() == 1 && &hitData[0].node == capturingNode)
-					hitData[0].hitStatus = newHitStatus;
-				else
-					hitData = ArrayView<NodeHitData>{ NodeHitData{.node = *capturingNode, .hitStatus = newHitStatus } };
-			}
-			else
-			{
-
-				auto treeView = screen->GetTree();
-				for (auto& node : std::ranges::reverse_view(treeView))
-				{
-					if (!node.IsEnabled())
-						continue;
-
-					node.CleanFinalTransform();
-
-					Node::HitStatus newHit = node.HitTest(pos);
-
-					if (newHit != Node::HitStatus::NotHit)
-						hitData.AddBack(node, newHit);
-
-					if (newHit == Node::HitStatus::HitBlocking)
-						break;
-				}
-			}
-		}
-		else
-			hitData.Clear();
-
-		//Notify all that were hit but aren't no more
-		for (auto& oldHitVal : oldHitData)
-		{
-			Node::HitStatus oldHit = oldHitVal.hitStatus;
-			Node::HitStatus newHit = Node::HitStatus::NotHit;
-
-			for (auto& newHitVal : hitData)
-				if (&newHitVal.node == &oldHitVal.node)
-				{
-					newHit = newHitVal.hitStatus;
-					break;
-				}
-
-			if (newHit == Node::HitStatus::NotHit)
-				if (InputNode* inputNode = dynamic_cast<InputNode*>(&oldHitVal.node))
-					inputNode->mouseHitStatusChangedEventDispatcher.Call({
-						.inputSubSystem = inputSubSystem,
-						.oldHitStatus = oldHit,
-						.newHitStatus = newHit
-						});
-		}
-
-		//Notify all that were hit and still are but whose hit status changed
-		for (auto& newHitVal : hitData)
-			for (auto& oldHitVal : oldHitData)
-				if (&oldHitVal.node == &newHitVal.node && newHitVal.hitStatus != oldHitVal.hitStatus)
-				{
-					if (InputNode* inputNode = dynamic_cast<InputNode*>(&oldHitVal.node))
-						inputNode->mouseHitStatusChangedEventDispatcher.Call({
-							.inputSubSystem = inputSubSystem,
-							.oldHitStatus = oldHitVal.hitStatus,
-							.newHitStatus = newHitVal.hitStatus
-							});
-					break;
-				}
-
-		//Notify all that weren't hit but are now
-		for (auto& newHitVal : hitData)
-		{
-			Node::HitStatus oldHit = Node::HitStatus::NotHit;
-			Node::HitStatus newHit = newHitVal.hitStatus;
-
-			for (auto& oldHitVal : oldHitData)
-				if (&oldHitVal.node == &newHitVal.node)
-				{
-					oldHit = oldHitVal.hitStatus;
-					break;
-				}
-
-			if (oldHit == Node::HitStatus::NotHit)
-				if (InputNode* inputNode = dynamic_cast<InputNode*>(&newHitVal.node))
-					inputNode->mouseHitStatusChangedEventDispatcher.Call({
-						.inputSubSystem = inputSubSystem,
-						.oldHitStatus = oldHit,
-						.newHitStatus = newHit
-						});
-		}
-	}
-	void PointerData::SetCapturingNode(InputNode* node)
-	{
-		capturingNode = node;
-		UpdateHitNodes();
-	}
-	void PointerData::HandleNodeRemoval(Node& node)
-	{
-		InputNode* inputNode = dynamic_cast<InputNode*>(&node);
-
-		if (inputNode != nullptr && capturingNode == inputNode)
-			SetCapturingNode(nullptr);
-		else
-		{
-			auto hitDataIt = hitData.FirstIterator();
-
-			for (; hitDataIt != hitData.BehindIterator(); ++hitDataIt)
-				if (&hitDataIt->node == &node)
-					break;
-
-			if (hitDataIt != hitData.BehindIterator())
-				switch (hitDataIt->hitStatus)
-				{
-				case Node::HitStatus::HitBlocking:
-					UpdateHitNodes();
-					break;
-				case Node::HitStatus::HitNotBlocking:
-					hitData.EraseAt(hitDataIt);
-					break;
-				default:
-					BLAZE_LOG_ERROR("Invalid hit status for node in hit data");
-					break;
-				}
-		}
-	}
-	void PointerData::HandleNodeAddition(Node& node)
-	{
-		if (node.HitTest(pos) != Node::HitStatus::NotHit)
-			UpdateHitNodes();
-	}
-	void PointerData::HandleEnabledStateChange(Node& node)
-	{
-		if (node.IsEnabled())
-			HandleNodeAddition(node);
-		else
-			HandleNodeRemoval(node);
-	}
-	void PointerData::HandleFinalTransformChange(Node& node)
-	{
-		auto newHitStatus = node.HitTest(pos);
-		Node::HitStatus oldHitStatus = Node::HitStatus::NotHit;
-
-		for (auto& oldHitVal : hitData)
-			if (&oldHitVal.node == &node)
-			{
-				oldHitStatus = oldHitVal.hitStatus;
-				break;
-			}
-
-		if (newHitStatus != oldHitStatus)
-			UpdateHitNodes(); //This can be potentially optimized to not update all of the nodes but just one
-	}
-	//PointerData& PointerData::operator=(const PointerData& other)
-	//{
-	//	hitData = Array<NodeHitData>(other.hitData);
-	//	pos = other.pos;
-	//	capturingNode = other.capturingNode;
-	//	return *this;
-	//}
-	//PointerData& PointerData::operator=(PointerData&& other) noexcept
-	//{
-	//	hitData = std::move(other.hitData);
-	//	pos = other.pos;
-	//	capturingNode = other.capturingNode;
-	//	other.capturingNode = nullptr;
-	//
-	//	return *this;
-	//}
-
 	InputSubSystem::InputSubSystem()
 		: screen(nullptr), selectedNode(nullptr), window(nullptr)
 	{
@@ -227,24 +30,35 @@ namespace Blaze::UI
 				if (auto inputNode = dynamic_cast<InputNode*>(&node))
 					inputNode->inputSubSystem = nullptr;
 
+			for (auto& node : screen->GetTree())
+			{
+				node.enabledStateChangedEventDispatcher.RemoveHandler<&InputSubSystem::NodeEnabledStateChangedEvent>(*this);
+			}
+
 			screen->destructionEventDispatcher.RemoveHandler<&InputSubSystem::ScreenDestructionEvent>(*this);
-			screen->treeChangedEventDispatcher.RemoveHandler<&InputSubSystem::TreeChangedEvent>(*this);
+			screen->treeChangedEventDispatcher.RemoveHandler<&InputSubSystem::ScreenTreeChangedEvent>(*this);
 		}
 
+		pointerMap.Clear();
 		screen = newScreen;
 
 		if (screen != nullptr)
 		{
-			screen->treeChangedEventDispatcher.AddHandler<&InputSubSystem::TreeChangedEvent>(*this);
+			screen->treeChangedEventDispatcher.AddHandler<&InputSubSystem::ScreenTreeChangedEvent>(*this);
 			screen->destructionEventDispatcher.AddHandler<&InputSubSystem::ScreenDestructionEvent>(*this);
+
+			for (auto& node : screen->GetTree())
+			{
+				node.enabledStateChangedEventDispatcher.AddHandler<&InputSubSystem::NodeEnabledStateChangedEvent>(*this);
+			}
 
 			for (auto& node : screen->GetTree())
 				if (auto inputNode = dynamic_cast<InputNode*>(&node))
 					inputNode->inputSubSystem = this;
-		}
 
-		for (auto& pair : pointerMap)
-			pair.value.UpdateHitNodes();
+			if (window != nullptr)
+				NewScreenAndWindow();
+		}		
 	}
 	void InputSubSystem::SetWindow(Window* newWindow)
 	{
@@ -254,17 +68,17 @@ namespace Blaze::UI
 		if (window != nullptr)
 		{
 			window->destructionEventDispatcher.RemoveHandler<&InputSubSystem::WindowDestructionEvent>(*this);
-			window->mouseEnterEventDispatcher.RemoveHandler<&InputSubSystem::WindowMouseEnterEvent>(*this);
-			window->mouseLeaveEventDispatcher.RemoveHandler<&InputSubSystem::WindowMouseLeaveEvent>(*this);
 		}
 
+		pointerMap.Clear();
 		window = newWindow;
 
 		if (window != nullptr)
 		{
-			window->mouseLeaveEventDispatcher.AddHandler<&InputSubSystem::WindowMouseLeaveEvent>(*this);
-			window->mouseEnterEventDispatcher.AddHandler<&InputSubSystem::WindowMouseEnterEvent>(*this);
 			window->destructionEventDispatcher.AddHandler<&InputSubSystem::WindowDestructionEvent>(*this);
+
+			if (screen != nullptr)
+				NewScreenAndWindow();
 		}
 	}
 	void InputSubSystem::SelectNode(InputNode* newSelectedInputNode)
@@ -306,39 +120,59 @@ namespace Blaze::UI
 			.node = *newSelectedInputNode
 			});
 	}
-	void InputSubSystem::InvalidateNodeHitStatus(InputNode& node)
+	Input::EventProcessedState InputSubSystem::ProcessInputEvent(const Input::GenericInputEvent& event, bool processed)
 	{
-		for (auto& pair : pointerMap)
-			pair.value.UpdateHitNodes();
-	}
-	bool InputSubSystem::ProcessInputEvent(const Input::GenericInputEvent& event, bool eventProcessed)
-	{
+		Input::EventProcessedState result;
+
 		switch (event.GetValueType())
 		{
 		case Input::GenericInputEvent::GetValueTypeOf<Input::MouseMotionEvent>():
-			event.TryProcess<Input::MouseMotionEvent>([&](const auto& e) { eventProcessed = MouseMotionEvent(e, eventProcessed); });
+			event.TryProcess([&](const Input::MouseMotionEvent& e) {
+				if (auto it = pointerMap.Find(e.mouseID); !it.IsNull())
+					result = it->value.MouseMotionEvent(e, processed);
+				});
 			break;
 		case Input::GenericInputEvent::GetValueTypeOf<Input::MouseScrollEvent>():
-			event.TryProcess<Input::MouseScrollEvent>([&](const auto& e) { eventProcessed = MouseScrollEvent(e, eventProcessed); });
+			event.TryProcess([&](const Input::MouseScrollEvent& e) {
+				if (auto it = pointerMap.Find(e.mouseID); !it.IsNull())
+					result = it->value.MouseScrollEvent(e, processed);
+				});
 			break;
 		case Input::GenericInputEvent::GetValueTypeOf<Input::MouseButtonDownEvent>():
-			event.TryProcess<Input::MouseButtonDownEvent>([&](const auto& e) { eventProcessed = MouseButtonDownEvent(e, eventProcessed); });
+			event.TryProcess([&](const Input::MouseButtonDownEvent& e) {
+				if (auto it = pointerMap.Find(e.mouseID); !it.IsNull())
+				{
+					result = it->value.MouseButtonDownEvent(e, processed);
+
+					if (!result)
+						SelectNode(nullptr);
+				}
+				});
 			break;
 		case Input::GenericInputEvent::GetValueTypeOf<Input::MouseButtonUpEvent>():
-			event.TryProcess<Input::MouseButtonUpEvent>([&](const auto& e) { eventProcessed = MouseButtonUpEvent(e, eventProcessed); });
+			event.TryProcess([&](const Input::MouseButtonUpEvent& e) {
+				if (auto it = pointerMap.Find(e.mouseID); !it.IsNull())
+					result = it->value.MouseButtonUpEvent(e, processed);
+				});
+			break;
+		case Input::GenericInputEvent::GetValueTypeOf<Input::MouseEntersWindowEvent>():
+			event.TryProcess([&](const Input::MouseEntersWindowEvent& e) { result = MouseEntersWindowEvent(e, processed); });
+			break;
+		case Input::GenericInputEvent::GetValueTypeOf<Input::MouseLeavesWindowEvent>():
+			event.TryProcess([&](const Input::MouseLeavesWindowEvent& e) { result = MouseLeavesWindowEvent(e, processed); });
 			break;
 		case Input::GenericInputEvent::GetValueTypeOf<Input::KeyDownEvent>():
-			event.TryProcess<Input::KeyDownEvent>([&](const auto& e) { eventProcessed = KeyDownEvent(e, eventProcessed); });
+			event.TryProcess([&](const Input::KeyDownEvent& e) { result = KeyDownEvent(e, processed); });
 			break;
 		case Input::GenericInputEvent::GetValueTypeOf<Input::KeyUpEvent>():
-			event.TryProcess<Input::KeyUpEvent>([&](const auto& e) { eventProcessed = KeyUpEvent(e, eventProcessed); });
+			event.TryProcess([&](const Input::KeyUpEvent& e) { result = KeyUpEvent(e, processed); });
 			break;
 		case Input::GenericInputEvent::GetValueTypeOf<Input::TextInputEvent>():
-			event.TryProcess<Input::TextInputEvent>([&](const auto& e) { eventProcessed = TextInputEvent(e, eventProcessed); });
+			event.TryProcess([&](const Input::TextInputEvent& e) { result = TextInputEvent(e, processed); });
 			break;
 		}
 
-		return eventProcessed;
+		return result;
 	}
 	bool InputSubSystem::SetMouseCapturingNode(Input::MouseID mouseID, InputNode* node)
 	{
@@ -348,49 +182,62 @@ namespace Blaze::UI
 			return false;
 		}
 
-		if (window != nullptr)
-		{
-			if (node == nullptr)
-			{
-				mouseCaptureHandle.ReleaseMouseCapture();
-			}
-			else
-			{
-				if (!window->CaptureMouse(mouseCaptureHandle))
-					return false;
-			}
-		}
+		auto it = pointerMap.Find(mouseID);
 
-		auto pointerData = FindPointerData(mouseID);
-
-		if (pointerData == nullptr)
+		if (it.IsNull())
 			return false;
 
-		pointerData->SetCapturingNode(node);
+		bool returnValue = it->value.SetCapturingNode(node);
+		
+		Vec2f pos = it->value.GetPos();
+		Vec2f windowSize = Vec2f(window->GetSize());
+		if (pos.x < 0.0f || pos.y < 0.0f || pos.x >= windowSize.x || pos.y >= windowSize.y)
+			pointerMap.Erase(mouseID);
 
-		return true;
+		return returnValue;
 	}
 	InputNode* InputSubSystem::GetMouseCapturingNode(Input::MouseID mouseID) const
 	{
-		auto pointerData = FindPointerData(mouseID);
+		auto it = pointerMap.Find(mouseID);
 
-		if (pointerData == nullptr)
+		if (it.IsNull())
 			return nullptr;
 
-		return pointerData->GetCapturingNode();
+		return it->value.GetCapturingNode();
 	}
 	Vec2f InputSubSystem::GetScreenMousePos(Input::MouseID mouseID) const
 	{
-		auto pointerData = FindPointerData(mouseID);
+		auto it = pointerMap.Find(mouseID);
 
-		if (pointerData == nullptr)
+		if (it.IsNull())
 			return Vec2f();
 
-		return pointerData->GetPos();
+		return it->value.GetPos();
 	}
-	void InputSubSystem::TreeChangedEvent(const Screen::TreeChangedEvent& event)
+	void InputSubSystem::NewScreenAndWindow()
 	{
-		if (event.type == Screen::TreeChangedEvent::Type::NodeRemoved)
+		//Rethrow mouse motion event to "hit test" the entire application again
+		auto mice = Input::GetMice();
+
+		for (auto& mouse : mice)
+			if (mouse.window == window)
+			{
+				pointerMap.Insert(mouse.id, *screen, *window, mouse.id, mouse.pos, true);
+
+				Input::MouseMotionEvent event{
+					.window = *window,
+					.timeNS = 0,
+					.mouseID = mouse.id,
+					.delta = { 0, 0},
+					.pos = mouse.pos,
+				};
+
+				window->AddInputEvent(event);
+			}
+	}
+	void InputSubSystem::ScreenTreeChangedEvent(const Screen::ScreenTreeChangedEvent& event)
+	{
+		if (event.type == Screen::ScreenTreeChangedEvent::Type::NodeRemoved)
 		{
 			if (InputNode* inputNode = dynamic_cast<InputNode*>(&event.node))
 			{
@@ -399,14 +246,6 @@ namespace Blaze::UI
 
 				inputNode->inputSubSystem = nullptr;
 			}
-
-			for (auto& pair : pointerMap)
-				pair.value.HandleNodeRemoval(event.node);
-		}
-		else if (event.type == Screen::TreeChangedEvent::Type::NodeAdded)
-		{
-			for (auto& pair : pointerMap)
-				pair.value.HandleNodeAddition(event.node);
 		}
 	}
 	void InputSubSystem::ScreenDestructionEvent(const Screen::DestructionEvent& event)
@@ -417,253 +256,66 @@ namespace Blaze::UI
 	{
 		SetWindow(nullptr);
 	}
-	void InputSubSystem::WindowMouseEnterEvent(const Window::MouseEnterEvent& event)
+	void InputSubSystem::NodeEnabledStateChangedEvent(const Node::NodeEnabledStateChangedEvent& event)
 	{
+		if (InputNode* inputNode = dynamic_cast<InputNode*>(&event.node); inputNode != nullptr && selectedNode == inputNode)
+				SelectNode(nullptr);
 	}
-	void InputSubSystem::WindowMouseLeaveEvent(const Window::MouseLeaveEvent& event)
+	Input::EventProcessedState InputSubSystem::MouseEntersWindowEvent(const Input::MouseEntersWindowEvent& event, bool processed)
 	{
-		if (!mouseCaptureHandle.IsCapturingMouse())
-			pointerMap.Clear();
+		if (screen == nullptr)
+			return Input::EventProcessedState::NotProcessed;
+
+		pointerMap.Insert(event.mouseID, *screen, *window, event.mouseID, event.pos, processed);
+
+		return Input::EventProcessedState::Processed;
 	}
-	void InputSubSystem::NodeFinalTransformChangedEvent(const Node::FinalTransformUpdatedEvent& event)
+	Input::EventProcessedState InputSubSystem::MouseLeavesWindowEvent(const Input::MouseLeavesWindowEvent& event, bool processed)
 	{
-		for (auto& pair : pointerMap)
-			pair.value.HandleFinalTransformChange(event.node);
+		auto it = pointerMap.Find(event.mouseID);
+
+		if (it.IsNull())
+			return Input::EventProcessedState::NotProcessed;
+
+		if (it->value.GetCapturingNode() == nullptr)
+			pointerMap.Erase(it);
+
+		return Input::EventProcessedState::Processed;
 	}
-	void InputSubSystem::EnabledStateChangedEvent(const Node::EnabledStateChangedEvent& event)
-	{
-		for (auto& pair : pointerMap)
-			pair.value.HandleEnabledStateChange(event.node);
-	}
-	bool InputSubSystem::MouseMotionEvent(const Input::MouseMotionEvent& event, bool eventProcessed)
-	{
-		const Vec2u windowSize = event.window.GetSize();
-		const Vec2f newMouseWindowPos = Vec2f(event.pos.x, windowSize.y - event.pos.y);		
-
-		const auto screenFinalTransform = screen->GetFinalTransform();
-
-		const Vec2f newMouseScreenPos = screenFinalTransform.TransformFromFinalToLocalTransformSpace(newMouseWindowPos) * screenFinalTransform.size / (Vec2f)windowSize;
-
-		PointerData* pointerData = PrepareMouseEvent(event.mouseID, newMouseScreenPos, eventProcessed, true);
-
-		if (pointerData == nullptr)
-			return false;
-
-		const Vec2f oldMouseScreenPos = pointerData->GetPos();
-		const Vec2f mouseScreenDelta = newMouseWindowPos - oldMouseScreenPos;
-
-		if (mouseScreenDelta == Vec2f(0, 0))
-			return false;
-
-		UIMouseMotionEvent eventUI{ event, *this };
-		eventUI.delta = mouseScreenDelta;
-		eventUI.pos = newMouseScreenPos;
-
-		pointerData->Move(newMouseScreenPos);
-
-		if (pointerData->GetCapturingNode() != nullptr)
-		{
-			pointerData->GetCapturingNode()->mouseMotionEventDispatcher.Call(eventUI);
-			return true;
-		}
-		else if (!pointerData->GetHitData().Empty())
-		{
-			Array<PointerData::NodeHitData> hitData = pointerData->GetHitData(); //Copy hit data
-			bool blockingHit = false;
-			for (auto& hitData : std::ranges::reverse_view(hitData))
-			{
-				if (InputNode* inputNode = dynamic_cast<InputNode*>(&hitData.node))
-					inputNode->mouseMotionEventDispatcher.Call(eventUI);
-
-				blockingHit |= hitData.hitStatus == Node::HitStatus::HitBlocking;
-			}
-			return blockingHit;
-		}
-
-		return false;
-	}
-	bool InputSubSystem::MouseScrollEvent(const Input::MouseScrollEvent& event, bool eventProcessed)
-	{
-		PointerData* pointerData = PrepareMouseEvent(event.mouseID, event.pos, eventProcessed, false);
-
-		if (pointerData == nullptr)
-			return false;
-
-		UIMouseScrollEvent eventUI{ event, *this };
-		eventUI.pos = pointerData->GetPos();
-
-		if (pointerData->GetCapturingNode() != nullptr)
-		{
-			pointerData->GetCapturingNode()->mouseScrollEventDispatcher.Call(eventUI);
-			return true;
-		}
-		else if (!pointerData->GetHitData().Empty())
-		{
-			Array<PointerData::NodeHitData> hitData = pointerData->GetHitData(); //Copy hit data
-			bool blockingHit = false;
-			for (auto& hitData : std::ranges::reverse_view(hitData))
-			{
-				if (InputNode* inputNode = dynamic_cast<InputNode*>(&hitData.node))
-					inputNode->mouseScrollEventDispatcher.Call(eventUI);
-
-				blockingHit |= hitData.hitStatus == Node::HitStatus::HitBlocking;
-			}
-			return blockingHit;
-		}
-
-		return false;
-	}
-	bool InputSubSystem::MouseButtonDownEvent(const Input::MouseButtonDownEvent& event, bool eventProcessed)
-	{
-		PointerData* pointerData = PrepareMouseEvent(event.mouseID, event.pos, eventProcessed, false);
-
-		if (pointerData == nullptr)
-			return false;
-
-		UIMouseButtonDownEvent eventUI{ event, *this };
-		eventUI.pos = pointerData->GetPos();
-
-		if (pointerData->GetCapturingNode() != nullptr)
-		{
-			pointerData->GetCapturingNode()->mouseButtonDownEventDispatcher.Call(eventUI);
-			return true;
-		}
-		else if (!pointerData->GetHitData().Empty())
-		{
-			Array<PointerData::NodeHitData> hitData = pointerData->GetHitData(); //Copy hit data
-			bool blockingHit = false;
-			for (auto& hitData : std::ranges::reverse_view(hitData))
-			{
-				if (InputNode* inputNode = dynamic_cast<InputNode*>(&hitData.node))
-					inputNode->mouseButtonDownEventDispatcher.Call(eventUI);
-
-				blockingHit |= (hitData.hitStatus == Node::HitStatus::HitBlocking);
-			}
-			return blockingHit;
-		}
-
-		return false;
-	}
-	bool InputSubSystem::MouseButtonUpEvent(const Input::MouseButtonUpEvent& event, bool eventProcessed)
-	{
-		PointerData* pointerData = PrepareMouseEvent(event.mouseID, event.pos, eventProcessed, false);
-
-		if (pointerData == nullptr)
-			return false;
-
-		UIMouseButtonUpEvent eventUI{ event, *this };
-		eventUI.pos = pointerData->GetPos();
-
-		if (pointerData->GetCapturingNode() != nullptr)
-		{
-			pointerData->GetCapturingNode()->mouseButtonUpEventDispatcher.Call(eventUI);
-			return true;
-		}
-		else if (!pointerData->GetHitData().Empty())
-		{
-			Array<PointerData::NodeHitData> hitData = pointerData->GetHitData(); //Copy hit data
-			bool blockingHit = false;
-			for (auto& hitData : std::ranges::reverse_view(hitData))
-			{
-				if (InputNode* inputNode = dynamic_cast<InputNode*>(&hitData.node))
-					inputNode->mouseButtonUpEventDispatcher.Call(eventUI);
-
-				blockingHit |= hitData.hitStatus == Node::HitStatus::HitBlocking;
-			}
-			return blockingHit;
-		}
-
-		return false;
-	}
-	bool InputSubSystem::KeyDownEvent(const Input::KeyDownEvent& event, bool eventProcessed)
+	Input::EventProcessedState InputSubSystem::KeyDownEvent(const Input::KeyDownEvent& event, bool processed)
 	{
 		if (selectedNode == nullptr)
-			return false;
+			return Input::EventProcessedState::NotProcessed;
 
 		selectedNode->keyDownEventDispatcher.Call({
 			event,
-			*this
+			*selectedNode
 			});
 
-		return true;
+		return Input::EventProcessedState::Consumed;
 	}
-	bool InputSubSystem::KeyUpEvent(const Input::KeyUpEvent& event, bool eventProcessed)
+	Input::EventProcessedState InputSubSystem::KeyUpEvent(const Input::KeyUpEvent& event, bool processed)
 	{
 		if (selectedNode == nullptr)
-			return false;
+			return Input::EventProcessedState::NotProcessed;
 
 		selectedNode->keyUpEventDispatcher.Call({
 			event,
-			* this
+			*selectedNode
 			});
 
-		return true;
+		return Input::EventProcessedState::Consumed;
 	}
-	bool InputSubSystem::TextInputEvent(const Input::TextInputEvent& event, bool eventProcessed)
+	Input::EventProcessedState InputSubSystem::TextInputEvent(const Input::TextInputEvent& event, bool processed)
 	{
 		if (selectedNode == nullptr)
-			return false;
+			return Input::EventProcessedState::NotProcessed;
 
 		selectedNode->textInputEventDispatcher.Call({
 			event,
-			* this
+			*selectedNode
 			});
 
-		return true;
-	}
-	PointerData* InputSubSystem::FindOrInsertPointerData(Input::MouseID mouseID, Vec2f pos)
-	{
-		auto it = pointerMap.Insert(mouseID, *this, pos).iterator;
-		if (it.IsNull())
-		{
-			BLAZE_LOG_FATAL("Failed to insert pointer data");
-			return nullptr;
-		}
-
-		return &it->value;
-	}
-	const PointerData* InputSubSystem::FindPointerData(Input::MouseID mouseID) const
-	{
-		auto it = pointerMap.Find(mouseID);
-
-		if (it.IsNull())
-			return nullptr;
-
-		return &it->value;
-	}
-	PointerData* InputSubSystem::FindPointerData(Input::MouseID mouseID)
-	{
-		auto it = pointerMap.Find(mouseID);
-
-		if (it.IsNull())
-			return nullptr;
-
-		return &it->value;
-	}
-	PointerData* InputSubSystem::PrepareMouseEvent(Input::MouseID mouseID, Vec2f pos, bool eventProcessed, bool insertMouse)
-	{
-		if (screen == nullptr)
-			return nullptr;
-
-		if (window != nullptr && window->IsMouseCaptured() && !mouseCaptureHandle.IsCapturingMouse())
-			return nullptr;
-
-		PointerData* pointerData = nullptr;
-		
-		if (insertMouse)
-			pointerData = FindOrInsertPointerData(mouseID, pos);
-		else
-			pointerData = FindPointerData(mouseID);
-
-		if (pointerData == nullptr)
-			return nullptr;
-
-		if (eventProcessed && pointerData->GetCapturingNode() == nullptr)
-		{
-			pointerMap.Clear();
-			return nullptr;
-		}
-
-		return pointerData;
+		return Input::EventProcessedState::Consumed;
 	}
 }

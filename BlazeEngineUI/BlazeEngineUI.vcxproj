@@ -111,11 +111,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
-      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
+call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
       <TreatOutputAsContent>
       </TreatOutputAsContent>
-      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,11 +135,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
-      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
+call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
       <TreatOutputAsContent>
       </TreatOutputAsContent>
-      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -157,11 +159,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
-      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
+call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
       <TreatOutputAsContent>
       </TreatOutputAsContent>
-      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -180,22 +183,27 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <CustomBuildStep>
-      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"</Command>
-      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp</Inputs>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
+call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
       <TreatOutputAsContent>
       </TreatOutputAsContent>
-      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp</Outputs>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\BlazeEngine\BlazeEngineUI.h" />
     <ClInclude Include="include\BlazeEngine\UI\Common\ButtonBase.h" />
     <ClInclude Include="include\BlazeEngine\UI\Common\System.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\AntialiasedTextRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\TextRendererBase.h" />
     <ClInclude Include="include\BlazeEngine\UI\Input\InputEvents.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Input\PointerData.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\PanelButton.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Slider.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\FontAtlas.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Text\FontGlyphRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\FontGlyphRasterizer.h" />
     <ClInclude Include="include\BlazeEngine\UI\Core\Node.h" />
     <ClInclude Include="include\BlazeEngine\UI\Core\NodeDataMap.h" />
     <ClInclude Include="include\BlazeEngine\UI\Core\NodeFinalTransform.h" />
@@ -214,11 +222,12 @@
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Image.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Panel.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Label.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Common\CharacterSet.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\CharacterSet.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\Font.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\FontFace.h" />
     <ClInclude Include="include\BlazeEngine\UI\Input\InputSubSystem.h" />
     <ClInclude Include="include\BlazeEngine\UI\Input\InputNode.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\FontManager.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextShaping\TextShaping.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextShaping\WrappedTextShaping.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextStyle.h" />
@@ -231,16 +240,26 @@
     <ClInclude Include="source\BlazeEngine\External\rectpack2D\rectpack2D.h" />
     <ClInclude Include="source\BlazeEngine\External\rectpack2D\rect_structs.h" />
     <ClInclude Include="source\BlazeEngine\UI\Files\Consola.h" />
+    <ClInclude Include="source\BlazeEngine\UI\Graphics\Shaders\Shaders.h" />
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\FontManager.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Common\ButtonBase.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Common\System.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Input\InputSubSystem.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Input\PointerData.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\PanelButton.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Slider.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\FontAtlas.cpp" />
-    <ClCompile Include="source\BlazeEngine\UI\Text\FontGlyphRenderer.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\FontGlyphRasterizer.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\Node.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeDataMap.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeFinalTransform.cpp" />
@@ -248,7 +267,7 @@
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeIterator.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\NodeTreeView.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Core\Screen.cpp" />
-    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsManager.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\GraphicsSubSystem.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\StaticTextRenderUnit.cpp" />
@@ -257,13 +276,12 @@
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Image.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Files\Consola.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Panel.cpp" />
-    <ClCompile Include="source\BlazeEngine\UI\Common\CharacterSet.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\CharacterSet.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\Font.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\FontFace.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Label.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\TextShaping\TextShaping.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\TextShaping\WrappedTextShaping.cpp" />
-    <ClCompile Include="source\BlazeEngine\UI\Text\TextStyle.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -273,6 +291,10 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="source\BlazeEngine\UI\Files\Consola.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag" />
+    <None Include="source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

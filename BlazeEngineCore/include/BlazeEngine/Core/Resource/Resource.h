@@ -1,9 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
-#include "BlazeEngine/Core/Common/Hash.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
 #include <atomic>
-#include <xmemory>
 
 namespace Blaze
 {

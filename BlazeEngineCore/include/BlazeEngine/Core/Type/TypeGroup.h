@@ -13,6 +13,12 @@ namespace Blaze
 		static constexpr bool AllTypesDifferent = true;
 		template<template<typename> class C>
 		static constexpr bool AppliesToAll = true;
+
+		template<uintMem indexOffset = 0, typename F>
+		static constexpr bool ForEach(F&& func)
+		{
+			return false;
+		}
 	};
 
 	template<typename T1, typename ... T>
@@ -121,5 +127,13 @@ namespace Blaze
 		static constexpr bool AppliesToAll = _AppliesToAll<C, T1, T...>::value;
 		template<template<typename> class C>
 		static constexpr bool AppliesToOne = _AppliesToOne<C, T1, T...>::value;
+
+		template<uintMem startIndex = 0, typename F>
+		static constexpr bool ForEach(F&& func)
+		{
+			bool shouldContinue = func.template operator()<T1, startIndex>();
+
+			return shouldContinue && Next::template ForEach<startIndex + 1>(std::forward<F>(func));
+		}
 	};
 }

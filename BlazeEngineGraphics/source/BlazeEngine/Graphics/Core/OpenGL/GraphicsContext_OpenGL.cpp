@@ -154,13 +154,16 @@ namespace Blaze::Graphics::OpenGL
 		if (contextFlags & SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG)
 		{
 			if (!out.Empty()) out += ", ";
-			out = "robust access";
+			out += "robust access";
 		}
 		if (contextFlags & SDL_GL_CONTEXT_RESET_ISOLATION_FLAG)
 		{
 			if (!out.Empty()) out += ", ";
-			out = "reset isolation";
+			out += "reset isolation";
 		}
+
+		if (out.Empty())
+			out = "no flags";
 
 		return out;
 	}
@@ -268,52 +271,28 @@ namespace Blaze::Graphics::OpenGL
 
 		SDL_GL_ResetAttributes();
 
-		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, properties.majorVersion))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MAJOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.majorVersion, SDL_GetError());
-			return false;
+#define TrySetGLAttributeWithString(ENUM_NAME, VALUE, STRING_VALUE)																																\
+		if (!SDL_GL_SetAttribute(ENUM_NAME, VALUE))																											\
+		{																																										\
+			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute " #ENUM_NAME " to {}. SDL_Error() returnd: \"{}\"", VALUE, SDL_GetError());				\
+			return false;																																						\
 		}
-
-		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, properties.minorVersion))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_MINOR_VERSION to {}. SDL_Error() returnd: \"{}\"", properties.minorVersion, SDL_GetError());
-			return false;
-		}
-
-		if (!SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_ACCELERTED_VISUAL to 1. SDL_Error() returnd: \"{}\"", SDL_GetError());
-			return false;
-		}
-
-		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, _contextFlags))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_FLAGS to {}.SDL_Error() returnd: \"{}\"", GetOpenGLContextFlagsString(_contextFlags), SDL_GetError());
-			return false;
-		}
-
-		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, _profileType))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_PROFILE_MASK to {}.SDL_Error() returnd: \"{}\"", GetOpenGLProfileTypeString(_profileType), SDL_GetError());
-			return false;
-		}
-
-		if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _releaseBehaviour))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_CONTEXT_RELEASE_BEHAVIOR to {}.SDL_Error() returnd: \"{}\"", GetOpenGLReleaseBehaviourString(_releaseBehaviour), SDL_GetError());
-			return false;
-		}
-
-		if (!SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, properties.depthBufferBitCount))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_DEPTH_SIZE to {}. SDL_Error() returnd: \"{}\"", properties.depthBufferBitCount, SDL_GetError());
-			return false;
-		}
-		if (!SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, properties.stencilBufferBitCount))
-		{
-			BLAZE_LOG_ERROR("Failed to set OpenGL context attribute SDL_GL_STENCIL_SIZE to . SDL_Error() returnd: \"{}\"", properties.stencilBufferBitCount, SDL_GetError());
-			return false;
-		}
+#define TrySetGLAttribute(ENUM_NAME, VALUE) TrySetGLAttributeWithString(ENUM_NAME, VALUE, #VALUE)
+		
+		TrySetGLAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, properties.majorVersion);
+		TrySetGLAttribute(SDL_GL_CONTEXT_MINOR_VERSION, properties.minorVersion);
+		TrySetGLAttribute(SDL_GL_ACCELERATED_VISUAL, properties.acceleratedVisual);
+		TrySetGLAttributeWithString(SDL_GL_CONTEXT_FLAGS, _contextFlags, GetOpenGLContextFlagsString(_contextFlags));
+		TrySetGLAttributeWithString(SDL_GL_CONTEXT_PROFILE_MASK, _contextFlags, GetOpenGLProfileTypeString(_profileType));
+		TrySetGLAttributeWithString(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _contextFlags, GetOpenGLReleaseBehaviourString(_releaseBehaviour));
+		TrySetGLAttribute(SDL_GL_DEPTH_SIZE, properties.minDepthBufferBitCount);
+		TrySetGLAttribute(SDL_GL_STENCIL_SIZE, properties.minStencilBufferBitCount);
+		TrySetGLAttribute(SDL_GL_RED_SIZE, properties.minRedBitCount);
+		TrySetGLAttribute(SDL_GL_GREEN_SIZE, properties.minGreenBitCount);
+		TrySetGLAttribute(SDL_GL_BLUE_SIZE, properties.minBlueBitCount);
+		TrySetGLAttribute(SDL_GL_ALPHA_SIZE, properties.minAlphaBitCount);
+		TrySetGLAttribute(SDL_GL_DOUBLEBUFFER, properties.doubleBuffer);
+		TrySetGLAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, properties.framebufferSRGBCapable);
 
 		return true;
 	}
@@ -510,39 +489,60 @@ namespace Blaze::Graphics::OpenGL
 		else
 			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_CONTEXT_MINOR_VERSION. SDL returned error: \"" + SDL_GetError() + "\"");
 
-		int finalDepthSize = 0;
-		if (SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &finalDepthSize))
+#define ValidateMinBitInBuffer(ENUM_NAME, PROPERTY_NAME, MESSAGE_NAME) {																			\
+			int value = 0;																															\
+			if (SDL_GL_GetAttribute(ENUM_NAME, &value))																								\
+			{																																		\
+				if (value < properties.PROPERTY_NAME)																								\
+					if (value == 0)																													\
+						BLAZE_LOG_WARNING("Asked for at least {}-bit " MESSAGE_NAME ", got no " MESSAGE_NAME, properties.PROPERTY_NAME);			\
+					else																															\
+						BLAZE_LOG_WARNING("Asked for at least {}-bit " MESSAGE_NAME ", got{} - bit", properties.PROPERTY_NAME, value);				\
+																																					\
+				properties.PROPERTY_NAME = value;																									\
+			}																																		\
+			else																																	\
+				BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with " #ENUM_NAME ".SDL returned error : \"" + SDL_GetError() + "\"");	\
+		}
+	
+		ValidateMinBitInBuffer(SDL_GL_DEPTH_SIZE, minDepthBufferBitCount, "depth buffer");
+		ValidateMinBitInBuffer(SDL_GL_STENCIL_SIZE, minStencilBufferBitCount, "stencil buffer");
+		ValidateMinBitInBuffer(SDL_GL_RED_SIZE, minRedBitCount, "red channel");
+		ValidateMinBitInBuffer(SDL_GL_GREEN_SIZE, minGreenBitCount, "green channel");
+		ValidateMinBitInBuffer(SDL_GL_BLUE_SIZE, minBlueBitCount, "blue channel");
+		ValidateMinBitInBuffer(SDL_GL_ALPHA_SIZE, minAlphaBitCount, "alpha channel");
+
+		int doublebuffer = false;
+		if (SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &doublebuffer))
 		{
-			if (finalDepthSize != properties.depthBufferBitCount)
-				if (finalDepthSize == 0)
-					BLAZE_LOG_WARNING("Asked for {}-bit depth buffer, got no depth buffer", properties.depthBufferBitCount);
-				else if (properties.depthBufferBitCount == 0)
-					BLAZE_LOG_WARNING("Asked for no depth buffer, got {}-bit depth buffer", finalDepthSize);
+			if (doublebuffer != static_cast<int>(properties.doubleBuffer))
+				if (properties.doubleBuffer)
+					BLAZE_LOG_WARNING("Asked for double buffering got no double buffering");
 				else
-					BLAZE_LOG_WARNING("Asked for {}-bit depth buffer, got {}-bit", properties.depthBufferBitCount, finalDepthSize);
-			properties.depthBufferBitCount = finalDepthSize;
+					BLAZE_LOG_WARNING("Asked for no double buffering got double buffering");
+
+			properties.doubleBuffer = doublebuffer;
 		}
 		else
-			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_DEPTH_SIZE. SDL returned error: \"" + SDL_GetError() + "\"");
+			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_DOUBLEBUFFER. SDL returned error: \"" + SDL_GetError() + "\"");
 
-		int finalStencilSize = 0;
-		if (SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &finalStencilSize))
+		int framebufferSRGBCapable = false;
+		if (SDL_GL_GetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, &framebufferSRGBCapable))
 		{
-			if (finalStencilSize != properties.stencilBufferBitCount)
-				if (finalStencilSize == 0)
-					BLAZE_LOG_WARNING("Asked for {}-bit stencil buffer, got no stencil buffer", properties.stencilBufferBitCount);
-				else if (properties.stencilBufferBitCount == 0)
-					BLAZE_LOG_WARNING("Asked for no stencil buffer, got {}-bit stencil buffer", finalStencilSize);
-				else
-					BLAZE_LOG_WARNING("Asked for {}-bit stencil buffer, got {}-bit", properties.stencilBufferBitCount, finalStencilSize);
-			properties.stencilBufferBitCount = finalStencilSize;
+			if (framebufferSRGBCapable != int(properties.framebufferSRGBCapable))
+				if (properties.framebufferSRGBCapable)
+					BLAZE_LOG_WARNING("Asked for SRGB capable framebuffer, but it wasn't supplied");
+
+			properties.framebufferSRGBCapable = framebufferSRGBCapable;
 		}
 		else
-			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_STENCIL_SIZE. SDL returned error: \"{}\"", SDL_GetError());
+			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_FRAMEBUFFER_SRGB_CAPABLE. SDL returned error: \"" + SDL_GetError() + "\"");
 
-		String contextFlagsText = GetContextFlagsText(finalContextFlags);
-		if (!contextFlagsText.Empty()) contextFlagsText = " (" + contextFlagsText + ")";
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> created OpenGL context {}.{} {} profile ", properties.majorVersion, properties.minorVersion, profileName, contextFlagsText);
+		BLAZE_LOG_INFO("<color=green>Successfully<color/> created OpenGL context {}.{} {} profile ({} R{}/G{}/B{}/A{} D{}/S{} DB{} SRGB{})",
+			properties.majorVersion, properties.minorVersion, profileName, GetContextFlagsText(finalContextFlags),
+			properties.minRedBitCount, properties.minGreenBitCount, properties.minBlueBitCount, properties.minAlphaBitCount, properties.minDepthBufferBitCount, properties.minStencilBufferBitCount,
+			int(properties.doubleBuffer), int(properties.framebufferSRGBCapable)
+		);
 
 		return true;
 	}
@@ -578,6 +578,7 @@ namespace Blaze::Graphics::OpenGL
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
 		glEnable(GL_BLEND);
+		glEnable(GL_FRAMEBUFFER_SRGB);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 		glBlendEquation(GL_FUNC_ADD);
 
@@ -632,6 +633,12 @@ namespace Blaze::Graphics::OpenGL
 			return Window(_options);
 		}
 
+		Rectf displayRect = Display::GetDisplayRect(initWindow.GetDisplayIndex());
+		Vec2i pos{
+			options.pos.x == INT_MAX ? static_cast<int>(displayRect.x) + (static_cast<int>(displayRect.w) - static_cast<int>(options.size.x)) / 2 : options.pos.x,
+			options.pos.y == INT_MAX ? static_cast<int>(displayRect.y) + (static_cast<int>(displayRect.h) - static_cast<int>(options.size.y)) / 2 : options.pos.y
+		};
+
 		initWindow.SetResizableFlag(options.resizable);
 		initWindow.SetBorderlessFlag(options.borderless);
 		initWindow.SetMouseGrabbedFlag(options.mouseGrabbed);
@@ -639,7 +646,7 @@ namespace Blaze::Graphics::OpenGL
 		initWindow.SetHiddenFlag(options.hidden);
 		initWindow.SetAlwaysOnTopFlag(options.alwaysOnTop);
 		initWindow.SetTitle(options.title);
-		initWindow.SetPos(options.pos);
+		initWindow.SetPos(pos);
 		initWindow.SetSize(options.size);
 		initWindow.SetWindowPresentMode(options.presentMode);
 
@@ -649,8 +656,6 @@ namespace Blaze::Graphics::OpenGL
 	{
 		if (!properties.useSeparateInitWindow && initWindow.GetHandle() == nullptr)
 			initWindow = std::move(window);
-		else
-			window.Destroy();
 	}
 	void GraphicsContext_OpenGL::ActiveWindowDestroyed(const Window::DestructionEvent& event)
 	{

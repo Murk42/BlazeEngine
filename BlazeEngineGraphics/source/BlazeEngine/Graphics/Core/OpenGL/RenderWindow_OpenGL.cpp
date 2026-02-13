@@ -45,6 +45,7 @@ namespace Blaze::Graphics::OpenGL
 
 		if (!SDL_GL_SwapWindow((SDL_Window*)GetHandle()))
 			BLAZE_LOG_ERROR("SDL_GL_SwapWindow() failed. SDL_Error() returned: \"{}\"", SDL_GetError());
+
 	}
 	void RenderWindow_OpenGL::ClearRenderBuffers()
 	{

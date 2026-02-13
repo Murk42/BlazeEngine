@@ -33,17 +33,27 @@ namespace Blaze::UI::Nodes
 			.cornerRadius = renderUnit.cornerRadius
 		};
 	}
-	void Panel::PreRender(const RenderContext& renderContext)
+	void Panel::SetBlocksHitTestFlag(bool blocksHitTest)
+	{
+		this->blocksHitTest = blocksHitTest;
+	}
+	bool Panel::PreRender(const RenderContext& renderContext)
 	{
 		auto finalTransform = GetFinalTransform();
 		renderUnit.pos = finalTransform.position;
 		renderUnit.right = finalTransform.Right() * finalTransform.size.x;
 		renderUnit.up = finalTransform.Up() * finalTransform.size.y;
+
+		return false;
 	}
 	RenderUnitBase* Panel::GetRenderUnit(uintMem index)
 	{
 		if (index == 0)
 			return &renderUnit;
 		return nullptr;
+	}
+	Node::HitStatus Panel::HitTest(Vec2f screenPosition)
+	{
+		return blocksHitTest ? Node::HitTest(screenPosition) : HitStatus::NotHit;
 	}
 }

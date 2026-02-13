@@ -20,11 +20,11 @@ namespace Blaze::UI
 		EventDispatcher<WindowChangedEvent> windowChangedEventDispatcher;
 		EventDispatcher<DestructionEvent> destructionEventDispatcher;
 
-		System();
-		System(Graphics::RendererRegistry newRegistry, Window& window, bool resizeScreenWithWindow = true);
+		System(Graphics::GraphicsContextBase& graphicsContext);
+		System(Graphics::GraphicsContextBase& graphicsContext, Graphics::RendererRegistry rendererRegistry, Window& window, bool resizeScreenWithWindow = true);
 		~System();
 
-		bool ProcessInputEvent(const Input::GenericInputEvent& event, bool isProcessed);
+		Input::EventProcessedState ProcessInputEvent(const Input::GenericInputEvent& event, bool processed);
 		void Render();
 
 		template<IsDerivedFrom<Screen> S, typename ... Args> requires IsConstructibleFrom<S, Args...>
@@ -48,6 +48,7 @@ namespace Blaze::UI
 		bool resizeScreenWithWindow;
 
 		void WindowResized(const Window::ResizedEvent& event);
+		void WindowContentScaleChanged(const Window::ContentScaleChangedEvent& event);
 	};
 
 	template<IsDerivedFrom<Screen> S, typename ... Args> requires IsConstructibleFrom<S, Args...>

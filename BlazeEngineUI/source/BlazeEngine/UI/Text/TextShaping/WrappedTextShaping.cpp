@@ -9,7 +9,7 @@
 
 namespace Blaze::UI::TextShaping
 {
-	Array<char> get_text_linebreaks(const u32StringView& string, const char* language)
+	static Array<char> get_text_linebreaks(const u32StringView& string, const char* language)
 	{
 		static struct Initializer {
 			Initializer() {
@@ -24,7 +24,7 @@ namespace Blaze::UI::TextShaping
 		set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(string.Ptr()), string.Count(), language, breaks.Ptr());
 		return breaks;
 	}
-	Array<char> get_text_wordbreaks(const u32StringView& string, const char* language)
+	static Array<char> get_text_wordbreaks(const u32StringView& string, const char* language)
 	{
 		static struct Initializer {
 			Initializer() {
@@ -39,13 +39,69 @@ namespace Blaze::UI::TextShaping
 		set_wordbreaks_utf32(reinterpret_cast<const utf32_t*>(string.Ptr()), string.Count(), language, breaks.Ptr());
 		return breaks;
 	}
+	static bool IsWordSuffixCharacter(char32_t character)
+	{
+		switch (character)
+		{
+		case U'.':
+		case U',':
+		case U'!':
+		case U'?':
+		case U':':
+		case U';':
+			return true;
+		default:
+			return false;
+		}
+	}
+	static Array<TextUnitSeparationLevel> get_text_separations(const u32StringView& text)
+	{
+		if (text.Empty())
+			return { };
+
+		auto wordBreaks = get_text_wordbreaks(text, hb_language_to_string(hb_language_get_default()));
+
+		Array<TextUnitSeparationLevel> out{ text.Count() };
+
+		utf8proc_int32_t state = 0;
+		for (uintMem i = 0; i < text.Count() - 1; ++i)
+		{
+			if (utf8proc_grapheme_break_stateful(text[i], text[i + 1], &state))
+			{
+				if (wordBreaks[i] == WORDBREAK_BREAK)
+					out[i] = TextUnitSeparationLevel::Word;
+				else
+				{
+					out[i] = TextUnitSeparationLevel::Grapheme;
+					state = 0;
+				}
+			}
+			else
+				out[i] = TextUnitSeparationLevel::Codepoint;
+
+			if (i != 0 && IsWordSuffixCharacter(text[i]) && !IsWordSuffixCharacter(text[i - 1]) && out[i - 1] == TextUnitSeparationLevel::Word)
+			{
+				out[i - 1] = TextUnitSeparationLevel::Grapheme;
+				out[i] = TextUnitSeparationLevel::Word;
+			}
+
+			if (text[i] == U'\n')
+				out[i] = TextUnitSeparationLevel::NewLine;
+
+		}
+
+		out.Last() = TextUnitSeparationLevel::Word;
+
+		return out;
+	}
 
 	WrappedTextShapingContext::WrappedTextShapingContext(u32StringView text, const FontFace& fontFace, uint32 maxWidth, TextUnitSeparationLevel smallestSeparationLevel, TextUnitSeparationLevel expectedSeparationLevel, ShouldIncludeAtEndFunctionType shouldIncludeAtEndFunction)
 		: ShapingContext(text, fontFace), maxWidth(maxWidth), smallestSeparationLevel(smallestSeparationLevel), expectedSeparationLevel(expectedSeparationLevel), shouldIncludeAtEndFunction(shouldIncludeAtEndFunction)
 	{
+		textUnitSeparations = get_text_separations({ text.Begin(), text.End() });
 	}
 
-	TextUnitSeparationLevel TextShaping::WrappedTextShapingContext::GetTextUnitSeparationAt(u32StringViewIterator iterator) const
+	TextUnitSeparationLevel WrappedTextShapingContext::GetTextUnitSeparationAt(u32StringViewIterator iterator) const
 	{
 		return textUnitSeparations[iterator - GetString().FirstIterator()];
 	}
@@ -230,27 +286,27 @@ namespace Blaze::UI::TextShaping
 
 		while (it != textBegin)
 		{
-			if (shapingContext.GetTextUnitSeparationAt(it) >= level)
-				break;
-
 			--it;
+
+			if (shapingContext.GetTextUnitSeparationAt(it) >= level)
+				return it + 1;
 		}
 
-		return it;
+		return textBegin;
 	}
 	static u32StringViewIterator find_end_rounded_to_text_unit(u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
 	{
 		u32StringViewIterator end = textEnd;
 
 		TextUnitSeparationLevel separationLevel = shapingContext.GetExpectedSeparationLevel();
-		while (separationLevel != shapingContext.GetSmallestSeparationLevel() - 1)
+		while (separationLevel != static_cast<TextUnitSeparationLevel>(static_cast<uint32>(shapingContext.GetSmallestSeparationLevel()) - 1))
 		{
 			end = find_end_rounded_to_text_unit(textBegin, textEnd, separationLevel, shapingContext);
 
 			if (end != textBegin)
 				break;
 
-			separationLevel = TextUnitSeparationLevel(separationLevel - 1);
+			separationLevel = static_cast<TextUnitSeparationLevel>(static_cast<uint32>(separationLevel) - 1);
 		}
 
 		return end;
@@ -433,11 +489,20 @@ namespace Blaze::UI::TextShaping
 
 		if (lineTailResult.startGlyph == nullptr)
 			return false;
+		
+		const bool lineTailResultEmpty = lineTailResult.shapedText.textBegin == lineTailResult.shapedText.textEnd;
+		const bool lineHeadResultEmpty = lineHeadResult.shapedText.textBegin == lineHeadResult.shapedText.textEnd;
+		if (lineHeadResultEmpty && lineTailResultEmpty)
+			return false;
 
-		if (lineTailResult.shapedText.textBegin == lineTailResult.shapedText.textEnd &&
-			lineHeadResult.shapedText.textBegin != lineHeadResult.shapedText.textEnd)
-			if (shapingContext.GetTextUnitSeparationAt(lineHeadResult.shapedText.textEnd) != shapingContext.GetExpectedSeparationLevel())
+		if (lineHeadResultEmpty)
+		{
+			//Can be executed only if the line head is empty
+			const bool lineTailCleanStart = shapingContext.GetTextUnitSeparationAt(lineHeadResult.shapedText.textEnd) == shapingContext.GetExpectedSeparationLevel();
+
+			if (lineTailCleanStart)
 				return false;
+		}
 
 		result.shapedText.textBegin = lineHeadResult.shapedText.textBegin;
 		result.shapedText.textEnd = lineTailResult.shapedText.textEnd;
@@ -485,7 +550,7 @@ namespace Blaze::UI::TextShaping
 			wrappedLineResult.clusterContainingEndCharacter = find_cluster_containing_character(glyphs, roundedEnd);
 		}
 	}
-	static void IncludeCharactersAtEnd(WrappedLineResult& result, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	static void IncludeCharactersAtEnd(WrappedLineResult& result, u32StringViewIterator textEnd, const ArrayView<GlyphInfo>& glyphs, const WrappedTextShapingContext& shapingContext)
 	{
 		if (result.shapedText.textBegin == result.shapedText.textEnd)
 			return;
@@ -508,6 +573,7 @@ namespace Blaze::UI::TextShaping
 
 		result.shapedText.extent -= width_between_glyphs(glyphBegin, result.shapedText.glyphs.End());
 		result.shapedText.textEnd = shouldIncludeAtEndEnd;
+		result.clusterContainingEndCharacter = find_cluster_containing_character(glyphs, shouldIncludeAtEndEnd);
 	}
 	/*
 		Wraps the line with the desired width. If the line is empty some characters are added. Includes empty characters at end
@@ -518,7 +584,7 @@ namespace Blaze::UI::TextShaping
 
 		HandleEmptyLine(result, textEnd, glyphs, shapingContext);
 
-		IncludeCharactersAtEnd(result, textEnd, shapingContext);
+		IncludeCharactersAtEnd(result, textEnd, glyphs, shapingContext);
 
 		return result;
 	}
@@ -572,69 +638,12 @@ namespace Blaze::UI::TextShaping
 		return next_line(text.FirstIterator(), lineBreaks, text);
 	}
 
-	static bool IsWordSuffixCharacter(char32_t character)
-	{
-		switch (character)
-		{
-		case U'.':
-		case U',':
-		case U'!':
-		case U'?':
-		case U':':
-		case U';':
-			return true;
-		default:
-			return false;
-		}
-	}
-	static Array<TextUnitSeparationLevel> get_text_separations(const u32StringView& text)
-	{
-		if (text.Empty())
-			return { };
-
-		auto wordBreaks = get_text_wordbreaks(text, hb_language_to_string(hb_language_get_default()));
-
-		Array<TextUnitSeparationLevel> out{ text.Count() };
-
-		utf8proc_int32_t state = 0;
-		for (uintMem i = 0; i < text.Count() - 1; ++i)
-		{
-			if (utf8proc_grapheme_break_stateful(text[i], text[i + 1], &state))
-			{
-				if (wordBreaks[i] == WORDBREAK_BREAK)
-					out[i] = TextUnitSeparationLevel::Word;
-				else
-				{
-					out[i] = TextUnitSeparationLevel::Grapheme;
-					state = 0;
-				}
-			}
-			else
-				out[i] = TextUnitSeparationLevel::Codepoint;
-
-			if (i != 0 && IsWordSuffixCharacter(text[i]) && !IsWordSuffixCharacter(text[i - 1]) && out[i - 1] == TextUnitSeparationLevel::Word)
-			{
-				out[i - 1] = TextUnitSeparationLevel::Grapheme;
-				out[i] = TextUnitSeparationLevel::Word;
-			}
-
-			if (text[i] == U'\n')
-				out[i] = TextUnitSeparationLevel::NewLine;
-
-		}
-
-		out.Last() = TextUnitSeparationLevel::Word;
-
-		return out;
-	}
-
 	Array<ShapedText> ShapeTextWrapped(u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
 	{
 		if (textBegin == textEnd)
 			return {};
 
 		const auto lineBreaks = get_text_linebreaks({ textBegin, textEnd }, hb_language_to_string(hb_language_get_default()));
-		auto textUnitSeparations = get_text_separations({ textBegin, textEnd });
 
 		Array<ShapedText> wrappedLines;
 		for (auto lineText = first_line(lineBreaks, { textBegin, textEnd }); lineText.begin != lineText.end; lineText = next_line(lineText.end, lineBreaks, { textBegin, textEnd }))

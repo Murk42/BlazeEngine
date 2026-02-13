@@ -1,11 +1,15 @@
 #pragma once
 #include "BlazeEngine/Core/Resource/ResourceStorage.h"
 #include "BlazeEngine/Core/Container/Map.h"
+#include "BlazeEngine/Core/Container/List.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
 
 namespace Blaze
 {
-	template<IsConstructibleFrom<> T>
+	template<typename T>
+	class Resource;
+
+	template<typename T>
 	class BLAZE_API DefaultResourceStorage : public ResourceStorage<T>
 	{
 	public:
@@ -16,7 +20,7 @@ namespace Blaze
 		List<Resource<T>> unnamedResources;
 	};
 
-	template<IsConstructibleFrom<> T>
+	template<typename T>
 	inline ResourceRef<T> DefaultResourceStorage<T>::CreateResource(StringView name)
 	{
 		if (name.Empty())
@@ -24,7 +28,7 @@ namespace Blaze
 		else
 			return resources.Insert(name).iterator->value;
 	}
-	template<IsConstructibleFrom<> T>
+	template<typename T>
 	inline ResourceRef<T> DefaultResourceStorage<T>::GetResource(StringView name)
 	{
 		auto it = resources.Find(name);

@@ -12,10 +12,13 @@ namespace Blaze
 		EventQueue();
 		~EventQueue();
 
+		uintMem Count();
+
 		template<typename ... Args> requires IsConstructibleFrom<T, Args...>
 		void AddEvent(Args&& ... args);
 		bool GetEvent(T& event);
-		bool WaitEvent(float seconds, T& event);
+		bool WaitEvent(float seconds, T& event) const;
+		bool WaitToBeEmpty(float seconds) const;
 
 		bool HasEvents() const;
 	private:
@@ -33,11 +36,18 @@ namespace Blaze
 	{
 	}
 	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>
+	inline uintMem EventQueue<T, Allocator>::Count() 
+	{
+		std::lock_guard lock{ mutex };
+		return queue.Count();
+	}
+	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>
 	template<typename ... Args> requires IsConstructibleFrom<T, Args...>
 	inline void EventQueue<T, Allocator>::AddEvent(Args&& ... args)
 	{
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard lock{ mutex } ;
 		queue.Push(std::forward<Args>(args)...);
+
 		cv.notify_one();
 	}
 	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>
@@ -52,7 +62,7 @@ namespace Blaze
 		return true;
 	}
 	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>
-	inline bool EventQueue<T, Allocator>::WaitEvent(float seconds, T& event)
+	inline bool EventQueue<T, Allocator>::WaitEvent(float seconds, T& event) const
 	{
 		std::unique_lock lock{ mutex };
 
@@ -61,6 +71,16 @@ namespace Blaze
 			event = queue.Pop();
 			return true;
 		}
+
+		return false;
+	}
+	template<typename T, AllocatorType Allocator> requires IsAssignableFrom<T, const T&>
+	inline bool EventQueue<T, Allocator>::WaitToBeEmpty(float seconds) const
+	{
+		std::unique_lock lock{ mutex };
+
+		if (cv.wait_for(lock, std::chrono::duration<float>(seconds), [this]() { return queue.Empty(); }))
+			return true;
 
 		return false;
 	}

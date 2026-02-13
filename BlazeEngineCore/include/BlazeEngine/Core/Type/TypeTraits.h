@@ -1,17 +1,12 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Type/TypeTraitsImpl.h"
+#include <type_traits>
 
 namespace Blaze
 {
     template<typename T1, typename T2>
     concept SameAs = Internal::SameAs<T1, T2>::value;
-
-	template<typename T1, typename T2>
-	concept ConvertibleTo = requires (const T1& value)
-	{
-		{ static_cast<T2>(value) } -> SameAs<T2>;
-	};
 
 	template<bool Condition, typename TrueType, typename FalseType>
 	using Conditional = typename Internal::Conditional<Condition, TrueType, FalseType>::Type;
@@ -44,39 +39,34 @@ namespace Blaze
 	template<typename T>
 	using ArrayValueType = typename Internal::ArrayValueType<T>::Type;
 
-    template<typename Base, typename Derived>
-    concept IsBaseOf = requires(Derived* d) {
-        { static_cast<Base*>(d) };
-    } && (!SameAs<Base, Derived> || requires { typename Internal::SameAs<Base, Derived>; });
-
-	template<typename Derived, typename Base>
-	concept IsDerivedFrom = IsBaseOf<Base, Derived>;
-
-    template<typename T, typename... Args>
-    concept IsConstructibleFrom = requires(Args&&... args) {
-        T{static_cast<Args&&>(args)...};
-    };
-    template<typename From, typename To>
-    concept IsConvertibleTo = requires(From&& from) {
-        { static_cast<To>(static_cast<From&&>(from)) } -> SameAs<To>;
-    };
-
 	template<typename Left, typename Right>
 	concept IsAssignableFrom = requires(Left left, Right && right) {
 		{ left = static_cast<Right&&>(right) };
 	};
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+	template<typename Base, typename Derived>
+	concept IsBaseOf = __is_base_of(Base, Derived);
+	template<typename Derived, typename Base>
+	concept IsDerivedFrom = __is_base_of(Base, Derived) && __is_convertible_to(const volatile Derived*, const volatile Base*);
+	template<typename T>
+	concept IsDestructible = __is_nothrow_destructible(T);
+	template<typename T, typename... Args>
+	concept IsConstructibleFrom = IsDestructible<T> && __is_constructible(T, Args...);
+	template<typename From, typename To>
+	concept IsConvertibleTo = __is_convertible_to(From, To) && requires { static_cast<To>(Declval<From>()); };
 	template<typename T>
 	concept IsFinal = __is_final(T);
-	template<typename T>
-	concept IsTriviallyCopyable= __is_trivially_copyable(T);
 	template<typename T, typename ... Args>
 	concept IsTriviallyConstructible = __is_trivially_constructible(T, Args...);
 	template<typename T>
 	concept IsTriviallyDestructible = __is_trivially_destructible(T);
+	template<typename T, typename T2>
+	concept IsTriviallyAssignable = __is_trivially_assignable(T, T2);
 	template<typename T>
 	concept HasVirtualDestructor = __has_virtual_destructor(T);
+	template<typename T>
+	using UnderlyingType = __underlying_type(T);
 #else
 	// If we reach here, the compiler doesn't expose the usual builtin.
 	// We can't reliably reimplement the standard trait in portable, standard C++,
@@ -84,16 +74,28 @@ namespace Blaze
 
 	// (sizeof(T) > 0) is used to keep SFINAE friendliness
 
+	template<typename Base, typename Derived>
+	concept IsBaseOf = (sizeof(Base) > 0) && false;
+	template<typename Derived, typename Base>
+	concept IsDerivedFrom = (sizeof(Base) > 0) && false;
+	template<typename T>
+	concept IsDestructible = (sizeof(T) > 0) && false;
+	template<typename T, typename... Args>
+	concept IsConstructibleFrom = (sizeof(T) > 0) && false;
+	template<typename From, typename To>
+	concept IsConvertibleTo = (sizeof(From) > 0) && false;
 	template<typename T>
 	concept IsFinal = = (sizeof(T) > 0) && false;
-	template<typename T>
-	concept IsTriviallyCopyable = (sizeof(T) > 0) && false;
 	template<typename T, typename ... Args>
 	concept IsTriviallyConstructible = (sizeof(T) > 0) && false;
 	template<typename T>
 	concept IsTriviallyDestructible = (sizeof(T) > 0) && false;
+	template<typename T, typename T2>
+	concept IsTriviallyAssignable = (sizeof(T) > 0) && false;
 	template<typename T>
 	concept HasVirtualDestructor = (sizeof(T) > 0) && false;
+	template<typename T>
+	using UnderlyingType = (sizeof(T) > 0) && false;;
 
 	static_assert("Your compiler doesn't support type trait builtins. ");
 #endif

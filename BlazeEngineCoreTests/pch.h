@@ -7,6 +7,6 @@
 #ifndef PCH_H
 #define PCH_H
 
-#include <BlazeEngine/Core/BlazeEngineCore.h>
+#include <BlazeEngine/BlazeEngineCore.h>
 
 #endif //PCH_H

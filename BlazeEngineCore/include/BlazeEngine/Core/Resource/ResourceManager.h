@@ -215,7 +215,7 @@ namespace Blaze
 	inline ResourceRef<T> ResourceManager::LoadResource(StringView name, Args && ...args)
 	{
 		ResourceRef<T> resource = AllocateResource<T>(name);
-		resource.GetResource().LoadResource(std::forward<Args>(args)...);
+		resource.GetResource()->LoadResource(std::forward<Args>(args)...);
 		return resource;
 	}
 	template<typename T>

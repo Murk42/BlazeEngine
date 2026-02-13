@@ -171,6 +171,9 @@ namespace Blaze::Graphics::OpenGL
 		RG32UI,
 		R32UI,
 
+		SRGBA32,
+		SRGB24,
+
 		Depth16,
 		Depth24,
 		Depth32F,

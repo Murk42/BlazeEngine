@@ -364,26 +364,28 @@ namespace Blaze::Math::Shapes
 	template<typename T>
 	constexpr bool Intersection(const Segment2D<T>& segment1, const Segment2D<T>& segment2, Vec2<T>& point)
 	{
-		Vec2<T> dir1 = segment1.pointB - segment1.pointA;
-		Vec2<T> dir2 = segment2.pointB - segment2.pointA;
-		dir2 = Vec2<T>(-dir2.y, dir2.x);
+		Vec2<T> d1 = segment1.pointB - segment1.pointA;
+		Vec2<T> d2 = segment2.pointB - segment2.pointA;
 
-		T dot = dir1.DotProduct(dir2);
+		T det = d1.x * d2.y - d1.y * d2.x;
 
-		if (dot == 0)
+		// Parallel or collinear
+		if ((det < 0.0f ? -det : det) < FLT_EPSILON)
 			return false;
 
 		Vec2<T> offset = segment2.pointA - segment1.pointA;
 
-		T t1 = offset.DotProduct(dir2) / dot;
-		T t2 = offset.DotProduct(dir1) / dot;
+		T t1 = (offset.x * d2.y - offset.y * d2.x) / det;
+		T t2 = (offset.x * d1.y - offset.y * d1.x) / det;
 
-		if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1)
-			return false;
+		// Check if the intersection lies within both segments
+		if (t1 >= 0 && t1 <= 1 && t2 >= 0 && t2 <= 1)
+		{
+			point = segment1.pointA + d1 * t1;
+			return true;
+		}
 
-		point = segment1.pointA + dir1 * t1;
-
-		return true;
+		return false;
 	}
 
 	template<typename T>

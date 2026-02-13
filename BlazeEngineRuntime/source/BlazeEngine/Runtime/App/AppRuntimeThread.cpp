@@ -15,7 +15,7 @@ namespace Blaze
 	}
 	void AppRuntimeThread::AddLayer(AppLayerCreationData&& layerCreationData)
 	{
-		std::lock_guard lg{ layerMutex };
+		std::lock_guard lg{ layerTasksMutex };
 		queuedLayerCreationData.AddBack(std::move(layerCreationData));
 	}
 	void AppRuntimeThread::RemoveLayer(AppLayer& layer)
@@ -42,60 +42,72 @@ namespace Blaze
 
 			EndRender();
 
-			ProcessMessages();
-
 			ProcessLayerTasks();
 		}
 
 		layerStack.Clear();
+	}
+	static bool GetMouseMotionReportingEventMouseID(Input::GenericInputEvent& event, Input::MouseID& mouseID)
+	{		
+		if (event.TryProcess([&](const Input::MouseMotionEvent      & event) { mouseID = event.mouseID; })) return true;
+		if (event.TryProcess([&](const Input::MouseEntersWindowEvent& event) { mouseID = event.mouseID; })) return true;
+		if (event.TryProcess([&](const Input::MouseLeavesWindowEvent& event) { mouseID = event.mouseID; })) return true;
+		return false;
 	}
 	void AppRuntimeThread::ProcessInputEvents()
 	{
 		Input::GenericInputEvent inputEvent;
 		while (window.ProcessInputEvent(inputEvent))
 		{
+			bool consumable = true;
+			bool consumed = false;
 			bool processed = false;
+
+			Input::MouseID mouseID;
+			if (GetMouseMotionReportingEventMouseID(inputEvent, mouseID))
+			{
+				consumable = false;
+
+				//if (window.IsMouseCaptured(mouseID))
+				//	processed = true;
+			}
 
 			for (auto& layer : std::ranges::reverse_view(layerStack))
 			{
-				processed |= layer->OnEvent(inputEvent, processed);
+				Input::EventProcessedState result = layer->OnEvent(inputEvent, processed);
 
-				bool eventBlocked = false;
-
-				switch (inputEvent.GetValueType())
+				switch (result)
 				{
-				case Input::GenericInputEvent::GetValueTypeOf<Input::MouseMotionEvent>():
-				case Input::GenericInputEvent::GetValueTypeOf<Input::MouseButtonDownEvent>():
-				case Input::GenericInputEvent::GetValueTypeOf<Input::MouseButtonUpEvent>():
-				case Input::GenericInputEvent::GetValueTypeOf<Input::MouseScrollEvent>():
-					eventBlocked = false;
+				case Input::EventProcessedState::NotProcessed:
+					break;
+				case Input::EventProcessedState::Processed:
+					processed = true;
+					break;
+				case Input::EventProcessedState::Consumed:
+					if (consumable)
+						consumed = true;
+					processed = true;
 					break;
 				default:
-					eventBlocked = true;
+					BLAZE_LOG_ERROR("Client function returned an invalid EventProcessedState enum value");
 					break;
 				}
 
-				if (eventBlocked)
+				if (consumed)
 					break;
 			}
 		}
 	}
-	void AppRuntimeThread::ProcessMessages()
-	{
-		Array<Handle<Message>> movedMessages;
-		{
-			std::lock_guard lg{ messagesMutex };
-			movedMessages = std::move(messages);
-		}
-
-		for (auto& message : movedMessages)
-			ProcessMessage(*message);
-	}
 	void AppRuntimeThread::ProcessLayerTasks()
 	{
-		std::lock_guard lg{ layerMutex };
-		Array<LayerRemovalData> movedQueuedLayerRemovalData = std::move(queuedLayerRemovalData);
-		Array<AppLayerCreationData> movedQueuedLayerCreationData = std::move(queuedLayerCreationData);
+		Array<LayerRemovalData> movedQueuedLayerRemovalData;
+		Array<AppLayerCreationData> movedQueuedLayerCreationData;
+
+		{
+			std::lock_guard lg{ layerTasksMutex };
+			movedQueuedLayerRemovalData = std::move(queuedLayerRemovalData);
+			movedQueuedLayerCreationData = std::move(queuedLayerCreationData);
+		}
 
 		for (auto& removalData : movedQueuedLayerRemovalData)
 			for (auto it = layerStack.FirstIterator(); it != layerStack.BehindIterator(); ++it)
@@ -106,23 +118,14 @@ namespace Blaze
 				}
 
 		for (auto& creationData : movedQueuedLayerCreationData)
-			creationData.CreateLayer(layerStack);
-	}
-	void AppRuntimeThread::SendMessage(Handle<Message> message)
-	{
-		if (message == nullptr)
-			return;
-
-		std::lock_guard lg{ messagesMutex };
-		messages.AddBack(std::move(message));
+			layerStack.AddBack(creationData.CreateLayer());
 	}
 	void AppRuntimeThread::RemoveLayer(const LayerRemovalData& layerRemovalData)
 	{
 		if (layerRemovalData.pickFunction == nullptr)
 			return;
 
-
-		std::lock_guard lg{ layerMutex };
+		std::lock_guard lg{ layerTasksMutex };
 		queuedLayerRemovalData.AddBack(layerRemovalData);
 	}
 }

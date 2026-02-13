@@ -55,12 +55,10 @@ namespace Blaze::UI::Nodes
 			.pressedTint = pressedTint
 		};
 	}
-	void PanelButton::PreRender(const RenderContext& renderContext)
+	bool PanelButton::PreRender(const RenderContext& renderContext)
 	{
-		CleanFinalTransform();
-
 		if (!renderUnitDirty)
-			return;
+			return false;
 
 		renderUnitDirty = false;
 
@@ -68,6 +66,8 @@ namespace Blaze::UI::Nodes
 		renderUnit.pos = transform.position;
 		renderUnit.right = transform.Right() * transform.size.x;
 		renderUnit.up= transform.Up() * transform.size.y;
+
+		return false;
 	}
 	RenderUnitBase* PanelButton::GetRenderUnit(uintMem index)
 	{

@@ -1,7 +1,7 @@
  #pragma once
 #include "BlazeEngine/Core/Common/Color.h"
 #include "BlazeEngine/Runtime/IO/Window.h"
-#include "BlazeEngine/Graphics/Core/Dynamic/GraphicsContext.h"
+#include "BlazeEngine/Graphics/Core/GraphicsContextBase.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGL
@@ -51,11 +51,18 @@ namespace Blaze::Graphics::OpenGL
 		ContextFlags contextFlags = ContextFlags::None;// = ContextFlags::Debug | ContextFlags::RobustAccess | ContextFlags::ForwardCompatible | ContextFlags::ResetIsolation;
 		ReleaseBehaviour releaseBehaviour = ReleaseBehaviour::Flush;
 
-		uint depthBufferBitCount = 16;
+		uint minDepthBufferBitCount = 16;
+		uint minStencilBufferBitCount = 0;
+		uint minRedBitCount = 8;
+		uint minGreenBitCount = 8;
+		uint minBlueBitCount = 8;
+		uint minAlphaBitCount = 8;
 
-		uint stencilBufferBitCount = 0;
-
+		bool acceleratedVisual = true;
+		bool doubleBuffer = true;
+		bool framebufferSRGBCapable = false;
 		bool useSeparateInitWindow = false;
+
 		//If not using a separate init window these are the options the init window will be created with. The
 		//first render window that is created by the user will use immutable window options provided in this
 		//variable (e.g. utility window, transparent window)
@@ -63,7 +70,7 @@ namespace Blaze::Graphics::OpenGL
 	};
 
 	//Not moveable because external references to the object might be invalidated
-	class BLAZE_API GraphicsContext_OpenGL : public Dynamic::GraphicsContextBase
+	class BLAZE_API GraphicsContext_OpenGL : public GraphicsContextBase
 	{
 	public:
 		/*Parity*/GraphicsContext_OpenGL();
@@ -97,8 +104,10 @@ namespace Blaze::Graphics::OpenGL
 
 		void SetActiveTextureSlot(uint slot);
 
-		void BindUniformBuffer(const OpenGL::GraphicsBuffer& buffer, uint binding);
-		void BindUniformBufferRange(const OpenGL::GraphicsBuffer& buffer, uint binding, uint offset, uint size);
+		void BindUniformBuffer(const OpenGL::GraphicsBuffer& buffer, uint bindingPoint);
+		void BindUniformBufferRange(const OpenGL::GraphicsBuffer& buffer, uint bindingPoint, uint offset, uint size);
+		void SetShaderUniformBlockBindingPoint(const ShaderProgram& program, uintMem uniformBlockIndex, uint bindingPoint);
+
 		void SelectImage(uint slot, const OpenGL::Texture2D& texture, uint level, OpenGL::ImageAccess access, OpenGL::ImageFormat format);
 		void SelectImage(uint slot, const OpenGL::Texture1D& texture, uint level, OpenGL::ImageAccess access, OpenGL::ImageFormat format);
 
@@ -123,6 +132,7 @@ namespace Blaze::Graphics::OpenGL
 		void EnableWritingToDepthBuffer(bool enable);
 		void EnableStencilTest(bool enable);
 		void EnableScissorTest(bool enable);
+		void EnableSRGBFramebuffer(bool enable);
 
 		void SetStencilOperation(OpenGL::ScreenBufferType bufferType, OpenGL::StencilOperationType bothFail, OpenGL::StencilOperationType depthFailStencilSucceed, OpenGL::StencilOperationType bothSucceed);
 		void SetStencilFunction(OpenGL::ScreenBufferType bufferType, OpenGL::StencilComparison comparison, int reference, uint mask);

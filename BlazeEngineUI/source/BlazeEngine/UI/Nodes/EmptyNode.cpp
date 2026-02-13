@@ -8,10 +8,8 @@ namespace Blaze::UI::Nodes
 		dataMap.SetTypeName("EmptyNode");
 	}
 	EmptyNode::EmptyNode(Node& node, const NodeTransform& transform)
-		: EmptyNode()
+		: Node(node, transform)
 	{
-		SetTransform(transform);
-		SetParent(&node);
 	}
 	Node::HitStatus EmptyNode::HitTest(Vec2f pos)
 	{

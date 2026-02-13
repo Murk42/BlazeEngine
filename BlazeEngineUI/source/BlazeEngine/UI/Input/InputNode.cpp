@@ -22,11 +22,6 @@ namespace Blaze::UI
 	{
 		return inputSubSystem != nullptr && inputSubSystem->GetSelectedNode() == this;
 	}
-	void InputNode::InvalidateHitStatus()
-	{
-		if (inputSubSystem != nullptr)
-			inputSubSystem->InvalidateNodeHitStatus(*this);
-	}
 	bool InputNode::CaptureMouse(Input::MouseID mouseID)
 	{
 		if (inputSubSystem != nullptr)

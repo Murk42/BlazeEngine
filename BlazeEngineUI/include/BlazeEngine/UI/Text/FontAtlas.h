@@ -2,32 +2,21 @@
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/Resource/ResourceManager.h"
 #include "BlazeEngine/Core/Container/Map.h"
+#include "BlazeEngine/Graphics/Core/GraphicsContextBase.h"
 #include "BlazeEngine/UI/Text/TextStyle.h"
 
 namespace Blaze::UI
 {
 	class FontFace;
-	class FontGlyphRenderer;
+	class FontGlyphRasterizer;
 
-	class BLAZE_API FontAtlasIdentifier
+	struct FontAtlasDescriptor
 	{
-	public:
-		FontAtlasIdentifier(const FontAtlasIdentifier&);
-		FontAtlasIdentifier(const FontFace& fontFace, float fontSize);
-
-		uint64 Hash() const;
-
-		inline const FontFace& GetFontFace() const { return *fontFace; }
-		inline float GetFontSize() const { return fontSize; }
-
-		bool operator==(const FontAtlasIdentifier& other) const;
-
-		FontAtlasIdentifier& operator=(const FontAtlasIdentifier&);
-	private:
-		const FontFace* fontFace;
-		float fontSize;
+		const FontFace& fontFace;
+		float rasterFontHeight;
+		ArrayView<uint32> glyphIndices;
+		const FontGlyphRasterizer& glyphRasterizer;
 	};
-
 
 	class BLAZE_API FontAtlas
 	{
@@ -40,7 +29,11 @@ namespace Blaze::UI
 
 		FontAtlas();
 		FontAtlas(FontAtlas&& other) noexcept;
-		FontAtlas(const FontFace& fontFace, float fontPixelHeight, ArrayView<uint32> glyphIndices, const FontGlyphRenderer& glyphRenderer, ResourceManager& resourceManager);
+		FontAtlas(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContextBase& graphicsContext, ResourceManager& resourceManager);
+		~FontAtlas();
+
+		void Clear();
+		void Create(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContextBase& graphicsContext, ResourceManager& resourceManager);
 
 		/*
 			Retrieves glyphs UV coordinates in the font atlas
@@ -55,15 +48,13 @@ namespace Blaze::UI
 		bool GetGlyphUV(uint32 glyphIndex, Vec2u16& uv1, Vec2u16& uv2) const;
 		inline Vec2u16 GetSize() const { return size; }
 		inline ResourceBaseRef GetTexture() const { return texture; }
-		inline const FontFace* GetFontFace() const { return fontFace; }
-		inline float GetFontPixelHeight() const { return fontPixelHeight; }
+		inline float GetRasterFontHeight() const { return rasterFontHeight; }		
 
 		FontAtlas& operator=(FontAtlas&& other) noexcept;
 	private:
-		const FontFace* fontFace;
-		float fontPixelHeight;
-		ResourceBaseRef texture;
 		Vec2u16 size;
+		float rasterFontHeight;
+		ResourceBaseRef texture;
 		Map<uint32, UVRect> uvs;
 	};
 }

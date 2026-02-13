@@ -1,9 +1,11 @@
 #pragma once
-#include "BlazeEngine/Core/Resource/ResourceRef.h"
 #include "BlazeEngine/Core/String/StringView.h"
 
 namespace Blaze
 {
+	template<typename T>
+	class ResourceRef;
+
 	template<typename T>
 	class BLAZE_API ResourceStorage
 	{

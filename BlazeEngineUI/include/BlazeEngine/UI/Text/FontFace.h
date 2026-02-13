@@ -5,6 +5,7 @@
 namespace Blaze::UI
 {
 	class File;
+	class CharacterSet;
 
 	enum class FontFaceDirection
 	{

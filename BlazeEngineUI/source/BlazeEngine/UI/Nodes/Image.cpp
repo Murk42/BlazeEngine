@@ -135,16 +135,16 @@ namespace Blaze::UI::Nodes
 		style.layout = imageLayout;
 		return style;
 	}
-	void Image::PreRender(const RenderContext& renderContext)
+	bool Image::PreRender(const RenderContext& renderContext)
 	{
 		NodeFinalTransform transform = GetFinalTransform();
 
 		if (!renderUnitDirty)
-			return;
+			return false;
 
 		renderUnitDirty = false;
 
-		Vec2f textureSize = (Vec2f)renderUnit.texture.Get<Graphics::OpenGL::Texture2D>().GetSize();
+		Vec2f textureSize = (Vec2f)renderUnit.texture.GetValue<Graphics::OpenGL::Texture2D>()->GetSize();
 		auto [renderPos, renderSize, renderUV1, renderUV2] = ApplyImageLayout(imageLayout, transform, uv1, uv2, textureSize);
 
 		renderUnit.uv1 = renderUV1;
@@ -152,6 +152,8 @@ namespace Blaze::UI::Nodes
 		renderUnit.pos = renderPos;
 		renderUnit.right = transform.right * renderSize.x;
 		renderUnit.up = Vec2f(-transform.right.y, transform.right.x) * renderSize.y;
+
+		return false;
 	}
 	RenderUnitBase* Image::GetRenderUnit(uintMem index)
 	{

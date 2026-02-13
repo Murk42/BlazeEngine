@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="source\BlazeEngine\Graphics\Common\BasicIndexedMesh.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\BufferedRendererBase_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\RenderContext.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\BasicIndexedMeshRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLFunctions.cpp" />
@@ -33,7 +34,7 @@
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\PanelRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\TexturedRectRenderer_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngine\Graphics\Core\Dynamic\GraphicsContext.cpp" />
+    <ClCompile Include="source\BlazeEngine\Graphics\Core\GraphicsContext.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.cpp" />
@@ -58,12 +59,14 @@
   <ItemGroup>
     <ClInclude Include="include\BlazeEngine\BlazeEngineGraphics.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\BlazeEngineGraphics.h" />
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\Dynamic\GraphicsContext.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsContextBase.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsAPI.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsAPI_OpenGL.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\BasicIndexedMeshRenderer.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\Line2DRenderer.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\BufferedRendererBase_OpenGL.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\BasicIndexedMeshRenderer_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\Line2DRenderer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\PanelRenderer.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RenderContext.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RendererBase.h" />

@@ -1,5 +1,7 @@
 #pragma once
+#include "BlazeEngine/Core/File/Path.h"
 #include "BlazeEngine/UI/Core/Node.h"
+#include "BlazeEngine/Core/Resource/ResourceManager.h"
 
 namespace Blaze::UI
 {
@@ -7,7 +9,7 @@ namespace Blaze::UI
 		public Node
 	{
 	public:
-		struct TreeChangedEvent
+		struct ScreenTreeChangedEvent
 		{
 			enum class Type
 			{
@@ -25,13 +27,15 @@ namespace Blaze::UI
 			Screen& screen;
 		};
 
+		ResourceManager& resourceManager;
 		EventDispatcher<DestructionEvent> destructionEventDispatcher;
-		EventDispatcher<TreeChangedEvent> treeChangedEventDispatcher;
+		EventDispatcher<ScreenTreeChangedEvent> treeChangedEventDispatcher;
 
-		Screen();
+		Screen(ResourceManager& resourceManager);
 		virtual ~Screen();
 
 		HitStatus HitTest(Vec2f screenPos) override;
-	private:
+
+		void Update();
 	};
 }

@@ -21,16 +21,21 @@ namespace Blaze
 		~Variant();
 
 		ValueType GetValueType() const;
+		template<OneOf<Ts...> T> 
+		bool IsType() const;
 
 		template<OneOf<Ts...> T>
 		bool TryGetValue(T& value) const;
-		template<OneOf<Ts...> T, typename Callable> requires std::invocable<Callable, const T&>
+		template<typename Callable> requires (std::invocable<Callable, const Ts&> || ...)
 		bool TryProcess(const Callable& callable) const;
 
 		template<OneOf<Ts...> T>
 		static constexpr ValueType GetValueTypeOf();
 		template<typename T>
 		static constexpr bool IsTypeValid();
+
+		template<typename ... Ts2>
+		bool TryConvert(Variant<Ts2...>& other);
 
 		Variant& operator=(const Variant& other) requires (IsConstructibleFrom<Ts, const Ts&> && ...);
 		Variant& operator=(Variant&& other) noexcept requires (IsConstructibleFrom<Ts, Ts&&> && ...);
@@ -113,15 +118,22 @@ namespace Blaze
 		return true;
 	}
 	template<typename ...Ts>
-	template<OneOf<Ts...> T, typename Callable> requires std::invocable<Callable, const T&>
+	template<typename Callable> requires (std::invocable<Callable, const Ts&> || ...)
 	inline bool Variant<Ts...>::TryProcess(const Callable& callable) const
 	{
-		if (type != GetValueTypeOf<T>())
+		static constexpr ValueType callableType = ((bool(std::invocable<Callable, const Ts&>) * TypeGroup<Ts...>::template IndexOfType<Ts>) + ...);
+		using T = TypeGroup<Ts...>::template TypeAtIndex<callableType>;
+
+		if (type != callableType)
 			return false;
 
-		callable(GetValueUnsafe<T>());
-
-		return true;
+		if constexpr (SameAs<std::invoke_result_t<Callable, const T&>, bool>)
+			return callable(GetValueUnsafe<T>());
+		else
+		{
+			callable(GetValueUnsafe<T>());
+			return true;
+		}
 	}
 	template<typename ...Ts>
 	template<OneOf<Ts...> T>
@@ -134,6 +146,29 @@ namespace Blaze
 	inline constexpr bool Variant<Ts...>::IsTypeValid()
 	{
 		return OneOf<T, Ts...>;
+	}
+	template<typename ...Ts>
+	template<typename ...Ts2>
+	inline bool Variant<Ts...>::TryConvert(Variant<Ts2...>& other)
+	{
+		auto TryMove = [&]<typename T, uintMem index>() {
+			if constexpr (OneOf<T, Ts...>)
+				if (type == GetValueTypeOf<T>())
+				{
+					other = std::move(GetValueUnsafe<T>());
+					*this = { };
+
+					return false;
+				}
+			return true;
+		};
+
+		bool failedToMove = TypeGroup<Ts2...>::ForEach(TryMove);
+
+		if (failedToMove)
+			return false;
+		else
+			return true;
 	}
 	template<typename ...Ts>
 	inline auto Variant<Ts...>::operator=(const Variant& other) -> Variant& requires (IsConstructibleFrom<Ts, const Ts&> && ...)
@@ -251,6 +286,12 @@ namespace Blaze
 	inline auto Variant<Ts...>::GetValueType() const -> ValueType 
 	{
 		return type; 
+	}
+	template<typename ...Ts>
+	template<OneOf<Ts...> T>
+	inline bool Blaze::Variant<Ts...>::IsType() const
+	{
+		return type == GetValueTypeOf<T>();
 	}
 	template<typename ...Ts>
 	inline constexpr void Variant<Ts...>::Destruct()

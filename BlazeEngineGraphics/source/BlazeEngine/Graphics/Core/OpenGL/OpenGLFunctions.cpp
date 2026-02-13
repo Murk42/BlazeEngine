@@ -238,13 +238,17 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
 	}
-	void GraphicsContext_OpenGL::BindUniformBuffer(const GraphicsBuffer& buffer, uint binding)
+	void GraphicsContext_OpenGL::BindUniformBuffer(const GraphicsBuffer& buffer, uint bindingPoint)
 	{
-		glBindBufferBase(GL_UNIFORM_BUFFER, binding, buffer.GetHandle());
+		glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, buffer.GetHandle());
 	}
-	void GraphicsContext_OpenGL::BindUniformBufferRange(const GraphicsBuffer& buffer, uint binding, uint offset, uint size)
+	void GraphicsContext_OpenGL::BindUniformBufferRange(const GraphicsBuffer& buffer, uint bindingPoint, uint offset, uint size)
 	{
-		glBindBufferRange(GL_UNIFORM_BUFFER, binding, buffer.GetHandle(), offset, size);
+		glBindBufferRange(GL_UNIFORM_BUFFER, bindingPoint, buffer.GetHandle(), offset, size);
+	}
+	void GraphicsContext_OpenGL::SetShaderUniformBlockBindingPoint(const ShaderProgram& program, uintMem uniformBlockIndex, uint bindingPoint)
+	{
+		glUniformBlockBinding(program.GetHandle(), uniformBlockIndex, bindingPoint);
 	}
 	void GraphicsContext_OpenGL::SelectImage(uint slot, const Texture2D& texture, uint level, ImageAccess access, ImageFormat format)
 	{
@@ -363,6 +367,13 @@ namespace Blaze::Graphics::OpenGL
 			glEnable(GL_SCISSOR_TEST);
 		else
 			glDisable(GL_SCISSOR_TEST);
+	}
+	void GraphicsContext_OpenGL::EnableSRGBFramebuffer(bool enable)
+	{
+		if (enable)
+			glEnable(GL_FRAMEBUFFER_SRGB);
+		else
+			glDisable(GL_FRAMEBUFFER_SRGB);
 	}
 
 	void GraphicsContext_OpenGL::SetStencilOperation(ScreenBufferType bufferType, StencilOperationType bothFail, StencilOperationType depthFailStencilSucceed, StencilOperationType bothSucceed)

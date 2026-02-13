@@ -61,6 +61,6 @@ namespace Blaze::Graphics
 	template<IsDerivedFrom<RendererBase> T>
 	inline T* RendererRegistry::GetRenderer() const
 	{
-		return dynamic_cast<T*>(GetRenderer(RendererBase::GetTypeID<T>(), { }));
+		return dynamic_cast<T*>(GetRenderer(RendererBase::GetTypeID<T>(), {}));
 	}
 }

@@ -2,6 +2,8 @@
 #include "BlazeEngine/UI/Core/Node.h"
 #include "BlazeEngine/UI/Graphics/RenderUnits/StaticTextRenderUnit.h"
 #include "BlazeEngine/UI/Graphics/RenderNode.h"
+#include "BlazeEngine/UI/Text/TextStyle.h"
+#include "BlazeEngine/UI/Text/FontManager.h"
 
 namespace Blaze::UI::Nodes
 {
@@ -10,29 +12,43 @@ namespace Blaze::UI::Nodes
 	public:
 		Label();
 		Label(Node& parent, const NodeTransform& transform);
-		Label(Node& parent, const NodeTransform& transform, u8StringView string, const FontAtlas& atlas, ColorRGBAf color = 0xf5f5f5ff, float fontSize = 0.0f);
+		Label(Node& parent, const NodeTransform& transform, const TextStyle& textColor, u8String text = "");
 		~Label();
 
-		void ClearText();
-		void BuildText(u8StringView string, const FontAtlas& atlas, float fontSize = 0.0f);
-		void BuildWrappedText(u8StringView string, const FontAtlas& atlas, float wrapWidth, float fontSize = 0.0f);
-		void SetColor(ColorRGBAf color);
-		inline ColorRGBAf GetColor() const { return renderUnit.color; }
+		void Clear();
+		
+		void SetText(u8String text);
+		void SetTextStyle(const TextStyle& textStyle);
+		void SetWrapWidth(float wrapWidth);
+
+		inline u8StringView GetText() { return text; }
+		inline const TextStyle& GetTextStyle() const { return textStyle; }
 		
 		void SetBlocksHitTestFlag(bool blocksHitTest);
 		inline bool GetBlocksHitTestFlag(bool blocksHitTest) { return blocksHitTest; }
 
-		void PreRender(const RenderContext& renderContext) override;
+		bool PreRender(const RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
 
 		HitStatus HitTest(Vec2f screenPosition) override;
 	private:
-		StaticTextRenderUnit renderUnit;
-		Vec2f textSize;
-		bool renderDataDirty;
-		bool blocksHitTest;
+		TextStyle textStyle;
+		u8String text;
+		float wrapWidth;
 
-		void TransformFilterEvent(const Node::TransformFilterEvent& event);
+		StaticTextRenderUnit renderUnit;
+		Vec2f textBuildSize;
+		bool rendererTypeIDChanged : 1;
+
+		bool blocksHitTest : 1;		
+
+		bool GetFontAtlasData(FontManager::FontAtlasData& fontAtlasData) const;
+
+		void UpdateTransformSize();
+		void UpdateRenderUnitTransform();
+
+		void UpdateRenderUnit();
+		
 		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
 	};
 }

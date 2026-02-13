@@ -3,6 +3,7 @@
 #include "BlazeEngine/Core/Type/TypeTraits.h"
 #include "BlazeEngine/Core/Memory/Allocator.h"
 #include "BlazeEngine/Core/Container/ArrayIterator.h"
+#include "BlazeEngine/Core/Container/ReferenceContainer.h"
 #include <initializer_list>
 
 namespace Blaze
@@ -19,7 +20,7 @@ namespace Blaze
 	public:
 		using Iterator = ArrayIterator<const T>;
 		using ValueType = T;
-		using StoredType = Conditional<IsReferenceType<T>, RemoveReference<T>* const, T>;
+		using StoredType = Conditional<IsReferenceType<T>, ReferenceContainer<RemoveReference<T>>, T>;
 		using value_type = T;
 
 		constexpr ArrayView();

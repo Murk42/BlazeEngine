@@ -17,11 +17,15 @@ namespace Blaze::UI::TextShaping
 		{
 			BLAZE_LOG_ERROR("Trying to shape a text with an invalid font handle");
 			return { };
-		}
+		}		
 
 		ShapedText result;
 		result.textBegin = begin;
 		result.textEnd = end;
+		result.extent = 0;
+
+		if (begin == end)
+			return result;
 
 		hb_buffer_t* buf = hb_buffer_create();
 		hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(shapingContext.GetString().Ptr()), static_cast<int>(shapingContext.GetString().Count()), static_cast<unsigned>(begin - shapingContext.GetString().FirstIterator()), static_cast<int>(end - begin));
@@ -39,7 +43,6 @@ namespace Blaze::UI::TextShaping
 
 		uint32_t clusterBegin = UINT32_MAX;
 		uint32_t clusterEnd = clusterBegin;
-		hb_position_t extent = 0;
 		for (unsigned i = 0; i < count; ++i)
 		{
 			uint32_t currentCluster = info[i].cluster;
@@ -67,10 +70,8 @@ namespace Blaze::UI::TextShaping
 				.unsafeToBreak = static_cast<bool>(hb_glyph_info_get_glyph_flags(info + i) & HB_GLYPH_FLAG_UNSAFE_TO_BREAK),
 				.unsafeToConcat = static_cast<bool>(hb_glyph_info_get_glyph_flags(info + i) & HB_GLYPH_FLAG_UNSAFE_TO_CONCAT),
 				});
-			extent += pos[i].x_advance;
+			result.extent += pos[i].x_advance;
 		}
-
-		result.extent = extent;
 
 		hb_buffer_destroy(buf);
 		return result;

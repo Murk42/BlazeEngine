@@ -45,7 +45,7 @@
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\TexturedRectRenderer_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Graphics\Core\Dynamic\GraphicsContext.cpp">
+    <ClCompile Include="source\BlazeEngine\Graphics\Core\GraphicsContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.cpp">
@@ -90,6 +90,9 @@
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\Semaphore_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -98,7 +101,7 @@
     <ClInclude Include="include\BlazeEngine\Graphics\BlazeEngineGraphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\Dynamic\GraphicsContext.h">
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsContextBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsAPI.h">
@@ -192,6 +195,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\BlazeEngineGraphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\Line2DRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\Line2DRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

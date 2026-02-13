@@ -36,7 +36,7 @@ namespace Blaze::UI::Nodes
 		inline void GetUVs(Vec2f& uv1, Vec2f& uv2) const { uv1 = this->uv1; uv2 = this->uv2; }
 		Style GetStyle() const;
 
-		void PreRender(const RenderContext& renderContext) override;
+		bool PreRender(const RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
 	private:
 		ImageLayout imageLayout;

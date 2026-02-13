@@ -3,7 +3,7 @@
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include <Windows.h>
-#endif
+#endif 
 
 namespace Blaze::Debug
 {

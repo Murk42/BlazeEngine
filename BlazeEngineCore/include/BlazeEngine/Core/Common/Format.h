@@ -78,16 +78,16 @@ namespace Blaze
 
 	template<typename T>
 	concept HasFormatFunctionWithSpecifiers =
-		requires(const T& value, StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<StringView>; } ||
-		requires(const T& value, u8StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<u8StringView>; } ||
-		requires(const T& value, u16StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<u16StringView>; } ||
-		requires(const T& value, u32StringView specifiers) { { value.Format(specifiers) } -> ConvertibleTo<u32StringView>; };
+		requires(const T& value, StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<StringView>; } ||
+		requires(const T& value, u8StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<u8StringView>; } ||
+		requires(const T& value, u16StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<u16StringView>; } ||
+		requires(const T& value, u32StringView specifiers) { { value.Format(specifiers) } -> IsConvertibleTo<u32StringView>; };
 	template<typename T>
 	concept HasFormatFunction =
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<StringView>; } ||
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<u8StringView>; } ||
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<u16StringView>; } ||
-		requires(const T& value) { { value.Format() } -> ConvertibleTo<u32StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<u8StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<u16StringView>; } ||
+		requires(const T& value) { { value.Format() } -> IsConvertibleTo<u32StringView>; } ||
 		HasFormatFunctionWithSpecifiers<T>;
 
 	template<HasFormatFunction T, typename Char>
@@ -170,6 +170,14 @@ namespace Blaze
 	public:
 		uintMem Parse(const GenericString<SrcChar>& string, const FormatParseContext<DstChar>& parseContext);
 		void Format(const GenericString<SrcChar>& string, FormatContext<DstChar>& context);
+	};
+
+	template<typename Char>
+	class Formatter<bool, Char> : BaseFormatter<Char>
+	{
+	public:
+		inline uintMem Parse(const bool& value, const FormatParseContext<Char>& parseContext);
+		inline void Format(const bool& string, FormatContext<Char>& context);
 	};
 
 	template<typename Char>
@@ -281,7 +289,7 @@ namespace Blaze
 	class Formatter<T*, Char> : BaseIntegerFormatter<Char>
 	{
 	public:
-		uintMem Parse(T* const & value, const FormatParseContext<Char>& parseContext)
+		uintMem Parse(T* const& value, const FormatParseContext<Char>& parseContext)
 		{
 			this->ParseFormatSpecifiers(parseContext);
 			this->base = 16;
@@ -290,7 +298,7 @@ namespace Blaze
 			this->signAwarePadding = 0;
 			return this->ParseValue(reinterpret_cast<uintMem>(value));
 		}
-		void Format(T* const & value, FormatContext<Char>& context)
+		void Format(T* const& value, FormatContext<Char>& context)
 		{
 			this->CopyFormated(context);
 		}

@@ -10,23 +10,12 @@ namespace Blaze
 
 	class AppRuntimeThread
 	{
-	public:
-		class Message
-		{
-		public:
-			virtual ~Message() {}
-		};
-
+	public:		
 		AppRuntimeThread(Window& window);
 		virtual ~AppRuntimeThread() {}
 
 		virtual void StartRender() {}
 		virtual void EndRender() {}
-
-		virtual void ProcessMessage(const Message&) { }
-
-		template<IsDerivedFrom<AppRuntimeThread::Message> M, typename ... Args> requires IsConstructibleFrom<M, Args...>
-		void SendMessage(Args&& ... args);
 
 		void MarkForExit();
 
@@ -51,10 +40,7 @@ namespace Blaze
 		Window& window;
 		bool shouldExit;
 
-		std::mutex messagesMutex;
-		Array<Handle<Message>> messages;
-
-		std::recursive_mutex layerMutex;
+		std::recursive_mutex layerTasksMutex;
 		Array<AppLayerCreationData> queuedLayerCreationData;
 		Array<LayerRemovalData> queuedLayerRemovalData;
 		Array<Handle<AppLayer>> layerStack;
@@ -62,20 +48,13 @@ namespace Blaze
 		void Run();
 
 		void ProcessInputEvents();
-		void ProcessMessages();
 		void ProcessLayerTasks();
 
-		void SendMessage(Handle<Message> message);
 		void RemoveLayer(const LayerRemovalData& layerRemovalData);
 
 		friend class AppRuntimeThreadCreationData;
 	};
 
-	template<IsDerivedFrom<AppRuntimeThread::Message> M, typename ...Args> requires IsConstructibleFrom<M, Args...>
-	inline void AppRuntimeThread::SendMessage(Args && ...args)
-	{
-		SendMessage(Handle<Message>::CreateDerived(std::forward<Args>(args)...));
-	}
 	template<IsDerivedFrom<AppLayer> T, typename ...Args> requires IsConstructibleFrom<T, Args...>
 	inline void AppRuntimeThread::AddLayer(Args&& ...args)
 	{

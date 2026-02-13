@@ -329,13 +329,13 @@ namespace Blaze
 		return out;
 	}
 	template<typename Char>
-	template<AllocatorType StringAllocator, ConvertibleTo<GenericStringView<Char>> ...Args>
+	template<AllocatorType StringAllocator, IsConvertibleTo<GenericStringView<Char>> ...Args>
 	inline GenericString<Char, StringAllocator> GenericStringView<Char>::Join(const Args & ...args)
 	{
 		return Join<StringAllocator>(std::initializer_list{ GenericStringView<Char>(args)... });
 	}
 	template<typename Char>
-	template<AllocatorType StringAllocator, ContainerType Container> requires ConvertibleTo<ContainerValueType<Container>, GenericStringView<Char>>
+	template<AllocatorType StringAllocator, ContainerType Container> requires IsConvertibleTo<ContainerValueType<Container>, GenericStringView<Char>>
 	inline GenericString<Char, StringAllocator> GenericStringView<Char>::Concat(const Container& container)
 	{
 		uintMem totalWidth = 0;
@@ -355,7 +355,7 @@ namespace Blaze
 		return out;
 	}
 	template<typename Char>
-	template<AllocatorType StringAllocator, ConvertibleTo<GenericStringView<Char>> ...Args>
+	template<AllocatorType StringAllocator, IsConvertibleTo<GenericStringView<Char>> ...Args>
 	inline GenericString<Char, StringAllocator> GenericStringView<Char>::Concat(const Args & ...args)
 	{
 		Tuple<const Args&...> containedArgs = { args... };

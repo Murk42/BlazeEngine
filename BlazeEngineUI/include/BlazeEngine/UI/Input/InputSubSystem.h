@@ -6,37 +6,7 @@
 
 namespace Blaze::UI
 {
-	class BLAZE_API PointerData
-	{
-	public:
-		struct NodeHitData
-		{
-			Node& node;
-			Node::HitStatus hitStatus;
-		};
-
-		PointerData(InputSubSystem& inputSubSystem, Vec2f pos);
-		~PointerData();
-
-		void Move(Vec2f newPos);
-
-		void UpdateHitNodes();
-		void SetCapturingNode(InputNode* node);
-
-		void HandleNodeRemoval(Node& node);
-		void HandleNodeAddition(Node& node);
-		void HandleEnabledStateChange(Node& node);
-		void HandleFinalTransformChange(Node& node);
-
-		inline ArrayView<NodeHitData> GetHitData() const { return hitData; }
-		inline Vec2f GetPos() const { return pos; }
-		inline InputNode* GetCapturingNode() const { return capturingNode; }
-	private:
-		InputSubSystem& inputSubSystem;
-		Array<NodeHitData> hitData;
-		Vec2f pos;
-		InputNode* capturingNode;
-	};
+	class PointerData;
 
 	class BLAZE_API InputSubSystem
 	{
@@ -53,9 +23,7 @@ namespace Blaze::UI
 		void SelectNode(InputNode* node);
 		inline InputNode* GetSelectedNode() const;
 		
-		void InvalidateNodeHitStatus(InputNode& node);
-
-		bool ProcessInputEvent(const Input::GenericInputEvent& event, bool eventProcessed);
+		Input::EventProcessedState ProcessInputEvent(const Input::GenericInputEvent& event, bool processed);
 
 		bool SetMouseCapturingNode(Input::MouseID mouseID, InputNode* node);
 		InputNode* GetMouseCapturingNode(Input::MouseID mouseID) const;
@@ -67,31 +35,20 @@ namespace Blaze::UI
 		Window* window;
 		InputNode* selectedNode;
 		Map<Input::MouseID, PointerData> pointerMap;
-		WindowMouseCaptureHandle mouseCaptureHandle;
-
-		void TreeChangedEvent(const Screen::TreeChangedEvent& event);
-		void ScreenDestructionEvent(const Screen::DestructionEvent& event);
 
 		void WindowDestructionEvent(const Window::DestructionEvent& event);
-		void WindowMouseEnterEvent(const Window::MouseEnterEvent& event);
-		void WindowMouseLeaveEvent(const Window::MouseLeaveEvent& event);
+		void ScreenDestructionEvent(const Screen::DestructionEvent& event);
+		void ScreenTreeChangedEvent(const Screen::ScreenTreeChangedEvent& event);
+		void NodeEnabledStateChangedEvent(const Node::NodeEnabledStateChangedEvent& event);
 
-		void NodeFinalTransformChangedEvent(const Node::FinalTransformUpdatedEvent& event);
-		void EnabledStateChangedEvent(const Node::EnabledStateChangedEvent& event);
+		void NewScreenAndWindow();
 
-		bool MouseMotionEvent(const Input::MouseMotionEvent& event, bool eventProcessed);
-		bool MouseScrollEvent(const Input::MouseScrollEvent& event, bool eventProcessed);
-		bool MouseButtonDownEvent(const Input::MouseButtonDownEvent& event, bool eventProcessed);
-		bool MouseButtonUpEvent(const Input::MouseButtonUpEvent& event, bool eventProcessed);
-		bool KeyDownEvent(const Input::KeyDownEvent& event, bool eventProcessed);
-		bool KeyUpEvent(const Input::KeyUpEvent& event, bool eventProcessed);
-		bool TextInputEvent(const Input::TextInputEvent& event, bool eventProcessed);
+		Input::EventProcessedState MouseEntersWindowEvent(const Input::MouseEntersWindowEvent& event, bool processed);
+		Input::EventProcessedState MouseLeavesWindowEvent(const Input::MouseLeavesWindowEvent& event, bool processed);
 
-		PointerData* FindOrInsertPointerData(Input::MouseID mouseID, Vec2f pos);
-		const PointerData* FindPointerData(Input::MouseID mouseID) const;
-		PointerData* FindPointerData(Input::MouseID mouseID);
-
-		PointerData* PrepareMouseEvent(Input::MouseID mouseID, Vec2f pos, bool eventProcessed, bool insertMouse);
+		Input::EventProcessedState KeyDownEvent(const Input::KeyDownEvent& event, bool processed);
+		Input::EventProcessedState KeyUpEvent(const Input::KeyUpEvent& event, bool processed);
+		Input::EventProcessedState TextInputEvent(const Input::TextInputEvent& event, bool processed);
 	};
 
 	inline Screen* InputSubSystem::GetScreen() const { return screen; }

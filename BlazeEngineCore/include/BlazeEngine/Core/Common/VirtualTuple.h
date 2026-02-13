@@ -19,7 +19,6 @@ namespace Blaze
 	class VirtualTuple : public VirtualTupleBase, public Tuple<Args...>
 	{
 	public:
-		VirtualTuple() = default;
 		VirtualTuple(const VirtualTuple&) = default;
 		VirtualTuple(VirtualTuple&&) = default;
 		VirtualTuple(Args&& ... args) : Tuple<Args...>(std::forward<Args>(args)...) {}

@@ -19,6 +19,6 @@ namespace Blaze::Graphics
 	public:
 		virtual void Render(const PanelRenderData& data, const RenderContext& context) = 0;
 
-		uint64 GetTypeID() const { return RendererBase::GetTypeID<PanelRenderer>(); }
+		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<PanelRenderer>(); }
 	};
 }
