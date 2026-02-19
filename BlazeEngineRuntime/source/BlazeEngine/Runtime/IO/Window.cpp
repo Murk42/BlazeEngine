@@ -141,7 +141,7 @@ namespace Blaze
 		RunOnMainThread([&]()
 			{
 				SDL_GetWindowPosition((SDL_Window*)handle, &apparentWindowPos.x, &apparentWindowPos.y);
-				SDL_GetWindowSize((SDL_Window*)handle, (int*)&apparentWindowSize.x, (int*)&apparentWindowSize.y);
+				SDL_GetWindowSizeInPixels((SDL_Window*)handle, (int*)&apparentWindowSize.x, (int*)&apparentWindowSize.y);
 
 				realWindowPos = apparentWindowPos;
 				realWindowSize = apparentWindowSize;
@@ -255,6 +255,8 @@ namespace Blaze
 				if (!SDL_SetWindowPosition((SDL_Window*)handle, pos.x, pos.y))
 					BLAZE_LOG_ERROR("SDL_SetWindowPosition failed. SDL returned error: \"" + SDL_GetError() + "\"");
 			});
+
+		apparentWindowPos = realWindowPos;
 	}
 	Vec2u Window::GetSize() const
 	{
@@ -273,6 +275,8 @@ namespace Blaze
 				if (!SDL_SetWindowSize((SDL_Window*)handle, s.x, s.y))
 					BLAZE_LOG_ERROR("SDL_GetWindowSizeInPixels failed. SDL returned error: \"" + SDL_GetError() + "\"");
 			});
+
+		apparentWindowSize = realWindowSize;
 	}
 	bool Window::GetResizableFlag() const
 	{

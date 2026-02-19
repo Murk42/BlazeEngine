@@ -18,7 +18,7 @@ namespace Blaze::UI
 		screen(nullptr), parent(nullptr), next(nullptr), prev(nullptr), children(),
 		transform(), finalTransform(),
 		enabled(true), enabledFlag(true),
-		transformDirty(false), finalTransformDirty(true)
+		transformDirty(true), finalTransformDirty(true)
 	{
 	}
 	Node::Node(Node& parent, const NodeTransform& transform)

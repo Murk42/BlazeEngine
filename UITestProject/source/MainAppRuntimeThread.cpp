@@ -15,7 +15,8 @@ public:
 	Graphics::PanelRenderer_OpenGL panelRenderer{ graphicsContext };
 	Graphics::TexturedRectRenderer_OpenGL texturedRectRenderer{ graphicsContext };
 	Graphics::AntialiasedTextRenderer_OpenGL antialiasedTextRenderer{ graphicsContext};
-	Graphics::RendererRegistry rendererRegistry{ panelRenderer, texturedRectRenderer, antialiasedTextRenderer };
+	Graphics::Quad2DRenderer_OpenGL quad2DRenderer{ graphicsContext };
+	Graphics::RendererRegistry rendererRegistry{ panelRenderer, texturedRectRenderer, antialiasedTextRenderer, quad2DRenderer };
 
 	ResourceRef<UI::FontManager> fontManager { resourceManager, "fontManager", resourceManager};
 
@@ -54,7 +55,7 @@ public:
 	{
 		UISystem.SetScreen<MainScreen>(runtimeThread.resourceManager);
 
-		//runtimeThread.AddLayer<ClientUIDebugLayer>(&UISystem);
+		runtimeThread.AddLayer<UIDebugLayer>(runtimeThread.graphicsContext, &UISystem);
 	}
 	void OnAttach() override
 	{
@@ -100,11 +101,20 @@ public:
 
 		return { };
 	}
-	void Render() override 
+	void Render() override
 	{
 		UISystem.Render();
+
+		runtimeThread.quad2DRenderer.StartRender({ runtimeThread.window.GetSize() });
+		Vec2f pos = Vec2f(1500, 800);
+		//if (runtimeThread.window.GetDefaultMousePos(pos))
+		{
+			pos.y = runtimeThread.window.GetSize().y - pos.y;
+			runtimeThread.quad2DRenderer.Render(pos + Vec2f(-10), Vec2f(20), 0.0f, 0xffff00ff, {runtimeThread.window.GetSize()});
+		}
+		runtimeThread.quad2DRenderer.EndRender({ runtimeThread.window.GetSize() });
 	}
-};
+}; 
 
 MainAppRuntimeThread::MainAppRuntimeThread(App& app)
 	: AppRuntimeThread(window), app(app)

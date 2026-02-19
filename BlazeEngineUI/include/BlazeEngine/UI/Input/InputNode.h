@@ -32,6 +32,7 @@ namespace Blaze::UI
 		EventDispatcher<UITextInputEvent>    	      textInputEventDispatcher;
 
 		InputNode();
+		InputNode(Node& parent, const NodeTransform& transform);
 		~InputNode() override;
 
 		InputSubSystem* GetInputSubSystem() const;

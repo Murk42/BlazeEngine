@@ -12,6 +12,10 @@ namespace Blaze::ShaderSources
 	const StringView line2d_frag = StringView(line2d_frag_str);
 	static const char line2d_vert_str[] = { $bytes "../Shaders/OpenGL/line2d.vert"$, '\0' };
 	const StringView line2d_vert = StringView(line2d_vert_str);
+	static const char quad2d_frag_str[] = { $bytes "../Shaders/OpenGL/quad2d.frag"$, '\0' };
+	const StringView quad2d_frag = StringView(quad2d_frag_str);
+	static const char quad2d_vert_str[] = { $bytes "../Shaders/OpenGL/quad2d.vert"$, '\0' };
+	const StringView quad2d_vert = StringView(quad2d_vert_str);
 	static const char line3d_frag_str[] = { $bytes "../Shaders/OpenGL/line3d.frag"$, '\0' };
 	const StringView line3d_frag = StringView(line3d_frag_str);
 	static const char line3d_vert_str[] = { $bytes "../Shaders/OpenGL/line3d.vert"$, '\0' };

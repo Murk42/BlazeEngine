@@ -12,7 +12,7 @@ namespace Blaze::UI::Nodes
 	public:
 		Label();
 		Label(Node& parent, const NodeTransform& transform);
-		Label(Node& parent, const NodeTransform& transform, const TextStyle& textColor, u8String text = "");
+		Label(Node& parent, const NodeTransform& transform, const TextStyle& textStyle, u8String text = "");
 		~Label();
 
 		void Clear();

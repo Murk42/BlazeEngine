@@ -8,6 +8,8 @@ namespace Blaze::ShaderSources
 	extern const StringView basicMesh_vert;
 	extern const StringView line2d_frag;
 	extern const StringView line2d_vert;
+	extern const StringView quad2d_frag;
+	extern const StringView quad2d_vert;
 	extern const StringView line3d_frag;
 	extern const StringView line3d_vert;
 	extern const StringView panel_frag;

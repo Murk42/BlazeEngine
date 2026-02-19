@@ -165,6 +165,12 @@
     <ClInclude Include="include\BlazeEngine\UI\Text\FontGlyphRasterizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\QuadRenderUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\TextInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pch.cpp">
@@ -267,6 +273,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Text\FontGlyphRasterizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\QuadRenderUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\TextInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

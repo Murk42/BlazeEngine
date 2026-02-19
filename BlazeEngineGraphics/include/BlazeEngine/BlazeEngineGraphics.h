@@ -18,12 +18,11 @@
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture1D.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
-//#include "BlazeEngine/Graphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
-//#include "BlazeEngine/Graphics/Renderers/OpenGL/Line3DRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/BasicIndexedMeshRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
+#include "BlazeEngine/Graphics/Renderers/OpenGL/Quad2DRenderer_OpenGL.h"
 #endif
 
 #ifdef GRAPHICS_VULKAN

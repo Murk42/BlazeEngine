@@ -8,6 +8,10 @@ namespace Blaze::UI
 		: Node(), inputSubSystem(nullptr), selectable(true)
 	{
 	}
+	InputNode::InputNode(Node& parent, const NodeTransform& transform)
+		: Node(parent, transform), inputSubSystem(nullptr), selectable(true)
+	{
+	}
 	InputNode::~InputNode()
 	{
 	}

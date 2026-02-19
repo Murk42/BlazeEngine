@@ -198,10 +198,12 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\AntialiasedTextRenderer.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\TextRendererBase.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\QuadRenderUnit.h" />
     <ClInclude Include="include\BlazeEngine\UI\Input\InputEvents.h" />
     <ClInclude Include="include\BlazeEngine\UI\Input\PointerData.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\PanelButton.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Slider.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\TextInput.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\FontAtlas.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\FontGlyphRasterizer.h" />
     <ClInclude Include="include\BlazeEngine\UI\Core\Node.h" />
@@ -245,12 +247,14 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\QuadRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\TextInput.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\FontManager.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Common\ButtonBase.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Common\System.cpp" />

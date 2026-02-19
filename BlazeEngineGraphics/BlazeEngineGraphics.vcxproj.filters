@@ -93,6 +93,12 @@
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\Quad2DRenderer_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\Quad2DRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -203,6 +209,12 @@
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\Line2DRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\Quad2DRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\Quad2DRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.frag" />
@@ -216,6 +228,8 @@
     <None Include="source\BlazeEngine\Graphics\Shaders\OpenGL\panel.vert" />
     <None Include="source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.frag" />
     <None Include="source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.vert" />
+    <None Include="source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.frag" />
+    <None Include="source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.vert" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="BlazeEngineGraphicsNodeView.natvis" />
