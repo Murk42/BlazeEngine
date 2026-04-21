@@ -16,13 +16,30 @@ namespace Blaze
 		std::lock_guard lg{ mutex };
 		scheduledRuntimeThreadsForCreation.AddBack(std::move(runtimeThreadCreation));
 	}
-	bool App::Update()
+	void App::Start()
 	{
-		threads.EraseAll([](const Thread& thread) -> bool { return !thread.IsRunning(); });
+		while (true)
+		{
+			ProcessScheduledRuntimeThreadsForCreation();				
 
-		ProcessScheduledRuntimeThreadsForCreation();
+			if (threads.Empty())
+				break;
 
-		return !threads.Empty();
+			Input::WaitForEvents(0.100f);
+
+			while (threadExitedCount.load() != 0)
+			{
+				threads.EraseAll([&](const Thread& thread) -> bool
+					{
+						if (!thread.IsRunning())
+						{
+							--threadExitedCount;
+							return true;
+						}
+						return false;
+					});
+			}
+		}
 	}
 	void App::ProcessScheduledRuntimeThreadsForCreation()
 	{
@@ -35,7 +52,25 @@ namespace Blaze
 		{
 			Thread& thread = *threads.AddFront();
 
-			if (!runtimeThreadCreationData.InstantiateOnThread(thread))
+			if (!thread.Run([&](AppRuntimeThreadCreationData creationData) -> int
+				{
+					creationData.Run([](AppRuntimeThread& thread)
+						{
+							thread.CreateAndRemoveDefferedLayers();
+
+							thread.Run();
+
+							thread.RemoveAllLayers();
+						});
+
+					auto context = BlazeEngineContext::GetEngineContext();
+					if (context != nullptr)
+						context->NudgeMainThread();
+
+					++threadExitedCount;
+
+					return 0;
+				}, AppRuntimeThreadCreationData(std::move(runtimeThreadCreationData))))
 			{
 				BLAZE_LOG_ERROR("Failed to instantiate thread");
 				continue;

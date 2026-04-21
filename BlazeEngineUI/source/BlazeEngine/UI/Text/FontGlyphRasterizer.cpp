@@ -4,10 +4,11 @@
 #include <freetype/freetype.h>
 
 namespace Blaze::UI::FontGlyphRasterizers
-{
-	Bitmap MonochromeFontGlyphRasterizer::Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const
+{ 
+	Bitmap MonochromeFontGlyphRasterizer::Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const
 	{
 		FT_Face face = (FT_Face)fontFace.GetHandle();
+		FT_Set_Pixel_Sizes(face, 0, rasterFontHeight);
 
 		FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 		auto glyph = face->glyph;
@@ -38,10 +39,10 @@ namespace Blaze::UI::FontGlyphRasterizers
 		return bitmap;
 	}
 
-	Bitmap AntialiasedFontGlyphRasterizer::Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const
+	Bitmap AntialiasedFontGlyphRasterizer::Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const
 	{
 		FT_Face face = (FT_Face)fontFace.GetHandle();
-		FT_Set_Pixel_Sizes(face, 0, static_cast<FT_UInt>(rasterFontHeight));
+		FT_Set_Pixel_Sizes(face, 0, rasterFontHeight);
 
 		FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 		auto glyph = face->glyph;
@@ -74,10 +75,10 @@ namespace Blaze::UI::FontGlyphRasterizers
 		return bitmap;
 	}
 
-	Bitmap HorizontalLCDFontGlyphRasterizer::Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const
+	Bitmap HorizontalLCDFontGlyphRasterizer::Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const
 	{
 		FT_Face face = (FT_Face)fontFace.GetHandle();
-		FT_Set_Pixel_Sizes(face, 0, static_cast<FT_UInt>(rasterFontHeight));
+		FT_Set_Pixel_Sizes(face, 0, rasterFontHeight);
 
 		FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 		auto glyph = face->glyph;
@@ -107,10 +108,10 @@ namespace Blaze::UI::FontGlyphRasterizers
 		return bitmap;
 	}
 
-	Bitmap VerticalLCDFontGlyphRasterizer::Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const
+	Bitmap VerticalLCDFontGlyphRasterizer::Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const
 	{
 		FT_Face face = (FT_Face)fontFace.GetHandle();
-		FT_Set_Pixel_Sizes(face, 0, static_cast<FT_UInt>(rasterFontHeight));
+		FT_Set_Pixel_Sizes(face, 0, rasterFontHeight);
 
 		FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 		auto glyph = face->glyph;
@@ -140,10 +141,10 @@ namespace Blaze::UI::FontGlyphRasterizers
 		return bitmap;
 	}
 
-	Bitmap SDFFontGlyphRasterizer::Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const
+	Bitmap SDFFontGlyphRasterizer::Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const
 	{
 		FT_Face face = (FT_Face)fontFace.GetHandle();
-		FT_Set_Pixel_Sizes(face, 0, static_cast<FT_UInt>(rasterFontHeight));
+		FT_Set_Pixel_Sizes(face, 0, rasterFontHeight);
 
 		FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
 		auto glyph = face->glyph;

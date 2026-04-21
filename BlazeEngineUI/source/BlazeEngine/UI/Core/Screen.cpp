@@ -3,12 +3,11 @@
 
 namespace Blaze::UI
 {
-	NodeFinalTransform CalculateFinalTransform(const NodeTransform& transform, const NodeFinalTransform& parentFinalTransform)
+	NodeFinalTransform CalculateFinalTransform(const NodeTransform& transform, float finalScale, const NodeFinalTransform& parentFinalTransform)
 	{
 		NodeFinalTransform newFinalTransform;
-
-		newFinalTransform.scale = parentFinalTransform.scale * transform.scale;
-		newFinalTransform.size = transform.size * parentFinalTransform.scale;
+		
+		newFinalTransform.size = transform.size * finalScale;
 		newFinalTransform.rotation = transform.rotation + parentFinalTransform.rotation;
 
 		Vec2f parentRelativeRight = { Math::Cos(transform.rotation), Math::Sin(transform.rotation) };
@@ -19,7 +18,7 @@ namespace Blaze::UI
 
 		Vec2f offset = -newFinalTransform.size * transform.pivot;
 		Vec2f parentRelativePos =
-			transform.parentPivot * parentFinalTransform.size + transform.pos * parentFinalTransform.scale +
+			transform.parentPivot * parentFinalTransform.size + transform.position * finalScale +
 			parentRelativeRight * offset.x + parentRelativeUp * offset.y;
 
 		newFinalTransform.position =
@@ -37,15 +36,14 @@ namespace Blaze::UI
 		return newFinalTransform;
 	}
 
-	Screen::Screen(ResourceManager &resourceManager)
-		: Node(), resourceManager(resourceManager)
+	Screen::Screen()
+		: Node()
 	{
 		SetTransform({
-			.pos = Vec2f(0.0f, 0.0f),
+			.position = Vec2f(0.0f, 0.0f),
 			.parentPivot = Vec2f(0.0f, 0.0f),
 			.pivot = Vec2f(0.0f, 0.0f),
 			.size = Vec2f(0.0f, 0.0f),
-			.scale = 1.0f,
 			.rotation = 0.0f,
 			});
 	}
@@ -61,32 +59,49 @@ namespace Blaze::UI
 	}
 	void Screen::Update()
 	{
-		auto CleanNode = [&](Node& node, const NodeFinalTransform& parentFinalTransform)
+		auto CleanNode = [&](Node& node, float parentFinalScale, const NodeFinalTransform& parentFinalTransform, bool dirctCopyTransform)
 			{
-				if (node.transformDirty)
+				float newFinalScale = node.scale * parentFinalScale;
+				if (node.finalScale != newFinalScale)
 				{
-					node.MarkFinalTransformDirty();
-					node.transformDirty = false;
+					node.finalScale = newFinalScale;
+					node.finalScaleUpdatedEventDispatcher.Call({ node });
+				}
 
-					
-					node.transformUpdatedEventDispatcher.Call({ node });
+				if (node.transformDirty)
+				{	
+					node.UpdateTransform();
+					node.transformDirty = false;
 				}
 
 				if (node.finalTransformDirty)
 				{
-					node.SetFinalTransform(CalculateFinalTransform(node.transform, parentFinalTransform));
-
+					if (dirctCopyTransform)
+					{
+						finalTransform = NodeFinalTransform{
+							.position = transform.position,
+							.size = transform.size,
+							.rotation = 0.0f,
+							.right = Vec2f(1, 0),
+						};
+					}
+					else
+					{
+						node.finalTransform = CalculateFinalTransform(node.transform, node.finalScale, parentFinalTransform);
+					}
+					
 					for (auto& child : node.children)
 						child.MarkFinalTransformDirty();
-					node.finalTransformDirty = false;
 
+					node.finalTransformDirty = false;
 					node.finalTransformUpdatedEventDispatcher.Call({ node });
 				}
 			};
+				
 		
-		CleanNode(*this, { });
+		CleanNode(*this, 1, { }, true);
 
 		for (auto node = GetNextNodeInTree(); node != nullptr; node = node->GetNextNodeInTree())
-			CleanNode(*node, node->parent->finalTransform);
+			CleanNode(*node, node->parent->finalScale, node->parent->finalTransform, false);
 	}
 }

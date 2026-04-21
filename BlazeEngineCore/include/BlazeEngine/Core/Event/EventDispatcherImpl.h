@@ -63,6 +63,11 @@ namespace Blaze
 		return false;
 	}
 	template<typename T, AllocatorType Allocator>
+	inline void EventDispatcher<T, Allocator>::RemoveAllHandlers()
+	{
+		handlers.Clear();
+	}
+	template<typename T, AllocatorType Allocator>
 	template<auto MemberFunctionPointer> requires SameAs<MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunctionPointer)>, TypeGroup<const T&>>
 	inline void EventDispatcher<T, Allocator>::AddHandler(MemberFunctionPointerTypeClassType<decltype(MemberFunctionPointer)>& handlerObject)
 	{

@@ -2,8 +2,6 @@
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include <atomic>
 
-	
-
 namespace Blaze
 {
 	enum class ThreadPriority
@@ -37,7 +35,7 @@ namespace Blaze
 		/*
 			Returns true on success, false otherwise
 		*/
-		template<typename F, typename ... Args> requires std::invocable<F, Args...> && SameAs<std::invoke_result_t<F, Args...>, uint>
+		template<typename F, typename ... Args> requires std::invocable<F, Args...> && SameAs<std::invoke_result_t<F, Args...>, int> && (!SameAs<RemoveCVRef<F>, Thread::BasicThreadFunction>)
 		bool Run(F&& func, Args&& ... parameters);
 		/*
 			Returns true on success, false otherwise
@@ -67,41 +65,47 @@ namespace Blaze
 	private:
 		void* handle;
 		ThreadID id;
+
+		bool RunInternal(BasicThreadFunction function, void* userData);
 	};
 
-	template<typename F, typename ... Args> requires std::invocable<F, Args...> && SameAs<std::invoke_result_t<F, Args...>, uint>
+	template<typename F, typename ... Args> requires std::invocable<F, Args...> && SameAs<std::invoke_result_t<F, Args...>, int> && (!SameAs<RemoveCVRef<F>, Thread::BasicThreadFunction>)
 	inline bool Thread::Run(F&& func, Args&& ... args)
 	{
 		struct ThreadArgumentData
 		{
 			std::atomic_flag dataCopied;
-			F function;
-			Tuple<Args...> argsTuple;
-		};		
+			RemoveReference<F> function; //Store the function
+			std::tuple<std::decay_t<Args>...> argsTuple; //Store the VALUE of the object
+		};
 
-		auto wrapperFunction = [](void* userData) -> int {
-			ThreadArgumentData* argumentData = static_cast<ThreadArgumentData*>(userData);
+		auto wrapperFunction = [](void* userData) -> int
+			{
+				ThreadArgumentData* argumentData = static_cast<ThreadArgumentData*>(userData);
 
-			Tuple<Args...> argsTuple = std::move(argumentData->argsTuple);
-			F function = std::move(argumentData->function);
+				//Move the values
+				auto argsTuple = std::move(argumentData->argsTuple);
+				auto function = std::move(argumentData->function);
 
-			argumentData->dataCopied.test_and_set();
-			argumentData->dataCopied.notify_all();
-
-			return static_cast<int>(std::apply(function, std::forward<Tuple<Args...>>(argsTuple)));
+				//Signal that the data was moved from argumentData
+				argumentData->dataCopied.test_and_set();
+				argumentData->dataCopied.notify_all();
+				
+				return std::apply(std::move(function), std::move(argsTuple));
 			};
 
 		ThreadArgumentData argumentData{
 			.dataCopied = ATOMIC_FLAG_INIT,
 			.function = std::forward<F>(func),
-			.argsTuple = { std::forward<Args>(args)... }
+			.argsTuple = std::make_tuple(std::forward<Args>(args)...)
 		};
 
-		bool result = Run(wrapperFunction, &argumentData);
+		bool result = RunInternal(wrapperFunction, &argumentData);
 
 		if (!result)
 			return false;
 
+		//Wait for the signal that data was moved from argumentData
 		argumentData.dataCopied.wait(false);
 
 		return true;

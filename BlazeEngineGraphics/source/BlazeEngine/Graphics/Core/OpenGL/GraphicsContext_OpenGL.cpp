@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngine/Runtime/BlazeEngineContext.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
+#include "BlazeEngine/Core/Time/Stopwatch.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/GraphicsContext_OpenGL.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/RenderWindow_OpenGL.h"
 #include "BlazeEngine/External/SDL/SDL.h"
@@ -84,17 +85,17 @@ namespace Blaze::Graphics::OpenGL
 		logFunc("OpenGL (" + _source + ")", "Type: " + _type + " | Severity: " + _severity + " | " + _message, false);
 	}
 
-	static StringView GetProfileTypeName(GLenum profile)
+	static StringView GetProfileTypeName(ProfileType profile)
 	{
 		switch (profile)
 		{
-		case SDL_GL_CONTEXT_PROFILE_COMPATIBILITY:
+		case ProfileType::Compatibility:
 			return "compatibility";
 			break;
-		case SDL_GL_CONTEXT_PROFILE_CORE:
+		case ProfileType::Core:
 			return "core";
 			break;
-		case SDL_GL_CONTEXT_PROFILE_ES:
+		case ProfileType::ES:
 			return "ES";
 		default:
 			return StringView();
@@ -137,26 +138,26 @@ namespace Blaze::Graphics::OpenGL
 		}
 	}
 
-	static String GetContextFlagsText(GLenum contextFlags)
+	static String GetContextFlagsText(ContextFlags contextFlags)
 	{
 		String out;
 
-		if (contextFlags & SDL_GL_CONTEXT_DEBUG_FLAG)
+		if (bool(contextFlags & ContextFlags::Debug))
 		{
 			if (!out.Empty()) out += ", ";
 			out += "debug";
 		}
-		if (contextFlags & SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG)
+		if (bool(contextFlags & ContextFlags::ForwardCompatible))
 		{
 			if (!out.Empty()) out += ", ";
 			out += "forward compatible";
 		}
-		if (contextFlags & SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG)
+		if (bool(contextFlags & ContextFlags::RobustAccess))
 		{
 			if (!out.Empty()) out += ", ";
 			out += "robust access";
 		}
-		if (contextFlags & SDL_GL_CONTEXT_RESET_ISOLATION_FLAG)
+		if (bool(contextFlags & ContextFlags::ResetIsolation))
 		{
 			if (!out.Empty()) out += ", ";
 			out += "reset isolation";
@@ -179,33 +180,6 @@ namespace Blaze::Graphics::OpenGL
 			out |= ContextFlags::RobustAccess;
 		if (bool(contextFlags & SDL_GL_CONTEXT_RESET_ISOLATION_FLAG))
 			out |= ContextFlags::ResetIsolation;
-
-		return out;
-	}
-	static String GetOpenGLContextFlagsString(GLenum contextFlags)
-	{
-		String out;
-
-		if (contextFlags & SDL_GL_CONTEXT_DEBUG_FLAG)
-		{
-			if (!out.Empty()) out += " | ";
-			out += "SDL_GL_CONTEXT_DEBUG_FLAG";
-		}
-		if (contextFlags & SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG)
-		{
-			if (!out.Empty()) out += " | ";
-			out += "SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG";
-		}
-		if (contextFlags & SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG)
-		{
-			if (!out.Empty()) out += " | ";
-			out = "SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG";
-		}
-		if (contextFlags & SDL_GL_CONTEXT_RESET_ISOLATION_FLAG)
-		{
-			if (!out.Empty()) out += " | ";
-			out = "SDL_GL_CONTEXT_RESET_ISOLATION_FLAG";
-		}
 
 		return out;
 	}
@@ -283,8 +257,8 @@ namespace Blaze::Graphics::OpenGL
 		TrySetGLAttribute(SDL_GL_CONTEXT_MINOR_VERSION, properties.minorVersion);
 		TrySetGLAttribute(SDL_GL_ACCELERATED_VISUAL, properties.acceleratedVisual);
 		TrySetGLAttributeWithString(SDL_GL_CONTEXT_FLAGS, _contextFlags, GetOpenGLContextFlagsString(_contextFlags));
-		TrySetGLAttributeWithString(SDL_GL_CONTEXT_PROFILE_MASK, _contextFlags, GetOpenGLProfileTypeString(_profileType));
-		TrySetGLAttributeWithString(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _contextFlags, GetOpenGLReleaseBehaviourString(_releaseBehaviour));
+		TrySetGLAttributeWithString(SDL_GL_CONTEXT_PROFILE_MASK, _profileType, GetOpenGLProfileTypeString(_profileType));
+		TrySetGLAttributeWithString(SDL_GL_CONTEXT_RELEASE_BEHAVIOR, _releaseBehaviour, GetOpenGLReleaseBehaviourString(_releaseBehaviour));
 		TrySetGLAttribute(SDL_GL_DEPTH_SIZE, properties.minDepthBufferBitCount);
 		TrySetGLAttribute(SDL_GL_STENCIL_SIZE, properties.minStencilBufferBitCount);
 		TrySetGLAttribute(SDL_GL_RED_SIZE, properties.minRedBitCount);
@@ -410,10 +384,7 @@ namespace Blaze::Graphics::OpenGL
 				return false;
 			}
 			else
-			{
 				glewInitialized = true;
-				BLAZE_LOG_INFO("<color=green><color=green>Successfully<color/><color/> initialized glew " + GetGlewString(GLEW_VERSION));
-			}
 		}
 
 		return true;
@@ -448,15 +419,15 @@ namespace Blaze::Graphics::OpenGL
 		else
 			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_CONTEXT_FLAGS. SDL returned error: \"" + SDL_GetError() + "\"");
 
-		String profileName = "invalid";
 		int finalProfileType = 0;
 		if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &finalProfileType))
 		{
-			profileName = GetProfileTypeName(finalProfileType);
+			ProfileType _finalProfileType = GetProfileType(finalProfileType);
+
 			if (finalProfileType != _profileType)
 			{
-				StringView name1 = GetProfileTypeName(_profileType);
-				StringView name2 = profileName;
+				StringView name1 = GetProfileTypeName(properties.profileType);
+				StringView name2 = GetProfileTypeName(_finalProfileType);
 
 				if (!name1.Empty())
 					if (name2.Empty())
@@ -464,7 +435,7 @@ namespace Blaze::Graphics::OpenGL
 					else
 						BLAZE_LOG_WARNING("Asked for OpenGL " + name1 + " profile, got " + name2);
 			}
-			properties.profileType = GetProfileType(finalProfileType);
+			properties.profileType = _finalProfileType;
 		}
 		else
 			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_CONTEXT_PROFILE_MASK. SDL returned error: \"" + SDL_GetError() + "\"");
@@ -538,12 +509,6 @@ namespace Blaze::Graphics::OpenGL
 		else
 			BLAZE_LOG_ERROR("SDL_GL_GetAttribute failed when called with SDL_GL_FRAMEBUFFER_SRGB_CAPABLE. SDL returned error: \"" + SDL_GetError() + "\"");
 
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> created OpenGL context {}.{} {} profile ({} R{}/G{}/B{}/A{} D{}/S{} DB{} SRGB{})",
-			properties.majorVersion, properties.minorVersion, profileName, GetContextFlagsText(finalContextFlags),
-			properties.minRedBitCount, properties.minGreenBitCount, properties.minBlueBitCount, properties.minAlphaBitCount, properties.minDepthBufferBitCount, properties.minStencilBufferBitCount,
-			int(properties.doubleBuffer), int(properties.framebufferSRGBCapable)
-		);
-
 		return true;
 	}
 
@@ -552,22 +517,39 @@ namespace Blaze::Graphics::OpenGL
 	{
 	}
 	GraphicsContext_OpenGL::GraphicsContext_OpenGL(const GraphicsContextProperties_OpenGL& _properties) :
-		activeWindowHandle(nullptr), properties(_properties), SDLOpenGLContext(nullptr), initWindow()
+		activeWindowHandle(nullptr), properties(_properties), SDLOpenGLContext(nullptr), initWindowHandle(nullptr)
 	{
+		Stopwatch stopwatch;
+
 		WindowCreateOptions initWindowCreateOptions = _properties.initWindowCreateOptions;
 		initWindowCreateOptions.hidden = true;
 		initWindowCreateOptions.graphicsAPI = WindowGraphicsAPI::OpenGL;
-		initWindow = Window(initWindowCreateOptions);
-		activeWindowHandle = initWindow.GetHandle();
+		initWindowHandle = Window(initWindowCreateOptions).ReleaseHandle();
+		activeWindowHandle = initWindowHandle;
 
+		double initWindowCreationTime = stopwatch.Reset();
+
+		BLAZE_LOG_INFO("<color=green><color=green>Successfully<color/><color/> created initializing window ({:.1f}ms)", initWindowCreationTime * 1000);
+			
 		if (!SetOpenGLContextAttributes(_properties))
 			return;
 
-		if (!CreateOpenGLContext(initWindow.GetHandle(), SDLOpenGLContext))
+		if (!CreateOpenGLContext(initWindowHandle, SDLOpenGLContext))
 			return;
+
+		double openGLContextInitializationTime = stopwatch.Reset();
+
+		BLAZE_LOG_INFO("<color=green>Successfully<color/> created OpenGL context {}.{} {} profile ({} R{}/G{}/B{}/A{} D{}/S{} DB{} SRGB{}) ({:.1f}ms)",
+			_properties.majorVersion, _properties.minorVersion, GetProfileTypeName(properties.profileType), GetContextFlagsText(_properties.contextFlags),
+			_properties.minRedBitCount, _properties.minGreenBitCount, _properties.minBlueBitCount, _properties.minAlphaBitCount, _properties.minDepthBufferBitCount, _properties.minStencilBufferBitCount,
+			int(_properties.doubleBuffer), int(_properties.framebufferSRGBCapable), openGLContextInitializationTime * 1000);
 
 		if (!InitializeGLEW())
 			return;
+
+		double glewInitializationTime = stopwatch.Reset();
+
+		BLAZE_LOG_INFO("<color=green><color=green>Successfully<color/><color/> initialized glew {} ({:.1f}ms)", GetGlewString(GLEW_VERSION), glewInitializationTime);
 
 		ValidateContextAttributes(properties);
 
@@ -589,7 +571,8 @@ namespace Blaze::Graphics::OpenGL
 		SDL_GL_DestroyContext((SDL_GLContext)SDLOpenGLContext);
 		SDLOpenGLContext = nullptr;
 
-		initWindow.Destroy();
+		//Destroy window handle
+		Window(initWindowHandle, WindowGraphicsAPI::OpenGL);
 	}
 	void GraphicsContext_OpenGL::MakeContextActive()
 	{
@@ -624,42 +607,44 @@ namespace Blaze::Graphics::OpenGL
 		if (SDL_GL_MakeCurrent((SDL_Window*)activeWindowHandle, (SDL_GLContext)SDLOpenGLContext) == false)
 			BLAZE_LOG_ERROR("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", SDL_GetError());
 	}
-	Window GraphicsContext_OpenGL::CreateWindow(const WindowCreateOptions& options)
+	void* GraphicsContext_OpenGL::CreateWindow(const WindowCreateOptions& options)
 	{
-		if (initWindow.GetHandle() == nullptr || properties.useSeparateInitWindow)
+		if (initWindowHandle == nullptr || properties.useSeparateInitWindow)
 		{
 			WindowCreateOptions _options = options;
 			_options.graphicsAPI = WindowGraphicsAPI::OpenGL;
-			return Window(_options);
+			return Window(_options).ReleaseHandle();
 		}
 
-		Rectf displayRect = Display::GetDisplayRect(initWindow.GetDisplayIndex());
+		Window initWindowView{ std::exchange(initWindowHandle, nullptr), WindowGraphicsAPI::OpenGL };
+
+		Rectf displayRect = Display::GetDisplayRect(initWindowView.GetDisplayIndex());
 		Vec2i pos{
 			options.pos.x == INT_MAX ? static_cast<int>(displayRect.x) + (static_cast<int>(displayRect.w) - static_cast<int>(options.size.x)) / 2 : options.pos.x,
 			options.pos.y == INT_MAX ? static_cast<int>(displayRect.y) + (static_cast<int>(displayRect.h) - static_cast<int>(options.size.y)) / 2 : options.pos.y
 		};
 
-		initWindow.SetResizableFlag(options.resizable);
-		initWindow.SetBorderlessFlag(options.borderless);
-		initWindow.SetMouseGrabbedFlag(options.mouseGrabbed);
-		initWindow.SetFocusableFlag(options.focusable);
-		initWindow.SetHiddenFlag(options.hidden);
-		initWindow.SetAlwaysOnTopFlag(options.alwaysOnTop);
-		initWindow.SetTitle(options.title);
-		initWindow.SetPos(pos);
-		initWindow.SetSize(options.size);
-		initWindow.SetWindowPresentMode(options.presentMode);
+		initWindowView.SetResizableFlag(options.resizable);
+		initWindowView.SetBorderlessFlag(options.borderless);
+		initWindowView.SetMouseGrabbedFlag(options.mouseGrabbed);
+		initWindowView.SetFocusableFlag(options.focusable);
+		initWindowView.SetHiddenFlag(options.hidden);
+		initWindowView.SetAlwaysOnTopFlag(options.alwaysOnTop);
+		initWindowView.SetTitle(options.title);
+		initWindowView.SetPos(pos);
+		initWindowView.SetSize(options.size);
+		initWindowView.SetWindowPresentMode(options.presentMode);
 
-		return std::move(initWindow);
+		return initWindowView.ReleaseHandle();
 	}
 	void GraphicsContext_OpenGL::RetrieveWindow(Window& window)
 	{
-		if (!properties.useSeparateInitWindow && initWindow.GetHandle() == nullptr)
-			initWindow = std::move(window);
+		if (!properties.useSeparateInitWindow && initWindowHandle == nullptr)
+			initWindowHandle = window.ReleaseHandle();
 	}
 	void GraphicsContext_OpenGL::ActiveWindowDestroyed(const Window::DestructionEvent& event)
 	{
-		activeWindowHandle = initWindow.GetHandle();
+		activeWindowHandle = initWindowHandle;
 		if (SDL_GL_MakeCurrent((SDL_Window*)activeWindowHandle, (SDL_GLContext)SDLOpenGLContext) == false)
 			BLAZE_LOG_ERROR("SDL_GL_MakeCurrent() failed. SDL_Error() returnd: \"{}\"", SDL_GetError());
 	}

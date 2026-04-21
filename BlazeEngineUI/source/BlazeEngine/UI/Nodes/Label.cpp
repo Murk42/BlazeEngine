@@ -1,21 +1,20 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Nodes/Label.h"
-#include "BlazeEngine/UI/Core/Screen.h"
+#include <BlazeEngine/UI/Text/WrappedLineTextShaper.h>
+#include <cmath>
 
 namespace Blaze::UI::Nodes
 {
 	Label::Label()
-		: rendererTypeIDChanged(false), blocksHitTest(true), textBuildSize(0.0f), wrapWidth(FLT_MAX)
+		: rebuildGlyphs(false), blocksHitTest(true), updateRenderTopology(false), wrapWidth(FLT_MAX), textFinalSize({ 0, 0 })
 	{
-		dataMap.SetTypeName("Label");
-
-		finalTransformUpdatedEventDispatcher.AddHandler<&Label::FinalTransformUpdatedEvent>(*this);
+		dataMap.SetTypeName("Label");		
 	}
 	Label::Label(Node& parent, const NodeTransform& transform)
 		: Label()
-	{
-		SetTransform(transform);
+	{		
 		SetParent(&parent);
+		SetTransform(transform);
 	}
 	Label::Label(Node& parent, const NodeTransform& transform, const TextStyle& textStyle, u8String text)
 		: Label(parent, transform)
@@ -25,61 +24,56 @@ namespace Blaze::UI::Nodes
 	}
 	Label::~Label()
 	{
-		finalTransformUpdatedEventDispatcher.RemoveHandler<&Label::FinalTransformUpdatedEvent>(*this);
 	}
 	void Label::Clear()
 	{
-		text.Clear();
-		textBuildSize = { 0.0f, 0.0f};
 		renderUnit.Clear();
-
-		UpdateTransformSize();
+		MarkTransformDirty();
 	}
-	void Label::SetText(u8String text)
+	void Label::SetText(u8String newText)
 	{
-		this->text = std::move(text);
+		if (text == newText)
+			return;
 
-		UpdateRenderUnit();
+		this->text = std::move(newText);
+		rebuildGlyphs = true;
+		MarkTransformDirty();
 	}
 	void Label::SetTextStyle(const TextStyle& newTextStyle)
-	{
-		bool fontChanged = false;
-		bool fontHeightChanged = false;
+	{		
+		if (textStyle == newTextStyle)
+			return;
 
-		if (newTextStyle.fontName != textStyle.fontName)
-			fontChanged = true;
-
-		if (newTextStyle.fontHeight != textStyle.fontHeight)
-			fontHeightChanged = true;
-
+		TextStyle oldTextStyle = std::move(textStyle);
 		textStyle = newTextStyle;
 
-		if (fontChanged || fontHeightChanged)
-			UpdateRenderUnit();		
-
-		renderUnit.SetColor(textStyle.color);
+		if (oldTextStyle.color != newTextStyle.color)
+			renderUnit.SetColor(textStyle.color);
+		
+		if (oldTextStyle.fontHeight != newTextStyle.fontHeight || oldTextStyle.fontName != newTextStyle.fontName)
+		{
+			rebuildGlyphs = true;
+			MarkTransformDirty();
+		}
 	}
 	void Label::SetWrapWidth(float newWrapWidth)
 	{
-		bool wrapWidthChanged = wrapWidth != newWrapWidth;
+		if (wrapWidth == newWrapWidth)
+			return;
 
 		wrapWidth = newWrapWidth;
-
-		if (wrapWidthChanged)
-			UpdateRenderUnit();
+		rebuildGlyphs = true;
+		MarkTransformDirty();
 	}
 	void Label::SetBlocksHitTestFlag(bool blocksHitTest)
 	{
 		this->blocksHitTest = blocksHitTest;
 	}
-	bool Label::PreRender(const RenderContext& renderContext)
+	bool Label::PreRender(const Graphics::RenderContext& renderContext)
 	{
-		bool returnValue = false;
-
-		returnValue |= rendererTypeIDChanged;
-		rendererTypeIDChanged = false;
-
-		return returnValue;
+		bool oldUpdateRenderTopology = updateRenderTopology;
+		updateRenderTopology = false;
+		return oldUpdateRenderTopology;
 	}
 	RenderUnitBase* Label::GetRenderUnit(uintMem index)
 	{
@@ -99,88 +93,53 @@ namespace Blaze::UI::Nodes
 			else
 				return HitStatus::NotHit;
 	}
-	bool Label::GetFontAtlasData(FontManager::FontAtlasData& fontAtlasData) const
+	void Label::UpdateTransform()
 	{
-		FontManager* fontManager = nullptr;
-
-		if (GetScreen() != nullptr)
-			fontManager = GetScreen()->resourceManager.GetResource<FontManager>("fontManager").GetValue();
-
-		if (fontManager == nullptr)
+		if (rebuildGlyphs)
 		{
-			BLAZE_LOG_WARNING("There is no font manager assigned to the scene");
-			return false;
+			RebuildGlyphs();
+			rebuildGlyphs = false;
 		}
 
-		const auto& finalTransform = GetFinalTransform();
-
-		TextStyle finalTextStyle = textStyle;
-		finalTextStyle.fontHeight *= finalTransform.scale;
-		
-		if (!fontManager->GetFontAtlas(finalTextStyle, fontAtlasData))
-		{
-			BLAZE_LOG_WARNING("Couldn't find font atlas with font name: \"{}\"", finalTextStyle.fontName);
-			return false;
-		}
-
-		if (fontAtlasData.atlas == nullptr)
-		{
-			BLAZE_LOG_WARNING("Font manager returned a nullptr atlas");
-			return false;
-		}
-
-		if (fontAtlasData.fontFace == nullptr)
-		{
-			BLAZE_LOG_WARNING("Font manager returned a nullptr font face");
-			return false;
-		}
-
-		return true;
-	}
-	void Label::UpdateTransformSize()
-	{
-		auto transform = GetTransform();
-		transform.size = textBuildSize / renderUnit.GetAtlasFontHeight() * textStyle.fontHeight;
+		NodeTransform transform = GetTransform();
+		transform.size = textFinalSize / GetFinalScale();
 		SetTransform(transform);
 	}
-	void Label::UpdateRenderUnitTransform()
+	void Label::FinalScaleUpdated(const FinalScaleUpdatedEvent&)
 	{
-		const auto& finalTransform = GetFinalTransform();
-		Vec2f finalTextSize = textBuildSize / renderUnit.GetAtlasFontHeight() * renderUnit.GetTargetFontHeight();
-		renderUnit.SetTransform(finalTransform.position + finalTransform.Up() * finalTextSize.y, finalTransform.right);
+		rebuildGlyphs = true;
+		MarkTransformDirty();
 	}
-	void Label::UpdateRenderUnit()
+	void Label::RebuildGlyphs()
 	{
-		if (text.Empty() || textStyle.fontHeight == 0 || textStyle.fontName.Empty())
+		if (text.Empty() || textStyle.fontHeight == 0 || textStyle.fontName.Empty() || textStyle.fontManager == nullptr)
 		{
 			renderUnit.Clear();
+
+			textFinalSize = { 0, 0 };
 			return;
 		}
 
-		FontManager::FontAtlasData atlasData;
+		uint32 finalFontHeight = static_cast<uint32>(std::round(textStyle.fontHeight * GetFinalScale()));
+		float finalWrapWidth = wrapWidth * GetFinalScale();
 
-		if (!GetFontAtlasData(atlasData))
+		FontManager::FontAtlasData atlasData;		
+		if (!textStyle.fontManager->GetFontAtlas(textStyle.fontName, finalFontHeight , atlasData))
 		{
+			BLAZE_LOG_WARNING("Couldn't find font atlas with font name: \"{}\"", textStyle.fontName);
 			renderUnit.Clear();
 			return;
-		}
+		}				
+
+		updateRenderTopology = atlasData.rendererTypeID != renderUnit.GetRequiredRendererTypeID();
 		
-		const auto& finalTransform = GetFinalTransform();
-		renderUnit.SetTargetFontHeight(textStyle.fontHeight * finalTransform.scale);
+		DefaultTextSeparationData textSeparationData{ text };
 
-		rendererTypeIDChanged = atlasData.rendererTypeID != renderUnit.GetRequiredRendererTypeID();
-		textBuildSize = renderUnit.BuildWrappedText(text, atlasData, wrapWidth / textStyle.fontHeight * atlasData.atlas->GetRasterFontHeight());
+		Text::WrappedLineTextShaper textShaper{ text, *atlasData.fontFace, finalFontHeight, textSeparationData, finalWrapWidth };
+		auto shapedLines = textShaper.Shape(text);
+				
+		Array<StaticTextRenderUnit::GlyphRenderData> glyphs = renderUnit.GenerateGlyphRenderData(shapedLines, *atlasData.fontFace, *atlasData.atlas, finalFontHeight, &textFinalSize);
 
-		UpdateTransformSize();
-		UpdateRenderUnitTransform();
-	}
-	void Label::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
-	{
-		const auto& finalTransform = GetFinalTransform();
-
-		if (finalTransform.scale * textStyle.fontHeight != renderUnit.GetTargetFontHeight())
-			UpdateRenderUnit();
-		else
-			UpdateRenderUnitTransform();
+		renderUnit.SetGlyphs(std::move(glyphs), atlasData.rendererTypeID, atlasData.atlas);
 	}
 }

@@ -150,10 +150,13 @@ namespace Blaze
 	{
 		if (auto newPtr = ReallocateUnsafe(count + 1))
 		{
+			//Firstly construct the new element. This solves the edge case where 'args' is one of the elements
+			//in the array and is going to be moved or copied as the new element, so we need to do that first, 
+			//before we move the old elements.
+			std::construct_at(newPtr + count, std::forward<Args>(args)...);
+
 			for (uintMem i = 0; i < count; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i]));
-
-			std::construct_at(newPtr + count, std::forward<Args>(args)...);
 
 			std::destroy_n(ptr, count);
 			allocator.Free(ptr);
@@ -191,16 +194,19 @@ namespace Blaze
 		if (index > count)
 			BLAZE_LOG_FATAL("Trying to add an element outside the array");
 #endif
+		if (index == count)
+			return AddBack(std::forward<Args>(args)...);
 
 		if (auto newPtr = ReallocateUnsafe(count + 1))
 		{
+			//Firstly construct the new element (explained in the AddBack method)
+			std::construct_at(newPtr + index, std::forward<Args>(args)...);
+
 			for (uintMem i = 0; i < index; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i]));
 
 			for (uintMem i = index; i < count; ++i)
 				std::construct_at(newPtr + i + 1, std::move(ptr[i]));
-
-			std::construct_at(newPtr + index, std::forward<Args>(args)...);
 
 			std::destroy_n(ptr, count);
 			allocator.Free(ptr);
@@ -208,10 +214,38 @@ namespace Blaze
 		}
 		else
 		{
-			for (uintMem i = count; i > index; --i)
-				ptr[i] = std::move(ptr[i - 1]);
+			bool handled = false;
 
-			std::construct_at(ptr + index, std::forward<Args>(args)...);
+			//Check if 'args' could be a reference to an element in the array
+			if constexpr (SameAs<TypeGroup<Args...>, TypeGroup<const T&>> || SameAs<TypeGroup<Args...>, TypeGroup<T&&>>)
+			{
+				const T* elementPtr = &(args, ...);
+
+				if (elementPtr >= ptr && elementPtr - ptr >= index && elementPtr - ptr < count)
+				{
+					//If 'args' references an element in the array that would be moved when inserting the new element, first create the new element and then move the others
+					T temp{ std::forward<Args>(args)... };
+
+					std::construct_at(ptr + count, std::move(ptr[count - 1]));
+
+					for (uintMem i = count - 1; i > index; --i)
+						ptr[i] = std::move(ptr[i - 1]);
+
+					ptr[index] = std::move(temp);
+
+					handled = true;
+				}
+			}
+			
+			if (!handled)
+			{
+				std::construct_at(ptr + count, std::move(ptr[count - 1]));
+
+				for (uintMem i = count - 1; i > index; --i)
+					ptr[i] = std::move(ptr[i - 1]);
+
+				ptr[index] = T(std::forward<Args>(args)...);
+			}
 		}
 		++count;
 
@@ -224,9 +258,46 @@ namespace Blaze
 		return AddAt(it.Ptr() - ptr, std::forward<Args>(args)...);
 	}
 	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::move_constructible<StoredType>
+	inline void Array<T, Allocator>::Append(const ArrayView<T>& other) requires std::copy_constructible<StoredType>
 	{
-		Insert(it.Ptr() - ptr, array);
+		if (auto newPtr = ReallocateUnsafe(count + other.Count()))
+		{
+			for (uintMem i = 0; i < count; ++i)
+				std::construct_at(newPtr + i, std::move(ptr[i]));
+
+			std::destroy_n(ptr, count);
+			allocator.Free(ptr);
+			ptr = newPtr;
+		}
+
+		for (uintMem i = 0; i < other.Count(); ++i)
+			std::construct_at(ptr + count + i, other[i]);
+
+		count += other.Count();
+	}
+	template<typename T, AllocatorType Allocator>
+	inline void Array<T, Allocator>::Append(Array&& other) requires std::move_constructible<StoredType>
+	{
+		if (auto newPtr = ReallocateUnsafe(count + other.count))
+		{
+			//Firstly construct the new elements (explained in the AddBack method)
+			for (uintMem i = 0; i < other.count; ++i)
+				std::construct_at(ptr + i + count, std::move(other.ptr[i]));
+
+			for (uintMem i = 0; i < count; ++i)
+				std::construct_at(newPtr + i, std::move(ptr[i]));
+
+			std::destroy_n(ptr, count);
+			allocator.Free(ptr);
+			ptr = newPtr;
+		}
+		else
+		{
+			for (uintMem i = 0; i < other.count; ++i)
+				std::construct_at(ptr + i + count, std::move(other.ptr[i]));
+		}
+
+		count += other.count;
 	}
 	template<typename T, AllocatorType Allocator>
 	inline void Array<T, Allocator>::Insert(uintMem index, ArrayView<T> array)  requires std::move_constructible<StoredType>
@@ -234,18 +305,21 @@ namespace Blaze
 #ifdef BLAZE_INVALID_ITERATOR_CHECK
 		if (index > count)
 			BLAZE_LOG_FATAL("Trying to add an element outside the array");
-#endif
+#endif		
+
+		if (index == count)
+			Append(array);
 
 		if (auto newPtr = ReallocateUnsafe(count + array.Count()))
 		{
-			uintMem i = 0;
-			for (; i < index; ++i)
+			//Firstly construct the new elements (explained in the AddBack method)
+			for (uintMem i = index; i < index + array.Count(); ++i)
+				std::construct_at(newPtr + i, array[i - index]);
+
+			for (uintMem i = 0; i < index; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i]));
 
-			for (; i < index + array.Count(); ++i)
-				std::construct_at(newPtr + i, std::move(array[i - index]));
-
-			for (; i < count + array.Count(); ++i)
+			for (uintMem i = index + array.Count(); i < count + array.Count(); ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i - array.Count()]));
 
 			std::destroy_n(ptr, count);
@@ -254,16 +328,122 @@ namespace Blaze
 		}
 		else
 		{
-			uintMem moveEndIndex = array.Count() + index < count ? array.Count() + index : count;
+			/*
+				  |7|8|
+					 V
+			  |1|2|3|4|5|6|
 
-			for (uintMem i = count + moveEndIndex; i > index; --i)
-				ptr[i + array.Count() - 1] = std::move(ptr[i - 1]);
+			  |1|2|3|7|8|4|5|6|
 
+
+
+			  scenario 1 (index + array.Count() < count)
+			  |           V       |
+			  |           #####        | 
+
+			  scenario 2 (index + array.Count() >= count)
+			  |           V       |
+			  |           ############        |
+			*/
+
+			T* sourcePtr = const_cast<T*>(array.Ptr());
+			T* tempBuffer = nullptr;
+
+			// If the source array is a sub-array of this array, we must allocate a temporary copy
+			// of the source array, because by moving the elements to make space for the source array its elements won't be the same
+			if (array.Ptr() >= ptr && array.Ptr() < (ptr + count))
+			{
+				tempBuffer = static_cast<T*>(allocator.Allocate(array.Count() * sizeof(T)));
+				for (uintMem i = 0; i < array.Count(); ++i)
+					std::construct_at(tempBuffer + i, sourcePtr[i]);
+				sourcePtr = tempBuffer;
+			}				
+
+			//Construct new elements (constructed from the old elements)
 			for (uintMem i = 0; i < array.Count(); ++i)
-				std::construct_at(ptr + i, array[i]);
+			{
+				uintMem src = count - i - 1;
+				uintMem dst = src + array.Count();
+
+				std::construct_at(ptr + dst, std::move(ptr[src]));
+			}
+
+			if (index + array.Count() < count)
+			{
+				for (uintMem i = 0; i < count - (index + array.Count()); ++i)
+				{
+					uintMem dst = count - i - 1;
+					uintMem src = dst - array.Count();
+
+					ptr[dst] = std::move(ptr[src]);
+				}
+
+				for (uintMem i = 0; i < array.Count(); ++i)
+				{
+					uintMem src = array.Count() - i - 1;
+					uintMem dst = index + src;
+
+					ptr[dst] = std::move(sourcePtr[src]);
+				}
+			}
+			else
+			{
+				for (uintMem i = 0; i < index + array.Count() - count; ++i)
+				{
+					uintMem src = array.Count() - i - 1;
+					uintMem dst = index + src;
+
+					std::construct_at(ptr + dst, std::move(sourcePtr[src]));
+				}
+
+				for (uintMem i = 0; i < count - index; ++i)
+				{
+					uintMem dst = count - i - 1;
+					uintMem src = dst - index;
+
+					ptr[dst] = std::move(sourcePtr[src]);
+				}
+			}
+			
+			if (tempBuffer)
+			{
+				std::destroy_n(tempBuffer, array.Count());
+				allocator.Free(tempBuffer);
+			}
 		}
 
 		count += array.Count();
+	}
+	/*
+	if (array.End() > End())
+			{
+				BLAZE_LOG_FATAL("Trying to insert a sub-array of an array into the same array, but the sub-array ends outside the array");
+				return;
+			}
+
+			for (uintMem i = count; i > index; --i)
+				std::construct_at(ptr + array.Count() + i - 1, std::move(ptr[count + i - 1]));
+
+			uintMem i = 0;
+			uintMem assignEnd = count - index;
+
+			for (; i < assignEnd; ++i)
+				ptr[index + i] = std::move(ptr[i - 1]);
+
+			if (index + array.Count() > count)
+			{
+				//There are more elements left to construct
+				for (uintMem i = 0; i < index + array.Count() - count; ++i)
+					std::construct_at(ptr + count + i, std::move([count + i - 1]));
+			}
+			else
+			{
+
+			}*/
+	template<typename T, AllocatorType Allocator>
+	inline void Array<T, Allocator>::Insert(Iterator it, ArrayView<T> array)  requires std::move_constructible<StoredType>
+	{
+		Insert(it.Ptr() - ptr, array);
 	}
 	template<typename T, AllocatorType Allocator>
 	inline Array<T, Allocator> Array<T, Allocator>::Split(Iterator it)
@@ -364,49 +544,6 @@ namespace Blaze
 	inline void Array<T, Allocator>::EraseAt(Iterator it) requires std::is_move_assignable_v<StoredType> || std::is_move_constructible_v<StoredType>
 	{
 		EraseAt(it.Ptr() - ptr);
-	}
-	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Append(const Array& other) requires std::copy_constructible<StoredType>
-	{
-		if (auto newPtr = ReallocateUnsafe(count + other.count))
-		{
-			for (uintMem i = 0; i < count; ++i)
-				std::construct_at(newPtr + i, std::move(ptr[i]));
-
-			std::destroy_n(ptr, count);
-			allocator.Free(ptr);
-			ptr = newPtr;
-		}
-
-		for (uintMem i = 0; i < other.count; ++i)
-			std::construct_at(ptr + count + i, other.ptr[i]);
-
-		count += other.count;
-	}
-	template<typename T, AllocatorType Allocator>
-	inline void Array<T, Allocator>::Append(Array&& other) requires std::move_constructible<StoredType>
-	{
-		if (auto newPtr = ReallocateUnsafe(count + other.count))
-		{
-			for (uintMem i = 0; i < count; ++i)
-				std::construct_at(newPtr + i, std::move(ptr[i]));
-
-			std::destroy_n(ptr, count);
-			allocator.Free(ptr);
-			ptr = newPtr;
-		}
-
-		for (uintMem i = 0; i < other.count; ++i)
-			std::construct_at(ptr + i + count, std::move(other.ptr[i]));
-
-		std::destroy_n(other.ptr, other.count);
-
-		count += other.count;
-
-		other.allocator.Free(other.ptr);
-		other.ptr = nullptr;
-		other.count = 0;
-		other.reserved = 0;
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires IsConstructibleFrom<T, Args...>

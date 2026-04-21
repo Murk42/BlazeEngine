@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "BlazeEngine/Core/Debug/Logger.h"
+#include "BlazeEngine/Core/Container/ArrayView.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLConversions.h"
 
 namespace Blaze::Graphics::OpenGL
@@ -11,677 +11,677 @@ namespace Blaze::Graphics::OpenGL
 		return static_cast<std::underlying_type_t<T>>(value);
 	}
 
-	template<typename T>
-	constexpr bool BitRemap(T in, GLenum& out, std::initializer_list<T> values, std::initializer_list<GLenum> enums)
+	template<typename T1, typename T2>
+	constexpr bool BitRemap(const T1& in, T2& out, ArrayView<Tuple<T1, T2>> values)
 	{
+		T1 value = in;
 		out = 0;
 
-		for (unsigned i = 0; i < values.size(); ++i)
+		for (auto& [v1, v2] :values)
 		{
-			if ((bool)(in & values.begin()[i]))
+			if ((bool)(value & v1))
 			{
-				out |= enums.begin()[i];
-				in ^= values.begin()[i];
+				out |= v2;
+				value ^= v1;
 			}
 		}
 
-		return !(bool)in;
+		return !(bool)value;
 	}
 
-	GLenum OpenGLPixelFormat(BitmapColorFormat value, Result& result)
+	bool OpenGLPixelFormat(BitmapColorFormat value, GLenum& result)
 	{
 		switch (value)
 		{
-		case BitmapColorFormat::Red: return GL_RED;
-		case BitmapColorFormat::RG:	return GL_RG;
-		case BitmapColorFormat::RGB: return GL_RGB;
-		case BitmapColorFormat::RGBA: return GL_RGBA;
-		case BitmapColorFormat::BGR: return GL_BGR;
-		case BitmapColorFormat::BGRA: return GL_BGRA;
+		case BitmapColorFormat::Red:  result = GL_RED; break;
+		case BitmapColorFormat::RG:	  result = GL_RG; break;
+		case BitmapColorFormat::RGB:  result = GL_RGB; break;
+		case BitmapColorFormat::RGBA: result = GL_RGBA; break;
+		case BitmapColorFormat::BGR:  result = GL_BGR; break;
+		case BitmapColorFormat::BGRA: result = GL_BGRA; break;
+		default: return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid BitmapColorFormat enum value. The integer value was: {}", ToInteger(value)));
-		return std::numeric_limits<GLenum>::max();
+
+		return true;
 	}
-	BitmapColorFormat OepnGLToBlazePixelFormat(GLenum value, Result& result)
+	bool OpenGLToBlazePixelFormat(GLenum value, BitmapColorFormat& result)
 	{
 		switch (value)
 		{
-		case GL_LUMINANCE: return BitmapColorFormat::Red;
-		case GL_LUMINANCE_ALPHA: return BitmapColorFormat::RG;
-		case GL_RGB: return BitmapColorFormat::RGB;
-		case GL_RGBA: return BitmapColorFormat::RGBA;
-		case GL_BGR: return BitmapColorFormat::BGR;
-		case GL_BGRA: return BitmapColorFormat::BGRA;
+		case GL_LUMINANCE: result = BitmapColorFormat::Red; break;
+		case GL_LUMINANCE_ALPHA: result = BitmapColorFormat::RG; break;
+		case GL_RGB: result = BitmapColorFormat::RGB; break;
+		case GL_RGBA: result = BitmapColorFormat::RGBA; break;
+		case GL_BGR: result = BitmapColorFormat::BGR; break;
+		case GL_BGRA: result = BitmapColorFormat::BGRA; break;
+		default: return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Unsupported/Invalid OpenGL pixel value enum value. The integer value was: {}", value));
-		return std::numeric_limits<BitmapColorFormat>::max();
+
+		return true;
 	}
 
 
-	GLenum OpenGLFormatByInternalPixelFormat(TextureInternalPixelFormat value, Result& result)
+	bool OpenGLFormatByInternalPixelFormat(TextureInternalPixelFormat value, GLenum& result)
 	{
 		switch (value)
 		{
-		case TextureInternalPixelFormat::RGBA:				 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG:				     return GL_RG;
-		case TextureInternalPixelFormat::R:				     return GL_RED;
-		case TextureInternalPixelFormat::RGBA8:				 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB8:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG8:				 return GL_RG;
-		case TextureInternalPixelFormat::R8:					 return GL_RED;
-		case TextureInternalPixelFormat::RGBA16:				 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB16:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG16:				 return GL_RG;
-		case TextureInternalPixelFormat::R16:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA16F:			 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB16F:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG16F:				 return GL_RG;
-		case TextureInternalPixelFormat::R16F:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA32F:			 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB32F:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG32F:				 return GL_RG;
-		case TextureInternalPixelFormat::R32F:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA8I:				 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB8I:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG8I:				 return GL_RG;
-		case TextureInternalPixelFormat::R8I:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA16I:			 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB16I:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG16I:				 return GL_RG;
-		case TextureInternalPixelFormat::R16I:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA32I:			 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB32I:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG32I:				 return GL_RG;
-		case TextureInternalPixelFormat::R32I:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA8UI:			 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB8UI:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG8UI:				 return GL_RG;
-		case TextureInternalPixelFormat::R8UI:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA16UI:			 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB16UI:			 return GL_RGB;
-		case TextureInternalPixelFormat::RG16UI:				 return GL_RG;
-		case TextureInternalPixelFormat::R16UI:				 return GL_RED;
-		case TextureInternalPixelFormat::RGBA32UI:			 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB32UI:			 return GL_RGB;
-		case TextureInternalPixelFormat::RG32UI:				 return GL_RG;
-		case TextureInternalPixelFormat::R32UI:				 return GL_RED;
-		case TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT;
-		case TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT;
-		case TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT;
-		case TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH_STENCIL;
-		case TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH_STENCIL;
-		case TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
-		case TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_RGB;
+		case TextureInternalPixelFormat::RGBA:				 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB:				 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R:				     result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA8:				 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB8:				 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG8:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R8:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA16:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB16:				 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG16:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R16:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA16F:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB16F:			 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG16F:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R16F:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA32F:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB32F:			 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG32F:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R32F:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA8I:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB8I:				 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG8I:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R8I:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA16I:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB16I:			 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG16I:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R16I:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA32I:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB32I:			 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG32I:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R32I:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA8UI:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB8UI:			 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG8UI:				 result = GL_RG; break;
+		case TextureInternalPixelFormat::R8UI:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA16UI:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB16UI:			 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG16UI:			 result = GL_RG; break;
+		case TextureInternalPixelFormat::R16UI:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA32UI:			 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB32UI:			 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG32UI:			 result = GL_RG; break;
+		case TextureInternalPixelFormat::R32UI:				 result = GL_RED; break;
+		case TextureInternalPixelFormat::Depth16:			 result = GL_DEPTH_COMPONENT; break;
+		case TextureInternalPixelFormat::Depth24:			 result = GL_DEPTH_COMPONENT; break;
+		case TextureInternalPixelFormat::Depth32F:			 result = GL_DEPTH_COMPONENT; break;
+		case TextureInternalPixelFormat::Depth24Stencil8:	 result = GL_DEPTH_STENCIL; break;
+		case TextureInternalPixelFormat::Depth32FStencil8:	 result = GL_DEPTH_STENCIL; break;
+		case TextureInternalPixelFormat::Stencil8:			 result = GL_STENCIL_INDEX; break;
+		case TextureInternalPixelFormat::R11F_G11F_B10F:	 result = GL_RGB; break;
+		default: return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureInternalPixelFormat enum value. The integer value was: {}", ToInteger(value)));
-		return std::numeric_limits<GLenum>::max();
+		
+		return true;
 	}
-	GLenum OpenGLInternalPixelFormat(TextureInternalPixelFormat value, Result& result)
+	bool OpenGLInternalPixelFormat(TextureInternalPixelFormat value, GLenum& result)
 	{
 		switch (value)
 		{
-		case TextureInternalPixelFormat::RGBA:				 return GL_RGBA;
-		case TextureInternalPixelFormat::RGB:				 return GL_RGB;
-		case TextureInternalPixelFormat::RG:					 return GL_RG;
-		case TextureInternalPixelFormat::R:					 return GL_RED;
-		case TextureInternalPixelFormat::RGBA8:				 return GL_RGBA8;
-		case TextureInternalPixelFormat::RGB8:				 return GL_RGB8;
-		case TextureInternalPixelFormat::RG8:				 return GL_RG8;
-		case TextureInternalPixelFormat::R8:					 return GL_R8;
-		case TextureInternalPixelFormat::RGBA16:				 return GL_RGBA16;
-		case TextureInternalPixelFormat::RGB16:				 return GL_RGB16;
-		case TextureInternalPixelFormat::RG16:				 return GL_RG16;
-		case TextureInternalPixelFormat::R16:				 return GL_R16;
-		case TextureInternalPixelFormat::RGBA16F:			 return GL_RGBA16F;
-		case TextureInternalPixelFormat::RGB16F:				 return GL_RGB16F;
-		case TextureInternalPixelFormat::RG16F:				 return GL_RG16F;
-		case TextureInternalPixelFormat::R16F:				 return GL_R16F;
-		case TextureInternalPixelFormat::RGBA32F:			 return GL_RGBA32F;
-		case TextureInternalPixelFormat::RGB32F:				 return GL_RGB32F;
-		case TextureInternalPixelFormat::RG32F:				 return GL_RG32F;
-		case TextureInternalPixelFormat::R32F:				 return GL_R32F;
-		case TextureInternalPixelFormat::RGBA8I:				 return GL_RGBA8I;
-		case TextureInternalPixelFormat::RGB8I:				 return GL_RGB8I;
-		case TextureInternalPixelFormat::RG8I:				 return GL_RG8I;
-		case TextureInternalPixelFormat::R8I:				 return GL_R8I;
-		case TextureInternalPixelFormat::RGBA16I:			 return GL_RGBA16I;
-		case TextureInternalPixelFormat::RGB16I:				 return GL_RGB16I;
-		case TextureInternalPixelFormat::RG16I:				 return GL_RG16I;
-		case TextureInternalPixelFormat::R16I:				 return GL_R16I;
-		case TextureInternalPixelFormat::RGBA32I:			 return GL_RGBA32I;
-		case TextureInternalPixelFormat::RGB32I:				 return GL_RGB32I;
-		case TextureInternalPixelFormat::RG32I:				 return GL_RG32I;
-		case TextureInternalPixelFormat::R32I:				 return GL_R32I;
-		case TextureInternalPixelFormat::RGBA8UI:			 return GL_RGBA8UI;
-		case TextureInternalPixelFormat::RGB8UI:				 return GL_RGB8UI;
-		case TextureInternalPixelFormat::RG8UI:				 return GL_RG8UI;
-		case TextureInternalPixelFormat::R8UI:				 return GL_R8UI;
-		case TextureInternalPixelFormat::RGBA16UI:			 return GL_RGBA16UI;
-		case TextureInternalPixelFormat::RGB16UI:			 return GL_RGB16UI;
-		case TextureInternalPixelFormat::RG16UI:				 return GL_RG16UI;
-		case TextureInternalPixelFormat::R16UI:				 return GL_R16UI;
-		case TextureInternalPixelFormat::RGBA32UI:			 return GL_RGBA32UI;
-		case TextureInternalPixelFormat::RGB32UI:			 return GL_RGB32UI;
-		case TextureInternalPixelFormat::RG32UI:				 return GL_RG32UI;
-		case TextureInternalPixelFormat::R32UI:				 return GL_R32UI;
-		case TextureInternalPixelFormat::SRGB24:             return GL_SRGB8;
-		case TextureInternalPixelFormat::SRGBA32:            return GL_SRGB8_ALPHA8;
-		case TextureInternalPixelFormat::Depth16:			 return GL_DEPTH_COMPONENT16;
-		case TextureInternalPixelFormat::Depth24:			 return GL_DEPTH_COMPONENT24;
-		case TextureInternalPixelFormat::Depth32F:			 return GL_DEPTH_COMPONENT32F;
-		case TextureInternalPixelFormat::Depth24Stencil8:	 return GL_DEPTH24_STENCIL8;
-		case TextureInternalPixelFormat::Depth32FStencil8:	 return GL_DEPTH32F_STENCIL8;
-		case TextureInternalPixelFormat::Stencil8:			 return GL_STENCIL_INDEX;
-		case TextureInternalPixelFormat::R11F_G11F_B10F:		 return GL_R11F_G11F_B10F;
-		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureInternalPixelFormat enum value. The integer value was: {}", ToInteger(value)));
-		return std::numeric_limits<GLenum>::max();
-	}
-	GLenum OpenGLBufferInternalPixelFormat(TextureBufferInternalPixelFormat value, Result& result)
-	{
-		switch (value)
-		{
-		case TextureBufferInternalPixelFormat::R8: return GL_R8;
-		case TextureBufferInternalPixelFormat::R16: return GL_R16;
-		case TextureBufferInternalPixelFormat::R16F: return GL_R16F;
-		case TextureBufferInternalPixelFormat::R32F: return GL_R32F;
-		case TextureBufferInternalPixelFormat::R8I: return GL_R8I;
-		case TextureBufferInternalPixelFormat::R16I: return GL_R16I;
-		case TextureBufferInternalPixelFormat::R32I: return GL_R32I;
-		case TextureBufferInternalPixelFormat::R8UI: return GL_R8UI;
-		case TextureBufferInternalPixelFormat::R16UI: return GL_R16UI;
-		case TextureBufferInternalPixelFormat::R32UI: return GL_R32UI;
-		case TextureBufferInternalPixelFormat::RG8: return GL_RG8;
-		case TextureBufferInternalPixelFormat::RG16: return GL_RG16;
-		case TextureBufferInternalPixelFormat::RG16F: return GL_RG16F;
-		case TextureBufferInternalPixelFormat::RG32F: return GL_RG32F;
-		case TextureBufferInternalPixelFormat::RG8I: return GL_RG8I;
-		case TextureBufferInternalPixelFormat::RG16I: return GL_RG16I;
-		case TextureBufferInternalPixelFormat::RG32I: return GL_RG32I;
-		case TextureBufferInternalPixelFormat::RG8UI: return GL_RG8UI;
-		case TextureBufferInternalPixelFormat::RG16UI: return GL_RG16UI;
-		case TextureBufferInternalPixelFormat::RG32UI: return GL_RG32UI;
-		case TextureBufferInternalPixelFormat::RGB32F: return GL_RGB32F;
-		case TextureBufferInternalPixelFormat::RGB32I: return GL_RGB32I;
-		case TextureBufferInternalPixelFormat::RGB32UI: return GL_RGB32UI;
-		case TextureBufferInternalPixelFormat::RGBA8: return GL_RGBA8;
-		case TextureBufferInternalPixelFormat::RGBA16: return GL_RGBA16;
-		case TextureBufferInternalPixelFormat::RGBA16F: return GL_RGBA16F;
-		case TextureBufferInternalPixelFormat::RGBA32F: return GL_RGBA32F;
-		case TextureBufferInternalPixelFormat::RGBA8I: return GL_RGBA8I;
-		case TextureBufferInternalPixelFormat::RGBA16I: return GL_RGBA16I;
-		case TextureBufferInternalPixelFormat::RGBA32I: return GL_RGBA32I;
-		case TextureBufferInternalPixelFormat::RGBA8UI: return GL_RGBA8UI;
-		case TextureBufferInternalPixelFormat::RGBA16UI: return GL_RGBA16UI;
-		case TextureBufferInternalPixelFormat::RGBA32UI: return GL_RGBA32UI;
-		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureBufferInternalPixelFormat enum value. The integer value was: {}", ToInteger(value)));
-		return std::numeric_limits<GLenum>::max();
-	}
-
-	GLenum OpenGLPixelType(BitmapColorComponentType value, Result& result)
-	{
-		switch (value)
-		{
-		case BitmapColorComponentType::Int8: return GL_BYTE;
-		case BitmapColorComponentType::Uint8:	return GL_UNSIGNED_BYTE;
-		case BitmapColorComponentType::Int16:	return GL_SHORT;
-		case BitmapColorComponentType::Uint16: return GL_UNSIGNED_SHORT;
-		case BitmapColorComponentType::Int32:	return GL_INT;
-		case BitmapColorComponentType::Uint32: return GL_UNSIGNED_INT;
-		case BitmapColorComponentType::Float:	return GL_FLOAT;
-		case BitmapColorComponentType::Double: return GL_DOUBLE;
+		case TextureInternalPixelFormat::RGBA:				 result = GL_RGBA; break;
+		case TextureInternalPixelFormat::RGB:				 result = GL_RGB; break;
+		case TextureInternalPixelFormat::RG:			     result = GL_RG; break;
+		case TextureInternalPixelFormat::R:					 result = GL_RED; break;
+		case TextureInternalPixelFormat::RGBA8:				 result = GL_RGBA8; break;
+		case TextureInternalPixelFormat::RGB8:				 result = GL_RGB8; break;
+		case TextureInternalPixelFormat::RG8:				 result = GL_RG8; break;
+		case TextureInternalPixelFormat::R8:				 result = GL_R8; break;
+		case TextureInternalPixelFormat::RGBA16:			 result = GL_RGBA16; break;
+		case TextureInternalPixelFormat::RGB16:				 result = GL_RGB16; break;
+		case TextureInternalPixelFormat::RG16:				 result = GL_RG16; break;
+		case TextureInternalPixelFormat::R16:				 result = GL_R16; break;
+		case TextureInternalPixelFormat::RGBA16F:			 result = GL_RGBA16F; break;
+		case TextureInternalPixelFormat::RGB16F:			 result = GL_RGB16F; break;
+		case TextureInternalPixelFormat::RG16F:				 result = GL_RG16F; break;
+		case TextureInternalPixelFormat::R16F:				 result = GL_R16F; break;
+		case TextureInternalPixelFormat::RGBA32F:			 result = GL_RGBA32F; break;
+		case TextureInternalPixelFormat::RGB32F:			 result = GL_RGB32F; break;
+		case TextureInternalPixelFormat::RG32F:				 result = GL_RG32F; break;
+		case TextureInternalPixelFormat::R32F:				 result = GL_R32F; break;
+		case TextureInternalPixelFormat::RGBA8I:			 result = GL_RGBA8I; break;
+		case TextureInternalPixelFormat::RGB8I:				 result = GL_RGB8I; break;
+		case TextureInternalPixelFormat::RG8I:				 result = GL_RG8I; break;
+		case TextureInternalPixelFormat::R8I:				 result = GL_R8I; break;
+		case TextureInternalPixelFormat::RGBA16I:			 result = GL_RGBA16I; break;
+		case TextureInternalPixelFormat::RGB16I:			 result = GL_RGB16I; break;
+		case TextureInternalPixelFormat::RG16I:				 result = GL_RG16I; break;
+		case TextureInternalPixelFormat::R16I:				 result = GL_R16I; break;
+		case TextureInternalPixelFormat::RGBA32I:			 result = GL_RGBA32I; break;
+		case TextureInternalPixelFormat::RGB32I:			 result = GL_RGB32I; break;
+		case TextureInternalPixelFormat::RG32I:				 result = GL_RG32I; break;
+		case TextureInternalPixelFormat::R32I:				 result = GL_R32I; break;
+		case TextureInternalPixelFormat::RGBA8UI:			 result = GL_RGBA8UI; break;
+		case TextureInternalPixelFormat::RGB8UI:			 result = GL_RGB8UI; break;
+		case TextureInternalPixelFormat::RG8UI:				 result = GL_RG8UI; break;
+		case TextureInternalPixelFormat::R8UI:				 result = GL_R8UI; break;
+		case TextureInternalPixelFormat::RGBA16UI:			 result = GL_RGBA16UI; break;
+		case TextureInternalPixelFormat::RGB16UI:			 result = GL_RGB16UI; break;
+		case TextureInternalPixelFormat::RG16UI:			 result = GL_RG16UI; break;
+		case TextureInternalPixelFormat::R16UI:				 result = GL_R16UI; break;
+		case TextureInternalPixelFormat::RGBA32UI:			 result = GL_RGBA32UI; break;
+		case TextureInternalPixelFormat::RGB32UI:			 result = GL_RGB32UI; break;
+		case TextureInternalPixelFormat::RG32UI:			 result = GL_RG32UI; break;
+		case TextureInternalPixelFormat::R32UI:				 result = GL_R32UI; break;
+		case TextureInternalPixelFormat::SRGB24:             result = GL_SRGB8; break;
+		case TextureInternalPixelFormat::SRGBA32:            result = GL_SRGB8_ALPHA8; break;
+		case TextureInternalPixelFormat::Depth16:			 result = GL_DEPTH_COMPONENT16; break;
+		case TextureInternalPixelFormat::Depth24:			 result = GL_DEPTH_COMPONENT24; break;
+		case TextureInternalPixelFormat::Depth32F:			 result = GL_DEPTH_COMPONENT32F; break;
+		case TextureInternalPixelFormat::Depth24Stencil8:	 result = GL_DEPTH24_STENCIL8; break;
+		case TextureInternalPixelFormat::Depth32FStencil8:	 result = GL_DEPTH32F_STENCIL8; break;
+		case TextureInternalPixelFormat::Stencil8:			 result = GL_STENCIL_INDEX; break;
+		case TextureInternalPixelFormat::R11F_G11F_B10F:	 result = GL_R11F_G11F_B10F; break;
+		default: return false;
 		}
 
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid BitmapColorComponentType enum value. The integer value was: {}", ToInteger(value)));
-		return std::numeric_limits<GLenum>::max();
+		return true;
 	}
-
-	BitmapColorComponentType OpenGLToBlazePixelType(GLenum value, Result& result)
+	bool OpenGLBufferInternalPixelFormat(TextureBufferInternalPixelFormat value, GLenum& result)
 	{
 		switch (value)
 		{
-		case GL_BYTE: return BitmapColorComponentType::Int8;
-		case GL_UNSIGNED_BYTE: return BitmapColorComponentType::Uint8;
-		case GL_SHORT: return BitmapColorComponentType::Int16;
-		case GL_UNSIGNED_SHORT: return BitmapColorComponentType::Uint16;
-		case GL_INT: return BitmapColorComponentType::Int32;
-		case GL_UNSIGNED_INT: return BitmapColorComponentType::Uint32;
-		case GL_FLOAT: return BitmapColorComponentType::Float;
-		case GL_DOUBLE: return BitmapColorComponentType::Double;
+		case TextureBufferInternalPixelFormat::R8:       result = GL_R8; break;
+		case TextureBufferInternalPixelFormat::R16:      result = GL_R16; break;
+		case TextureBufferInternalPixelFormat::R16F:     result = GL_R16F; break;
+		case TextureBufferInternalPixelFormat::R32F:     result = GL_R32F; break;
+		case TextureBufferInternalPixelFormat::R8I:      result = GL_R8I; break;
+		case TextureBufferInternalPixelFormat::R16I:     result = GL_R16I; break;
+		case TextureBufferInternalPixelFormat::R32I:     result = GL_R32I; break;
+		case TextureBufferInternalPixelFormat::R8UI:     result = GL_R8UI; break;
+		case TextureBufferInternalPixelFormat::R16UI:    result = GL_R16UI; break;
+		case TextureBufferInternalPixelFormat::R32UI:    result = GL_R32UI; break;
+		case TextureBufferInternalPixelFormat::RG8:      result = GL_RG8; break;
+		case TextureBufferInternalPixelFormat::RG16:     result = GL_RG16; break;
+		case TextureBufferInternalPixelFormat::RG16F:    result = GL_RG16F; break;
+		case TextureBufferInternalPixelFormat::RG32F:    result = GL_RG32F; break;
+		case TextureBufferInternalPixelFormat::RG8I:     result = GL_RG8I; break;
+		case TextureBufferInternalPixelFormat::RG16I:    result = GL_RG16I; break;
+		case TextureBufferInternalPixelFormat::RG32I:    result = GL_RG32I; break;
+		case TextureBufferInternalPixelFormat::RG8UI:    result = GL_RG8UI; break;
+		case TextureBufferInternalPixelFormat::RG16UI:   result = GL_RG16UI; break;
+		case TextureBufferInternalPixelFormat::RG32UI:   result = GL_RG32UI; break;
+		case TextureBufferInternalPixelFormat::RGB32F:   result = GL_RGB32F; break;
+		case TextureBufferInternalPixelFormat::RGB32I:   result = GL_RGB32I; break;
+		case TextureBufferInternalPixelFormat::RGB32UI:  result = GL_RGB32UI; break;
+		case TextureBufferInternalPixelFormat::RGBA8:    result = GL_RGBA8; break;
+		case TextureBufferInternalPixelFormat::RGBA16:   result = GL_RGBA16; break;
+		case TextureBufferInternalPixelFormat::RGBA16F:  result = GL_RGBA16F; break;
+		case TextureBufferInternalPixelFormat::RGBA32F:  result = GL_RGBA32F; break;
+		case TextureBufferInternalPixelFormat::RGBA8I:   result = GL_RGBA8I; break;
+		case TextureBufferInternalPixelFormat::RGBA16I:  result = GL_RGBA16I; break;
+		case TextureBufferInternalPixelFormat::RGBA32I:  result = GL_RGBA32I; break;
+		case TextureBufferInternalPixelFormat::RGBA8UI:  result = GL_RGBA8UI; break;
+		case TextureBufferInternalPixelFormat::RGBA16UI: result = GL_RGBA16UI; break;
+		case TextureBufferInternalPixelFormat::RGBA32UI: result = GL_RGBA32UI; break;
+		default: return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Unsupported/Invalid OpenGL pixel value enum value. The integer value was: {}", value));
-		return std::numeric_limits<BitmapColorComponentType>::max();
+
+		return true;
 	}
-	GLenum OpenGLTextureMinSampling(TextureSampling min, TextureSampling mip, bool mipmaps, Result& result)
+
+	bool OpenGLPixelType(BitmapColorComponentType value, GLenum& result)
+	{
+		switch (value)
+		{
+		case BitmapColorComponentType::Int8:   result = GL_BYTE; break;
+		case BitmapColorComponentType::Uint8:  result = GL_UNSIGNED_BYTE; break;
+		case BitmapColorComponentType::Int16:  result = GL_SHORT; break;
+		case BitmapColorComponentType::Uint16: result = GL_UNSIGNED_SHORT; break;
+		case BitmapColorComponentType::Int32:  result = GL_INT; break;
+		case BitmapColorComponentType::Uint32: result = GL_UNSIGNED_INT; break;
+		case BitmapColorComponentType::Float:  result = GL_FLOAT; break;
+		case BitmapColorComponentType::Double: result = GL_DOUBLE; break;
+		default: return false;
+		}
+
+		return true;
+	}
+
+	bool OpenGLToBlazePixelType(GLenum value, BitmapColorComponentType& result)
+	{
+		switch (value)
+		{
+		case GL_BYTE:           result = BitmapColorComponentType::Int8; break;
+		case GL_UNSIGNED_BYTE:  result = BitmapColorComponentType::Uint8; break;
+		case GL_SHORT:          result = BitmapColorComponentType::Int16; break;
+		case GL_UNSIGNED_SHORT: result = BitmapColorComponentType::Uint16; break;
+		case GL_INT:            result = BitmapColorComponentType::Int32; break;
+		case GL_UNSIGNED_INT:   result = BitmapColorComponentType::Uint32; break;
+		case GL_FLOAT:          result = BitmapColorComponentType::Float; break;
+		case GL_DOUBLE:         result = BitmapColorComponentType::Double; break;
+		default: return false;
+		}
+
+		return true;
+	}
+	bool OpenGLTextureMinSampling(TextureSampling min, TextureSampling mip, bool mipmaps, GLenum& result)
 	{
 		if (mipmaps)
 		{
 			if (mip == TextureSampling::Nearest)
-				if (min == TextureSampling::Nearest)
-					return GL_NEAREST_MIPMAP_NEAREST;
-				else if (min == TextureSampling::Linear)
-					return GL_LINEAR_MIPMAP_NEAREST;
-				else
-				{
-					result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureSampling enum value. The integer value was: {}", ToInteger(min)));
-					return std::numeric_limits<GLenum>::max();
-				}
-			else if (mip == TextureSampling::Linear)
-				if (min == TextureSampling::Nearest)
-					return GL_NEAREST_MIPMAP_LINEAR;
-				else if (min == TextureSampling::Linear)
-					return GL_LINEAR_MIPMAP_LINEAR;
-				else
-				{
-					result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureSampling enum value. The integer value was: {}", ToInteger(min)));
-					return std::numeric_limits<GLenum>::max();
-				}
-			else
 			{
-				result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureSampling enum value. The integer value was: {}", ToInteger(mip)));
-				return std::numeric_limits<GLenum>::max();
+				if (min == TextureSampling::Nearest)
+					result = GL_NEAREST_MIPMAP_NEAREST;
+				else if (min == TextureSampling::Linear)
+					result = GL_LINEAR_MIPMAP_NEAREST;
+				else
+					return false;
 			}
+			else if (mip == TextureSampling::Linear)
+			{
+				if (min == TextureSampling::Nearest)
+					result = GL_NEAREST_MIPMAP_LINEAR;
+				else if (min == TextureSampling::Linear)
+					result = GL_LINEAR_MIPMAP_LINEAR;
+				else
+					return false;
+			}
+			else
+				return false;
 		}
 		else
 			if (min == TextureSampling::Nearest)
-				return GL_NEAREST;
+				result = GL_NEAREST;
 			else if (min == TextureSampling::Linear)
-				return GL_LINEAR;
+				result = GL_LINEAR;
 			else
-			{
-				result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureSampling enum value. The integer value was: {}", ToInteger(min)));
-				return std::numeric_limits<GLenum>::max();
-			}
+				return false;
+
+		return true;
 	}
-	GLenum OpenGLTextureMagSampling(TextureSampling sampling, Result& result)
+	bool OpenGLTextureMagSampling(TextureSampling sampling, GLenum& result)
 	{
 		switch (sampling)
 		{
-		case TextureSampling::Nearest: return GL_NEAREST;
-		case TextureSampling::Linear: return GL_LINEAR;
+		case TextureSampling::Nearest: result = GL_NEAREST; break;
+		case TextureSampling::Linear:  result = GL_LINEAR; break;
+		default: return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureSampling enum value. The integer value was: {}", ToInteger(sampling)));
-		return std::numeric_limits<GLenum>::max();
+		return true;
 	}
-	GLenum OpenGLTextureWrapping(TextureWrapping wrapping, Result& result)
+	bool OpenGLTextureWrapping(TextureWrapping wrapping, GLenum& result)
 	{
 		switch (wrapping)
 		{
-		case TextureWrapping::ClampToBorder: return GL_CLAMP_TO_BORDER;
-		case TextureWrapping::ClampToEdge: return GL_CLAMP_TO_EDGE;
-		case TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;
-		case TextureWrapping::Repeat: return GL_REPEAT;
+		case TextureWrapping::ClampToBorder:  result = GL_CLAMP_TO_BORDER; break;
+		case TextureWrapping::ClampToEdge:    result = GL_CLAMP_TO_EDGE; break;
+		case TextureWrapping::MirroredRepeat: result = GL_MIRRORED_REPEAT; break;
+		case TextureWrapping::Repeat:         result = GL_REPEAT; break;
+		default: return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid TextureWrapping enum value. The integer value was: {}", ToInteger(wrapping)));
-		return std::numeric_limits<GLenum>::max();
+		return true;
 	}
-	TextureInternalPixelFormat MapInternalTexturePixelFormat(BitmapColorFormat value, Result& result)
+	bool BlazeInternalTexturePixelFormat(BitmapColorFormat value, TextureInternalPixelFormat& result)
 	{
 		switch (value)
 		{
-		case BitmapColorFormat::Red: return TextureInternalPixelFormat::R32F;
-		case BitmapColorFormat::RG: return TextureInternalPixelFormat::RG32F;
-		case BitmapColorFormat::RGB: return TextureInternalPixelFormat::RGB32F;
-		case BitmapColorFormat::RGBA: return TextureInternalPixelFormat::RGBA32F;
-		case BitmapColorFormat::BGR: return TextureInternalPixelFormat::RGB32F;
-		case BitmapColorFormat::BGRA: return TextureInternalPixelFormat::RGBA32F;
+		case BitmapColorFormat::Red:  result = TextureInternalPixelFormat::R32F; break;
+		case BitmapColorFormat::RG:   result = TextureInternalPixelFormat::RG32F; break;
+		case BitmapColorFormat::RGB:  result = TextureInternalPixelFormat::RGB32F; break;
+		case BitmapColorFormat::RGBA: result = TextureInternalPixelFormat::RGBA32F; break;
+		case BitmapColorFormat::BGR:  result = TextureInternalPixelFormat::RGB32F; break;
+		case BitmapColorFormat::BGRA: result = TextureInternalPixelFormat::RGBA32F; break;
+		default: return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid BitmapColorFormat enum value. The integer value was: {}", ToInteger(value)));
-		return std::numeric_limits<TextureInternalPixelFormat>::max();
+
+		return true;
 	}
-	BitmapColorFormat MapInternalTexturePixelFormat(TextureInternalPixelFormat value, Result& result)
+	bool BlazeBitmapColorFormat(TextureInternalPixelFormat value, BitmapColorFormat& result)
 	{
 		switch (value)
 		{
-		case TextureInternalPixelFormat::RGBA: return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB:  return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG:   return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R:    return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA8:  return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB8:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG8:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R8:		return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA16:	return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB16:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG16:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R16:	return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA16F:return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB16F:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG16F:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R16F:	return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA32F:return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB32F:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG32F:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R32F:	return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA8I:	return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB8I:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG8I:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R8I:	return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA16I:return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB16I:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG16I:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R16I:	return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA32I:return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB32I:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG32I:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R32I:	return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA8UI:return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB8UI:	return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG8UI:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R8UI:	return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA16UI:return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB16UI:return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG16UI:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R16UI:	 return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::RGBA32UI:return BitmapColorFormat::RGBA;
-		case TextureInternalPixelFormat::RGB32UI:return BitmapColorFormat::RGB;
-		case TextureInternalPixelFormat::RG32UI:	return BitmapColorFormat::RG;
-		case TextureInternalPixelFormat::R32UI:	return BitmapColorFormat::Red;
+		case TextureInternalPixelFormat::RGBA:           result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB:            result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG:             result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R:              result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA8:          result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB8:	         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG8:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R8:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA16:         result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB16:	         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG16:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R16:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA16F:        result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB16F:         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG16F:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R16F:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA32F:        result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB32F:         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG32F:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R32F:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA8I:         result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB8I:	         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG8I:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R8I:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA16I:        result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB16I:         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG16I:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R16I:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA32I:        result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB32I:         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG32I:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R32I:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA8UI:        result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB8UI:         result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG8UI:	         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R8UI:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA16UI:       result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB16UI:        result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG16UI:         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R16UI:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::RGBA32UI:       result = BitmapColorFormat::RGBA; break;
+		case TextureInternalPixelFormat::RGB32UI:        result = BitmapColorFormat::RGB; break;
+		case TextureInternalPixelFormat::RG32UI:         result = BitmapColorFormat::RG; break;
+		case TextureInternalPixelFormat::R32UI:	         result = BitmapColorFormat::Red; break;
+		case TextureInternalPixelFormat::R11F_G11F_B10F: result = BitmapColorFormat::RGB; break;
 		case TextureInternalPixelFormat::Depth16:
 		case TextureInternalPixelFormat::Depth24:
 		case TextureInternalPixelFormat::Depth32F:
 		case TextureInternalPixelFormat::Depth24Stencil8:
 		case TextureInternalPixelFormat::Depth32FStencil8:
 		case TextureInternalPixelFormat::Stencil8:
-			BLAZE_LOG_ERROR("Unsupported TextureInternalPixelFormat enum value");
-			return BitmapColorFormat::Red;
-		case TextureInternalPixelFormat::R11F_G11F_B10F:	return BitmapColorFormat::RGB;
 		default:
-			BLAZE_LOG_ERROR("Invalid TextureInternalPixelFormat enum value");
-			return BitmapColorFormat::Red;
-			break;
+			return false;
 		}
+
+		return true;
 	}
-	GLenum ConvertToOpenGLEnum(IntegerVertexAttributeType value)
+	bool OpenGLIntegerVertexAttributeType(IntegerVertexAttributeType value, GLenum& result)
 	{
 		switch (value)
 		{
-		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Int8: return GL_BYTE;
-		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Int16: return GL_SHORT;
-		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Int32: return GL_INT;
-		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Uint8: return GL_UNSIGNED_BYTE;
-		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Uint16: return GL_UNSIGNED_SHORT;
-		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Uint32: return GL_UNSIGNED_INT;
+		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Int8:   result = GL_BYTE; break;
+		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Int16:  result = GL_SHORT; break;
+		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Int32:  result = GL_INT; break;
+		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Uint8:  result = GL_UNSIGNED_BYTE; break;
+		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Uint16: result = GL_UNSIGNED_SHORT; break;
+		case Blaze::Graphics::OpenGL::IntegerVertexAttributeType::Uint32: result = GL_UNSIGNED_INT; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid OpenGL integer vertex attribute value enum value.");
-			return 0;
+			return false;
 		}
+
+		return true;
 	}
-	GLenum ConvertToOpenGLEnum(FloatVertexAttributeType value)
+	bool OpenGLFloatVertexAttributeType(FloatVertexAttributeType value, GLenum& result)
 	{
 		switch (value)
 		{
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Int8: return GL_BYTE;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Int16: return GL_SHORT;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Int32: return GL_INT;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Uint8: return GL_UNSIGNED_BYTE;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Uint16: return GL_UNSIGNED_SHORT;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Uint32: return GL_UNSIGNED_INT;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Half: return GL_HALF_FLOAT;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float: return GL_FLOAT;
-		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Double: return GL_DOUBLE;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Int8: result = GL_BYTE; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Int16: result = GL_SHORT; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Int32: result = GL_INT; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Uint8: result = GL_UNSIGNED_BYTE; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Uint16: result = GL_UNSIGNED_SHORT; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Uint32: result = GL_UNSIGNED_INT; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Half: result = GL_HALF_FLOAT; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float: result = GL_FLOAT; break;
+		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Double: result = GL_DOUBLE; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid OpenGL float vertex attribute value enum value.");
-			return 0;
+			return false;
 		}
+
+		return true;
 	}
-	GLenum ConvertToOpenGLEnum(PackedVertexAttributeType value)
+	bool OpenGLPackedVertexAttributeType(PackedVertexAttributeType value, GLenum& result)
 	{
 		switch (value)
 		{
-		case Blaze::Graphics::OpenGL::PackedVertexAttributeType::Int_2_10_10_10_Rev: return GL_INT_2_10_10_10_REV;
-		case Blaze::Graphics::OpenGL::PackedVertexAttributeType::Uint_2_10_10_10_Rev: return GL_UNSIGNED_INT_2_10_10_10_REV;
-		case Blaze::Graphics::OpenGL::PackedVertexAttributeType::Uint_10F_11F_11F_Rev: return GL_UNSIGNED_INT_10F_11F_11F_REV;
+		case Blaze::Graphics::OpenGL::PackedVertexAttributeType::Int_2_10_10_10_Rev: result = GL_INT_2_10_10_10_REV; break;
+		case Blaze::Graphics::OpenGL::PackedVertexAttributeType::Uint_2_10_10_10_Rev: result = GL_UNSIGNED_INT_2_10_10_10_REV; break;
+		case Blaze::Graphics::OpenGL::PackedVertexAttributeType::Uint_10F_11F_11F_Rev: result = GL_UNSIGNED_INT_10F_11F_11F_REV; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid OpenGL packed vertex attribute value enum value.");
-			return 0;
+			return false;
 		}
+
+		return true;
 	}
-	GLenum ConvertToOpenGLEnum(BGRAVertexAttributeType value)
+	bool OpenGLBGRAVertexAttributeType(BGRAVertexAttributeType value, GLenum& result)
 	{
 		switch (value)
 		{
-		case Blaze::Graphics::OpenGL::BGRAVertexAttributeType::Uint8: return GL_UNSIGNED_BYTE;
-		case Blaze::Graphics::OpenGL::BGRAVertexAttributeType::Int_2_10_10_10_Rev: return GL_INT_2_10_10_10_REV;
-		case Blaze::Graphics::OpenGL::BGRAVertexAttributeType::Uint_2_10_10_10_Rev: return GL_UNSIGNED_INT_2_10_10_10_REV;
+		case Blaze::Graphics::OpenGL::BGRAVertexAttributeType::Uint8: result = GL_UNSIGNED_BYTE; break;
+		case Blaze::Graphics::OpenGL::BGRAVertexAttributeType::Int_2_10_10_10_Rev: result = GL_INT_2_10_10_10_REV; break;
+		case Blaze::Graphics::OpenGL::BGRAVertexAttributeType::Uint_2_10_10_10_Rev: result = GL_UNSIGNED_INT_2_10_10_10_REV; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid OpenGL BGRA vertex attribute value enum value.");
-			return 0;
+			return false;
 		}
+
+		return true;
 	}
-	GLenum OpenGLFramebufferAttachment(FramebufferAttachment value, Result& result)
+	bool OpenGLFramebufferAttachment(FramebufferAttachment value, GLenum& result)
 	{
 		switch (value)
 		{
-		case FramebufferAttachment::DepthStencil: return GL_DEPTH_STENCIL_ATTACHMENT;
-		case FramebufferAttachment::Stencil:	return GL_STENCIL_ATTACHMENT;
-		case FramebufferAttachment::Depth: return GL_DEPTH_ATTACHMENT;
+		case FramebufferAttachment::DepthStencil: result = GL_DEPTH_STENCIL_ATTACHMENT; break;
+		case FramebufferAttachment::Stencil:	  result = GL_STENCIL_ATTACHMENT; break;
+		case FramebufferAttachment::Depth:	      result = GL_DEPTH_ATTACHMENT; break;
+		default :
+			return false;
 		}
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid FramebufferAttachment enum value. The integer value was: {}", ToInteger(value)));
-		return std::numeric_limits<GLenum>::max();
+
+		return true;
 	}
 
-	FramebufferStatus MapFramebufferStatus(GLenum value, Result& result)
+	bool BlazeFramebufferStatus(GLenum value, FramebufferStatus& result)
 	{
 		switch (value)
 		{
-		case GL_FRAMEBUFFER_COMPLETE: return FramebufferStatus::Complete;
-		case GL_FRAMEBUFFER_UNDEFINED: return FramebufferStatus::Undefined;
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: return FramebufferStatus::IncompleteAttachment;
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: return FramebufferStatus::MissingAttachment;
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: return FramebufferStatus::IncompleteDrawBuffer;
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: return FramebufferStatus::IncompleteReadBuffer;
-		case GL_FRAMEBUFFER_UNSUPPORTED:return FramebufferStatus::Unsupported;
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: return FramebufferStatus::IncompleteMultisample;
-		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: return FramebufferStatus::IncompleteLayerTargets;
-		}
-
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid framebuffer value enum value. The integer value was: {}", value));
-		return std::numeric_limits<FramebufferStatus>::max();
-	}
-
-	GLenum OpenGLBufferMappingAccess(GraphicsBufferMapAccessFlags value, Result& result)
-	{
-		GLenum out;
-
-		if (!BitRemap(value, out, {
-				GraphicsBufferMapAccessFlags::Read,
-				GraphicsBufferMapAccessFlags::Write
-			}, {
-				GL_MAP_READ_BIT,
-				GL_MAP_WRITE_BIT
-			}))
-		{
-			result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid GraphicsBufferMapAccessFlags enum value. The integer value was: {}", ToInteger(value)));
-			return std::numeric_limits<GLenum>::max();
-		}
-
-		return out;
-	}
-	GLenum OpenGLBufferMappingType(GraphicsBufferMapType value, Result& result)
-	{
-		GLenum out;
-
-		if (!BitRemap(value, out, {
-				GraphicsBufferMapType::PersistentCoherent,
-				GraphicsBufferMapType::PersistentUncoherent
-			}, {
-				GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
-				GL_MAP_PERSISTENT_BIT
-			}))
-		{
-			result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid GraphicsBufferMapType enum value. The integer value was: {}", ToInteger(value)));
-			return std::numeric_limits<GLenum>::max();
-		}
-
-		return out;
-	}
-	GLenum OpenGLBufferMappingOptions(GraphicsBufferMapOptions value, Result& result)
-	{
-		GLenum out;
-
-		if (!BitRemap(value, out, {
-				GraphicsBufferMapOptions::ExplicitFlush,
-				GraphicsBufferMapOptions::InvalidateBuffer,
-				GraphicsBufferMapOptions::InvalidateRange,
-				GraphicsBufferMapOptions::Unsynchronized,
-			}, {
-				GL_MAP_FLUSH_EXPLICIT_BIT,
-				GL_MAP_INVALIDATE_BUFFER_BIT,
-				GL_MAP_INVALIDATE_RANGE_BIT,
-				GL_MAP_UNSYNCHRONIZED_BIT
-			}))
-		{
-			result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid GraphicsBufferMapOptions enum value. The integer value was: {}", static_cast<uint>(value)));
-			return std::numeric_limits<GLenum>::max();
-		}
-
-		return out;
-	}
-
-	UniformType MapOpenGLUniformType(GLenum value)
-	{
-		switch (value)
-		{
-		case GL_FLOAT: return UniformType::Float;
-		case GL_FLOAT_VEC2: return UniformType::Vec2f;
-		case GL_FLOAT_VEC3: return UniformType::Vec3f;
-		case GL_FLOAT_VEC4: return UniformType::Vec4f;
-		case GL_DOUBLE: return UniformType::Double;
-		case GL_DOUBLE_VEC2: return UniformType::Vec2d;
-		case GL_DOUBLE_VEC3: return UniformType::Vec3d;
-		case GL_DOUBLE_VEC4: return UniformType::Vec4d;
-		case GL_INT: return UniformType::Int;
-		case GL_INT_VEC2: return UniformType::Vec2i;
-		case GL_INT_VEC3: return UniformType::Vec3i;
-		case GL_INT_VEC4: return UniformType::Vec4i;
-		case GL_UNSIGNED_INT: return UniformType::UnsignedInt;
-		case GL_UNSIGNED_INT_VEC2: return UniformType::Vec2u;
-		case GL_UNSIGNED_INT_VEC3: return UniformType::Vec3u;
-		case GL_UNSIGNED_INT_VEC4: return UniformType::Vec4u;
-		case GL_BOOL: return UniformType::Bool;
-		case GL_BOOL_VEC2: return UniformType::BoolVec2;
-		case GL_BOOL_VEC3: return UniformType::BoolVec3;
-		case GL_BOOL_VEC4: return UniformType::BoolVec4;
-		case GL_FLOAT_MAT2: return UniformType::Mat2f;
-		case GL_FLOAT_MAT3: return UniformType::Mat3f;
-		case GL_FLOAT_MAT4: return UniformType::Mat4f;
-		case GL_FLOAT_MAT2x3: return UniformType::Mat2x3f;
-		case GL_FLOAT_MAT2x4: return UniformType::Mat2x4f;
-		case GL_FLOAT_MAT3x2: return UniformType::Mat3x2f;
-		case GL_FLOAT_MAT3x4: return UniformType::Mat3x4f;
-		case GL_FLOAT_MAT4x2: return UniformType::Mat4x2f;
-		case GL_FLOAT_MAT4x3: return UniformType::Mat4x3f;
-		case GL_DOUBLE_MAT2: return UniformType::Mat2d;
-		case GL_DOUBLE_MAT3: return UniformType::Mat3d;
-		case GL_DOUBLE_MAT4: return UniformType::Mat4d;
-		case GL_DOUBLE_MAT2x3: return UniformType::Mat2x3d;
-		case GL_DOUBLE_MAT2x4: return UniformType::Mat2x4d;
-		case GL_DOUBLE_MAT3x2: return UniformType::Mat3x2d;
-		case GL_DOUBLE_MAT3x4: return UniformType::Mat3x4d;
-		case GL_DOUBLE_MAT4x2: return UniformType::Mat4x2d;
-		case GL_DOUBLE_MAT4x3: return UniformType::Mat4x3d;
-		case GL_SAMPLER_1D: return UniformType::Sampler1D;
-		case GL_SAMPLER_2D: return UniformType::Sampler2D;
-		case GL_SAMPLER_3D: return UniformType::Sampler3D;
-		case GL_SAMPLER_CUBE: return UniformType::SamplerCube;
-		case GL_SAMPLER_1D_SHADOW: return UniformType::Sampler1DShadow;
-		case GL_SAMPLER_2D_SHADOW: return UniformType::Sampler2DShadow;
-		case GL_SAMPLER_1D_ARRAY: return UniformType::Sampler1DArray;
-		case GL_SAMPLER_2D_ARRAY: return UniformType::Sampler2DArray;
-		case GL_SAMPLER_1D_ARRAY_SHADOW: return UniformType::Sampler1DArrayShadow;
-		case GL_SAMPLER_2D_ARRAY_SHADOW: return UniformType::Sampler2DArrayShadow;
-		case GL_SAMPLER_2D_MULTISAMPLE: return UniformType::Sampler2DMultisample;
-		case GL_SAMPLER_2D_MULTISAMPLE_ARRAY: return UniformType::Sampler2DMultisampleArray;
-		case GL_SAMPLER_CUBE_SHADOW: return UniformType::SamplerCubeShadow;
-		case GL_SAMPLER_BUFFER: return UniformType::SamplerBuffer;
-		case GL_SAMPLER_2D_RECT: return UniformType::Sampler2DRect;
-		case GL_SAMPLER_2D_RECT_SHADOW: return UniformType::Sampler2DRectShadow;
-		case GL_INT_SAMPLER_1D: return UniformType::IntSampler1D;
-		case GL_INT_SAMPLER_2D: return UniformType::IntSampler2D;
-		case GL_INT_SAMPLER_3D: return UniformType::IntSampler3D;
-		case GL_INT_SAMPLER_CUBE: return UniformType::IntSamplerCube;
-		case GL_INT_SAMPLER_1D_ARRAY: return UniformType::IntSampler1DArray;
-		case GL_INT_SAMPLER_2D_ARRAY: return UniformType::IntSampler2DArray;
-		case GL_INT_SAMPLER_2D_MULTISAMPLE: return UniformType::IntSampler2DMultisample;
-		case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: return UniformType::IntSampler2DMultisampleArray;
-		case GL_INT_SAMPLER_BUFFER: return UniformType::IntSamplerBuffer;
-		case GL_INT_SAMPLER_2D_RECT: return UniformType::IntSampler2DRect;
-		case GL_UNSIGNED_INT_SAMPLER_1D: return UniformType::UnsignedIntSampler1D;
-		case GL_UNSIGNED_INT_SAMPLER_2D: return UniformType::UnsignedIntSampler2D;
-		case GL_UNSIGNED_INT_SAMPLER_3D: return UniformType::UnsignedIntSampler3D;
-		case GL_UNSIGNED_INT_SAMPLER_CUBE: return UniformType::UnsignedIntSamplerCube;
-		case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY: return UniformType::UnsignedIntSampler1DArray;
-		case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY: return UniformType::UnsignedIntSampler2DArray;
-		case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: return UniformType::UnsignedIntSampler2DMultisample;
-		case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: return UniformType::UnsignedIntSampler2DMultisampleArray;
-		case GL_UNSIGNED_INT_SAMPLER_BUFFER: return UniformType::UnsignedIntSamplerBuffer;
-		case GL_UNSIGNED_INT_SAMPLER_2D_RECT: return UniformType::UnsignedIntSampler2DRect;
-		case GL_IMAGE_1D: return UniformType::Image1D;
-		case GL_IMAGE_2D: return UniformType::Image2D;
-		case GL_IMAGE_3D: return UniformType::Image3D;
-		case GL_IMAGE_2D_RECT: return UniformType::Image2DRect;
-		case GL_IMAGE_CUBE: return UniformType::ImageCube;
-		case GL_IMAGE_BUFFER: return UniformType::ImageBuffer;
-		case GL_IMAGE_1D_ARRAY: return UniformType::Image1DArray;
-		case GL_IMAGE_2D_ARRAY: return UniformType::Image2DArray;
-		case GL_IMAGE_2D_MULTISAMPLE: return UniformType::Image2DMultisample;
-		case GL_IMAGE_2D_MULTISAMPLE_ARRAY: return UniformType::Image2DMultisampleArray;
-		case GL_INT_IMAGE_1D: return UniformType::IntImage1D;
-		case GL_INT_IMAGE_2D: return UniformType::IntImage2D;
-		case GL_INT_IMAGE_3D: return UniformType::IntImage3D;
-		case GL_INT_IMAGE_2D_RECT: return UniformType::IntImage2DRect;
-		case GL_INT_IMAGE_CUBE: return UniformType::IntImageCube;
-		case GL_INT_IMAGE_BUFFER: return UniformType::IntImageBuffer;
-		case GL_INT_IMAGE_1D_ARRAY: return UniformType::IntImage1DArray;
-		case GL_INT_IMAGE_2D_ARRAY: return UniformType::IntImage2DArray;
-		case GL_INT_IMAGE_2D_MULTISAMPLE: return UniformType::IntImage2DMultisample;
-		case GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY: return UniformType::IntImage2DMultisampleArray;
-		case GL_UNSIGNED_INT_IMAGE_1D: return UniformType::UnsignedIntImage1D;
-		case GL_UNSIGNED_INT_IMAGE_2D: return UniformType::UnsignedIntImage2D;
-		case GL_UNSIGNED_INT_IMAGE_3D: return UniformType::UnsignedIntImage3D;
-		case GL_UNSIGNED_INT_IMAGE_2D_RECT: return UniformType::UnsignedIntImage2DRect;
-		case GL_UNSIGNED_INT_IMAGE_CUBE: return UniformType::UnsignedIntImageCube;
-		case GL_UNSIGNED_INT_IMAGE_BUFFER: return UniformType::UnsignedIntImageBuffer;
-		case GL_UNSIGNED_INT_IMAGE_1D_ARRAY: return UniformType::UnsignedIntImage1DArray;
-		case GL_UNSIGNED_INT_IMAGE_2D_ARRAY: return UniformType::UnsignedIntImage2DArray;
-		case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE: return UniformType::UnsignedIntImage2DMultisample;
-		case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY: return UniformType::UnsignedIntImage2DMultisampleArray;
-		case GL_UNSIGNED_INT_ATOMIC_COUNTER: return UniformType::UnsignedIntAtomicCounter;
+		case GL_FRAMEBUFFER_COMPLETE: result = FramebufferStatus::Complete; break;
+		case GL_FRAMEBUFFER_UNDEFINED: result = FramebufferStatus::Undefined; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: result = FramebufferStatus::IncompleteAttachment; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: result = FramebufferStatus::MissingAttachment; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: result = FramebufferStatus::IncompleteDrawBuffer; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: result = FramebufferStatus::IncompleteReadBuffer; break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:result = FramebufferStatus::Unsupported; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: result = FramebufferStatus::IncompleteMultisample; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: result = FramebufferStatus::IncompleteLayerTargets; break;
 		default:
-			Debug::Logger::LogError("Blaze Engine Graphics", "Invalid OpenGL uniform value value enum value.");
-			return UniformType::Invalid;
+			return false;
+		}
+
+		return true;
+	}
+
+	bool OpenGLRenderWindowFramebufferBufferTargets(RenderWindowFramebufferBufferTargets value, GLenum& result)
+	{
+		switch (value)
+		{
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::FrontLeft: result = GL_FRONT_LEFT; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::FrontRight: result = GL_FRONT_RIGHT; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::BackLeft: result = GL_BACK_LEFT; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::BackRight: result = GL_BACK_RIGHT; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::Front: result = GL_FRONT; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::Back: result = GL_BACK; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::Left: result = GL_LEFT; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::Right: result = GL_RIGHT; break;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTargets::FontAndBack: result = GL_FRONT_AND_BACK; break;
+		default:
+			return false;
+		}
+
+		return true;
+	}
+
+	bool OpenGLRenderWindowFramebufferBufferTarget(RenderWindowFramebufferBufferTarget value, GLenum& result)
+	{
+		switch (value)
+		{
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTarget::FrontLeft: result = GL_FRONT_LEFT; return true;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTarget::FrontRight: result = GL_FRONT_RIGHT; return true;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTarget::BackLeft: result = GL_BACK_LEFT; return true;
+		case Blaze::Graphics::OpenGL::RenderWindowFramebufferBufferTarget::BackRight: result = GL_BACK_RIGHT; return true;
+		default: return false;
 		}
 	}
 
-	GLenum OpenGLMutableBufferUsage(GraphicsBufferUseFrequency value, GraphicsBufferUseType use, Result& result)
+	bool OpenGLBufferMappingAccess(GraphicsBufferMapAccessFlags value, GLenum& result)
+	{
+		return BitRemap(value, result, {
+				{ GraphicsBufferMapAccessFlags::Read, GL_MAP_READ_BIT },
+				{ GraphicsBufferMapAccessFlags::Write, GL_MAP_WRITE_BIT }
+			});
+	}
+	bool OpenGLBufferMappingType(GraphicsBufferMapType value, GLenum& result)
+	{
+		return BitRemap(value, result, {
+				{ GraphicsBufferMapType::PersistentCoherent, GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT },
+				{ GraphicsBufferMapType::PersistentUncoherent, GL_MAP_PERSISTENT_BIT }
+			});
+	}
+	bool OpenGLBufferMappingOptions(GraphicsBufferMapOptions value, GLenum& result)
+	{
+		return BitRemap(value, result, {
+				{ GraphicsBufferMapOptions::ExplicitFlush, GL_MAP_FLUSH_EXPLICIT_BIT },
+				{ GraphicsBufferMapOptions::InvalidateBuffer, GL_MAP_INVALIDATE_BUFFER_BIT },
+				{ GraphicsBufferMapOptions::InvalidateRange, GL_MAP_INVALIDATE_RANGE_BIT },
+				{ GraphicsBufferMapOptions::Unsynchronized, GL_MAP_UNSYNCHRONIZED_BIT }
+			});
+	}
+
+	bool BlazeUniformType(GLenum value, UniformType& result)
+	{
+		switch (value)
+		{
+		case GL_FLOAT: result = UniformType::Float; break;
+		case GL_FLOAT_VEC2: result = UniformType::Vec2f; break;
+		case GL_FLOAT_VEC3: result = UniformType::Vec3f; break;
+		case GL_FLOAT_VEC4: result = UniformType::Vec4f; break;
+		case GL_DOUBLE: result = UniformType::Double; break;
+		case GL_DOUBLE_VEC2: result = UniformType::Vec2d; break;
+		case GL_DOUBLE_VEC3: result = UniformType::Vec3d; break;
+		case GL_DOUBLE_VEC4: result = UniformType::Vec4d; break;
+		case GL_INT: result = UniformType::Int; break;
+		case GL_INT_VEC2: result = UniformType::Vec2i; break;
+		case GL_INT_VEC3: result = UniformType::Vec3i; break;
+		case GL_INT_VEC4: result = UniformType::Vec4i; break;
+		case GL_UNSIGNED_INT: result = UniformType::UnsignedInt; break;
+		case GL_UNSIGNED_INT_VEC2: result = UniformType::Vec2u; break;
+		case GL_UNSIGNED_INT_VEC3: result = UniformType::Vec3u; break;
+		case GL_UNSIGNED_INT_VEC4: result = UniformType::Vec4u; break;
+		case GL_BOOL: result = UniformType::Bool; break;
+		case GL_BOOL_VEC2: result = UniformType::BoolVec2; break;
+		case GL_BOOL_VEC3: result = UniformType::BoolVec3; break;
+		case GL_BOOL_VEC4: result = UniformType::BoolVec4; break;
+		case GL_FLOAT_MAT2: result = UniformType::Mat2f; break;
+		case GL_FLOAT_MAT3: result = UniformType::Mat3f; break;
+		case GL_FLOAT_MAT4: result = UniformType::Mat4f; break;
+		case GL_FLOAT_MAT2x3: result = UniformType::Mat2x3f; break;
+		case GL_FLOAT_MAT2x4: result = UniformType::Mat2x4f; break;
+		case GL_FLOAT_MAT3x2: result = UniformType::Mat3x2f; break;
+		case GL_FLOAT_MAT3x4: result = UniformType::Mat3x4f; break;
+		case GL_FLOAT_MAT4x2: result = UniformType::Mat4x2f; break;
+		case GL_FLOAT_MAT4x3: result = UniformType::Mat4x3f; break;
+		case GL_DOUBLE_MAT2: result = UniformType::Mat2d; break;
+		case GL_DOUBLE_MAT3: result = UniformType::Mat3d; break;
+		case GL_DOUBLE_MAT4: result = UniformType::Mat4d; break;
+		case GL_DOUBLE_MAT2x3: result = UniformType::Mat2x3d; break;
+		case GL_DOUBLE_MAT2x4: result = UniformType::Mat2x4d; break;
+		case GL_DOUBLE_MAT3x2: result = UniformType::Mat3x2d; break;
+		case GL_DOUBLE_MAT3x4: result = UniformType::Mat3x4d; break;
+		case GL_DOUBLE_MAT4x2: result = UniformType::Mat4x2d; break;
+		case GL_DOUBLE_MAT4x3: result = UniformType::Mat4x3d; break;
+		case GL_SAMPLER_1D: result = UniformType::Sampler1D; break;
+		case GL_SAMPLER_2D: result = UniformType::Sampler2D; break;
+		case GL_SAMPLER_3D: result = UniformType::Sampler3D; break;
+		case GL_SAMPLER_CUBE: result = UniformType::SamplerCube; break;
+		case GL_SAMPLER_1D_SHADOW: result = UniformType::Sampler1DShadow; break;
+		case GL_SAMPLER_2D_SHADOW: result = UniformType::Sampler2DShadow; break;
+		case GL_SAMPLER_1D_ARRAY: result = UniformType::Sampler1DArray; break;
+		case GL_SAMPLER_2D_ARRAY: result = UniformType::Sampler2DArray; break;
+		case GL_SAMPLER_1D_ARRAY_SHADOW: result = UniformType::Sampler1DArrayShadow; break;
+		case GL_SAMPLER_2D_ARRAY_SHADOW: result = UniformType::Sampler2DArrayShadow; break;
+		case GL_SAMPLER_2D_MULTISAMPLE: result = UniformType::Sampler2DMultisample; break;
+		case GL_SAMPLER_2D_MULTISAMPLE_ARRAY: result = UniformType::Sampler2DMultisampleArray; break;
+		case GL_SAMPLER_CUBE_SHADOW: result = UniformType::SamplerCubeShadow; break;
+		case GL_SAMPLER_BUFFER: result = UniformType::SamplerBuffer; break;
+		case GL_SAMPLER_2D_RECT: result = UniformType::Sampler2DRect; break;
+		case GL_SAMPLER_2D_RECT_SHADOW: result = UniformType::Sampler2DRectShadow; break;
+		case GL_INT_SAMPLER_1D: result = UniformType::IntSampler1D; break;
+		case GL_INT_SAMPLER_2D: result = UniformType::IntSampler2D; break;
+		case GL_INT_SAMPLER_3D: result = UniformType::IntSampler3D; break;
+		case GL_INT_SAMPLER_CUBE: result = UniformType::IntSamplerCube; break;
+		case GL_INT_SAMPLER_1D_ARRAY: result = UniformType::IntSampler1DArray; break;
+		case GL_INT_SAMPLER_2D_ARRAY: result = UniformType::IntSampler2DArray; break;
+		case GL_INT_SAMPLER_2D_MULTISAMPLE: result = UniformType::IntSampler2DMultisample; break;
+		case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: result = UniformType::IntSampler2DMultisampleArray; break;
+		case GL_INT_SAMPLER_BUFFER: result = UniformType::IntSamplerBuffer; break;
+		case GL_INT_SAMPLER_2D_RECT: result = UniformType::IntSampler2DRect; break;
+		case GL_UNSIGNED_INT_SAMPLER_1D: result = UniformType::UnsignedIntSampler1D; break;
+		case GL_UNSIGNED_INT_SAMPLER_2D: result = UniformType::UnsignedIntSampler2D; break;
+		case GL_UNSIGNED_INT_SAMPLER_3D: result = UniformType::UnsignedIntSampler3D; break;
+		case GL_UNSIGNED_INT_SAMPLER_CUBE: result = UniformType::UnsignedIntSamplerCube; break;
+		case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY: result = UniformType::UnsignedIntSampler1DArray; break;
+		case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY: result = UniformType::UnsignedIntSampler2DArray; break;
+		case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: result = UniformType::UnsignedIntSampler2DMultisample; break;
+		case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: result = UniformType::UnsignedIntSampler2DMultisampleArray; break;
+		case GL_UNSIGNED_INT_SAMPLER_BUFFER: result = UniformType::UnsignedIntSamplerBuffer; break;
+		case GL_UNSIGNED_INT_SAMPLER_2D_RECT: result = UniformType::UnsignedIntSampler2DRect; break;
+		case GL_IMAGE_1D: result = UniformType::Image1D; break;
+		case GL_IMAGE_2D: result = UniformType::Image2D; break;
+		case GL_IMAGE_3D: result = UniformType::Image3D; break;
+		case GL_IMAGE_2D_RECT: result = UniformType::Image2DRect; break;
+		case GL_IMAGE_CUBE: result = UniformType::ImageCube; break;
+		case GL_IMAGE_BUFFER: result = UniformType::ImageBuffer; break;
+		case GL_IMAGE_1D_ARRAY: result = UniformType::Image1DArray; break;
+		case GL_IMAGE_2D_ARRAY: result = UniformType::Image2DArray; break;
+		case GL_IMAGE_2D_MULTISAMPLE: result = UniformType::Image2DMultisample; break;
+		case GL_IMAGE_2D_MULTISAMPLE_ARRAY: result = UniformType::Image2DMultisampleArray; break;
+		case GL_INT_IMAGE_1D: result = UniformType::IntImage1D; break;
+		case GL_INT_IMAGE_2D: result = UniformType::IntImage2D; break;
+		case GL_INT_IMAGE_3D: result = UniformType::IntImage3D; break;
+		case GL_INT_IMAGE_2D_RECT: result = UniformType::IntImage2DRect; break;
+		case GL_INT_IMAGE_CUBE: result = UniformType::IntImageCube; break;
+		case GL_INT_IMAGE_BUFFER: result = UniformType::IntImageBuffer; break;
+		case GL_INT_IMAGE_1D_ARRAY: result = UniformType::IntImage1DArray; break;
+		case GL_INT_IMAGE_2D_ARRAY: result = UniformType::IntImage2DArray; break;
+		case GL_INT_IMAGE_2D_MULTISAMPLE: result = UniformType::IntImage2DMultisample; break;
+		case GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY: result = UniformType::IntImage2DMultisampleArray; break;
+		case GL_UNSIGNED_INT_IMAGE_1D: result = UniformType::UnsignedIntImage1D; break;
+		case GL_UNSIGNED_INT_IMAGE_2D: result = UniformType::UnsignedIntImage2D; break;
+		case GL_UNSIGNED_INT_IMAGE_3D: result = UniformType::UnsignedIntImage3D; break;
+		case GL_UNSIGNED_INT_IMAGE_2D_RECT: result = UniformType::UnsignedIntImage2DRect; break;
+		case GL_UNSIGNED_INT_IMAGE_CUBE: result = UniformType::UnsignedIntImageCube; break;
+		case GL_UNSIGNED_INT_IMAGE_BUFFER: result = UniformType::UnsignedIntImageBuffer; break;
+		case GL_UNSIGNED_INT_IMAGE_1D_ARRAY: result = UniformType::UnsignedIntImage1DArray; break;
+		case GL_UNSIGNED_INT_IMAGE_2D_ARRAY: result = UniformType::UnsignedIntImage2DArray; break;
+		case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE: result = UniformType::UnsignedIntImage2DMultisample; break;
+		case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY: result = UniformType::UnsignedIntImage2DMultisampleArray; break;
+		case GL_UNSIGNED_INT_ATOMIC_COUNTER: result = UniformType::UnsignedIntAtomicCounter; break;
+		default: return false;
+		}
+
+		return true;
+	}
+
+	bool OpenGLMutableBufferUsage(GraphicsBufferUseFrequency value, GraphicsBufferUseType use, GLenum& result)
 	{
 		switch (value)
 		{
 		case GraphicsBufferUseFrequency::Static:	switch (use) {
-		case GraphicsBufferUseType::Draw: return GL_STATIC_DRAW;
-		case GraphicsBufferUseType::Read: return GL_STATIC_READ;
-		case GraphicsBufferUseType::Copy: return GL_STATIC_COPY;
-		}
+			case GraphicsBufferUseType::Draw: result = GL_STATIC_DRAW; break;
+			case GraphicsBufferUseType::Read: result = GL_STATIC_READ; break;
+			case GraphicsBufferUseType::Copy: result = GL_STATIC_COPY; break;
+		} break;
 		case GraphicsBufferUseFrequency::Dynamic:	switch (use) {
-		case GraphicsBufferUseType::Draw: return GL_DYNAMIC_DRAW;
-		case GraphicsBufferUseType::Read: return GL_DYNAMIC_READ;
-		case GraphicsBufferUseType::Copy: return GL_DYNAMIC_COPY;
-		}
+			case GraphicsBufferUseType::Draw: result = GL_DYNAMIC_DRAW; break;
+			case GraphicsBufferUseType::Read: result = GL_DYNAMIC_READ; break;
+			case GraphicsBufferUseType::Copy: result = GL_DYNAMIC_COPY; break;
+		} break;
 		case GraphicsBufferUseFrequency::Stream:	switch (use) {
-		case GraphicsBufferUseType::Draw: return GL_STREAM_DRAW;
-		case GraphicsBufferUseType::Read: return GL_STREAM_READ;
-		case GraphicsBufferUseType::Copy: return GL_STREAM_COPY;
-		}
-		default:
-			result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Invalid GraphicsBufferUseFrequency enum value. The integer value was: {}", ToInteger(value)));
-			return std::numeric_limits<GLenum>::max();
-			break;
+			case GraphicsBufferUseType::Draw: result = GL_STREAM_DRAW; break;
+			case GraphicsBufferUseType::Read: result = GL_STREAM_READ; break;
+			case GraphicsBufferUseType::Copy: result = GL_STREAM_COPY; break;
+		} break;
+		default: return false;
 		}
 
-		result += Debug::Log(Debug::LogType::Error, "Blaze Engine", Format("Engine error. Invalid GraphicsBufferUseType enum value. The integer value was: {}", ToInteger(use)));
-		return std::numeric_limits<GLenum>::max();
+		return true;
 	}
 }

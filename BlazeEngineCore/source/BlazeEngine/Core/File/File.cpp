@@ -113,7 +113,9 @@ namespace Blaze
 
 		if (handle == INVALID_HANDLE_VALUE)
 		{
-			BLAZE_WINDOWS_ERROR("CreateFileA given a path \"{}\" failed with error: \"{}\"", path, Windows::GetErrorString(GetLastError()));
+			if (parameters.openOption != FileOpenOptions::OpenExisting)
+				BLAZE_WINDOWS_ERROR("CreateFileA given a path \"{}\" failed with error: \"{}\"", path, Windows::GetErrorString(GetLastError()));
+
 			return;
 		}
 

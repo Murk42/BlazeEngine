@@ -119,7 +119,7 @@ namespace Blaze
 	class BaseFormatter<Char>
 	{
 	public:
-		uintMem characterWidth;
+		uintMem requestedWidth; //Counted in characters (not bytes or code points). It has a value of 0 if no target lenght is set
 		char32_t fill;
 		uint8 align : 2;
 
@@ -162,7 +162,7 @@ namespace Blaze
 		inline uintMem Parse(const GenericStringView<SrcChar>& value, const FormatParseContext<DstChar>& parseContext);
 		inline void Format(const GenericStringView<SrcChar>& string, FormatContext<DstChar>& context);
 	private:
-		uintMem convertedLength;
+		uintMem inputStringWidth;
 	};
 	template<typename SrcChar, typename DstChar> requires Formattable<GenericStringView<SrcChar>, DstChar>
 	class Formatter<GenericString<SrcChar>, DstChar> : Formatter<GenericStringView<SrcChar>, DstChar>

@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/Common/Color.h"
-#include "BlazeEngine/Graphics/Renderers/RendererBase.h"
+#include "BlazeEngine/Graphics/Core/RendererBase.h"
 
 namespace Blaze::Graphics
 {
@@ -11,13 +11,13 @@ namespace Blaze::Graphics
 		ColorRGBAf color = 0xffffffff;
 	};
 
-	class BLAZE_API Quad2DRenderer : public RendererBase
+	class BLAZE_API Quad2DRenderer : public virtual RendererBase
 	{
 	public:
-		virtual void Render(const Quad2DRenderData& data, const RenderContext& context) = 0;
-		void Render(Vec2f pos, Vec2f size, float rotation, ColorRGBAf color, const RenderContext& context);
-		void Render(Vec2f pos, Vec2f size, Vec2f right, ColorRGBAf color, const RenderContext& context);
+		virtual void Render(const Quad2DRenderData& data) = 0;
+		void Render(Vec2f pos, Vec2f size, float rotation, ColorRGBAf color);
+		void Render(Vec2f pos, Vec2f size, Vec2f right, ColorRGBAf color);
 
-		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<Quad2DRenderer>(); }
+		RendererTypeID GetTypeID() const override final { return RendererBase::GetTypeIDFor<Quad2DRenderer>(); }
 	};
 }

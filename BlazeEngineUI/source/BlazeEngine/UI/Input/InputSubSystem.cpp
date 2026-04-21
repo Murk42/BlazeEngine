@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Input/InputSubSystem.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
-#include "BlazeEngine/UI/Input/PointerData.h"
+
+#include "BlazeEngine/Runtime/IO/Input.h"
 
 namespace Blaze::UI
 {
@@ -57,7 +58,7 @@ namespace Blaze::UI
 					inputNode->inputSubSystem = this;
 
 			if (window != nullptr)
-				NewScreenAndWindow();
+				ThrowSyntheticMouseMotionEvent();
 		}		
 	}
 	void InputSubSystem::SetWindow(Window* newWindow)
@@ -78,7 +79,7 @@ namespace Blaze::UI
 			window->destructionEventDispatcher.AddHandler<&InputSubSystem::WindowDestructionEvent>(*this);
 
 			if (screen != nullptr)
-				NewScreenAndWindow();
+				ThrowSyntheticMouseMotionEvent();
 		}
 	}
 	void InputSubSystem::SelectNode(InputNode* newSelectedInputNode)
@@ -214,9 +215,8 @@ namespace Blaze::UI
 
 		return it->value.GetPos();
 	}
-	void InputSubSystem::NewScreenAndWindow()
+	void InputSubSystem::ThrowSyntheticMouseMotionEvent()
 	{
-		//Rethrow mouse motion event to "hit test" the entire application again
 		auto mice = Input::GetMice();
 
 		for (auto& mouse : mice)
@@ -263,7 +263,7 @@ namespace Blaze::UI
 	}
 	Input::EventProcessedState InputSubSystem::MouseEntersWindowEvent(const Input::MouseEntersWindowEvent& event, bool processed)
 	{
-		if (screen == nullptr)
+		if (screen == nullptr || &event.window != window)
 			return Input::EventProcessedState::NotProcessed;
 
 		pointerMap.Insert(event.mouseID, *screen, *window, event.mouseID, event.pos, processed);
@@ -272,6 +272,9 @@ namespace Blaze::UI
 	}
 	Input::EventProcessedState InputSubSystem::MouseLeavesWindowEvent(const Input::MouseLeavesWindowEvent& event, bool processed)
 	{
+		if (&event.window != window)
+			return Input::EventProcessedState::NotProcessed;
+
 		auto it = pointerMap.Find(event.mouseID);
 
 		if (it.IsNull())

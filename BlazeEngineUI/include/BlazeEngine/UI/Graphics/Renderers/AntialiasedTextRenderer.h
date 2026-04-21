@@ -9,7 +9,7 @@ namespace Blaze::Graphics
 	public:
 		const UI::FontGlyphRasterizer& GetFontGlyphRasterizer() const { return glyphRasterizer; }
 
-		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<AntialiasedTextRenderer>(); }
+		RendererTypeID GetTypeID() const override final { return RendererBase::GetTypeIDFor<AntialiasedTextRenderer>(); }
 	private:
 		UI::FontGlyphRasterizers::AntialiasedFontGlyphRasterizer glyphRasterizer;
 	};

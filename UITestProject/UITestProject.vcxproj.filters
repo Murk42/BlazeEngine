@@ -26,19 +26,16 @@
     <ClInclude Include="source\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScreen.h">
+    <ClInclude Include="source\Screens\MainScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainAppRuntimeThread.h">
+    <ClInclude Include="source\Threads\MainThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\UIDebugLayer.h">
+    <ClInclude Include="source\Layers\MainLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\ScreenManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UIDebugScreen.h">
+    <ClInclude Include="source\UI\Nodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -46,23 +43,24 @@
     <ClCompile Include="source\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\MainScreen.cpp">
+    <ClCompile Include="source\Screens\MainScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\MainAppRuntimeThread.cpp">
+    <ClCompile Include="source\Threads\MainThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\UIDebugLayer.cpp">
+    <ClCompile Include="source\Layers\MainLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\UIDebugScreen.cpp">
+    <ClCompile Include="source\UI\Nodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\scene.txt" />
+    <Text Include="log.txt" />
   </ItemGroup>
 </Project>

@@ -2,7 +2,6 @@
 #include "BlazeEngine/Graphics/Renderers/OpenGL/BasicIndexedMeshRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
 #include "BlazeEngine/Graphics/Shaders/Shaders.h"
-#include "BlazeEngine/Core/Common/Buffer.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -21,7 +20,7 @@ namespace Blaze::Graphics::OpenGL
 	constexpr uintMem BatchBufferSize = sizeof(Vertex) * 1024 + sizeof(uint32) * 4 * 1024;
 
 	BasicIndexedMeshRenderer_OpenGL::BasicIndexedMeshRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, bool loadDefaultShaders)
-		: BufferedRendererBase_OpenGL(BatchBufferSize, graphicsContext), graphicsContext(graphicsContext), vertexCount(0), indexCount(0), meshCount(0), rendering(false)
+		: BufferedRendererBase_OpenGL(graphicsContext, BatchBufferSize), vertexCount(0), indexCount(0), meshCount(0), rendering(false)
 	{
 		if (loadDefaultShaders)
 		{
@@ -48,7 +47,7 @@ namespace Blaze::Graphics::OpenGL
 		WaitFence();
 		meshDataBuffer.UnmapBuffer();
 	}
-	void BasicIndexedMeshRenderer_OpenGL::StartRender(const RenderContext& context)
+	void BasicIndexedMeshRenderer_OpenGL::StartRender(const RenderContext_OpenGL& context)
 	{
 		graphicsContext.SelectVertexArray(&va);
 		graphicsContext.SelectProgram(&program);
@@ -56,9 +55,9 @@ namespace Blaze::Graphics::OpenGL
 		graphicsContext.SetShaderUniformBlockBindingPoint(program, 0, 0);
 		rendering = true;
 	}
-	void BasicIndexedMeshRenderer_OpenGL::EndRender(const RenderContext& context)
+	void BasicIndexedMeshRenderer_OpenGL::EndRender()
 	{
-		Flush(context);
+		Flush();
 		rendering = false;
 	}
 	void BasicIndexedMeshRenderer_OpenGL::SetProjectionMatrix(const Mat4f& matrix)
@@ -92,7 +91,7 @@ namespace Blaze::Graphics::OpenGL
 		program.SetUniform(2, lightDirection);
 		program.SetUniform(3, (Vec3f)ambientColor);
 	}
-	void BasicIndexedMeshRenderer_OpenGL::Render(ArrayView<Vec3f> vertices, ArrayView<uint32> indices, Mat4f modelMatrix, ColorRGBAf color, const RenderContext& context)
+	void BasicIndexedMeshRenderer_OpenGL::Render(ArrayView<Vec3f> vertices, ArrayView<uint32> indices, Mat4f modelMatrix, ColorRGBAf color)
 	{
 		if (!rendering)
 		{
@@ -110,7 +109,7 @@ namespace Blaze::Graphics::OpenGL
 		}
 
 		if (meshCount == BatchMaxMeshCount)
-			Flush(context);
+			Flush();
 
 		WaitFence();
 
@@ -155,7 +154,7 @@ namespace Blaze::Graphics::OpenGL
 					.color = color
 				};
 
-				Flush(context);
+				Flush();
 
 				WaitFence();
 			}
@@ -167,25 +166,6 @@ namespace Blaze::Graphics::OpenGL
 			.transformMatrix = modelMatrix.Transposed(),
 			.color = color
 		};
-	}
-	void BasicIndexedMeshRenderer_OpenGL::Flush(const RenderContext& context)
-	{
-		if (indexCount == 0)
-			return;
-
-		uintMem indicesOffset = GetBufferSize() - sizeof(uint32) * indexCount;
-		FlushBuffer(0, sizeof(Vertex) * vertexCount);
-		FlushBuffer(indicesOffset, sizeof(uint32) * indexCount);
-
-		meshDataBuffer.FlushBufferRange(0, sizeof(MeshData) * meshCount);
-
-		graphicsContext.RenderIndexedPrimitives(PrimitiveType::Triangles, IndexType::Uint32, indexCount, indicesOffset);
-		fence.SetFence();
-
-		vertexCount = 0;
-		indexCount = 0;
-		meshCount = 0;
-
 	}
 	void BasicIndexedMeshRenderer_OpenGL::WaitFence()
 	{
@@ -225,5 +205,25 @@ namespace Blaze::Graphics::OpenGL
 
 		vertexCount += vertices.Count();
 		indexCount += indices.Count();
+	}
+
+	void BasicIndexedMeshRenderer_OpenGL::Flush()
+	{
+		if (indexCount == 0)
+			return;
+
+		uintMem indicesOffset = GetBufferSize() - sizeof(uint32) * indexCount;
+		FlushBuffer(0, sizeof(Vertex) * vertexCount);
+		FlushBuffer(indicesOffset, sizeof(uint32) * indexCount);
+
+		meshDataBuffer.FlushBufferRange(0, sizeof(MeshData) * meshCount);
+
+		graphicsContext.RenderIndexedPrimitives(PrimitiveType::Triangles, IndexType::Uint32, indexCount, indicesOffset);
+		fence.SetFence();
+
+		vertexCount = 0;
+		indexCount = 0;
+		meshCount = 0;
+
 	}
 }

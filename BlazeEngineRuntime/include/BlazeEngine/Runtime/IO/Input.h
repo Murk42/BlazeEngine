@@ -8,7 +8,8 @@ namespace Blaze::Input
     struct InputPreUpdateEvent {};
     struct InputPostUpdateEvent {};
 
-    BLAZE_API void Update();
+    BLAZE_API void PollEvents();
+    BLAZE_API bool WaitForEvents(float seconds);
 
     BLAZE_API Vec2f GetFocusedWindowLastUpdateMousePos();
     BLAZE_API Vec2f GetFocusedWindowLastUpdateMouseMovementSum();

@@ -102,10 +102,12 @@ namespace Blaze::Graphics::OpenGL
 
 	void Texture2D::Create(Vec2u size, TextureInternalPixelFormat internalFormat, const Texture2DSettings& settings)
 	{
-		Result result;
-
-		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
-		if (result) return;
+		GLenum internalPixelFormat;
+		if (!OpenGLInternalPixelFormat(internalFormat, internalPixelFormat))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureInternalPixelFormat enum value");
+			return;
+		}
 
 		this->size = size;
 
@@ -115,9 +117,12 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void Texture2D::Create(BitmapView bm, const Texture2DSettings& settings)
 	{
-		Result result;
-		auto internalFormat = MapInternalTexturePixelFormat(bm.GetPixelFormat(), result);
-		if (result) return;
+		TextureInternalPixelFormat internalFormat;
+		if (!BlazeInternalTexturePixelFormat(bm.GetPixelFormat(), internalFormat))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureInternalPixelFormat enum value");
+			return;
+		}
 
 		Create(bm.GetSize(), internalFormat, settings);
 
@@ -149,28 +154,43 @@ namespace Blaze::Graphics::OpenGL
 	{
 		Bitmap bm;
 		Vec2u size = GetSize();
-
-		Result result;
-		GLenum _format = OpenGLPixelFormat(colorFormat, result);
-		if (result) return Bitmap();
+		
+		GLenum _format;
+		if (!OpenGLPixelFormat(colorFormat, _format))
+		{
+			BLAZE_LOG_ERROR("Invalid BitmapColorFormat enum value");
+			return { };
+		}
 
 		bm.Create(size, colorFormat, componentType, nullptr);
 
-		GLenum _type = OpenGLPixelType(componentType, result);
-		if (result) return Bitmap();
+		GLenum _type;
+		if (!OpenGLPixelType(componentType, _type))
+		{
+			BLAZE_LOG_ERROR("Invalid BitmapComponentColorType enum value");
+			return { };
+		}
 
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glGetTextureImage(id, 0, _format, _type, static_cast<GLsizei>(bm.GetPixelSize() * size.x * size.y), bm.GetPixels());
 
 		return bm;
 	}
 
 	void Texture2D::SetPixels(Vec2u offset, BitmapView bm, uint textureLevel)
-	{
-		Result result;
-		GLenum format = OpenGLPixelFormat(bm.GetPixelFormat(), result);
-		if (result) return;
-		GLenum type = OpenGLPixelType(bm.GetPixelType(), result);
-		if (result) return;
+	{		
+		GLenum format;
+		if (!OpenGLPixelFormat(bm.GetPixelFormat(), format))
+		{
+			BLAZE_LOG_ERROR("Invalid BitmapColorFormats enum value");
+			return;
+		}
+		GLenum type;
+		if (!OpenGLPixelType(bm.GetPixelType(), type))
+		{
+			BLAZE_LOG_ERROR("Invalid BitmapComponentColorType enum value");
+			return;
+		}
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -194,16 +214,30 @@ namespace Blaze::Graphics::OpenGL
 
 	void Texture2D::SetSettings(const Texture2DSettings& settings)
 	{
-		Result result;
-
-		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.textureLevelCount > 1, result);
-		if (result) return;
-		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
-		if (result) return;
-		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
-		if (result) return;
-		GLenum _yWrap = OpenGLTextureWrapping(settings.yWrap, result);
-		if (result) return;
+		GLenum _min;
+		if (!OpenGLTextureMinSampling(settings.min, settings.mip, settings.textureLevelCount > 1, _min))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureSampling enum value");
+			return;
+		}
+		GLenum _mag;
+		if (!OpenGLTextureMagSampling(settings.mag, _mag))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureSampling enum value");
+			return;
+		}
+		GLenum _xWrap;
+		if (!OpenGLTextureWrapping(settings.xWrap, _xWrap))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureWrapping enum value");
+			return;
+		}
+		GLenum _yWrap;
+		if (!OpenGLTextureWrapping(settings.yWrap, _yWrap))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureWrapping enum value");
+			return;
+		}
 
 		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
 		glTextureParameteri(id, GL_TEXTURE_WRAP_T, _yWrap);

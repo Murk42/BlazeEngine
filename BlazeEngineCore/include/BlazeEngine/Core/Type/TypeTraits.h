@@ -49,8 +49,8 @@ namespace Blaze
 	concept IsBaseOf = __is_base_of(Base, Derived);
 	template<typename Derived, typename Base>
 	concept IsDerivedFrom = __is_base_of(Base, Derived) && __is_convertible_to(const volatile Derived*, const volatile Base*);
-	template<typename T>
-	concept IsDestructible = __is_nothrow_destructible(T);
+    template<typename T>
+	concept IsDestructible = __is_destructible(T);
 	template<typename T, typename... Args>
 	concept IsConstructibleFrom = IsDestructible<T> && __is_constructible(T, Args...);
 	template<typename From, typename To>
@@ -64,9 +64,13 @@ namespace Blaze
 	template<typename T, typename T2>
 	concept IsTriviallyAssignable = __is_trivially_assignable(T, T2);
 	template<typename T>
+	concept IsTriviallyCopyable = __is_trivially_copyable(T);
+	template<typename T>
 	concept HasVirtualDestructor = __has_virtual_destructor(T);
 	template<typename T>
 	using UnderlyingType = __underlying_type(T);
+	template<typename T>
+	concept IsEnumType = __is_enum(T);
 #else
 	// If we reach here, the compiler doesn't expose the usual builtin.
 	// We can't reliably reimplement the standard trait in portable, standard C++,
@@ -93,9 +97,13 @@ namespace Blaze
 	template<typename T, typename T2>
 	concept IsTriviallyAssignable = (sizeof(T) > 0) && false;
 	template<typename T>
+	concept IsTriviallyCopyable = (sizeof(T) > 0) && false;
+	template<typename T>
 	concept HasVirtualDestructor = (sizeof(T) > 0) && false;
 	template<typename T>
-	using UnderlyingType = (sizeof(T) > 0) && false;;
+	using UnderlyingType = (sizeof(T) > 0) && false;
+	template<typename T>
+	concept IsEnumType = (sizeof(T) > 0) && false;
 
 	static_assert("Your compiler doesn't support type trait builtins. ");
 #endif

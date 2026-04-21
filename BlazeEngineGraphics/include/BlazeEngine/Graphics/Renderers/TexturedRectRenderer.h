@@ -2,7 +2,7 @@
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/Common/Color.h"
 #include "BlazeEngine/Core/Resource/ResourceRef.h"
-#include "BlazeEngine/Graphics/Renderers/RendererBase.h"
+#include "BlazeEngine/Graphics/Core/RendererBase.h"
 
 namespace Blaze::Graphics
 {
@@ -18,11 +18,11 @@ namespace Blaze::Graphics
 		float alpha;
 	};
 
-	class TexturedRectRenderer : public RendererBase
+	class TexturedRectRenderer : public virtual RendererBase
 	{
 	public:
-		virtual void Render(const TexturedRectRenderData& data, const RenderContext& context) = 0;
+		virtual void Render(const TexturedRectRenderData& data) = 0;
 
-		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<TexturedRectRenderer>(); }
+		RendererTypeID GetTypeID() const override final { return RendererBase::GetTypeIDFor<TexturedRectRenderer>(); }
 	};
 }

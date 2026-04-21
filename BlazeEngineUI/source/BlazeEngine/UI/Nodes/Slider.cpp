@@ -1,23 +1,21 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Nodes/Slider.h"
-#include "BlazeEngine/UI/Input/InputSubSystem.h"
+#include "BlazeEngine/Runtime/IO/Input.h"
 
 namespace Blaze::UI::Nodes
 {
 	Slider::Slider()
-		: renderUnitDirty(true), highlighted(false), handleSize(30, 12), trackThickness(1), value(0.0f), draggingMouseOffset(0)
+		: renderUnitDirty(true), handleSize(30, 12), trackThickness(1), value(0.0f), draggingMouseOffset(0)
 	{
 		dataMap.SetTypeName("Slider");
-
-		SetStyle(Style());
+		
 		SetTransform({ .size = { 200, 20 } });
 
 		finalTransformUpdatedEventDispatcher.AddHandler<&Slider::FinalTransformUpdatedEvent>(*this);
 		mouseHitStatusChangedEventDispatcher.AddHandler<&Slider::MouseHitStatusChangedEvent>(*this);
-		pressedStateChangedEventDispatcher.AddHandler<&Slider::PressedStateChangedEvent>(*this);
 		mouseMotionEventDispatcher.AddHandler<&Slider::MouseMotionEvent>(*this);
 	}
-	Slider::Slider(Node& parent, const NodeTransform& transform, float value, Vec2f handleSize, float trackThickness, const Style& style)
+	Slider::Slider(Node& parent, const NodeTransform& transform, float value, Vec2f handleSize, float trackThickness, const SliderStyle& style)
 		: Slider()
 	{
 		SetStyle(style);
@@ -31,7 +29,6 @@ namespace Blaze::UI::Nodes
 	{
 		finalTransformUpdatedEventDispatcher.RemoveHandler<&Slider::FinalTransformUpdatedEvent>(*this);
 		mouseHitStatusChangedEventDispatcher.RemoveHandler<&Slider::MouseHitStatusChangedEvent>(*this);
-		pressedStateChangedEventDispatcher.RemoveHandler<&Slider::PressedStateChangedEvent>(*this);
 		mouseMotionEventDispatcher.RemoveHandler<&Slider::MouseMotionEvent>(*this);
 	}
 	/*Node::HitStatus Slider::HitTest(Vec2f screenPosition)
@@ -77,27 +74,18 @@ namespace Blaze::UI::Nodes
 
 		return HitStatus::NotHit;
 	}*/
-	void Slider::SetStyle(const Style& style)
+	void Slider::SetStyle(const SliderStyle& style)
 	{
-		highlightTint = style.highlightTint;
-		pressedTint = style.pressedTint;
-
-		handleFillColor = style.handleFillColor;
-		handleBorderColor = style.handleBorderColor;
-		handleRenderUnit.borderWidth = style.handleBorderWidth;
-		handleRenderUnit.cornerRadius = style.handleCornerRadius;
-
-		trackRenderUnit.fillColor = style.trackFillColor;
-		trackRenderUnit.borderColor = style.trackBorderColor;
-		trackRenderUnit.borderWidth = style.trackBorderWidth;
-		trackRenderUnit.cornerRadius = style.trackCornerRadius;
+		this->style = style;
+			
+		handleRenderUnit.style = style.handleStyle;
+		trackRenderUnit.style = style.trackStyle;
 
 		UpdateColor();
 	}
-	void Slider::SetStepCount(uint32 stepCount)
+	SliderStyle Slider::GetStyle() const
 	{
-		this->stepCount = stepCount;
-		renderUnitDirty = true;
+		return style;
 	}
 	void Slider::SetValue(float value)
 	{
@@ -142,30 +130,15 @@ namespace Blaze::UI::Nodes
 	{
 		this->valueChangedCallback = valueChangedCallback;
 	}
-	bool Slider::PreRender(const RenderContext& renderContext)
+	bool Slider::PreRender(const Graphics::RenderContext& renderContext)
 	{
 		if (!renderUnitDirty)
 			return false;
 
 		renderUnitDirty = false;
 
-		auto transform = GetFinalTransform();
-		Vec2f right = Vec2f(Math::Cos(transform.rotation), Math::Sin(transform.rotation));
-		Vec2f up = Vec2f(-right.y, right.x);
-
-		trackRenderUnit.pos = transform.position + Vec2f(0, (transform.size.y - trackThickness) / 2);
-		trackRenderUnit.right = right * transform.size.x;
-		trackRenderUnit.up = up * trackThickness * transform.scale;
-
-		Vec2f finalHandleSize = handleSize * transform.scale;
-
-		if (finalHandleSize.x < transform.size.x)
-			handleRenderUnit.pos = transform.position + right * (transform.size.x - finalHandleSize.x) * value + up * (transform.size.y - finalHandleSize.y) / 2;
-		else
-			handleRenderUnit.pos = transform.position + right * (transform.size.x - finalHandleSize.x) * 0.5f + up * (transform.size.y - finalHandleSize.y) / 2;
-
-		handleRenderUnit.right = right * finalHandleSize.x;
-		handleRenderUnit.up = up * finalHandleSize.y;
+		UpdateTrackRenderUnit();
+		UpdateHandleRenderUnit();
 
 		return false;
 	}
@@ -189,113 +162,115 @@ namespace Blaze::UI::Nodes
 	{
 		return { Mix(a.r, b.r, b.a), Mix(a.g, b.g, b.a), Mix(a.b, b.b, b.a), a.a };
 	}
+	Vec2f Slider::CalculateHandlePos() const
+	{
+		const auto& transform = GetTransform();
+
+		float slideLength = transform.size.x - handleSize.x;
+			
+		Vec2f pos{
+			slideLength > 0.0f ? slideLength * value : slideLength * 0.5f,
+			(transform.size.y - handleSize.y) / 2
+		};
+		
+		return pos;
+	}
 	void Slider::UpdateColor()
 	{
-		if (IsPressed())
+		if (IsDown())
 		{
-			handleRenderUnit.fillColor = Mix(handleFillColor, pressedTint);
-			handleRenderUnit.borderColor = Mix(handleBorderColor, pressedTint);
+			handleRenderUnit.style.fillColor = Mix(style.handleStyle.fillColor, style.pressedTint);
+			handleRenderUnit.style.borderColor = Mix(style.handleStyle.borderColor, style.pressedTint);
 		}
-		else if (highlighted)
+		else if (IsMouseOver())
 		{
-			handleRenderUnit.fillColor = Mix(handleFillColor, highlightTint);
-			handleRenderUnit.borderColor = Mix(handleBorderColor, highlightTint);
+			handleRenderUnit.style.fillColor = Mix(style.handleStyle.fillColor, style.highlightTint);
+			handleRenderUnit.style.borderColor = Mix(style.handleStyle.borderColor, style.highlightTint);
 		}
 		else
 		{
-			handleRenderUnit.fillColor = handleFillColor;
-			handleRenderUnit.borderColor = handleBorderColor;
+			handleRenderUnit.style.fillColor = style.handleStyle.fillColor;
+			handleRenderUnit.style.borderColor = style.handleStyle.borderColor;
 		}
 	}
-	void Slider::UpdateCursor()
+	void Slider::UpdateHandleRenderUnit()
 	{
-		if (highlighted || IsPressed())
-			Input::SetCursorType(Input::CursorType::ResizeEW);
-		else
-			Input::SetCursorType(Input::CursorType::Default);
+		const auto& finalTransform = GetFinalTransform();
+
+		Vec2f finalHandleSize = handleSize * GetFinalScale();
+
+		handleRenderUnit.pos = TransformFromLocalToFinalSpace(CalculateHandlePos());
+		handleRenderUnit.right = finalTransform.Right() * finalHandleSize.x;
+		handleRenderUnit.up = finalTransform.Up() * finalHandleSize.y;
 	}
-	bool Slider::HitTestHandle(Vec2f mouseScreenPos)
+	void Slider::UpdateTrackRenderUnit()
 	{
-		auto transform = GetFinalTransform();
-		Vec2f right = Vec2f(Math::Cos(transform.rotation), Math::Sin(transform.rotation));
-		Vec2f up = Vec2f(-right.y, right.x);
+		const auto& finalTransform = GetFinalTransform();
 
-		Vec2f nodePosition = mouseScreenPos - transform.position;
+		trackRenderUnit.pos = finalTransform.position + Vec2f(0, (finalTransform.size.y - trackThickness) / 2);
+		trackRenderUnit.right = finalTransform.Right() * finalTransform.size.x;
+		trackRenderUnit.up = finalTransform.Up() * trackThickness * GetFinalScale();
+	}
+	void Slider::SetValueForHandleRelativePos(Vec2f handleRelativePos)
+	{
+		const auto& transform = GetTransform();
+		if (transform.size.x - handleSize.x > 0.0f)
+			SetValue(value + (handleRelativePos.x - draggingMouseOffset) / (transform.size.x - handleSize.x));
+	}
+	bool Slider::HitTestHandle(Vec2f mouseScreenPos, Vec2f* handleRelativePosOut)
+	{
+		Vec2f handleRelativePos = TransformFromFinalToLocalSpace(mouseScreenPos) - CalculateHandlePos();
 
-		nodePosition = {
-			right.DotProduct(nodePosition),
-			up.DotProduct(nodePosition),
-		};
+		if (handleRelativePosOut != nullptr)
+			*handleRelativePosOut = handleRelativePos;
 
-		Rectf handleHitbox;
-		handleHitbox.size = {
-			handleSize.x * transform.scale,
-			std::max(handleSize.y, trackThickness) * transform.scale
-		};
-		handleHitbox.pos = {
-			transform.size.x > handleHitbox.size.x ? (transform.size.x - handleHitbox.size.x) * value : (transform.size.x - handleHitbox.size.x) * 0.5f,
-			(transform.size.y - handleHitbox.size.y) / 2
-		};
+		return handleRelativePos.x >= 0 && handleRelativePos.y >= 0 && handleRelativePos.x < handleSize.x && handleRelativePos.y < handleSize.y;
+	}
+	void Slider::IsDownChanged(bool byMouse, Vec2f pos)
+	{
+		if (IsDown())
+		{	
+			UpdateColor();
 
-		auto InRect = [](Vec2f point, Rectf rect) { return point.x >= rect.x && point.x < rect.x + rect.w && point.y >= rect.y && point.y < rect.y + rect.h; };
-		return InRect(nodePosition, handleHitbox);
+			if (!byMouse)
+				return;			
+
+			Vec2f handleRelativePos;
+			if (HitTestHandle(pos, &handleRelativePos))
+				draggingMouseOffset = handleRelativePos.x;
+			else
+			{
+				draggingMouseOffset = handleSize.x / 2;
+				SetValueForHandleRelativePos(handleRelativePos);
+			}
+		}
+		else
+		{
+			UpdateColor();
+
+			if (!IsMouseOver())
+				Input::SetCursorType(Input::CursorType::Default);
+		}
 	}
 	void Slider::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
 	{
 		renderUnitDirty = true;
 	}
 	void Slider::MouseHitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event)
-	{
-		highlighted = event.newHitStatus != HitStatus::NotHit;
-
+	{		
 		UpdateColor();
-		UpdateCursor();
-	}
-	void Slider::PressedStateChangedEvent(const ButtonBase::PressedStateChangedEvent& event)
-	{
-		if (!event.mouseID.IsValid() || GetInputSubSystem() == nullptr)
-			return;
 
-		if (IsPressed())
-		{
-			Vec2f mousePos = GetInputSubSystem()->GetScreenMousePos(event.mouseID);
-
-			if (HitTestHandle(mousePos))
-			{
-				auto transform = GetFinalTransform();
-				draggingMouseOffset = transform.Right().DotProduct(mousePos - transform.position) - value * (transform.size.x - handleSize.x * transform.scale);
-				UpdateCursor();
-			}
-			else
-			{
-				auto transform = GetFinalTransform();
-				float newValue = (transform.Right().DotProduct(mousePos - transform.position) - handleSize.x / 2 * transform.scale) / (transform.size.x - handleSize.x * transform.scale);
-				draggingMouseOffset = handleSize.x * transform.scale / 2;
-				SetValue(newValue);
-			}
-
-			UpdateColor();
-		}
+		if (IsDown() || IsMouseOver())
+			Input::SetCursorType(Input::CursorType::ResizeEW);
 		else
-		{
-			UpdateCursor();
-			UpdateColor();
-		}
+			Input::SetCursorType(Input::CursorType::Default);
 	}
 	void Slider::MouseMotionEvent(const UIMouseMotionEvent& event)
 	{
-		if (IsPressed() && event.mouseID == GetPressingMouseID())
+		if (IsDown() && event.mouseID == GetPressingMouseID())
 		{
-			auto transform = GetFinalTransform();
-
-			if (transform.size.x < handleSize.x)
-				SetValue(0.5);
-			else
-			{
-				float newValue = (transform.Right().DotProduct(event.pos - transform.position) - draggingMouseOffset) / (transform.size.x - handleSize.x * transform.scale);
-
-				SetValue(newValue);
-			}
+			Vec2f handleLocalPos = TransformFromFinalToLocalSpace(event.pos) - CalculateHandlePos();
+			SetValueForHandleRelativePos(handleLocalPos);
 		}
 	}
 }

@@ -16,17 +16,6 @@ namespace Blaze
 	{
 	}
 
-	template<HashableType Key, typename Base, typename Derived> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && (!IsFinal<Derived>)
-	template<typename _Key, typename ... Args> requires IsConstructibleFrom<Derived, Args...>
-	inline VirtualMapNode<Key, Base, Derived>::VirtualMapNode(VirtualMapNodeBase<Key, Base>* prev, VirtualMapNodeBase<Key, Base>* next, _Key&& key, Args && ...args)
-		: VirtualMapNodeBase<Key, Base>(prev, next, std::forward<_Key>(key)), Derived(std::forward<Args>(args)...)
-	{
-	}
-	template<HashableType Key, typename Base, typename Derived> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && (!IsFinal<Derived>)
-	inline VirtualMapNode<Key, Base, Derived>::~VirtualMapNode()
-	{
-	}
-
 	template<typename NodeBase>
 	inline VirtualMapIterator<NodeBase>::VirtualMapIterator()
 		: mapData(nullptr), bucket(nullptr), nodeBase(nullptr)
@@ -61,8 +50,18 @@ namespace Blaze
 			BLAZE_LOG_FATAL("Trying to access a null iterator");
 			return nullptr;
 		}
+		
+		if constexpr (std::is_class_v<Derived>)
+			return dynamic_cast<MatchConst<Derived>*>(nodeBase);
+		else
+		{
+			auto node = dynamic_cast<MatchConst<VirtualMapNode<KeyType, BaseType, Derived>>*>(nodeBase);
 
-		return dynamic_cast<MatchConst<Derived>*>(nodeBase);
+			if (node == nullptr)
+				return nullptr;
+
+			return &node->value;
+		}
 	}
 	template<typename NodeBase>
 	inline auto VirtualMapIterator<NodeBase>::GetKey() const -> const KeyType&
@@ -370,7 +369,7 @@ namespace Blaze
 		return Hasher().Compute(key);
 	}
 	template<HashableType Key,typename Base, typename Hasher, AllocatorType Allocator>
-	inline auto VirtualMap<Key, Base, Hasher, Allocator>::GetBucketFromHash(uintMem hash) const -> Bucket*
+	inline auto VirtualMap<Key, Base, Hasher, Allocator>::GetBucketFromHash(uint64 hash) const -> Bucket*
 	{
 		if (this->begin == nullptr)
 			return nullptr;
@@ -378,12 +377,12 @@ namespace Blaze
 		return GetBucketFromHashModUnsafe(hash % (this->end - this->begin));
 	}
 	template<HashableType Key,typename Base, typename Hasher, AllocatorType Allocator>
-	inline auto VirtualMap<Key, Base, Hasher, Allocator>::GetBucketFromHashModUnsafe(uintMem hashMod) const -> Bucket*
+	inline auto VirtualMap<Key, Base, Hasher, Allocator>::GetBucketFromHashModUnsafe(uint64 hashMod) const -> Bucket*
 	{
 		return &this->begin[hashMod];
 	}
 	template<HashableType Key,typename Base, typename Hasher, AllocatorType Allocator>
-	inline VirtualMap<Key, Base, Hasher, Allocator>::Iterator VirtualMap<Key, Base, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash)
+	inline VirtualMap<Key, Base, Hasher, Allocator>::Iterator VirtualMap<Key, Base, Hasher, Allocator>::FindWithHint(const Key& key, uint64 hash)
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -393,7 +392,7 @@ namespace Blaze
 		return FindWithHintUnsafe(key, bucket);
 	}
 	template<HashableType Key,typename Base, typename Hasher, AllocatorType Allocator>
-	inline VirtualMap<Key, Base, Hasher, Allocator>::ConstIterator VirtualMap<Key, Base, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash) const
+	inline VirtualMap<Key, Base, Hasher, Allocator>::ConstIterator VirtualMap<Key, Base, Hasher, Allocator>::FindWithHint(const Key& key, uint64 hash) const
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -440,7 +439,7 @@ namespace Blaze
 	}
 	template<HashableType Key,typename Base, typename Hasher, AllocatorType Allocator>
 	template<bool Replace, typename _Key, typename Derived, typename ... Args> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && IsConstructibleFrom<Key, _Key>&& IsConstructibleFrom<Derived, Args...>
-	inline auto VirtualMap<Key, Base, Hasher, Allocator>::InsertWithHint(_Key&& key, uintMem hash, Args&& ... args) -> InsertResult<Derived>
+	inline auto VirtualMap<Key, Base, Hasher, Allocator>::InsertWithHint(_Key&& key, uint64 hash, Args&& ... args) -> InsertResult<Derived>
 	{
 		if (this->begin == nullptr)
 			AllocateEmptyUnsafe();
@@ -457,7 +456,7 @@ namespace Blaze
 	}
 	template<HashableType Key,typename Base, typename Hasher, AllocatorType Allocator>
 	template<bool Replace, typename _Key, typename Derived, typename ... Args> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && IsConstructibleFrom<Key, _Key>&& IsConstructibleFrom<Derived, Args...>
-	inline auto VirtualMap<Key, Base, Hasher, Allocator>::InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uintMem hash, Args&& ... args) -> InsertResult<Derived>
+	inline auto VirtualMap<Key, Base, Hasher, Allocator>::InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uint64 hash, Args&& ... args) -> InsertResult<Derived>
 	{
 		NodeBaseType* nodeBase = nullptr;
 		NodeBaseType* prev = nullptr;

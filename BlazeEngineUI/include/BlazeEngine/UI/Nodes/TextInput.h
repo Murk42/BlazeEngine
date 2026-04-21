@@ -1,13 +1,17 @@
 #pragma once
 #include "BlazeEngine/Core/Event/EventMemberFunctionTie.h"
-#include "BlazeEngine/UI/Input/InputNode.h"
-#include "BlazeEngine/UI/Graphics/RenderNode.h"
+#include "BlazeEngine/UI/Common/ButtonBase.h"
+#include "BlazeEngine/UI/Graphics/RenderableNode.h"
 #include "BlazeEngine/UI/Graphics/RenderUnits/StaticTextRenderUnit.h"
-#include "BlazeEngine/UI/Graphics/RenderUnits/QuadRenderUnit.h"
+#include "BlazeEngine/UI/Graphics/RenderUnits/CursorRenderUnit.h"
+#include "BlazeEngine/UI/Text/TextInputControl.h"
+#include <BlazeEngine/UI/Text/TextShaper.h>
+#include <BlazeEngine/UI/Text/TextLayoutMetadata.h>
+#include <functional>
 
-namespace Blaze::UI::Nodes
-{
-	class TextInput : public InputNode, public RenderNode
+namespace Blaze::UI::Nodes 
+{ 	
+	class TextInput : public ButtonBase, public RenderableNode
 	{
 	public:
 		TextInput();
@@ -15,35 +19,71 @@ namespace Blaze::UI::Nodes
 		TextInput(Node& parent, const NodeTransform& transform, const TextStyle& textStyle, u8String emptyText = "", u8String text = "");
 		~TextInput();		
 
-		void SetText(u8String text);
+		bool SetText(u8String text);
 		void SetEmptyText(u8String emptyText);
 		void SetTextStyle(const TextStyle& textStyle);
+		void SetEmptyTextColor(const ColorRGBAf& color);
 		void SetMultiline(bool multiline);
-
-		inline u8StringView GetText() { return text; }
+		void SetWrapWidth(float wrapWidth);
+		void SetValueEnteredCallback(std::function<void(u8StringView)> callback);
+	
+		inline u8StringView GetText() { return inputControl.GetText(); }
 		inline u8StringView GetEmptyText() { return emptyText; }
 		inline const TextStyle& GetTextStyle() const { return textStyle; }		
 
-		bool PreRender(const RenderContext& renderContext) override;
+		bool PreRender(const Graphics::RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
-	private:
-		u8String text;
-		u8String emptyText;
-		TextStyle textStyle;
-		bool multiline : 1 = false;		
+	protected:
+		virtual bool FindWordAt(uintMem index, uintMem& begin, uintMem& end);
+		virtual bool FindLineAt(uintMem index, uintMem& begin, uintMem& end);
 
-		float textWrapWidth = 0.0f;
-		Vec2f textBuildSize = { 0.0f, 0.0f };
-		bool rendererTypeIDChanged;
+		virtual bool FilterEnteredText(u8StringView text);
+	private:
+		u8String enteredText;
+		u8String emptyText;
+
+		TextStyle textStyle;
+		ColorRGBAf emptyTextColor;
+		bool multiline : 1;
+
+		bool rebuildGlyphs : 1;
+		bool updatetCursorRenderUnit : 1;
+		bool updateRenderTopology : 1;
+
+		float textWrapWidth; 
 
 		StaticTextRenderUnit textRenderUnit;
-		QuadRenderUnit cursorRenderUnit;
+		CursorRenderUnit cursorRenderUnit;
+		 
+		Text::TextInputControl inputControl;
+		Text::TextLayoutMetadata layoutMetadata;
 
-		void TransformUpdated(const TransformUpdatedEvent& event);
-		EVENT_MEMBER_FUNCTION(TextInput, TransformUpdated, transformUpdatedEventDispatcher);
+		std::function<void(u8StringView)> callback;
+
+		bool IsRenderingEmptyText() const;
 		
-		bool GetFontAtlasData(FontManager::FontAtlasData& fontAtlasData) const;
-		void UpdateTextRenderUnitTransform();
-		void UpdateRenderUnits();
+		void UpdateTextState();				
+		Array<Text::ShapedString> UpdateGlyphs(u8StringView text, const TextStyle& style);
+
+		void FinalScaleUpdated(const FinalScaleUpdatedEvent& event);
+		EVENT_MEMBER_FUNCTION(TextInput, FinalScaleUpdated, finalScaleUpdatedEventDispatcher);
+
+		void SelectedStateChanged(const InputNode::SelectedStateChangedEvent& event);
+		EVENT_MEMBER_FUNCTION(TextInput, SelectedStateChanged, selectedStateChangedEventDispatcher);
+
+		void MouseButtonDownEvent(const UIMouseButtonDownEvent& event);
+		EVENT_MEMBER_FUNCTION(TextInput, MouseButtonDownEvent, mouseButtonDownEventDispatcher);
+
+		void MouseMotionEvent(const UIMouseMotionEvent& event);
+		EVENT_MEMBER_FUNCTION(TextInput, MouseMotionEvent, mouseMotionEventDispatcher);
+
+		void KeyDownEvent(const UIKeyDownEvent& event);
+		EVENT_MEMBER_FUNCTION(TextInput, KeyDownEvent, keyDownEventDispatcher);
+
+		void TextInputEvent(const UITextInputEvent& event);
+		EVENT_MEMBER_FUNCTION(TextInput, TextInputEvent, textInputEventDispatcher);
+
+		void TextInputControlStateChanged(const Text::TextCursorControl::StateChangedEvent& event);
+		EVENT_MEMBER_FUNCTION(TextInput, TextInputControlStateChanged, inputControl.GetCursorControl().stateChangedEventDispatcher);
 	};
 }

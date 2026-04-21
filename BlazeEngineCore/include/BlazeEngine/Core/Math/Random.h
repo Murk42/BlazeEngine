@@ -12,6 +12,7 @@ namespace Blaze::Random
     BLAZE_API Blaze::ColorRGBA ColorRGBA();
     BLAZE_API Blaze::ColorRGBAf ColorRGBAf();
 
+    BLAZE_API void SetSimplexSeed(uint32 seed);
     BLAZE_API float Simplex(float v);
     BLAZE_API float Simplex(Vec2f v);
     BLAZE_API float Simplex(Vec3f v);

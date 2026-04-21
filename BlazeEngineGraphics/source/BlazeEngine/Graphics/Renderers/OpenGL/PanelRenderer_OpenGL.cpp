@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Shaders/Shaders.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -16,7 +17,7 @@ namespace Blaze::Graphics::OpenGL
 	};
 
 	PanelRenderer_OpenGL::PanelRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferInstanceCount, bool loadDefaultShaders)
-		: BufferedRendererBase_OpenGL(bufferInstanceCount * sizeof(Instance), graphicsContext), graphicsContext(graphicsContext), instanceCount(0)
+		: BufferedRendererBase_OpenGL(graphicsContext, bufferInstanceCount * sizeof(Instance)), instanceCount(0)
 	{
 		if (loadDefaultShaders)
 		{
@@ -58,15 +59,20 @@ namespace Blaze::Graphics::OpenGL
 	{
 		WaitFence();
 	}
-	void PanelRenderer_OpenGL::StartRender(const RenderContext& context)
+	void PanelRenderer_OpenGL::StartRender(const RenderContext_OpenGL& renderContext)
 	{
 		instanceCount = 0;
+
+		graphicsContext.SelectProgram(&program);
+		graphicsContext.SelectVertexArray(&va);
+
+		program.SetUniform(0, renderContext.OrthographicsProjectionMatrix(-1, 1));
 	}
-	void PanelRenderer_OpenGL::EndRender(const RenderContext& context)
+	void PanelRenderer_OpenGL::EndRender()
 	{
-		Flush(context);
+		Flush();
 	}
-	void PanelRenderer_OpenGL::Render(const PanelRenderData& data, const RenderContext& context)
+	void PanelRenderer_OpenGL::Render(const PanelRenderData& data)
 	{
 		WaitFence();
 		((Instance*)GetBufferMap())[instanceCount] = {
@@ -82,17 +88,12 @@ namespace Blaze::Graphics::OpenGL
 		instanceCount++;
 
 		if ((instanceCount + 1) * sizeof(Instance) > GetBufferSize())
-			Flush(context);
+			Flush();
 	}
-	void PanelRenderer_OpenGL::Flush(const RenderContext& context)
+	void PanelRenderer_OpenGL::Flush()
 	{
 		if (instanceCount == 0)
 			return;
-
-		graphicsContext.SelectProgram(&program);
-		graphicsContext.SelectVertexArray(&va);
-		graphicsContext.SetActiveTextureSlot(0);
-		program.SetUniform(0, Mat4f::OrthographicMatrix(0, static_cast<float>(context.GetTargetSize().x), 0, static_cast<float>(context.GetTargetSize().y), -1, 1));
 
 		FlushBuffer(0, sizeof(Instance) * instanceCount);
 		graphicsContext.RenderInstancedPrimitiveArray(Blaze::Graphics::OpenGL::PrimitiveType::TriangleStrip, 0, 4, 0, instanceCount);

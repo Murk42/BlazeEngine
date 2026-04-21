@@ -28,6 +28,17 @@
 		</Expand>
 	</Type>
 
+	<Type Name="Blaze::ArrayView&lt;*&gt;">
+		<DisplayString>{{ count={ count } }}</DisplayString>
+		<Expand>
+			<Item Name="[count]" ExcludeView="simple">count</Item>
+			<ArrayItems>
+				<Size>count</Size>
+				<ValuePointer>ptr</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
 	<Type Name="Blaze::Queue&lt;*&gt;">
 		<DisplayString>{{ count={ head >= tail ? end - head + tail - begin : tail - head } }}</DisplayString>
 		<Expand>

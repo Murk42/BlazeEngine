@@ -19,28 +19,15 @@ namespace Blaze
 		return StringView(ptr, len);
 	}
 
-#define _STRINGIZE(x) #x
-#define STRINGIZE(x) _STRINGIZE(x)
-
-	Timing InitializeCoreFreeType()
+	bool InitializeFreeType(TimingTree& timingTree)
 	{
-		Timing timing{ "FreeType initialization" };
-
 		if (auto error = FT_Init_FreeType(&freeTypeLibrary))
-			BLAZE_LOG_FATAL("Failed to initialize the FreeType libary. FT_Error_String returned \"" + GetFTError(error) + "\"");
+		{
+			BLAZE_LOG_ERROR("Failed to initialize the FreeType libary. FT_Error_String returned \"" + GetFTError(error) + "\"");
+			return false;
+		}
 
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized FreeType " STRINGIZE(FREETYPE_MAJOR) "." STRINGIZE(FREETYPE_MINOR) "." STRINGIZE(FREETYPE_PATCH) " ({.1f}ms)", timing.GetTimingResult().time.GetSeconds() * 1000.0);
-
-		return timing;
-	}
-
-	TimingResult InitializeFreeType()
-	{
-		Timing timing{ "FreeType" };
-
-		timing.AddNode(InitializeCoreFreeType());
-
-		return timing;
+		return true;
 	}
 	void TerminateFreeType()
 	{

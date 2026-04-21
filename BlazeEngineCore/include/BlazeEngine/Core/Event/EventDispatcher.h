@@ -41,6 +41,8 @@ namespace Blaze
 		void SwapHandlers(const EventHandlerData<T>& oldHandlerData, const EventHandlerData<T>& newHandlerData) override;
 		bool HasHandler(const EventHandlerData<T>& handlerData) override;
 
+		void RemoveAllHandlers();
+
 		//This function is meant to be used in the following way:
 		//eventDispatcher.AddHandler<&ClassA::MemberFunction>(instanceOfClassA);
 		template<auto MemberFunctionPointer> requires SameAs<MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunctionPointer)>, TypeGroup<const T&>>

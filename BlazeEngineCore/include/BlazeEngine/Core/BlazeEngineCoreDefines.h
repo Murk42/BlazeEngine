@@ -94,7 +94,7 @@ namespace Blaze
 
 	template<typename Char>
 	class GenericStringView;
-
+	
 	namespace Debug::Logger
 	{
 		BLAZE_API void LogDebug(GenericStringView<char8_t>&& source, GenericStringView<char8_t>&& message, bool styledText = true);

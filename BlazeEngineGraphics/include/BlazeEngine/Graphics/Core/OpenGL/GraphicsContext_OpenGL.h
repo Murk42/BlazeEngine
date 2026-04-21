@@ -1,7 +1,7 @@
  #pragma once
 #include "BlazeEngine/Core/Common/Color.h"
 #include "BlazeEngine/Runtime/IO/Window.h"
-#include "BlazeEngine/Graphics/Core/GraphicsContextBase.h"
+#include "BlazeEngine/Graphics/Core/GraphicsContext.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
 
 namespace Blaze::Graphics::OpenGL
@@ -17,7 +17,7 @@ namespace Blaze::Graphics::OpenGL
 namespace Blaze::Graphics::OpenGL
 {
 	class RenderWindow_OpenGL;
-	class Framebuffer_OpenGL;
+	class FramebufferBase_OpenGL;
 
 	enum class ProfileType
 	{
@@ -27,6 +27,8 @@ namespace Blaze::Graphics::OpenGL
 	{
 		None = 0, Debug = 1, ForwardCompatible = 2, RobustAccess = 4, ResetIsolation = 8, Default = 16
 	};
+	ENUM_CLASS_BITWISE_OPERATIONS(ContextFlags)
+
 	enum class ReleaseBehaviour
 	{
 		None, Flush
@@ -38,9 +40,6 @@ namespace Blaze::Graphics::OpenGL
 		VSync,
 		AdaptiveVSync
 	};
-
-
-	ENUM_CLASS_BITWISE_OPERATIONS(ContextFlags)
 
 
 	struct GraphicsContextProperties_OpenGL
@@ -70,13 +69,13 @@ namespace Blaze::Graphics::OpenGL
 	};
 
 	//Not moveable because external references to the object might be invalidated
-	class BLAZE_API GraphicsContext_OpenGL : public GraphicsContextBase
+	class BLAZE_API GraphicsContext_OpenGL : public GraphicsContext
 	{
 	public:
 		/*Parity*/GraphicsContext_OpenGL();
 		/*Parity*/~GraphicsContext_OpenGL() override;
 
-		/*Parity*/inline String GetImplementationName() const override final { return "OpenGL"; }
+		/*Parity*/inline StringView GetImplementationName() const override final { return "OpenGL"; }
 
 		GraphicsContext_OpenGL(const GraphicsContextProperties_OpenGL& properties);
 
@@ -96,9 +95,9 @@ namespace Blaze::Graphics::OpenGL
 		void SelectUniformBuffer(const OpenGL::GraphicsBuffer* buffer);
 		void SelectVertexArray(const OpenGL::VertexArray* vertexArray);
 		void SelectProgram(const OpenGL::ShaderProgram* program);
-		void SelectFramebuffer(const Framebuffer_OpenGL* framebuffer);
-		void SelectDrawFramebuffer(const Framebuffer_OpenGL* framebuffer);
-		void SelectReadFramebuffer(const Framebuffer_OpenGL* framebuffer);
+		void SelectFramebuffer(const FramebufferBase_OpenGL* framebuffer);
+		void SelectDrawFramebuffer(const FramebufferBase_OpenGL* framebuffer);
+		void SelectReadFramebuffer(const FramebufferBase_OpenGL* framebuffer);
 		void SelectRenderbuffer(const OpenGL::Renderbuffer* renderbuffer);
 		void SelectShaderStorageBufferToSlot(uint slotIndex, const OpenGL::GraphicsBuffer* buffer, uintMem offset, uintMem size);
 
@@ -111,11 +110,10 @@ namespace Blaze::Graphics::OpenGL
 		void SelectImage(uint slot, const OpenGL::Texture2D& texture, uint level, OpenGL::ImageAccess access, OpenGL::ImageFormat format);
 		void SelectImage(uint slot, const OpenGL::Texture1D& texture, uint level, OpenGL::ImageAccess access, OpenGL::ImageFormat format);
 
-		void SetClearColor(ColorRGBAf);
 		void SetRenderArea(Vec2i pos, Vec2u size);
 		void SetPatchSize(uint size);
-		void SetPointSize(uint size);
-		void SetScissorRect(Vec2i pos, Vec2i size);
+		void SetPointSize(float size);
+		void SetScissorRect(Vec2i pos, Vec2u size);
 
 		//Returns false if AdaptiveVSync is requirested but it isn't supported, in which case VSync is used.
 		//Otherwise returns true
@@ -141,14 +139,14 @@ namespace Blaze::Graphics::OpenGL
 		void RenderInstancedPrimitiveArray(OpenGL::PrimitiveType type, uintMem firstVertexIndex, uintMem vertexCount, uintMem firstInstanceIndex, uintMem instanceCount);
 		void RenderPrimitiveArray(OpenGL::PrimitiveType type, uintMem firstVertexIndex, uintMem vertexCount);
 
-		void BlitFramebuffer(Framebuffer_OpenGL& writeFramebuffer, Framebuffer_OpenGL& readFramebuffer, Vec2i dstP1, Vec2i dstP2, Vec2i srcP1, Vec2i srcP2, bool copyColor, bool copyDepth, bool copyStencil, OpenGL::TextureSampling sampling);
+		void BlitFramebuffer(FramebufferBase_OpenGL& writeFramebuffer, FramebufferBase_OpenGL& readFramebuffer, Vec2i dstP1, Vec2i dstP2, Vec2i srcP1, Vec2i srcP2, bool copyColor, bool copyDepth, bool copyStencil, OpenGL::TextureSampling sampling);
 
 		void DispatchCompute(uint x, uint y, uint z);
 
 		void Flush();
 		void MemoryBarrier();
 
-		Window CreateWindow(const WindowCreateOptions& options);
+		void* CreateWindow(const WindowCreateOptions& options);
 		void RetrieveWindow(Window& window);
 
 		static bool IsExtensionSupported(StringView name);
@@ -157,7 +155,7 @@ namespace Blaze::Graphics::OpenGL
 
 		void* SDLOpenGLContext;
 
-		Window initWindow;
+		void* initWindowHandle;
 		void* activeWindowHandle;
 
 		void ActiveWindowDestroyed(const Window::DestructionEvent& event);

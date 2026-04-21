@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "BlazeEngine/Core/File/File.h"
 #include "BlazeEngine/UI/Text/FontManager.h"
 #include "BlazeEngine/UI/Text/FontAtlas.h"
 #include "BlazeEngine/UI/Text/FontFace.h"
@@ -9,6 +10,11 @@ namespace Blaze::UI
 	FontManager::FontManager(ResourceManager& resourceManager)
 		: resourceManager(resourceManager)
 	{
+	}
+	FontManager::FontManager(ResourceManager& resourceManager, Screen& screen)
+		: resourceManager(resourceManager)
+	{
+		AddToScreen(screen);
 	}
 	FontManager::~FontManager()
 	{
@@ -41,7 +47,7 @@ namespace Blaze::UI
 			return false;
 		}
 	}
-	bool FontManager::CreateFontAtlas(StringView name, ArrayView<float> fontAtlasPixelSizes, const FontGlyphRasterizer& glyphRasterizer, Graphics::RendererTypeID rendererTypeID, Graphics::GraphicsContextBase& graphicsContext)
+	bool FontManager::CreateFontAtlas(StringView name, ArrayView<uint32> fontAtlasPixelSizes, const FontGlyphRasterizer& glyphRasterizer, Graphics::RendererTypeID rendererTypeID, Graphics::GraphicsContext& graphicsContext, bool useCache)
 	{
 		auto it = entries.Find(name);
 
@@ -76,20 +82,43 @@ namespace Blaze::UI
 				.glyphIndices = glyphIndices,
 				.glyphRasterizer = glyphRasterizer,
 			};
+			
+			bool createAtlas = true;
 
 			newAtlasData->rendererTypeID = rendererTypeID;
-			newAtlasData->atlas.Create(descriptor, graphicsContext, resourceManager);
+
+			if (useCache)
+			{
+				Blaze::File file{ Path(Format("cache/{}_{}.bzatlas", name, fontAtlasPixelSize)), FileAccessPermission::Read};
+				
+				if (file.IsOpen())
+				{
+					createAtlas = false;
+					newAtlasData->atlas.Load(file, graphicsContext, resourceManager);
+				}
+			}
+			
+			if (createAtlas)
+			{
+				newAtlasData->atlas.Create(descriptor, graphicsContext, resourceManager);
+
+				if (useCache)
+				{
+					Blaze::File file{ Path(Format("cache/{}_{}.bzatlas", name, fontAtlasPixelSize)), FileAccessPermission::Write };
+					newAtlasData->atlas.Save(file);
+				}
+			}
 		}
 
 		return true;
 	}
-	bool FontManager::CreateFontAtlas(StringView name, ArrayView<float> fontAtlasPixelSizes, const Graphics::TextRendererBase& textRenderer)
+	bool FontManager::CreateFontAtlas(StringView name, ArrayView<uint32> fontAtlasPixelSizes, const Graphics::TextRendererBase& textRenderer, bool useCache)
 	{
-		return CreateFontAtlas(name, fontAtlasPixelSizes, textRenderer.GetFontGlyphRasterizer(), textRenderer.GetTypeID(), textRenderer.GetGraphicsContext());
+		return CreateFontAtlas(name, fontAtlasPixelSizes, textRenderer.GetFontGlyphRasterizer(), textRenderer.GetTypeID(), textRenderer.GetGraphicsContext(), useCache);
 	}
-	bool FontManager::GetFontAtlas(const TextStyle& style, FontAtlasData& fontAtlasData) const
+	bool FontManager::GetFontAtlas(StringView name, uint32 fontHeight, FontAtlasData& fontAtlasData) const
 	{
-		if (style.fontHeight == 0.0f || style.fontName.Empty())
+		if (fontHeight == 0.0f || name.Empty())
 		{
 			fontAtlasData.atlas = nullptr;
 			fontAtlasData.fontFace = nullptr;
@@ -97,7 +126,7 @@ namespace Blaze::UI
 			return false;
 		}
 
-		auto it = entries.Find(style.fontName);
+		auto it = entries.Find(name);
 
 		if (it.IsNull() || it->value.atlasData.Empty())
 		{
@@ -110,7 +139,7 @@ namespace Blaze::UI
 		uintMem i = 0;
 
 		for (; i < it->value.atlasData.Count(); ++i)
-			if (it->value.atlasData[i].atlas.GetRasterFontHeight() > style.fontHeight)
+			if (it->value.atlasData[i].atlas.GetRasterFontHeight() >= fontHeight)
 				break;
 
 		if (i == it->value.atlasData.Count())
@@ -121,23 +150,22 @@ namespace Blaze::UI
 		fontAtlasData.rendererTypeID = it->value.atlasData[i].rendererTypeID;
 		return true;
 	}
-	void FontManager::AddScreenFontManager(Screen& screen, ResourceRef<FontManager> fontManager)
+	void FontManager::AddToScreen(Screen& screen)
 	{
-		if (fontManager.IsNull())
-		{
-			BLAZE_LOG_WARNING("Trying to add a null reference FontManager to a screen");
-			return;
-		}
-
-		screen.dataMap.map.Insert<ResourceRef<FontManager>>("FontManager", std::move(fontManager));
+		screen.dataMap.map.Insert<FontManager*>("font manager", this);
 	}
 	FontManager* FontManager::GetScreenFontManager(Screen& screen)
 	{
-		auto it = screen.dataMap.map.Find("FontManager");
+		auto it = screen.dataMap.map.Find("font manager");
 
 		if (it.IsNull())
 			return nullptr;
 
-		return it.GetValue<ResourceRef<FontManager>>()->GetValue();
+		auto ptr = it.GetValue<FontManager*>();
+
+		if (ptr == nullptr)
+			return nullptr;
+
+		return *ptr;
 	}
 }

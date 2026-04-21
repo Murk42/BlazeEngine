@@ -10,12 +10,11 @@ namespace Blaze::UI
 	class BLAZE_API InputNode : public Node
 	{
 	public:
-		enum class MouseMotionReportPolicy : uint8
+		struct HitData
 		{
-			ReportWhileMouseInside,
-			ReportWhileSelected
+			HitStatus status;
+			Vec2f pointerPosition;
 		};
-
 		struct SelectedStateChangedEvent
 		{
 			InputNode& node;
@@ -43,6 +42,8 @@ namespace Blaze::UI
 		void Unselect();
 		void Select();
 		bool IsSelected() const;
+
+		bool GetHitData(Input::MouseID mouseID, HitData& hitData) const;
 		
 		bool CaptureMouse(Input::MouseID mouseID);
 		bool ReleaseMouse(Input::MouseID mouseID);

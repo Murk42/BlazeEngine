@@ -3,8 +3,8 @@
 
 namespace Blaze::Graphics::OpenGL
 {
-	BufferedRendererBase_OpenGL::BufferedRendererBase_OpenGL(uintMem bufferSize, GraphicsContext_OpenGL& graphicsContext)
-		: program(0), bufferSize(bufferSize)
+	BufferedRendererBase_OpenGL::BufferedRendererBase_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferSize)
+		: RendererBase_OpenGL(graphicsContext), program(0), bufferSize(bufferSize)
 	{
 		buffer.Allocate(nullptr, bufferSize, GraphicsBufferMapAccessFlags::Write, GraphicsBufferMapType::PersistentUncoherent);
 		bufferMap = buffer.MapBufferRange(0, bufferSize, GraphicsBufferMapOptions::InvalidateBuffer | GraphicsBufferMapOptions::ExplicitFlush);

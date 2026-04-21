@@ -1,7 +1,8 @@
 #pragma once
+#include "BlazeEngine/Core/Event/EventMemberFunctionTie.h"
 #include "BlazeEngine/UI/Core/Node.h"
 #include "BlazeEngine/UI/Graphics/RenderUnits/ImageRenderUnit.h"
-#include "BlazeEngine/UI/Graphics/RenderNode.h"
+#include "BlazeEngine/UI/Graphics/RenderableNode.h"
 
 namespace Blaze::UI::Nodes
 {
@@ -14,36 +15,28 @@ namespace Blaze::UI::Nodes
 		KeepHeight
 	};
 
-	class BLAZE_API Image : public Node, public RenderNode
+	class BLAZE_API Image : public Node, public RenderableNode
 	{
 	public:
-		struct Style
-		{
-			ColorRGBAf blendColor = ColorRGBAf(1.0f, 1.0f, 1.0f, 1.0f);
-			float blendFactor = 0.0f;
-			float alphaMultiplier = 1.0f;
-			ImageLayout layout;
-		};
-
 		Image();
-		Image(Node& parent, const NodeTransform& transform, ResourceBaseRef texture, Vec2f uv1, Vec2f uv2, const Style& style);
+		Image(Node& parent, const NodeTransform& transform, const ImageStyle& style = {}, ImageLayout layout = ImageLayout::Fit);
 		~Image();
 
-		void SetTexture(ResourceBaseRef texture, Vec2f uv1, Vec2f uv2);
-		void SetStyle(const Style& style);
+		void SetLayout(ImageLayout layout);
+		ImageLayout GetLayout() const;
 
-		inline const ResourceBaseRef GetTexture() const { return renderUnit.texture; }
-		inline void GetUVs(Vec2f& uv1, Vec2f& uv2) const { uv1 = this->uv1; uv2 = this->uv2; }
-		Style GetStyle() const;
+		void SetStyle(const ImageStyle& style);
+		ImageStyle GetStyle() const;
 
-		bool PreRender(const RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
 	private:
-		ImageLayout imageLayout;
-		Vec2f uv1, uv2;
 		ImageRenderUnit renderUnit;
-		bool renderUnitDirty;
+		ImageStyle style;
+		ImageLayout layout;
 
-		void OnEvent(const Node::FinalTransformUpdatedEvent& event);
+		void UpdateImageRenderUnit();
+
+		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
+		EVENT_MEMBER_FUNCTION(Image, FinalTransformUpdatedEvent, finalTransformUpdatedEventDispatcher);
 	};
 }

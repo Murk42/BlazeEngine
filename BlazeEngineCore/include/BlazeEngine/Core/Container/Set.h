@@ -203,14 +203,14 @@ namespace Blaze
 	private:
 		struct Node
 		{
-			uintMem hash;
+			uint64 hash;
 			Node* next;
 			Node* prev;
 			Value value;
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 			uintMem iteratorCount;
 #endif
-			Node(Node* prev, Node* next, uintMem hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>;
+			Node(Node* prev, Node* next, uint64 hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>;
 		};
 		struct Bucket
 		{
@@ -228,22 +228,22 @@ namespace Blaze
 
 		static uint64 Hash(const Value& value);
 
-		Bucket* GetBucketFromHash(uintMem hash) const;
+		Bucket* GetBucketFromHash(uint64 hash) const;
 
 		//Wont check if hashMod is smaller than bucketCount
-		Bucket* GetBucketFromHashModUnsafe(uintMem hashMod) const;
+		Bucket* GetBucketFromHashModUnsafe(uint64 hashMod) const;
 
-		Iterator FindWithHint(const Value& value, uintMem hash);
-		ConstIterator FindWithHint(const Value& value, uintMem hash) const;
+		Iterator FindWithHint(const Value& value, uint64 hash);
+		ConstIterator FindWithHint(const Value& value, uint64 hash) const;
 
 		//Wont check if bucket is nullptr
 		Iterator FindWithHintUnsafe(const Value& value, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Value& value, Bucket* bucket) const;
 
-		InsertResult InsertWithHint(uintMem hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>;
+		InsertResult InsertWithHint(uint64 hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>;
 
 		//Wont check if bucket is nullptr
-		InsertResult InsertWithHintUnsafe(Bucket* bucket, uintMem hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>;
+		InsertResult InsertWithHintUnsafe(Bucket* bucket, uint64 hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>;
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, Node* node);

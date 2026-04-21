@@ -1,55 +1,55 @@
 #include "pch.h"
 #include "BlazeEngine/Runtime/BlazeEngineContext.h"
+#include "BlazeEngine/Core/Time/TimingTree.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
 #include "BlazeEngine/Platform/Windows/Windows.h"
 #include <Windows.h>
 #endif
 
-#ifdef BLAZE_STATIC
-extern void Setup();
-extern void PreInitialization();
-static void PreInitialization()
-{
-}
-#else
-static void(*Setup)();
-static void(*PreInitialization)();
-#endif
+extern int Main();
+extern bool PreInitialization();
 
 namespace Blaze
 {
 	static int BlazeMain()
 	{
-#ifndef BLAZE_STATIC
-#ifdef BLAZE_PLATFORM_WINDOWS
-		HMODULE applicationModule = GetModuleHandleA(NULL);
+//#ifndef BLAZE_STATIC
+//#ifdef BLAZE_PLATFORM_WINDOWS
+//		HMODULE applicationModule = GetModuleHandleA(NULL);
+//
+//		if (applicationModule == nullptr)
+//			return 1;
+//
+//		Setup = (void(*)())GetProcAddress(applicationModule, "Setup");
+//		PreInitialization = (void(*)())GetProcAddress(applicationModule, "PreInitialization");
+//
+//		if (PreInitialization == nullptr)
+//			PreInitialization = []() { return true; };
+//
+//		if (Setup == nullptr)
+//		{
+//			BLAZE_LOG_ERROR("Could not find Setup function in application");
+//			return 1;
+//		}
+//#endif
+//#endif
 
-		if (applicationModule == nullptr)
+		TimingTree initializationTimingTree;
+
+		initializationTimingTree.Start("User pre-initialization");
+		if (!PreInitialization())
 			return 1;
+		initializationTimingTree.End();
 
-		Setup = (void(*)())GetProcAddress(applicationModule, "Setup");
-		PreInitialization = (void(*)())GetProcAddress(applicationModule, "PreInitialization");
-
-		if (PreInitialization == nullptr)
-			PreInitialization = []() {};
-
-		if (Setup == nullptr)
-		{
-			BLAZE_LOG_ERROR("Could not find Setup function in application");
+		initializationTimingTree.Start("Engine initialization");
+		if (!BlazeEngineContext::InitializeEngine({ }, initializationTimingTree))
 			return 1;
-		}
+		initializationTimingTree.End();
 
-		if (PreInitialization == nullptr)
-			PreInitialization = []() {};
-#endif
-#endif
+		BlazeEngineContext::GetEngineContext()->SetInitializationTimingTree(std::move(initializationTimingTree));
 
-		PreInitialization();
-
-		BlazeEngineContext::InitializeEngine({ });
-
-		Setup();
+		Main();
 
 		BlazeEngineContext::TerminateEngine();
 

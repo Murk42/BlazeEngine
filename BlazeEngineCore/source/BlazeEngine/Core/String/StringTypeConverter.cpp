@@ -7,26 +7,35 @@ namespace Blaze
 	static inline uint32_t DecodeUTF8(const char8_t* src, uintMem& i, uintMem size)
 	{
 		UnicodeChar ch{ static_cast<char32_t>(0xFFFD) };
-		i += ch.FromChars(src + i, size - i);
+		uintMem characterSize = ch.FromFirstCodePoints(u8StringView(src + i, size - i));
+
+		if (characterSize == 0)
+		{
+			BLAZE_LOG_FATAL("Invalid UTF-8 sequence");
+			characterSize = 1;
+		}
+
+		i += characterSize;
+
 		return static_cast<uint32_t>(ch.Value());
 	}
 	static inline uint32_t DecodeUTF16(const char16_t* src, uintMem& i, uintMem size)
 	{
 		UnicodeChar ch{ static_cast<char32_t>(0xFFFD) };
-		i += ch.FromChars(src + i, size - i);
+		i += ch.FromFirstCodePoints(u16StringView(src + i, size - i));
 		return static_cast<uint32_t>(ch.Value());
 	}
 	static inline void EncodeUTF8(uint32_t cp, char8_t* dst, uintMem dstSize, uintMem& j)
 	{
 		UnicodeChar ch{ static_cast<char32_t>(cp) };
-		auto result = ch.ToChars<char8_t>();
+		auto result = ch.ToCodePoints<char8_t>();
 		for (uintMem i = 0; j < dstSize && i < result.count; ++j, ++i)
 			dst[j] = result.chars[i];
 	}
 	static inline void EncodeUTF16(uint32_t cp, char16_t* dst, uintMem dstSize, uintMem& j)
 	{
 		UnicodeChar ch{ static_cast<char32_t>(cp) };
-		auto result = ch.ToChars<char16_t>();
+		auto result = ch.ToCodePoints<char16_t>();
 		for (uintMem i = 0; j < dstSize && i < result.count; ++j, ++i)
 			dst[j] = result.chars[i];
 	}

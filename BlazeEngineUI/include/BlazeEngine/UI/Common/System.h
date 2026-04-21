@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/Common/Handle.h"
 #include "BlazeEngine/Runtime/IO/Window.h"
 #include "BlazeEngine/UI/Graphics/GraphicsSubSystem.h"
 #include "BlazeEngine/UI/Input/InputSubSystem.h"
@@ -20,29 +19,27 @@ namespace Blaze::UI
 		EventDispatcher<WindowChangedEvent> windowChangedEventDispatcher;
 		EventDispatcher<DestructionEvent> destructionEventDispatcher;
 
-		System(Graphics::GraphicsContextBase& graphicsContext);
-		System(Graphics::GraphicsContextBase& graphicsContext, Graphics::RendererRegistry rendererRegistry, Window& window, bool resizeScreenWithWindow = true);
+		System();
+		System(Screen& screen);
 		~System();
 
 		Input::EventProcessedState ProcessInputEvent(const Input::GenericInputEvent& event, bool processed);
-		void Render();
-
-		template<IsDerivedFrom<Screen> S, typename ... Args> requires IsConstructibleFrom<S, Args...>
-		S& SetScreen(Args&& ... args);
-		void SetScreen(Handle<Screen>&& newScreen);
+		void Render(const Graphics::RenderContext& renderContext);
+		
+		void SetScreen(Screen* screen);
 		Screen* GetScreen();
 
 		void SetWindow(Window* newWindow, bool resizeScreenWithWindow = true);
 		Window* GetWindow() const;
 
-		void SetRendererRegistry(Graphics::RendererRegistry newRegistry);
+		void InitializeGraphics(Graphics::GraphicsContext& graphicsContext, Graphics::RendererRegistry newRegistry);
 
 		const InputSubSystem& GetInputSubSystem() const;
 		const GraphicsSubSystem& GetGraphicsSubSystem() const;
 	private:
 		GraphicsSubSystem graphicsSubSystem;
 		InputSubSystem inputSubSystem;
-		Handle<Screen> screen;
+		Screen* screen;
 		Window* window;
 
 		bool resizeScreenWithWindow;
@@ -50,13 +47,7 @@ namespace Blaze::UI
 		void WindowResized(const Window::ResizedEvent& event);
 		void WindowContentScaleChanged(const Window::ContentScaleChangedEvent& event);
 	};
-
-	template<IsDerivedFrom<Screen> S, typename ... Args> requires IsConstructibleFrom<S, Args...>
-	inline S& System::SetScreen(Args&& ... args)
-	{
-		SetScreen(Handle<Screen>::CreateDerived<S>(std::forward<Args>(args)...));
-		return *static_cast<S*>(screen.Ptr());
-	}
+	
 	inline Screen* System::GetScreen() { return screen; }
 	inline Window* System::GetWindow() const { return window; }
 	inline const InputSubSystem& System::GetInputSubSystem() const { return inputSubSystem; }

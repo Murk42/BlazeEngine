@@ -86,7 +86,7 @@ namespace Blaze
 
 		Window();
 		Window(const Window&) = delete;
-		Window(Window&&) noexcept;
+		Window(Window&&) noexcept = delete;
 		Window(const WindowCreateOptions& createOptions);
 		Window(void* handle, WindowGraphicsAPI graphicsAPI);
 		virtual ~Window();
@@ -159,7 +159,7 @@ namespace Blaze
 		void SetDisplayModeForFullScreen(const Display::DisplayMode& displayMode);
 		Display::DisplayID GetDisplayIndex();
 
-		bool ProcessInputEvent(Input::GenericInputEvent& event);
+		bool GetInputEvent(Input::GenericInputEvent& event);
 		bool HasInputEvents() const;
 		bool WaitForEventsToBeProcessed(float seconds) const;
 		void AddInputEvent(const Input::GenericInputEvent& event);
@@ -169,7 +169,7 @@ namespace Blaze
 		inline void* GetHandle() const { return handle; }
 
 		Window& operator=(const Window&) = delete;
-		Window& operator=(Window&&) noexcept;
+		Window& operator=(Window&&) noexcept = delete;
 	private:
 		using InternalEvent = Variant<Input::GenericInputEvent, GenericWindowEvent>;
 

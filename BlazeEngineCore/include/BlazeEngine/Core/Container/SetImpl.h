@@ -311,7 +311,7 @@ namespace Blaze
 	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::Insert(Args&& ... args) requires IsConstructibleFrom<Value, Value&&>
 	{
 		Value value{ std::forward<Args>(args)... };
-		uintMem hash = Hash(value);
+		uint64 hash = Hash(value);
 		return InsertWithHint(hash, std::move(value));
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
@@ -455,7 +455,7 @@ namespace Blaze
 		return *this;
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>
+	inline Set<Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uint64 hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>
 		: prev(prev), next(next), hash(hash), value(std::move(value))
 	{
 	}
@@ -506,7 +506,7 @@ namespace Blaze
 		return Hasher().Compute(value);
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHash(uintMem hash) const
+	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHash(uint64 hash) const
 	{
 		if (bucketCount == 0)
 			return nullptr;
@@ -514,12 +514,12 @@ namespace Blaze
 		return GetBucketFromHashModUnsafe(hash % bucketCount);
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uintMem hashMod) const
+	inline Set<Value, Hasher, Allocator>::Bucket* Set<Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uint64 hashMod) const
 	{
 		return &buckets[hashMod];
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uintMem hash)
+	inline Set<Value, Hasher, Allocator>::Iterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uint64 hash)
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -529,7 +529,7 @@ namespace Blaze
 		return FindWithHintUnsafe(value, bucket);
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uintMem hash) const
+	inline Set<Value, Hasher, Allocator>::ConstIterator Set<Value, Hasher, Allocator>::FindWithHint(const Value& value, uint64 hash) const
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -575,7 +575,7 @@ namespace Blaze
 		return ConstIterator(node, this);
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(uintMem hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHint(uint64 hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>
 	{
 		if (count == 0)
 			AllocateEmptyUnsafe();
@@ -592,7 +592,7 @@ namespace Blaze
 		return InsertWithHintUnsafe(bucket, hash, std::move(value));
 	}
 	template<SetValueType Value, HasherOf<Value> Hasher, AllocatorType Allocator>
-	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(Bucket* bucket, uintMem hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>
+	inline Set<Value, Hasher, Allocator>::InsertResult Set<Value, Hasher, Allocator>::InsertWithHintUnsafe(Bucket* bucket, uint64 hash, Value&& value) requires IsConstructibleFrom<Value, Value&&>
 	{
 		Node* node = nullptr;
 		Node* prev = nullptr;

@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/Time/Timing.h"
+#include "BlazeEngine/Core/Time/TimingTree.h"
 
 #include <ft2build.h>
 #include <freetype/freetype.h>
@@ -11,7 +11,7 @@ namespace Blaze
 
 	FT_Library FT_GetLibrary();
 
-	TimingResult InitializeFreeType();
+	bool InitializeFreeType(TimingTree& timingTree);
 	void TerminateFreeType();
 
 	FT_Face FT_OpenFaceFromStream(ReadStream& source, int index);

@@ -11,46 +11,35 @@ namespace Blaze::UI
 
 		node.SetTransform(transform);
 	}
-	static void SetNodeScale(Node& node, float scale)
-	{
-		NodeTransform transform = node.GetTransform();
 
-		transform.scale = scale;
-
-		node.SetTransform(transform);
-	}
-
-	System::System(Graphics::GraphicsContextBase& graphicsContext)
-		: window(nullptr), resizeScreenWithWindow(false), graphicsSubSystem(graphicsContext)
+	System::System()
+		: window(nullptr), resizeScreenWithWindow(false), graphicsSubSystem(), screen(nullptr)
 	{
 	}
-	System::System(Graphics::GraphicsContextBase& graphicsContext, Graphics::RendererRegistry newRegistry, Window& newWindow, bool newResizeScreenWithWindow)
-		: System(graphicsContext)
+	System::System(Screen& screen)
+		: System()
 	{
-		SetWindow(&newWindow, newResizeScreenWithWindow);
-		SetRendererRegistry(newRegistry);
+		SetScreen(&screen);
 	}
 	System::~System()
 	{
 		SetWindow(nullptr, false);
 		destructionEventDispatcher.Call({ *this });
 	}
-	void System::SetScreen(Handle<Screen>&& newScreen)
+	void System::SetScreen(Screen* newScreen)
 	{
-		screen = std::move(newScreen);
+		screen = newScreen;
 
-		if (!screen.Empty() && window != nullptr)
+		inputSubSystem.SetScreen(screen);
+		graphicsSubSystem.SetScreen(screen);
+
+		if (screen != nullptr && window != nullptr)
 		{
 			if (resizeScreenWithWindow)
 				SetNodeSize(*screen, Vec2f(window->GetSize()));
 
-			SetNodeScale(*screen, window->GetContentScale());
+			screen->SetScale(window->GetContentScale());
 		}
-
-		screen->Update();
-
-		inputSubSystem.SetScreen(screen);
-		graphicsSubSystem.SetScreen(screen);
 	}
 	void System::SetWindow(Window* newWindow, bool newResizeScreenWithWindow)
 	{
@@ -78,7 +67,7 @@ namespace Blaze::UI
 			window->contentScaleChangedEventDispatcher.AddHandler<&System::WindowContentScaleChanged>(*this);
 
 			if (screen != nullptr)
-				SetNodeScale(*screen, window->GetContentScale());
+				screen->SetScale(window->GetContentScale());
 		}
 	
 
@@ -87,14 +76,13 @@ namespace Blaze::UI
 		windowChangedEventDispatcher.Call({ *this });
 
 	}
-	void System::SetRendererRegistry(Graphics::RendererRegistry newRegistry)
+	void System::InitializeGraphics(Graphics::GraphicsContext& graphicsContext, Graphics::RendererRegistry newRegistry)
 	{
-		graphicsSubSystem.SetRendererRegistry(newRegistry);
+		graphicsSubSystem.Initialize(graphicsContext, newRegistry);
 	}
-	void System::Render()
+	void System::Render(const Graphics::RenderContext& renderContext)
 	{
-		if (window != nullptr)
-			graphicsSubSystem.Render(window->GetSize());
+		graphicsSubSystem.Render(renderContext);
 	}
 	Input::EventProcessedState System::ProcessInputEvent(const Input::GenericInputEvent& event, bool processed)
 	{
@@ -105,12 +93,12 @@ namespace Blaze::UI
 	}
 	void System::WindowResized(const Window::ResizedEvent& event)
 	{
-		if (!screen.Empty())
+		if (screen != nullptr)
 			SetNodeSize(*screen, Vec2f(event.size));
 	}
 	void System::WindowContentScaleChanged(const Window::ContentScaleChangedEvent& event)
 	{
 		if (screen != nullptr)
-			SetNodeScale(*screen, event.newContentScale);
+			screen->SetScale(event.newContentScale);
 	}
 }

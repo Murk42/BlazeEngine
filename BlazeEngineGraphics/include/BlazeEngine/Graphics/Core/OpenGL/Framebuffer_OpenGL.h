@@ -1,6 +1,8 @@
 #pragma once
 #include "BlazeEngine/Core/Math/Vector.h"
+#include "BlazeEngine/Core/Container/ArrayView.h"
 #include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/FramebufferBase_OpenGL.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -10,39 +12,37 @@ namespace Blaze::Graphics::OpenGL
 
 namespace Blaze::Graphics::OpenGL
 {
+	struct FramebufferDrawBufferInfo
+	{
+		uint drawBufferIndex;
+		uint colorAttachmentIndex;
+	};
+
 	class RenderWindowFramebuffer_OpenGL;
 
-	class BLAZE_API Framebuffer_OpenGL
+	class BLAZE_API Framebuffer_OpenGL : public FramebufferBase_OpenGL
 	{
 	public:
 		Framebuffer_OpenGL();
 		Framebuffer_OpenGL(const Framebuffer_OpenGL&) = delete;
 		Framebuffer_OpenGL(Framebuffer_OpenGL&&) noexcept;
-		/*Parity*/~Framebuffer_OpenGL();
+		~Framebuffer_OpenGL() override;
 
-		/*Parity*/inline Vec2u GetSize() const { return size; }
-		/*Parity*/inline RenderWindowFramebuffer_OpenGL* GetRenderWindowFramebuffer() { return renderWindowFramebuffer; }
+		inline Vec2u GetSize() const override { return size; }
 
-		void SetColorAttachment(uint colorAttachmentNumber, OpenGL::Renderbuffer& renderbuffer);
-		void SetColorAttachment(uint colorAttachmentNumber, OpenGL::Texture2D& texture);
+		void SetColorAttachment(uint colorAttachmentIndex, OpenGL::Renderbuffer& renderbuffer);
+		void SetColorAttachment(uint colorAttachmentIndex, OpenGL::Texture2D& texture);
 		void SetAttachment(OpenGL::FramebufferAttachment attachment, OpenGL::Renderbuffer& renderbuffer);
 		void SetAttachment(OpenGL::FramebufferAttachment attachment, OpenGL::Texture2D& texture);
 		OpenGL::FramebufferStatus GetStatus() const;
 
-		void SetBufferOutputs(const std::initializer_list<int>& outputs);
-
-		inline uint GetHandle() const { return id; };
+		void SetDrawBuffer(uint colorAttachmentIndex);
+		void SetDrawBuffers(const ArrayView<FramebufferDrawBufferInfo>& drawBuffers);
+		void DisableDrawBuffers();
 
 		Framebuffer_OpenGL& operator=(const Framebuffer_OpenGL&) = delete;
 		Framebuffer_OpenGL& operator=(Framebuffer_OpenGL&&) noexcept;
-	private:
-		uint32 id;
+	protected:
 		Vec2u size;
-		RenderWindowFramebuffer_OpenGL* renderWindowFramebuffer;
-
-		Framebuffer_OpenGL(RenderWindowFramebuffer_OpenGL* renderWindowFramebuffer);
-
-		friend class RenderWindowFramebuffer_OpenGL;
-		friend class RenderWindow_OpenGL;
 	};
 }

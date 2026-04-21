@@ -1,21 +1,19 @@
 #include "pch.h"
-#include "MainAppRuntimeThread.h"
-#include "UIDebugLayer.h"
-
-
-CLIENT_API void Setup()
+#include "Threads/MainThread.h"
+#include "Layers/MainLayer.h"
+ 
+bool PreInitialization()
 {
 	Debug::Logger::AddOutputFile("log.txt");
-
-	ResourceManager resourceManager;
-
-	App app;
-
-	auto mainRuntimeThreadCreationData = GetMainRuntimeThreadCreationData(app);
-	app.RegisterRuntimeThread(std::move(mainRuntimeThreadCreationData));
-
-	while (app.Update())
-	{
-		Input::Update();
-	}
+	return true;
 }
+ 
+int Main() 
+{	
+	App app;	
+	app.RegisterRuntimeThread(AppRuntimeThreadCreationData::New<AppThread>().RegisterLayer<MainLayer>()
+		//.RegisterLayer<UIDebugLayer>()
+	);
+	app.Start();
+	return 0;
+}  

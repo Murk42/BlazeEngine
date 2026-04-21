@@ -188,7 +188,14 @@ namespace Blaze
 		template<typename ... Args> requires IsConstructibleFrom<T, Args...>
 		Iterator AddAt(Iterator it, Args&& ... args) requires std::move_constructible<StoredType>;
 
-
+		/*
+			Appends all elements from 'other' to the end of the array. The elements are copied individually
+		*/
+		void Append(const ArrayView<T>& other) requires std::copy_constructible<StoredType>;
+		/*
+			Appends all elements from 'other' to the end of the array. The elements are moved individually
+		*/
+		void Append(Array&& other) requires std::move_constructible<StoredType>;
 		/*
 			Inserts an array into the array before the elemenet with index 'index'.
 
@@ -236,16 +243,7 @@ namespace Blaze
 
 			\param it - iterator pointing to the element to remove
 		*/
-		void EraseAt(Iterator it) requires std::is_move_assignable_v<StoredType> || std::is_move_constructible_v<StoredType>;
-
-		/*
-			Appends all elements from 'other' to the end of the array. The elements are copied individually
-		*/
-		void Append(const Array& other) requires std::copy_constructible<StoredType>;
-		/*
-			Appends all elements from 'other' to the end of the array. The elements are moved individually
-		*/
-		void Append(Array&& other) requires std::move_constructible<StoredType>;
+		void EraseAt(Iterator it) requires std::is_move_assignable_v<StoredType> || std::is_move_constructible_v<StoredType>;	
 
 		/*
 			Resizes the array to 'newCount' elements. If the new count is smaller than the current count the

@@ -17,8 +17,16 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(BlazeDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineRuntime\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineUI\build\$(Configuration)\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;BlazeEngineCore-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineRuntime-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-static-$(PlatformTarget)-$(Configuration).lib;BlazeEngineUI-static-$(PlatformTarget)-$(Configuration).lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib
+
+;setupapi.lib
+
+;cfgmgr32.lib
+
+;version.lib
+
+;imm32.lib;BlazeEngineCore-$(PlatformTarget)-$(Configuration).lib;BlazeEngineRuntime-$(PlatformTarget)-$(Configuration).lib;BlazeEngineGraphics-$(PlatformTarget)-$(Configuration).lib;BlazeEngineUI-$(PlatformTarget)-$(Configuration).lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(BlazeDir)BlazeEngineCore\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineRuntime\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineGraphics\build\$(Configuration)\$(PlatformTarget)\;$(BlazeDir)BlazeEngineUI\build\$(Configuration)\$(PlatformTarget)\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>

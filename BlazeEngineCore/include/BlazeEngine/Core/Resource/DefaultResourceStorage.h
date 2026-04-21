@@ -13,23 +13,28 @@ namespace Blaze
 	class BLAZE_API DefaultResourceStorage : public ResourceStorage<T>
 	{
 	public:
-		ResourceRef<T> CreateResource(StringView name) override;
-		ResourceRef<T> GetResource(StringView name) override;
+		ResourceRef<T> AllocateNamedResource(StringView name) override;
+		ResourceRef<T> AllocateResource() override;
+		ResourceRef<T> GetNamedResource(StringView name) override;
 	private:
 		Map<String, Resource<T>> resources;
 		List<Resource<T>> unnamedResources;
+
+		void FreeResource(Resource<T>& resource) override;
 	};
 
 	template<typename T>
-	inline ResourceRef<T> DefaultResourceStorage<T>::CreateResource(StringView name)
+	inline ResourceRef<T> DefaultResourceStorage<T>::AllocateNamedResource(StringView name)
 	{
-		if (name.Empty())
-			return *unnamedResources.AddFront();
-		else
-			return resources.Insert(name).iterator->value;
+		return resources.Insert(name, *this).iterator->value;
 	}
 	template<typename T>
-	inline ResourceRef<T> DefaultResourceStorage<T>::GetResource(StringView name)
+	inline ResourceRef<T> DefaultResourceStorage<T>::AllocateResource()
+	{		
+		return *unnamedResources.AddFront(*this);
+	}
+	template<typename T>
+	inline ResourceRef<T> DefaultResourceStorage<T>::GetNamedResource(StringView name)
 	{
 		auto it = resources.Find(name);
 
@@ -37,5 +42,23 @@ namespace Blaze
 			return { };
 
 		return it->value;
+	}
+	template<typename T>
+	inline void DefaultResourceStorage<T>::FreeResource(Resource<T>& resource)
+	{
+		for (auto it = resources.FirstIterator(); it != resources.BehindIterator(); ++it)
+			if (&it->value == &resource)
+			{
+				resources.Erase(it);
+				return;
+			}
+
+		if (unnamedResources.EraseOne([&](Resource<T>& ref) -> bool
+			{
+				return &ref == &resource;
+			}))
+			return;		
+
+		BLAZE_LOG_ERROR("Trying to free an invalid resource");
 	}
 }

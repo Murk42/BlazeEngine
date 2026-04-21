@@ -152,7 +152,7 @@ namespace Blaze
 		};
 
 		Map();
-		Map(const Map&);
+		Map(const Map&) requires IsConstructibleFrom<Value, const Value&>;
 		Map(Map&&) noexcept;
 
 		Map(const std::initializer_list<MapPairType>&);
@@ -216,13 +216,13 @@ namespace Blaze
 		*/
 		ConstIterator BehindIterator() const;
 
-		Map& operator=(const Map&);
+		Map& operator=(const Map&) requires IsConstructibleFrom<Value, const Value&>;
 		Map& operator=(Map&&) noexcept;
 
 	private:
 		struct Node
 		{
-			uintMem hash;
+			uint64 hash;
 			Node* next;
 			Node* prev;
 			MapPairType pair;
@@ -231,7 +231,7 @@ namespace Blaze
 #endif
 
 			template<typename ... Args> requires IsConstructibleFrom<Value, Args...>
-			Node(Node* prev, Node* next, uintMem hash, Key&& key, Args&& ... args);
+			Node(Node* prev, Node* next, uint64 hash, Key&& key, Args&& ... args);
 		};
 		struct Bucket
 		{
@@ -248,26 +248,26 @@ namespace Blaze
 		static uint64 Hash(const Key& key);
 
 		//Wont free previous contents
-		void CopyUnsafe(const Map& other);
+		void CopyUnsafe(const Map& other) requires IsConstructibleFrom<Value, const Value&>;
 
-		Bucket* GetBucketFromHash(uintMem hash) const;
+		Bucket* GetBucketFromHash(uint64 hash) const;
 
 		//Wont check if hashMod is smaller than bucketCount
-		Bucket* GetBucketFromHashModUnsafe(uintMem hashMod) const;
+		Bucket* GetBucketFromHashModUnsafe(uint64 hashMod) const;
 
-		Iterator FindWithHint(const Key& key, uintMem hash);
-		ConstIterator FindWithHint(const Key& key, uintMem hash) const;
+		Iterator FindWithHint(const Key& key, uint64 hash);
+		ConstIterator FindWithHint(const Key& key, uint64 hash) const;
 
 		//Wont check if bucket is nullptr
 		Iterator FindWithHintUnsafe(const Key& key, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Key& key, Bucket* bucket) const;
 
 		template<typename ... Args> requires IsConstructibleFrom<Value, Args...>
-		InsertResult InsertWithHint(const Key& key, uintMem hash, Args&& ... args);
+		InsertResult InsertWithHint(const Key& key, uint64 hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
 		template<typename ... Args> requires IsConstructibleFrom<Value, Args...>
-		InsertResult InsertWithHintUnsafe(const Key& key, Bucket* bucket, uintMem hash, Args&& ... args);
+		InsertResult InsertWithHintUnsafe(const Key& key, Bucket* bucket, uint64 hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, Node* node);

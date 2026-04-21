@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Runtime/App/AppLayerCreationData.h"
+#include "BlazeEngine/Runtime/App/AppLayer.h"
 
 namespace Blaze
 {

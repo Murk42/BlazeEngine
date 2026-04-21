@@ -119,7 +119,7 @@ namespace Blaze
 	};
 
 	template<typename... T>
-	Tuple(T&&...) -> Tuple<std::decay_t<T>...>;
+	Tuple(T&&...) -> Tuple<T...>;
 
 	template<typename... T>
 	struct std::tuple_size<Blaze::Tuple<T...>> : std::integral_constant<size_t, sizeof...(T)> {};
@@ -138,7 +138,7 @@ namespace Blaze
 	template <size_t I, typename... T>
 	constexpr decltype(auto) get(Blaze::Tuple<T...>&& tuple) noexcept
 	{
-		return tuple.template GetValueByIndex<I>();
+		return std::move(tuple.template GetValueByIndex<I>());
 	}
 	template <size_t I, typename... T>
 	constexpr decltype(auto) get(const Blaze::Tuple<T...>& tuple) noexcept
@@ -153,7 +153,7 @@ namespace Blaze
 	template <typename T, typename... Ts>
 	constexpr decltype(auto) get(Blaze::Tuple<Ts...>&& tuple) noexcept
 	{
-		return tuple.template GetValueByType<T>();
+		return std::move(tuple.template GetValueByType<T>());
 	}
 	template <typename T, typename... Ts>
 	constexpr decltype(auto) get(const Blaze::Tuple<Ts...>& tuple) noexcept

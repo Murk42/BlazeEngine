@@ -4,10 +4,9 @@
 #include "BlazeEngine/Core/Container/Map.h"
 #include "BlazeEngine/Core/Resource/ResourceRef.h"
 #include "BlazeEngine/Core/Resource/ResourceManager.h"
-#include "BlazeEngine/Graphics/Core/GraphicsContextBase.h"
+#include "BlazeEngine/Graphics/Core/GraphicsContext.h"
 #include "BlazeEngine/UI/Graphics/Renderers/TextRendererBase.h"
 #include "BlazeEngine/UI/Text/FontAtlas.h"
-#include "BlazeEngine/UI/Text/TextStyle.h"
 
 namespace Blaze::UI
 {
@@ -25,21 +24,22 @@ namespace Blaze::UI
 		};
 
 		FontManager(ResourceManager& resourceManager);
+		FontManager(ResourceManager& resourceManager, Screen& screen);
 		~FontManager();
 		
 		bool AddFontFace(StringView name, ResourceRef<FontFace> fontFace);
-		bool CreateFontAtlas(StringView name, ArrayView<float> fontAtlasPixelSizes, const FontGlyphRasterizer& glyphRasterizer, Graphics::RendererTypeID rendererTypeID, Graphics::GraphicsContextBase& graphicsContext);
-		bool CreateFontAtlas(StringView name, ArrayView<float> fontAtlasPixelSizes, const Graphics::TextRendererBase& textRenderer);
+		bool CreateFontAtlas(StringView name, ArrayView<uint32> fontAtlasPixelSizes, const FontGlyphRasterizer& glyphRasterizer, Graphics::RendererTypeID rendererTypeID, Graphics::GraphicsContext& graphicsContext, bool useCache = true);
+		bool CreateFontAtlas(StringView name, ArrayView<uint32> fontAtlasPixelSizes, const Graphics::TextRendererBase& textRenderer, bool useCache = true);
 
-		bool GetFontAtlas(const TextStyle& style, FontAtlasData& fontAtlasData) const;
+		bool GetFontAtlas(StringView name, uint32 fontHeight, FontAtlasData& fontAtlasData) const;
 
-		static void AddScreenFontManager(Screen& screen, ResourceRef<FontManager> fontManager);
+		void AddToScreen(Screen& screen);
 		static FontManager* GetScreenFontManager(Screen& screen);
 	private:
 		struct AtlasData
 		{
 			FontAtlas atlas;
-			Graphics::RendererTypeID rendererTypeID;
+			Graphics::RendererTypeID rendererTypeID{ };
 		};
 		struct FontFaceData
 		{

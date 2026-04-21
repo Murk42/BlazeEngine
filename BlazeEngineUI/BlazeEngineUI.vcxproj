@@ -5,6 +5,14 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseStatic|Win32">
+      <Configuration>ReleaseStatic</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseStatic|x64">
+      <Configuration>ReleaseStatic</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -39,6 +47,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -46,6 +61,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
@@ -65,6 +87,12 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseProperties.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseStaticProperties.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -74,31 +102,64 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseProperties.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseStaticProperties.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
-    <VcpkgAutoLink>false</VcpkgAutoLink>
+    <VcpkgAutoLink>true</VcpkgAutoLink>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -113,7 +174,7 @@
     <CustomBuildStep>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
 call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
-      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
       <TreatOutputAsContent>
       </TreatOutputAsContent>
       <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
@@ -122,7 +183,29 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;$(SolutionDir)BlazeEngineGraphics\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
+call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
+      <TreatOutputAsContent>
+      </TreatOutputAsContent>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -146,7 +229,6 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -161,7 +243,7 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <CustomBuildStep>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
 call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
-      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
       <TreatOutputAsContent>
       </TreatOutputAsContent>
       <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
@@ -170,7 +252,29 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;$(SolutionDir)BlazeEngineGraphics\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP src="$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp" dst="$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp"
+call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp"</Command>
+      <Inputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola_template.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.vert;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\OpenGL\antialiasedText.frag;%(Inputs)</Inputs>
+      <TreatOutputAsContent>
+      </TreatOutputAsContent>
+      <Outputs>$(ProjectDir)source\BlazeEngine\UI\Files\Consola.cpp;$(ProjectDir)source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -195,6 +299,16 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <ClInclude Include="include\BlazeEngine\BlazeEngineUI.h" />
     <ClInclude Include="include\BlazeEngine\UI\Common\ButtonBase.h" />
     <ClInclude Include="include\BlazeEngine\UI\Common\System.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Debug\UIDebuggableLayer.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Debug\UIDebugLayer.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\CursorRenderUnit.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\SingleLineTextShaper.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextCursorControl.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextInputControl.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextLayoutMetadata.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextShaper.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\WrappedLineTextShaper.h" />
+    <ClInclude Include="source\BlazeEngine\UI\Debug\UIDebugScreen.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\AntialiasedTextRenderer.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\Renderers\TextRendererBase.h" />
@@ -213,12 +327,11 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <ClInclude Include="include\BlazeEngine\UI\Core\NodeTreeIterator.h" />
     <ClInclude Include="include\BlazeEngine\UI\Core\NodeTreeView.h" />
     <ClInclude Include="include\BlazeEngine\UI\Core\Screen.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderNode.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderableNode.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\GraphicsSubSystem.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\ImageRenderUnit.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\StaticTextRenderUnit.h" />
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderContext.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnit.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\EmptyNode.h" />
     <ClInclude Include="include\BlazeEngine\UI\Nodes\Image.h" />
@@ -243,16 +356,26 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <ClInclude Include="source\BlazeEngine\External\rectpack2D\rect_structs.h" />
     <ClInclude Include="source\BlazeEngine\UI\Files\Consola.h" />
     <ClInclude Include="source\BlazeEngine\UI\Graphics\Shaders\Shaders.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextSeparations.h" />
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\CursorRenderUnit.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextStyle.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextLayoutMetadata.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\WrappedLineTextShaper.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\SingleLineTextShaper.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Debug\UIDebugLayer.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Debug\UIDebugScreen.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\Renderers\OpenGL\AntialiasedTextRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\QuadRenderUnit.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\Shaders\Shaders.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Nodes\TextInput.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\FontManager.cpp" />
@@ -284,13 +407,18 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <ClCompile Include="source\BlazeEngine\UI\Text\Font.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\FontFace.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Nodes\Label.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextCursorControl.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextInputControl.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextSeparations.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\TextShaping\TextShaping.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\TextShaping\WrappedTextShaping.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

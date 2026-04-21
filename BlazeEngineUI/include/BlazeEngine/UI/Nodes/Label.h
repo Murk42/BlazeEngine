@@ -1,13 +1,14 @@
 #pragma once
+#include "BlazeEngine/Core/Event/EventMemberFunctionTie.h"
 #include "BlazeEngine/UI/Core/Node.h"
 #include "BlazeEngine/UI/Graphics/RenderUnits/StaticTextRenderUnit.h"
-#include "BlazeEngine/UI/Graphics/RenderNode.h"
+#include "BlazeEngine/UI/Graphics/RenderableNode.h"
 #include "BlazeEngine/UI/Text/TextStyle.h"
-#include "BlazeEngine/UI/Text/FontManager.h"
+#include "BlazeEngine/UI/Text/TextSeparations.h"
 
 namespace Blaze::UI::Nodes
 {
-	class BLAZE_API Label : public Node, public RenderNode
+	class BLAZE_API Label : public Node, public RenderableNode
 	{
 	public:
 		Label();
@@ -17,38 +18,39 @@ namespace Blaze::UI::Nodes
 
 		void Clear();
 		
-		void SetText(u8String text);
-		void SetTextStyle(const TextStyle& textStyle);
-		void SetWrapWidth(float wrapWidth);
+		void SetText(u8String newText);
+		void SetTextStyle(const TextStyle& newTextStyle);
+		void SetWrapWidth(float newWrapWidth);
 
 		inline u8StringView GetText() { return text; }
 		inline const TextStyle& GetTextStyle() const { return textStyle; }
+		inline float GetWrapWidth() const { return wrapWidth; }
 		
 		void SetBlocksHitTestFlag(bool blocksHitTest);
 		inline bool GetBlocksHitTestFlag(bool blocksHitTest) { return blocksHitTest; }
 
-		bool PreRender(const RenderContext& renderContext) override;
+		bool PreRender(const Graphics::RenderContext& renderContext) override;
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
 
 		HitStatus HitTest(Vec2f screenPosition) override;
 	private:
-		TextStyle textStyle;
+		StaticTextRenderUnit renderUnit;
+
 		u8String text;
+		TextStyle textStyle;
 		float wrapWidth;
 
-		StaticTextRenderUnit renderUnit;
-		Vec2f textBuildSize;
-		bool rendererTypeIDChanged : 1;
+		Vec2f textFinalSize;
 
 		bool blocksHitTest : 1;		
+		bool rebuildGlyphs : 1;
+		bool updateRenderTopology : 1;
 
-		bool GetFontAtlasData(FontManager::FontAtlasData& fontAtlasData) const;
+		void UpdateTransform() override;
 
-		void UpdateTransformSize();
-		void UpdateRenderUnitTransform();
+		void FinalScaleUpdated(const FinalScaleUpdatedEvent&);
+		EVENT_MEMBER_FUNCTION(Label, FinalScaleUpdated, finalScaleUpdatedEventDispatcher)
 
-		void UpdateRenderUnit();
-		
-		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
+		void RebuildGlyphs();
 	};
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/Event/EventHandler.h"
 #include "BlazeEngine/Runtime/IO/Window.h"
 #include "RenderWindowFramebuffer_OpenGL.h"
 
@@ -30,17 +29,10 @@ namespace Blaze::Graphics::OpenGL
 
 		void Destroy() override;
 
-		/*Parity*/RenderWindowFramebuffer_OpenGL& AcquireNextFramebuffer(Semaphore_OpenGL* semaphore);
-		/*Parity*/void PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, ArrayView<Semaphore_OpenGL*> waitSemaphores);
+		/*Parity*/RenderWindowFramebuffer_OpenGL& AcquireNextFramebuffer(Semaphore_OpenGL* semaphore = nullptr);
+		/*Parity*/void PresentFramebuffer(RenderWindowFramebuffer_OpenGL& framebuffer, ArrayView<Semaphore_OpenGL*> waitSemaphores = { });
 
 		/*Parity*/inline GraphicsContext_OpenGL& GetGraphicsContext() { return *graphicsContext; }
-
-		void Present();
-
-		void ClearRenderBuffers();
-		void ClearRenderColorBuffer();
-		void ClearRenderDepthBuffer();
-		void ClearRenderStencilBuffer();
 	private:
 		RenderWindowOptions_OpenGL options;
 		RenderWindowFramebuffer_OpenGL framebuffer;

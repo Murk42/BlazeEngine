@@ -1,12 +1,11 @@
 #pragma once
 #include "BlazeEngine/Core/Common/VirtualTuple.h"
 #include "BlazeEngine/Core/Common/Handle.h"
-#include "BlazeEngine/Core/Container/VirtualList.h"
-#include "BlazeEngine/Runtime/App/AppLayer.h"
-#include "BlazeEngine/External/BlazeEngineCoreSTDInterface.h"
 
 namespace Blaze
 {
+	class AppLayer;
+
 	class AppLayerCreationData
 	{
 	public:

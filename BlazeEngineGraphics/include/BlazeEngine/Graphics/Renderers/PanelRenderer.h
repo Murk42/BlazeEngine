@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/Common/Color.h"
 #include "BlazeEngine/Core/Math/Vector.h"
-#include "BlazeEngine/Graphics/Renderers/RendererBase.h"
+#include "BlazeEngine/Graphics/Core/RendererBase.h"
 
 namespace Blaze::Graphics
 {
@@ -14,11 +14,11 @@ namespace Blaze::Graphics
 		float cornerRadius;
 	};
 
-	class PanelRenderer : public RendererBase
+	class PanelRenderer : public virtual RendererBase
 	{
 	public:
-		virtual void Render(const PanelRenderData& data, const RenderContext& context) = 0;
+		virtual void Render(const PanelRenderData& data) = 0;
 
-		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<PanelRenderer>(); }
+		RendererTypeID GetTypeID() const override final { return RendererBase::GetTypeIDFor<PanelRenderer>(); }
 	};
 }

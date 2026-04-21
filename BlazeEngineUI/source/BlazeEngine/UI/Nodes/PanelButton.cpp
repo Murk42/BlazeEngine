@@ -5,21 +5,10 @@
 namespace Blaze::UI::Nodes
 {
 	PanelButton::PanelButton()
-		: highlighted(false), renderUnitDirty(true)
 	{
 		dataMap.SetTypeName("PanelButton");
-
-		fillColor = renderUnit.fillColor;
-		borderColor = renderUnit.borderColor;
-		highlightTint = ColorRGBAf(1, 1, 1, 0.04f);
-		pressedTint = ColorRGBAf(0, 0, 0, 0.4f);
-
-		finalTransformUpdatedEventDispatcher.AddHandler<&PanelButton::FinalTransformUpdatedEvent>(*this);
-		mouseHitStatusChangedEventDispatcher.AddHandler<&PanelButton::MouseHitStatusChangedEvent>(*this);
-		pressedStateChangedEventDispatcher.AddHandler<&PanelButton::PressedStateChangedEvent>(*this);
-
 	}
-	PanelButton::PanelButton(Node& parent, const NodeTransform& transform, const Style& style)
+	PanelButton::PanelButton(Node& parent, const NodeTransform& transform, const PanelButtonStyle& style)
 		: PanelButton()
 	{
 		SetStyle(style);
@@ -28,46 +17,22 @@ namespace Blaze::UI::Nodes
 	}
 	PanelButton::~PanelButton()
 	{
-		finalTransformUpdatedEventDispatcher.RemoveHandler<&PanelButton::FinalTransformUpdatedEvent>(*this);
-		mouseHitStatusChangedEventDispatcher.RemoveHandler<&PanelButton::MouseHitStatusChangedEvent>(*this);
-		pressedStateChangedEventDispatcher.RemoveHandler<&PanelButton::PressedStateChangedEvent>(*this);
 	}
-	void PanelButton::SetStyle(const Style& style)
+	void PanelButton::SetPressedCallback(const std::function<void()>& callback)
 	{
-		fillColor = style.panelStyle.fillColor;
-		borderColor = style.panelStyle.borderColor;
-		renderUnit.cornerRadius = style.panelStyle.cornerRadius;
-		renderUnit.borderWidth = style.panelStyle.borderWidth;
-		highlightTint = style.highlightTint;
-		pressedTint = style.pressedTint;
+		this->pressedCallback = callback;
+	}
+	void PanelButton::SetStyle(const PanelButtonStyle& style)
+	{
+		this->style = style;
+
+		renderUnit.style = style.panelStyle;
+
 		UpdateColor();
 	}
-	PanelButton::Style PanelButton::GetStyle() const
+	PanelButtonStyle PanelButton::GetStyle() const
 	{
-		return Style{
-			.panelStyle = {
-				.fillColor = fillColor,
-				.borderColor = borderColor,
-				.borderWidth = renderUnit.borderWidth,
-				.cornerRadius = renderUnit.cornerRadius,
-			},
-			.highlightTint = highlightTint,
-			.pressedTint = pressedTint
-		};
-	}
-	bool PanelButton::PreRender(const RenderContext& renderContext)
-	{
-		if (!renderUnitDirty)
-			return false;
-
-		renderUnitDirty = false;
-
-		NodeFinalTransform transform = GetFinalTransform();
-		renderUnit.pos = transform.position;
-		renderUnit.right = transform.Right() * transform.size.x;
-		renderUnit.up= transform.Up() * transform.size.y;
-
-		return false;
+		return style;
 	}
 	RenderUnitBase* PanelButton::GetRenderUnit(uintMem index)
 	{
@@ -83,39 +48,45 @@ namespace Blaze::UI::Nodes
 	}
 	void PanelButton::UpdateColor()
 	{
-		if (IsPressed())
+		if (IsDown())
 		{
-			renderUnit.fillColor = Mix(fillColor, pressedTint);
-			renderUnit.borderColor = Mix(borderColor, pressedTint);
+			renderUnit.style.fillColor = Mix(style.panelStyle.fillColor, style.pressedTint);
+			renderUnit.style.borderColor = Mix(style.panelStyle.borderColor, style.pressedTint);
 		}
-		else if (highlighted)
+		else if (IsMouseOver())
 		{
-			renderUnit.fillColor = Mix(fillColor, highlightTint);
-			renderUnit.borderColor = Mix(borderColor, highlightTint);
+			renderUnit.style.fillColor = Mix(style.panelStyle.fillColor, style.highlightTint);
+			renderUnit.style.borderColor = Mix(style.panelStyle.borderColor, style.highlightTint);
 		}
 		else
 		{
-			renderUnit.fillColor = fillColor;
-			renderUnit.borderColor = borderColor;
+			renderUnit.style.fillColor = style.panelStyle.fillColor;
+			renderUnit.style.borderColor = style.panelStyle.borderColor;
 		}
 	}
-	void PanelButton::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
+	void PanelButton::IsDownChanged(bool byMouse, Vec2f pos)
 	{
-		renderUnitDirty = true;
+		UpdateColor();
 	}
-	void PanelButton::MouseHitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event)
+	void PanelButton::IsMouseOverChanged(Vec2f pos)
 	{
-		highlighted = event.newHitStatus != Node::HitStatus::NotHit;
-
 		UpdateColor();
 
-		if (event.newHitStatus != Node::HitStatus::HitBlocking)
+		if (IsMouseOver())
 			Input::SetCursorType(Input::CursorType::Pointer);
 		else
 			Input::SetCursorType(Input::CursorType::Default);
 	}
-	void PanelButton::PressedStateChangedEvent(const ButtonBase::PressedStateChangedEvent& event)
+	void PanelButton::Pressed()
 	{
-		UpdateColor();
+		if (pressedCallback)
+			pressedCallback();
+	}
+	void PanelButton::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
+	{
+		NodeFinalTransform transform = GetFinalTransform();
+		renderUnit.pos = transform.position;
+		renderUnit.right = transform.Right() * transform.size.x;
+		renderUnit.up = transform.Up() * transform.size.y;
 	}
 }

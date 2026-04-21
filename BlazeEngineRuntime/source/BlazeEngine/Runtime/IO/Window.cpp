@@ -169,10 +169,10 @@ namespace Blaze
 			realWindowSize = apparentWindowSize;
 			});
 	}
-	Window::Window(Window&& other) noexcept : Window()
-	{
-		Move(other);
-	}
+	//Window::Window(Window&& other) noexcept : Window()
+	//{
+	//	Move(other);
+	//}
 	Window::~Window()
 	{
 		Destroy();
@@ -895,7 +895,7 @@ namespace Blaze
 			return false;
 		}
 	}
-	bool Window::ProcessInputEvent(Input::GenericInputEvent& outInputEvent)
+	bool Window::GetInputEvent(Input::GenericInputEvent& outInputEvent)
 	{
 		InternalEvent event;
 		while (eventQueue.GetEvent(event))
@@ -955,21 +955,34 @@ namespace Blaze
 	}
 	void* Window::ReleaseHandle()
 	{
+		auto context = BlazeEngineContextInternal::GetEngineContext();
+		if (context == nullptr)
+		{
+			BLAZE_LOG_ERROR("Trying to create a window but the engine context is not valid");
+			return nullptr;
+		}
+
+		context->UnregisterWindow(*this);
+
 		void* _handle = handle;
 
 		handle = nullptr;
 		graphicsAPI = WindowGraphicsAPI::None;
+		apparentWindowPos = { };
+		apparentWindowSize = { };
+		realWindowPos = { };
+		realWindowSize = { };
 
 		return _handle;
 	}
-	Window& Window::operator=(Window&& other) noexcept
-	{
-		Destroy();
-
-		Move(other);
-
-		return *this;
-	}
+	//Window& Window::operator=(Window&& other) noexcept
+	//{
+	//	Destroy();
+	//
+	//	Move(other);
+	//
+	//	return *this;
+	//}
 	void Window::Move(Window& other)
 	{
 		auto context = BlazeEngineContextInternal::GetEngineContext();
@@ -1006,8 +1019,8 @@ namespace Blaze
 	{
 		switch (event.GetValueType())
 		{
-		case GenericWindowEvent::GetValueTypeOf<ResizedEvent>():             event.TryProcess([&](const ResizedEvent& e) { resizedEventDispatcher.Call(e); apparentWindowSize = e.size; }); break;
-		case GenericWindowEvent::GetValueTypeOf<MovedEvent>():               event.TryProcess([&](const MovedEvent& e) { movedEventDispatcher.Call(e); apparentWindowPos = e.pos; }); break;
+		case GenericWindowEvent::GetValueTypeOf<ResizedEvent>():             event.TryProcess([&](const ResizedEvent& e) { apparentWindowSize = e.size; resizedEventDispatcher.Call(e); }); break;
+		case GenericWindowEvent::GetValueTypeOf<MovedEvent>():               event.TryProcess([&](const MovedEvent& e) { apparentWindowPos = e.pos; movedEventDispatcher.Call(e); }); break;
 		case GenericWindowEvent::GetValueTypeOf<MinimizedEvent>():           event.TryProcess([&](const MinimizedEvent& e) { minimizedEventDispatcher.Call(e); }); break;
 		case GenericWindowEvent::GetValueTypeOf<MaximizedEvent>():           event.TryProcess([&](const MaximizedEvent& e) { maximizedEventDispatcher.Call(e); }); break;
 		case GenericWindowEvent::GetValueTypeOf<FocusGainedEvent>():         event.TryProcess([&](const FocusGainedEvent& e) { focusGainedEventDispatcher.Call(e); }); break;

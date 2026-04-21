@@ -25,15 +25,11 @@ namespace Blaze
 		//This context must be destroy before all of the libraries are unloaded
 		~BlazeEngineContextInternal() override;
 
-		void ProcessEvents() override;
-		void ResetInputState();
-		void CopyInputState();
+		void PollEvents() override;
+		bool WaitForEvents(float seconds) override;
+		
+		void NudgeMainThread() override;
 
-		Vec2f GetMouseLastFramePos() const;
-		Vec2f GetMouseLastFrameMovementSum() const;
-		Vec2f GetMouseLastFrameScrollSum() const;
-		Input::KeyFrameState GetKeyFrameState(Input::Key key) const;
-		Input::MouseButtonFrameState GetMouseButtonFrameState(Input::MouseButton button) const;
 		bool GetKeyState(Input::Key key) const;
 		bool GetMouseButtonState(Input::MouseButton button) const;
 		Array<Input::MouseData> GetMice();
@@ -67,31 +63,13 @@ namespace Blaze
 		mutable std::mutex inputStateMutex;
 
 		Vec2f mouseCurrentPos;
-		Vec2f mouseLastFramePos;
-		Vec2f mouseCurrentFrameMovementSum;
-		Vec2f mouseLastFrameMovementSum;
-		Vec2f mouseCurrentScrollSum;
-		Vec2f mouseLastFrameScrollSum;
-
-		uint8 mouseButtonsComboDuringCurrentFrame[(uintMem)Input::MouseButton::COUNT];
-		uint8 mouseButtonsComboDuringLastFrame[(uintMem)Input::MouseButton::COUNT];
+		
 		std::atomic_flag mouseButtonsCurrentState[(uintMem)Input::MouseButton::COUNT];
-		std::bitset<(uintMem)Input::MouseButton::COUNT> pressedMouseButtonsDuringCurrentFrame;
-		std::bitset<(uintMem)Input::MouseButton::COUNT> pressedMouseButtonsDuringLastFrame;
-		std::bitset<(uintMem)Input::MouseButton::COUNT> releasedMouseButtonsDuringCurrentUpdate;
-		std::bitset<(uintMem)Input::MouseButton::COUNT> releasedMouseButtonsDuringLastUpdate;
-		std::bitset<(uintMem)Input::MouseButton::COUNT> downMouseButtonsDuringCurrentFrame;
-		std::bitset<(uintMem)Input::MouseButton::COUNT> downMouseButtonsDuringLastFrame;
-
-		std::atomic_flag keysCurrentState[(uintMem)Input::Key::COUNT];
-		std::bitset<(uintMem)Input::Key::COUNT> pressedKeysDuringCurrentFrame;
-		std::bitset<(uintMem)Input::Key::COUNT> pressedKeysDuringLastFrame;
-		std::bitset<(uintMem)Input::Key::COUNT> releasedKeysDuringCurrentFrame;
-		std::bitset<(uintMem)Input::Key::COUNT> releasedKeysDuringLastFrame;
-		std::bitset<(uintMem)Input::Key::COUNT> downKeysDuringCurrentFrame;
-		std::bitset<(uintMem)Input::Key::COUNT> downKeysDuringLastFrame;
+		std::atomic_flag keysCurrentState[(uintMem)Input::Key::COUNT];		
 
 		Array<Input::MouseData> mice;
+
+		uint32 nudgeEventNumber;
 
 		void UpdateMouseData(const Input::MouseData& data);
 		void EraseMouseData(Input::MouseID id);

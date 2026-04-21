@@ -209,7 +209,7 @@ namespace Blaze
 	{
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
-	inline Map<Key, Value, Hasher, Allocator>::Map(const Map& other)
+	inline Map<Key, Value, Hasher, Allocator>::Map(const Map& other)requires IsConstructibleFrom<Value, const Value&>
 		: buckets(nullptr), bucketCount(0), count(0)
 	{
 		CopyUnsafe(other);
@@ -414,7 +414,7 @@ namespace Blaze
 		return ConstIterator();
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
-	inline Map<Key, Value, Hasher, Allocator>& Map<Key, Value, Hasher, Allocator>::operator=(const Map& other)
+	inline Map<Key, Value, Hasher, Allocator>& Map<Key, Value, Hasher, Allocator>::operator=(const Map& other) requires IsConstructibleFrom<Value, const Value&>
 	{
 		Clear();
 
@@ -437,7 +437,7 @@ namespace Blaze
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	template<typename ... Args> requires IsConstructibleFrom<Value, Args...>
-	inline Map<Key, Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uintMem hash, Key&& key, Args&& ... args)
+	inline Map<Key, Value, Hasher, Allocator>::Node::Node(Node* prev, Node* next, uint64 hash, Key&& key, Args&& ... args)
 		: prev(prev), next(next), hash(hash), pair(std::move(key), std::forward<Args>(args)...)
 #ifdef BLAZE_CONTAINER_INVALIDATION_CHECK
 		, iteratorCount(0)
@@ -461,7 +461,7 @@ namespace Blaze
 			return Hasher().Compute(key);
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
-	inline void Map<Key, Value, Hasher, Allocator>::CopyUnsafe(const Map& other)
+	inline void Map<Key, Value, Hasher, Allocator>::CopyUnsafe(const Map& other) requires IsConstructibleFrom<Value, const Value&>
 	{
 		bucketCount = other.bucketCount;
 		count = other.count;
@@ -502,7 +502,7 @@ namespace Blaze
 		}
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
-	inline Map<Key, Value, Hasher, Allocator>::Bucket* Map<Key, Value, Hasher, Allocator>::GetBucketFromHash(uintMem hash) const
+	inline Map<Key, Value, Hasher, Allocator>::Bucket* Map<Key, Value, Hasher, Allocator>::GetBucketFromHash(uint64 hash) const
 	{
 		if (bucketCount == 0)
 			return nullptr;
@@ -510,12 +510,12 @@ namespace Blaze
 		return GetBucketFromHashModUnsafe(hash % bucketCount);
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
-	inline Map<Key, Value, Hasher, Allocator>::Bucket* Map<Key, Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uintMem hashMod) const
+	inline Map<Key, Value, Hasher, Allocator>::Bucket* Map<Key, Value, Hasher, Allocator>::GetBucketFromHashModUnsafe(uint64 hashMod) const
 	{
 		return &buckets[hashMod];
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
-	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash)
+	inline Map<Key, Value, Hasher, Allocator>::Iterator Map<Key, Value, Hasher, Allocator>::FindWithHint(const Key& key, uint64 hash)
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -525,7 +525,7 @@ namespace Blaze
 		return FindWithHintUnsafe(key, bucket);
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
-	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::FindWithHint(const Key& key, uintMem hash) const
+	inline Map<Key, Value, Hasher, Allocator>::ConstIterator Map<Key, Value, Hasher, Allocator>::FindWithHint(const Key& key, uint64 hash) const
 	{
 		auto* bucket = GetBucketFromHash(hash);
 
@@ -572,7 +572,7 @@ namespace Blaze
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	template<typename ... Args> requires  IsConstructibleFrom<Value, Args...>
-	inline Map<Key, Value, Hasher, Allocator>::InsertResult Map<Key, Value, Hasher, Allocator>::InsertWithHint(const Key& key, uintMem hash, Args&& ... args)
+	inline Map<Key, Value, Hasher, Allocator>::InsertResult Map<Key, Value, Hasher, Allocator>::InsertWithHint(const Key& key, uint64 hash, Args&& ... args)
 	{
 		if (count == 0)
 			AllocateEmptyUnsafe();
@@ -589,7 +589,7 @@ namespace Blaze
 	}
 	template<MapKeyType Key, typename Value, MapHasherType<Key> Hasher, AllocatorType Allocator>
 	template<typename ... Args> requires IsConstructibleFrom<Value, Args...>
-	inline Map<Key, Value, Hasher, Allocator>::InsertResult Map<Key, Value, Hasher, Allocator>::InsertWithHintUnsafe(const Key& key, Bucket* bucket, uintMem hash, Args&& ... args)
+	inline Map<Key, Value, Hasher, Allocator>::InsertResult Map<Key, Value, Hasher, Allocator>::InsertWithHintUnsafe(const Key& key, Bucket* bucket, uint64 hash, Args&& ... args)
 	{
 		Node* node = nullptr;
 		Node* prev = nullptr;

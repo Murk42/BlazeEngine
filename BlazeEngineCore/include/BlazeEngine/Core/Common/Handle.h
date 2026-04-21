@@ -38,6 +38,8 @@ namespace Blaze
 	private:
 		T* ptr;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
+
+		Handle(T* ptr, Allocator&& allocator);
 	};			
 }
 

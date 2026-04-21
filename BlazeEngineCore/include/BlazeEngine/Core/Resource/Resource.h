@@ -1,10 +1,15 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
+#include "BlazeEngine/Core/Resource/ResourceStorage.h"
 #include <atomic>
+#include <xmemory>
 
 namespace Blaze
 {
+	template<typename T>
+	class ResourceStorage;
+
 	class BLAZE_API ResourceBase
 	{
 	public:
@@ -20,7 +25,7 @@ namespace Blaze
 	protected:
 		void MarkAsLoaded();
 
-		virtual void DestructResource() = 0;
+		virtual void Destruct() = 0;
 	private:
 		uint32 referenceCount;
 		std::atomic_flag loaded;
@@ -32,8 +37,7 @@ namespace Blaze
 	public:
 		using Type = T;
 
-		template<typename ... Args>
-		void LoadResource(Args&& ... args) requires IsConstructibleFrom<T, Args...>;
+		Resource(ResourceStorage<T>& resourceStorage);
 
 		T& Get();
 		const T& Get() const;
@@ -54,23 +58,21 @@ namespace Blaze
 			byte bytes[sizeof(T)];
 		};
 		ResourceMemory resourceMemory;
+		ResourceStorage<T>& resourceStorage;
 
-		void DestructResource() override;
+		void Destruct() override;
+
+		template<typename ... Args> requires IsConstructibleFrom<T, Args...>
+		void Construct(Args&& ... args);
+
+		friend class ResourceManager;
 	};
 
+
 	template<typename T>
-	template<typename ...Args>
-	inline void Resource<T>::LoadResource(Args&& ...args) requires IsConstructibleFrom<T, Args...>
+	inline Resource<T>::Resource(ResourceStorage<T>& resourceStorage)
+		: resourceStorage(resourceStorage)
 	{
-		if (IsLoaded())
-		{
-			BLAZE_LOG_ERROR("Trying to load an already loaded resource");
-			return;
-		}
-
-		std::construct_at<T>((T*)&resourceMemory, std::forward<Args>(args)...);
-
-		MarkAsLoaded();
 	}
 	template<typename T>
 	inline T& Resource<T>::Get()
@@ -97,8 +99,17 @@ namespace Blaze
 		return *(T*)&resourceMemory;
 	}
 	template<typename T>
-	inline void Resource<T>::DestructResource()
+	inline void Resource<T>::Destruct()
 	{
-		std::destroy_at<T>((T*)&resourceMemory);
+		std::destroy_at(reinterpret_cast<T*>(&resourceMemory));
+		resourceStorage.FreeResource(*this);
+	}
+	template<typename T>
+	template<typename ...Args> requires IsConstructibleFrom<T, Args...>
+	inline void Resource<T>::Construct(Args&& ...args)
+	{		
+		std::construct_at<T>((T*)&resourceMemory, std::forward<Args>(args)...);
+
+		MarkAsLoaded();
 	}
 }

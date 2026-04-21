@@ -22,14 +22,14 @@ namespace Blaze
 	template<typename Char>
 	constexpr UnicodeChar::UnicodeChar(const Char* buffer, uintMem bufferSize)
 	{
-		FromChars(buffer, bufferSize);
+		FromFirstCodePoints(buffer, bufferSize);
 	}
 	constexpr bool UnicodeChar::IsASCII() const
 	{
 		return value <= 0x7F;
 	}
 	template<typename Char>
-	inline constexpr uintMem UnicodeChar::ToCharsSize()
+	inline constexpr uintMem UnicodeChar::GetCodePointCount()
 	{
 		if constexpr (SameAs<Char, char>)
 		{
@@ -70,7 +70,7 @@ namespace Blaze
 		}
 	}
 	template<typename Char>
-	constexpr UnicodeCharConvertResult<Char> UnicodeChar::ToChars()
+	constexpr UnicodeCharConvertResult<Char> UnicodeChar::ToCodePoints()
 	{
 		if constexpr (SameAs<Char, char>)
 		{
@@ -166,23 +166,20 @@ namespace Blaze
 			static_assert("Conversion not supported");
 	}
 	template<typename Char>
-	constexpr uintMem UnicodeChar::FromChars(const Char* buffer, uintMem bufferSize)
+	constexpr uintMem UnicodeChar::FromFirstCodePoints(GenericStringView<Char> string)
 	{
+		if (string.Empty())
+			return 0;
+
 		if constexpr (SameAs<Char, char>)
 		{
-			if (buffer == nullptr || bufferSize == 0)
-				return 0;
-
-			value = static_cast<char32_t>(*buffer);
+			value = static_cast<char32_t>(string[0]);
 		}
 		else if constexpr (SameAs<Char, char8_t>)
-		{
-			// If no bytes left, return replacement
-			if (buffer == nullptr || bufferSize == 0)
-				return 0;
+		{	
 
 			// Read first byte as an unsigned value
-			uint32 b0 = static_cast<uint32>(buffer[0]);
+			uint32 b0 = static_cast<uint32>(string[0]);
 
 			// 1-byte (ASCII)
 			if (b0 < 0x80)
@@ -194,10 +191,10 @@ namespace Blaze
 			// 2-byte
 			if ((b0 >> 5) == 0x6)
 			{
-				if (bufferSize < 2)
+				if (string.Count() < 2)
 					return 0; // missing continuation
 
-				uint32 b1 = static_cast<uint32>(buffer[1]);
+				uint32 b1 = static_cast<uint32>(string[1]);
 
 				if ((b1 & 0xC0) != 0x80) { return 0; } // invalid continuation (consume it to avoid infinite loop)
 
@@ -213,11 +210,11 @@ namespace Blaze
 			// 3-byte
 			if ((b0 >> 4) == 0xE)
 			{
-				if (bufferSize < 3)
+				if (string.Count() < 3)
 					return 0; // need two continuation bytes
 
-				uint32 b1 = static_cast<uint32>(buffer[1]);
-				uint32 b2 = static_cast<uint32>(buffer[2]);
+				uint32 b1 = static_cast<uint32>(string[1]);
+				uint32 b2 = static_cast<uint32>(string[2]);
 
 				if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80)
 				{
@@ -238,12 +235,12 @@ namespace Blaze
 			// 4-byte
 			if ((b0 >> 3) == 0x1E)
 			{
-				if (bufferSize < 4)
+				if (string.Count() < 4)
 					return 0; // need three continuation bytes
 
-				uint32 b1 = static_cast<uint32>(buffer[1]);
-				uint32 b2 = static_cast<uint32>(buffer[2]);
-				uint32 b3 = static_cast<uint32>(buffer[3]);
+				uint32 b1 = static_cast<uint32>(string[1]);
+				uint32 b2 = static_cast<uint32>(string[2]);
+				uint32 b3 = static_cast<uint32>(string[3]);
 
 				if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80 || (b3 & 0xC0) != 0x80)
 				{
@@ -265,21 +262,18 @@ namespace Blaze
 		}
 		else if constexpr (SameAs<Char, char16_t>)
 		{
-			if (buffer == nullptr || bufferSize == 0)
-				return 0;
-
-			char16_t first = buffer[0];
+			char16_t first = string[0];
 
 			// Check if it's a surrogate pair
 			if (first >= 0xD800 && first <= 0xDBFF) // high surrogate
 			{
-				if (bufferSize < 2)
+				if (string.Count() < 2)
 				{
 					value = U'\0'; // incomplete
 					return 0;
 				}
 
-				char16_t second = buffer[1];
+				char16_t second = string[1];
 				if (second >= 0xDC00 && second <= 0xDFFF) // valid low surrogate
 				{
 					char32_t high = first - 0xD800;
@@ -305,15 +299,22 @@ namespace Blaze
 				return 1; // consumed 1 code unit
 			}
 		}
-		else
+		else if constexpr (SameAs<Char, char32_t>)
 		{
-			if (buffer == nullptr || bufferSize == 0)
-				return 0;
-
-			value = *buffer;
+			value = string[0];
 		}
 
 		return 1;
+	}
+	template<typename Char>
+	constexpr uintMem UnicodeChar::FromLastCodePoints(GenericStringView<Char> string)
+	{
+		uintMem startIndex = FindStartOfLastCharacter(string);
+
+		if (startIndex == string.Count())
+			return 0;		
+
+		return FromFirstCodePoints(string.SubString(static_cast<intMem>(startIndex)));
 	}
 	constexpr uint64 UnicodeChar::Hash() const
 	{
@@ -326,6 +327,112 @@ namespace Blaze
 		}
 
 		return hash;
+	}
+	template<typename Char>
+	inline constexpr uintMem UnicodeChar::FindStartOfLastCharacter(GenericStringView<Char> string)
+	{
+		if (string.Empty())
+			return 0;
+
+		const uintMem count = string.Count();
+
+		if constexpr (SameAs<Char, char>)
+		{
+			return string.Count() - 1;
+		}
+		else if constexpr (SameAs<Char, char8_t>)
+		{
+			// UTF-8 Backward Scan
+			// We look for the start byte (anything not 10xxxxxx)
+			uintMem lastCharStart = count - 1;
+
+			// Move backward while we see continuation bytes (up to 3 times for a 4-byte max)
+			while (lastCharStart > 0 && (static_cast<uint8>(string[lastCharStart]) & 0xC0) == 0x80)
+			{
+				if ((count - lastCharStart) >= 4)
+				{
+					//More than 4 code points for a character should not happen
+					return string.Count();
+				}
+				lastCharStart--;
+			}
+
+			return lastCharStart;
+		}
+		else if constexpr (SameAs<Char, char16_t>)
+		{
+			uintMem lastCharStart = count - 1;
+
+			char16_t lastChar = string[lastCharStart];
+			// Check if the last unit is a low surrogate
+			if (lastChar >= 0xDC00 && lastChar <= 0xDFFF)
+			{
+				if (lastCharStart == 0)
+				{
+					--lastCharStart;
+
+					// If there is a preceding high surrogate, it's a pair
+					lastChar = string[lastCharStart];
+
+					if (lastChar >= 0xD800 && lastChar <= 0xDBFF)
+						return lastCharStart;
+				}
+
+				return string.Count();
+			}
+			else if (lastChar >= 0xD800 && lastChar <= 0xDBFF)
+				return string.Count();
+			else
+				return lastCharStart;
+		}
+		else if constexpr (SameAs<Char, char32_t>)
+		{
+			if (count == 0)
+				return 0;
+
+			return count - 1;
+		}
+
+		return string.Count();
+	}
+	template<typename Char>
+	constexpr uintMem UnicodeChar::CodePointsInChar(Char firstCodePoint)
+	{
+		if constexpr (SameAs<Char, char>)
+			return 1;
+		else if constexpr (SameAs<Char, char8_t>)
+		{
+			if (firstCodePoint < 0x80)
+				return 1;
+
+			if ((firstCodePoint >> 5) == 0x6)
+				return 2;
+
+			if ((firstCodePoint >> 4) == 0xE)
+				return 3;
+
+			if ((firstCodePoint >> 3) == 0x1E)
+				return 4;
+
+			// otherwise invalid leading byte
+			return 0;
+		}
+		else if constexpr (SameAs<Char, char16_t>)
+		{
+			// Check if it's a surrogate pair
+			if (firstCodePoint >= 0xD800 && firstCodePoint <= 0xDBFF) // high surrogate
+				return 2;
+			else if (firstCodePoint >= 0xDC00 && firstCodePoint <= 0xDFFF) // stray low surrogate
+				return 0;
+			else
+				return 1;
+		}
+		else if constexpr (SameAs<Char, char32_t>)
+		{
+			return 1;
+		}
+		else
+			return 0;
 	}
 	constexpr UnicodeChar& UnicodeChar::operator++()
 	{

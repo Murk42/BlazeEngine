@@ -373,7 +373,7 @@ namespace Blaze
 		sail_image* image;
 		void* state = nullptr;
 
-		stream.SetPosition(0);
+		//stream.SetPosition(0);
 
 		SAIL_CHECK_RET(sail_alloc_io(&io), false, "sail_alloc_io failed");
 		sail_SetupReadIO(io, stream);
@@ -399,7 +399,7 @@ namespace Blaze
 		sail_image* image;
 		void* state = nullptr;
 
-		stream.SetPosition(0);
+		//stream.SetPosition(0);
 
 		SAIL_CHECK_RET(sail_alloc_io(&io), false, "sail_alloc_io failed");
 		sail_SetupReadIO(io, stream);
@@ -427,7 +427,7 @@ namespace Blaze
 		sail_image* image;
 		void* state = nullptr;
 
-		stream.SetPosition(0);
+		//stream.SetPosition(0);
 
 		SAIL_CHECK_RET(sail_alloc_io(&io), false, "sail_alloc_io failed");
 		sail_SetupReadIO(io, stream);
@@ -471,7 +471,7 @@ namespace Blaze
 		sail_image image;
 		void* state = nullptr;
 
-		stream.SetPosition(0);
+		//stream.SetPosition(0);
 
 		if (!MakeSailImageViewIntoBitmap(*this, image))
 			return false;

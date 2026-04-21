@@ -1,131 +1,113 @@
 #include "pch.h"
 #include "BlazeEngine/Runtime/App/AppRuntimeThread.h"
-#include "BlazeEngine/Runtime/IO/Window.h"
+#include "BlazeEngine/Runtime/App/AppLayer.h"
 #include <ranges>
+#include <algorithm>
 
 namespace Blaze
 {
-	AppRuntimeThread::AppRuntimeThread(Window& window)
-		: window(window), shouldExit(false)
+	thread_local AppRuntimeThread* threadAppRuntimeThreadObject = nullptr;
+
+	static bool IsMouseMotionReportingEvent(const Input::GenericInputEvent& event)
 	{
+		return event.IsType<Input::MouseMotionEvent>() || event.IsType<Input::MouseEntersWindowEvent>() || event.IsType<Input::MouseLeavesWindowEvent>();
 	}
-	void AppRuntimeThread::MarkForExit()
+
+	AppRuntimeThread::AppRuntimeThread()
 	{
-		shouldExit = true;
+		if (Blaze::threadAppRuntimeThreadObject != nullptr)
+			BLAZE_LOG_WARNING("Multiple AppRuntimeThread objects alive at the same time on the same thread");
+		else
+			Blaze::threadAppRuntimeThreadObject = this;
+	}
+	AppRuntimeThread::~AppRuntimeThread()
+	{
+		if (Blaze::threadAppRuntimeThreadObject == this)
+			Blaze::threadAppRuntimeThreadObject = nullptr;
+	}
+	void AppRuntimeThread::RemoveAllLayers()
+	{
+		layerStack.Clear();
 	}
 	void AppRuntimeThread::AddLayer(AppLayerCreationData&& layerCreationData)
 	{
-		std::lock_guard lg{ layerTasksMutex };
-		queuedLayerCreationData.AddBack(std::move(layerCreationData));
+		defferedLayerCreationData.AddBack(std::move(layerCreationData));
 	}
-	void AppRuntimeThread::RemoveLayer(AppLayer& layer)
+	bool AppRuntimeThread::RemoveLayer(AppLayer& layerToBeRemoved)
 	{
-		LayerRemovalData removalData{
-			.pickFunction = [](AppLayer& layer, void* userData) { return &layer == static_cast<AppLayer*>(userData); },
-			.userData = &layer
-		};
-		RemoveLayer(removalData);
-	}
-	void AppRuntimeThread::Run()
-	{
-		while (!shouldExit)
-		{
-			ProcessInputEvents();
+		for (uintMem i = 0; i < layerStack.Count(); ++i)
+			if (layerStack[i].Ptr() == &layerToBeRemoved)
+			{
+				defferedLayerRemovalData.AddBack(i);
+				return true;
+			}
 
-			for (auto& layer : layerStack)
-				layer->Update();
-
-			StartRender();
-
-			for (auto& layer : layerStack)
-				layer->Render();
-
-			EndRender();
-
-			ProcessLayerTasks();
-		}
-
-		layerStack.Clear();
-	}
-	static bool GetMouseMotionReportingEventMouseID(Input::GenericInputEvent& event, Input::MouseID& mouseID)
-	{		
-		if (event.TryProcess([&](const Input::MouseMotionEvent      & event) { mouseID = event.mouseID; })) return true;
-		if (event.TryProcess([&](const Input::MouseEntersWindowEvent& event) { mouseID = event.mouseID; })) return true;
-		if (event.TryProcess([&](const Input::MouseLeavesWindowEvent& event) { mouseID = event.mouseID; })) return true;
 		return false;
 	}
-	void AppRuntimeThread::ProcessInputEvents()
-	{
-		Input::GenericInputEvent inputEvent;
-		while (window.ProcessInputEvent(inputEvent))
+	void AppRuntimeThread::CreateAndRemoveDefferedLayers()
+	{			
+		if (!defferedLayerRemovalData.Empty())
 		{
-			bool consumable = true;
-			bool consumed = false;
-			bool processed = false;
+			Array<uintMem> moved = std::move(moved);
 
-			Input::MouseID mouseID;
-			if (GetMouseMotionReportingEventMouseID(inputEvent, mouseID))
+			std::sort(moved.Begin(), moved.End(), std::greater());
+
+			for (auto& index : moved)
+				layerRemovedEventDispatcher.Call({ .thread = *this, .layer = *layerStack[index] });
+
+			for (auto& index : std::ranges::reverse_view(moved))
+				layerStack.EraseAt(index);
+		}
+
+		while (!defferedLayerCreationData.Empty())
+		{
+			Array<AppLayerCreationData> moved = std::move(defferedLayerCreationData);
+
+			for (auto& creationData : moved)
 			{
-				consumable = false;
+				layerStack.AddBack(std::move(creationData.CreateLayer()));
 
-				//if (window.IsMouseCaptured(mouseID))
-				//	processed = true;
-			}
-
-			for (auto& layer : std::ranges::reverse_view(layerStack))
-			{
-				Input::EventProcessedState result = layer->OnEvent(inputEvent, processed);
-
-				switch (result)
-				{
-				case Input::EventProcessedState::NotProcessed:
-					break;
-				case Input::EventProcessedState::Processed:
-					processed = true;
-					break;
-				case Input::EventProcessedState::Consumed:
-					if (consumable)
-						consumed = true;
-					processed = true;
-					break;
-				default:
-					BLAZE_LOG_ERROR("Client function returned an invalid EventProcessedState enum value");
-					break;
-				}
-
-				if (consumed)
-					break;
+				layerAddedEventDispatcher.Call({ .thread = *this, .layer = *layerStack.Last()});
 			}
 		}
 	}
-	void AppRuntimeThread::ProcessLayerTasks()
+	Input::EventProcessedState AppRuntimeThread::SendInputEventToLayers(const Input::GenericInputEvent& inputEvent)
 	{
-		Array<LayerRemovalData> movedQueuedLayerRemovalData;
-		Array<AppLayerCreationData> movedQueuedLayerCreationData;
+		bool consumable = true;
+		bool consumed = false;
+		bool processed = false;
 
+		Input::MouseID mouseID;
+		if (IsMouseMotionReportingEvent(inputEvent))
+			consumable = false;
+
+		Input::EventProcessedState result = Input::EventProcessedState::NotProcessed;
+
+		for (auto& layer : std::ranges::reverse_view(layerStack))
 		{
-			std::lock_guard lg{ layerTasksMutex };
-			movedQueuedLayerRemovalData = std::move(queuedLayerRemovalData);
-			movedQueuedLayerCreationData = std::move(queuedLayerCreationData);
+			result = layer->OnEvent(inputEvent, processed);
+
+			switch (result)
+			{
+			case Input::EventProcessedState::NotProcessed:
+				break;
+			case Input::EventProcessedState::Processed:
+				processed = true;
+				break;
+			case Input::EventProcessedState::Consumed:
+				if (consumable)
+					consumed = true;
+				processed = true;
+				break;
+			default:
+				BLAZE_LOG_ERROR("Client function returned an invalid EventProcessedState enum value");
+				break;
+			}
+
+			if (consumed)
+				break;
 		}
 
-		for (auto& removalData : movedQueuedLayerRemovalData)
-			for (auto it = layerStack.FirstIterator(); it != layerStack.BehindIterator(); ++it)
-				if (removalData.pickFunction(**it, removalData.userData))
-				{
-					layerStack.EraseAt(it);
-					break;
-				}
-
-		for (auto& creationData : movedQueuedLayerCreationData)
-			layerStack.AddBack(creationData.CreateLayer());
-	}
-	void AppRuntimeThread::RemoveLayer(const LayerRemovalData& layerRemovalData)
-	{
-		if (layerRemovalData.pickFunction == nullptr)
-			return;
-
-		std::lock_guard lg{ layerTasksMutex };
-		queuedLayerRemovalData.AddBack(layerRemovalData);
+		return result;
 	}
 }

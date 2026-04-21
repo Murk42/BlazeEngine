@@ -275,6 +275,25 @@ namespace Blaze::Graphics::OpenGL
 		IncompleteMultisample,
 		IncompleteLayerTargets
 	};	
+	enum class RenderWindowFramebufferBufferTargets
+	{
+		FrontLeft,
+		FrontRight,
+		BackLeft,
+		BackRight,
+		Front,
+		Back,
+		Left,
+		Right,
+		FontAndBack
+	};
+	enum class RenderWindowFramebufferBufferTarget
+	{
+		FrontLeft,
+		FrontRight,
+		BackLeft,
+		BackRight
+	};
 	enum class ShaderType
 	{
 		FragmentShader = 35632,

@@ -2,7 +2,7 @@
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/Resource/ResourceManager.h"
 #include "BlazeEngine/Core/Container/Map.h"
-#include "BlazeEngine/Graphics/Core/GraphicsContextBase.h"
+#include "BlazeEngine/Graphics/Core/GraphicsContext.h"
 #include "BlazeEngine/UI/Text/TextStyle.h"
 
 namespace Blaze::UI
@@ -13,7 +13,7 @@ namespace Blaze::UI
 	struct FontAtlasDescriptor
 	{
 		const FontFace& fontFace;
-		float rasterFontHeight;
+		uint32 rasterFontHeight;
 		ArrayView<uint32> glyphIndices;
 		const FontGlyphRasterizer& glyphRasterizer;
 	};
@@ -29,11 +29,13 @@ namespace Blaze::UI
 
 		FontAtlas();
 		FontAtlas(FontAtlas&& other) noexcept;
-		FontAtlas(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContextBase& graphicsContext, ResourceManager& resourceManager);
+		FontAtlas(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContext& graphicsContext, ResourceManager& resourceManager);
 		~FontAtlas();
 
 		void Clear();
-		void Create(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContextBase& graphicsContext, ResourceManager& resourceManager);
+		void Create(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContext& graphicsContext, ResourceManager& resourceManager);
+		void Load(ReadStream& stream, Graphics::GraphicsContext& graphicsContext, ResourceManager& resourceManager);
+		void Save(WriteStream& stream) const;
 
 		/*
 			Retrieves glyphs UV coordinates in the font atlas
@@ -48,12 +50,12 @@ namespace Blaze::UI
 		bool GetGlyphUV(uint32 glyphIndex, Vec2u16& uv1, Vec2u16& uv2) const;
 		inline Vec2u16 GetSize() const { return size; }
 		inline ResourceBaseRef GetTexture() const { return texture; }
-		inline float GetRasterFontHeight() const { return rasterFontHeight; }		
+		inline uint32 GetRasterFontHeight() const { return rasterFontHeight; }
 
 		FontAtlas& operator=(FontAtlas&& other) noexcept;
 	private:
 		Vec2u16 size;
-		float rasterFontHeight;
+		uint32 rasterFontHeight;
 		ResourceBaseRef texture;
 		Map<uint32, UVRect> uvs;
 	};

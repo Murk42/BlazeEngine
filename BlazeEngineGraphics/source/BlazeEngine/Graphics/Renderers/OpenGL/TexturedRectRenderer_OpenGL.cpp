@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
 #include "BlazeEngine/Graphics/Shaders/Shaders.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -18,7 +20,7 @@ namespace Blaze::Graphics::OpenGL
 	};
 
 	TexturedRectRenderer_OpenGL::TexturedRectRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferInstanceCount, bool loadDefaultShaders)
-		: BufferedRendererBase_OpenGL(bufferInstanceCount * sizeof(Instance), graphicsContext), graphicsContext(graphicsContext), instanceCount(0)
+		: BufferedRendererBase_OpenGL(graphicsContext, bufferInstanceCount * sizeof(Instance)), instanceCount(0)
 	{
 		if (loadDefaultShaders)
 		{
@@ -68,18 +70,18 @@ namespace Blaze::Graphics::OpenGL
 	{
 		WaitFence();
 	}
-	void TexturedRectRenderer_OpenGL::StartRender(const RenderContext& context)
+	void TexturedRectRenderer_OpenGL::StartRender(const RenderContext_OpenGL& renderContext)
 	{
 		graphicsContext.SelectProgram(&program);
 		graphicsContext.SelectVertexArray(&va);
-
-		program.SetUniform(0, Mat4f::OrthographicMatrix(0, (float)context.GetTargetSize().x, 0, (float)context.GetTargetSize().y, -1, 1));
+		
+		program.SetUniform(0, renderContext.OrthographicsProjectionMatrix(-1, 1));
 	}
-	void TexturedRectRenderer_OpenGL::EndRender(const RenderContext& context)
+	void TexturedRectRenderer_OpenGL::EndRender()
 	{
-		Flush(context);
+		Flush();
 	}
-	void TexturedRectRenderer_OpenGL::Render(const TexturedRectRenderData& data, const RenderContext& context)
+	void TexturedRectRenderer_OpenGL::Render(const TexturedRectRenderData& data)
 	{
 		int textureIndex = 0;
 
@@ -98,14 +100,13 @@ namespace Blaze::Graphics::OpenGL
 
 			if (textureIndex == _countof(textures))
 			{
-				Flush(context);
+				Flush();
 				textureIndex = 0;
 				textures[0] = texture;
 			}
 		}
 
 		WaitFence();
-
 
 		((Instance*)GetBufferMap())[instanceCount] = Instance{
 			.color = data.color,
@@ -122,9 +123,9 @@ namespace Blaze::Graphics::OpenGL
 		instanceCount++;
 
 		if ((instanceCount + 1) * sizeof(Instance) > GetBufferSize())
-			Flush(context);
+			Flush();
 	}
-	void TexturedRectRenderer_OpenGL::Flush(const RenderContext& context)
+	void TexturedRectRenderer_OpenGL::Flush()
 	{
 		if (instanceCount == 0)
 			return;

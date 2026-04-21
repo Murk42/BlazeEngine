@@ -26,7 +26,7 @@ namespace Blaze::Debug
 
 		{
 			uintMem countToCopy = std::min(_countof(this->locationName) - 1, locationName.Count());
-			memcpy(this->locationName, locationName.Ptr(), countToCopy);
+			memcpy(this->locationName, locationName.Ptr() + (locationName.Count() - countToCopy), countToCopy);
 			this->locationName[countToCopy] = '\0';
 		}
 	}

@@ -256,17 +256,21 @@ namespace Blaze
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, T&>&& SameAs<std::invoke_result_t<C, T&>, bool>
-	inline void List<T, Allocator>::EraseAll(const C& function)
+	inline uintMem List<T, Allocator>::EraseAll(const C& function)
 	{
 		if (first == nullptr)
-			return;
+			return 0;
+
+		uintMem count = 0;
 
 		while (function(first->value))
 		{
 			EraseFirst();
 
+			++count;
+
 			if (first == nullptr)
-				return;
+				return count;
 		}
 
 		Node* prev = first;
@@ -280,6 +284,8 @@ namespace Blaze
 			{
 				EraseAfter(Iterator(prev));
 
+				++count;
+
 				curr = next;
 			}
 			else
@@ -288,21 +294,20 @@ namespace Blaze
 				curr = next;
 			}
 		}
+
+		return count;
 	}
 	template<typename T, AllocatorType Allocator>
 	template<typename C> requires std::invocable<C, T&>&& SameAs<std::invoke_result_t<C, T&>, bool>
-	inline void List<T, Allocator>::EraseOne(const C& function)
+	inline bool List<T, Allocator>::EraseOne(const C& function)
 	{
 		if (first == nullptr)
-		{
-			BLAZE_LOG_FATAL("Erasing from an empty list");
-			return;
-		}
+			return false;
 
 		if (function(first->value))
 		{
 			EraseFirst();
-			return;
+			return true;
 		}
 
 		Node* prev = first;
@@ -313,12 +318,14 @@ namespace Blaze
 			if (function(curr->value))
 			{
 				EraseAfter(Iterator(prev));
-				return;
+				return true;
 			}
 
 			prev = curr;
 			curr = curr->next;
 		}
+
+		return false;
 	}
 	template<typename T, AllocatorType Allocator>
 	inline List<T, Allocator> List<T, Allocator>::SplitAfter(const Iterator& it)

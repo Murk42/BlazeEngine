@@ -5,6 +5,7 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>

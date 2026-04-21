@@ -68,7 +68,7 @@ namespace Blaze
 		}
 		constexpr Vector<T, Sy> operator* (const Vector<T, Sy>& v) const
 		{
-			Vector<T, Sy> out;
+			Vector<T, Sy> out{ };
 
 			for (uintMem i = 0; i != Sy; ++i)
 				for (uintMem j = 0; j != Sx; ++j)

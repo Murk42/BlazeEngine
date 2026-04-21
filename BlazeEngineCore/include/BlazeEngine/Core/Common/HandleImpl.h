@@ -1,3 +1,4 @@
+#include "Handle.h"
 #pragma once
 
 namespace Blaze
@@ -27,8 +28,9 @@ namespace Blaze
 	{
 		if (ptr)
 		{
+			void* objectMemoryStart = dynamic_cast<void*>(ptr);
 			ptr->~T();
-			allocator.Free(ptr);
+			allocator.Free(objectMemoryStart);
 			ptr = nullptr;
 		}
 	}
@@ -86,24 +88,26 @@ namespace Blaze
 		return *this;
 	}
 	template<typename T, AllocatorType Allocator>
+	inline Handle<T, Allocator>::Handle(T* ptr, Allocator&& allocator)
+		: ptr(ptr), allocator(std::move(allocator))
+	{
+	}
+	template<typename T, AllocatorType Allocator>
 	template<typename ...Args> requires IsConstructibleFrom<T, Args...>
 	inline auto Handle<T, Allocator>::Create(Args && ...args) -> Handle
 	{
-		Handle<T, Allocator> handle;
-		handle.ptr = static_cast<T*>(handle.allocator.Allocate(sizeof(T)));
-		std::construct_at(handle.ptr, std::forward<Args>(args)...);
-		return handle;
+		Allocator allocator{ };
+		T* object = static_cast<T*>(allocator.Allocate(sizeof(T)));
+		std::construct_at(object, std::forward<Args>(args)...);
+		return Handle<T, Allocator>(object, std::move(allocator));
 	}
 	template<typename T, AllocatorType Allocator>
 	template<IsDerivedFrom<T> D, typename ... Args> requires HasVirtualDestructor<D> && IsConstructibleFrom<D, Args...>
 	inline auto Handle<T, Allocator>::CreateDerived(Args&& ... args) -> Handle
 	{
-		Handle<T, Allocator> handle;
-
-		D* ptr = static_cast<D*>(handle.allocator.Allocate(sizeof(D)));
-		std::construct_at(ptr, std::forward<Args>(args)...);
-
-		handle.ptr = static_cast<T*>(ptr);
-		return handle;
+		Allocator allocator{ };
+		D* object = static_cast<D*>(allocator.Allocate(sizeof(D)));
+		std::construct_at(object, std::forward<Args>(args)...);
+		return Handle<T, Allocator>(object, std::move(allocator));
 	}
 }

@@ -11,7 +11,7 @@ namespace Blaze::UI
 	public:
 		virtual ~FontGlyphRasterizer() {}
 
-		virtual Bitmap Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const = 0;
+		virtual Bitmap Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const = 0;
 	};
 
 	namespace FontGlyphRasterizers
@@ -19,31 +19,31 @@ namespace Blaze::UI
 		class BLAZE_API MonochromeFontGlyphRasterizer : public FontGlyphRasterizer
 		{
 		public:
-			Bitmap Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const override;
+			Bitmap Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const override;
 		};
 
 		class BLAZE_API AntialiasedFontGlyphRasterizer : public FontGlyphRasterizer
 		{
 		public:
-			Bitmap Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const override;
+			Bitmap Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const override;
 		};
 
 		class BLAZE_API HorizontalLCDFontGlyphRasterizer : public FontGlyphRasterizer
 		{
 		public:
-			Bitmap Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const override;
+			Bitmap Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const override;
 		};
 
 		class BLAZE_API VerticalLCDFontGlyphRasterizer : public FontGlyphRasterizer
 		{
 		public:
-			Bitmap Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const override;
+			Bitmap Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const override;
 		};
 
 		class BLAZE_API SDFFontGlyphRasterizer : public FontGlyphRasterizer
 		{
 		public:
-			Bitmap Render(const FontFace& fontFace, float rasterFontHeight, uint32 glyphIndex) const override;
+			Bitmap Render(const FontFace& fontFace, uint32 rasterFontHeight, uint32 glyphIndex) const override;
 		};
 	}
 }

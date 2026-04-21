@@ -1,5 +1,6 @@
 #pragma once
-#include "BlazeEngine/Graphics/Core/GraphicsAPI_OpenGL.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/BufferedRendererBase_OpenGL.h"
 #include "BlazeEngine/UI/Graphics/Renderers/AntialiasedTextRenderer.h"
 
@@ -11,13 +12,10 @@ namespace Blaze::Graphics::OpenGL
 		AntialiasedTextRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferInstanceCount = 64, bool loadDefaultShaders = true);
 		~AntialiasedTextRenderer_OpenGL();
 
-		void StartRender(const RenderContext& context) override;
-		void EndRender(const RenderContext& context) override;
-		void Render(const TextRectRenderData& data, const RenderContext& context) override;
-
-		GraphicsContextBase& GetGraphicsContext() const { return graphicsContext; }
+		void StartRender(const RenderContext_OpenGL& context) override;
+		void EndRender() override;
+		void Render(const TextRectRenderData& data) override;
 	private:
-		GraphicsContext_OpenGL& graphicsContext;
 		VertexArray va;
 
 		const Texture2D* textures[8]{ };
@@ -25,7 +23,7 @@ namespace Blaze::Graphics::OpenGL
 
 		Fence fence;
 
-		void Flush(const RenderContext& context);
+		void Flush();
 		void WaitFence();
 	};
 }

@@ -90,6 +90,7 @@
 
 #include "BlazeEngine/Core/String/FixedString.h"
 #include "BlazeEngine/Core/String/String.h"
+#include "BlazeEngine/Core/String/StringCharIterator.h"
 #include "BlazeEngine/Core/String/StringCommon.h"
 #include "BlazeEngine/Core/String/StringIterator.h"
 #include "BlazeEngine/Core/String/StringTypeConverter.h"
@@ -103,7 +104,7 @@
 #include "BlazeEngine/Core/Time/Stopwatch.h"
 #include "BlazeEngine/Core/Time/TimeInterval.h"
 #include "BlazeEngine/Core/Time/TimePoint.h"
-#include "BlazeEngine/Core/Time/Timing.h"
+#include "BlazeEngine/Core/Time/TimingTree.h"
 
 #include "BlazeEngine/Core/Type/FunctionTraits.h"
 #include "BlazeEngine/Core/Type/IntegerTraits.h"

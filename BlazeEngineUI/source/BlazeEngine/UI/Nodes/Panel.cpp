@@ -4,10 +4,11 @@
 namespace Blaze::UI::Nodes
 {
 	Panel::Panel()
+		: blocksHitTest(true)
 	{
 		dataMap.SetTypeName("Panel");
 	}
-	Panel::Panel(Node& parent, const NodeTransform& transform, const Style& style)
+	Panel::Panel(Node& parent, const NodeTransform& transform, const PanelStyle& style)
 		: Panel()
 	{
 		SetStyle(style);
@@ -17,34 +18,17 @@ namespace Blaze::UI::Nodes
 	Panel::~Panel()
 	{
 	}
-	void Panel::SetStyle(const Panel::Style& style)
+	void Panel::SetStyle(const PanelStyle& style)
 	{
-		renderUnit.fillColor = style.fillColor;
-		renderUnit.borderColor = style.borderColor;
-		renderUnit.borderWidth = style.borderWidth;
-		renderUnit.cornerRadius = style.cornerRadius;
+		renderUnit.style = style;
 	}
-	Panel::Style Panel::GetStyle() const
+	PanelStyle Panel::GetStyle() const
 	{
-		return {
-			.fillColor = renderUnit.fillColor,
-			.borderColor = renderUnit.borderColor,
-			.borderWidth = renderUnit.borderWidth,
-			.cornerRadius = renderUnit.cornerRadius
-		};
+		return renderUnit.style;
 	}
 	void Panel::SetBlocksHitTestFlag(bool blocksHitTest)
 	{
 		this->blocksHitTest = blocksHitTest;
-	}
-	bool Panel::PreRender(const RenderContext& renderContext)
-	{
-		auto finalTransform = GetFinalTransform();
-		renderUnit.pos = finalTransform.position;
-		renderUnit.right = finalTransform.Right() * finalTransform.size.x;
-		renderUnit.up = finalTransform.Up() * finalTransform.size.y;
-
-		return false;
 	}
 	RenderUnitBase* Panel::GetRenderUnit(uintMem index)
 	{
@@ -55,5 +39,12 @@ namespace Blaze::UI::Nodes
 	Node::HitStatus Panel::HitTest(Vec2f screenPosition)
 	{
 		return blocksHitTest ? Node::HitTest(screenPosition) : HitStatus::NotHit;
+	}
+	void Panel::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
+	{
+		auto finalTransform = GetFinalTransform();
+		renderUnit.pos = finalTransform.position;
+		renderUnit.right = finalTransform.Right() * finalTransform.size.x;
+		renderUnit.up = finalTransform.Up() * finalTransform.size.y;
 	}
 }

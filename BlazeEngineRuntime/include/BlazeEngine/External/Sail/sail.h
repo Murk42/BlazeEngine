@@ -1,5 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/Time/Timing.h"
+#include "BlazeEngine/Core/Time/TimingTree.h"
 #include "sail/sail.h"
 
 class ReadStream;
@@ -14,7 +14,7 @@ namespace Blaze
 
 	void sail_EnableLogs(bool enable);
 
-	TimingResult InitializeSail();
+	bool InitializeSail(TimingTree& timingTree);
 	void TerminateSail();
 
 #define SAIL_CHECK_RET(value, ret, message, ...) if (sail_status_t status = (value)) { Debug::Logger::LogError(u8"SAIL image library", Format<char8_t>(message + StringView(". Returned value:") + sail_GetStatusString(status), __VA_ARGS__)); return ret; }

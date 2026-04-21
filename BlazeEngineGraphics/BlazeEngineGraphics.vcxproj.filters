@@ -24,16 +24,13 @@
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\BufferedRendererBase_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\RenderContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\BasicIndexedMeshRenderer_OpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\RendererRegistry.cpp">
+    <ClCompile Include="source\BlazeEngine\Graphics\Core\RendererRegistry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Shaders\Shaders.cpp">
@@ -43,9 +40,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\TexturedRectRenderer_OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BlazeEngine\Graphics\Core\GraphicsContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.cpp">
@@ -99,6 +93,12 @@
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\Quad2DRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\FramebufferBase_OpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\Graphics\App\GraphicsAppRuntimeThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -107,13 +107,10 @@
     <ClInclude Include="include\BlazeEngine\Graphics\BlazeEngineGraphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsContextBase.h">
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsAPI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsAPI_OpenGL.h">
+    <ClInclude Include="include\BlazeEngine\Graphics\GraphicsAPI_OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\BasicIndexedMeshRenderer.h">
@@ -128,13 +125,13 @@
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\PanelRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RenderContext.h">
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\RenderContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RendererBase.h">
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\RendererBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RendererRegistry.h">
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\RendererRegistry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\TexturedRectRenderer.h">
@@ -213,6 +210,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\Quad2DRenderer_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\OpenGL\FramebufferBase_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\FramebufferBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\OpenGL\RenderContext_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\OpenGL\RendererBase_OpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\App\GraphicsAppLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\Graphics\App\GraphicsAppRuntimeThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

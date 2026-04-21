@@ -21,16 +21,37 @@ namespace Blaze
 		template<typename _Key>
 		VirtualMapNodeBase(VirtualMapNodeBase* prev, VirtualMapNodeBase* next, _Key&& key);
 		virtual ~VirtualMapNodeBase();
-	};
+	};	
 
-	template<HashableType Key, typename Base, typename Derived> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && (!IsFinal<Derived>)
-	struct BLAZE_API VirtualMapNode : public VirtualMapNodeBase<Key, Base>, public Derived
+	template<HashableType Key, typename Base, typename Derived>
+	struct VirtualMapNode;
+
+	template<HashableType Key, typename Base, typename Derived> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && (!IsFinal<Derived>) && std::is_class_v<Derived>
+	struct BLAZE_API VirtualMapNode<Key, Base, Derived> : public VirtualMapNodeBase<Key, Base>, public Derived
 	{
 		using DerivedType = Derived;
 
 		template<typename _Key, typename ... Args> requires IsConstructibleFrom<Derived, Args...>
-		VirtualMapNode(VirtualMapNodeBase<Key, Base>* prev, VirtualMapNodeBase<Key, Base>* next, _Key&& key, Args&& ... args);
-		~VirtualMapNode() override;
+		VirtualMapNode(VirtualMapNodeBase<Key, Base>* prev, VirtualMapNodeBase<Key, Base>* next, _Key&& key, Args&& ... args) 
+			: VirtualMapNodeBase<Key, Base>(prev, next, std::forward<_Key>(key)), Derived(std::forward<Args>(args)...)
+		{
+		}
+		~VirtualMapNode() override { }
+	};
+
+	template<HashableType Key, typename Base, typename Derived> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && (!IsFinal<Derived>) && (!std::is_class_v<Derived>)
+	struct BLAZE_API VirtualMapNode<Key, Base, Derived> : public VirtualMapNodeBase<Key, Base>
+	{
+		using DerivedType = Derived;
+
+		Derived value;
+
+		template<typename _Key, typename ... Args> requires IsConstructibleFrom<Derived, Args...>
+		VirtualMapNode(VirtualMapNodeBase<Key, Base>* prev, VirtualMapNodeBase<Key, Base>* next, _Key&& key, Args&& ... args)
+			: VirtualMapNodeBase<Key, Base>(prev, next, std::forward<_Key>(key)), value(std::forward<Args>(args)...)
+		{
+		}
+		~VirtualMapNode() override { }
 	};
 
 	template<HashableType Key, typename Base>
@@ -233,24 +254,24 @@ namespace Blaze
 
 		static uint64 Hash(const Key& key);
 
-		Bucket* GetBucketFromHash(uintMem hash) const;
+		Bucket* GetBucketFromHash(uint64 hash) const;
 
 		//Wont check if hashMod is smaller than bucketCount
-		Bucket* GetBucketFromHashModUnsafe(uintMem hash) const;
+		Bucket* GetBucketFromHashModUnsafe(uint64 hash) const;
 
-		Iterator FindWithHint(const Key& key, uintMem hash);
-		ConstIterator FindWithHint(const Key& key, uintMem hash) const;
+		Iterator FindWithHint(const Key& key, uint64 hash);
+		ConstIterator FindWithHint(const Key& key, uint64 hash) const;
 
 		//Wont check if bucket is nullptr
 		Iterator FindWithHintUnsafe(const Key& key, Bucket* bucket);
 		ConstIterator FindWithHintUnsafe(const Key& key, Bucket* bucket) const;
 
 		template<bool Replace, typename _Key, typename Derived, typename ... Args> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && IsConstructibleFrom<Key, _Key> && IsConstructibleFrom<Derived, Args...>
-		InsertResult<Derived> InsertWithHint(_Key&& key, uintMem hash, Args&& ... args);
+		InsertResult<Derived> InsertWithHint(_Key&& key, uint64 hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
 		template<bool Replace, typename _Key, typename Derived, typename ... Args> requires (IsDerivedFrom<Derived, Base> || SameAs<Base, void>) && IsConstructibleFrom<Key, _Key> && IsConstructibleFrom<Derived, Args...>
-		InsertResult<Derived>InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uintMem hash, Args&& ... args);
+		InsertResult<Derived>InsertWithHintUnsafe(_Key&& key, Bucket* bucket, uint64 hash, Args&& ... args);
 
 		//Wont check if bucket is nullptr
 		void EraseNodeUnsafe(Bucket* bucket, VirtualMapNodeBase<Key, BaseType>* node);

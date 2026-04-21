@@ -1,29 +1,35 @@
 #pragma once
 
-#include "BlazeEngine/Graphics/Core/GraphicsContextBase.h"
+#include "BlazeEngine/Graphics/Core/FramebufferBase.h"
+#include "BlazeEngine/Graphics/Core/GraphicsContext.h"
+#include "BlazeEngine/Graphics/Core/RenderContext.h"
+#include "BlazeEngine/Graphics/Core/RendererBase.h"
+#include "BlazeEngine/Graphics/Core/RendererRegistry.h"
 
-#ifdef GRAPHICS_OPENGL
-#include "BlazeEngine/Graphics/Core/OpenGL/Framebuffer_OpenGL.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/GraphicsContext_OpenGL.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/RenderWindowFramebuffer_OpenGL.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/RenderWindow_OpenGL.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/Semaphore_OpenGL.h"
+#include "BlazeEngine/Graphics/Renderers/BasicIndexedMeshRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/Line2DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/PanelRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/Quad2DRenderer.h"
+#include "BlazeEngine/Graphics/Renderers/TexturedRectRenderer.h"
 
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLRenderbuffer.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture1D.h"
-#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
-#include "BlazeEngine/Graphics/Renderers/OpenGL/PanelRenderer_OpenGL.h"
-#include "BlazeEngine/Graphics/Renderers/OpenGL/TexturedRectRenderer_OpenGL.h"
-#include "BlazeEngine/Graphics/Renderers/OpenGL/BasicIndexedMeshRenderer_OpenGL.h"
-#include "BlazeEngine/Graphics/Renderers/OpenGL/Line2DRenderer_OpenGL.h"
-#include "BlazeEngine/Graphics/Renderers/OpenGL/Quad2DRenderer_OpenGL.h"
+#include "BlazeEngine/Graphics/Common/BasicIndexedMesh.h"
+
+#include "BlazeEngine/Graphics/App/GraphicsAppLayer.h"
+#include "BlazeEngine/Graphics/App/GraphicsAppRuntimeThread.h"
+
+#if not (defined(BLAZE_GRAPHICS_OPENGL))
+#define BLAZE_GRAPHICS_OPENGL
 #endif
+
+#ifdef BLAZE_GRAPHICS_OPENGL
+#include "BlazeEngine/Graphics/GraphicsAPI_OpenGL.h"
+
+namespace Blaze::Graphics
+{
+	using namespace OpenGL;
+}
+#endif
+
 
 #ifdef GRAPHICS_VULKAN
 #include "BlazeEngine/Graphics/Vulkan/Core/Framebuffer_Vulkan.h"

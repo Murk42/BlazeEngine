@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Graphics/Renderers/OpenGL/AntialiasedTextRenderer_OpenGL.h"
 #include "BlazeEngine/UI/Graphics/Shaders/Shaders.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLShader.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/Textures/OpenGLTexture2D.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -18,7 +20,7 @@ namespace Blaze::Graphics::OpenGL
 	};
 
 	AntialiasedTextRenderer_OpenGL::AntialiasedTextRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferInstanceCount, bool loadDefaultShaders)
-		: BufferedRendererBase_OpenGL(bufferInstanceCount * sizeof(Instance), graphicsContext), graphicsContext(graphicsContext), instanceCount(0)
+		: BufferedRendererBase_OpenGL(graphicsContext, bufferInstanceCount * sizeof(Instance)), instanceCount(0)
 	{
 		if (loadDefaultShaders)
 		{
@@ -68,16 +70,18 @@ namespace Blaze::Graphics::OpenGL
 	{
 		WaitFence();
 	}
-	void AntialiasedTextRenderer_OpenGL::StartRender(const RenderContext& context)
+	void AntialiasedTextRenderer_OpenGL::StartRender(const RenderContext_OpenGL& renderContext)
 	{
 		graphicsContext.SelectProgram(&program);
 		graphicsContext.SelectVertexArray(&va);
+
+		program.SetUniform(0, renderContext.OrthographicsProjectionMatrix(-1, 1));
 	}
-	void AntialiasedTextRenderer_OpenGL::EndRender(const RenderContext& context)
+	void AntialiasedTextRenderer_OpenGL::EndRender()
 	{
-		Flush(context);
+		Flush();
 	}
-	void AntialiasedTextRenderer_OpenGL::Render(const TextRectRenderData& data, const RenderContext& context)
+	void AntialiasedTextRenderer_OpenGL::Render(const TextRectRenderData& data)
 	{
 		int textureIndex = 0;
 
@@ -96,7 +100,7 @@ namespace Blaze::Graphics::OpenGL
 
 			if (textureIndex == _countof(textures))
 			{
-				Flush(context);
+				Flush();
 				textureIndex = 0;
 				textures[0] = texture;
 			}
@@ -119,16 +123,14 @@ namespace Blaze::Graphics::OpenGL
 		instanceCount++;
 
 		if ((instanceCount + 1) * sizeof(Instance) > GetBufferSize())
-			Flush(context);
+			Flush();
 	}
-	void AntialiasedTextRenderer_OpenGL::Flush(const RenderContext& context)
+	void AntialiasedTextRenderer_OpenGL::Flush()
 	{
 		if (instanceCount == 0)
 			return;
 
 		FlushBuffer(0, sizeof(Instance) * instanceCount);
-
-		program.SetUniform(0, Mat4f::OrthographicMatrix(0, (float)context.GetTargetSize().x, 0, (float)context.GetTargetSize().y, -1, 1));
 
 		for (uint i = 0; i < _countof(textures) && textures[i] != nullptr; ++i)
 		{

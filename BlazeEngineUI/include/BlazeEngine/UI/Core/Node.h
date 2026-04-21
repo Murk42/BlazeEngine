@@ -18,7 +18,7 @@ namespace Blaze::UI
 			HitBlocking = 1,
 			HitNotBlocking = 2,
 		};
-		struct TransformUpdatedEvent
+		struct FinalScaleUpdatedEvent
 		{
 			Node& node;
 		};
@@ -54,8 +54,8 @@ namespace Blaze::UI
 			Node& node;
 		};
 		NodeDataMap dataMap;
-
-		EventDispatcher<TransformUpdatedEvent> transformUpdatedEventDispatcher;
+		
+		EventDispatcher<FinalScaleUpdatedEvent> finalScaleUpdatedEventDispatcher;
 		EventDispatcher<FinalTransformUpdatedEvent> finalTransformUpdatedEventDispatcher;
 		EventDispatcher<NodeEnabledStateChangedEvent> enabledStateChangedEventDispatcher;
 		EventDispatcher<SurroundingNodeTreeChangedEvent> surroundingNodeTreeChangedEventDispatcher;
@@ -75,16 +75,20 @@ namespace Blaze::UI
 		void SetParent(Node* parent);
 
 		void SetTransform(const NodeTransform& transform);
-		const NodeTransform& GetTransform() const;
-		void SetFinalTransform(const NodeFinalTransform& newFinalTransform);
-		const NodeFinalTransform& GetFinalTransform() const;
-		/*
-			Sets the transform and marks it as dirty
-		*/
+
 		void MarkTransformDirty();
 		bool GetTransformDirtyFlag() const;
+		const NodeTransform& GetTransform() const;
+
+		void SetScale(float newScale);
+		const float GetFinalScale() const;
+
 		void MarkFinalTransformDirty();
 		bool GetFinalTransformDirtyFlag() const;
+		const NodeFinalTransform& GetFinalTransform() const;
+
+		Vec2f TransformFromLocalToFinalSpace(Vec2f point) const;
+		Vec2f TransformFromFinalToLocalSpace(Vec2f point) const;
 
 		void Disable();
 		void Enable();
@@ -105,6 +109,8 @@ namespace Blaze::UI
 		Node* GetPreviousNodeInTree() const;
 		ArrayView<Node&> GetChildren() const;
 		Screen* GetScreen() const;
+	protected:
+		virtual void UpdateTransform() { }
 	private:
 		Screen* screen;
 
@@ -113,6 +119,8 @@ namespace Blaze::UI
 		Node* prev;
 		Array<Node&> children;
 
+		float scale;
+		float finalScale;
 		NodeTransform transform;
 		NodeFinalTransform finalTransform;
 
@@ -121,7 +129,6 @@ namespace Blaze::UI
 
 		bool transformDirty : 1;
 		bool finalTransformDirty : 1;
-
 
 		void PropagateScreenChange(Screen* newScreen);
 		void PropagateScreenChangeEvent(Screen* oldScreen);
@@ -141,6 +148,7 @@ namespace Blaze::UI
 
 	inline Node* Node::GetParent() const { return parent; }
 	inline const NodeTransform& Node::GetTransform() const { return transform; }
+	inline const float Node::GetFinalScale() const { return finalScale; }
 	inline const NodeFinalTransform& Node::GetFinalTransform() const { return finalTransform; }
 	inline bool Node::GetTransformDirtyFlag() const { return transformDirty; }
 	inline bool Node::GetFinalTransformDirtyFlag() const { return finalTransformDirty; }

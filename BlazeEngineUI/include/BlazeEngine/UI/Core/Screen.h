@@ -1,7 +1,5 @@
 #pragma once
-#include "BlazeEngine/Core/File/Path.h"
 #include "BlazeEngine/UI/Core/Node.h"
-#include "BlazeEngine/Core/Resource/ResourceManager.h"
 
 namespace Blaze::UI
 {
@@ -26,12 +24,11 @@ namespace Blaze::UI
 		{
 			Screen& screen;
 		};
-
-		ResourceManager& resourceManager;
+		
 		EventDispatcher<DestructionEvent> destructionEventDispatcher;
-		EventDispatcher<ScreenTreeChangedEvent> treeChangedEventDispatcher;
+		EventDispatcher<ScreenTreeChangedEvent> treeChangedEventDispatcher;		
 
-		Screen(ResourceManager& resourceManager);
+		Screen();
 		virtual ~Screen();
 
 		HitStatus HitTest(Vec2f screenPos) override;

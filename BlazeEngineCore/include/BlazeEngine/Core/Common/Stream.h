@@ -40,20 +40,16 @@ namespace Blaze
 	template<typename T>
 	concept Serializable = requires(const T & a, WriteStream & stream) {
 		a.Serialize(stream);
-	} || requires(const T & a, WriteStream & stream) {
-		stream << a;
-	} || std::is_trivially_copy_assignable_v<T>;
+	} || IsTriviallyCopyable<T>;
 	template<typename T>
 	concept Deserializable = requires(T & a, ReadStream & stream) {
 		a.Deserialize(stream);
-	} || requires(T & a, ReadStream & stream) {
-		stream >> a;
-	} || std::is_trivially_copy_assignable_v<T>;
+	} || IsTriviallyCopyable<T>;
 
-	template<typename T> requires Serializable<T>
+	template<Serializable T>
 	WriteStream& operator<<(WriteStream& stream, const T& value)
 	{
-		if constexpr (std::is_trivially_copy_assignable_v<T>)
+		if constexpr (IsTriviallyCopyable<T>)
 			stream.Write(&value, sizeof(T));
 		else
 			value.Serialize(stream);
@@ -63,23 +59,24 @@ namespace Blaze
 	template<Deserializable T>
 	ReadStream& operator>>(ReadStream& stream, T& value)
 	{
-		if constexpr (std::is_trivially_copy_assignable_v<T>)
+		if constexpr (IsTriviallyCopyable<T>)
 			stream.Read(&value, sizeof(T));
 		else
 			value.Deserialize(stream);
 
 		return stream;
 	}
-	template<typename T> requires std::is_trivially_copy_assignable_v<T>
+	template<Serializable T>
 	Stream& operator>>(Stream& stream, T& value)
 	{
-		stream.Read(&value, sizeof(T));
+		((ReadStream&)stream) >> value;
+
 		return stream;
 	}
-	template<typename T> requires std::is_trivially_copy_assignable_v<T>
+	template<Deserializable T>
 	Stream& operator<<(Stream& stream, T& value)
 	{
-		stream.Write(&value, sizeof(T));
+		((WriteStream&)stream) << value;
 		return stream;
 	}
 }

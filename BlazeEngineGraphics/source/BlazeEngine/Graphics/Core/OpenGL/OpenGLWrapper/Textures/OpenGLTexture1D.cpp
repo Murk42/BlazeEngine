@@ -26,9 +26,12 @@ namespace Blaze::Graphics::OpenGL
 	
 	void Texture1D::Create(uint size, TextureInternalPixelFormat internalFormat, const Texture1DSettings& settings)
 	{
-		Result result;
-		auto internalPixelFormat = OpenGLInternalPixelFormat(internalFormat, result);
-		if (result) return;		
+		GLenum internalPixelFormat;
+		if (!OpenGLInternalPixelFormat(internalFormat, internalPixelFormat))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureInternalPixelFormat enum value");
+			return;
+		}
 
 		this->size = size;						
 		glTextureStorage1D(id, settings.textureLevelCount, internalPixelFormat, size);				
@@ -41,13 +44,18 @@ namespace Blaze::Graphics::OpenGL
 		SetPixels(0, size, format, type, pixels, 0);
 	}
 	void Texture1D::SetPixels(uint offset, uint size, BitmapColorFormat format, BitmapColorComponentType type, void* pixels, uint textureLevel)
-	{
-		Result result;
-		
-		GLenum _format = OpenGLPixelFormat(format, result);
-		if (result) return;
-		GLenum _type = OpenGLPixelType(type, result);
-		if (result) return;
+	{				
+		GLenum _format, _type;
+		if (!OpenGLPixelFormat(format, _format))
+		{
+			BLAZE_LOG_ERROR("Invalid BitmapColorFormat enum value");
+			return;
+		}
+		if (!OpenGLPixelType(type, _type))
+		{
+			BLAZE_LOG_ERROR("Invalid BitmapColorComponentType enum value");
+			return;
+		}
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);		
@@ -70,13 +78,24 @@ namespace Blaze::Graphics::OpenGL
 
 	void Texture1D::SetSettings(const Texture1DSettings& settings)
 	{
-		Result result;
-		GLenum _min = OpenGLTextureMinSampling(settings.min, settings.mip, settings.textureLevelCount > 1, result);
-		if (result) return;
-		GLenum _mag = OpenGLTextureMagSampling(settings.mag, result);
-		if (result) return;
-		GLenum _xWrap = OpenGLTextureWrapping(settings.xWrap, result);
-		if (result) return;
+		GLenum _min;
+		if (!OpenGLTextureMinSampling(settings.min, settings.mip, settings.textureLevelCount > 1, _min))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureSampling enum value");
+			return;
+		}
+		GLenum _mag;
+		if (!OpenGLTextureMagSampling(settings.mag, _mag))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureSampling enum value");
+			return;
+		}
+		GLenum _xWrap;
+		if (!OpenGLTextureWrapping(settings.xWrap, _xWrap))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureWrapping enum value");
+			return;
+		}
 
 		glTextureParameteri(id, GL_TEXTURE_WRAP_S, _xWrap);
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, _min);

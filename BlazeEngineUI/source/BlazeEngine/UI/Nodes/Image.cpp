@@ -93,74 +93,62 @@ namespace Blaze::UI::Nodes
 		return out;
 	}
 	Image::Image()
-		: renderUnitDirty(true), imageLayout(ImageLayout::Fit), uv1(0), uv2(1)
 	{
 		dataMap.SetTypeName("Image");
-
-		finalTransformUpdatedEventDispatcher.AddHandler<&Image::OnEvent>(*this);
 	}
-	Image::Image(Node& parent, const NodeTransform& transform, ResourceBaseRef texture, Vec2f uv1, Vec2f uv2, const Style& style)
+	Image::Image(Node& parent, const NodeTransform& transform, const ImageStyle& style, ImageLayout layout)
 		: Image()
 	{
-		SetStyle(style);
-		SetTexture(texture, uv1, uv2);
 		SetTransform(transform);
 		SetParent(&parent);
+		SetStyle(style);
+		SetLayout(layout);
 	}
 	Image::~Image()
 	{
-		finalTransformUpdatedEventDispatcher.RemoveHandler<&Image::OnEvent>(*this);
 	}
-	void Image::SetTexture(ResourceBaseRef texture, Vec2f uv1, Vec2f uv2)
+	void Image::SetLayout(ImageLayout layout)
 	{
-		renderUnit.texture = texture;
-		this->uv1 = uv1;
-		this->uv2 = uv2;
-		renderUnitDirty = true;
+		this->layout = layout;
+
+		UpdateImageRenderUnit();
 	}
-	void Image::SetStyle(const Style& style)
+	ImageLayout Image::GetLayout() const
 	{
-		renderUnit.color = style.blendColor;
-		renderUnit.blend = style.blendFactor;
-		renderUnit.alpha = style.alphaMultiplier;
-		imageLayout = style.layout;
-		renderUnitDirty = true;
+		return layout;
 	}
-	auto Image::GetStyle() const -> Style
+	void Image::SetStyle(const ImageStyle& style)
 	{
-		Style style;
-		style.blendColor = renderUnit.color;
-		style.blendFactor = renderUnit.blend;
-		style.alphaMultiplier = renderUnit.alpha;
-		style.layout = imageLayout;
+		this->style = style;
+		renderUnit.style = style;
+	}
+	ImageStyle Image::GetStyle() const
+	{		
 		return style;
-	}
-	bool Image::PreRender(const RenderContext& renderContext)
-	{
-		NodeFinalTransform transform = GetFinalTransform();
-
-		if (!renderUnitDirty)
-			return false;
-
-		renderUnitDirty = false;
-
-		Vec2f textureSize = (Vec2f)renderUnit.texture.GetValue<Graphics::OpenGL::Texture2D>()->GetSize();
-		auto [renderPos, renderSize, renderUV1, renderUV2] = ApplyImageLayout(imageLayout, transform, uv1, uv2, textureSize);
-
-		renderUnit.uv1 = renderUV1;
-		renderUnit.uv2 = renderUV2;
-		renderUnit.pos = renderPos;
-		renderUnit.right = transform.right * renderSize.x;
-		renderUnit.up = Vec2f(-transform.right.y, transform.right.x) * renderSize.y;
-
-		return false;
 	}
 	RenderUnitBase* Image::GetRenderUnit(uintMem index)
 	{
 		return index == 0 ? &renderUnit : nullptr;
 	}
-	void Image::OnEvent(const Node::FinalTransformUpdatedEvent& event)
+	void Image::FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event)
+	{	
+		UpdateImageRenderUnit();
+	}
+	void Image::UpdateImageRenderUnit()
 	{
-		renderUnitDirty = true;
+		if (auto texture = style.texture.GetValue<Graphics::OpenGL::Texture2D>())
+		{
+			NodeFinalTransform transform = GetFinalTransform();
+
+			Vec2f textureSize = (Vec2f)texture->GetSize();
+			auto [renderPos, renderSize, renderUV1, renderUV2] = ApplyImageLayout(layout, transform, style.uv1, style.uv2, textureSize);
+
+			renderUnit.style.uv1 = renderUV1;
+			renderUnit.style.uv2 = renderUV2;
+
+			renderUnit.pos = renderPos;
+			renderUnit.right = transform.right * renderSize.x;
+			renderUnit.up = transform.Up() * renderSize.y;
+		}
 	}
 }

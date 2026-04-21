@@ -1,22 +1,26 @@
 #pragma once
-#include "BlazeEngine/Core/Common/Rect.h"
 #include "BlazeEngine/Graphics/Renderers/PanelRenderer.h"
 #include "BlazeEngine/UI/Graphics/RenderUnit.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {
+	struct PanelStyle
+	{
+		ColorRGBAf fillColor = 0x111111ff;
+		ColorRGBAf borderColor = 0xeeeeeeff;
+		float borderWidth = 1;
+		float cornerRadius = 10;
+	};
+
 	class BLAZE_API PanelRenderUnit : public RenderUnit<Graphics::PanelRenderer>
 	{
 	public:
 		Vec2f pos, right, up;
-		ColorRGBAf fillColor = 0x444444ff;
-		ColorRGBAf borderColor = 0x222222ff;
-		float borderWidth = 1;
-		float cornerRadius = 10;
+		PanelStyle style;		
 
 		PanelRenderUnit();
 		~PanelRenderUnit();
 
-		void Render(const Node& node, Graphics::PanelRenderer& renderer, const RenderContext& renderContext) override;
+		void Render(const Node& node, Graphics::PanelRenderer& renderer) override;
 	};
 }

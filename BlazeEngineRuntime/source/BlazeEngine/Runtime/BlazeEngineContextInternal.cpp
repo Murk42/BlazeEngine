@@ -26,15 +26,52 @@ namespace Blaze
 		return blazeEngineContext->GetWindowFromHandle((SDL_Window*)handle);
 	}
 
-	bool BlazeEngineContext::InitializeEngine(const InitializationParameters& params)
+	void BlazeEngineContext::SetInitializationTimingTree(TimingTree initializationTimingTree)
+	{
+		this->initializationTimingTree = std::move(initializationTimingTree);
+	}
+
+
+#define _STRINGIZE(x) #x
+#define STRINGIZE(x) _STRINGIZE(x)
+
+	bool BlazeEngineContext::InitializeEngine(const InitializationParameters& params, TimingTree& timingTree)
 	{
 		if (blazeEngineContext == nullptr)
 		{
-			InitializeSDL();
-			InitializeFreeType();
-			InitializeSail();
+			timingTree.Start("SDL initialization");
 
+			if (!InitializeSDL(timingTree))
+				return false;
+
+			float SDLTime = timingTree.End();
+			int SDLVersion = SDL_GetVersion();
+			BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized SDL {}.{}.{} ({.1f}ms)", SDL_VERSIONNUM_MAJOR(SDLVersion), SDL_VERSIONNUM_MINOR(SDLVersion), SDL_VERSIONNUM_MICRO(SDLVersion), SDLTime * 1000.0);
+
+
+			timingTree.Start("FreeType initialization");
+
+			if (!InitializeFreeType(timingTree))
+				return false;
+
+			float freeTypeTime = timingTree.End();
+			BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized FreeType " STRINGIZE(FREETYPE_MAJOR) "." STRINGIZE(FREETYPE_MINOR) "." STRINGIZE(FREETYPE_PATCH) " ({.1f}ms)", freeTypeTime * 1000.0);
+
+
+			timingTree.Start("Sail initialization");
+
+			if (!InitializeSail(timingTree))
+				return false;
+
+			float sailTime = timingTree.End();
+			BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized sail " SAIL_VERSION_STRING " ({.1f}ms)", sailTime * 1000.0);
+
+
+			timingTree.Start("Blaze context initialization");
 			new BlazeEngineContextInternal(params);
+			timingTree.End();
+
+
 			return true;
 		}
 		else
@@ -60,9 +97,9 @@ namespace Blaze
 	BlazeEngineContextInternal::BlazeEngineContextInternal(InitializationParameters parameters) :
 		previousEventFilter(nullptr), previousEventFilterUserData(nullptr)
 	{
-		ResetInputState();
-
 		blazeEngineContext = this;
+
+		nudgeEventNumber = SDL_RegisterEvents(1);
 
 		SDL_GetEventFilter(&previousEventFilter, &previousEventFilterUserData);
 		SDL_SetEventFilter(SDLEventFilter, this);
@@ -71,10 +108,6 @@ namespace Blaze
 	{
 		if (!windowsData.Empty())
 			BLAZE_LOG_ERROR("The engine context is being destroyed but there are windows that aren't destroyed");
-
-		//for (auto& cursor : cursors)
-		//	if (cursor != nullptr)
-		//		SDL_DestroyCursor((SDL_Cursor*)cursor);
 
 		SDL_SetEventFilter(previousEventFilter, previousEventFilterUserData);
 	}
@@ -143,80 +176,11 @@ namespace Blaze
 
 		return it->value.object;
 	}
-//	void BlazeEngineContextInternal::UpdateInputAndEvents()
-//	{
-//		CopyInputState();
-//
-//		if (!separateClientThreadMode)
-//		{
-//			SDL_Event event;
-//			while (SDL_PollEvent(&event));
-//		}
-//
-//		clientEventStack.ProcessEvents();
-//
-//#ifdef BLAZE_PLATFORM_WINDOWS
-//		sentMovedWindowEvent = false;
-//		sentResizedWindowEvent = false;
-//#endif
-//	}
-	//void* BlazeEngineContextInternal::GetSystemCursor(Input::CursorType type)
-	//{
-	//	std::lock_guard lg{ cursorsMutex };
-	//
-	//	auto& cursor = cursors[(uint)type];
-	//
-	//	if (cursor == nullptr)
-	//	{
-	//		struct Parameters
-	//		{
-	//			SDL_SystemCursor type;
-	//			void** cursor;
-	//		} parameters{ SDL_GetSDLSystemCursor(type), &cursor };
-	//
-	//		uint64 timeoutMilliseconds = 1000;
-	//		if (!ExecuteOnMainThread([](void* parameters) { *((Parameters*)parameters)->cursor = SDL_CreateSystemCursor(((Parameters*)parameters)->type); }, &parameters, timeoutMilliseconds))
-	//			BLAZE_LOG_ERROR("Timeout of {}ms elapsed for executing a function on the main thread", timeoutMilliseconds);
-	//	}
-	//
-	//	return cursor;
-	//}
-	Vec2f BlazeEngineContextInternal::GetMouseLastFramePos() const
+	void BlazeEngineContextInternal::NudgeMainThread()
 	{
-		return mouseLastFramePos;
-	}
-	Vec2f BlazeEngineContextInternal::GetMouseLastFrameMovementSum() const
-	{
-		return mouseLastFrameMovementSum;
-	}
-	Vec2f BlazeEngineContextInternal::GetMouseLastFrameScrollSum() const
-	{
-		return mouseLastFrameScrollSum;
-	}
-	Input::KeyFrameState BlazeEngineContextInternal::GetKeyFrameState(Input::Key key) const
-	{
-		bool down = downKeysDuringLastFrame[(uintMem)key];
-		bool pressed = pressedKeysDuringLastFrame[(uintMem)key];
-		bool released = releasedKeysDuringLastFrame[(uintMem)key];
-		return Input::KeyFrameState{
-			.pressed = pressed,
-			.released = released,
-			.down = down || pressed,
-			.up = !down || released,
-		};
-	}
-	Input::MouseButtonFrameState BlazeEngineContextInternal::GetMouseButtonFrameState(Input::MouseButton button) const
-	{
-		bool down = downMouseButtonsDuringLastFrame[(uintMem)button];
-		bool pressed = pressedMouseButtonsDuringCurrentFrame[(uintMem)button];
-		bool released = releasedMouseButtonsDuringCurrentUpdate[(uintMem)button];
-		return Input::MouseButtonFrameState{
-			.combo = mouseButtonsComboDuringLastFrame[(uintMem)button],
-			.pressed = pressed,
-			.released = released,
-			.down = down || pressed,
-			.up = !down || released,
-		};
+		SDL_Event event{ };
+		event.type = nudgeEventNumber;
+		SDL_PushEvent(&event);
 	}
 	bool BlazeEngineContextInternal::GetKeyState(Input::Key key) const
 	{
@@ -230,101 +194,24 @@ namespace Blaze
 	{
 		return mice;
 	}
-	void BlazeEngineContextInternal::ProcessEvents()
+	void BlazeEngineContextInternal::PollEvents()
 	{
-		CopyInputState();
+		SDL_Event event;
+		while (SDL_PollEvent(&event));
 
 		ProcessEventQueue();
-
+	}
+	bool BlazeEngineContextInternal::WaitForEvents(float seconds)
+	{
 		SDL_Event event;
-		while (SDL_PollEvent(&event))
+		if (SDL_WaitEventTimeout(&event, seconds * 1000.0f))
 		{
 			ProcessEventQueue();
+			return true;
 		}
 
-		ProcessEventQueue();
+		return false;
 	}
-	void BlazeEngineContextInternal::ResetInputState()
-	{
-		std::lock_guard lg{ inputStateMutex };
-
-		mouseCurrentPos = Vec2f();
-		mouseCurrentFrameMovementSum = Vec2f();
-		mouseCurrentScrollSum = Vec2f();
-		memset(mouseButtonsComboDuringCurrentFrame, 0, sizeof(mouseButtonsComboDuringCurrentFrame));
-		pressedMouseButtonsDuringCurrentFrame.reset();
-		releasedMouseButtonsDuringCurrentUpdate.reset();
-		downMouseButtonsDuringCurrentFrame.reset();
-		pressedKeysDuringCurrentFrame.reset();
-		releasedKeysDuringCurrentFrame.reset();
-		downKeysDuringCurrentFrame.reset();
-	}
-	void BlazeEngineContextInternal::CopyInputState()
-	{
-		std::lock_guard lg{ inputStateMutex };
-
-		pressedKeysDuringLastFrame = pressedKeysDuringCurrentFrame;
-		releasedKeysDuringLastFrame = releasedKeysDuringCurrentFrame;
-		downKeysDuringLastFrame = downKeysDuringCurrentFrame;
-		memcpy(mouseButtonsComboDuringLastFrame, mouseButtonsComboDuringCurrentFrame, sizeof(mouseButtonsComboDuringLastFrame));
-		pressedMouseButtonsDuringLastFrame = pressedMouseButtonsDuringCurrentFrame;
-		releasedMouseButtonsDuringLastUpdate = releasedMouseButtonsDuringCurrentUpdate;
-		downMouseButtonsDuringLastFrame = downMouseButtonsDuringCurrentFrame;
-		mouseLastFramePos = mouseCurrentPos;
-		mouseLastFrameMovementSum = mouseCurrentFrameMovementSum;
-		mouseLastFrameScrollSum = mouseLastFrameScrollSum;
-
-		releasedKeysDuringCurrentFrame.reset();
-		pressedKeysDuringCurrentFrame.reset();
-		downKeysDuringCurrentFrame.reset();
-		releasedMouseButtonsDuringCurrentUpdate.reset();
-		pressedMouseButtonsDuringCurrentFrame.reset();
-		downMouseButtonsDuringCurrentFrame.reset();
-		mouseCurrentFrameMovementSum = Vec2f();
-		mouseCurrentScrollSum = Vec2f();
-	}
-	//bool BlazeEngineContextInternal::ExecuteOnMainThread(void(*function)(void*), void* data, uint64 timeoutMilliseconds) const
-	//{
-	//	if (separateClientThreadMode)
-	//	{
-	//		struct Parameters
-	//		{
-	//			void(*function)(void*);
-	//			void* data;
-	//
-	//			bool finished;
-	//			std::mutex mutex;
-	//			std::condition_variable cv;
-	//		} parameters{ function, data, false };
-	//
-	//		auto tempFunc = [](void* _parameters) {
-	//			Parameters* parameters = (Parameters*)_parameters;
-	//
-	//			parameters->function(parameters->data);
-	//
-	//			std::unique_lock lk{ parameters->mutex };
-	//			parameters->finished = true;
-	//			parameters->cv.notify_all();
-	//			};
-	//
-	//		SDL_Event event;
-	//		SDL_zero(event);
-	//		event.type = mainThreadSDLEventIdentifier;
-	//		event.user.data1 = (void(*)(void*))tempFunc;
-	//		event.user.data2 = &parameters;
-	//
-	//		std::unique_lock lk{ parameters.mutex };
-	//		SDL_PushEvent(&event);
-	//		return parameters.cv.wait_for(lk, std::chrono::milliseconds(timeoutMilliseconds), [&]() {
-	//			return parameters.finished;
-	//			});
-	//	}
-	//	else
-	//	{
-	//		function(data);
-	//		return true;
-	//	}
-	//}
 	BlazeEngineContextInternal* BlazeEngineContextInternal::GetEngineContext()
 	{
 		return blazeEngineContext;
@@ -379,19 +266,6 @@ namespace Blaze
 			if (window == nullptr)
 				break;
 
-			{
-				std::lock_guard lg{ inputStateMutex };
-				switch (event->wheel.direction)
-				{
-				case SDL_MOUSEWHEEL_NORMAL:
-					mouseCurrentScrollSum += Vec2f(event->wheel.x, event->wheel.y);
-					break;
-				case SDL_MOUSEWHEEL_FLIPPED:
-					mouseCurrentScrollSum -= Vec2f(event->wheel.x, event->wheel.y);
-					break;
-				}
-			}
-
 			Input::MouseScrollEvent _event{
 				.window = *window,
 				.timeNS = event->wheel.timestamp,
@@ -411,11 +285,6 @@ namespace Blaze
 
 			if (window == nullptr)
 				break;
-
-			{
-				std::lock_guard lg{ inputStateMutex };
-				mouseCurrentFrameMovementSum += Vec2f(event->motion.xrel, event->motion.yrel);
-			}
 
 			Input::MouseMotionEvent _event{
 				.window = *window,
@@ -438,12 +307,6 @@ namespace Blaze
 
 			auto button = SDL_GetBlazeMouseButton(event->button.button);
 
-			{
-				std::lock_guard lg{ inputStateMutex };
-				downMouseButtonsDuringCurrentFrame.set((uintMem)button);
-				mouseButtonsComboDuringCurrentFrame[(uintMem)button] = std::max(mouseButtonsComboDuringCurrentFrame[(uintMem)button], event->button.clicks);
-				pressedMouseButtonsDuringCurrentFrame.set((uintMem)button);
-			}
 			mouseButtonsCurrentState[static_cast<uintMem>(button)].test_and_set();
 
 			Input::MouseButtonDownEvent _event{
@@ -468,11 +331,6 @@ namespace Blaze
 
 			auto button = SDL_GetBlazeMouseButton(event->button.button);
 
-			{
-				std::lock_guard lg{ inputStateMutex };
-				downMouseButtonsDuringCurrentFrame.reset((uintMem)button);
-				releasedMouseButtonsDuringCurrentUpdate.set((uintMem)button);
-			}
 			mouseButtonsCurrentState[static_cast<uintMem>(button)].clear();
 
 			Input::MouseButtonUpEvent _event{
@@ -495,12 +353,6 @@ namespace Blaze
 			if (window == nullptr)
 				break;
 
-			{
-				std::lock_guard lg{ inputStateMutex };
-
-				downKeysDuringCurrentFrame.set(event->key.scancode);
-				pressedKeysDuringCurrentFrame.set(event->key.scancode);
-			}
 			keysCurrentState[static_cast<uintMem>(event->key.scancode)].test_and_set();
 
 			Input::KeyDownEvent _event{
@@ -531,12 +383,6 @@ namespace Blaze
 				.keyCode = (Input::KeyCode)event->key.key,
 			};
 
-			{
-				std::lock_guard lg{ inputStateMutex };
-
-				releasedKeysDuringCurrentFrame.set(event->key.scancode);
-				downKeysDuringCurrentFrame.reset(event->key.scancode);
-			}
 			keysCurrentState[static_cast<uintMem>(event->key.scancode)].clear();
 
 			window->AddInputEvent(_event);
@@ -737,8 +583,6 @@ namespace Blaze
 
 			if (window == nullptr)
 				break;
-
-			ResetInputState();
 
 			Window::FocusLostEvent _event{
 				.window = *window,

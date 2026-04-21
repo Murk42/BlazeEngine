@@ -1,16 +1,13 @@
 #pragma once
-#include "BlazeEngine/External/BlazeEngineCoreSTDInterface.h"
+#include "BlazeEngine/Runtime/BlazeEngineContext.h"
 #include "BlazeEngine/Core/Container/Array.h"
 #include "BlazeEngine/Core/Type/TypeTraits.h"
 #include "BlazeEngine/Core/Common/Tuple.h"
-#include "BlazeEngine/Core/Threading/Thread.h"
 #include "BlazeEngine/Runtime/App/AppRuntimeThread.h"
-#include <atomic>
+#include "BlazeEngine/External/BlazeEngineCoreSTDInterface.h"
 
 namespace Blaze
 {
-	class Thread;
-
 	class AppRuntimeThreadCreationData
 	{
 	public:
@@ -22,7 +19,8 @@ namespace Blaze
 		template<IsDerivedFrom<AppRuntimeThread> T, typename ... Args> requires IsConstructibleFrom<T, Args...>
 		void Initialize(Args&& ... args);
 
-		bool InstantiateOnThread(Thread& thread);
+		template<std::invocable<AppRuntimeThread&> F>
+		void Run(const F& function);
 
 		template<typename T, typename ... Args> requires IsConstructibleFrom<T, Args...>&& IsDerivedFrom<T, AppLayer>
 		AppRuntimeThreadCreationData&& RegisterLayer(Args&& ... args);
@@ -33,16 +31,16 @@ namespace Blaze
 		template<IsDerivedFrom<AppRuntimeThread> T, typename ... Args> requires IsConstructibleFrom<T, Args...>
 		static AppRuntimeThreadCreationData New(Args&& ... args);
 	private:
-		struct ThreadArguments
-		{
-			AppRuntimeThreadCreationData& creationData;
-			std::atomic_flag threadInitialized;
-		};
+		using RunWithObjectFuntion = void(*)(AppRuntimeThread&, const void*);
+		using CreateObjectFunction = void(AppRuntimeThreadCreationData::*)(RunWithObjectFuntion, const void*);
 
-		Thread::BasicThreadFunction threadFunction;
-		Handle<VirtualTupleBase> runtimeThreadArguments;
+		CreateObjectFunction createObjectFunction;
+		Handle<VirtualTupleBase> arguments;
 
 		Array<AppLayerCreationData> layerCreationData;
+
+		template<IsDerivedFrom<AppRuntimeThread> T, typename ...Args> requires IsConstructibleFrom<T, Args...>
+		void SpecificCreateObjectFunction(RunWithObjectFuntion, const void*);
 
 		friend class App;
 	};
@@ -50,24 +48,15 @@ namespace Blaze
 	template<IsDerivedFrom<AppRuntimeThread> T, typename ...Args> requires IsConstructibleFrom<T, Args...>
 	inline void AppRuntimeThreadCreationData::Initialize(Args && ...args)
 	{
-		runtimeThreadArguments = Handle<VirtualTupleBase>::CreateDerived<VirtualTuple<Args...>>(std::forward<Args>(args)...);
+		arguments = Handle<VirtualTupleBase>::CreateDerived<VirtualTuple<Args...>>(std::forward<Args>(args)...);
+		createObjectFunction = &AppRuntimeThreadCreationData::SpecificCreateObjectFunction<T, Args...>;
+	}
 
-		threadFunction = [](void* userData) -> int {
-			AppRuntimeThreadCreationData& data = reinterpret_cast<ThreadArguments*>(userData)->creationData;
-			Tuple<Args...> arguments = std::move(*static_cast<Tuple<Args...>*>(static_cast<VirtualTuple<Args...>*>(data.runtimeThreadArguments.Ptr())));
-			Array<AppLayerCreationData> layerCreationData = std::move(data.layerCreationData);
-
-			reinterpret_cast<ThreadArguments*>(userData)->threadInitialized.test_and_set();
-			reinterpret_cast<ThreadArguments*>(userData)->threadInitialized.notify_one();
-
-			T runtimeThreadDerived = make_from_tuple<T, Args...>(std::move(arguments));
-			AppRuntimeThread& runtimeThread = runtimeThreadDerived;
-
-			runtimeThread.queuedLayerCreationData.Append(std::move(layerCreationData));
-			runtimeThread.Run();
-
-			return 0;
-			};
+	template<std::invocable<AppRuntimeThread&> F>
+	inline void AppRuntimeThreadCreationData::Run(const F& function)
+	{
+		RunWithObjectFuntion relayFunction = [](AppRuntimeThread& thread, const void* data) { (*reinterpret_cast<const F*>(data))(thread); };
+		(this->*createObjectFunction)(relayFunction, &function);
 	}
 
 	template<typename T, typename ...Args> requires IsConstructibleFrom<T, Args...> && IsDerivedFrom<T, AppLayer>
@@ -76,6 +65,8 @@ namespace Blaze
 		AppLayerCreationData creationData;
 		creationData.Initialize<T>(std::forward<Args>(args)...);
 		RegisterLayer(std::move(creationData));
+
+		return std::move(*this);
 	}
 	template<IsDerivedFrom<AppRuntimeThread> T, typename ...Args> requires IsConstructibleFrom<T, Args...>
 	inline AppRuntimeThreadCreationData AppRuntimeThreadCreationData::New(Args && ...args)
@@ -83,5 +74,15 @@ namespace Blaze
 		AppRuntimeThreadCreationData creationData;
 		creationData.Initialize<T>(std::forward<Args>(args)...);
 		return creationData;
+	}
+	template<IsDerivedFrom<AppRuntimeThread> T, typename ...Args> requires IsConstructibleFrom<T, Args...>
+	inline void AppRuntimeThreadCreationData::SpecificCreateObjectFunction(RunWithObjectFuntion function, const void* data)
+	{
+		T runtimeThreadDerived = make_from_tuple<T, Args...>(std::move(*static_cast<VirtualTuple<Args...>*>(arguments.Ptr())));
+
+		for (auto& data : layerCreationData)
+			runtimeThreadDerived.AddLayer(std::move(data));
+
+		function(runtimeThreadDerived, data);
 	}
 }

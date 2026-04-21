@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Core/Math/Random.h"
+//#include "BlazeEngine/Core/"
 #include <random>
 
 namespace Blaze::Random
@@ -19,11 +20,16 @@ namespace Blaze::Random
         49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254,
         138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
     };
+
+    static uint64_t simplex_seed;
+
+    inline uint64_t hash2(uint32 value1, uint32 value2)
+    {
+        return Hash<uint64>().Compute(static_cast<uint64>(value2) + static_cast<uint64>(value1) << 32);
+    }
+
     static inline uint8_t hash(int32_t i) {
-        return perm[static_cast<uint8_t>(i)];
-    }  
-    static inline uint8_t hash(int64_t i) {
-        return perm[static_cast<uint8_t>(i)];
+        return perm[static_cast<uint8_t>(hash2(i, simplex_seed))];
     }
 
     static inline int32_t fastfloor_float(float fp) {
@@ -86,6 +92,11 @@ namespace Blaze::Random
     {
         return ((float)rand()) * (max - min) / (float)RAND_MAX + min;
     }    
+
+    void SetSimplexSeed(uint32 seed)
+    {
+        simplex_seed = seed;
+    }
 
     float Simplex(float x) {
         float n0, n1;

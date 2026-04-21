@@ -213,15 +213,15 @@ namespace Blaze::Graphics::OpenGL
 	{
 		glUseProgram(obj == nullptr ? 0 : obj->GetHandle());
 	}
-	void GraphicsContext_OpenGL::SelectFramebuffer(const Framebuffer_OpenGL* obj)
+	void GraphicsContext_OpenGL::SelectFramebuffer(const FramebufferBase_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
 	}
-	void GraphicsContext_OpenGL::SelectDrawFramebuffer(const Framebuffer_OpenGL* obj)
+	void GraphicsContext_OpenGL::SelectDrawFramebuffer(const FramebufferBase_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
 	}
-	void GraphicsContext_OpenGL::SelectReadFramebuffer(const Framebuffer_OpenGL* obj)
+	void GraphicsContext_OpenGL::SelectReadFramebuffer(const FramebufferBase_OpenGL* obj)
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, obj == nullptr ? 0 : obj->GetHandle());
 	}
@@ -259,25 +259,21 @@ namespace Blaze::Graphics::OpenGL
 		glBindImageTexture(slot, texture.GetHandle(), level, GL_FALSE, 0, OpenGLImageAccess(access), OpenGLImageFormat(format));
 	}
 
-	void GraphicsContext_OpenGL::SetClearColor(ColorRGBAf color)
-	{
-		glClearColor(color.r, color.g, color.b, color.a);
-	}
 	void GraphicsContext_OpenGL::SetRenderArea(Vec2i pos, Vec2u size)
 	{
 		glViewport(pos.x, pos.y, size.x, size.y);
 	}
 	void GraphicsContext_OpenGL::SetPatchSize(uint size)
 	{
-		glPatchParameteri(GL_PATCH_VERTICES, size);
+		glPatchParameteri(GL_PATCH_VERTICES, static_cast<uint>(size));
 	}
-	void GraphicsContext_OpenGL::SetPointSize(uint size)
+	void GraphicsContext_OpenGL::SetPointSize(float size)
 	{
-		glPointSize((float)size);
+		glPointSize(static_cast<float>(size));
 	}
-	void GraphicsContext_OpenGL::SetScissorRect(Vec2i pos, Vec2i size)
+	void GraphicsContext_OpenGL::SetScissorRect(Vec2i pos, Vec2u size)
 	{
-		glScissor(pos.x, pos.y, size.x, size.y);
+		glScissor(static_cast<GLint>(pos.x), static_cast<GLint>(pos.y), static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
 	}
 
 	bool GraphicsContext_OpenGL::SetSwapInterval(WindowSwapInterval swapInterval)
@@ -398,7 +394,7 @@ namespace Blaze::Graphics::OpenGL
 		glDrawArrays(OpenGLRenderPrimitive(type), static_cast<GLint>(firstVertexIndex), static_cast<GLsizei>(vertexCount));
 	}
 
-	void GraphicsContext_OpenGL::BlitFramebuffer(Framebuffer_OpenGL& writeFramebuffer, Framebuffer_OpenGL& readFramebuffer, Vec2i dstP1, Vec2i dstP2, Vec2i srcP1, Vec2i srcP2, bool copyColor, bool copyDepth, bool copyStencil, TextureSampling sampling)
+	void GraphicsContext_OpenGL::BlitFramebuffer(FramebufferBase_OpenGL& writeFramebuffer, FramebufferBase_OpenGL& readFramebuffer, Vec2i dstP1, Vec2i dstP2, Vec2i srcP1, Vec2i srcP2, bool copyColor, bool copyDepth, bool copyStencil, TextureSampling sampling)
 	{
 		GLenum mask = 0;
 		if (copyColor) mask |= GL_COLOR_BUFFER_BIT;

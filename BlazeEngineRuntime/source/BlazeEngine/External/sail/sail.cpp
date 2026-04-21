@@ -52,7 +52,7 @@ namespace Blaze
 		default: levelString = "UNKNOWN"; break;
 		}
 
-		Debug::Log log{ logType, "sail", Format(u8"sail ({}, line {}) level {}: \"{}\"", Path(StringView(file, strlen(file))).FileName(), line, levelString, message)};
+		Debug::Log log{ logType, "sail", Format(u8"sail ({}, line {}) level {}: \"{}\"", Path(StringView(file, strlen(file))).FileName(), line, levelString, message), Debug::Callstack(1) };
 
 		Debug::Logger::ProcessLog(log);
 
@@ -241,10 +241,8 @@ namespace Blaze
 		sailLogsEnabled = enable;
 	}
 
-	TimingResult InitializeSail()
-	{
-		Timing timing{ "sail" };
-		
+	bool InitializeSail(TimingTree& timingTree)
+	{	
 		sail_set_logger(SailLogger);
 		sail_init_with_flags(SAIL_FLAG_PRELOAD_CODECS);
 
@@ -259,9 +257,7 @@ namespace Blaze
 			node = node->next;
 		}
 
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized sail " SAIL_VERSION_STRING " ({.1f}ms). Available image formats : {}", timing.GetTimingResult().time.GetSeconds() * 1000.0, StringView(", ").Join(imageFormats));
-
-		return timing.GetTimingResult();
+		return true;
 	}
 
 	void TerminateSail()

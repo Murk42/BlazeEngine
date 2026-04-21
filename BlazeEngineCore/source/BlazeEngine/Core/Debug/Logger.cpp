@@ -73,29 +73,38 @@ namespace Blaze::Debug::Logger
 
 		while (begin != string.Count())
 		{
-			while (insideStyleTag)
-			{
-				if (string[begin] == '>')
-					insideStyleTag = false;
+			if (insideStyleTag)
+				while (true)
+				{
+					if (string[begin] == '>')
+					{
+						insideStyleTag = false;
+						++begin;
+						break;
+					}
 
-				++begin;
+					++begin;
 
-				if (begin == string.Count())
-					return;
-			}
+					if (begin == string.Count())
+						return;
+				}
 
 			end = begin;
 
-			while (!insideStyleTag)
-			{
-				++end;
+			if (!insideStyleTag)
+				while (true)
+				{
+					if (end == string.Count())
+						break;
 
-				if (end == string.Count())
-					break;
+					if (string[end] == '<')
+					{
+						insideStyleTag = true;
+						break;
+					}
 
-				if (string[end] == '<')
-					insideStyleTag = true;
-			}
+					++end;
+				}
 
 			stream->Write(string.Ptr() + begin, end - begin);
 
@@ -183,16 +192,16 @@ namespace Blaze::Debug::Logger
 				for (auto& frame : callstack)
 				{
 					char formattedName[40];
-					FormatInto<char>(formattedName, _countof(formattedName), "{ >40}", frame.GetLocationName());
+					FormatInto<char>(formattedName, _countof(formattedName), "{: >40}", frame.GetLocationName());
 
 					char formattedAddress[18];
 					FormatInto<char>(formattedAddress, _countof(formattedAddress), "{#18x}", frame.Address());
 
 					char formattedFileLine[6];
-					FormatInto<char>(formattedFileLine, _countof(formattedFileLine), "{<6}", frame.GetFileLine());
+					FormatInto<char>(formattedFileLine, _countof(formattedFileLine), "{>6}", frame.GetFileLine());
 
-					char formattedFilePath[128];
-					FormatInto<char>(formattedFilePath, _countof(formattedFilePath), "{}\0", frame.GetFilePath());
+					char formattedFilePath[65];
+					FormatInto<char>(formattedFilePath, _countof(formattedFilePath), "{: >64}\0", frame.GetFilePath());
 
 					WriteToOutput_Unsafe(formattedAddress);
 					WriteToOutput_Unsafe(" - ");
@@ -221,22 +230,27 @@ namespace Blaze::Debug::Logger
 
 	void LogDebug(u8StringView&& source, u8StringView&& message, bool styledText)
 	{
-		ProcessLog(Log(LogType::Debug, std::move(source), std::move(message)), styledText);
+		Callstack callstack = bool(blazeEngineCoreContext.logCallstackPrintMask & LogType::Debug) ? Callstack(1) : Callstack();
+		ProcessLog(Log(LogType::Debug, std::move(source), std::move(message), std::move(callstack)), styledText);
 	}
 	void LogInfo(u8StringView&& source, u8StringView&& message, bool styledText)
 	{
-		ProcessLog(Log(LogType::Info, std::move(source), std::move(message)), styledText);
+		Callstack callstack = bool(blazeEngineCoreContext.logCallstackPrintMask & LogType::Info) ? Callstack(1) : Callstack();
+		ProcessLog(Log(LogType::Info, std::move(source), std::move(message), std::move(callstack)), styledText);
 	}
 	void LogWarning(u8StringView&& source, u8StringView&& message, bool styledText)
 	{
-		ProcessLog(Log(LogType::Warning, std::move(source), std::move(message)), styledText);
+		Callstack callstack = bool(blazeEngineCoreContext.logCallstackPrintMask & LogType::Warning) ? Callstack(1) : Callstack();
+		ProcessLog(Log(LogType::Warning, std::move(source), std::move(message), std::move(callstack)), styledText);
 	}
 	void LogError(u8StringView&& source, u8StringView&& message, bool styledText)
 	{
-		ProcessLog(Log(LogType::Error, std::move(source), std::move(message)), styledText);
+		Callstack callstack = bool(blazeEngineCoreContext.logCallstackPrintMask & LogType::Error) ? Callstack(1) : Callstack();
+		ProcessLog(Log(LogType::Error, std::move(source), std::move(message), std::move(callstack)), styledText);
 	}
 	void LogFatal(u8StringView&& source, u8StringView&& message, bool styledText)
 	{
-		ProcessLog(Log(LogType::Fatal, std::move(source), std::move(message)), styledText);
+		Callstack callstack = bool(blazeEngineCoreContext.logCallstackPrintMask & LogType::Fatal) ? Callstack(1) : Callstack();
+		ProcessLog(Log(LogType::Fatal, std::move(source), std::move(message), std::move(callstack)), styledText);
 	}
 }

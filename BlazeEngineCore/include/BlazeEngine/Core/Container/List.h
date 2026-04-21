@@ -129,9 +129,9 @@ namespace Blaze
 		void EraseAfter(const Iterator& it);
 		void EraseFirst();
 		template<typename C> requires std::invocable<C, T&> && SameAs<std::invoke_result_t<C, T&>, bool>
-		void EraseAll(const C& function);
+		uintMem EraseAll(const C& function);
 		template<typename C> requires std::invocable<C, T&>&& SameAs<std::invoke_result_t<C, T&>, bool>
-		void EraseOne(const C& function);
+		bool EraseOne(const C& function);
 
 		List SplitAfter(const Iterator& it);
 

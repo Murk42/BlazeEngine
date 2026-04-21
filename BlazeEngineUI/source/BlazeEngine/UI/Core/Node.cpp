@@ -16,6 +16,7 @@ namespace Blaze::UI
 
 	Node::Node() :
 		screen(nullptr), parent(nullptr), next(nullptr), prev(nullptr), children(),
+		scale(1.0f), finalScale(1.0f),
 		transform(), finalTransform(),
 		enabled(true), enabledFlag(true),
 		transformDirty(true), finalTransformDirty(true)
@@ -146,14 +147,14 @@ namespace Blaze::UI
 
 		PropagateEnabledStateEvent();
 	}
+	void Node::SetScale(float newScale)
+	{
+		scale = newScale;
+		finalTransformDirty = true;
+	}
 	void Node::SetTransform(const NodeTransform& newTransform)
 	{
 		transform = newTransform;
-		transformDirty = true;
-	}
-	void Node::SetFinalTransform(const NodeFinalTransform& newFinalTransform)
-	{
-		finalTransform = newFinalTransform;
 		finalTransformDirty = true;
 	}
 	void Node::MarkTransformDirty()
@@ -163,6 +164,29 @@ namespace Blaze::UI
 	void Node::MarkFinalTransformDirty()
 	{
 		finalTransformDirty = true;
+	}
+	Vec2f Node::TransformFromLocalToFinalSpace(Vec2f point) const
+	{
+		Vec2f out = point * finalScale + finalTransform.position;
+
+		if (finalTransform.rotation != 0)
+			out =
+				finalTransform.Right() * out.x +
+				finalTransform.Up() * out.y;
+
+		return out;
+	}
+	Vec2f Node::TransformFromFinalToLocalSpace(Vec2f point) const
+	{
+		Vec2f out = (point - finalTransform.position) / finalScale;
+
+		if (finalTransform.rotation != 0)
+			out = {
+				finalTransform.Right().DotProduct(out),
+				finalTransform.Up().DotProduct(out)
+			};
+
+		return out;
 	}
 	void Node::SetEnabledFlag(bool newEnabledFlag)
 	{

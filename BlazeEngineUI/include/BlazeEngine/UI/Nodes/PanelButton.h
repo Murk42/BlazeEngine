@@ -1,44 +1,45 @@
 #pragma once
+#include "BlazeEngine/Core/Event/EventMemberFunctionTie.h"
 #include "BlazeEngine/UI/Common/ButtonBase.h"
 #include "BlazeEngine/UI/Input/InputNode.h"
-#include "BlazeEngine/UI/Nodes/Panel.h"
-#include "BlazeEngine/UI/Graphics/RenderNode.h"
+#include "BlazeEngine/UI/Graphics/RenderUnits/PanelRenderUnit.h"
+#include "BlazeEngine/UI/Graphics/RenderableNode.h"
+#include <functional>
 
 namespace Blaze::UI::Nodes
 {
-	class BLAZE_API PanelButton : public ButtonBase, public RenderNode
+	struct PanelButtonStyle
+	{
+		PanelStyle panelStyle = {};
+		ColorRGBAf highlightTint = ColorRGBAf(0.2f, 0.2f, 0.2f, 0.4f);
+		ColorRGBAf pressedTint = ColorRGBAf(0.1f, 0.1f, 0.1f, 0.5f);
+	};
+	class BLAZE_API PanelButton : public ButtonBase, public RenderableNode
 	{
 	public:
-		struct Style
-		{
-			Panel::Style panelStyle = {};
-			ColorRGBAf highlightTint = ColorRGBAf(0.2f, 0.2f, 0.2f, 0.4f);
-			ColorRGBAf pressedTint = ColorRGBAf(0.1f, 0.1f, 0.1f, 0.5f);
-		};
 		PanelButton();
-		PanelButton(Node& parent, const NodeTransform& transform, const Style& style = { });
+		PanelButton(Node& parent, const NodeTransform& transform, const PanelButtonStyle& style = { });
 		~PanelButton();
 
-		void SetStyle(const Style& style);
-		Style GetStyle() const;
+		void SetPressedCallback(const std::function<void()>& callback);
 
-		bool PreRender(const RenderContext& renderContext) override;
+		void SetStyle(const PanelButtonStyle& style);
+		PanelButtonStyle GetStyle() const;
+		
 		RenderUnitBase* GetRenderUnit(uintMem index) override;
 	private:
 		PanelRenderUnit renderUnit;
-		bool renderUnitDirty;
+		PanelButtonStyle style;
 
-		ColorRGBAf fillColor;
-		ColorRGBAf borderColor;
-		ColorRGBAf highlightTint;
-		ColorRGBAf pressedTint;
-
-		bool highlighted;
+		std::function<void()> pressedCallback;
 
 		void UpdateColor();
 
+		void Pressed() override;
+		void IsDownChanged(bool byMouse, Vec2f pos) override;
+		void IsMouseOverChanged(Vec2f pos) override;
+
 		void FinalTransformUpdatedEvent(const Node::FinalTransformUpdatedEvent& event);
-		void MouseHitStatusChangedEvent(const UIMouseHitStatusChangedEvent& event);
-		void PressedStateChangedEvent(const PressedStateChangedEvent& event);
+		EVENT_MEMBER_FUNCTION(PanelButton, FinalTransformUpdatedEvent, finalTransformUpdatedEventDispatcher);		
 	};
 }

@@ -78,6 +78,10 @@ namespace Blaze
 	}
 	bool Thread::Run(BasicThreadFunction function, void* userData)
 	{
+		return RunInternal(function, userData);
+	}
+	bool Thread::RunInternal(BasicThreadFunction function, void* userData)
+	{
 #ifdef BLAZE_PLATFORM_WINDOWS
 		if (handle != NULL)
 		{

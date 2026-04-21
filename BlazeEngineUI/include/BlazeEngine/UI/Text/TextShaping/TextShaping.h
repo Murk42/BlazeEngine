@@ -6,39 +6,40 @@
 
 namespace Blaze::UI::TextShaping
 {
-	struct GlyphInfo {
-		u32StringViewIterator textBegin;
-		u32StringViewIterator textEnd;
+	struct GlyphInfo 
+	{
+		u8StringViewIterator textBegin;
+		u8StringViewIterator textEnd;		
 		uint32 glyphIndex;
-		Vec2i32 advance;
-		Vec2i32 offset;
+		Vec2f advance;
+		Vec2f offset;
 
 		bool unsafeToBreak : 1;
 		bool unsafeToConcat : 1;
 	};
 
-	struct ShapedText
-	{
-		u32StringViewIterator textBegin;
-		u32StringViewIterator textEnd;
-		Array<GlyphInfo> glyphs;
-		uint32 extent = 0;
-	};
-
 	class ShapingContext
 	{
 	public:
-		ShapingContext(u32StringView text, const FontFace& fontFace);
+		ShapingContext(u8StringView text, const FontFace& fontFace, uint32 fontHeight);
 		~ShapingContext();
 
-		inline u32StringView GetString() const { return text; }
+		inline u8StringView GetText() const { return text; }
 		inline const FontFace& GetFontFace() const { return fontFace; }
+		inline uint32 GetFontHeight() const { return fontHeight; }
 		inline void* GetFontHandle() const { return fontHandle; }
 	private:
-		u32StringView text;
+		u8StringView text;
 		const FontFace& fontFace;
+		uint32 fontHeight;
 		void* fontHandle;
 	};
+	
+	struct ShapingResult
+	{
+		Array<GlyphInfo> glyphs;
+		float extent = 0;
+	};
 
-	BLAZE_API ShapedText ShapeText(u32StringViewIterator begin, u32StringViewIterator end, const ShapingContext& shapingContext);
+	BLAZE_API ShapingResult ShapeText(u8StringView text, const ShapingContext& shapingContext);
 }

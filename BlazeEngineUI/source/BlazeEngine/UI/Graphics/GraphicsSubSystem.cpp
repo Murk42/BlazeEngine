@@ -3,8 +3,8 @@
 #include "BlazeEngine/Core/Container/Set.h"
 #include "BlazeEngine/Core/Common/Rect.h"
 #include "BlazeEngine/Core/Container/Map.h"
+#include "BlazeEngine/UI/Graphics/RenderableNode.h"
 
-#include "BlazeEngine/UI/Graphics/RenderNode.h"
 
 namespace Blaze::UI
 {
@@ -15,7 +15,7 @@ namespace Blaze::UI
 	{
 		void _GetRenderOrder(UI::Node& node, Array<RenderItem>& arr)
 		{
-			if (auto* renderedNode = dynamic_cast<RenderNode*>(&node))
+			if (auto* renderedNode = dynamic_cast<RenderableNode*>(&node))
 			{
 				uint i = 0;
 				while (auto unit = renderedNode->GetRenderUnit(i))
@@ -37,7 +37,7 @@ namespace Blaze::UI
 				if (!node.IsEnabled())
 					continue;
 
-				if (auto* renderedNode = dynamic_cast<RenderNode*>(&node))
+				if (auto* renderedNode = dynamic_cast<RenderableNode*>(&node))
 				{
 					uint i = 0;
 					while (auto unit = renderedNode->GetRenderUnit(i))
@@ -105,7 +105,7 @@ namespace Blaze::UI
 	{
 		struct UINodeCache
 		{
-			RenderNode& renderNode;
+			RenderableNode& renderNode;
 			UI::Node& node;
 			Rectf boundingRect;
 		};
@@ -144,7 +144,7 @@ namespace Blaze::UI
 			if (!node.IsEnabled())
 				return;
 
-			if (auto renderNode = dynamic_cast<RenderNode*>(&node))
+			if (auto renderNode = dynamic_cast<RenderableNode*>(&node))
 			{
 				auto finalTransform = node.GetFinalTransform();
 				Vec2f pos = finalTransform.position;
@@ -357,13 +357,11 @@ namespace Blaze::UI
 		}
 	};
 
-	GraphicsSubSystem::GraphicsSubSystem(Graphics::GraphicsContextBase& graphicsContext): 
-		graphicsContext(graphicsContext), screen(nullptr), recreateRenderQueue(false)
+	GraphicsSubSystem::GraphicsSubSystem() : screen(nullptr), recreateRenderQueue(false)
 	{
 	}
-
-	GraphicsSubSystem::GraphicsSubSystem(Graphics::GraphicsContextBase& graphicsContext, Graphics::RendererRegistry rendererRegistry) :
-		graphicsContext(graphicsContext), rendererRegistry(rendererRegistry), screen(nullptr), recreateRenderQueue(false)
+	GraphicsSubSystem::GraphicsSubSystem(Graphics::RendererRegistry rendererRegistry) :
+		rendererRegistry(rendererRegistry), screen(nullptr), recreateRenderQueue(false)
 	{
 	}
 	GraphicsSubSystem::~GraphicsSubSystem()
@@ -374,10 +372,26 @@ namespace Blaze::UI
 			screen->destructionEventDispatcher.RemoveHandler<&GraphicsSubSystem::ScreenDestroyed>(*this);
 		}
 	}
-	void GraphicsSubSystem::SetRendererRegistry(Graphics::RendererRegistry newRegistry)
+	void GraphicsSubSystem::Initialize(Graphics::GraphicsContext& graphicsContext, Graphics::RendererRegistry newRegistry)
 	{
-		rendererRegistry = std::move(newRegistry);
+		rendererRegistry = newRegistry;
 	}
+	//void GraphicsSubSystem::SetRendererRegistry(Graphics::RendererRegistry newRegistry)
+	//{
+	//	rendererRegistry = std::move(newRegistry);
+	//
+	//	if (auto graphicsContext_OpenGL = dynamic_cast<Graphics::OpenGL::GraphicsContext_OpenGL*>(&graphicsContext))
+	//	{ 
+	//	if (rendererRegistry.GetRenderer<)
+	//	{
+	//		renderers.AddBack<Graphics::OpenGL::TexturedRectRenderer_OpenGL>(*graphicsContext_OpenGL);
+	//		renderers.AddBack<Graphics::OpenGL::PanelRenderer_OpenGL>(*graphicsContext_OpenGL);
+	//		renderers.AddBack<Graphics::OpenGL::AntialiasedTextRenderer_OpenGL>(*graphicsContext_OpenGL);
+	//
+	//		for (auto& renderer : renderers)
+	//			rendererRegistry.RegisterRenderer(renderer);
+	//	}
+	//}
 	void GraphicsSubSystem::SetScreen(UI::Screen* newScreen)
 	{
 		if (screen != nullptr)
@@ -410,13 +424,11 @@ namespace Blaze::UI
 	void GraphicsSubSystem::Render(const Graphics::RenderContext& renderContext)
 	{
 		if (screen == nullptr)
-			return;
-
-		RenderContext RenderContext{ renderContext };
+			return;		
 
 		for (auto& node : screen->GetTree())
-			if (RenderNode* renderNode = dynamic_cast<RenderNode*>(&node))
-				recreateRenderQueue |= renderNode->PreRender(RenderContext);
+			if (RenderableNode* renderNode = dynamic_cast<RenderableNode*>(&node))
+				recreateRenderQueue |= renderNode->PreRender(renderContext);
 
 		if (recreateRenderQueue)
 			RecreateRenderQueue();
@@ -427,9 +439,9 @@ namespace Blaze::UI
 			group.renderer.StartRender(renderContext);
 
 			for (uintMem i = 0; i < group.count; ++i)
-				it[i].renderUnit.Render(it[i].node, group.renderer, RenderContext);
+				it[i].renderUnit.Render(it[i].node, group.renderer);
 
-			group.renderer.EndRender(renderContext);
+			group.renderer.EndRender();
 
 			it += group.count;
 		}

@@ -91,24 +91,39 @@ namespace Blaze::Graphics::OpenGL
 	{
 		this->mapAccess = access;
 		this->mappingType = mappingType;
-
-		Result result;
-		GLenum _access = OpenGLBufferMappingAccess(access, result);
-		if (result) return;
-		GLenum _mappingType = OpenGLBufferMappingType(mappingType, result);
-		if (result) return;
+		
+		GLenum _access, _mappingType;
+		if (!OpenGLBufferMappingAccess(access, _access))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferMapAccessFlags enum value");
+			return;
+		}
+		if (!OpenGLBufferMappingType(mappingType, _mappingType))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferMapType enum value");
+			return;
+		}
 
 		glNamedBufferStorage(id, size, ptr, GL_DYNAMIC_STORAGE_BIT | (clientStorage ? GL_CLIENT_STORAGE_BIT : 0) | _access | _mappingType);
 	}
 	void* ImmutableMappedGraphicsBuffer::MapBufferRange(size_t offset, size_t size, GraphicsBufferMapOptions options)
 	{
-		Result result;
-		GLenum _access = OpenGLBufferMappingAccess(mapAccess, result);
-		if (result) return nullptr;
-		GLenum _type = OpenGLBufferMappingType(mappingType, result);
-		if (result) return nullptr;
-		GLenum _options = OpenGLBufferMappingOptions(options, result);
-		if (result) return nullptr;
+		GLenum _access, _type, _options;
+		if (!OpenGLBufferMappingAccess(mapAccess, _access))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferMapAccessFlags enum value");
+			return nullptr;
+		}
+		if (!OpenGLBufferMappingType(mappingType, _type))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferMapType enum value");
+			return nullptr;
+		}
+		if (!OpenGLBufferMappingOptions(options, _options))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferMapOptions enum value");
+			return nullptr;
+		}
 
 		void* map = glMapNamedBufferRange(id, offset, size, _access | _type | _options);
 
@@ -140,10 +155,13 @@ namespace Blaze::Graphics::OpenGL
 		return *this;
 	}
 	void MutableDrawGraphicsBuffer::Allocate(const void* ptr, size_t size, GraphicsBufferUseFrequency frequency)
-	{
-		Result result;
-		GLenum usage = OpenGLMutableBufferUsage(frequency, GraphicsBufferUseType::Draw, result);
-		if (result) return;
+	{		
+		GLenum usage;
+		if (!OpenGLMutableBufferUsage(frequency, GraphicsBufferUseType::Draw, usage))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferUseType enum value");
+			return;
+		}
 
 		glNamedBufferData(id, size, ptr, usage);
 	}
@@ -159,9 +177,12 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void MutableReadGraphicsBuffer::Allocate(size_t size, GraphicsBufferUseFrequency frequency)
 	{
-		Result result;
-		GLenum usage = OpenGLMutableBufferUsage(frequency, GraphicsBufferUseType::Read, result);
-		if (result) return;
+		GLenum usage;
+		if (!OpenGLMutableBufferUsage(frequency, GraphicsBufferUseType::Read, usage))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferUseFrequency enum value");
+			return;
+		}
 
 		glNamedBufferData(id, size, nullptr, usage);
 	}
@@ -177,8 +198,12 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void MutableCopyGraphicsBuffer::Allocate(size_t size, GraphicsBufferUseFrequency frequency)
 	{
-		Result result;
-		GLenum usage = OpenGLMutableBufferUsage(frequency, GraphicsBufferUseType::Copy, result);
+		GLenum usage;
+		if (!OpenGLMutableBufferUsage(frequency, GraphicsBufferUseType::Copy, usage))
+		{
+			BLAZE_LOG_ERROR("Invalid GraphicsBufferUseType enum value");
+			return;
+		}
 
 		glNamedBufferData(id, size, nullptr, usage);
 	}

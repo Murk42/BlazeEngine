@@ -26,6 +26,33 @@ namespace Blaze::UI
 	{
 		return inputSubSystem != nullptr && inputSubSystem->GetSelectedNode() == this;
 	}
+	bool InputNode::GetHitData(Input::MouseID mouseID, HitData& hitDataOut) const
+	{
+		if (inputSubSystem == nullptr)
+			return false;
+
+		const auto& pointerMap = inputSubSystem->GetPointerMap();
+
+		auto it = pointerMap.Find(mouseID);
+		if (it.IsNull())
+			return false;
+
+		hitDataOut = {
+			InputNode::HitStatus::NotHit,
+			it->value.GetPos()
+		};
+
+		auto hitData = it->value.GetHitData();
+
+		for (auto& data : hitData)
+			if (&data.node == this)
+			{
+				hitDataOut.status = data.hitStatus;
+				break;
+			}
+
+		return true;
+	}
 	bool InputNode::CaptureMouse(Input::MouseID mouseID)
 	{
 		if (inputSubSystem != nullptr)

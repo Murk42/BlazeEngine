@@ -12,15 +12,26 @@
 #include "BlazeEngine/UI/Core/Node.h"
 #include "BlazeEngine/UI/Core/Screen.h"
 
+
+#include "BlazeEngine/UI/Text/CharacterSet.h"
 #include "BlazeEngine/UI/Text/Font.h"
 #include "BlazeEngine/UI/Text/FontAtlas.h"
 #include "BlazeEngine/UI/Text/FontFace.h"
 #include "BlazeEngine/UI/Text/FontGlyphRasterizer.h"
 #include "BlazeEngine/UI/Text/FontManager.h"
+#include "BlazeEngine/UI/Text/SingleLineTextShaper.h"
+#include "BlazeEngine/UI/Text/TextCursorControl.h"
+#include "BlazeEngine/UI/Text/TextInputControl.h"
+#include "BlazeEngine/UI/Text/TextSeparations.h"
+#include "BlazeEngine/UI/Text/TextShaper.h"
+#include "BlazeEngine/UI/Text/TextStyle.h"
+#include "BlazeEngine/UI/Text/WrappedLineTextShaper.h"
 
-#include "BlazeEngine/UI/Graphics/RenderNode.h"
+#include "BlazeEngine/UI/Debug/UIDebuggableLayer.h"
+#include "BlazeEngine/UI/Debug/UIDebugLayer.h"
+
+#include "BlazeEngine/UI/Graphics/RenderableNode.h"
 #include "BlazeEngine/UI/Graphics/GraphicsSubSystem.h"
-#include "BlazeEngine/UI/Graphics/RenderContext.h"
 #include "BlazeEngine/UI/Graphics/RenderUnit.h"
 #include "BlazeEngine/UI/Graphics/Renderers/TextRendererBase.h"
 #include "BlazeEngine/UI/Graphics/Renderers/AntialiasedTextRenderer.h"
@@ -40,3 +51,4 @@
 #include "BlazeEngine/UI/Nodes/Label.h"
 #include "BlazeEngine/UI/Nodes/PanelButton.h"
 #include "BlazeEngine/UI/Nodes/Slider.h"
+#include "BlazeEngine/UI/Nodes/TextInput.h"

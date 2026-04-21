@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/Container/DualList.h"
 #include "BlazeEngine/Runtime/App/AppRuntimeThreadCreationData.h"
+#include "BlazeEngine/Core/Threading/Thread.h"
 
 namespace Blaze
 {
@@ -12,10 +13,11 @@ namespace Blaze
 		
 		void RegisterRuntimeThread(AppRuntimeThreadCreationData&& runtimeThreadCreation);
 
-		bool Update();
+		void Start();
 	private:
 		DualList<Thread> threads;
 		Array<AppRuntimeThreadCreationData> scheduledRuntimeThreadsForCreation;
+		std::atomic_uint32_t threadExitedCount;
 
 		std::recursive_mutex mutex;
 

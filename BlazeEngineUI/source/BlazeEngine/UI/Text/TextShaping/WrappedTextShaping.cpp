@@ -1,109 +1,20 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Text/TextShaping/WrappedTextShaping.h"
 #include "BlazeEngine/Core/Container/ArrayView.h"
+#include "BlazeEngine/Core/String/StringCharIterator.h"
 #include <stdexcept>
-#include <utf8proc.h>
-#include <harfbuzz/hb.h>
-#include <linebreak.h>
-#include <wordbreak.h>
 
 namespace Blaze::UI::TextShaping
 {
-	static Array<char> get_text_linebreaks(const u32StringView& string, const char* language)
+	using StringView = u8StringView;
+	using StringViewIterator = u8StringViewIterator;
+
+	WrappedTextShapingContext::WrappedTextShapingContext(StringView text, const FontFace& fontFace, uint32 fontHeight, float maxWidth, const TextSeparationDataBase& textSeparationData, ShouldIncludeAtEndFunctionType shouldIncludeAtEndFunction) :
+		ShapingContext(text, fontFace, fontHeight), 
+		maxWidth(maxWidth), 
+		textSeparationData(textSeparationData),
+		shouldIncludeAtEndFunction(shouldIncludeAtEndFunction)
 	{
-		static struct Initializer {
-			Initializer() {
-				init_linebreak();
-			}
-		} initializer;
-
-		if (string.Empty())
-			return { };
-
-		Array<char> breaks(string.Count());
-		set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(string.Ptr()), string.Count(), language, breaks.Ptr());
-		return breaks;
-	}
-	static Array<char> get_text_wordbreaks(const u32StringView& string, const char* language)
-	{
-		static struct Initializer {
-			Initializer() {
-				init_wordbreak();
-			}
-		} initializer;
-
-		if (string.Empty())
-			return { };
-
-		Array<char> breaks(string.Count());
-		set_wordbreaks_utf32(reinterpret_cast<const utf32_t*>(string.Ptr()), string.Count(), language, breaks.Ptr());
-		return breaks;
-	}
-	static bool IsWordSuffixCharacter(char32_t character)
-	{
-		switch (character)
-		{
-		case U'.':
-		case U',':
-		case U'!':
-		case U'?':
-		case U':':
-		case U';':
-			return true;
-		default:
-			return false;
-		}
-	}
-	static Array<TextUnitSeparationLevel> get_text_separations(const u32StringView& text)
-	{
-		if (text.Empty())
-			return { };
-
-		auto wordBreaks = get_text_wordbreaks(text, hb_language_to_string(hb_language_get_default()));
-
-		Array<TextUnitSeparationLevel> out{ text.Count() };
-
-		utf8proc_int32_t state = 0;
-		for (uintMem i = 0; i < text.Count() - 1; ++i)
-		{
-			if (utf8proc_grapheme_break_stateful(text[i], text[i + 1], &state))
-			{
-				if (wordBreaks[i] == WORDBREAK_BREAK)
-					out[i] = TextUnitSeparationLevel::Word;
-				else
-				{
-					out[i] = TextUnitSeparationLevel::Grapheme;
-					state = 0;
-				}
-			}
-			else
-				out[i] = TextUnitSeparationLevel::Codepoint;
-
-			if (i != 0 && IsWordSuffixCharacter(text[i]) && !IsWordSuffixCharacter(text[i - 1]) && out[i - 1] == TextUnitSeparationLevel::Word)
-			{
-				out[i - 1] = TextUnitSeparationLevel::Grapheme;
-				out[i] = TextUnitSeparationLevel::Word;
-			}
-
-			if (text[i] == U'\n')
-				out[i] = TextUnitSeparationLevel::NewLine;
-
-		}
-
-		out.Last() = TextUnitSeparationLevel::Word;
-
-		return out;
-	}
-
-	WrappedTextShapingContext::WrappedTextShapingContext(u32StringView text, const FontFace& fontFace, uint32 maxWidth, TextUnitSeparationLevel smallestSeparationLevel, TextUnitSeparationLevel expectedSeparationLevel, ShouldIncludeAtEndFunctionType shouldIncludeAtEndFunction)
-		: ShapingContext(text, fontFace), maxWidth(maxWidth), smallestSeparationLevel(smallestSeparationLevel), expectedSeparationLevel(expectedSeparationLevel), shouldIncludeAtEndFunction(shouldIncludeAtEndFunction)
-	{
-		textUnitSeparations = get_text_separations({ text.Begin(), text.End() });
-	}
-
-	TextUnitSeparationLevel WrappedTextShapingContext::GetTextUnitSeparationAt(u32StringViewIterator iterator) const
-	{
-		return textUnitSeparations[iterator - GetString().FirstIterator()];
 	}
 
 	bool WrappedTextShapingContext::ShouldIncludeAtEndDefault(UnicodeChar character, const WrappedTextShapingContext& shapingContext)
@@ -123,7 +34,6 @@ namespace Blaze::UI::TextShaping
 			return false;
 		}
 	}
-
 	static const GlyphInfo* next_cluster(const GlyphInfo* glyph, const ArrayView<GlyphInfo>& glyphs)
 	{
 		if (glyph < glyphs.Begin() || glyph >= glyphs.End())
@@ -167,11 +77,12 @@ namespace Blaze::UI::TextShaping
 
 		return glyph;
 	}
-	static int32 width_between_glyphs(const GlyphInfo* begin, const GlyphInfo* end)
+	static float width_between_glyphs(const GlyphInfo* begin, const GlyphInfo* end)
 	{
 		if (begin > end)
 			throw std::invalid_argument("Invalid glyph iterator");
-		int32 sumWidth = 0;
+
+		float sumWidth = 0;
 		while (begin != end)
 		{
 			sumWidth += begin->advance.x;
@@ -180,12 +91,12 @@ namespace Blaze::UI::TextShaping
 
 		return sumWidth;
 	}
-	static int32 cluster_width(const GlyphInfo* glyph, const ArrayView<GlyphInfo>& glyphs)
+	static float cluster_width(const GlyphInfo* glyph, const ArrayView<GlyphInfo>& glyphs)
 	{
 		if (glyph < glyphs.Begin() || glyph >= glyphs.End())
 			throw std::exception("Invalid glyph iterator");
 
-		int32 width = 0;
+		float width = 0;
 		const auto originalCluster = glyph->textBegin;
 
 		while (glyph != glyphs.End() && glyph->textBegin == originalCluster)
@@ -272,41 +183,56 @@ namespace Blaze::UI::TextShaping
 		}
 	}
 
-	//static bool include_special_characters_at_end(u32StringViewIterator& it, const WrappedTextShapingContext& shapingContext)
-	//{
-	//	const u32StringViewIterator original = it;
-	//	while (it != shapingContext.GetString().BehindIterator() && shapingContext.ShouldIncludeAtEnd({ it, it + 1 }))
-	//		++it;
-	//
-	//	return original != it;
-	//}
-	static u32StringViewIterator find_end_rounded_to_text_unit(u32StringViewIterator textBegin, u32StringViewIterator textEnd, TextUnitSeparationLevel level, const WrappedTextShapingContext& shapingContext)
+	static ShapingResult combine_shaped_texts(ShapingResult& a, const GlyphInfo* beginGlyph, const GlyphInfo* endGlyph, ShapingResult& b)
 	{
-		u32StringViewIterator it = textEnd;
+		ShapingResult result;
+		result.extent = a.extent + width_between_glyphs(beginGlyph, endGlyph) + b.extent;
 
-		while (it != textBegin)
+		result.glyphs.ReserveExactly(a.glyphs.Count() + (endGlyph - beginGlyph) +b.glyphs.Count());
+		result.glyphs.Append(a.glyphs);
+		result.glyphs.Append({ endGlyph, beginGlyph});
+		result.glyphs.Append(b.glyphs);
+
+		return result;
+	}
+
+	
+	static StringViewIterator find_end_rounded_to_text_unit(StringView text, uint32 level, const WrappedTextShapingContext& shapingContext)
+	{
+		StringViewIterator it = text.BehindIterator();
+
+		while (it != text.FirstIterator())
 		{
-			--it;
+			UnicodeChar ch;
+			uintMem count = ch.FromLastCodePoints(u8StringView{ text.FirstIterator(), it });
 
-			if (shapingContext.GetTextUnitSeparationAt(it) >= level)
-				return it + 1;
+			if (count == 0)
+			{
+				BLAZE_LOG_FATAL("Invalid UTF-8 sequence");
+				return it;
+			}
+			
+			it -= count;
+
+			if (shapingContext.GetTextSeparationData().GetSeparationValue(it - shapingContext.GetText().FirstIterator()) >= level)
+				return it + count;
 		}
 
-		return textBegin;
+		return text.FirstIterator();
 	}
-	static u32StringViewIterator find_end_rounded_to_text_unit(u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	static StringViewIterator find_end_rounded_to_text_unit(StringView text, const WrappedTextShapingContext& shapingContext)
 	{
-		u32StringViewIterator end = textEnd;
+		StringViewIterator end = text.BehindIterator();
 
-		TextUnitSeparationLevel separationLevel = shapingContext.GetExpectedSeparationLevel();
-		while (separationLevel != static_cast<TextUnitSeparationLevel>(static_cast<uint32>(shapingContext.GetSmallestSeparationLevel()) - 1))
+		uint32 separationLevel = shapingContext.GetTextSeparationData().GetMaximumWrappingSeparationValue();
+		while (separationLevel != 0)
 		{
-			end = find_end_rounded_to_text_unit(textBegin, textEnd, separationLevel, shapingContext);
+			end = find_end_rounded_to_text_unit(text, separationLevel, shapingContext);
 
-			if (end != textBegin)
+			if (end != text.FirstIterator())
 				break;
 
-			separationLevel = static_cast<TextUnitSeparationLevel>(static_cast<uint32>(separationLevel) - 1);
+			separationLevel = separationLevel - 1;
 		}
 
 		return end;
@@ -315,18 +241,18 @@ namespace Blaze::UI::TextShaping
 	struct FirstGlyphToExceedWidthData
 	{
 		const GlyphInfo* glyph;
-		uint32 widthUpToGlyph;
+		float widthUpToGlyph;
 	};
-	static FirstGlyphToExceedWidthData first_glyph_to_exceed_width(const ArrayView<GlyphInfo>& lineGlyphs, uint32 maxWidth, const WrappedTextShapingContext& shapingContext)
+	static FirstGlyphToExceedWidthData first_glyph_to_exceed_width(const ArrayView<GlyphInfo>& lineGlyphs, float maxWidth, const WrappedTextShapingContext& shapingContext)
 	{
 		if (lineGlyphs.Empty())
 			return { lineGlyphs.Begin(), 0 };
 
-		uint32 width = 0;
+		float width = 0;
 		const GlyphInfo* it = lineGlyphs.Begin();
 		for (; it != lineGlyphs.End(); ++it)
 		{
-			uint32 newWidth = width + it->advance.x;
+			float newWidth = width + it->advance.x;
 
 			if (newWidth > maxWidth)
 				return { it, width };
@@ -336,17 +262,20 @@ namespace Blaze::UI::TextShaping
 
 		return { lineGlyphs.End(), width };
 	}
-	static u32StringViewIterator first_character_to_pass_minimum_separation_level(u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	static StringViewIterator first_character_to_pass_minimum_separation_level(StringView text, const WrappedTextShapingContext& shapingContext)
 	{
-		for (auto it = textBegin; it != textEnd; ++it)
-			if (shapingContext.GetTextUnitSeparationAt(it) >= shapingContext.GetSmallestSeparationLevel())
-				return it;
+		for (auto it = u8StringCharIterator::FirstIterator(text); it < u8StringCharIterator::BehindIterator(text); ++it)
+		{
+			uintMem globalTextIndex = it - shapingContext.GetText().FirstIterator();
+			if (shapingContext.GetTextSeparationData().GetSeparationValue(globalTextIndex) > 0)
+				return it;			
+		}
 
-		return textEnd;
+		return text.BehindIterator();
 	}
-	static const GlyphInfo* find_cluster_containing_character(const ArrayView<GlyphInfo>& glyphs, u32StringViewIterator character)
+	static const GlyphInfo* find_cluster_containing_character(const ArrayView<GlyphInfo>& glyphs, StringViewIterator character)
 	{
-		auto it = std::lower_bound(glyphs.Begin(), glyphs.End(), character, [](const GlyphInfo& glyph, u32StringViewIterator character) { return glyph.textBegin < character; });
+		auto it = std::lower_bound(glyphs.Begin(), glyphs.End(), character, [](const GlyphInfo& glyph, StringViewIterator character) { return glyph.textBegin < character; });
 
 		if (it != glyphs.End())
 			it = cluster_floor(it, glyphs);
@@ -356,7 +285,9 @@ namespace Blaze::UI::TextShaping
 
 	struct ShapedTailResult
 	{
-		ShapedText shapedText;
+		ShapingResult shapingResult;
+
+		StringView tailText;
 
 		//This glyph is either nullptr or the start of a cluster that is safe to concat.
 		//The shaped text is shaped with text starting at startGlyph->textBegin.
@@ -364,46 +295,42 @@ namespace Blaze::UI::TextShaping
 		//This glyph is either nullptr or the start of a cluster that contains the end character of
 		//the shaped text. If the end charecter of the <shapedText> is the end character of <text>
 		//then this glyph is the end of <glyphs>.
-		const GlyphInfo* clusterContainingEndCharacter;
+		const GlyphInfo* clusterContainingLineEnd;
 	};
-	static ShapedTailResult shape_line_tail(const ArrayView<GlyphInfo>& glyphs, u32StringViewIterator textBegin, u32StringViewIterator textEnd, uint32 maxWidth, const WrappedTextShapingContext& shapingContext, bool mustBeConcatableAtBeginning)
+	static ShapedTailResult shape_line_tail(const ArrayView<GlyphInfo>& glyphs, StringView text, float maxWidth, const WrappedTextShapingContext& shapingContext, bool mustBeConcatableAtBeginning)
 	{
 		auto [tailEndGlyph, widthUpToTailEnd] = first_glyph_to_exceed_width(glyphs, maxWidth, shapingContext);
 
 		if (tailEndGlyph == glyphs.Begin() || tailEndGlyph == glyphs.End())
 			return {
-				.shapedText = {
-					.textBegin = textBegin,
-					.textEnd = tailEndGlyph == glyphs.End() ? textEnd : textBegin,
-					.glyphs = { glyphs.Begin(), tailEndGlyph },
-					.extent = widthUpToTailEnd
-				},
+				.shapingResult{ .glyphs = { glyphs.Begin(), tailEndGlyph }, .extent = widthUpToTailEnd },
+				.tailText = { text.FirstIterator(),  tailEndGlyph == glyphs.Begin() ? text.FirstIterator() : text.BehindIterator() },
 				.startGlyph = glyphs.Begin(),
-				.clusterContainingEndCharacter = tailEndGlyph
+				.clusterContainingLineEnd = tailEndGlyph
 		};
 
-		auto tailEndCharacter = find_end_rounded_to_text_unit(textBegin, tailEndGlyph->textBegin, shapingContext);
+		auto tailEndCharacter = find_end_rounded_to_text_unit({ text.FirstIterator(), tailEndGlyph->textBegin}, shapingContext);
 		auto tailStartCluster = find_cluster_containing_character(glyphs, tailEndCharacter);
-		uint32 widthUpToTailStart = widthUpToTailEnd - width_between_glyphs(tailStartCluster, tailEndGlyph);
+		float widthUpToTailStart = widthUpToTailEnd - width_between_glyphs(tailStartCluster, tailEndGlyph);
 
 		//Find next previous cluster safe to concat and try to form tail end
 		while (tailStartCluster > glyphs.Begin())
 		{
 			if (!is_cluster_unsafe_to_concat(tailStartCluster, glyphs))
 			{
-				auto shapedTail = ShapeText(tailStartCluster->textBegin, tailEndCharacter, shapingContext);
+				auto shapedTail = ShapeText({ tailStartCluster->textBegin, tailEndCharacter }, shapingContext);
 
 				//The first glyph might not be concatable so it wouldn't satisfy conditions even if the shaped text
 				//doesn't need to be concatable at the begging, so we need to add that check
 
 				if (tailStartCluster == glyphs.Begin() && !mustBeConcatableAtBeginning || shapedTail.glyphs.Empty() || !is_cluster_unsafe_to_concat(shapedTail.glyphs.Ptr(), shapedTail.glyphs))
 				{
-					auto clusterContainingEndCharacter = find_cluster_containing_character(glyphs, shapedTail.textEnd);
+					auto clusterContainingLineEnd = find_cluster_containing_character(glyphs, tailEndCharacter);
 
 					return {
-						.shapedText = std::move(shapedTail),
+						.shapingResult = std::move(shapedTail),
 						.startGlyph = tailStartCluster,
-						.clusterContainingEndCharacter = clusterContainingEndCharacter
+						.clusterContainingLineEnd = clusterContainingLineEnd
 					};
 				}
 			}
@@ -413,26 +340,30 @@ namespace Blaze::UI::TextShaping
 		}
 
 		return {
-			.shapedText = { },
+			.shapingResult = { },
 			.startGlyph = nullptr,
-			.clusterContainingEndCharacter = nullptr
+			.clusterContainingLineEnd = nullptr
 		};
 	}
 
 	struct ShapedHeadResult
 	{
-		ShapedText shapedText;
+		ShapingResult shapingResult;
+		StringViewIterator headEnd;
+
 		//This glyph is either nullptr, the end of remainingGlyphs or the start of a cluster.
 		//If the glyph is the start of a cluster then the preceeding cluster (if it exists) is safe to concat or the cluster is safe to break at.
 		//The shaped text is shaped with text up until endGlyph->textBegin.
 		const GlyphInfo* endGlyph;
 	};
-	static ShapedHeadResult shape_line_head(const ArrayView<GlyphInfo>& glyphs, u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	static ShapedHeadResult shape_line_head(const ArrayView<GlyphInfo>& glyphs, StringView text, const WrappedTextShapingContext& shapingContext)
 	{
 		//If the first cluster is safe to break we dont need to shape the line head and can return an empty result
-		if (glyphs.Empty() || textBegin == textEnd || textBegin == glyphs.First().textBegin && !is_cluster_unsafe_to_break(glyphs.Begin(), glyphs))
+		if (glyphs.Empty() || text.Empty() || text.FirstIterator() == glyphs.First().textBegin && !is_cluster_unsafe_to_break(glyphs.Begin(), glyphs))
 			return {
-				.shapedText = {.textBegin = textBegin, .textEnd = textBegin, .glyphs = {}, .extent = 0 },
+				
+				.shapingResult = {  },
+				.headEnd = text.FirstIterator(),
 				.endGlyph = glyphs.Begin()
 		};
 
@@ -447,17 +378,17 @@ namespace Blaze::UI::TextShaping
 
 			//Include the concatable cluster
 			auto endCluster = next_cluster(nextConcatableClusterGlyph, glyphs);
-			auto endCharacter = endCluster == glyphs.End() ? textEnd : endCluster->textBegin;
+			auto endCharacter = endCluster == glyphs.End() ? text.BehindIterator() : endCluster->textBegin;
 
-			ShapedText shapedText = ShapeText(textBegin, endCharacter, shapingContext);
+			ShapingResult shapingResult = ShapeText({ text.FirstIterator(), endCharacter }, shapingContext);
 
-			if (shapedText.extent > shapingContext.GetMaxWidth())
+			if (shapingResult.extent > shapingContext.GetMaxWidth())
 				break;
 
 			//If the line head end glyph isn't safe to concat we search for the next concatable cluster
-			if (!shapedText.glyphs.Empty() && !is_cluster_unsafe_to_concat_reverse(shapedText.glyphs.Ptr() + shapedText.glyphs.Count(), shapedText.glyphs))
+			if (!shapingResult.glyphs.Empty() && !is_cluster_unsafe_to_concat_reverse(shapingResult.glyphs.End(), shapingResult.glyphs))
 				return {
-					.shapedText = std::move(shapedText),
+					.shapingResult = std::move(shapingResult),
 					.endGlyph = endCluster
 			};
 
@@ -465,71 +396,71 @@ namespace Blaze::UI::TextShaping
 		}
 
 		return {
-			.shapedText = {.textBegin = textBegin, .textEnd = textBegin, .glyphs = {}, .extent = 0},
+			.shapingResult = { },
+			.headEnd = text.FirstIterator(),
 			.endGlyph = nullptr
 		};
 	}
 
 	struct WrappedLineResult
 	{
-		ShapedText shapedText;
+		ShapingResult shapingResult;
+		StringViewIterator lineEnd;
+
 		//This glyph is either start of a cluster that contains the end character of the shaped text.
 		//If the end charecter of the shaped text is the end character of remainingText
 		//then this glyph is the end of the remainingGlyphs.
-		const GlyphInfo* clusterContainingEndCharacter = nullptr;
+		const GlyphInfo* clusterContainingLineEnd = nullptr;
 	};
-	static bool TryReuseGlyphs(WrappedLineResult& result, const ArrayView<GlyphInfo>& glyphs, u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	static bool TryReuseGlyphs(WrappedLineResult& result, const ArrayView<GlyphInfo>& glyphs, StringView text, const WrappedTextShapingContext& shapingContext)
 	{
-		ShapedHeadResult lineHeadResult = shape_line_head(glyphs, textBegin, textEnd, shapingContext);
+		ShapedHeadResult lineHeadResult = shape_line_head(glyphs, text, shapingContext);
 
 		if (lineHeadResult.endGlyph == nullptr)
 			return false;
 
-		ShapedTailResult lineTailResult = shape_line_tail({ lineHeadResult.endGlyph, glyphs.End() }, lineHeadResult.shapedText.textEnd, textEnd, shapingContext.GetMaxWidth() - lineHeadResult.shapedText.extent, shapingContext, !lineHeadResult.shapedText.glyphs.Empty());
+		ShapedTailResult lineTailResult = shape_line_tail({ lineHeadResult.endGlyph, glyphs.End() }, { lineHeadResult.headEnd, text.BehindIterator() }, shapingContext.GetMaxWidth() - lineHeadResult.shapingResult.extent, shapingContext, !lineHeadResult.shapingResult.glyphs.Empty());
 
 		if (lineTailResult.startGlyph == nullptr)
 			return false;
-		
-		const bool lineTailResultEmpty = lineTailResult.shapedText.textBegin == lineTailResult.shapedText.textEnd;
-		const bool lineHeadResultEmpty = lineHeadResult.shapedText.textBegin == lineHeadResult.shapedText.textEnd;
-		if (lineHeadResultEmpty && lineTailResultEmpty)
+				
+		if (lineHeadResult.headEnd == text.FirstIterator() && lineTailResult.tailText.Empty())
 			return false;
 
-		if (lineHeadResultEmpty)
+		if (lineHeadResult.headEnd == text.FirstIterator())
 		{
-			//Can be executed only if the line head is empty
-			const bool lineTailCleanStart = shapingContext.GetTextUnitSeparationAt(lineHeadResult.shapedText.textEnd) == shapingContext.GetExpectedSeparationLevel();
+			const bool lineTailCleanStart = shapingContext.GetTextSeparationData().GetSeparationValue(lineHeadResult.headEnd - shapingContext.GetText().FirstIterator()) == shapingContext.GetTextSeparationData().GetMaximumWrappingSeparationValue();
 
 			if (lineTailCleanStart)
 				return false;
 		}
 
-		result.shapedText.textBegin = lineHeadResult.shapedText.textBegin;
-		result.shapedText.textEnd = lineTailResult.shapedText.textEnd;
-		result.shapedText.extent = lineHeadResult.shapedText.extent + lineTailResult.shapedText.extent + width_between_glyphs(lineHeadResult.endGlyph, lineTailResult.startGlyph);
-		result.clusterContainingEndCharacter = lineTailResult.clusterContainingEndCharacter;
-		result.shapedText.glyphs.ReserveExactly(lineHeadResult.shapedText.glyphs.Count() + (lineTailResult.startGlyph - lineHeadResult.endGlyph) + lineTailResult.shapedText.glyphs.Count());
-		result.shapedText.glyphs.Append(lineHeadResult.shapedText.glyphs);
-		result.shapedText.glyphs.Append({ lineHeadResult.endGlyph, lineTailResult.startGlyph });
-		result.shapedText.glyphs.Append(lineTailResult.shapedText.glyphs);
+		//Combine text shaping results
+		result.lineEnd = lineTailResult.tailText.BehindIterator();
+		result.shapingResult = combine_shaped_texts(lineHeadResult.shapingResult, lineHeadResult.endGlyph, lineTailResult.startGlyph, lineTailResult.shapingResult);
+		result.clusterContainingLineEnd = lineTailResult.clusterContainingLineEnd;
 		return true;
 	}
 
 	/**/
-	static WrappedLineResult WrapLineRaw(const ArrayView<GlyphInfo>& glyphs, u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	static WrappedLineResult WrapLineRaw(const ArrayView<GlyphInfo>& glyphs, StringView text, const WrappedTextShapingContext& shapingContext)
 	{
 		WrappedLineResult result;
-		if (!TryReuseGlyphs(result, glyphs, textBegin, textEnd, shapingContext))
+		if (!TryReuseGlyphs(result, glyphs, text, shapingContext))
 		{
 			auto [firstGlyphToExceedWidth, width] = first_glyph_to_exceed_width(glyphs, shapingContext.GetMaxWidth(), shapingContext);
-			auto firstCharacterToExceedWidth = firstGlyphToExceedWidth == glyphs.End() ? textEnd : firstGlyphToExceedWidth->textBegin;
-			firstCharacterToExceedWidth = find_end_rounded_to_text_unit(textBegin, firstCharacterToExceedWidth, shapingContext);
+			auto firstCharacterToExceedWidth = firstGlyphToExceedWidth == glyphs.End() ? text.BehindIterator()  : firstGlyphToExceedWidth->textBegin;
+			firstCharacterToExceedWidth = find_end_rounded_to_text_unit({ text.FirstIterator(), firstCharacterToExceedWidth }, shapingContext);
 
-			auto shapedText = ShapeText(textBegin, firstCharacterToExceedWidth, shapingContext);
+			auto shapingResult = ShapeText({ text.FirstIterator(), firstCharacterToExceedWidth } , shapingContext);
 
-			auto clusterContainingEndCharacter = find_cluster_containing_character(glyphs, shapedText.textEnd);
+			auto clusterContainingLineEnd = find_cluster_containing_character(glyphs, firstCharacterToExceedWidth);
 
-			result = { std::move(shapedText), clusterContainingEndCharacter };
+			result = { 
+				std::move(shapingResult), 
+				firstCharacterToExceedWidth,
+				clusterContainingLineEnd 
+			};
 		}
 
 		return result;
@@ -537,117 +468,128 @@ namespace Blaze::UI::TextShaping
 	/*
 		Wraps the line with the desired width.
 	*/
-	static void HandleEmptyLine(WrappedLineResult& wrappedLineResult, u32StringViewIterator textEnd, const ArrayView<GlyphInfo>& glyphs, const WrappedTextShapingContext& shapingContext)
+	static void HandleEmptyLine(WrappedLineResult& wrappedLineResult, StringView text, const ArrayView<GlyphInfo>& glyphs, const WrappedTextShapingContext& shapingContext)
 	{
-		if (wrappedLineResult.shapedText.textBegin == wrappedLineResult.shapedText.textEnd)
+		if (text.FirstIterator() == wrappedLineResult.lineEnd)
 		{
-			auto roundedEnd = first_character_to_pass_minimum_separation_level(wrappedLineResult.shapedText.textBegin, textEnd, shapingContext);
+			auto roundedEnd = first_character_to_pass_minimum_separation_level(text, shapingContext);
 
-			if (roundedEnd != textEnd)
+			if (roundedEnd != text.BehindIterator())
 				++roundedEnd;
 
-			wrappedLineResult.shapedText = ShapeText(wrappedLineResult.shapedText.textBegin, roundedEnd, shapingContext);
-			wrappedLineResult.clusterContainingEndCharacter = find_cluster_containing_character(glyphs, roundedEnd);
+			wrappedLineResult.shapingResult = ShapeText({ text.FirstIterator(), roundedEnd }, shapingContext);
+			wrappedLineResult.lineEnd = roundedEnd;
+			wrappedLineResult.clusterContainingLineEnd = find_cluster_containing_character(glyphs, roundedEnd);
 		}
 	}
-	static void IncludeCharactersAtEnd(WrappedLineResult& result, u32StringViewIterator textEnd, const ArrayView<GlyphInfo>& glyphs, const WrappedTextShapingContext& shapingContext)
-	{
-		if (result.shapedText.textBegin == result.shapedText.textEnd)
+	static void IncludeCharactersAtEnd(WrappedLineResult& result, StringView text, const ArrayView<GlyphInfo>& glyphs, const WrappedTextShapingContext& shapingContext)
+	{ 
+		//Find all characters at the end of the line that can be ignored (for example white spaces)
+		u8StringCharIterator ignorableCharactersBegin = { result.lineEnd, text };
+		while (true)
+		{
+			if (ignorableCharactersBegin <= u8StringCharIterator::FirstIterator(text))
+				break;
+
+			u8StringCharIterator prev = ignorableCharactersBegin;
+			--prev;
+
+			if (!shapingContext.ShouldIncludeAtEnd(*prev))
+				break;
+
+			ignorableCharactersBegin = prev;
+		}
+
+		//Find all characters that weren't included in the line because of its extent but can be added to it and ignored
+		u8StringCharIterator ignorableCharacterEnd = { result.lineEnd, text };
+		while (true)
+		{	
+			if (ignorableCharacterEnd >= u8StringCharIterator::BehindIterator(text))
+				break;
+
+			if (!shapingContext.ShouldIncludeAtEnd(*ignorableCharacterEnd))
+				break;		
+
+			++ignorableCharacterEnd;
+		}
+
+		if (ignorableCharacterEnd == ignorableCharactersBegin)
 			return;
 
-		u32StringViewIterator shouldIncludeAtEndBegin = result.shapedText.textEnd;
-		for (; shouldIncludeAtEndBegin != result.shapedText.textBegin; --shouldIncludeAtEndBegin)
-		{
-			if (!shapingContext.ShouldIncludeAtEnd(*(shouldIncludeAtEndBegin - 1)))
-				break;
-		}
+		auto ignorableGlyphBegin = find_cluster_containing_character(result.shapingResult.glyphs, ignorableCharactersBegin);		
+		auto newClusterContainingLineEnd = find_cluster_containing_character(glyphs, ignorableCharacterEnd);
 
-		u32StringViewIterator shouldIncludeAtEndEnd = result.shapedText.textEnd;
-		for (; shouldIncludeAtEndEnd != textEnd; ++shouldIncludeAtEndEnd)
-		{
-			if (!shapingContext.ShouldIncludeAtEnd(*shouldIncludeAtEndEnd))
-				break;
-		}
-
-		auto glyphBegin = find_cluster_containing_character(result.shapedText.glyphs, shouldIncludeAtEndBegin);
-
-		result.shapedText.extent -= width_between_glyphs(glyphBegin, result.shapedText.glyphs.End());
-		result.shapedText.textEnd = shouldIncludeAtEndEnd;
-		result.clusterContainingEndCharacter = find_cluster_containing_character(glyphs, shouldIncludeAtEndEnd);
+		result.shapingResult.extent -= width_between_glyphs(ignorableGlyphBegin, result.shapingResult.glyphs.End());
+		result.shapingResult.glyphs.Append({ result.clusterContainingLineEnd, newClusterContainingLineEnd });
+		result.lineEnd = ignorableCharacterEnd;
+		result.clusterContainingLineEnd = newClusterContainingLineEnd;
 	}
 	/*
 		Wraps the line with the desired width. If the line is empty some characters are added. Includes empty characters at end
 	*/
-	static WrappedLineResult WrapLine(const ArrayView<GlyphInfo>& glyphs, u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	static WrappedLineResult WrapLine(const ArrayView<GlyphInfo>& glyphs, StringView text, const WrappedTextShapingContext& shapingContext)
 	{
-		WrappedLineResult result = WrapLineRaw(glyphs, textBegin, textEnd, shapingContext);
+		WrappedLineResult result = WrapLineRaw(glyphs, text, shapingContext);
 
-		HandleEmptyLine(result, textEnd, glyphs, shapingContext);
+		HandleEmptyLine(result, text, glyphs, shapingContext);
 
-		IncludeCharactersAtEnd(result, textEnd, glyphs, shapingContext);
+		IncludeCharactersAtEnd(result, text, glyphs, shapingContext);
 
 		return result;
 	}
 
-	static void DivideLineIntoWrappedLines(Array<ShapedText>& wrappedLines, u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& lineShapingContext)
+	static void DivideLineIntoWrappedLines(Array<ShapingResult>& wrappedLines, StringView text, const WrappedTextShapingContext& lineShapingContext)
 	{
-		ShapedText shapedLine = ShapeText(textBegin, textEnd, lineShapingContext);
-
-		if (shapedLine.glyphs.Empty())
-			return;
+		ShapingResult shapedLine = ShapeText(text, lineShapingContext);
 
 		//First character in next line
-		auto lineStart = shapedLine.textBegin;
+		StringViewIterator lineBegin = text.FirstIterator();
 		//First glyph in the first WHOLE cluster in the next line
 		const auto* clusterContainingStartCharacter = shapedLine.glyphs.Ptr();
 
 
-		while (lineStart != shapedLine.textEnd)
+		while (lineBegin != text.BehindIterator())
 		{
-			const WrappedLineResult result = WrapLine({ clusterContainingStartCharacter, shapedLine.glyphs.Ptr() + shapedLine.glyphs.Count() }, lineStart, textEnd, lineShapingContext);
+			const WrappedLineResult result = WrapLine({ clusterContainingStartCharacter, shapedLine.glyphs.End() }, { lineBegin, text.BehindIterator() }, lineShapingContext);
 
-			wrappedLines.AddBack(result.shapedText);
+			wrappedLines.AddBack(result.shapingResult);
 
-			lineStart = result.shapedText.textEnd;
-			clusterContainingStartCharacter = result.clusterContainingEndCharacter;
+			lineBegin = result.lineEnd;
+			clusterContainingStartCharacter = result.clusterContainingLineEnd;
 		}
 	}
 
-	struct LineSpan
+	static StringView next_line(StringViewIterator it, const StringView& text, const WrappedTextShapingContext& context)
 	{
-		u32StringViewIterator begin;
-		u32StringViewIterator end;
-	};
-	static LineSpan next_line(u32StringViewIterator begin, const Array<char>& lineBreaks, const u32StringView& text)
-	{
-		if (begin < text.FirstIterator() || begin > text.BehindIterator() || lineBreaks.Count() != text.Count())
-			throw std::out_of_range("iterator out of range");
+		if (it < text.FirstIterator() || it > text.BehindIterator())
+			throw std::out_of_range("iterator out of range");		
 
-		uintMem endIndex = begin - text.FirstIterator();
+		auto begin = it;
 
-		while (endIndex != lineBreaks.Count() && lineBreaks[endIndex] != LINEBREAK_MUSTBREAK)
-			++endIndex;
+		while (it < text.BehindIterator() && !context.GetTextSeparationData().IsNewLine(it - context.GetText().FirstIterator()))
+			++it;
 
-		if (endIndex != lineBreaks.Count())
-			++endIndex;
+		if (it != text.BehindIterator())
+			++it;
 
-		return { begin, text.FirstIterator() + endIndex };
+		return { begin, it };
 	}
-	static LineSpan first_line(const Array<char>& lineBreaks, const u32StringView& text)
+	static StringView first_line(const StringView& text, const WrappedTextShapingContext& context)
 	{
-		return next_line(text.FirstIterator(), lineBreaks, text);
+		return next_line(text.FirstIterator(), text, context);
 	}
 
-	Array<ShapedText> ShapeTextWrapped(u32StringViewIterator textBegin, u32StringViewIterator textEnd, const WrappedTextShapingContext& shapingContext)
+	Array<ShapingResult> ShapeTextWrapped(StringView text, const WrappedTextShapingContext& shapingContext)
 	{
-		if (textBegin == textEnd)
+		if (text.Empty())
 			return {};
 
-		const auto lineBreaks = get_text_linebreaks({ textBegin, textEnd }, hb_language_to_string(hb_language_get_default()));
+		Array<ShapingResult> wrappedLines;
+		for (auto lineText = first_line(text, shapingContext); !lineText.Empty(); lineText = next_line(lineText.BehindIterator(), text, shapingContext))
+			DivideLineIntoWrappedLines(wrappedLines, lineText, shapingContext);
 
-		Array<ShapedText> wrappedLines;
-		for (auto lineText = first_line(lineBreaks, { textBegin, textEnd }); lineText.begin != lineText.end; lineText = next_line(lineText.end, lineBreaks, { textBegin, textEnd }))
-			DivideLineIntoWrappedLines(wrappedLines, lineText.begin, lineText.end, shapingContext);
+		if (text.Last() == '\n')
+			wrappedLines.AddBack();
 
 		return wrappedLines;
 	}

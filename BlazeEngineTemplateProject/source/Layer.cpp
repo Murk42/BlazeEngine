@@ -5,7 +5,7 @@ void Layer::Update()
 {
 }
 
-void Layer::Render()
+void Layer::Render(const Graphics::RenderContext& renderContext)
 {
 }
 

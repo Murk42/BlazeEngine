@@ -11,7 +11,8 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)source\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
       <Command>

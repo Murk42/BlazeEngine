@@ -1,6 +1,6 @@
 #pragma once
-#include "BlazeEngine/Graphics/Renderers/RendererBase.h"
-#include "BlazeEngine/Graphics/Renderers/RendererRegistry.h"
+#include "BlazeEngine/Graphics/Core/RendererBase.h"
+#include "BlazeEngine/Graphics/Core/RendererRegistry.h"
 #include "BlazeEngine/UI/Graphics/RenderUnit.h"
 #include "BlazeEngine/UI/Core/Screen.h"
 
@@ -20,11 +20,11 @@ namespace Blaze::UI
 			UI::Node& node;
 		};
 
-		GraphicsSubSystem(Graphics::GraphicsContextBase& graphicsContext);
-		GraphicsSubSystem(Graphics::GraphicsContextBase& graphicsContext, Graphics::RendererRegistry rendererRegistry);
+		GraphicsSubSystem();
+		GraphicsSubSystem(Graphics::RendererRegistry rendererRegistry);
 		~GraphicsSubSystem();
 
-		void SetRendererRegistry(Graphics::RendererRegistry newRegistry);
+		void Initialize(Graphics::GraphicsContext& graphicsContext, Graphics::RendererRegistry newRegistry);
 
 		void SetScreen(UI::Screen* newScreen);
 		void Render(const Graphics::RenderContext& renderContext);
@@ -33,13 +33,14 @@ namespace Blaze::UI
 
 		inline UI::Screen* GetScreen() const { return screen; }
 	private:
-		Graphics::GraphicsContextBase& graphicsContext;
 		Graphics::RendererRegistry rendererRegistry;
 		UI::Screen* screen;
 		bool recreateRenderQueue;
 
 		Array<RenderItem> renderQueue;
 		Array<RenderGroup> renderGroups;
+
+		VirtualList<Graphics::RendererBase> renderers;
 
 		void RecreateRenderQueue();
 

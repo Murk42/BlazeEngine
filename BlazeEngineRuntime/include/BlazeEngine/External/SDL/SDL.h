@@ -1,13 +1,13 @@
 #pragma once
 #include "BlazeEngine/Core/String/StringView.h"
-#include "BlazeEngine/Core/Time/Timing.h"
+#include "BlazeEngine/Core/Time/TimingTree.h"
 #include "SDL3/SDL.h"
 
 namespace Blaze
 {
 	StringView SDL_GetError();
 
-	TimingResult InitializeSDL();
+	bool InitializeSDL(TimingTree& timingTree);
 	void TerminateSDL();
 
 	class SDLAllocator

@@ -24,6 +24,9 @@
     <ClCompile Include="source\Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\MainAppRuntimeThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -32,10 +35,16 @@
     <ClInclude Include="source\Layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainAppRuntimeThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="BlazeEngineProjectPropertySheet.props">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="log.txt" />
   </ItemGroup>
 </Project>

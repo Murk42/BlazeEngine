@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Graphics/RenderUnits/ImageRenderUnit.h"
 
-namespace Blaze::UI
+namespace Blaze::UI::Nodes
 {
 	ImageRenderUnit::ImageRenderUnit()
 	{
@@ -9,18 +9,18 @@ namespace Blaze::UI
 	ImageRenderUnit::~ImageRenderUnit()
 	{
 	}
-	void ImageRenderUnit::Render(const Node& node, Graphics::TexturedRectRenderer& renderer, const RenderContext& renderContext)
+	void ImageRenderUnit::Render(const Node& node, Graphics::TexturedRectRenderer& renderer) 
 	{
 		renderer.Render(Graphics::TexturedRectRenderData{
-			.texture = texture,
-			.uv1 = uv1,
-			.uv2 = uv2,
+			.texture = style.texture,
+			.uv1 = style.uv1,
+			.uv2 = style.uv2,
 			.pos = pos,
 			.right = right,
 			.up = up,
-			.color = color,
-			.blend = blend,
-			.alpha = alpha
-			}, renderContext);
+			.color = style.blendColor,
+			.blend = style.blendFactor,
+			.alpha = style.alphaMultiplier
+			});
 	}
 }

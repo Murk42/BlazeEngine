@@ -1,23 +1,16 @@
 #include "pch.h"
 #include "BlazeEngine/Runtime/App/AppLayer.h"
+#include "BlazeEngine/Runtime/App/AppRuntimeThread.h"
 
 namespace Blaze
 {
-    AppLayer::AppLayer()
-        : scheduledForDestruction(false)
+    extern thread_local AppRuntimeThread* threadAppRuntimeThreadObject;
+     
+    AppLayer::AppLayer() 
+        : thread(*threadAppRuntimeThreadObject), resourceManager(threadAppRuntimeThreadObject->resourceManager)
     {
     }
     AppLayer::~AppLayer() 
     {
-        destructionEventDispatcher.Call({ *this });
-    }
-    void AppLayer::ScheduleForDestruction()
-    {
-        scheduledForDestruction = true;
-    }
-
-    bool AppLayer::IsScheduledForDesturction() const
-    {
-        return scheduledForDestruction;
     }
 }

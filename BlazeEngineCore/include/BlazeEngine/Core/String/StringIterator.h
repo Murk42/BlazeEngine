@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/String/StringCommon.h"
+#include "BlazeEngine/Core/String/UnicodeChar.h"
 
 namespace Blaze
 {

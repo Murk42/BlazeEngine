@@ -8,6 +8,8 @@ namespace Blaze
 
 namespace Blaze::Debug
 {
+	class Log;
+
 	class BLAZE_API LoggerListener
 	{
 	public:

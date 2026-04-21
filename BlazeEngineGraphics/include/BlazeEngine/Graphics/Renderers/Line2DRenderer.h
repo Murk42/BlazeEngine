@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/Math/Vector.h"
 #include "BlazeEngine/Core/Common/Color.h"
-#include "BlazeEngine/Graphics/Renderers/RendererBase.h"
+#include "BlazeEngine/Graphics/Core/RendererBase.h"
 
 namespace Blaze::Graphics
 {
@@ -12,11 +12,11 @@ namespace Blaze::Graphics
 		float width = 1.0f;
 	};
 
-	class Line2DRenderer : public RendererBase
+	class Line2DRenderer : public virtual RendererBase
 	{
 	public:
-		virtual void Render(const Line2DRenderData& data, const RenderContext& context) = 0;
+		virtual void Render(const Line2DRenderData& data) = 0;
 
-		RendererTypeID GetTypeID() const { return RendererBase::GetTypeID<Line2DRenderer>(); }
+		RendererTypeID GetTypeID() const override final { return RendererBase::GetTypeIDFor<Line2DRenderer>(); }
 	};
 }

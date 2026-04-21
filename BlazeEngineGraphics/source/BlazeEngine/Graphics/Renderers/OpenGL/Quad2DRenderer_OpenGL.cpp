@@ -18,7 +18,7 @@ namespace Blaze::Graphics::OpenGL
 
 
 	Quad2DRenderer_OpenGL::Quad2DRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferInstanceCount, bool loadDefaultShaders)
-		: BufferedRendererBase_OpenGL(bufferInstanceCount * sizeof(Instance), graphicsContext), graphicsContext(graphicsContext), instanceCount(0)
+		: BufferedRendererBase_OpenGL(graphicsContext, bufferInstanceCount * sizeof(Instance)), instanceCount(0)
 	{
 		if (loadDefaultShaders)
 		{
@@ -48,20 +48,18 @@ namespace Blaze::Graphics::OpenGL
 	{
 		WaitFence();
 	}
-	void Quad2DRenderer_OpenGL::StartRender(const RenderContext& context)
+	void Quad2DRenderer_OpenGL::StartRender(const RenderContext_OpenGL& renderContext)
 	{
 		graphicsContext.SelectProgram(&program);
 		graphicsContext.SelectVertexArray(&va);
 
-		Mat4f proj = Mat4f::OrthographicMatrix(0, (float)context.GetTargetSize().x, 0, (float)context.GetTargetSize().y, -1, 1);
-
-		program.SetUniform(0, proj);
+		program.SetUniform(0, renderContext.OrthographicsProjectionMatrix(-1, 1));
 	}
-	void Quad2DRenderer_OpenGL::EndRender(const RenderContext& context)
+	void Quad2DRenderer_OpenGL::EndRender()
 	{
-		Flush(context);
+		Flush();
 	}
-	void Quad2DRenderer_OpenGL::Render(const Quad2DRenderData& data, const RenderContext& context)
+	void Quad2DRenderer_OpenGL::Render(const Quad2DRenderData& data)
 	{
 		WaitFence();
 
@@ -75,9 +73,9 @@ namespace Blaze::Graphics::OpenGL
 		instanceCount++;
 
 		if ((instanceCount + 1) * sizeof(Instance) > GetBufferSize())
-			Flush(context);
+			Flush();
 	}
-	void Quad2DRenderer_OpenGL::Flush(const RenderContext& context)
+	void Quad2DRenderer_OpenGL::Flush()
 	{
 		if (instanceCount == 0)
 			return;

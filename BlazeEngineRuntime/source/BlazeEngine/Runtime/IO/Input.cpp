@@ -7,7 +7,7 @@
 
 namespace Blaze::Input
 {
-	void Update()
+	void PollEvents()
 	{
 		auto context = BlazeEngineContextInternal::GetEngineContext();
 
@@ -17,7 +17,20 @@ namespace Blaze::Input
 			return;
 		}
 
-		context->ProcessEvents();
+		context->PollEvents();
+	}
+
+	bool WaitForEvents(float seconds)
+	{
+		auto context = BlazeEngineContextInternal::GetEngineContext();
+
+		if (context == nullptr)
+		{
+			BLAZE_LOG_FATAL("Calling a function dependent on the engine context, but its not initialized");
+			return false;
+		}
+
+		return context->WaitForEvents(seconds);
 	}
 
 	KeyCode GetKeyCode(Key key, KeyModifier modifier)
@@ -109,9 +122,10 @@ namespace Blaze::Input
 		return out;
 	}
 
-	void SetClipboardText(u8String text)
+	void SetClipboardText(u8StringView text)
 	{
-		if (!SDL_SetClipboardText(reinterpret_cast<const char*>(text.Ptr())))
+		u8String nullTerminated = text;
+		if (!SDL_SetClipboardText(reinterpret_cast<const char*>(nullTerminated.Ptr())))
 			BLAZE_LOG_ERROR("SDL_SetClipboardText failed with message: \"{}\"", SDL_GetError());
 	}
 }

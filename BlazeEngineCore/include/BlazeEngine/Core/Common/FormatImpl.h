@@ -255,13 +255,14 @@ namespace Blaze
 		else if (i = string.FindReverse(centerAlignString); i != SIZE_MAX)
 			parsedAlign = 2;
 
-		if (i != SIZE_MAX)
+		//Before the fill character is before the align character
+		if (i != SIZE_MAX) //Check if there is a align character
 		{
-			if (i != 0)
+			if (i != 0) //Check if the align character isn't the first one, meaning there is a fill character before it
 			{
-				//Read fill character
+				//Read the fill character
 				UnicodeChar ch;
-				if (uintMem j = ch.FromChars(string.Ptr(), i); j != i)
+				if (uintMem j = ch.FromFirstCodePoints(string.SubString(0, i)); j != i)
 				{
 					//Invalid format
 					if (j == 0)
@@ -283,13 +284,13 @@ namespace Blaze
 	template<typename Char> requires OneOf<Char, char, char8_t, char16_t, char32_t>
 	inline uintMem BaseFormatter<Char>::ParseWidth(GenericStringView<Char> string, const FormatParseContext<Char>& parseContext)
 	{
-		uintMem parsedCharacterWidth = 0;
+		uintMem parsedTargetWidth = 0;
 
 		uintMem i = 0;
 		while (i < string.Count())
 		{
 			UnicodeChar ch;
-			uintMem charWidth = ch.FromChars(string.Ptr() + i, string.Count() - i);
+			uintMem charWidth = ch.FromFirstCodePoints(string.SubString(i));
 
 			if (charWidth == 0)
 			{
@@ -316,12 +317,12 @@ namespace Blaze
 			if (digit > 9)
 				break;
 
-			parsedCharacterWidth = parsedCharacterWidth * 10 + digit;
+			parsedTargetWidth = parsedTargetWidth * 10 + digit;
 
 			i += charWidth;
 		}
 
-		characterWidth = parsedCharacterWidth;
+		requestedWidth = parsedTargetWidth;
 		return i;
 	}
 
@@ -335,74 +336,99 @@ namespace Blaze
 
 		if constexpr (SameAs<SrcChar, DstChar>)
 		{
-			convertedLength = value.Count();
-			return this->characterWidth > value.Count() ? this->characterWidth : value.Count();
+			inputStringWidth = value.Count();
 		}
 		else
 		{
 			uintMem count = 0;
-			uintMem i = 0;
-			while (i < value.Count())
-			{
-				UnicodeChar ch;
-				i += ch.FromChars(value.Ptr() + i, value.Count() - i);
-				count += ch.ToChars<DstChar>().count;
-			}
 
-			convertedLength = count;
-			return this->characterWidth > count ? this->characterWidth : count;
+			for (uintMem i = 0; i < value.Count(); i += UnicodeChar::CodePointsInChar(value[i]), ++count);
+
+			inputStringWidth = count;
 		}
+
+		//If in the format the target width wasn't set then the output will be the same as the input string
+		if (this->requestedWidth == 0)
+			return inputStringWidth;
+		else
+			return this->requestedWidth;
 	}
 	template<typename SrcChar, typename DstChar>
 	inline void Formatter<GenericStringView<SrcChar>, DstChar>::Format(const GenericStringView<SrcChar>& string, FormatContext<DstChar>& context)
 	{
 		uintMem preFillCount = 0, postFillCount = 0;
+		uintMem writeStart = 0, writeEnd = string.Count();
 
-		if (this->characterWidth != 0)
+		if (this->requestedWidth != 0)
 		{
-			if (convertedLength >= this->characterWidth)
+			if (inputStringWidth > this->requestedWidth)
 			{
 				preFillCount = 0;
 				postFillCount = 0;
+
+				if (this->align == 0)
+				{
+					writeEnd = this->requestedWidth;
+				}
+				else if (this->align == 1)
+				{
+					writeStart = inputStringWidth - this->requestedWidth;
+				}
+				else if (this->align == 2)
+				{
+					writeStart = (inputStringWidth - this->requestedWidth) / 2;
+					writeEnd = this->requestedWidth + writeStart;
+				}
 			}
 			else
 			{
 				if (this->align == 0)
 				{
 					preFillCount = 0;
-					postFillCount = this->characterWidth - convertedLength;
+					postFillCount = this->requestedWidth - inputStringWidth;
 				}
 				else if (this->align == 1)
 				{
-					preFillCount = this->characterWidth - convertedLength;
+					preFillCount = this->requestedWidth - inputStringWidth;
 					postFillCount = 0;
 				}
 				else if (this->align == 2)
 				{
-					preFillCount = (this->characterWidth - convertedLength) / 2;
-					postFillCount = this->characterWidth - convertedLength - preFillCount;
+					preFillCount = (this->requestedWidth - inputStringWidth) / 2;
+					postFillCount = this->requestedWidth - inputStringWidth - preFillCount;
 				}
 			}
 		}
 
 		for (uintMem i = 0; i < preFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<DstChar>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<DstChar>().AsString());
 
 		if constexpr (SameAs<SrcChar, DstChar>)
-			context.Write(string);
+			context.Write(string.SubString(writeStart, writeEnd));
 		else
 		{
-			uintMem i = 0;
-			while (i < string.Count())
+			uintMem characterIndex = 0;
+			uintMem codePointIndex = 0;
+
+			while (characterIndex < writeStart)
 			{
 				UnicodeChar ch;
-				i += ch.FromChars(string.Ptr() + i, string.Count() - i);
-				context.Write(ch.ToChars<DstChar>().AsString());
+				codePointIndex += ch.FromFirstCodePoints(string.SubString(codePointIndex));
+				++characterIndex;
+			}
+
+			while (characterIndex < writeEnd)
+			{
+				UnicodeChar ch;
+				codePointIndex += ch.FromFirstCodePoints(string.SubString(codePointIndex));
+
+				context.Write(ch.ToCodePoints<DstChar>().AsString());
+				++characterIndex;
 			}
 		}
 
 		for (uintMem i = 0; i < postFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<DstChar>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<DstChar>().AsString());
 	}
 
 	template<typename SrcChar, typename DstChar> requires Formattable<GenericStringView<SrcChar>, DstChar>
@@ -425,8 +451,8 @@ namespace Blaze
 		start += this->ParseWidth(GenericStringView<Char>(string.Ptr() + start, string.Count() - start), parseContext);
 		
 		uintMem convertedLength = value ? 4 : 5;
-		this->characterWidth = (convertedLength > this->characterWidth ? convertedLength : this->characterWidth);
-		return this->characterWidth;
+		this->requestedWidth = (convertedLength > this->requestedWidth ? convertedLength : this->requestedWidth);
+		return this->requestedWidth;
 	}
 	template<typename Char>
 	inline void Formatter<bool, Char>::Format(const bool& value, FormatContext<Char>& context)
@@ -438,21 +464,21 @@ namespace Blaze
 		if (this->align == 0)
 		{
 			preFillCount = 0;
-			postFillCount = this->characterWidth - convertedLength;
+			postFillCount = this->requestedWidth - convertedLength;
 		}
 		else if (this->align == 1)
 		{
-			preFillCount = this->characterWidth - convertedLength;
+			preFillCount = this->requestedWidth - convertedLength;
 			postFillCount = 0;
 		}
 		else if (this->align == 2)
 		{
-			preFillCount = (this->characterWidth - convertedLength) / 2;
-			postFillCount = this->characterWidth - convertedLength - preFillCount;
+			preFillCount = (this->requestedWidth - convertedLength) / 2;
+			postFillCount = this->requestedWidth - convertedLength - preFillCount;
 		}
 
 		for (uintMem i = 0; i < preFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<Char>().AsString());
 
 		if (value)
 			context.Write("true");
@@ -460,7 +486,7 @@ namespace Blaze
 			context.Write("false");
 
 		for (uintMem i = 0; i < postFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<Char>().AsString());
 	}
 
 	template<typename Char> requires OneOf<Char, char, char8_t, char16_t, char32_t>
@@ -488,7 +514,7 @@ namespace Blaze
 		if (type == 1)
 		{
 			*reinterpret_cast<char32_t*>(symbols) = static_cast<char32_t>(value);
-			return UnicodeChar(static_cast<char32_t>(value)).ToCharsSize<Char>();
+			return UnicodeChar(static_cast<char32_t>(value)).GetCodePointCount<Char>();
 		}
 
 		char* dst = symbols;
@@ -556,11 +582,11 @@ namespace Blaze
 					if (*it >= 'a' && *it <= 'z')
 						*it = *it - ('a' - 'A');
 
-			if (this->characterWidth != 0)
-				if (symbolsCount >= this->characterWidth)
+			if (this->requestedWidth != 0)
+				if (symbolsCount >= this->requestedWidth)
 					return symbolsCount;
 				else
-					return (this->characterWidth - symbolsCount) * UnicodeChar(this->fill).ToCharsSize<Char>() + symbolsCount;
+					return (this->requestedWidth - symbolsCount) * UnicodeChar(this->fill).GetCodePointCount<Char>() + symbolsCount;
 
 			return symbolsCount;
 		}
@@ -577,7 +603,7 @@ namespace Blaze
 	{
 		uintMem preFillCount = 0, postFillCount = 0;
 
-		if (this->characterWidth != 0)
+		if (this->requestedWidth != 0)
 		{
 			uintMem formattedWidth = 0;
 			char* it = symbols;
@@ -587,7 +613,7 @@ namespace Blaze
 				++it;
 			}
 
-			if (formattedWidth >= this->characterWidth)
+			if (formattedWidth >= this->requestedWidth)
 			{
 				preFillCount = 0;
 				postFillCount = 0;
@@ -597,17 +623,17 @@ namespace Blaze
 				if (this->align == 0)
 				{
 					preFillCount = 0;
-					postFillCount = this->characterWidth - formattedWidth;
+					postFillCount = this->requestedWidth - formattedWidth;
 				}
 				else if (this->align == 1)
 				{
-					preFillCount = this->characterWidth - formattedWidth;
+					preFillCount = this->requestedWidth - formattedWidth;
 					postFillCount = 0;
 				}
 				else if (this->align == 2)
 				{
-					preFillCount = (this->characterWidth - formattedWidth) / 2;
-					postFillCount = this->characterWidth - formattedWidth - preFillCount;
+					preFillCount = (this->requestedWidth - formattedWidth) / 2;
+					postFillCount = this->requestedWidth - formattedWidth - preFillCount;
 				}
 			}
 		}
@@ -615,19 +641,19 @@ namespace Blaze
 		bool signFirst = type == 0 && signAwarePadding == 1 && alternateValue == 0 && (symbols[0] == '-' || symbols[0] == '+');
 
 		if (signFirst)
-			context.Write(UnicodeChar(symbols[0]).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(symbols[0]).ToCodePoints<Char>().AsString());
 
 		for (uintMem i = 0; i < preFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<Char>().AsString());
 
 		if (type == 0)
 			for (uintMem i = signFirst ? 1 : 0; symbols[i] != '\0' && i < _countof(symbols); ++i)
-				context.Write(UnicodeChar(symbols[i]).ToChars<Char>().AsString());
+				context.Write(UnicodeChar(symbols[i]).ToCodePoints<Char>().AsString());
 		else
-			context.Write(UnicodeChar(*reinterpret_cast<char32_t*>(symbols)).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(*reinterpret_cast<char32_t*>(symbols)).ToCodePoints<Char>().AsString());
 
 		for (uintMem i = 0; i < postFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<Char>().AsString());
 	}
 	template<typename Char> requires OneOf<Char, char, char8_t, char16_t, char32_t>
 	inline uintMem BaseIntegerFormatter<Char>::ParseSign(GenericStringView<Char> string, const FormatParseContext<Char>& parseContext)
@@ -802,11 +828,11 @@ namespace Blaze
 					if (*it >= 'a' && *it <= 'z')
 						*it = *it - ('a' - 'A');
 
-			if (this->characterWidth != 0)
-				if (symbolsCount >= this->characterWidth)
+			if (this->requestedWidth != 0)
+				if (symbolsCount >= this->requestedWidth)
 					return symbolsCount;
 				else
-					return (this->characterWidth - symbolsCount) * UnicodeChar(this->fill).ToCharsSize<Char>() + symbolsCount;
+					return (this->requestedWidth - symbolsCount) * UnicodeChar(this->fill).GetCodePointCount<Char>() + symbolsCount;
 
 			return symbolsCount;
 		}
@@ -824,13 +850,13 @@ namespace Blaze
 		if (errorFlag == 1)
 		{
 			for (char* it = symbols; it < symbols + _countof(symbols) && *it != '\0'; ++it)
-				context.Write(UnicodeChar(*it).ToChars<Char>().AsString());
+				context.Write(UnicodeChar(*it).ToCodePoints<Char>().AsString());
 			return;
 		}
 
 		uintMem preFillCount = 0, postFillCount = 0;
 
-		if (this->characterWidth != 0)
+		if (this->requestedWidth != 0)
 		{
 			uintMem formattedWidth = 0;
 			char* it = symbols;
@@ -840,7 +866,7 @@ namespace Blaze
 				++it;
 			}
 
-			if (formattedWidth >= this->characterWidth)
+			if (formattedWidth >= this->requestedWidth)
 			{
 				preFillCount = 0;
 				postFillCount = 0;
@@ -850,17 +876,17 @@ namespace Blaze
 				if (this->align == 0)
 				{
 					preFillCount = 0;
-					postFillCount = this->characterWidth - formattedWidth;
+					postFillCount = this->requestedWidth - formattedWidth;
 				}
 				else if (this->align == 1)
 				{
-					preFillCount = this->characterWidth - formattedWidth;
+					preFillCount = this->requestedWidth - formattedWidth;
 					postFillCount = 0;
 				}
 				else if (this->align == 2)
 				{
-					preFillCount = (this->characterWidth - formattedWidth) / 2;
-					postFillCount = this->characterWidth - formattedWidth - preFillCount;
+					preFillCount = (this->requestedWidth - formattedWidth) / 2;
+					postFillCount = this->requestedWidth - formattedWidth - preFillCount;
 				}
 			}
 		}
@@ -868,16 +894,16 @@ namespace Blaze
 		bool signFirst = signAwarePadding == 1 && (symbols[0] == '-' || symbols[0] == '+');
 
 		if (signFirst)
-			context.Write(UnicodeChar(symbols[0]).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(symbols[0]).ToCodePoints<Char>().AsString());
 
 		for (uintMem i = 0; i < preFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<Char>().AsString());
 
 		for (uintMem i = signFirst ? 1 : 0; symbols[i] != '\0' && i < _countof(symbols); ++i)
-			context.Write(UnicodeChar(symbols[i]).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(symbols[i]).ToCodePoints<Char>().AsString());
 
 		for (uintMem i = 0; i < postFillCount; ++i)
-			context.Write(UnicodeChar(this->fill).ToChars<Char>().AsString());
+			context.Write(UnicodeChar(this->fill).ToCodePoints<Char>().AsString());
 	}
 	template<typename Char> requires OneOf<Char, char, char8_t, char16_t, char32_t>
 	inline uintMem BaseDecimalFormatter<Char>::ParseSign(GenericStringView<Char> string, const FormatParseContext<Char>& parseContext)
@@ -945,7 +971,7 @@ namespace Blaze
 			while (i < string.Count())
 			{
 				UnicodeChar ch;
-				uintMem charWidth = ch.FromChars(string.Ptr() + i, string.Count() - i);
+				uintMem charWidth = ch.FromFirstCodePoints(string.SubString(i));
 
 				if (charWidth == 0)
 				{

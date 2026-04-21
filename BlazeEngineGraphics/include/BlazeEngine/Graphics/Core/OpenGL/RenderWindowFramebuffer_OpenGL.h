@@ -1,25 +1,32 @@
 #pragma once
-#include "Framebuffer_OpenGL.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/FramebufferBase_OpenGL.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLEnums.h"
+#include "BlazeEngine/Core/Container/ArrayView.h"
 
 namespace Blaze::Graphics::OpenGL
 {		
 	class RenderWindow_OpenGL;
 
-	class BLAZE_API RenderWindowFramebuffer_OpenGL
+	struct RenderWindowFramebufferDrawBufferInfo
+	{
+		uint drawBufferIndex;
+		RenderWindowFramebufferBufferTarget target;
+	};
+
+	class BLAZE_API RenderWindowFramebuffer_OpenGL : public FramebufferBase_OpenGL
 	{
 	public:
-		/*Parity*/~RenderWindowFramebuffer_OpenGL();
+		~RenderWindowFramebuffer_OpenGL() override;
 
-		/*Parity*/inline Framebuffer_OpenGL& GetFramebuffer() { return framebuffer; }
-		/*Parity*/inline RenderWindow_OpenGL& GetRenderWindow() { return renderWindow; }
+		inline Vec2u GetSize() const override { return size; }
 
-		RenderWindowFramebuffer_OpenGL(RenderWindow_OpenGL& renderWindow);			
+		void SetDrawBuffer(RenderWindowFramebufferBufferTargets target);
+		void SetDrawBuffers(const ArrayView<RenderWindowFramebufferDrawBufferInfo>& drawBuffers);
+		void DisableDrawBuffers();
 	private:
-		RenderWindow_OpenGL& renderWindow;
-		Framebuffer_OpenGL framebuffer;		
+		Vec2u size;
 
-		void ChangeSize(Vec2u size);
-
+		RenderWindowFramebuffer_OpenGL(uint32 id, Vec2u size);
 		friend class RenderWindow_OpenGL;
 	};
 

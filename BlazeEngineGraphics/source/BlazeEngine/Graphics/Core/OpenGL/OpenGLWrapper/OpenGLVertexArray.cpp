@@ -53,7 +53,12 @@ namespace Blaze::Graphics::OpenGL
     }
     void VertexArray::SetIntegerVertexAttributeFormat(uint index, IntegerVertexAttributeType type, uintMem count, uintMem offset)
     {
-        GLenum _type = ConvertToOpenGLEnum(type);
+        GLenum _type;
+        if (!OpenGLIntegerVertexAttributeType(type, _type))
+        {
+            BLAZE_LOG_ERROR("Invalid IntegerVertexAttributeType enum value");
+            return;
+        }
         glVertexArrayAttribIFormat(id, index, count, _type, offset);
     }
     void VertexArray::SetDoubleVertexAttributeFormat(uint index, uintMem count, uintMem offset)
@@ -62,22 +67,42 @@ namespace Blaze::Graphics::OpenGL
     }
     void VertexArray::SetFloatVertexAttributeFormat(uint index, FloatVertexAttributeType type, uintMem count, uintMem offset)
     {
-        GLenum _type = ConvertToOpenGLEnum(type);
+        GLenum _type;
+        if (!OpenGLFloatVertexAttributeType(type, _type))
+        {
+            BLAZE_LOG_ERROR("Invalid FloatVertexAttributeType enum value");
+            return;
+        }
         glVertexArrayAttribFormat(id, index, count, _type, false, offset);
     }
     void VertexArray::SetFloatVertexAttributeAsNormalizedFormat(uint index, IntegerVertexAttributeType type, uintMem count, uintMem offset)
     {
-        GLenum _type = ConvertToOpenGLEnum(type);
+        GLenum _type;
+        if (!OpenGLIntegerVertexAttributeType(type, _type))
+        {
+            BLAZE_LOG_ERROR("Invalid IntegerVertexAttributeType enum value");
+            return;
+        }
         glVertexArrayAttribFormat(id, index, count, _type, true, offset);
     }
     void VertexArray::SetFloatVertexAttributeAsPackedFormat(uint index, PackedVertexAttributeType type, uintMem count, uintMem offset)
     {
-        GLenum _type = ConvertToOpenGLEnum(type);
+        GLenum _type;
+        if (!OpenGLPackedVertexAttributeType(type, _type))
+        {
+            BLAZE_LOG_ERROR("Invalid PackedVertexAttributeType enum value");
+            return;
+        }
         glVertexArrayAttribFormat(id, index, 4, _type, true, offset);
     }
     void VertexArray::SetFloatVertexAttributeAsBGRAFormat(uint index, BGRAVertexAttributeType type, uintMem count, uintMem offset)
     {
-        GLenum _type = ConvertToOpenGLEnum(type);
+        GLenum _type;
+        if (!OpenGLBGRAVertexAttributeType(type, _type))
+        {
+            BLAZE_LOG_ERROR("Invalid BGRAVertexAttributeType enum value");
+            return;
+        }
         glVertexArrayAttribFormat(id, index, GL_BGRA, _type, true, offset);
     }
     void VertexArray::SetVertexAttributeDivisor(uint index, uint divisor)

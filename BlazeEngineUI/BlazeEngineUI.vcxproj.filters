@@ -45,7 +45,7 @@
     <ClInclude Include="include\BlazeEngine\UI\Core\Screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderNode.h">
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderableNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Graphics\GraphicsSubSystem.h">
@@ -55,9 +55,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\PanelRenderUnit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnit.h">
@@ -171,6 +168,39 @@
     <ClInclude Include="include\BlazeEngine\UI\Nodes\TextInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Debug\UIDebugLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Debug\UIDebuggableLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BlazeEngine\UI\Debug\UIDebugScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextCursorControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextInputControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextSeparations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextShaper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\SingleLineTextShaper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\WrappedLineTextShaper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\CursorRenderUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Text\TextLayoutMetadata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pch.cpp">
@@ -279,6 +309,36 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Nodes\TextInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Debug\UIDebugLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Debug\UIDebugScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextCursorControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextInputControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextSeparations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\SingleLineTextShaper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\WrappedLineTextShaper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextLayoutMetadata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Text\TextStyle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\CursorRenderUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

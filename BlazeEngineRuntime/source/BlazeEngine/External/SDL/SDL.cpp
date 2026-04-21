@@ -17,29 +17,27 @@ namespace Blaze
 		return StringView(ptr, len);
 	}
 
-	TimingResult InitializeSDL()
+	bool InitializeSDL(TimingTree& timingTree)
 	{
-		Timing timing{ "SDL" };
-
 		SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Blaze Engine application");
-		//SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_VERSION_STRING, "");
-		//SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_IDENTIFIER_STRING, "");
-		//SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_CREATOR_STRING, "");
-		//SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_COPYRIGHT_STRING, "");
-		//SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "");
-		//SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "");
+		SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_VERSION_STRING, "0.1");
+		SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_IDENTIFIER_STRING, "blaze_engine.app");
+		SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_CREATOR_STRING, "Marko Radojevic");
+		SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_COPYRIGHT_STRING, "No copyright for now");
+		SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/Murk42/BlazeEngine");
+		SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "application");
 
 		SDL_SetHint("SDL_HINT_VIDEO_ALLOW_SCREENSAVER", "1");
 
 		SDL_SetMainReady();
 
 		if (SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS) == false)
-			BLAZE_LOG_FATAL("Failed to initialize the SDL library. SDL returned error: \"" + SDL_GetError() + "\"");
+		{
+			BLAZE_LOG_ERROR("Failed to initialize the SDL library. SDL returned error: \"" + SDL_GetError() + "\"");
+			return false;
+		}
 
-		int version = SDL_GetVersion();
-		BLAZE_LOG_INFO("<color=green>Successfully<color/> initialized SDL {}.{}.{} ({.1f}ms)", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version), timing.GetTimingResult().time.GetSeconds() * 1000.0);
-
-		return timing.GetTimingResult();
+		return true;
 	}
 
 	void TerminateSDL()

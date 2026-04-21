@@ -69,7 +69,7 @@ namespace Blaze
 		*/
 		constexpr UnicodeChar(char32_t value);
 		/*
-			Constructs a unicode character from a character sequence. For example multiple UTF-8 code-points
+			Constructs a unicode character from a character sequence. For example multiple UTF-8 code points
 			can make a single unicode character, same for UTF-16. If the Char type is char or char32_t then only
 			one character is copied.
 
@@ -92,7 +92,7 @@ namespace Blaze
 			\returns The count of code units that the character would take if it was in an other format
 		*/
 		template<typename Char>
-		constexpr uintMem ToCharsSize();
+		constexpr uintMem GetCodePointCount();
 		/*
 			Converts the unicode character into a different format. If the buffer is not big enough 0 is returned.
 			The amount of bytes written is returned otherwise.
@@ -100,23 +100,52 @@ namespace Blaze
 			\returns The result of the conversion that stores the characters and the converted length
 		*/
 		template<typename Char>
-		constexpr UnicodeCharConvertResult<Char> ToChars();
+		constexpr UnicodeCharConvertResult<Char> ToCodePoints();
 		/*
-			Constructs a unicode character from a character sequence. For example multiple UTF-8 code-points
-			can make a single unicode character, same for UTF-16. If the Char type is char or char32_t then only
-			one character is copied.
+			Constructs a unicode character from the first code points in the given string
 
-			\param buffer     the buffer where the character sequence is be stored
-			\param bufferSize the size of the buffer
-			\returns The amount of bytes read or 0 if the buffer is not big enough
+			\param string      The string to exctract a unicode character from
+			\returns           The amount of code points read or 0 if the string has an invalid code point
+							   sequence or is empty
 		*/
 		template<typename Char>
-		constexpr uintMem FromChars(const Char* buffer, uintMem bufferSize);
+		constexpr uintMem FromFirstCodePoints(GenericStringView<Char> string);	
+		/*
+			Constructs a unicode character from last code points in the given string
 
+			\param string      The string to exctract a unicode character from
+			\returns           The amount of code points read or 0 if the string has an invalid code point
+							   sequence or is empty
+		*/
+		template<typename Char>
+		constexpr uintMem FromLastCodePoints(GenericStringView<Char> string);
+		
 		/*
 			Returns a hash of the unicode character (basically returns it's value)
 		*/
 		constexpr uint64 Hash() const;
+
+		/*
+			Returns the index of the first code point in the last character that includes the last code point in
+			the string.
+
+			\param string      The string in which search for the start of the last character
+			\returns           Index of the code point that is the last character. Returns string.Count() if the
+							   code point sequence is invalid
+		*/
+		template<typename Char>
+		static constexpr uintMem FindStartOfLastCharacter(GenericStringView<Char> string);
+		/*
+			Determines the count of code points present in a character staring with the given code point. UTF-8 
+			characters can have up to 4 code points, UTF-16 can have up to 2, UTF-32 and ASCII characters always 
+			have 1. Zero is returned if the code point is invalid.
+
+			\param firstCodePoint   The first code point in the character
+			\returns                The count of code points present in a character starting with the code point. 
+			                        Zero is returned if the code point is invalid.
+		*/
+		template<typename Char>
+		static constexpr uintMem CodePointsInChar(Char firstCodePoint);
 
 		/*
 			Pre-increments the unicode character

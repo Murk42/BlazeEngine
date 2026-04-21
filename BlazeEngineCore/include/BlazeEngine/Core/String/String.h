@@ -52,6 +52,7 @@ namespace Blaze
 		void Erase(intMem pos, uintMem countToErase = 1);
 		void Replace(GenericStringView<Char> target, GenericStringView<Char> value);
 
+		GenericStringView<Char> SubString(intMem start) const;
 		GenericStringView<Char> SubString(intMem start, intMem end) const;
 		template<AllocatorType ArrayAllocator = Allocator>
 		Array<GenericStringView<Char>, ArrayAllocator> Split(GenericStringView<Char> separation, uintMem maxSplit = 0) const;
@@ -128,8 +129,12 @@ namespace Blaze
 		Char& operator[](intMem index);
 		const Char& operator[](intMem index) const;
 
-		bool operator==(const GenericString& s) const;
-		bool operator!=(const GenericString& s) const;
+		template<AllocatorType OtherAllocator>
+		bool operator==(const GenericString<Char, OtherAllocator>& other) const;
+		template<AllocatorType OtherAllocator>
+		bool operator!=(const GenericString<Char, OtherAllocator>& other) const;
+		bool operator==(const GenericStringView<Char>& other) const;
+		bool operator!=(const GenericStringView<Char>& other) const;
 
 		template<AllocatorType OtherAllocator>
 		GenericString& operator+=(const GenericString<Char, OtherAllocator>& other);

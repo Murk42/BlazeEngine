@@ -36,7 +36,7 @@ namespace Blaze
 		--referenceCount;
 
 		if (referenceCount == 0)
-			DestructResource();
+			Destruct();
 	}
 	uintMem ResourceBase::GetReferenceCount() const
 	{

@@ -1,13 +1,14 @@
 #pragma once
-#include "BlazeEngine/Graphics/Renderers/RendererBase.h"
-#include "BlazeEngine/Graphics/Core/GraphicsAPI_OpenGL.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/RendererBase_OpenGL.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLProgram.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLGraphicsBuffer.h"
 
 namespace Blaze::Graphics::OpenGL
 {
-	class BufferedRendererBase_OpenGL
+	class BufferedRendererBase_OpenGL : public RendererBase_OpenGL
 	{
 	public:
-		BufferedRendererBase_OpenGL(uintMem bufferSize, GraphicsContext_OpenGL& graphicsContext);
+		BufferedRendererBase_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferSize);
 		~BufferedRendererBase_OpenGL();
 
 		void SetShaderProgram(Blaze::Graphics::OpenGL::ShaderProgram&& program);

@@ -1,5 +1,6 @@
 #pragma once
 #include "BlazeEngine/Core/String/StringView.h"
+#include "String.h"
 
 namespace Blaze
 {
@@ -343,6 +344,11 @@ namespace Blaze
 		}
 	}
 	template<typename Char, AllocatorType Allocator>
+	inline GenericStringView<Char> GenericString<Char, Allocator>::SubString(intMem start) const
+	{
+		return GenericStringView<Char>(*this).SubString(start);
+	}
+	template<typename Char, AllocatorType Allocator>
 	inline GenericStringView<Char> GenericString<Char, Allocator>::SubString(intMem start, intMem end) const
 	{
 		return GenericStringView<Char>(*this).SubString(start, end);
@@ -608,16 +614,27 @@ namespace Blaze
 		return ptr[index];
 	}
 	template<typename Char, AllocatorType Allocator>
-	bool GenericString<Char, Allocator>::operator==(const GenericString& other) const
+	template<AllocatorType OtherAllocator>
+	bool GenericString<Char, Allocator>::operator==(const GenericString<Char, OtherAllocator>& other) const
 	{
 		return GenericStringView<Char>(*this).operator==(other);
 	}
 	template<typename Char, AllocatorType Allocator>
-	bool GenericString<Char, Allocator>::operator!=(const GenericString& other) const
+	template<AllocatorType OtherAllocator>
+	bool GenericString<Char, Allocator>::operator!=(const GenericString<Char, OtherAllocator>& other) const
 	{
 		return GenericStringView<Char>(*this).operator!=(other);
 	}
-
+	template<typename Char, AllocatorType Allocator>
+	inline bool GenericString<Char, Allocator>::operator==(const GenericStringView<Char>& other) const
+	{
+		return GenericStringView<Char>(*this).operator==(other);
+	}
+	template<typename Char, AllocatorType Allocator>
+	inline bool GenericString<Char, Allocator>::operator!=(const GenericStringView<Char>& other) const
+	{
+		return GenericStringView<Char>(*this).operator!=(other);
+	}
 	template<typename Char, AllocatorType Allocator>
 	template<AllocatorType OtherAllocator>
 	inline GenericString<Char, Allocator>& GenericString<Char, Allocator>::operator+=(const GenericString<Char, OtherAllocator>& other)

@@ -86,31 +86,43 @@ namespace Blaze
 	};
 
 	template<IntegerType T>
-	class Hash<T>
+	class Hash<T> : Hash<uint64>
 	{
 	public:
 		using Type = T;
 
 		inline uint64 Compute(const T& x) const
 		{
-			return Hash<uint64>().Compute(static_cast<uint64>(x));
+			return Hash<uint64>::Compute(static_cast<uint64>(x));
 		}
 	};
 
 	template<DecimalType T> requires (sizeof(T) <= 8)
-	class Hash<T>
+	class Hash<T> : public Hash<uint64>
 	{
 	public:
 		using Type = T;
 
-		inline uint64 Compute(T x) const
+		inline uint64 Compute(const T& x) const
 		{
 			if (x == static_cast<T>(0))
 				x = static_cast<T>(0); // maps -0.0 to +0.0
 
 			uint64 bits = 0;
 			*reinterpret_cast<T*>(&bits) = x;
-			return Hash<uint64>().Compute(bits);
+			return Hash<uint64>::Compute(bits);
 		}
+	};
+
+	template<IsEnumType T>
+	struct Hash<T> : Hash<UnderlyingType<T>> 
+	{ 
+	public:
+		using Type = T;
+
+		inline uint64 Compute(const T& x) const 
+		{ 
+			return Hash<UnderlyingType<T>>::Compute(static_cast<UnderlyingType<T>>(x));
+		} 
 	};
 }

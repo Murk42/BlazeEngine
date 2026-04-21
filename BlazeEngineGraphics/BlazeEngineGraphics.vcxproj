@@ -5,6 +5,14 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseStatic|Win32">
+      <Configuration>ReleaseStatic</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseStatic|x64">
+      <Configuration>ReleaseStatic</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -19,24 +27,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngine\Graphics\App\GraphicsAppRuntimeThread.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Common\BasicIndexedMesh.cpp" />
+    <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\FramebufferBase_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\BufferedRendererBase_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\Line2DRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\Quad2DRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\Quad2DRenderer.cpp" />
-    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\RenderContext.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\BasicIndexedMeshRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLFunctions.cpp" />
-    <ClCompile Include="source\BlazeEngine\Graphics\Renderers\RendererRegistry.cpp" />
+    <ClCompile Include="source\BlazeEngine\Graphics\Core\RendererRegistry.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Shaders\Shaders.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\PanelRenderer_OpenGL.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Renderers\OpenGL\TexturedRectRenderer_OpenGL.cpp" />
-    <ClCompile Include="source\BlazeEngine\Graphics\Core\GraphicsContext.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLConversions.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLFence.cpp" />
     <ClCompile Include="source\BlazeEngine\Graphics\Core\OpenGL\OpenGLWrapper\OpenGLGraphicsBuffer.cpp" />
@@ -54,16 +64,23 @@
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BlazeEngine\BlazeEngineGraphics.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\App\GraphicsAppLayer.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\App\GraphicsAppRuntimeThread.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\BlazeEngineGraphics.h" />
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsContextBase.h" />
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsAPI.h" />
-    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsAPI_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\FramebufferBase.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\GraphicsContext.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\GraphicsAPI_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\OpenGL\FramebufferBase_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\OpenGL\RenderContext_OpenGL.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\OpenGL\RendererBase_OpenGL.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\BasicIndexedMeshRenderer.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\Line2DRenderer.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\BufferedRendererBase_OpenGL.h" />
@@ -72,9 +89,9 @@
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\OpenGL\Quad2DRenderer_OpenGL.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\PanelRenderer.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\Quad2DRenderer.h" />
-    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RenderContext.h" />
-    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RendererBase.h" />
-    <ClInclude Include="include\BlazeEngine\Graphics\Renderers\RendererRegistry.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\RenderContext.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\RendererBase.h" />
+    <ClInclude Include="include\BlazeEngine\Graphics\Core\RendererRegistry.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Renderers\TexturedRectRenderer.h" />
     <ClInclude Include="include\BlazeEngine\Graphics\Common\BasicIndexedMesh.h" />
     <ClInclude Include="source\BlazeEngine\Graphics\Core\OpenGL\Debug_OpenGL.h" />
@@ -136,11 +153,21 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v145</PlatformToolset>
@@ -158,6 +185,12 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseProperties.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseStaticProperties.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -167,54 +200,86 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseProperties.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\BlazeEngineDefaultProperties.props" />
+    <Import Project="..\BlazeEngineReleaseStaticProperties.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>ResourceCompile</CustomBuildAfterTargets>
+    <TargetName>$(ProjectName)-$(PlatformTarget)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
-    <VcpkgAutoLink>false</VcpkgAutoLink>
+    <VcpkgAutoLink>true</VcpkgAutoLink>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="Vcpkg">
+    <VcpkgAdditionalInstallOptions />
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'" Label="Vcpkg">
+    <VcpkgAdditionalInstallOptions />
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -232,7 +297,7 @@
     <CustomBuildStep>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp"</Command>
       <Outputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
-      <Inputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.geom;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\text.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.frag;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.geom;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.vert;%(Inputs)</Inputs>
       <RootFolder>
       </RootFolder>
       <Message>Translating shader files into shaders.cpp</Message>
@@ -243,7 +308,6 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
@@ -255,6 +319,38 @@
     </Link>
     <Lib>
       <AdditionalDependencies>OpenGL32.Lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent />
+    <PreBuildEvent />
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.geom;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.vert;%(Inputs)</Inputs>
+      <RootFolder>
+      </RootFolder>
+      <Message>Translating shader files into shaders.cpp</Message>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <PreprocessorDefinitions>GLEW_STATIC;BLAZE_STATIC</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>
@@ -274,10 +370,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -294,7 +388,7 @@
     <CustomBuildStep>
       <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp"</Command>
       <Outputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
-      <Inputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.geom;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\text.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.frag;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.geom;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.vert;%(Inputs)</Inputs>
       <RootFolder>
       </RootFolder>
       <Message>Translating shader files into shaders.cpp</Message>
@@ -305,7 +399,6 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>BLAZE_STATIC</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
@@ -317,6 +410,39 @@
     </Link>
     <Lib>
       <AdditionalDependencies>OpenGL32.Lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent />
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <CustomBuildStep>
+      <Command>call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp" "dst=$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp"</Command>
+      <Outputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders.cpp;%(Outputs)</Outputs>
+      <Inputs>$(ProjectDir)source\BlazeEngine\Graphics\Shaders\Shaders_template.cpp;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.geom;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\basicMesh.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\line3d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\panel.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\quad2d.vert;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.frag;$(ProjectDir)source\BlazeEngine\Graphics\Shaders\OpenGL\texturedRect.vert;%(Inputs)</Inputs>
+      <RootFolder>
+      </RootFolder>
+      <Message>Translating shader files into shaders.cpp</Message>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlazeEngineCore\include;$(SolutionDir)BlazeEngineRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <PreprocessorDefinitions>GLEW_STATIC;BLAZE_STATIC</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Lib>

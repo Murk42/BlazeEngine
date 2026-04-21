@@ -43,6 +43,7 @@ namespace Blaze
 
 		constexpr void Clear();
 
+		constexpr GenericStringView SubString(intMem start) const;
 		constexpr GenericStringView SubString(intMem start, intMem end) const;
 		template<AllocatorType ArrayAllocator = DefaultAllocator>
 		Array<GenericStringView, ArrayAllocator> Split(GenericStringView separation, uintMem maxSplit = 0) const;
@@ -111,6 +112,10 @@ namespace Blaze
 
 		constexpr bool operator==(const GenericStringView& other) const;
 		constexpr bool operator!=(const GenericStringView& other) const;
+		template<AllocatorType StringAllocator>
+		constexpr bool operator==(const GenericString<Char, StringAllocator>& other) const;
+		template<AllocatorType StringAllocator>
+		constexpr bool operator!=(const GenericString<Char, StringAllocator>& other) const;
 
 		constexpr GenericStringView& operator=(const GenericStringView& other) = default;
 		constexpr GenericStringView& operator=(GenericStringView&& other) noexcept = default;

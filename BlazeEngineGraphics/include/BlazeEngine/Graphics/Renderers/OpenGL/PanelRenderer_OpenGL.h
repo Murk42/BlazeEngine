@@ -1,7 +1,8 @@
 #pragma once
-#include "BlazeEngine/Graphics/Core/GraphicsAPI_OpenGL.h"
 #include "BlazeEngine/Graphics/Renderers/PanelRenderer.h"
 #include "BlazeEngine/Graphics/Renderers/OpenGL/BufferedRendererBase_OpenGL.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLVertexArray.h"
+#include "BlazeEngine/Graphics/Core/OpenGL/OpenGLWrapper/OpenGLFence.h"
 
 namespace Blaze::Graphics::OpenGL
 {
@@ -11,19 +12,16 @@ namespace Blaze::Graphics::OpenGL
 		PanelRenderer_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferInstanceCount = 128, bool loadDefaultShaders = true);
 		~PanelRenderer_OpenGL();
 
-		void StartRender(const RenderContext& context) override;
-		void EndRender(const RenderContext& context) override;
-		void Render(const PanelRenderData& data, const RenderContext& context) override;
-
-		GraphicsContextBase& GetGraphicsContext() const { return graphicsContext; }
+		void StartRender(const RenderContext_OpenGL& context) override;
+		void EndRender() override;
+		void Render(const PanelRenderData& data) override;
 	private:
-		GraphicsContext_OpenGL& graphicsContext;
 		VertexArray va;
 		Fence fence;
 
 		uintMem instanceCount;
 
-		void Flush(const RenderContext& context);
+		void Flush();
 		void WaitFence();
 	};
 }

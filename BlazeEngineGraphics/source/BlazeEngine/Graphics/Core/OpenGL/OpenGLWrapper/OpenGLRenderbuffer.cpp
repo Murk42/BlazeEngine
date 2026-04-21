@@ -24,9 +24,12 @@ namespace Blaze::Graphics::OpenGL
 	}
 	void Renderbuffer::Create(Vec2u size, Blaze::Graphics::OpenGL::TextureInternalPixelFormat format)
 	{
-		Result result;
-		GLenum _format = OpenGLInternalPixelFormat(format, result);
-		if (result) return;
+		GLenum _format;
+		if (!OpenGLInternalPixelFormat(format, _format))
+		{
+			BLAZE_LOG_ERROR("Invalid TextureInternalPixelFormat enum value");
+			return;
+		}
 		
 		this->size = size;
 

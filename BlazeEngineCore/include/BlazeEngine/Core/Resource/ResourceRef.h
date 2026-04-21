@@ -48,8 +48,6 @@ namespace Blaze
 		ResourceRef(const ResourceRef& other) = default;
 		ResourceRef(ResourceRef&& other) noexcept = default;
 		ResourceRef(Resource<T>& resource);
-		template<typename ... Args> requires IsConstructibleFrom<T, Args...>
-		ResourceRef(ResourceManager& resourceManager, StringView name, Args&& ... args);
 		~ResourceRef() = default;
 
 		Resource<T>* GetResource() const;
@@ -85,12 +83,6 @@ namespace Blaze
 	template<typename T>
 	inline ResourceRef<T>::ResourceRef(Resource<T>& resource)
 		: ResourceBaseRef(resource)
-	{
-	}
-	template<typename T>
-	template<typename ...Args>  requires IsConstructibleFrom<T, Args...>
-	inline ResourceRef<T>::ResourceRef(ResourceManager& resourceManager, StringView name, Args && ...args)
-		: ResourceRef(resourceManager.LoadResource<T>(name, std::forward<Args>(args)...))
 	{
 	}
 	template<typename T>

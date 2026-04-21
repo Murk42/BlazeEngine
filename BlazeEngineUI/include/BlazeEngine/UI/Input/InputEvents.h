@@ -22,6 +22,8 @@ namespace Blaze::UI
 		InputNode& node;
 		Node::HitStatus oldHitStatus;
 		Node::HitStatus newHitStatus;
+
+		Vec2f pos;
 	};
 	struct UIMouseScrollEvent : Input::MouseScrollEvent
 	{

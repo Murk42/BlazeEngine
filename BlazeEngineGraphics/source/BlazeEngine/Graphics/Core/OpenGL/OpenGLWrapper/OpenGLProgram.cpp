@@ -110,7 +110,12 @@ namespace Blaze::Graphics::OpenGL
 
 		name = StringView((char*)buffer.Ptr(), length);
 		uniformSize = size;
-		uniformType = MapOpenGLUniformType(type);
+
+		if (!BlazeUniformType(type, uniformType))
+		{
+			BLAZE_LOG_ERROR("Invalid uniform variable type value retrieved from OpenGL");
+			return;
+		}
 	}
 
 	uint ShaderProgram::GetUniformBlockCount() const
@@ -168,8 +173,12 @@ namespace Blaze::Graphics::OpenGL
 
 		name = std::move(String(ptr, v2.uniformBlockVariableNameLenght));
 		delete[] ptr;
-		size = v2.uniformBlockVariableSize;
-		type = MapOpenGLUniformType(v2.uniformBlockVariableType);
+		size = v2.uniformBlockVariableSize;		
+		if (!BlazeUniformType(v2.uniformBlockVariableType, type))
+		{
+			BLAZE_LOG_ERROR("Invalid uniform block variable type value retrieved from OpenGL");
+			return;
+		}
 		offset = v2.uniformBlockVariableOffset;
 	}
 

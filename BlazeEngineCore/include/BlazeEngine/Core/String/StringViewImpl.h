@@ -80,13 +80,24 @@ namespace Blaze
 		count = 0;
 	}
 	template<typename Char>
+	inline constexpr GenericStringView<Char> GenericStringView<Char>::SubString(intMem start) const
+	{
+		if (start < 0)
+			start += static_cast<intMem>(count);		
+
+		if (start < 0 || start > static_cast<intMem>(count))
+			BLAZE_LOG_FATAL_BASIC("Invalid substring");
+
+		return GenericStringView(ptr + start, static_cast<uintMem>(count - start));
+	}
+	template<typename Char>
 	constexpr GenericStringView<Char> GenericStringView<Char>::SubString(intMem start, intMem end) const
 	{
 		if (start < 0)
 			start += static_cast<intMem>(count);
 
 		if (end < 0)
-			end += static_cast<intMem>(count) + 1;
+			end += static_cast<intMem>(count);
 
 		if (start < 0 || end > static_cast<intMem>(count) || start > end)
 			BLAZE_LOG_FATAL_BASIC("Invalid substring");
@@ -168,7 +179,7 @@ namespace Blaze
 	inline constexpr uintMem GenericStringView<Char>::FindReverse(const GenericStringView& value, intMem start) const
 	{
 		if (start < 0)
-			start += count + 1;
+			start += count;
 
 		if (start < 0 || static_cast<uintMem>(start) > count)
 			BLAZE_LOG_FATAL_BASIC("Invalid index");
@@ -184,7 +195,7 @@ namespace Blaze
 	inline constexpr bool GenericStringView<Char>::Contains(const GenericStringView& value, intMem start) const
 	{
 		if (start < 0)
-			start += count + 1;
+			start += count;
 
 		if (start < 0 || start > count)
 			BLAZE_LOG_FATAL_BASIC("Invalid index");
@@ -529,7 +540,8 @@ namespace Blaze
 				if (offset > count)
 					offset = count;
 
-				*remainingString = GenericStringView(ptr + offset, ptr + count);
+				if (remainingString != nullptr)
+					*remainingString = GenericStringView(ptr + offset, ptr + count);
 				return true;
 			}
 
@@ -704,6 +716,18 @@ namespace Blaze
 		return !(*this == other);
 	}
 	template<typename Char>
+	template<AllocatorType StringAllocator>
+	constexpr bool GenericStringView<Char>::operator==(const GenericString<Char, StringAllocator>& other) const
+	{
+		return *this == GenericStringView<Char>(other);
+	}
+	template<typename Char>
+	template<AllocatorType StringAllocator>
+	constexpr bool GenericStringView<Char>::operator!=(const GenericString<Char, StringAllocator>& other) const
+	{
+		return *this != GenericStringView<Char>(other);
+	}
+	template<typename Char>
 	template<TriviallyConvertibleCharacter<Char> Char2, uintMem Size>
 	inline constexpr GenericStringView<Char>& GenericStringView<Char>::operator=(const Char2(&arr)[Size])
 	{
@@ -723,11 +747,8 @@ namespace Blaze
 	}
 	template<typename Char>
 	inline constexpr void GenericStringView<Char>::Assign(const Char* ptr, uintMem bufferSize)
-	{
-		if (bufferSize == 0)
-			return;
-
-		if (ptr[bufferSize - 1] == '\0')
+	{		
+		if (bufferSize != 0 && ptr[bufferSize - 1] == '\0')
 		{
 			if (bufferSize == 1)
 				return;

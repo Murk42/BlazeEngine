@@ -1,8 +1,11 @@
 #pragma once
-#include "BlazeEngine/Runtime/IO/Input.h"
+
+#include "BlazeEngine/Runtime/IO/InputEvents.h"
 #include "BlazeEngine/Runtime/IO/Window.h"
 #include "BlazeEngine/UI/Core/Screen.h"
 #include "BlazeEngine/UI/Input/InputNode.h"
+
+#include "BlazeEngine/UI/Input/PointerData.h"
 
 namespace Blaze::UI
 {
@@ -41,7 +44,8 @@ namespace Blaze::UI
 		void ScreenTreeChangedEvent(const Screen::ScreenTreeChangedEvent& event);
 		void NodeEnabledStateChangedEvent(const Node::NodeEnabledStateChangedEvent& event);
 
-		void NewScreenAndWindow();
+		//Throw a mouse motion event to hit test the entire application again
+		void ThrowSyntheticMouseMotionEvent();
 
 		Input::EventProcessedState MouseEntersWindowEvent(const Input::MouseEntersWindowEvent& event, bool processed);
 		Input::EventProcessedState MouseLeavesWindowEvent(const Input::MouseLeavesWindowEvent& event, bool processed);

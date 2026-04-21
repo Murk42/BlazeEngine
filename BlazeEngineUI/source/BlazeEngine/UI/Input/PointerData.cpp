@@ -11,16 +11,18 @@ namespace Blaze::UI
 	{
 		const Vec2u windowSize = window.GetSize();
 		const Vec2f newMouseWindowPos = Vec2f(point.x, windowSize.y - point.y);
-
-		const auto screenFinalTransform = screen.GetFinalTransform();
-
-		return screenFinalTransform.TransformFromFinalToLocalTransformSpace(newMouseWindowPos * screenFinalTransform.scale * screenFinalTransform.size / (Vec2f)windowSize);
+		return newMouseWindowPos;
+		//
+		//const auto screenFinalTransform = screen.GetFinalTransform();
+		//
+		//return screen.TransformFromFinalToLocalSpace(newMouseWindowPos * screenFinalTransform.size / (Vec2f)windowSize);
 	}
 	static Vec2f TransformWindowDeltaToScreenDelta(Vec2f delta, Screen& screen, Window& window)
 	{
-		const Vec2u windowSize = window.GetSize();
-		const auto screenFinalTransform = screen.GetFinalTransform();
-		return Vec2f(delta.x, -delta.y) * screenFinalTransform.scale * screenFinalTransform.size / (Vec2f)windowSize;
+		return { delta.x, -delta.y };
+		//const Vec2u windowSize = window.GetSize();
+		//const auto screenFinalTransform = screen.GetFinalTransform();
+		//return Vec2f(delta.x, -delta.y) * screenFinalTransform.size / (Vec2f)windowSize;
 	}
 
 	PointerData::PointerData(Screen& screen, Window& window, Input::MouseID mouseID, Vec2f windowPos, bool blocked) :
@@ -77,18 +79,19 @@ namespace Blaze::UI
 		const Vec2f newPos = TransformWindowPointToScreenPoint(windowEvent.pos, screen, windowEvent.window);
 		const Vec2f delta = TransformWindowDeltaToScreenDelta(windowEvent.delta, screen, windowEvent.window);
 
-		const bool mouseCapturedByOther = capturingNode == nullptr && window.IsMouseCaptured(mouseID);
-		//If the event was already processed or the mouse is captured not by this input sub system the pointer 
-		const bool newBlocked = processed || mouseCapturedByOther;
+		const bool mouseCapturedByOther = capturingNode == nullptr && window.IsMouseCaptured(mouseID);		
+
+		const bool oldBlocked = blocked;
+		blocked = processed || mouseCapturedByOther;
 
 		windowPos = windowEvent.pos;
 
-		if (!syntheticMouseMoveEventSent && capturingNode == nullptr && windowEvent.delta == Vec2f(0, 0) && blocked == newBlocked)
-			return hitData.Empty() || hitData.Last().hitStatus != Node::HitStatus::HitBlocking ? Input::EventProcessedState::NotProcessed : Input::EventProcessedState::Processed;
+		//If nothing changed, the event isn't synthetic and no nodes are capturing events exit early
+		if (windowEvent.delta == Vec2f(0, 0) && blocked == oldBlocked && !syntheticMouseMoveEventSent && capturingNode == nullptr)
+			return !hitData.Empty() && hitData.Last().hitStatus == Node::HitStatus::HitBlocking ? Input::EventProcessedState::Processed : Input::EventProcessedState::NotProcessed;
 		
 		syntheticMouseMoveEventSent = false;
 
-		blocked = newBlocked;
 		pos = newPos;
 
 		UpdateHitNodes();
@@ -100,7 +103,7 @@ namespace Blaze::UI
 			node.mouseMotionEventDispatcher.Call(screenEvent);
 			});
 
-		return hitData.Empty() || hitData.Last().hitStatus != Node::HitStatus::HitBlocking ? Input::EventProcessedState::NotProcessed : Input::EventProcessedState::Processed;
+		return !hitData.Empty() && hitData.Last().hitStatus == Node::HitStatus::HitBlocking ? Input::EventProcessedState::Processed : Input::EventProcessedState::NotProcessed;
 	}
 	Input::EventProcessedState PointerData::MouseScrollEvent(const Input::MouseScrollEvent& windowEvent, bool processed)
 	{
@@ -136,7 +139,7 @@ namespace Blaze::UI
 	{
 		if (event.type == Screen::ScreenTreeChangedEvent::Type::NodeRemoved)
 		{
-			InputNode* inputNode = dynamic_cast<InputNode*>(&event.node);
+			Node* inputNode = dynamic_cast<Node*>(&event.node);
 
 			if (inputNode != nullptr && capturingNode == inputNode)
 				SetCapturingNode(nullptr);
@@ -303,7 +306,8 @@ namespace Blaze::UI
 					inputNode->mouseHitStatusChangedEventDispatcher.Call({
 						.node = *inputNode,
 						.oldHitStatus = oldHit,
-						.newHitStatus = newHit
+						.newHitStatus = newHit,
+						.pos = pos
 						});
 		}
 
@@ -316,7 +320,8 @@ namespace Blaze::UI
 						inputNode->mouseHitStatusChangedEventDispatcher.Call({
 							.node = *inputNode,
 							.oldHitStatus = oldHitVal.hitStatus,
-							.newHitStatus = newHitVal.hitStatus
+							.newHitStatus = newHitVal.hitStatus,
+						.pos = pos
 							});
 					break;
 				}
@@ -339,7 +344,8 @@ namespace Blaze::UI
 					inputNode->mouseHitStatusChangedEventDispatcher.Call({
 						.node = *inputNode,
 						.oldHitStatus = oldHit,
-						.newHitStatus = newHit
+						.newHitStatus = newHit,
+						.pos = pos
 						});
 		}
 	}
