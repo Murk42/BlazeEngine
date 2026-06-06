@@ -34,6 +34,8 @@ namespace Blaze::UI
 
 			if (!pressable && pressingMouseID.IsValid())
 				Unpress(false, Vec2f(0, 0), false);
+
+			PressableFlagChanged();
 		}
 	}
 	void ButtonBase::MouseButtonDownEvent(const UIMouseButtonDownEvent& event)

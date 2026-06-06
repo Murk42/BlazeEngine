@@ -5,7 +5,7 @@
 
 namespace Blaze::Graphics::OpenGL
 {
-	class BufferedRendererBase_OpenGL : public RendererBase_OpenGL
+	class BLAZE_API BufferedRendererBase_OpenGL : public RendererBase_OpenGL
 	{
 	public:
 		BufferedRendererBase_OpenGL(GraphicsContext_OpenGL& graphicsContext, uintMem bufferSize);

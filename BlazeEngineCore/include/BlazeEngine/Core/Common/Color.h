@@ -12,70 +12,72 @@ namespace Blaze
 	{
 		uint8 r, g, b;
 
-		ColorRGB() : r(255), g(255), b(255) { }
-		ColorRGB(uint8 r, uint8 g, uint8 b) : r(r), g(g), b(b) { }
-		explicit ColorRGB(const ColorRGBf&);
-		explicit ColorRGB(const ColorRGBA&);
-		explicit ColorRGB(const ColorRGBAf&);		
-		ColorRGB(uint32 hex);
+		constexpr ColorRGB();
+		constexpr ColorRGB(uint r, uint g, uint b);
+		constexpr ColorRGB(const ColorRGBf&);
+		constexpr ColorRGB(const ColorRGBA&);
+		constexpr ColorRGB(const ColorRGBAf&);
 
-		explicit operator Vec3<uint8>() const;				
+		constexpr operator Vec3<uint8>() const;
 
-		inline bool operator==(const ColorRGB& other) const { return other.r == r && other.g == g && other.b == b; }
-		inline bool operator!=(const ColorRGB& other) const { return other.r != r || other.g != g || other.b != b; }
+		constexpr bool operator==(const ColorRGB& other) const { return other.r == r && other.g == g && other.b == b; }
+		constexpr bool operator!=(const ColorRGB& other) const { return other.r != r || other.g != g || other.b != b; }
 	};
 	struct BLAZE_API ColorRGBA
 	{		
 		uint8 r, g, b, a;
 
-		ColorRGBA();
-		ColorRGBA(uint8 r, uint8 g, uint8 b);
-		ColorRGBA(uint8 r, uint8 g, uint8 b, uint8 a);
-		explicit ColorRGBA(const ColorRGB& c);
-		ColorRGBA(const ColorRGB& c, uint8 a);
-		explicit ColorRGBA(const ColorRGBf& c);
-		ColorRGBA(const ColorRGBf& c, uint8 a);
-		explicit ColorRGBA(const ColorRGBAf& c);
-		ColorRGBA(uint32 hex);
+		constexpr ColorRGBA();
+		constexpr ColorRGBA(uint r, uint g, uint b);
+		constexpr ColorRGBA(uint r, uint g, uint b, uint a);
+		constexpr ColorRGBA(const ColorRGB& c);
+		constexpr ColorRGBA(const ColorRGB& c, uint a);
+		constexpr ColorRGBA(const ColorRGBf& c);
+		constexpr ColorRGBA(const ColorRGBf& c, uint a);
+		constexpr ColorRGBA(const ColorRGBAf& c);
 		
-		explicit operator Vec4<uint8>() const;
+		constexpr operator Vec4<uint8>() const;
 
-		inline bool operator==(const ColorRGBA& other) const { return other.r == r && other.g == g && other.b == b && other.a == a; }
-		inline bool operator!=(const ColorRGBA& other) const { return other.r != r || other.g != g || other.b != b || other.a != a; }
+		constexpr bool operator==(const ColorRGBA& other) const { return other.r == r && other.g == g && other.b == b && other.a == a; }
+		constexpr bool operator!=(const ColorRGBA& other) const { return other.r != r || other.g != g || other.b != b || other.a != a; }
 	};	
 	struct BLAZE_API ColorRGBf
 	{
 		float r, g, b;
 
-		ColorRGBf();
-		ColorRGBf(float r, float g, float b);
-		explicit ColorRGBf(const ColorRGB&);
-		explicit ColorRGBf(const ColorRGBA&);
-		explicit ColorRGBf(const ColorRGBAf&);				
-		ColorRGBf(uint32 hex);
+		constexpr ColorRGBf();
+		constexpr ColorRGBf(float r, float g, float b);
+		constexpr ColorRGBf(const ColorRGB&);
+		constexpr ColorRGBf(const ColorRGBA&);
+		constexpr ColorRGBf(const ColorRGBAf&);
 		
-		explicit operator Vec3f() const;
+		constexpr operator Vec3f() const;
 
-		inline bool operator==(const ColorRGBf& other) const { return other.r == r && other.g == g && other.b == b; }
-		inline bool operator!=(const ColorRGBf& other) const { return other.r != r || other.g != g || other.b != b; }
+		constexpr bool operator==(const ColorRGBf& other) const { return other.r == r && other.g == g && other.b == b; }
+		constexpr bool operator!=(const ColorRGBf& other) const { return other.r != r || other.g != g || other.b != b; }
 	};
 	struct BLAZE_API ColorRGBAf
 	{
 		float r, g, b, a;
 
-		ColorRGBAf();
-		ColorRGBAf(float r, float g, float b);
-		ColorRGBAf(float r, float g, float b, float a);
-		explicit ColorRGBAf(const ColorRGBf& c);
-		ColorRGBAf(const ColorRGBf& c, float a);
-		explicit ColorRGBAf(const ColorRGB& c);
-		ColorRGBAf(const ColorRGB& c, float a);		
-		explicit ColorRGBAf(const ColorRGBA& c);
-		ColorRGBAf(uint hex);
+		constexpr ColorRGBAf();
+		constexpr ColorRGBAf(float r, float g, float b);
+		constexpr ColorRGBAf(float r, float g, float b, float a);
+		constexpr ColorRGBAf(const ColorRGBf& c);
+		constexpr ColorRGBAf(const ColorRGBf& c, float a);
+		constexpr ColorRGBAf(const ColorRGB& c);
+		constexpr ColorRGBAf(const ColorRGB& c, float a);		
+		constexpr ColorRGBAf(const ColorRGBA& c);
 		
-		operator Vec4f() const;
+		constexpr operator Vec4f() const;
 
-		inline bool operator==(const ColorRGBAf& other) const { return other.r == r && other.g == g && other.b == b && other.a == a; }
-		inline bool operator!=(const ColorRGBAf& other) const { return other.r != r || other.g != g || other.b != b || other.a != a; }
-	};	
+		constexpr bool operator==(const ColorRGBAf& other) const { return other.r == r && other.g == g && other.b == b && other.a == a; }
+		constexpr bool operator!=(const ColorRGBAf& other) const { return other.r != r || other.g != g || other.b != b || other.a != a; }
+	};
+
+	constexpr ColorRGB operator ""_rgb(unsigned long long hex);
+	constexpr ColorRGBA operator ""_rgba(unsigned long long hex);
 }
+
+
+#include "BlazeEngine/Core/Common/ColorImpl.h"

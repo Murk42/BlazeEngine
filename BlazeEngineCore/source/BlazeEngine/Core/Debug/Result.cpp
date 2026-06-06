@@ -32,15 +32,15 @@ namespace Blaze
 	{
 		Clear();
 	}
-	void Result::AddLogs(std::initializer_list<Debug::Log> logs)
+	void Result::AddLogs(std::initializer_list<Debug::Log> newLogs)
 	{
-		for (auto& log : logs)
+		for (auto& log : newLogs)
 			AddLog(log);
 	}
-	void Result::AddLog(const Debug::Log& log)
+	void Result::AddLog(const Debug::Log& newLog)
 	{
-		highestLogType = (Debug::LogType)std::max((std::underlying_type_t<Debug::LogType>)highestLogType, (std::underlying_type_t<Debug::LogType>)log.GetType());
-		logs.AddBack(log);
+		highestLogType = (Debug::LogType)std::max((std::underlying_type_t<Debug::LogType>)highestLogType, (std::underlying_type_t<Debug::LogType>)newLog.GetType());
+		logs.AddBack(newLog);
 	}
 
 	void Result::Clear()

@@ -88,10 +88,79 @@ namespace Blaze::Input
 
 	void SetCursorType(CursorType type)
 	{
-		//TODO
+		static SDL_Cursor* cursor = nullptr;
 
-		//if (!SDL_SetCursor((SDL_Cursor*)blazeEngineContext->GetSystemCursor(type)))
-		//	BLAZE_LOG_ERROR("SDL_SetCursor failed with message: \"{}\"", SDL_GetError());
+		if (cursor != nullptr)
+			SDL_DestroyCursor(cursor);
+
+		switch (type)
+		{
+		case Blaze::Input::CursorType::Default:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
+			break;
+		case Blaze::Input::CursorType::Text:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
+			break;
+		case Blaze::Input::CursorType::Wait:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
+			break;
+		case Blaze::Input::CursorType::Crosshair:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
+			break;
+		case Blaze::Input::CursorType::Progress:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_PROGRESS);
+			break;
+		case Blaze::Input::CursorType::NotAllowed:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NOT_ALLOWED);
+			break;
+		case Blaze::Input::CursorType::Move:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
+			break;
+		case Blaze::Input::CursorType::Pointer:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER);
+			break;
+		case Blaze::Input::CursorType::ResizeNWSE:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NWSE_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeNESW:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NESW_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeNW:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NW_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeNS:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NS_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeNE:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NE_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeSE:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SE_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeSW:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SW_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeEW:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_EW_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeN:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_N_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeW:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_W_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeS:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_S_RESIZE);
+			break;
+		case Blaze::Input::CursorType::ResizeE:
+			cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_E_RESIZE);
+			break;
+		default:
+			break;
+		}
+
+		if (!SDL_SetCursor(cursor))
+			BLAZE_LOG_ERROR("SDL_SetCursor failed with message: \"{}\"", SDL_GetError());
 	}
 
 	void ShowCursor(bool show)

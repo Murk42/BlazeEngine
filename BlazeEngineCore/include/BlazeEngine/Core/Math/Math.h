@@ -42,22 +42,64 @@ namespace Blaze::Math
 	constexpr float Pow(float base, float exponent) { return gcem::pow(base, exponent); }
 	constexpr double Pow(double base, float exponent) { return gcem::pow(base, exponent); }
 
-	constexpr float Ceil(float value) { return gcem::ceil(value); }
-	constexpr double Ceil(double value) { return gcem::ceil(value); }
-	constexpr float Floor(float value) { return gcem::floor(value); }
-	constexpr double Floor(double value) { return gcem::floor(value); }
-	template<typename T, uintMem S>
+	template<DecimalType Decimal>
+	constexpr Decimal Ceil(Decimal value) { return gcem::ceil(value); }
+	template<DecimalType T, uintMem S>
 	constexpr Vector<T, S> Ceil(Vector<T, S> vector)
 	{
 		for (uintMem i = 0; i < S; ++i)
 			vector[i] = Ceil(vector[i]);
 		return vector;
 	}
-	template<typename T, uintMem S>
+
+	template<DecimalType Decimal>
+	constexpr Decimal Floor(Decimal value) { return gcem::floor(value); }
+	template<DecimalType T, uintMem S>
 	constexpr Vector<T, S> Floor(Vector<T, S> vector)
 	{
 		for (uintMem i = 0; i < S; ++i)
 			vector[i] = Floor(vector[i]);
 		return vector;
+	}
+	
+	template<DecimalType Decimal>
+	constexpr Decimal Round(Decimal value) { return gcem::round(value); }
+	template<DecimalType T, uintMem S>
+	constexpr Vector<T, S> Round(Vector<T, S> vector)
+	{
+		for (uintMem i = 0; i < S; ++i)
+			vector[i] = Round(vector[i]);
+		return vector;
+	}
+
+	template<NumberType Number>
+	constexpr Number Min(Number a, Number b) { return gcem::min(a, b); }
+	template<NumberType T, uintMem S>
+	constexpr Vector<T, S> Min(Vector<T, S> a, Vector<T, S> b)
+	{
+		for (uintMem i = 0; i < S; ++i)
+			a[i] = Min(a[i], b[i]);
+		return a;
+	}
+
+	template<NumberType Number>
+	constexpr Number Max(Number a, Number b) { return gcem::max(a, b); }
+	template<NumberType T, uintMem S>
+	constexpr Vector<T, S> Max(Vector<T, S> a, Vector<T, S> b)
+	{
+		for (uintMem i = 0; i < S; ++i)
+			a[i] = Max(a[i], b[i]);
+		return a;
+	}
+
+	template<NumberType Number>
+	constexpr Number Clamp(Number value, Number min, Number max) { return Max(Min(value, max), min); }
+	template<NumberType T, uintMem S>
+	constexpr Vector<T, S> Clamp(Vector<T, S> value, Vector<T, S> min, Vector<T, S> max)
+	{
+		for (uintMem i = 0; i < S; ++i)
+			value[i] = Clamp(value[i], min[i], max[i]);
+
+		return value;
 	}
 }

@@ -245,33 +245,27 @@
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
-    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
-    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="Vcpkg">
     <VcpkgAdditionalInstallOptions />
     <VcpkgUseStatic>true</VcpkgUseStatic>
-    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
     <VcpkgConfiguration>Debug</VcpkgConfiguration>
-    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgAdditionalInstallOptions>
     </VcpkgAdditionalInstallOptions>
-    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'" Label="Vcpkg">
     <VcpkgAdditionalInstallOptions />
     <VcpkgUseStatic>true</VcpkgUseStatic>
-    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

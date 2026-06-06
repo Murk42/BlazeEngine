@@ -7,12 +7,12 @@
 
 namespace Blaze::Graphics
 {
-	class BasicIndexedMeshRenderer : public virtual RendererBase
+	class BLAZE_API BasicIndexedMeshRenderer : public virtual RendererBase
 	{
 	public:
 		virtual void SetProjectionMatrix(const Mat4f& matrix) = 0;
 		virtual void SetViewMatrix(const Mat4f& matrix) = 0;
-		virtual void SetShadingOptions(Vec3f lightDirection, ColorRGBf ambientColor = 0x000000) = 0;
+		virtual void SetShadingOptions(Vec3f lightDirection, ColorRGBf ambientColor = 0x000000_rgb) = 0;
 
 		virtual void Render(ArrayView<Vec3f> vertices, ArrayView<uint32> indices, Mat4f modelMatrix, ColorRGBAf color) = 0;
 

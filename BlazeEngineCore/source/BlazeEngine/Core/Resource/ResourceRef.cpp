@@ -42,7 +42,7 @@ namespace Blaze
 		if (resourceBase != nullptr)
 			resourceBase->WaitToLoad();
 	}
-	uint32 ResourceBaseRef::Hash() const
+	uint64 ResourceBaseRef::Hash() const
 	{
 		return Blaze::Hash<void*>().Compute(resourceBase);
 	}

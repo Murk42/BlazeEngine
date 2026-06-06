@@ -282,7 +282,7 @@ namespace Blaze
 		{
 			//Firstly construct the new elements (explained in the AddBack method)
 			for (uintMem i = 0; i < other.count; ++i)
-				std::construct_at(ptr + i + count, std::move(other.ptr[i]));
+				std::construct_at(newPtr + i + count, std::move(other.ptr[i]));
 
 			for (uintMem i = 0; i < count; ++i)
 				std::construct_at(newPtr + i, std::move(ptr[i]));

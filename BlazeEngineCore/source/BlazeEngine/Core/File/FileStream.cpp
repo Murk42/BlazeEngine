@@ -1,13 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Core/File/FileStream.h"
 
-#ifdef BLAZE_PLATFORM_WINDOWS
-#include <Windows.h>
-#include "BlazeEngine/Core/Internal/WindowsPlatform.h"
-#else
-#pragma error
-#endif
-
 namespace Blaze
 {
 	FileStreamBase::FileStreamBase()
@@ -23,11 +16,11 @@ namespace Blaze
 	{
 		Close();
 	}
-	void FileStreamBase::AcquireHandle(void* file)
+	void FileStreamBase::AcquireHandle(void* newHandle)
 	{
 		Close();
 
-		this->file = file;
+		this->file = newHandle;
 	}
 	bool FileStreamBase::IsOpen() const
 	{

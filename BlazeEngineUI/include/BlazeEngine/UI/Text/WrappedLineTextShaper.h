@@ -7,7 +7,7 @@ namespace Blaze::UI::Text
 	class WrappedLineTextShaper : public SingleLineTextShaper
 	{
 	public:
-		WrappedLineTextShaper(u8StringView textContext, const FontFace& fontFace, uint32 fontHeight, const TextSeparationDataBase& textSeparationData, float maxWidth);
+		WrappedLineTextShaper(u8StringView textContext, const Nodes::TextStyle& textStyle, const TextSeparationDataBase& textSeparationData, float maxWidth);
 		~WrappedLineTextShaper() override;
 
 		virtual Array<ShapedString> Shape(u8StringView text) override;

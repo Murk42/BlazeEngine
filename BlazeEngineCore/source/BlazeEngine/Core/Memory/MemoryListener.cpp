@@ -70,9 +70,9 @@ namespace Blaze
 
 		events.AddBack(event);
 	}
-	void MemoryListener::StartListening(bool recordLocations)
+	void MemoryListener::StartListening(bool newRecordLocations)
 	{
-		this->recordLocations = recordLocations;
+		recordLocations = newRecordLocations;
 
 		if (listening)
 			return;

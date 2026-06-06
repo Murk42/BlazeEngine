@@ -512,8 +512,8 @@ namespace Blaze::UI::Text
 		return NextLine(text.FirstIterator(), text);
 	}
 
-	WrappedLineTextShaper::WrappedLineTextShaper(u8StringView textContext, const FontFace& fontFace, uint32 fontHeight, const TextSeparationDataBase& textSeparationData, float maxWidth)
-		: SingleLineTextShaper(textContext, fontFace, fontHeight), textSeparationData(textSeparationData), maxWidth(maxWidth)
+	WrappedLineTextShaper::WrappedLineTextShaper(u8StringView textContext, const Nodes::TextStyle& textStyle, const TextSeparationDataBase& textSeparationData, float maxWidth)
+		: SingleLineTextShaper(textContext, textStyle), textSeparationData(textSeparationData), maxWidth(maxWidth)
 	{
 	}
 	WrappedLineTextShaper::~WrappedLineTextShaper()

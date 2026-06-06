@@ -27,22 +27,11 @@ namespace Blaze::Graphics::OpenGL
 			SetShaderProgram(ShaderProgram{ { vert, frag } });
 		}
 
-		va.EnableVertexAttribute(0);
-		va.SetFloatVertexAttributeFormat(0, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 2, 0);
-		va.SetVertexAttributeBuffer(0, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(0, 1);
-		va.EnableVertexAttribute(1);
-		va.SetFloatVertexAttributeFormat(1, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 2, 8);
-		va.SetVertexAttributeBuffer(1, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(1, 1);
-		va.EnableVertexAttribute(2);
-		va.SetFloatVertexAttributeFormat(2, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 2, 16);
-		va.SetVertexAttributeBuffer(2, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(2, 1);
-		va.EnableVertexAttribute(3);
-		va.SetFloatVertexAttributeFormat(3, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 4, 24);
-		va.SetVertexAttributeBuffer(3, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(3, 1);
+		va.SetVertexAttribute({ 0, &Instance::p1, 1 });
+		va.SetVertexAttribute({ 1, &Instance::p2, 1 });
+		va.SetVertexAttribute({ 2, &Instance::p3, 1 });
+		va.SetVertexAttribute({ 3, &Instance::color, 1});		
+		va.SetBindingBuffer(0, &GetBuffer(), sizeof(Instance), 0);
 	}
 	Quad2DRenderer_OpenGL::~Quad2DRenderer_OpenGL()
 	{

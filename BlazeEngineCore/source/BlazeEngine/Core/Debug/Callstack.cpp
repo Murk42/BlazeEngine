@@ -155,7 +155,7 @@ namespace Blaze::Debug
 	{
 		return frames;
 	}
-	const StackFrame& Callstack::operator[](int i) const
+	const StackFrame& Callstack::operator[](uintMem i) const
 	{
 		if (i > frameCount)
 			BLAZE_LOG_FATAL("Index out of bounds");

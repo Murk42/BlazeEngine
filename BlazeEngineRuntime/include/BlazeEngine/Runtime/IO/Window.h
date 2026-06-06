@@ -4,7 +4,7 @@
 #include "BlazeEngine/Core/String/String.h"
 #include "BlazeEngine/Core/Container/Map.h"
 #include "BlazeEngine/Core/Common/EventQueue.h"
-#include "BlazeEngine/Core/Type/Variant.h"
+#include "BlazeEngine/Core/Common/Variant.h"
 #include "BlazeEngine/Runtime/IO/Display.h"
 #include "BlazeEngine/Common/Bitmap.h"
 #include "BlazeEngine/Runtime/IO/InputEvents.h"

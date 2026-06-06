@@ -1,10 +1,6 @@
 #pragma once
 #include "BlazeEngine/Core/Common/Color.h"
-
-namespace Blaze::UI
-{
-	class FontManager;
-}
+#include "BlazeEngine/UI/Text/FontManager.h"
 
 namespace Blaze::UI::Nodes
 {
@@ -14,8 +10,8 @@ namespace Blaze::UI::Nodes
 
 		String fontName = "";
 
-		float fontHeight = 20.0f;
-		ColorRGBAf color = 0xFDFDFDFF;
+		uint32 fontHeight = 20;
+		ColorRGBAf color = 0xFDFDFDFF_rgba;
 
 		bool underline : 1 = false;
 		bool strikethrough : 1 = false;
@@ -23,6 +19,8 @@ namespace Blaze::UI::Nodes
 		float baselineOffset = 0.0f; //for super-script for example
 
 		TextStyle Scale(float scale) const;
+
+		FontManager::FontData GetFontData() const;
 
 		bool operator==(const TextStyle&) const = default;
 		bool operator!=(const TextStyle&) const = default;

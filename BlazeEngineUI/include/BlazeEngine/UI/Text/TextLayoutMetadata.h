@@ -10,21 +10,21 @@ namespace Blaze::UI::Text
 	class TextLayoutMetadata
 	{
 	public:
-		struct LineData
+		struct LineLayoutData
 		{
 			uintMem firstCharacter;
 			Vec2f lineStart;
+			float width;
 		};
-		struct CharacterData
+		struct CharacterLayoutData
 		{
 			uintMem lineIndex;
-			Vec2f cursorPos;
-			Vec2f topRight;
-			Vec2f bottomLeft;
+			Vec2f cursorPos;			
 		};
-		struct GlyphData
+		struct GlyphLayoutData
 		{
 			uintMem characterIndex;
+			uint32 glyphIndex;
 			Vec2f offset;
 			Vec2f size;
 		};
@@ -43,23 +43,21 @@ namespace Blaze::UI::Text
 			\param line    line whose characters to hit test
 			\returns       Index to the hit character
 		*/
-		uintMem HitTestLineCharacters(Vec2f pos, uintMem line) const;
+		uintMem HitTestLineCharacters(Vec2f pos, uintMem line) const;		
+
+		LineLayoutData GetLineData(uintMem lineIndex) const;
+		CharacterLayoutData GetCharacterData(uintMem characterIndex) const;
+		GlyphLayoutData GetGlyphData(uintMem glyphIndex) const;
 
 		Vec2f GetCursorPosBeforeCharacter(uintMem characterIndex) const;
 		Vec2f GetCursorPosAfterCharacter(uintMem characterIndex) const;
-		
-		uintMem GetCharacterLineIndex(uintMem characterIndex) const;
-		uintMem GetLineFirstCharacter(uintMem lineIndex) const;
 
 		inline uintMem GetLineCount() const { return lineData.Count(); }
-
-		//inline ArrayView<GlyphData> GetGlyphData() const { return glyphData; }
-		//inline ArrayView<CharacterData> GetCharacterData() const { return characterData; }
-		//inline ArrayView<LineData> GetLineData() const { return lineData; }
+		inline uintMem GetGlyphCount() const { return glyphData.Count(); }
 	private:
-		Array<GlyphData> glyphData;
-		Array<CharacterData> characterData;
-		Array<LineData> lineData;
+		Array<GlyphLayoutData> glyphData;
+		Array<CharacterLayoutData> characterData;
+		Array<LineLayoutData> lineData;
 
 		void UpdateLineLayout(ArrayView<ShapedString> shapedLines, const Nodes::TextStyle& style);
 		void UpdateCharacterLayout(ArrayView<ShapedString> shapedLines, const Nodes::TextStyle& style);

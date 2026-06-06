@@ -8,7 +8,7 @@ namespace Blaze::Graphics
 	struct Quad2DRenderData
 	{
 		Vec2f p1, p2, p3;
-		ColorRGBAf color = 0xffffffff;
+		ColorRGBAf color = 0xffffffff_rgba;
 	};
 
 	class BLAZE_API Quad2DRenderer : public virtual RendererBase

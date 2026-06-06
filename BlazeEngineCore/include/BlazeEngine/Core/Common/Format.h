@@ -103,7 +103,7 @@ namespace Blaze
 
 			return formattedString.Count();
 		}
-		void Format(const T& value, FormatContext<Char>& context)
+		void Format(const T&, FormatContext<Char>& context)
 		{
 			context.Write(formattedString);
 			formattedString.Clear();
@@ -215,7 +215,7 @@ namespace Blaze
 			this->ParseFormatSpecifiers(parseContext);
 			return this->ParseValue(value);
 		}
-		void Format(const T& value, FormatContext<Char>& context)
+		void Format(const T&, FormatContext<Char>& context)
 		{
 			this->CopyFormated(context);
 		}
@@ -279,7 +279,7 @@ namespace Blaze
 			this->ParseFormatSpecifiers(parseContext);
 			return this->ParseValue(value);
 		}
-		void Format(const T& value, FormatContext<Char>& context)
+		void Format(const T&, FormatContext<Char>& context)
 		{
 			this->CopyFormated(context);
 		}
@@ -298,7 +298,7 @@ namespace Blaze
 			this->signAwarePadding = 0;
 			return this->ParseValue(reinterpret_cast<uintMem>(value));
 		}
-		void Format(T* const& value, FormatContext<Char>& context)
+		void Format(T* const&, FormatContext<Char>& context)
 		{
 			this->CopyFormated(context);
 		}

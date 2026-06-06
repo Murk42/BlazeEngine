@@ -52,3 +52,4 @@
 #include "BlazeEngine/UI/Nodes/PanelButton.h"
 #include "BlazeEngine/UI/Nodes/Slider.h"
 #include "BlazeEngine/UI/Nodes/TextInput.h"
+#include "BlazeEngine/UI/Nodes/FloatInput.h"

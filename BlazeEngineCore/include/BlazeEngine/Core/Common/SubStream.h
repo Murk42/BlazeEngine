@@ -5,18 +5,19 @@ namespace Blaze
 {
 	class ReadSubStream : public ReadStream
 	{
-		ReadStream* parentStream;
-		uintMem offset;
-		uintMem size;
 	public:
-		ReadSubStream(ReadStream& parentStream, uintMem offset, uintMem size);
+		ReadSubStream(ReadStream& parentStream, uintMem position, uintMem size);
 
 		bool MovePosition(intMem offset) override;
-		bool SetPosition(uintMem offset) override;
-		bool SetPositionFromEnd(intMem offset) override;
+		bool SetPosition(uintMem position) override;
+		bool SetPositionFromEnd(intMem position) override;
 		uintMem GetPosition() const override;
 		uintMem GetSize() const override;
 
-		uintMem Read(void* ptr, uintMem byteCount) override;
+		uintMem Read(void* destinationPtr, uintMem byteCount) override;
+	public:
+		ReadStream* parentStream;
+		uintMem parentOffset;
+		uintMem size;
 	};
 }

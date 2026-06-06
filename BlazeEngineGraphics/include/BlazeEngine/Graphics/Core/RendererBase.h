@@ -8,7 +8,7 @@ namespace Blaze::Graphics
 {
 	using RendererTypeID = uint64;
 
-#pragma warning(disable : 4250)
+#pragma warning(disable : 4250) //Disable "inherits via dominance" warning
 
 	class BLAZE_API RendererBase
 	{

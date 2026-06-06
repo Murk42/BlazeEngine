@@ -5,18 +5,17 @@ namespace Blaze
 {
 	ResourceManager::ResourceManager()
 	{
-		threadPool.AllocateThreads(1);
 	}
 	void ResourceManager::HandleResourceLoadedCallbacks()
 	{
-		Array<ResourceLoadedCallbackData> resourceLoadedCallbacks;
+		Array<ResourceLoadedCallbackData> oldResourceLoadedCallbacks;
 
 		{
 			std::lock_guard lg{ mutex };
-			resourceLoadedCallbacks = std::move(this->resourceLoadedCallbacks);
+			oldResourceLoadedCallbacks = std::move(resourceLoadedCallbacks);
 		}
 
-		for (auto& callback : resourceLoadedCallbacks)
+		for (auto& callback : oldResourceLoadedCallbacks)
 			callback.function(callback.resource, callback.resourceLoadedCallback, callback.resourceLoadedCallbackUserData);
 	}
 }

@@ -25,9 +25,9 @@ namespace Blaze
 	}
 	bool BufferStreamBase::MovePosition(intMem offset)
 	{
-		uintMem newPos = position + offset;
+		uintMem newPos = position + static_cast<uintMem>(offset);
 
-		if (offset >= buffer.Count() || newPos >= buffer.Count())
+		if (newPos >= buffer.Count())
 			return false;
 
 		position = newPos;
@@ -104,13 +104,13 @@ namespace Blaze
 	}
 	uintMem BufferReadStream::Read(void* ptr, uintMem byteCount)
 	{
-		uintMem position = GetPosition();
-		uintMem leftBytes = GetSize() - position;
+		uintMem pos= GetPosition();
+		uintMem leftBytes = GetSize() - pos;
 
 		if (leftBytes < byteCount)
 			byteCount = leftBytes;
 
-		memcpy(ptr, (char*)buffer.Ptr() + position, byteCount);
+		memcpy(ptr, (char*)buffer.Ptr() + pos, byteCount);
 		MovePosition(byteCount);
 
 		return byteCount;
@@ -143,9 +143,9 @@ namespace Blaze
 	}
 	bool BufferViewStream::MovePosition(intMem offset)
 	{
-		uintMem newPos = position + offset;
+		uintMem newPos = position + static_cast<uintMem>(offset);
 
-		if (offset >= size || newPos >= size)
+		if (newPos >= size)
 			return false;
 
 		position = newPos;
@@ -182,31 +182,30 @@ namespace Blaze
 	{
 		return ptr;
 	}
-	uintMem BufferViewStream::Read(void* ptr, uintMem byteCount)
-	{
-		uintMem position = GetPosition();
+	uintMem BufferViewStream::Read(void* destinationPtr, uintMem byteCount)
+	{		
 		uintMem leftBytes = GetSize() - position;
 
 		if (leftBytes < byteCount)
 			byteCount = leftBytes;
 
-		memcpy(ptr, (char*)this->ptr + position, byteCount);
+		memcpy(destinationPtr, (char*)ptr + position, byteCount);
 		MovePosition(byteCount);
 
 		return byteCount;
 	}
-	void BufferViewStream::SetBuffer(const void* ptr, uintMem size)
+	void BufferViewStream::SetBuffer(const void* newPtr, uintMem newSize)
 	{
-		if (ptr == nullptr || size == 0)
+		if (newPtr == nullptr || newSize == 0)
 		{
-			this->ptr = nullptr;
-			this->size = 0;
+			ptr = nullptr;
+			size = 0;
 			position = 0;
 		}
 		else
 		{
-			this->ptr = ptr;
-			this->size = size;
+			ptr = newPtr;
+			size = newSize;
 			position = 0;
 		}
 	}

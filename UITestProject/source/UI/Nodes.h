@@ -23,16 +23,3 @@ public:
 	LabeledButton(Node& parent, const UI::NodeTransform& transform, u8StringView label, const TextStyle& textStyle, const PanelButtonStyle& buttonStyle);
 };
 
-class NumberTextInput : public TextInput
-{
-public:
-	NumberTextInput();
-	NumberTextInput(Node& parent, const UI::NodeTransform& transform);
-	NumberTextInput(Node& parent, const UI::NodeTransform& transform, const TextStyle& textStyle, u8String text);
-
-	float GetValue() const { return value; }
-private:
-	float value;
-
-	bool FilterEnteredText(u8StringView text) override;
-};

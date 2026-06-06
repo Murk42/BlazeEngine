@@ -299,9 +299,11 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <ClInclude Include="include\BlazeEngine\BlazeEngineUI.h" />
     <ClInclude Include="include\BlazeEngine\UI\Common\ButtonBase.h" />
     <ClInclude Include="include\BlazeEngine\UI\Common\System.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Common\TextInputBase.h" />
     <ClInclude Include="include\BlazeEngine\UI\Debug\UIDebuggableLayer.h" />
     <ClInclude Include="include\BlazeEngine\UI\Debug\UIDebugLayer.h" />
     <ClInclude Include="include\BlazeEngine\UI\Graphics\RenderUnits\CursorRenderUnit.h" />
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\FloatInput.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\SingleLineTextShaper.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextCursorControl.h" />
     <ClInclude Include="include\BlazeEngine\UI\Text\TextInputControl.h" />
@@ -360,7 +362,9 @@ call "$(SolutionDir)scripts\ResourceToCPP.exe" resourceToCPP "src=$(ProjectDir)s
     <ClInclude Include="source\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\BlazeEngine\UI\Common\TextInputBase.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\CursorRenderUnit.cpp" />
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\FloatInput.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\TextStyle.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\TextLayoutMetadata.cpp" />
     <ClCompile Include="source\BlazeEngine\UI\Text\WrappedLineTextShaper.cpp" />

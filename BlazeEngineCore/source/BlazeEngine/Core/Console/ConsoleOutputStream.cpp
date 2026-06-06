@@ -58,9 +58,9 @@ namespace Blaze
 	uintMem ConsoleOutputStream::WriteWithoutStyle(const void* ptr, uintMem byteCount)
 	{
 #ifdef BLAZE_PLATFORM_WINDOWS
-		WriteConsoleA(handle, (const char*)ptr, byteCount, NULL, NULL);
+		WriteConsoleA(handle, (const char*)ptr, static_cast<DWORD>(byteCount), NULL, NULL);
+		return static_cast<DWORD>(byteCount);
 #endif
-		return byteCount;
 	}
 	bool ConsoleOutputStream::MovePosition(intMem offset)
 	{
@@ -88,7 +88,7 @@ namespace Blaze
 		SetConsoleTextAttribute(handle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #endif
 	}
-	bool GetAttributeFromString(u8StringView text, uint16& attribute)
+	static bool GetAttributeFromString(u8StringView text, uint16& attribute)
 	{
 		if (text == "red")
 			attribute = FOREGROUND_RED;
@@ -148,11 +148,11 @@ namespace Blaze
 				auto color = tag.SubString(6, -1);
 
 #ifdef BLAZE_PLATFORM_WINDOWS
-				uint16 attribute;
-				if (GetAttributeFromString(color, attribute))
+				uint16 newAttribute;
+				if (GetAttributeFromString(color, newAttribute))
 				{
-					this->attribute = (this->attribute & ~15) | (attribute & 15);
-					SetConsoleTextAttribute(handle, this->attribute);
+					attribute = (attribute & ~15) | (newAttribute & 15);
+					SetConsoleTextAttribute(handle, attribute);
 				}
 #endif
 
@@ -176,11 +176,11 @@ namespace Blaze
 				auto color = tag.SubString(11, -1);
 
 #ifdef BLAZE_PLATFORM_WINDOWS
-				uint16 attribute;
-				if (GetAttributeFromString(color, attribute))
+				uint16 newAttribute;
+				if (GetAttributeFromString(color, newAttribute))
 				{
-					this->attribute = (this->attribute & ~240) | ((attribute << 4) & 240);
-					SetConsoleTextAttribute(handle, this->attribute);
+					attribute = (attribute & ~240) | ((newAttribute << 4) & 240);
+					SetConsoleTextAttribute(handle, attribute);
 				}
 #endif
 			}

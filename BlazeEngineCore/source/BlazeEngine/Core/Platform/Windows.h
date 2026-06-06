@@ -1,13 +1,19 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
+#include <Windows.h>
+#undef DeleteFile
+#undef CreateDirectory
+#undef min
+#undef max
+#undef GetMessage
 
 namespace Blaze::Windows
 {
 	// Parameters:
 	// error - usually the result of GetLastError()
 	// recursionIndex - for internal use
-	String GetErrorString(uint32 error, uint recursionIndex = 0);
+	String GetErrorString(DWORD error, uint recursionIndex = 0);
 }
 
 #define BLAZE_WINDOWS_DEBUG(message, ...) ::Blaze::Debug::Logger::LogDebug("Windows API", Format(message, __VA_ARGS__))

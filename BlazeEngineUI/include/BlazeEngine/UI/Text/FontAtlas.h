@@ -3,7 +3,6 @@
 #include "BlazeEngine/Core/Resource/ResourceManager.h"
 #include "BlazeEngine/Core/Container/Map.h"
 #include "BlazeEngine/Graphics/Core/GraphicsContext.h"
-#include "BlazeEngine/UI/Text/TextStyle.h"
 
 namespace Blaze::UI
 {

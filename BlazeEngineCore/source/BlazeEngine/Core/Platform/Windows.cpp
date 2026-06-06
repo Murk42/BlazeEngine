@@ -5,21 +5,7 @@
 
 namespace Blaze::Windows
 {
-	template<typename T>
-	class Guard
-	{
-	public:
-		T function;
-		Guard(const T& function)
-			: function(function)
-		{
-		}
-		~Guard()
-		{
-			function();
-		}
-	};
-	String GetErrorString(uint32 error, uint recursionIndex)
+	String GetErrorString(DWORD  error, uint recursionIndex)
 	{
 		LPSTR errorString;
 		auto res = FormatMessageA(

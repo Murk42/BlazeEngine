@@ -16,7 +16,7 @@ namespace Blaze::UI
 	class FontManager
 	{
 	public:
-		struct FontAtlasData
+		struct FontData
 		{
 			const FontAtlas* atlas;
 			const FontFace* fontFace;
@@ -31,7 +31,7 @@ namespace Blaze::UI
 		bool CreateFontAtlas(StringView name, ArrayView<uint32> fontAtlasPixelSizes, const FontGlyphRasterizer& glyphRasterizer, Graphics::RendererTypeID rendererTypeID, Graphics::GraphicsContext& graphicsContext, bool useCache = true);
 		bool CreateFontAtlas(StringView name, ArrayView<uint32> fontAtlasPixelSizes, const Graphics::TextRendererBase& textRenderer, bool useCache = true);
 
-		bool GetFontAtlas(StringView name, uint32 fontHeight, FontAtlasData& fontAtlasData) const;
+		bool GetFontAtlas(StringView name, uint32 fontHeight, FontData& fontAtlasData) const;
 
 		void AddToScreen(Screen& screen);
 		static FontManager* GetScreenFontManager(Screen& screen);
@@ -44,7 +44,7 @@ namespace Blaze::UI
 		struct FontFaceData
 		{
 			ResourceRef<FontFace> fontFace;
-			Array<AtlasData> atlasData;
+			Array<AtlasData> fontData;
 		};
 		ResourceManager& resourceManager;
 		Map<StringView, FontFaceData> entries;

@@ -39,11 +39,10 @@ namespace Blaze::UI::Nodes
 		if (hide)
 			return;
 
-
 		const NodeFinalTransform& finalTransform = node.GetFinalTransform();
 		Vec2f pos = nodeRelativePos + finalTransform.position;
 
-		if (std::fmodf((ProgramTimePoint() - blinkingStart).GetSeconds(), 1.0f) < 0.5f)
+		if (std::fmod((ProgramTimePoint() - blinkingStart).GetSeconds(), 1.0) < 0.5)
 		{
 			renderer.Render(Graphics::Quad2DRenderData{
 				.p1 = pos,
@@ -85,30 +84,33 @@ namespace Blaze::UI::Nodes
 		if (selectionBegin == selectionEnd)
 			return;
 
-		uintMem beginLineIndex = layoutMetadata.GetCharacterLineIndex(selectionBegin);
-		uintMem endLineIndex = layoutMetadata.GetCharacterLineIndex(selectionEnd - 1);
+		uintMem beginLineIndex = layoutMetadata.GetCharacterData(selectionBegin).lineIndex;
+		uintMem endLineIndex = layoutMetadata.GetCharacterData(selectionEnd - 1).lineIndex;
+
+		Vec2f offset = Vec2f(0, -0.125f * screenSize.y);
+		Vec2f size = Vec2f(0, 1.25f * screenSize.y);
 		
 		if (beginLineIndex == endLineIndex)
 			selectionBoxes.AddBack(SelectionBox{ 
-				.pos1 = layoutMetadata.GetCursorPosBeforeCharacter(selectionBegin),
-				.pos2 = layoutMetadata.GetCursorPosAfterCharacter(selectionEnd - 1) + Vec2f(0, screenSize.y)
+				.pos1 = offset + layoutMetadata.GetCursorPosBeforeCharacter(selectionBegin),
+				.pos2 = offset + layoutMetadata.GetCursorPosAfterCharacter(selectionEnd - 1) + size
 				});
 		else
 		{
 			selectionBoxes.AddBack(SelectionBox{
-				.pos1 = layoutMetadata.GetCursorPosBeforeCharacter(selectionBegin),
-				.pos2 = layoutMetadata.GetCursorPosAfterCharacter(layoutMetadata.GetLineFirstCharacter(beginLineIndex + 1) - 1) + Vec2f(0, screenSize.y)
+				.pos1 = offset + layoutMetadata.GetCursorPosBeforeCharacter(selectionBegin),
+				.pos2 = offset + layoutMetadata.GetCursorPosAfterCharacter(layoutMetadata.GetLineData(beginLineIndex + 1).firstCharacter -1) + size
 				});
 
 			for (uintMem i = beginLineIndex + 1; i < endLineIndex; ++i)
 				selectionBoxes.AddBack(SelectionBox{
-				.pos1 = layoutMetadata.GetCursorPosBeforeCharacter(layoutMetadata.GetLineFirstCharacter(i)),
-				.pos2 = layoutMetadata.GetCursorPosAfterCharacter(layoutMetadata.GetLineFirstCharacter(i + 1) - 1) + Vec2f(0, screenSize.y)
+				.pos1 = offset + layoutMetadata.GetCursorPosBeforeCharacter(layoutMetadata.GetLineData(i).firstCharacter),
+				.pos2 = offset + layoutMetadata.GetCursorPosAfterCharacter(layoutMetadata.GetLineData(i + 1).firstCharacter - 1) + size
 					});
 
 			selectionBoxes.AddBack(SelectionBox{
-				.pos1 = layoutMetadata.GetCursorPosBeforeCharacter(layoutMetadata.GetLineFirstCharacter(endLineIndex)),
-				.pos2 = layoutMetadata.GetCursorPosAfterCharacter(selectionEnd - 1) + Vec2f(0, screenSize.y)
+				.pos1 = offset + layoutMetadata.GetCursorPosBeforeCharacter(layoutMetadata.GetLineData(endLineIndex).firstCharacter),
+				.pos2 = offset + layoutMetadata.GetCursorPosAfterCharacter(selectionEnd - 1) + size
 				});
 		}
 	}

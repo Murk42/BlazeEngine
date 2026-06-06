@@ -165,7 +165,7 @@ namespace Blaze
 		if (start < 0 || static_cast<uintMem>(start) > count)
 			BLAZE_LOG_FATAL_BASIC("Invalid index");
 
-		if (start == count)
+		if (static_cast<uintMem>(start) == count)
 			return SIZE_MAX;
 
 		uintMem index = Blaze::Algorithm::FindRange(GenericStringView(ptr + start, ptr + count), value).Ptr() - ptr;
@@ -388,7 +388,6 @@ namespace Blaze
 		});
 
 		return out;
-		return GenericString<Char, StringAllocator>();
 	}
 	template<typename Char>
 	template<AllocatorType StringAllcoator>
@@ -746,9 +745,9 @@ namespace Blaze
 		return *this;
 	}
 	template<typename Char>
-	inline constexpr void GenericStringView<Char>::Assign(const Char* ptr, uintMem bufferSize)
+	inline constexpr void GenericStringView<Char>::Assign(const Char* sourcePtr, uintMem bufferSize)
 	{		
-		if (bufferSize != 0 && ptr[bufferSize - 1] == '\0')
+		if (bufferSize != 0 && sourcePtr[bufferSize - 1] == '\0')
 		{
 			if (bufferSize == 1)
 				return;
@@ -758,7 +757,7 @@ namespace Blaze
 		else
 			count = bufferSize;
 
-		this->ptr = ptr;
+		ptr = sourcePtr;
 	}
 
 	template<typename Char, AllocatorType Allocator = DefaultAllocator>

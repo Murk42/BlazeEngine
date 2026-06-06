@@ -17,8 +17,8 @@ namespace Blaze
 
 		~Result();
 
-		void AddLogs(std::initializer_list<Debug::Log> logs);
-		void AddLog(const Debug::Log& log);
+		void AddLogs(std::initializer_list<Debug::Log> newLogs);
+		void AddLog(const Debug::Log& newLog);
 
 		void Clear();
 		void ClearSilent();

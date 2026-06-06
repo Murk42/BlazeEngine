@@ -44,12 +44,26 @@ namespace Blaze::Graphics::OpenGL
     {
         glDisableVertexArrayAttrib(id, index);
     }
-    void VertexArray::SetVertexAttributeBuffer(uint index, const GraphicsBuffer* buffer, uintMem stride, uintMem offset)
-    {
-        if (buffer != nullptr)
-            glVertexArrayVertexBuffer(id, index, buffer->GetHandle(), static_cast<GLintptr>(offset), static_cast<GLsizei>(stride));
-        else
-            glVertexArrayVertexBuffer(id, index, 0, offset, stride);
+    void VertexArray::SetVertexAttribute(const VertexAttributeDescriptor& descriptor)
+    {        
+        for (uintMem i = 0; i < descriptor.arraySize; ++i)
+        {
+            uint index = descriptor.attributeIndex + static_cast<uint>(i);
+            uintMem offset = descriptor.offset + i * descriptor.elementSize;
+
+            EnableVertexAttribute(index);
+            SetVertexAttributeBinding(index, descriptor.bindingIndex);
+            SetVertexAttributeDivisor(index, descriptor.divisor);
+
+            descriptor.type.Visit(Visitor{
+                [&](const IntegerVertexAttributeType& type)    { SetIntegerVertexAttributeFormat           (index, type, descriptor.count, offset); },
+                [&](const DoubleVertexAttributeType& type)     { SetDoubleVertexAttributeFormat            (index, type, descriptor.count, offset); },
+                [&](const FloatVertexAttributeType& type)      { SetFloatVertexAttributeFormat             (index, type, descriptor.count, offset); },
+                [&](const NormalizedVertexAttributeType& type) { SetFloatVertexAttributeAsNormalizedFormat (index, type, descriptor.count, offset); },
+                [&](const PackedVertexAttributeType& type)     { SetFloatVertexAttributeAsPackedFormat     (index, type, descriptor.count, offset); },
+                [&](const BGRAVertexAttributeType& type)       { SetFloatVertexAttributeAsBGRAFormat       (index, type, descriptor.count, offset); },
+                });
+        }
     }
     void VertexArray::SetIntegerVertexAttributeFormat(uint index, IntegerVertexAttributeType type, uintMem count, uintMem offset)
     {
@@ -61,9 +75,15 @@ namespace Blaze::Graphics::OpenGL
         }
         glVertexArrayAttribIFormat(id, index, count, _type, offset);
     }
-    void VertexArray::SetDoubleVertexAttributeFormat(uint index, uintMem count, uintMem offset)
+    void VertexArray::SetDoubleVertexAttributeFormat(uint index, DoubleVertexAttributeType type, uintMem count, uintMem offset)
     {
-        glVertexArrayAttribLFormat(id, index, count, GL_DOUBLE, offset);
+        GLenum _type;
+        if (!OpenGLDoubleVertexAttributeType(type, _type))
+        {
+            BLAZE_LOG_ERROR("Invalid DoubleVertexAttributeType enum value");
+            return;
+        }
+        glVertexArrayAttribLFormat(id, index, count, _type, offset);
     }
     void VertexArray::SetFloatVertexAttributeFormat(uint index, FloatVertexAttributeType type, uintMem count, uintMem offset)
     {
@@ -75,10 +95,10 @@ namespace Blaze::Graphics::OpenGL
         }
         glVertexArrayAttribFormat(id, index, count, _type, false, offset);
     }
-    void VertexArray::SetFloatVertexAttributeAsNormalizedFormat(uint index, IntegerVertexAttributeType type, uintMem count, uintMem offset)
+    void VertexArray::SetFloatVertexAttributeAsNormalizedFormat(uint index, NormalizedVertexAttributeType type, uintMem count, uintMem offset)
     {
         GLenum _type;
-        if (!OpenGLIntegerVertexAttributeType(type, _type))
+        if (!OpenGLNormalizedVertexAttributeType(type, _type))
         {
             BLAZE_LOG_ERROR("Invalid IntegerVertexAttributeType enum value");
             return;
@@ -104,6 +124,17 @@ namespace Blaze::Graphics::OpenGL
             return;
         }
         glVertexArrayAttribFormat(id, index, GL_BGRA, _type, true, offset);
+    }
+    void VertexArray::SetBindingBuffer(uint bindingIndex, const GraphicsBuffer* buffer, uintMem stride, uintMem offset)
+    {
+        if (buffer != nullptr)
+            glVertexArrayVertexBuffer(id, bindingIndex, buffer->GetHandle(), static_cast<GLintptr>(offset), static_cast<GLsizei>(stride));
+        else
+            glVertexArrayVertexBuffer(id, bindingIndex, 0, offset, stride);
+    }
+    void VertexArray::SetVertexAttributeBinding(uint attributeIndex, uint bindingIndex)
+    {
+        glVertexArrayAttribBinding(id, attributeIndex, bindingIndex);
     }
     void VertexArray::SetVertexAttributeDivisor(uint index, uint divisor)
     {

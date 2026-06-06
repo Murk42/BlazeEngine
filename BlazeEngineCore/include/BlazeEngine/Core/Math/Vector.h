@@ -16,8 +16,11 @@ namespace Blaze
 	using Vecd = Vector<double, S>;
 
 	template<typename T>
-	struct Vector<T, 2>
+	struct BLAZE_API Vector<T, 2>
 	{
+		using Type = T;
+		static constexpr uintMem Size = 2;
+
 		T x, y;
 
 		constexpr Vector() = default;
@@ -71,11 +74,15 @@ namespace Blaze
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 * v2 }; }
 		constexpr auto operator*(const Vector<T2, 2>& v) const { return Vector(x * v.x, y * v.y); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 }; }
-		constexpr auto operator/(const Vector<T2, 2>& v) const { return Vector(x / v.x, y / v.y); }
+		constexpr auto operator/(const Vector<T2, 2>& v) const { return Vector(x / v.x, y / v.y); }		
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1% v2 }; }
+		constexpr auto operator%(const Vector<T2, 2>& v) const { return Vector(x % v.x, y % v.y); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 * v2 }; }
 		constexpr auto operator*(const T2& v) const { return Vector(x * v, y * v); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 }; }
 		constexpr auto operator/(const T2& v) const { return Vector(x / v, y / v); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 % v2 }; }
+		constexpr auto operator%(const T2& v) const { return Vector(x % v, y % v); }
 
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 += v2 }; }
 		constexpr Vector& operator+= (const Vector<T2, 2>& v) { x += v.x; y += v.y; return *this; }
@@ -85,10 +92,14 @@ namespace Blaze
 		constexpr Vector& operator*= (const Vector<T2, 2>& v) { x *= v.x; y *= v.y; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 /= v2 }; }
 		constexpr Vector& operator/= (const Vector<T2, 2>& v) { x /= v.x; y /= v.y; return *this; }
+		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 %= v2 }; }
+		constexpr Vector& operator%= (const Vector<T2, 2>& v) { x %= v.x; y %= v.y; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 *= v2 }; }
 		constexpr Vector& operator*= (const T2& v) { x *= v; y *= v; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 /= v2 }; }
 		constexpr Vector& operator/= (const T2& v) { x /= v; y /= v; return *this; }
+		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 %= v2 }; }
+		constexpr Vector& operator%= (const T2& v) { x %= v; y %= v; return *this; }
 
 		constexpr T& operator[](uintMem index)
 		{
@@ -96,7 +107,7 @@ namespace Blaze
 			{
 			case 0: return x;
 			case 1: return y;
-			default: throw; return x;
+			default: BLAZE_LOG_FATAL_BASIC("Indexing a vector by a index outside its range"); return x;
 			}
 		}
 		constexpr const T& operator[](uintMem index) const
@@ -105,7 +116,7 @@ namespace Blaze
 			{
 			case 0: return x;
 			case 1: return y;
-			default: throw; return x;
+			default: BLAZE_LOG_FATAL_BASIC("Indexing a vector by a index outside its range"); return x;
 			}
 		}
 
@@ -130,10 +141,16 @@ namespace Blaze
 	using Vec2u64 = Vec2<uint64>;
 	using Vec2f = Vec2<float>;
 	using Vec2d = Vec2<double>;
+	
+	template<typename T>
+	Vector(T, T) -> Vec2<T>;
 
 	template<typename T>
-	struct Vector<T, 3>
+	struct BLAZE_API Vector<T, 3>
 	{
+		using Type = T;
+		static constexpr uintMem Size = 3;
+
 		T x, y, z;
 
 		constexpr Vector() = default;
@@ -209,10 +226,14 @@ namespace Blaze
 		constexpr auto operator*(const Vector<T2, 3>& v) const { return Vector(x * v.x, y * v.y, z * v.z); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 }; }
 		constexpr auto operator/(const Vector<T2, 3>& v) const { return Vector(x / v.x, y / v.y, z / v.z); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1% v2 }; }
+		constexpr auto operator%(const Vector<T2, 3>& v) const { return Vector(x % v.x, y % v.y, z % v.z); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 * v2 }; }
 		constexpr auto operator*(const T2& v) const { return Vector(x * v, y * v, z * v); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 }; }
 		constexpr auto operator/(const T2& v) const { return Vector(x / v, y / v, z / v); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1% v2 }; }
+		constexpr auto operator%(const T2& v) const { return Vector(x % v, y % v, z % v); }
 
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 += v2 }; }
 		constexpr Vector& operator+= (const Vector<T2, 3>& v) { x += v.x; y += v.y; z += v.z; return *this; }
@@ -222,10 +243,14 @@ namespace Blaze
 		constexpr Vector& operator*= (const Vector<T2, 3>& v) { x *= v.x; y *= v.y; z *= v.z; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 /= v2 }; }
 		constexpr Vector& operator/= (const Vector<T2, 3>& v) { x /= v.x; y /= v.y; z /= v.z; return *this; }
+		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 %= v2 }; }
+		constexpr Vector& operator%= (const Vector<T2, 3>& v) { x %= v.x; y %= v.y; z %= v.z; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 *= v2 }; }
 		constexpr Vector& operator*= (const T2& v) { x *= v; y *= v; z *= v; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 /= v2 }; }
 		constexpr Vector& operator/= (const T2& v) { x /= v; y /= v; z /= v; return *this; }
+		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 %= v2 }; }
+		constexpr Vector& operator%= (const T2& v) { x %= v; y %= v; z %= v; return *this; }
 
 		constexpr T& operator[](uintMem index)
 		{
@@ -234,7 +259,7 @@ namespace Blaze
 			case 0: return x;
 			case 1: return y;
 			case 2: return z;
-			default: throw; return x;
+			default: BLAZE_LOG_FATAL_BASIC("Indexing a vector by a index outside its range"); return x;
 			}
 		}
 		constexpr const T& operator[](uintMem index) const
@@ -244,7 +269,7 @@ namespace Blaze
 			case 0: return x;
 			case 1: return y;
 			case 2: return z;
-			default: throw; return x;
+			default: BLAZE_LOG_FATAL_BASIC("Indexing a vector by a index outside its range"); return x;
 			}
 		}
 
@@ -271,8 +296,11 @@ namespace Blaze
 	using Vec3d = Vec3<double>;
 
 	template<typename T>
-	struct Vector<T, 4>
+	struct BLAZE_API Vector<T, 4>
 	{
+		using Type = T;
+		static constexpr uintMem Size = 4;
+
 		T x, y, z, w;
 
 		constexpr Vector() = default;
@@ -352,10 +380,14 @@ namespace Blaze
 		constexpr auto operator*(const Vector<T2, 4>& v) const { return Vector(x * v.x, y * v.y, z * v.z, w * v.w); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 }; }
 		constexpr auto operator/(const Vector<T2, 4>& v) const { return Vector(x / v.x, y / v.y, z / v.z, w / v.w); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1% v2 }; }
+		constexpr auto operator%(const Vector<T2, 4>& v) const { return Vector(x % v.x, y % v.y, z % v.z, w % v.w); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 * v2 }; }
 		constexpr auto operator*(const T2& v) const { return Vector(x * v, y * v, z * v, w * v); }
 		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1 / v2 }; }
 		constexpr auto operator/(const T2& v) const { return Vector(x / v, y / v, z / v, w / v); }
+		template<typename T2> requires requires (const T& v1, const T2& v2) { { v1% v2 }; }
+		constexpr auto operator%(const T2& v) const { return Vector(x % v, y % v, z % v, w % v); }
 
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 += v2 }; }
 		constexpr Vector& operator+= (const Vector<T2, 4>& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
@@ -365,10 +397,14 @@ namespace Blaze
 		constexpr Vector& operator*= (const Vector<T2, 4>& v) { x *= v.x; y *= v.y; z *= v.z; w *= v.w; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 /= v2 }; }
 		constexpr Vector& operator/= (const Vector<T2, 4>& v) { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return *this; }
+		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 %= v2 }; }
+		constexpr Vector& operator%= (const Vector<T2, 4>& v) { x %= v.x; y %= v.y; z %= v.z; w %= v.w; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 *= v2 }; }
 		constexpr Vector& operator*= (const T2& v) { x *= v; y *= v; z *= v; w *= v; return *this; }
 		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 /= v2 }; }
 		constexpr Vector& operator/= (const T2& v) { x /= v; y /= v; z /= v; w /= v; return *this; }
+		template<typename T2> requires requires (T& v1, const T2& v2) { { v1 %= v2 }; }
+		constexpr Vector& operator%= (const T2& v) { x %= v; y %= v; z %= v; w %= v; return *this; }
 
 		constexpr T& operator[](uintMem index)
 		{
@@ -378,7 +414,7 @@ namespace Blaze
 			case 1: return y;
 			case 2: return z;
 			case 3: return w;
-			default: throw; return x;
+			default: BLAZE_LOG_FATAL_BASIC("Indexing a vector by a index outside its range"); return x;
 			}
 		}
 		constexpr const T& operator[](uintMem index) const
@@ -389,7 +425,7 @@ namespace Blaze
 			case 1: return y;
 			case 2: return z;
 			case 3: return w;
-			default: throw; return x;
+			default: BLAZE_LOG_FATAL_BASIC("Indexing a vector by a index outside its range"); return x;
 			}
 		}
 

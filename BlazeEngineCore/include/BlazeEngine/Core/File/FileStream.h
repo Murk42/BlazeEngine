@@ -12,7 +12,7 @@ namespace Blaze
 		FileStreamBase(FileStreamBase&& other) noexcept;
 		~FileStreamBase() override;
 
-		void AcquireHandle(void* file);
+		void AcquireHandle(void* newHandle);
 		bool IsOpen() const;
 
 		void Close();

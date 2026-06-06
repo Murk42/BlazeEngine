@@ -410,6 +410,17 @@ namespace Blaze::Graphics::OpenGL
 
 		return true;
 	}
+	bool OpenGLDoubleVertexAttributeType(DoubleVertexAttributeType value, GLenum& result)
+	{
+		switch (value)
+		{
+		case Blaze::Graphics::OpenGL::DoubleVertexAttributeType::Double: result = GL_DOUBLE; break;
+		default:
+			return false;
+		}
+
+		return true;
+	}
 	bool OpenGLFloatVertexAttributeType(FloatVertexAttributeType value, GLenum& result)
 	{
 		switch (value)
@@ -423,6 +434,22 @@ namespace Blaze::Graphics::OpenGL
 		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Half: result = GL_HALF_FLOAT; break;
 		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float: result = GL_FLOAT; break;
 		case Blaze::Graphics::OpenGL::FloatVertexAttributeType::Double: result = GL_DOUBLE; break;
+		default:
+			return false;
+		}
+
+		return true;
+	}
+	bool OpenGLNormalizedVertexAttributeType(NormalizedVertexAttributeType value, GLenum& result)
+	{
+		switch (value)
+		{
+		case Blaze::Graphics::OpenGL::NormalizedVertexAttributeType::Int8:   result = GL_BYTE; break;
+		case Blaze::Graphics::OpenGL::NormalizedVertexAttributeType::Int16:  result = GL_SHORT; break;
+		case Blaze::Graphics::OpenGL::NormalizedVertexAttributeType::Int32:  result = GL_INT; break;
+		case Blaze::Graphics::OpenGL::NormalizedVertexAttributeType::Uint8:  result = GL_UNSIGNED_BYTE; break;
+		case Blaze::Graphics::OpenGL::NormalizedVertexAttributeType::Uint16: result = GL_UNSIGNED_SHORT; break;
+		case Blaze::Graphics::OpenGL::NormalizedVertexAttributeType::Uint32: result = GL_UNSIGNED_INT; break;
 		default:
 			return false;
 		}

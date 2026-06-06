@@ -1,13 +1,6 @@
 #include "pch.h"
 #include "BlazeEngine/Core/Threading/Thread.h"
 #include "BlazeEngine/Core/Debug/Logger.h"
-#include "BlazeEngine/Core/String/String.h"
-
-#ifdef BLAZE_PLATFORM_WINDOWS
-#include "BlazeEngine/Core/Internal/WindowsPlatform.h"
-#else
-#error Not supported
-#endif
 
 namespace Blaze
 {

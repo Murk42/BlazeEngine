@@ -3,8 +3,8 @@
 
 namespace Blaze
 {
-	ReadSubStream::ReadSubStream(ReadStream& stream, uintMem offset, uintMem size)
-		: parentStream(&stream), offset(offset), size(size)
+	ReadSubStream::ReadSubStream(ReadStream& stream, uintMem position, uintMem size)
+		: parentStream(&stream), parentOffset(position), size(size)
 	{
 	}
 	bool ReadSubStream::MovePosition(intMem offset)
@@ -13,33 +13,32 @@ namespace Blaze
 	}
 	bool ReadSubStream::SetPosition(uintMem offset)
 	{
-		return parentStream->SetPosition(offset + this->offset);
+		return parentStream->SetPosition(offset + parentOffset);
 	}
 	bool ReadSubStream::SetPositionFromEnd(intMem offset)
 	{
-		return parentStream->SetPosition(this->offset + this->size + offset);
+		return parentStream->SetPosition(parentOffset + this->size + offset);
 	}
 	uintMem ReadSubStream::GetPosition() const
 	{
-		return parentStream->GetPosition() - offset;
+		return parentStream->GetPosition() - parentOffset;
 	}
 	uintMem ReadSubStream::GetSize() const
 	{
 		return size;
 	}
-	uintMem ReadSubStream::Read(void* ptr, uintMem byteCount)
+	uintMem ReadSubStream::Read(void* destinationPtr, uintMem byteCount)
 	{
 		uintMem position = parentStream->GetPosition();
 
-		if (position > offset + size || position < offset)
+		if (position > parentOffset + size || position < parentOffset)
 			return 0;
 
-		if (position + byteCount > offset + size)
+		if (parentOffset + byteCount > position + size)
 		{
-
-			byteCount = offset + size - position;
+			byteCount = position + size - parentOffset;
 		}
 
-		return parentStream->Read(ptr, byteCount);
+		return parentStream->Read(destinationPtr, byteCount);
 	}
 }

@@ -705,7 +705,7 @@ namespace Blaze::Input
         NumberIDType numberID;
     };
 
-    struct MouseID
+    struct BLAZE_API MouseID
     {
     public:
         using NumberIDType = uint32;

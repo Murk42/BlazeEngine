@@ -5,7 +5,7 @@
 namespace Blaze
 {
 	template<auto MemberFunction>
-	class EventMemberFunctionTie
+	class BLAZE_API EventMemberFunctionTie
 	{
 	public:
 		using Arguments = MemberFunctionPointerTypeArgumentTypes<decltype(MemberFunction)>;

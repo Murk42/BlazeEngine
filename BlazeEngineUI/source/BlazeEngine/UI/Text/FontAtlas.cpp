@@ -23,12 +23,12 @@ namespace Blaze::UI
 		std::vector<rect_type> glyphAtlasRects;
 		glyphAtlasRects.reserve(glyphIndices.Count());
 
-		struct GlyphData
+		struct GlyphLayoutData
 		{
 			Bitmap bitmap;
 			uint32 glyphIndex;
 		};
-		Array<GlyphData> glyphs;
+		Array<GlyphLayoutData> glyphs;
 		glyphs.ReserveExactly(glyphIndices.Count());
 
 		auto glyphAtlasRectIt = glyphAtlasRects.begin();
@@ -42,7 +42,7 @@ namespace Blaze::UI
 			Vec2u size = bitmap.GetSize() + Vec2u(glyphBitmapExtraPadding * 2);
 
 			glyphAtlasRects.push_back(rect_type(0, 0, size.x, size.y));
-			glyphs.AddBack(GlyphData{ std::move(bitmap), glyphIndex });
+			glyphs.AddBack(GlyphLayoutData{ std::move(bitmap), glyphIndex });
 		}
 
 		const auto result_size = PackRects(glyphAtlasRects);
@@ -63,7 +63,7 @@ namespace Blaze::UI
 	}
 
 	FontAtlas::FontAtlas() : 
-		rasterFontHeight(0.0f), 
+		rasterFontHeight(0), 
 		size({ })
 	{
 	}
@@ -71,7 +71,7 @@ namespace Blaze::UI
 		texture(std::move(other.texture)),
 		uvs(std::move(other.uvs)),
 		size(std::exchange(other.size, { })),
-		rasterFontHeight(std::exchange(other.rasterFontHeight, 0.0f))
+		rasterFontHeight(std::exchange(other.rasterFontHeight, 0))
 	{
 	}
 	FontAtlas::FontAtlas(const FontAtlasDescriptor& descriptor, Graphics::GraphicsContext& graphicsContext, ResourceManager& resourceManager)
@@ -180,7 +180,7 @@ namespace Blaze::UI
 		texture = std::move(other.texture);
 		uvs = std::move(other.uvs);
 		size = std::exchange(other.size, { });
-		rasterFontHeight = std::exchange(other.rasterFontHeight, 0.0f);
+		rasterFontHeight = std::exchange(other.rasterFontHeight, 0);
 
 		return *this;
 	}

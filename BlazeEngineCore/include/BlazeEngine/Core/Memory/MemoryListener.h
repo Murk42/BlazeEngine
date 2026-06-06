@@ -53,7 +53,7 @@ namespace Blaze
 
 		void AddMemoryEvent(const MemoryEvent&);
 
-		void StartListening(bool recordLocations = false);
+		void StartListening(bool newRecordLocations = false);
 		void StopListening();
 
 		MemoryListenerReport GenerateReport() const;

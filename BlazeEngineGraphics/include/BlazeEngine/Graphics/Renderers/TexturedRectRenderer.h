@@ -18,7 +18,7 @@ namespace Blaze::Graphics
 		float alpha;
 	};
 
-	class TexturedRectRenderer : public virtual RendererBase
+	class BLAZE_API TexturedRectRenderer : public virtual RendererBase
 	{
 	public:
 		virtual void Render(const TexturedRectRenderData& data) = 0;

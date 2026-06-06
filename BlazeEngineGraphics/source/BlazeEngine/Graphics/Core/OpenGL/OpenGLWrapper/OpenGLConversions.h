@@ -22,7 +22,9 @@ namespace Blaze::Graphics::OpenGL
 	bool BlazeBitmapColorFormat(TextureInternalPixelFormat format, BitmapColorFormat& result);
 
 	bool OpenGLIntegerVertexAttributeType(IntegerVertexAttributeType type, GLenum& result);
+	bool OpenGLDoubleVertexAttributeType(DoubleVertexAttributeType value, GLenum& result);
 	bool OpenGLFloatVertexAttributeType(FloatVertexAttributeType type, GLenum& result);
+	bool OpenGLNormalizedVertexAttributeType(NormalizedVertexAttributeType value, GLenum& result);
 	bool OpenGLPackedVertexAttributeType(PackedVertexAttributeType type, GLenum& result);
 	bool OpenGLBGRAVertexAttributeType(BGRAVertexAttributeType type, GLenum& result);
 

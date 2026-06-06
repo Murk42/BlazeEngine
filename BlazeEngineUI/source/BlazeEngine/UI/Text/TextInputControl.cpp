@@ -94,6 +94,14 @@ namespace Blaze::UI::Text
 
 		cursorControl.MoveCursorTo(pos, expandSelection);
 	}
+	void TextInputControl::MoveCursorGraphemeLeft(bool expandSelection)
+	{
+		cursorControl.MoveCursorTo(cursorControl.GetCursorPos() - 1, expandSelection);
+	}
+	void TextInputControl::MoveCursorGraphemeRight(bool expandSelection)
+	{
+		cursorControl.MoveCursorTo(cursorControl.GetCursorPos() + 1, expandSelection);
+	}
 	void TextInputControl::InsertAtCursor(u8StringView string)
 	{
 		u8String newString = text;

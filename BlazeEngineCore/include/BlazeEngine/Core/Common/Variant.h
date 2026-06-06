@@ -1,9 +1,17 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Type/TypeTraits.h"
+#include <new>
+#include <array>
 
 namespace Blaze
 {
+	template<class... Ts> struct Visitor : Ts... 
+	{
+		using Ts::operator()...; 
+	};
+	template<class... Ts> Visitor(Ts...) -> Visitor<Ts...>;
+
 	template<typename ... Ts>
 	class Variant
 	{
@@ -28,6 +36,11 @@ namespace Blaze
 		bool TryGetValue(T& value) const;
 		template<typename Callable> requires (std::invocable<Callable, const Ts&> || ...)
 		bool TryProcess(const Callable& callable) const;
+
+		template<typename R = void, typename V>
+		R Visit(V&& visitor);
+		template<typename R = void, typename V>
+		R Visit(V&& visitor) const;
 
 		template<OneOf<Ts...> T>
 		static constexpr ValueType GetValueTypeOf();
@@ -67,6 +80,23 @@ namespace Blaze
 
 		template<typename ... Args>
 		static constexpr void Apply(ValueType type, void(*functions[])(Args&&...), Args&& ... args);
+
+		template<typename R, typename T, typename V>
+		static R Invoke(V&& vis, const Variant& var)
+		{
+			static_assert(std::invocable<V, T&> || std::invocable<V>, "Visitor not defined neither for a type or no type");
+
+			if constexpr (std::invocable<V, T&>)
+			{
+				static_assert(SameAs<std::invoke_result_t<V, T&>, R>, "Unexpected visitor return ");
+				return std::forward<V>(vis)(var.GetValueUnsafe<RemoveCV<T>>());
+			}
+			else
+			{
+				static_assert(SameAs<std::invoke_result_t<V>, R>, "Unexpected visitor return ");
+				return std::forward<V>(vis)();
+			}
+		};
 	};
 	template<typename ...Ts>
 	inline Variant<Ts...>::Variant()
@@ -134,6 +164,50 @@ namespace Blaze
 			callable(GetValueUnsafe<T>());
 			return true;
 		}
+	}
+	template<typename ...Ts>
+	template<typename R, typename V>
+	inline R Variant<Ts...>::Visit(V&& visitor)
+	{
+		constexpr void(*table[sizeof...(Ts)])(V&&, Variant&) = { &Invoke<R, const Ts, V>... };
+
+		if (type >= sizeof...(Ts))
+		{
+			if constexpr (std::invocable<V>)
+			{
+				static_assert(SameAs<std::invoke_result_t<V>, R>, "Unexpected visitor return type");
+				return visitor();
+			}
+			else 
+			{
+				static_assert(SameAs<R, void>, "Visitor not defined for invalid type but a non-void return type is expected");
+				return;
+			}
+		}
+
+		return table[static_cast<uintMem>(type)](visitor, *this);
+	}
+	template<typename ...Ts>
+	template<typename R, typename V>
+	inline R Variant<Ts...>::Visit(V&& visitor) const
+	{
+		constexpr void(*table[sizeof...(Ts)])(V&&, const Variant&) = { &Invoke<R, const Ts, V>... };
+
+		if (type >= sizeof...(Ts))
+		{
+			if constexpr (std::invocable<V>)
+			{
+				static_assert(SameAs<std::invoke_result_t<V>, R>, "Unexpected visitor return type");
+				return visitor();
+			}
+			else
+			{
+				static_assert(SameAs<R, void>, "Visitor not defined for invalid type but a non-void return type is expected");
+				return;
+			}
+		}
+
+		return table[static_cast<uintMem>(type)](std::forward<V>(visitor), *this);
 	}
 	template<typename ...Ts>
 	template<OneOf<Ts...> T>

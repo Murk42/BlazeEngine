@@ -151,6 +151,8 @@
       <Optimization>Disabled</Optimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -172,6 +174,8 @@
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -195,6 +199,8 @@
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -218,6 +224,8 @@
       <Optimization>Disabled</Optimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
     <PostBuildEvent />
@@ -230,6 +238,8 @@
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
     <PostBuildEvent />
@@ -242,6 +252,8 @@
       <AdditionalIncludeDirectories>D:\Programming\Libraries\boost\boost_1_82_0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
     <PostBuildEvent />
@@ -256,7 +268,7 @@
     <ClCompile Include="source\BlazeEngine\Core\Resource\ResourceManager.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\BlazeEngineCoreContext.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Common\Buffer.cpp" />
-    <ClCompile Include="source\BlazeEngine\Core\Common\Color.cpp" />
+    <ClInclude Include="include\BlazeEngine\Core\Common\ColorImpl.h" />
     <ClCompile Include="source\BlazeEngine\Core\Debug\Breakpoint.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Debug\Callstack.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Debug\Log.cpp" />
@@ -269,7 +281,7 @@
     <ClCompile Include="source\BlazeEngine\Core\Common\BufferStream.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\File\FileStream.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Common\SubStream.cpp" />
-    <ClCompile Include="source\BlazeEngine\Core\Internal\WindowsPlatform.cpp" />
+    <ClCompile Include="source\BlazeEngine\Core\Platform\Windows.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Math\Random.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Memory\Allocator.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Memory\MallocAllocator.cpp" />
@@ -278,8 +290,8 @@
     <ClCompile Include="source\BlazeEngine\Core\Resource\ResourceRef.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\String\StringHash.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\String\StringTypeConverter.cpp" />
-    <ClCompile Include="source\BlazeEngine\Core\Threading\ThreadGroup.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Threading\ThreadPool.cpp" />
+    <ClCompile Include="source\BlazeEngine\Core\Platform\Windows\ThreadPool_Win32.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Time\TimeInterval.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Time\Stopwatch.cpp" />
     <ClCompile Include="source\BlazeEngine\Core\Threading\Thread.cpp" />
@@ -303,7 +315,8 @@
     <ClInclude Include="include\BlazeEngine\Core\Event\EventMemberFunctionTie.h" />
     <ClInclude Include="include\BlazeEngine\Core\String\StringCharIterator.h" />
     <ClInclude Include="include\BlazeEngine\Core\String\StringCharIteratorImpl.h" />
-    <ClInclude Include="include\BlazeEngine\Core\Type\Variant.h" />
+    <ClInclude Include="include\BlazeEngine\Core\Common\Variant.h" />
+    <ClInclude Include="include\BlazeEngine\Core\Type\VectorTraits.h" />
     <ClInclude Include="include\BlazeEngine\External\BlazeEngineCoreSTDInterface.h" />
     <ClInclude Include="include\BlazeEngine\BlazeEngineCore.h" />
     <ClInclude Include="include\BlazeEngine\Core\BlazeEngineCoreContext.h" />
@@ -361,7 +374,6 @@
     <ClInclude Include="include\BlazeEngine\Core\String\StringTypeConverter.h" />
     <ClInclude Include="include\BlazeEngine\Core\String\StringView.h" />
     <ClInclude Include="include\BlazeEngine\Core\String\StringViewImpl.h" />
-    <ClInclude Include="include\BlazeEngine\Core\Threading\ThreadGroup.h" />
     <ClInclude Include="include\BlazeEngine\Core\Threading\ThreadPool.h" />
     <ClInclude Include="include\BlazeEngine\Core\Threading\ThreadTaskQueue.h" />
     <ClInclude Include="include\BlazeEngine\Core\Type\FunctionTraits.h" />
@@ -554,7 +566,7 @@
     <ClInclude Include="source\BlazeEngine\Core\Application\ECS\SystemCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Core\Application\UI\Components\UIElmenetCreationData.h" />
     <ClInclude Include="source\BlazeEngine\Core\Input\ClientEventStack.h" />
-    <ClInclude Include="source\BlazeEngine\Core\Internal\WindowsPlatform.h" />
+    <ClInclude Include="source\BlazeEngine\Core\Platform\Windows.h" />
     <ClInclude Include="source\BlazeEngine\Core\Resources\Bitmap\SailClasses.h" />
     <ClInclude Include="source\BlazeEngine\Core\Resources\Font\rectpack2D.h" />
     <ClInclude Include="source\pch.h" />

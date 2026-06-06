@@ -79,21 +79,21 @@ namespace Blaze
 		inline bool Empty() const { return size == 0; }
 		void Clear();
 
-		bool MovePosition(intMem offset) override;
-		bool SetPosition(uintMem offset) override;
-		bool SetPositionFromEnd(intMem offset) override;
+		bool MovePosition(intMem offset) override final;
+		bool SetPosition(uintMem offset) override final;
+		bool SetPositionFromEnd(intMem offset) override final;
 
-		uintMem GetPosition() const override;
+		uintMem GetPosition() const override final;
 
-		uintMem GetSize() const override;
+		uintMem GetSize() const override final;
 		const void* GetPtr() const;
 
-		uintMem Read(void* ptr, uintMem byteCount) override;
+		uintMem Read(void* destinationPtr, uintMem byteCount) override final;
 
 		/*
 			Replaces the internal buffer. Sets the position to the beginning
 		*/
-		void SetBuffer(const void* ptr, uintMem size);		
+		void SetBuffer(const void* newPtr, uintMem size);		
 
 		BufferViewStream& operator=(const BufferViewStream&) = delete;
 		BufferViewStream& operator=(BufferViewStream&&) noexcept;

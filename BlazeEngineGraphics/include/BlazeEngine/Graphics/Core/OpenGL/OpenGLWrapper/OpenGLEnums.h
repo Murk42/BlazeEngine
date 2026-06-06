@@ -233,6 +233,10 @@ namespace Blaze::Graphics::OpenGL
 		Uint16,
 		Uint32,		
 	};
+	enum class DoubleVertexAttributeType
+	{
+		Double
+	};
 	enum class FloatVertexAttributeType
 	{
 		Int8,
@@ -244,6 +248,15 @@ namespace Blaze::Graphics::OpenGL
 		Half,
 		Float,
 		Double,
+	};
+	enum class NormalizedVertexAttributeType
+	{
+		Int8,
+		Int16,
+		Int32,
+		Uint8,
+		Uint16,
+		Uint32,
 	};
 	enum class PackedVertexAttributeType
 	{

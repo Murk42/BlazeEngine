@@ -2,13 +2,7 @@
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 
 #ifdef BLAZE_PLATFORM_WINDOWS
-#include "BlazeEngine/Core/Internal/WindowsPlatform.h"
-#include <Windows.h>
-#undef DeleteFile
-#undef CreateDirectory
-#undef min
-#undef max
-#undef GetMessage
+#include "BlazeEngine/Core/Platform/Windows.h"
 #endif
 
 #include "BlazeEngine/Core/String/String.h"

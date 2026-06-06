@@ -19,8 +19,9 @@ namespace Blaze
 		}		
 		constexpr Matrix(const T(&values)[Sx*Sy])
 		{
-			for (uintMem i = 0; i != Sx * Sy; ++i)
-				((T*)arr)[i] = values[i];
+			for (uintMem x = 0; x < Sx; ++x)
+				for (uintMem y = 0; y < Sy; ++y)
+					arr[x][y] = values[x * Sx + y];
 		}
 		constexpr Matrix(T* ptr)
 		{
@@ -138,23 +139,22 @@ namespace Blaze
 				0, 0, 0, 1,
 				});
 		}
-		static constexpr Matrix ScalingMatrix(Vec3<T> v) requires (Sx == 4) && (Sy == 4)
+		template<uintMem S>
+		static constexpr Matrix ScalingMatrix(Vector<T, S> v) requires (Sx == Sy) && (S <= Sx)
 		{
-			return Matrix<T, 4, 4>({
-				v.x, 0, 0, 0,
-				0, v.y, 0, 0,
-				0, 0, v.z, 0,
-				0, 0, 0, 1,
-				});
+			Matrix identity = Matrix<T, Sx, Sy>::Identity();
+			for (uintMem i = 0; i < S; ++i)
+				identity[i][i] = v[i];
+
+			return identity;			
 		}
-		static constexpr Matrix ScalingMatrix(T v) requires (Sx == 4) && (Sy == 4)
+		static constexpr Matrix ScalingMatrix(T v) requires (Sx == Sy)
 		{
-			return Matrix<T, 4, 4>({
-				v, 0, 0, 0,
-				0, v, 0, 0,
-				0, 0, v, 0,
-				0, 0, 0, 1,
-				});
+			Matrix identity = Matrix<T, Sx, Sy>::Identity();
+			for (uintMem i = 0; i < Sx; ++i)
+				identity[i][i] = v;
+
+			return identity;			
 		}
 		static constexpr Matrix RotationMatrix(Quat<T> q) requires (Sx == 4) && (Sy == 4)
 		{

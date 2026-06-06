@@ -1,21 +1,28 @@
 #include "pch.h"
 #include "BlazeEngine/UI/Text/SingleLineTextShaper.h"
+#include "BlazeEngine/UI/Text/FontFace.h"
 #include <harfbuzz/hb-ft.h>
 
 namespace Blaze::UI::Text
 {	
-	SingleLineTextShaper::SingleLineTextShaper(u8StringView textContext, const FontFace& fontFace, uint32 fontHeight)
-		: textContext(textContext), fontHandle(nullptr), fontHeight(fontHeight)
+	SingleLineTextShaper::SingleLineTextShaper(u8StringView textContext, const Nodes::TextStyle& textStyle)
+		: textContext(textContext), fontHandle(nullptr), textStyle(textStyle)
 	{
-		if (fontFace.IsValidFontFace())
+		auto fontData = textStyle.GetFontData();
+		if (fontData.fontFace == nullptr)
 		{
-			FT_Face fontFaceHandle = (FT_Face)fontFace.GetHandle();
-			FT_Set_Pixel_Sizes(fontFaceHandle, static_cast<FT_UInt>(fontHeight), 0);
-			fontHandle = hb_ft_font_create_referenced((FT_Face)fontFace.GetHandle());
+			BLAZE_LOG_ERROR("Creating a shaping context with an invalid text style");
+			return;
+		}
+
+		if (fontData.fontFace->IsValidFontFace())
+		{
+			FT_Face fontFaceHandle = (FT_Face)fontData.fontFace->GetHandle();
+			FT_Set_Pixel_Sizes(fontFaceHandle, static_cast<FT_UInt>(textStyle.fontHeight), 0);
+			fontHandle = hb_ft_font_create_referenced((FT_Face)fontData.fontFace->GetHandle());
 		}
 		else
 		{
-			fontHeight = 0;
 			BLAZE_LOG_ERROR("Creating a shaping context with an invalid font face");
 		}
 	}

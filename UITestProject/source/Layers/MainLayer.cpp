@@ -13,10 +13,15 @@ MainLayer::~MainLayer()
 void MainLayer::SetupGraphics(const GraphicsAppRuntimeThreadData& data)
 {
 	UISystem.InitializeGraphics(data.graphicsContext, data.rendererRegistry);
-	UISystem.SetWindow(&data.window);	
+	UISystem.SetWindow(&data.window);
 
 	if (auto textRenderer = UISystem.GetGraphicsSubSystem().GetRendererRegistry().GetRenderer<Graphics::AntialiasedTextRenderer>())
-		fontManager.CreateFontAtlas("default", { 48, 30, 18, 9 }, *textRenderer);
+		fontManager.CreateFontAtlas("default", { 48, 32, 27, 18, 12, 9, 6 }, *textRenderer);
+
+	screen.windowTitleTextInput.SetValueEnteredCallback([&](u8StringView text)
+		{
+			data.window.SetTitle(text);
+		});
 } 
 
 void MainLayer::Update() 

@@ -26,34 +26,15 @@ namespace Blaze::Graphics::OpenGL
 			program = ShaderProgram({ vert, frag });
 		}
 
-		va.EnableVertexAttribute(0);
-		va.SetFloatVertexAttributeFormat(0, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 4, 0);
-		va.SetVertexAttributeBuffer(0, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(0, 1);
-		va.EnableVertexAttribute(1);
-		va.SetFloatVertexAttributeFormat(1, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 4, 16);
-		va.SetVertexAttributeBuffer(1, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(1, 1);
-		va.EnableVertexAttribute(2);
-		va.SetFloatVertexAttributeFormat(2, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 2, 32);
-		va.SetVertexAttributeBuffer(2, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(2, 1);
-		va.EnableVertexAttribute(3);
-		va.SetFloatVertexAttributeFormat(3, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 2, 40);
-		va.SetVertexAttributeBuffer(3, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(3, 1);
-		va.EnableVertexAttribute(4);
-		va.SetFloatVertexAttributeFormat(4, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 2, 48);
-		va.SetVertexAttributeBuffer(4, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(4, 1);
-		va.EnableVertexAttribute(5);
-		va.SetFloatVertexAttributeFormat(5, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 1, 56);
-		va.SetVertexAttributeBuffer(5, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(5, 1);
-		va.EnableVertexAttribute(6);
-		va.SetFloatVertexAttributeFormat(6, Blaze::Graphics::OpenGL::FloatVertexAttributeType::Float, 1, 60);
-		va.SetVertexAttributeBuffer(6, &GetBuffer(), sizeof(Instance), 0);
-		va.SetVertexAttributeDivisor(6, 1);
+		va.SetVertexAttribute({ 0, &Instance::fillColor, 1 });
+		va.SetVertexAttribute({ 1, &Instance::borderColor, 1 });
+		va.SetVertexAttribute({ 2, &Instance::p1, 1 });
+		va.SetVertexAttribute({ 3, &Instance::p2, 1 });
+		va.SetVertexAttribute({ 4, &Instance::p3, 1 });
+		va.SetVertexAttribute({ 5, &Instance::borderWidth, 1 });
+		va.SetVertexAttribute({ 6, &Instance::cornerRadius, 1 });
+
+		va.SetBindingBuffer(0, &GetBuffer(), sizeof(Instance), 0);
 	}
 	PanelRenderer_OpenGL::~PanelRenderer_OpenGL()
 	{

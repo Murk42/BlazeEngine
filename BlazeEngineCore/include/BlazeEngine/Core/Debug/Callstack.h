@@ -44,7 +44,7 @@ namespace Blaze::Debug
 
 		const StackFrame* FirstStackFrame() const;
 
-		const StackFrame& operator[](int i) const;
+		const StackFrame& operator[](uintMem i) const;
 
 		bool operator==(const Callstack& other) const;
 		bool operator!=(const Callstack& other) const;

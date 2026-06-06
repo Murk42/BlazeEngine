@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "BlazeEngine/Core/Math/Random.h"
-//#include "BlazeEngine/Core/"
-#include <random>
+
+#pragma warning(disable : 4244)
 
 namespace Blaze::Random
 {
-    static const uint8_t perm[256] = {
+    static const uint8 perm[256] = {
         151, 160, 137, 91, 90, 15,
         131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
         190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33,
@@ -21,60 +21,60 @@ namespace Blaze::Random
         138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
     };
 
-    static uint64_t simplex_seed;
+    static uint64 simplex_seed;
 
-    inline uint64_t hash2(uint32 value1, uint32 value2)
+    inline uint64 hash2(uint32 value1, uint32 value2)
     {
-        return Hash<uint64>().Compute(static_cast<uint64>(value2) + static_cast<uint64>(value1) << 32);
+        return Hash<uint64>().Compute(static_cast<uint64>(value2) + (static_cast<uint64>(value1) << 32));
     }
 
-    static inline uint8_t hash(int32_t i) {
-        return perm[static_cast<uint8_t>(hash2(i, simplex_seed))];
+    static inline uint8 hash(uint32 i) {
+        return perm[static_cast<uint8>(hash2(i, static_cast<uint32>(simplex_seed)))];
     }
 
-    static inline int32_t fastfloor_float(float fp) {
-        int32_t i = static_cast<int32_t>(fp);
+    static inline int64 fastfloor_float(float fp) {
+        int64 i = static_cast<int64>(fp);
         return (fp < i) ? (i - 1) : (i);
     }
-    static float grad_float(int32_t hash, float x) {
-        const int32_t h = hash & 0x0F;  
+    static float grad_float(uint8 hash, float x) {
+        const uint8 h = hash & 0x0F;
         float grad_float = 1.0f + (h & 7);    
         if ((h & 8) != 0) grad_float = -grad_float;     
         return (grad_float * x);              
     }
-    static float grad_float(int32_t hash, float x, float y) {
-        const int32_t h = hash & 0x3F;  
+    static float grad_float(uint8 hash, float x, float y) {
+        const uint8 h = hash & 0x3F;
         const float u = h < 4 ? x : y;  
         const float v = h < 4 ? y : x;
         return ((h & 1) ? -u : u) + ((h & 2) ? -2.0f * v : 2.0f * v);
     }
-    static float grad_float(int32_t hash, float x, float y, float z) {
-        int h = hash & 15;    
-        float u = h < 8 ? x : y; 
-        float v = h < 4 ? y : h == 12 || h == 14 ? x : z; 
+    static float grad_float(uint8 hash, float x, float y, float z) {
+        const uint8 h = hash & 15;
+        const float u = h < 8 ? x : y; 
+        const float v = h < 4 ? y : h == 12 || h == 14 ? x : z; 
         return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
     }
 
-    static inline int64_t fastfloor_double(double fp) {
-        int64_t i = static_cast<int64_t>(fp);
+    static inline int64 fastfloor_double(double fp) {
+        int64 i = static_cast<int64>(fp);
         return (fp < i) ? (i - 1) : (i);
     }
-    static double grad_double(int64_t hash, double x) {
-        const int64_t h = hash & 0x0F;
+    static double grad_double(uint8 hash, double x) {
+        const uint8 h = hash & 0x0F;
         double grad_double = 1.0 + (h & 7);
         if ((h & 8) != 0) grad_double = -grad_double;
         return (grad_double * x);
     }
-    static double grad_double(int64_t hash, double x, double y) {
-        const int64_t h = hash & 0x3F;
+    static double grad_double(uint8 hash, double x, double y) {
+        const uint8 h = hash & 0x3F;
         const double u = h < 4 ? x : y;
         const double v = h < 4 ? y : x;
         return ((h & 1) ? -u : u) + ((h & 2) ? -2.0 * v : 2.0 * v);
     }
-    static double grad_double(int64_t hash, double x, double y, double z) {
-        int h = hash & 15;
-        double u = h < 8 ? x : y;
-        double v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+    static double grad_double(uint8 hash, double x, double y, double z) {
+        const uint8 h = hash & 15;
+        const double u = h < 8 ? x : y;
+        const double v = h < 4 ? y : h == 12 || h == 14 ? x : z;
         return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
     }
     
@@ -101,19 +101,19 @@ namespace Blaze::Random
     float Simplex(float x) {
         float n0, n1;
         
-        int32_t i0 = fastfloor_float(x);
-        int32_t i1 = i0 + 1;
+        int64 i0 = fastfloor_float(x);
+        int64 i1 = i0 + 1;
         
         float x0 = x - i0;
         float x1 = x0 - 1.0f;
         
         float t0 = 1.0f - x0 * x0;        
         t0 *= t0;
-        n0 = t0 * t0 * grad_float(hash(i0), x0);
+        n0 = t0 * t0 * grad_float(hash(static_cast<uint32>(i0)), x0);
         
         float t1 = 1.0f - x1 * x1;        
         t1 *= t1;
-        n1 = t1 * t1 * grad_float(hash(i1), x1);        
+        n1 = t1 * t1 * grad_float(hash(static_cast<uint32>(i1)), x1);        
         return 0.395f * (n0 + n1);
     }
     float Simplex(Vec2f v) {
@@ -125,8 +125,8 @@ namespace Blaze::Random
         const float s = (v.x + v.y) * F2; 
         const float xs = v.x + s;
         const float ys = v.y + s;
-        const int32_t i = fastfloor_float(xs);
-        const int32_t j = fastfloor_float(ys);
+        const int64 i = fastfloor_float(xs);
+        const int64 j = fastfloor_float(ys);
         
         const float t = static_cast<float>(i + j) * G2;
         const float X0 = i - t;
@@ -134,7 +134,7 @@ namespace Blaze::Random
         const float x0 = v.x - X0; 
         const float y0 = v.y - Y0;
         
-        int32_t i1, j1;  
+        uint64 i1, j1;  
         if (x0 > y0) {   
             i1 = 1;
             j1 = 0;
@@ -149,9 +149,9 @@ namespace Blaze::Random
         const float x2 = x0 - 1.0f + 2.0f * G2;  
         const float y2 = y0 - 1.0f + 2.0f * G2;
         
-        const int gi0 = hash(i + hash(j));
-        const int gi1 = hash(i + i1 + hash(j + j1));
-        const int gi2 = hash(i + 1 + hash(j + 1));
+        const uint8 gi0 = hash(i + hash(j));
+        const uint8 gi1 = hash(i + i1 + hash(j + j1));
+        const uint8 gi2 = hash(i + 1 + hash(j + 1));
         
         float t0 = 0.5f - x0 * x0 - y0 * y0;
         if (t0 < 0.0f) {
@@ -189,9 +189,9 @@ namespace Blaze::Random
         static const float G3 = 1.0f / 6.0f;
         
         float s = (v.x + v.y + v.z) * F3; 
-        int i = fastfloor_float(v.x + s);
-        int j = fastfloor_float(v.y + s);
-        int k = fastfloor_float(v.z + s);
+        int64 i = fastfloor_float(v.x + s);
+        int64 j = fastfloor_float(v.y + s);
+        int64 k = fastfloor_float(v.z + s);
         float t = (i + j + k) * G3;
         float X0 = i - t;
         float Y0 = j - t;
@@ -200,8 +200,8 @@ namespace Blaze::Random
         float y0 = v.y - Y0;
         float z0 = v.z - Z0;
         
-        int i1, j1, k1; 
-        int i2, j2, k2; 
+        uint64 i1, j1, k1; 
+        uint64 i2, j2, k2; 
         if (x0 >= y0) {
             if (y0 >= z0) {
                 i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0; 
@@ -235,10 +235,10 @@ namespace Blaze::Random
         float y3 = y0 - 1.0f + 3.0f * G3;
         float z3 = z0 - 1.0f + 3.0f * G3;
         
-        int gi0 = hash(i + hash(j + hash(k)));
-        int gi1 = hash(i + i1 + hash(j + j1 + hash(k + k1)));
-        int gi2 = hash(i + i2 + hash(j + j2 + hash(k + k2)));
-        int gi3 = hash(i + 1 + hash(j + 1 + hash(k + 1)));
+        uint8 gi0 = hash(i + hash(j + hash(k)));
+        uint8 gi1 = hash(i + i1 + hash(j + j1 + hash(k + k1)));
+        uint8 gi2 = hash(i + i2 + hash(j + j2 + hash(k + k2)));
+        uint8 gi3 = hash(i + 1 + hash(j + 1 + hash(k + 1)));
         
         float t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;
         if (t0 < 0) {
@@ -278,19 +278,19 @@ namespace Blaze::Random
     double Simplex(double x) {
         double n0, n1;
 
-        int64_t i0 = fastfloor_double(x);
-        int64_t i1 = i0 + 1;
+        int64 i0 = fastfloor_double(x);
+        int64 i1 = i0 + 1;
 
         double x0 = x - i0;
         double x1 = x0 - 1.0f;
 
         double t0 = 1.0f - x0 * x0;
         t0 *= t0;
-        n0 = t0 * t0 * grad_double(hash(i0), x0);
+        n0 = t0 * t0 * grad_double(static_cast<int64>(hash(i0)), x0);
 
         double t1 = 1.0f - x1 * x1;
         t1 *= t1;
-        n1 = t1 * t1 * grad_double(hash(i1), x1);
+        n1 = t1 * t1 * grad_double(static_cast<int64>(hash(i1)), x1);
         return 0.395f * (n0 + n1);
     }
     double Simplex(Vec2d v) {
@@ -302,8 +302,8 @@ namespace Blaze::Random
         const double s = (v.x + v.y) * F2;
         const double xs = v.x + s;
         const double ys = v.y + s;
-        const int64_t i = fastfloor_double(xs);
-        const int64_t j = fastfloor_double(ys);
+        const int64 i = fastfloor_double(xs);
+        const int64 j = fastfloor_double(ys);
 
         const double t = static_cast<double>(i + j) * G2;
         const double X0 = i - t;
@@ -311,7 +311,7 @@ namespace Blaze::Random
         const double x0 = v.x - X0;
         const double y0 = v.y - Y0;
 
-        int64_t i1, j1;
+        uint64 i1, j1;
         if (x0 > y0) {
             i1 = 1;
             j1 = 0;
@@ -326,9 +326,9 @@ namespace Blaze::Random
         const double x2 = x0 - 1.0f + 2.0f * G2;
         const double y2 = y0 - 1.0f + 2.0f * G2;
 
-        const int gi0 = hash(i + hash(j));
-        const int gi1 = hash(i + i1 + hash(j + j1));
-        const int gi2 = hash(i + 1 + hash(j + 1));
+        const uint8 gi0 = hash(i + hash(j));
+        const uint8 gi1 = hash(i + i1 + hash(j + j1));
+        const uint8 gi2 = hash(i + 1 + hash(j + 1));
 
         double t0 = 0.5f - x0 * x0 - y0 * y0;
         if (t0 < 0.0f) {
@@ -377,8 +377,8 @@ namespace Blaze::Random
         double y0 = v.y - Y0;
         double z0 = v.z - Z0;
 
-        int i1, j1, k1;
-        int i2, j2, k2;
+        uint64 i1, j1, k1;
+        uint64 i2, j2, k2;
         if (x0 >= y0) {
             if (y0 >= z0) {
                 i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0;

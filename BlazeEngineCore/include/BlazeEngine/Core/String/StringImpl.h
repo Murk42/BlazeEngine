@@ -226,7 +226,7 @@ namespace Blaze
 		if (pos < 0)
 			pos += count;
 
-		if (pos < 0 || pos > count)
+		if (pos < 0 || static_cast<uintMem>(pos) > count)
 			BLAZE_LOG_FATAL_BASIC("Invalid index");
 
 		if (count == 0)
@@ -243,7 +243,7 @@ namespace Blaze
 
 		memcpy(ptr, old, pos * sizeof(Char));
 		memcpy(ptr + pos, other.Ptr(), other.Count() * sizeof(Char));
-		memcpy(ptr + pos + other.Count(), old + pos, (oldCount - pos) * sizeof(Char));
+		memcpy(ptr + pos + other.Count(), old + pos, (oldCount - static_cast<uintMem>(pos)) * sizeof(Char));
 
 		ptr[count] = 0;
 
@@ -258,10 +258,10 @@ namespace Blaze
 		if (pos < 0)
 			pos += count;
 
-		if (pos < 0 || pos >= count)
+		if (pos < 0 || static_cast<uintMem>(pos) >= count)
 			BLAZE_LOG_FATAL_BASIC("Invalid index");
 
-		if (countToErase > count - pos)
+		if (countToErase > count - static_cast<uintMem>(pos))
 			BLAZE_LOG_FATAL_BASIC("Accesing string outside its range");
 
 		if (countToErase == count)
@@ -277,7 +277,7 @@ namespace Blaze
 		ptr = (Char*)allocator.Allocate((count + 1) * sizeof(Char));
 
 		memcpy(ptr, old, pos * sizeof(Char));
-		memcpy(ptr + pos, old + pos + countToErase, (oldCount - pos - countToErase) * sizeof(Char));
+		memcpy(ptr + pos, old + pos + countToErase, (oldCount - static_cast<uintMem>(pos) - countToErase) * sizeof(Char));
 
 		ptr[count] = 0;
 
@@ -662,6 +662,11 @@ namespace Blaze
 		return *this;
 	}
 	template<typename Char, AllocatorType Allocator>
+	inline GenericString<Char, Allocator>& GenericString<Char, Allocator>::operator+=(UnicodeChar other)
+	{
+		return *this += GenericStringView<Char>(other.ToCodePoints<Char>().AsString());
+	}
+	template<typename Char, AllocatorType Allocator>
 	inline GenericString<Char, Allocator>& GenericString<Char, Allocator>::operator=(GenericString&& other) noexcept
 	{
 		allocator.Free(ptr);
@@ -701,12 +706,12 @@ namespace Blaze
 		return *this;
 	}
 	template<typename Char, AllocatorType Allocator>
-	inline void GenericString<Char, Allocator>::AssignUnsafe(const Char* ptr, uintMem bufferSize)
+	inline void GenericString<Char, Allocator>::AssignUnsafe(const Char* sourcePtr, uintMem bufferSize)
 	{
 		if (bufferSize == 0)
 			return;
 
-		if (ptr[bufferSize - 1] == '\0')
+		if (sourcePtr[bufferSize - 1] == '\0')
 		{
 			if (bufferSize == 1)
 				return;
@@ -716,9 +721,9 @@ namespace Blaze
 		else
 			count = bufferSize;
 
-		this->ptr = (Char*)allocator.Allocate(sizeof(Char) * (bufferSize + 1));
-		memcpy(this->ptr, ptr, sizeof(Char) * count);
-		this->ptr[count] = 0;
+		ptr = (Char*)allocator.Allocate(sizeof(Char) * (bufferSize + 1));
+		memcpy(ptr, sourcePtr, sizeof(Char) * count);
+		ptr[count] = 0;
 	}
 
 	template<typename Char, AllocatorType Allocator1, AllocatorType Allocator2>

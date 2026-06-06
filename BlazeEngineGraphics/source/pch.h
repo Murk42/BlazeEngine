@@ -7,5 +7,5 @@
 #endif
 
 #ifdef BLAZE_GRAPHICS_OPENGL
-	#include <gl/glew.h>
+#include <gl/glew.h>
 #endif

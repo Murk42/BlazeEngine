@@ -1,7 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/Container/Array.h"
-#include "BlazeEngine/Core/Threading/Thread.h"
-#include <mutex>
 
 namespace Blaze
 {
@@ -11,28 +8,20 @@ namespace Blaze
 		using TaskFunction = void(*)(void*);
 
 		ThreadPool();
+		ThreadPool(const ThreadPool& other) = delete;
+		ThreadPool(ThreadPool&& other) noexcept;
 		~ThreadPool();
 
-		void AllocateThreads(uintMem threads);
+		void Clear();
+
+		void SetThreadCountHint(uintMem minThreads, uintMem maxThreads);
 
 		void RunTask(TaskFunction function, void* userData);
 
-		bool IsAnyRunning();
-		uintMem WaitForAll(float timeout);
-
-		inline uintMem ThreadCount() const { return threads.Count(); }
+		ThreadPool& operator=(const ThreadPool& other) = delete;
+		ThreadPool& operator=(ThreadPool&& other) noexcept;
 	private:
-		struct TaskData
-		{
-			TaskFunction function;
-			void* userData;
-		};
-
-		bool exit : 1;
-		Array<Blaze::Thread> threads;
-		Array<TaskData> tasks;
-		std::condition_variable cv;
-		std::mutex mutex;
+		void* impl;	
 
 		static int ThreadFunc(void* userData);
 	};

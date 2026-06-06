@@ -1,11 +1,11 @@
 #pragma once
-#include "BlazeEngine/Core/Type/Variant.h"
+#include "BlazeEngine/Core/Common/Variant.h"
 #include "BlazeEngine/Runtime/IO/InputEvents.h"
 #include "BlazeEngine/Core/Event/EventHandlerData.h"
 
 namespace Blaze
 {
-	class WindowMouseCaptureHandle
+	class BLAZE_API WindowMouseCaptureHandle
 	{
 	public:
 		struct MouseCaptureLostEvent { WindowMouseCaptureHandle& handle; };

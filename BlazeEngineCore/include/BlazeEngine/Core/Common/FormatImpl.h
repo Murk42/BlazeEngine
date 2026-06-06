@@ -93,7 +93,7 @@ namespace Blaze
 
 				auto specifiersSubString = parseSubString.SubString(colonIndex == SIZE_MAX ? 0 : colonIndex + 1, parseSubString.Count());
 
-				const Arg& value = args.GetValueByIndex<I>();
+				const Arg& value = args.template GetValueByIndex<I>();
 				FormatParseContext<Char> parseContext(specifiersSubString);
 				uintMem size = formatter.Parse(value, parseContext);
 
@@ -154,7 +154,7 @@ namespace Blaze
 				if (outputStringPosition == size)
 					return;
 
-				const Arg& value = args.GetValueByIndex<I>();
+				const Arg& value = args.template GetValueByIndex<I>();
 
 				FormatContext<Char> context{ ptr, outputStringPosition, outputStringPosition + formatArgumentData[I].formatedSize };
 				formatter.Format(value, context);

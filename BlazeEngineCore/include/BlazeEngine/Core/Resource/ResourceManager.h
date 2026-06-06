@@ -1,7 +1,9 @@
 #pragma once
 #include "BlazeEngine/Core/Resource/DefaultResourceStorage.h"
 #include "BlazeEngine/Core/Container/VirtualMap.h"
+#include "BlazeEngine/Core/Container/Array.h"
 #include "BlazeEngine/Core/Threading/ThreadPool.h"
+#include <mutex>
 
 namespace Blaze
 {

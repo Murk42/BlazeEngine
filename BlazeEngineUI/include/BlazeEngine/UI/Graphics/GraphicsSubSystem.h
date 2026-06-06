@@ -6,7 +6,7 @@
 
 namespace Blaze::UI
 {
-	class GraphicsSubSystem
+	class BLAZE_API GraphicsSubSystem
 	{
 	public:
 		struct RenderGroup

@@ -45,32 +45,3 @@ LabeledButton::LabeledButton(Node& parent, const UI::NodeTransform& transform, u
 	label.SetText(labelText);
 	label.SetTextStyle(textStyle);
 }
-
-NumberTextInput::NumberTextInput()
-	: TextInput()
-{
-}
-
-NumberTextInput::NumberTextInput(Node& parent, const UI::NodeTransform& transform)
-	: TextInput(parent, transform), value(0.0f)
-{
-}
-
-NumberTextInput::NumberTextInput(Node& parent, const UI::NodeTransform& transform, const TextStyle& textStyle, u8String text)
-	: TextInput(parent, transform, textStyle, "", "0.0"), value(0.0f)
-{
-	SetText(std::move(text));
-}
-
-bool NumberTextInput::FilterEnteredText(u8StringView text)
-{	
-	float value = 0.0f;
-
-	u8StringView remainingString;
-	if (!text.ConvertToDecimal(value, FloatStringConvertFormat::General, &remainingString) || !remainingString.Empty())
-		return false;
-
-	this->value = value;
-
-	return true;
-}

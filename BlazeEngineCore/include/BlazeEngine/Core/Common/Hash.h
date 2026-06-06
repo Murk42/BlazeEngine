@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Type/IntegerTraits.h"
+#include "BlazeEngine/Core/Type/TypeTraits.h"
 
 namespace Blaze
 {
@@ -109,14 +110,14 @@ namespace Blaze
 				x = static_cast<T>(0); // maps -0.0 to +0.0
 
 			uint64 bits = 0;
-			*reinterpret_cast<T*>(&bits) = x;
+			std::memcpy(&bits, &x, sizeof(T));
 			return Hash<uint64>::Compute(bits);
 		}
 	};
 
-	template<IsEnumType T>
-	struct Hash<T> : Hash<UnderlyingType<T>> 
-	{ 
+	template<typename T> requires IsEnumType<T>
+	class Hash<T> : public Hash<std::underlying_type_t<T>>
+	{
 	public:
 		using Type = T;
 

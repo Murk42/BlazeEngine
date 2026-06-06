@@ -98,7 +98,6 @@
 #include "BlazeEngine/Core/String/UnicodeChar.h"
 
 #include "BlazeEngine/Core/Threading/Thread.h"
-#include "BlazeEngine/Core/Threading/ThreadGroup.h"
 #include "BlazeEngine/Core/Threading/ThreadPool.h"
 
 #include "BlazeEngine/Core/Time/Stopwatch.h"
@@ -112,4 +111,5 @@
 #include "BlazeEngine/Core/Type/TypeGroup.h"
 #include "BlazeEngine/Core/Type/TypeTraits.h"
 #include "BlazeEngine/Core/Type/TypeTraitsImpl.h"
-#include "BlazeEngine/Core/Type/Variant.h"
+#include "BlazeEngine/Core/Type/VectorTraits.h"
+#include "BlazeEngine/Core/Common/Variant.h"

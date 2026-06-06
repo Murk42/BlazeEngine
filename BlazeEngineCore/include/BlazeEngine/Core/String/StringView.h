@@ -127,7 +127,7 @@ namespace Blaze
 		const Char* ptr;
 		uintMem count;
 
-		constexpr void Assign(const Char* ptr, uintMem bufferSize);
+		constexpr void Assign(const Char* sourcePtr, uintMem bufferSize);
 	};
 
 	template<typename Char, AllocatorType Allocator>

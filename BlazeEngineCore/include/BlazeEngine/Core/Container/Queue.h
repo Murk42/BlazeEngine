@@ -1,9 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/BlazeEngineCoreDefines.h"
 #include "BlazeEngine/Core/Memory/Allocator.h" 
-#include "BlazeEngine/Core/Container/ArrayView.h"
-#include "BlazeEngine/Core/Container/RawArray.h"
-#include <memory>
+#include "BlazeEngine/Core/Container/ReferenceContainer.h"
 
 namespace Blaze
 {

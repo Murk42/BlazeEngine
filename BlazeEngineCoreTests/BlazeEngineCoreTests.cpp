@@ -157,7 +157,7 @@ namespace BlazeEngineCoreTests
 			Assert::IsFalse(GenericString(U"fg1漢字2g3.41").ConvertToDecimal(value, FloatStringConvertFormat::Fixed, nullptr), L"A float conversion that shouldn't succeed succeeded");
 		}
 
-		TEST_METHOD(FormatTest1)
+		TEST_METHOD(FormatIntegerTest)
 		{
 			{
 				u8String formatted = Format("{:-<15}", 230149);
@@ -215,134 +215,23 @@ namespace BlazeEngineCoreTests
 				Assert::IsTrue(formatted == u"| 10       |", L"Format produced wrong result");
 			}
 		}
-		TEST_METHOD(FormatTest2)
+		TEST_METHOD(FormatStringTest)
 		{
-			MemoryListener memoryListener{ true, true };
-			{
+			auto AssertFormat = [](const auto& format, const auto& text, const auto& correctResult)
 				{
-					u8String formatted = Format("{:-<15}", 230.149f);
+					u8String formatted = Format(format, text);
 					Logger::WriteMessage((const char*)formatted.Ptr());
 					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u8"230.149--------", L"Format produced wrong result");
-				}
+					Assert::IsTrue(formatted == correctResult, reinterpret_cast<const wchar_t*>(Format(u"Format produced wrong result: Format({}, {}) != {}", format, text, correctResult).Ptr()));
+				};
 
-				{
-					u16String formatted = Format(u"{: ^5}", 12.34567);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"12.34567", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"{:_>12}", -0.0623457);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"__-0.0623457", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"{:_>+#}", 0.0f);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"+0.", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{: ^#26a}|", 272.0625f);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"|        0x1.101p+8        |", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{: ^#26a}|", -272.0625f);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"|       -0x1.101p+8        |", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{: >+010d}|", 13438.23);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"|+ 13438.23|", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{: ^ 010d}|", -.001);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"|-  0.001  |", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{: < #010o}|", 8.0f);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"| 8.       |", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{: < #010.5o}|", 8.0f);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"| 8.00000  |", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{:>+#012.5E}|", 8.0f);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"|+ 8.0000E+00|", L"Format produced wrong result");
-				}
-
-				{
-					u16String formatted = Format(u"|{: <+#012.5f}|", 654.4167743);
-					Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-					Logger::WriteMessage("\n");
-					Assert::IsTrue(formatted == u"|+654.41677  |", L"Format produced wrong result");
-				}
-			}
-			memoryListener.StopListening();
-			auto report = memoryListener.GenerateReport();
-			Logger::WriteMessage(report.Format().Ptr());
-			if (report.unfreedSize != 0)
-				Assert::Fail(L"Memory leak");
+			AssertFormat("{:-<15}", "TestString", "TestString-----");
+			AssertFormat("{:_>12}", "TestString", "__TestString");
+			AssertFormat("{:_>}", "", "");
+			AssertFormat("{: ^5}", "TestString", "stStr");
+			AssertFormat("|{: ^26}|", "TestString", "|        TestString        |");			
 		}
-		TEST_METHOD(FormatTest3)
-		{
-			{
-				u8String formatted = Format("{:-<15}", "TestString");
-				Logger::WriteMessage((const char*)formatted.Ptr());
-				Logger::WriteMessage("\n");
-				Assert::IsTrue(formatted == u8"TestString-----", L"Format produced wrong result");
-			}
-			{
-				u16String formatted = Format(u"{: ^5}", u"TestString");
-				Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-				Logger::WriteMessage("\n");
-				Assert::IsTrue(formatted == u"TestString", L"Format produced wrong result");
-			}
-			{
-				u16String formatted = Format(u"{:_>12}", u"TestString");
-				Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-				Logger::WriteMessage("\n");
-				Assert::IsTrue(formatted == u"__TestString", L"Format produced wrong result");
-			}
-			{
-				u16String formatted = Format(u"{:_>}", u"");
-				Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-				Logger::WriteMessage("\n");
-				Assert::IsTrue(formatted == u"", L"Format produced wrong result");
-			}
-			{
-				u16String formatted = Format(u"|{: ^26}|", u"TestString");
-				Logger::WriteMessage((const wchar_t*)formatted.Ptr());
-				Logger::WriteMessage("\n");
-				Assert::IsTrue(formatted == u"|        TestString        |", L"Format produced wrong result");
-			}
-		}
-		TEST_METHOD(FormatTest4)
+		TEST_METHOD(FormatComplexTest)
 		{
 			u16StringView formatString = u"|{: ^26}|{:.^#15X}|   {:>+012h}|   |{:<10}|{:^15f}|";
 			{
@@ -375,9 +264,25 @@ namespace BlazeEngineCoreTests
 				Logger::WriteMessage("\n");
 			}
 		}
+		TEST_METHOD(FormatMemoryLeakTest)
+		{
+			MemoryListener memoryListener{ true, true };
+
+			FormatIntegerTest();
+			FormatStringTest();
+			FormatComplexTest();
+
+			memoryListener.StopListening();
+			auto report = memoryListener.GenerateReport();
+			Logger::WriteMessage(report.Format().Ptr());
+			if (report.unfreedSize != 0)
+				Assert::Fail(L"Memory leak");
+		}
 
 		TEST_METHOD(QueueTest)
 		{
+			MemoryListener memoryListener{ true, true };
+
 			Queue<int> queue;
 			
 			for (int i = 0; i < 47; ++i)
@@ -394,6 +299,16 @@ namespace BlazeEngineCoreTests
 				queue.Pop();
 
 			queue.Clear();
+
+			memoryListener.StopListening();
+			auto report = memoryListener.GenerateReport();
+			Logger::WriteMessage(report.Format().Ptr());
+			if (report.unfreedSize != 0)
+				Assert::Fail(L"Memory leak");
+		}
+
+		TEST_METHOD(OtherTest)
+		{
 		}
 	};
 }

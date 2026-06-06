@@ -18,7 +18,7 @@ namespace Blaze::Graphics::OpenGL
 
 		void SetProjectionMatrix(const Mat4f& matrix) override;
 		void SetViewMatrix(const Mat4f& matrix) override;
-		void SetShadingOptions(Vec3f lightDirection, ColorRGBf ambientColor = 0x000000) override;
+		void SetShadingOptions(Vec3f lightDirection, ColorRGBf ambientColor = 0x000000_rgb) override;
 
 		void Render(ArrayView<Vec3f> vertices, ArrayView<uint32> indices, Mat4f modelMatrix, ColorRGBAf color) override;
 	private:

@@ -5,7 +5,7 @@
 
 namespace Blaze::Graphics::OpenGL
 {	
-	class RendererBase_OpenGL : public virtual RendererBase
+	class BLAZE_API RendererBase_OpenGL : public virtual RendererBase
 	{
 	public:
 		GraphicsContext_OpenGL& graphicsContext;

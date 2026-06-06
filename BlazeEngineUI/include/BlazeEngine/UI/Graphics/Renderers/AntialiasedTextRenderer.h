@@ -4,7 +4,7 @@
 
 namespace Blaze::Graphics
 {
-	class AntialiasedTextRenderer : public TextRendererBase
+	class BLAZE_API AntialiasedTextRenderer : public TextRendererBase
 	{
 	public:
 		const UI::FontGlyphRasterizer& GetFontGlyphRasterizer() const { return glyphRasterizer; }

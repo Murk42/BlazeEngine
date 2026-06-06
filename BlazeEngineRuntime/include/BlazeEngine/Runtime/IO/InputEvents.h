@@ -1,7 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/String/String.h"
 #include "BlazeEngine/Core/Math/Vector.h"
-#include "BlazeEngine/Core/Type/Variant.h"
+#include "BlazeEngine/Core/Common/Variant.h"
 #include "BlazeEngine/Runtime/IO/InputTypes.h"
 
 namespace Blaze

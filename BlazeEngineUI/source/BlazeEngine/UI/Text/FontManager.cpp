@@ -38,7 +38,7 @@ namespace Blaze::UI
 		{
 			if (it->value.fontFace != fontFace)
 			{
-				it->value.atlasData.Clear();
+				it->value.fontData.Clear();
 				it->value.fontFace = fontFace;
 
 				return true;
@@ -57,23 +57,23 @@ namespace Blaze::UI
 		for (auto& fontAtlasPixelSize : fontAtlasPixelSizes)
 		{
 			AtlasData* newAtlasData = nullptr;
-			for (uintMem i = 0; i < it->value.atlasData.Count(); ++i)
+			for (uintMem i = 0; i < it->value.fontData.Count(); ++i)
 			{
-				AtlasData& atlasData = it->value.atlasData[i];
-				if (atlasData.atlas.GetRasterFontHeight() == fontAtlasPixelSize)
+				AtlasData& fontData = it->value.fontData[i];
+				if (fontData.atlas.GetRasterFontHeight() == fontAtlasPixelSize)
 				{
-					newAtlasData = &it->value.atlasData[i];
+					newAtlasData = &it->value.fontData[i];
 					break;
 				}
-				else if (atlasData.atlas.GetRasterFontHeight() > fontAtlasPixelSize)
+				else if (fontData.atlas.GetRasterFontHeight() > fontAtlasPixelSize)
 				{
-					newAtlasData = it->value.atlasData.AddAt(i);
+					newAtlasData = it->value.fontData.AddAt(i);
 					break;
 				}
 			}
 
 			if (newAtlasData == nullptr)
-				newAtlasData = it->value.atlasData.AddBack();
+				newAtlasData = it->value.fontData.AddBack();
 
 			auto glyphIndices = it->value.fontFace->GetAllGlyphsInidices();
 			FontAtlasDescriptor descriptor{
@@ -116,7 +116,7 @@ namespace Blaze::UI
 	{
 		return CreateFontAtlas(name, fontAtlasPixelSizes, textRenderer.GetFontGlyphRasterizer(), textRenderer.GetTypeID(), textRenderer.GetGraphicsContext(), useCache);
 	}
-	bool FontManager::GetFontAtlas(StringView name, uint32 fontHeight, FontAtlasData& fontAtlasData) const
+	bool FontManager::GetFontAtlas(StringView name, uint32 fontHeight, FontData& fontAtlasData) const
 	{
 		if (fontHeight == 0.0f || name.Empty())
 		{
@@ -128,7 +128,7 @@ namespace Blaze::UI
 
 		auto it = entries.Find(name);
 
-		if (it.IsNull() || it->value.atlasData.Empty())
+		if (it.IsNull() || it->value.fontData.Empty())
 		{
 			fontAtlasData.atlas = nullptr;
 			fontAtlasData.fontFace = nullptr;
@@ -138,16 +138,16 @@ namespace Blaze::UI
 
 		uintMem i = 0;
 
-		for (; i < it->value.atlasData.Count(); ++i)
-			if (it->value.atlasData[i].atlas.GetRasterFontHeight() >= fontHeight)
+		for (; i < it->value.fontData.Count(); ++i)
+			if (it->value.fontData[i].atlas.GetRasterFontHeight() >= fontHeight)
 				break;
 
-		if (i == it->value.atlasData.Count())
+		if (i == it->value.fontData.Count())
 			--i;
 
 		fontAtlasData.fontFace = it->value.fontFace.GetValue();
-		fontAtlasData.atlas = &it->value.atlasData[i].atlas;
-		fontAtlasData.rendererTypeID = it->value.atlasData[i].rendererTypeID;
+		fontAtlasData.atlas = &it->value.fontData[i].atlas;
+		fontAtlasData.rendererTypeID = it->value.fontData[i].rendererTypeID;
 		return true;
 	}
 	void FontManager::AddToScreen(Screen& screen)

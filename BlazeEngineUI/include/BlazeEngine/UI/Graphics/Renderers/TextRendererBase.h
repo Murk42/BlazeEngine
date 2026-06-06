@@ -1,5 +1,4 @@
 #pragma once
-#include "BlazeEngine/Core/Common/Handle.h"
 #include "BlazeEngine/Core/Common/Color.h"
 #include "BlazeEngine/Graphics/Core/RendererBase.h"
 #include "BlazeEngine/UI/Text/FontGlyphRasterizer.h"
@@ -19,7 +18,7 @@ namespace Blaze::Graphics
 		float alpha;
 	};
 
-	class TextRendererBase : public virtual RendererBase
+	class BLAZE_API TextRendererBase : public virtual RendererBase
 	{
 	public:
 		virtual void Render(const TextRectRenderData& data) = 0;

@@ -20,79 +20,65 @@ namespace Blaze::UI::Nodes
 		this->glyphs = std::move(glyphs);
 		this->rendererTypeID = rendererTypeID;
 		this->atlas = atlas;
-	}	
+	}
 	void StaticTextRenderUnit::SetColor(ColorRGBAf color)
 	{
 		this->color = color;
 	}
+	Vec2f StaticTextRenderUnit::Initialize(const Text::TextLayoutMetadata& layoutMetadata, const TextStyle& style)
+	{	
+		glyphs.Clear();
+
+		color = style.color;
+
+		auto fontData = style.GetFontData();
+
+		if (fontData.fontFace == nullptr || fontData.atlas == nullptr)
+		{
+			rendererTypeID = 0;
+			atlas = nullptr;
+			return { 0, static_cast<float>(style.fontHeight) };
+		}
+
+		rendererTypeID = fontData.rendererTypeID;
+		atlas = fontData.atlas;		
+	
+		glyphs.Resize(layoutMetadata.GetGlyphCount());
+
+		float maxWidth = 0.0f;		
+		for (uintMem i = 0; i < glyphs.Count(); ++i)
+		{
+			GlyphRenderData& glyphRenderData = glyphs[i];
+			Text::TextLayoutMetadata::GlyphLayoutData glyphLayoutData = layoutMetadata.GetGlyphData(i);
+			Text::TextLayoutMetadata::CharacterLayoutData characterLayoutData = layoutMetadata.GetCharacterData(glyphLayoutData.characterIndex);
+			Text::TextLayoutMetadata::LineLayoutData lineLayoutData = layoutMetadata.GetLineData(characterLayoutData.lineIndex);
+
+			FT_Load_Glyph(static_cast<FT_Face>(fontData.fontFace->GetHandle()), static_cast<FT_UInt>(glyphLayoutData.glyphIndex), FT_LOAD_COMPUTE_METRICS | FT_LOAD_NO_BITMAP);
+
+			glyphRenderData.offset = Math::Floor(lineLayoutData.lineStart + glyphLayoutData.offset);
+			glyphRenderData.size = Math::Floor(glyphLayoutData.size);
+
+			Vec2u16 uv1, uv2;
+			if (fontData.atlas->GetGlyphUV(glyphLayoutData.glyphIndex, uv1, uv2))
+			{
+				glyphRenderData.uv1 = Vec2f(uv1) / fontData.atlas->GetSize();
+				glyphRenderData.uv2 = Vec2f(uv2) / fontData.atlas->GetSize();
+			}
+			else
+			{
+				glyphRenderData.uv1 = Vec2f();
+				glyphRenderData.uv2 = Vec2f();
+				glyphRenderData.size = Vec2f();
+			}
+
+			maxWidth = std::max(maxWidth, lineLayoutData.width);
+		}		
+		
+		return { maxWidth, static_cast<float>(style.fontHeight) * layoutMetadata.GetLineCount() };
+	}
 	Graphics::RendererTypeID StaticTextRenderUnit::GetRequiredRendererTypeID() const
 	{
 		return rendererTypeID;
-	}
-	Array<StaticTextRenderUnit::GlyphRenderData> StaticTextRenderUnit::GenerateGlyphRenderData(ArrayView<Text::ShapedString> shapedLines, const FontFace& fontFace, const FontAtlas& fontAtlas, uint32 fontHeight, Vec2f* size)
-	{
-		if (shapedLines.Empty())
-		{
-			if (size != nullptr)
-				*size = { 0, static_cast<float>(fontHeight) };
-			return { };
-		}
-		FT_Face fontFaceHandle = (FT_Face)fontFace.GetHandle();
-		FT_Set_Pixel_Sizes(fontFaceHandle, static_cast<FT_UInt>(fontHeight), 0);
-
-		uintMem glyphCount = 0;
-		for (auto& shapedLine : shapedLines)
-			glyphCount += shapedLine.glyphs.Count();
-
-		Array<GlyphRenderData> glyphs{ glyphCount };
-
-		float maxWidth = 0.0f;
-		Vec2f advance{ 0, static_cast<float>(fontHeight) * (shapedLines.Count() - 1) };
-		auto it = glyphs.Ptr();
-		for (const auto& shapedLine : shapedLines)
-		{
-			advance.x = 0;
-
-			for (const auto& glyph : shapedLine.glyphs)
-			{
-				FT_Load_Glyph(fontFaceHandle, glyph.glyphIndex, FT_LOAD_COMPUTE_METRICS | FT_LOAD_NO_BITMAP);
-
-				it->offset = advance + glyph.offset + 
-					Vec2f(
-						static_cast<float>(fontFaceHandle->glyph->metrics.horiBearingX),
-						static_cast<float>(fontFaceHandle->glyph->metrics.horiBearingY - fontFaceHandle->glyph->metrics.height)
-					) / 64;
-				it->size = { static_cast<float>(fontFaceHandle->glyph->metrics.width / 64) , static_cast<float>(fontFaceHandle->glyph->metrics.height / 64) };
-
-				it->offset = Vec2f(Math::Floor(it->offset.x), Math::Floor(it->offset.y));
-				it->size = Vec2f(Math::Floor(it->size.x), Math::Floor(it->size.y));
-
-				Vec2u16 uv1, uv2;
-				if (fontAtlas.GetGlyphUV(glyph.glyphIndex, uv1, uv2))
-				{
-					it->uv1 = Vec2f(uv1) / fontAtlas.GetSize();
-					it->uv2 = Vec2f(uv2) / fontAtlas.GetSize();
-				}
-				else
-				{
-					it->uv1 = Vec2f();
-					it->uv2 = Vec2f();
-					it->size = Vec2f();
-				}
-
-				advance += glyph.advance;
-
-				++it;
-			}
-
-			maxWidth = shapedLine.extent > maxWidth ? shapedLine.extent : maxWidth;
-			advance.y -= static_cast<float>(fontHeight);
-		}
-
-		if (size != nullptr)
-			*size = { maxWidth, (static_cast<float>(shapedLines.Count())) * fontHeight };
-
-		return glyphs;
 	}
 	void StaticTextRenderUnit::Render(const Node& node, Graphics::TextRendererBase& renderer) 
 	{
@@ -103,8 +89,6 @@ namespace Blaze::UI::Nodes
 		Vec2f right = finalTransform.Right();
 		Vec2f up = finalTransform.Up();
 		Vec2f pos = Math::Floor(finalTransform.position);
-		
-		float atlasFontHeight = atlas->GetRasterFontHeight();
 
 		ResourceBaseRef atlasTexture = atlas->GetTexture();
 		

@@ -1,6 +1,7 @@
 #pragma once
 #include "BlazeEngine/Core/Memory/Allocator.h"
 #include "BlazeEngine/Core/String/StringCommon.h"
+#include "BlazeEngine/Core/String/UnicodeChar.h"
 #include "BlazeEngine/Core/Type/IntegerTraits.h"
 
 
@@ -142,6 +143,7 @@ namespace Blaze
 		template<uintMem Size>
 		GenericString& operator+=(const Char(&other)[Size]);
 		GenericString& operator+=(const Char& other);
+		GenericString& operator+=(UnicodeChar other);
 
 		GenericString& operator=(const GenericString& other);
 		GenericString& operator=(GenericString&& other) noexcept;
@@ -154,7 +156,7 @@ namespace Blaze
 		uintMem count;
 		BLAZE_ALLOCATOR_ATTRIBUTE Allocator allocator;
 
-		void AssignUnsafe(const Char* ptr, uintMem bufferSize);
+		void AssignUnsafe(const Char* sourcePtr, uintMem bufferSize);
 	};
 
 	template<typename Char, uintMem Size>

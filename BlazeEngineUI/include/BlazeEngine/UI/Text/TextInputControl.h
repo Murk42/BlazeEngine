@@ -17,6 +17,8 @@ namespace Blaze::UI::Text
 
 		void SetFocus(uintMem begin, uintMem end);
 		void MoveCursorTo(uintMem newCursorCharacterPos, bool expandSelection);
+		void MoveCursorGraphemeLeft(bool expandSelection);
+		void MoveCursorGraphemeRight(bool expandSelection);
 
 		void InsertAtCursor(u8StringView string);
 		void EraseSelection();

@@ -46,7 +46,7 @@ namespace Blaze
 			else if (value <= 0x10FFFF)
 				return 4;
 
-			return -1;
+			return 0;
 		}
 		else if constexpr (SameAs<Char, char16_t>)
 		{
@@ -62,7 +62,7 @@ namespace Blaze
 				return 2; // surrogate pair
 			}
 
-			return -1; // invalid code point
+			return 0; // invalid code point
 		}
 		else if constexpr (SameAs<Char, char32_t>)
 		{
@@ -174,6 +174,7 @@ namespace Blaze
 		if constexpr (SameAs<Char, char>)
 		{
 			value = static_cast<char32_t>(string[0]);
+			return 1;
 		}
 		else if constexpr (SameAs<Char, char8_t>)
 		{	
@@ -302,9 +303,8 @@ namespace Blaze
 		else if constexpr (SameAs<Char, char32_t>)
 		{
 			value = string[0];
+			return 1;
 		}
-
-		return 1;
 	}
 	template<typename Char>
 	constexpr uintMem UnicodeChar::FromLastCodePoints(GenericStringView<Char> string)

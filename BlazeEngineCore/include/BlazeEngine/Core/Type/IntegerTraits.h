@@ -10,6 +10,9 @@ namespace Blaze
 	concept IntegerType = OneOf<T, int8, uint8, int16, uint16, int32, uint32, int64, uint64, long, unsigned long>;
 
 	template<typename T>
+	concept NumberType = DecimalType<T> || IntegerType<T>;
+
+	template<typename T>
 	concept UnsignedIntegerType = OneOf<T, uint8, uint16, uint32, uint64>;
 
 	template<typename T>

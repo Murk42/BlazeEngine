@@ -10,7 +10,7 @@ namespace Blaze
 	template<typename G>
 	struct _ToTuple
 	{
-		static_assert(std::_Always_false<G>, "ToTuple requires the template parameter to be a TypeGroup");
+		static_assert((sizeof(G) > 0) && false, "ToTuple requires the template parameter to be a TypeGroup");
 	};
 	template<typename ... G>
 	struct _ToTuple<TypeGroup<G...>>

@@ -32,7 +32,7 @@ namespace Blaze
 	{
 	}
 	template<typename NodeBase>
-	inline VirtualMapIterator<NodeBase>::VirtualMapIterator(MatchConst<VirtualMapData<KeyType, BaseType>>& virtualMapData, typename VirtualMapData<KeyType, BaseType>::template Bucket* bucket, NodeBase* nodeBase)
+	inline VirtualMapIterator<NodeBase>::VirtualMapIterator(MatchConst<VirtualMapData<KeyType, BaseType>>& virtualMapData, VirtualMapData<KeyType, BaseType>::Bucket* bucket, NodeBase* nodeBase)
 		: mapData(&virtualMapData), bucket(bucket), nodeBase(nodeBase)
 	{
 	}

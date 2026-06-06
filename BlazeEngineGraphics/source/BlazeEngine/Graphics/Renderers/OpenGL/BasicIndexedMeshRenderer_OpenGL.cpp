@@ -27,16 +27,12 @@ namespace Blaze::Graphics::OpenGL
 			auto vert = OpenGL::VertexShader(ShaderSources::basicMesh_vert);
 			auto frag = OpenGL::FragmentShader(ShaderSources::basicMesh_frag);
 			auto geom = OpenGL::GeometryShader(ShaderSources::basicMesh_geom);
-			SetShaderProgram(ShaderProgram({vert, frag, geom}));
+			SetShaderProgram(ShaderProgram({ vert, frag, geom }));
 		}
 
-		va.EnableVertexAttribute(0);
-		va.SetFloatVertexAttributeFormat(0, FloatVertexAttributeType::Float, 3, offsetof(Vertex, pos));
-		va.SetVertexAttributeBuffer(0, &GetBuffer(), sizeof(Vertex), 0);
-		va.EnableVertexAttribute(1);
-		va.SetIntegerVertexAttributeFormat(1, IntegerVertexAttributeType::Uint32, 1, offsetof(Vertex, meshIndex));
-		va.SetVertexAttributeBuffer(1, &GetBuffer(), sizeof(Vertex), 0);
-
+		va.SetVertexAttribute({ 0, &Vertex::pos });
+		va.SetVertexAttribute({ 1, &Vertex::meshIndex });
+		va.SetBindingBuffer(0, &GetBuffer(), sizeof(Vertex), 0);
 		va.SetIndexBuffer(GetBuffer());
 
 		meshDataBuffer.Allocate(nullptr, sizeof(MeshData) * BatchMaxMeshCount, GraphicsBufferMapAccessFlags::Write, GraphicsBufferMapType::PersistentUncoherent);

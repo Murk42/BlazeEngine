@@ -26,7 +26,7 @@ namespace Blaze::UI::TextShaping
 		hb_font_destroy((hb_font_t*)fontHandle);
 	}
 
-	static uint32 ShapeTextGlyphs(u8StringView text, const ShapingContext& shapingContext, Array<GlyphInfo>& glyphs)
+	static float ShapeTextGlyphs(u8StringView text, const ShapingContext& shapingContext, Array<GlyphInfo>& glyphs)
 	{
 		hb_buffer_t* buf = hb_buffer_create();
 		//hb_buffer_add_utf32(buf, reinterpret_cast<const uint32*>(shapingContext.GetText().Ptr()), static_cast<int>(shapingContext.GetText().Count()), static_cast<unsigned>(text.FirstIterator() - shapingContext.GetText().FirstIterator()), static_cast<int>(text.Count()));
@@ -78,7 +78,7 @@ namespace Blaze::UI::TextShaping
 
 		hb_buffer_destroy(buf);
 
-		return float(extent) / 64.0f;
+		return static_cast<float>(extent) / 64.0f;
 	}
 
 	ShapingResult ShapeText(u8StringView text, const ShapingContext& shapingContext)

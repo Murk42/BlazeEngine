@@ -120,26 +120,19 @@ namespace Blaze::UI::Nodes
 			return;
 		}
 
-		uint32 finalFontHeight = static_cast<uint32>(std::round(textStyle.fontHeight * GetFinalScale()));
-		float finalWrapWidth = wrapWidth * GetFinalScale();
-
-		FontManager::FontAtlasData atlasData;		
-		if (!textStyle.fontManager->GetFontAtlas(textStyle.fontName, finalFontHeight , atlasData))
-		{
-			BLAZE_LOG_WARNING("Couldn't find font atlas with font name: \"{}\"", textStyle.fontName);
-			renderUnit.Clear();
-			return;
-		}				
-
-		updateRenderTopology = atlasData.rendererTypeID != renderUnit.GetRequiredRendererTypeID();
+		TextStyle renderedStyle = textStyle.Scale(GetFinalScale());
 		
 		DefaultTextSeparationData textSeparationData{ text };
 
-		Text::WrappedLineTextShaper textShaper{ text, *atlasData.fontFace, finalFontHeight, textSeparationData, finalWrapWidth };
+		Text::WrappedLineTextShaper textShaper{ text, renderedStyle, textSeparationData, wrapWidth * GetFinalScale() };
 		auto shapedLines = textShaper.Shape(text);
-				
-		Array<StaticTextRenderUnit::GlyphRenderData> glyphs = renderUnit.GenerateGlyphRenderData(shapedLines, *atlasData.fontFace, *atlasData.atlas, finalFontHeight, &textFinalSize);
 
-		renderUnit.SetGlyphs(std::move(glyphs), atlasData.rendererTypeID, atlasData.atlas);
+		Text::TextLayoutMetadata layoutMetadata;
+		layoutMetadata.UpdateLayoutData(shapedLines, renderedStyle);						
+
+		textFinalSize = renderUnit.Initialize(layoutMetadata, renderedStyle);
+
+		updateRenderTopology = renderedStyle.GetFontData().rendererTypeID != renderUnit.GetRequiredRendererTypeID();
+
 	}
 }

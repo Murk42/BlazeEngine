@@ -21,7 +21,7 @@ namespace Blaze
 		bool IsLoaded() const;
 		void WaitToLoad() const;
 
-		uint32 Hash() const;
+		uint64 Hash() const;
 
 		ResourceBase* GetResource() const;
 		template<typename T>

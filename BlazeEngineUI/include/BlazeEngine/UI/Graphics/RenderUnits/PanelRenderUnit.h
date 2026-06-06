@@ -6,8 +6,8 @@ namespace Blaze::UI::Nodes
 {
 	struct PanelStyle
 	{
-		ColorRGBAf fillColor = 0x111111ff;
-		ColorRGBAf borderColor = 0xeeeeeeff;
+		ColorRGBAf fillColor = 0x111111ff_rgba;
+		ColorRGBAf borderColor = 0xeeeeeeff_rgba;
 		float borderWidth = 1;
 		float cornerRadius = 10;
 	};

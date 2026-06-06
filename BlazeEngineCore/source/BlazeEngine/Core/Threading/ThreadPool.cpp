@@ -1,60 +1,92 @@
 #include "pch.h"
+#ifndef BLAZE_PLATFORM_WINDOWS
 #include "BlazeEngine/Core/Threading/ThreadPool.h"
+#include "BlazeEngine/Core/Container/Array.h"
+#include "BlazeEngine/Core/Threading/Thread.h"
+#include <mutex>
+#include <condition_variable>
 
 namespace Blaze
 {
+	struct TaskData
+	{
+		ThreadPool::TaskFunction function;
+		void* userData;
+	};
+
+	struct ThreadPoolImpl
+	{
+		bool exit : 1 = false;
+		Array<Blaze::Thread> threads;
+		Array<TaskData> tasks;
+		std::condition_variable cv;
+		std::mutex mutex;				
+	};
+#undef THIS
+#define THIS static_cast<ThreadPoolImpl*>(this->impl)
+
 	ThreadPool::ThreadPool()
-		: exit(false)
+		: impl(nullptr)
+	{
+	}
+	ThreadPool::ThreadPool(ThreadPool&& other) noexcept
+		: impl(std::exchange(other.impl, nullptr))
 	{
 	}
 	ThreadPool::~ThreadPool()
 	{
+		Clear();
+	}
+
+	void ThreadPool::Clear()
+	{
+		if (impl == nullptr)
+			return;
+
 		{
-			std::lock_guard lk{ mutex };
-			exit = true;
+			std::lock_guard lk{ THIS->mutex };
+			THIS->exit = true;
 		}
 
-		cv.notify_all();
+		THIS->cv.notify_all();
 
-		for (auto& thread : threads)
+		for (auto& thread : THIS->threads)
 			thread.WaitToFinish(FLT_MAX);
-	}
 
-	void ThreadPool::AllocateThreads(uintMem threadCount)
+		delete impl;
+	}
+	void ThreadPool::SetThreadCountHint(uintMem minThreads, uintMem maxThreads)
 	{
-		threads.Resize(threadCount);
-		for (auto& thread : threads)
+		if (impl == nullptr) impl = new ThreadPoolImpl();
+
+		THIS->threads.Resize((minThreads + maxThreads + 1) / 2);
+
+		for (auto& thread : THIS->threads)
 			thread.Run(ThreadFunc, (void*)this);
 	}
-
 	void ThreadPool::RunTask(TaskFunction function, void* userData)
 	{
+		if (impl == nullptr) impl = new ThreadPoolImpl();
+
 		if (function == nullptr)
 			return;
-		std::lock_guard lk{ mutex };
-		tasks.AddBack(function, userData);
 
-		cv.notify_one();
+		std::lock_guard lk{ THIS->mutex };
+		THIS->tasks.AddBack(function, userData);
+
+		THIS->cv.notify_one();
 	}
-
-	bool ThreadPool::IsAnyRunning()
+	ThreadPool& ThreadPool::operator=(ThreadPool&& other) noexcept
 	{
-		for (auto& thread : threads)
-			if (thread.IsRunning())
-				return true;
-		return false;
-	}
+		Clear();
 
-	uintMem ThreadPool::WaitForAll(float timeout)
-	{
-		uintMem count = 0;
-		for (auto& thread : threads)
-			count += thread.WaitToFinish(timeout) ? 1 : 0;
-		return count;
+		impl = std::exchange(other.impl, nullptr);
+
+		return *this;
 	}
 	int ThreadPool::ThreadFunc(void* userData)
 	{
-		ThreadPool& threadPool = *(ThreadPool*)userData;
+		ThreadPoolImpl& threadPool = *static_cast<ThreadPoolImpl*>(static_cast<ThreadPool*>(userData)->impl);
 
 		while (true)
 		{
@@ -75,3 +107,4 @@ namespace Blaze
 		return 0;
 	}
 }
+#endif

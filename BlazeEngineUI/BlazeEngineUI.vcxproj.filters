@@ -201,6 +201,12 @@
     <ClInclude Include="include\BlazeEngine\UI\Text\TextLayoutMetadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Common\TextInputBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BlazeEngine\UI\Nodes\FloatInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pch.cpp">
@@ -339,6 +345,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\BlazeEngine\UI\Graphics\RenderUnits\CursorRenderUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Common\TextInputBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BlazeEngine\UI\Nodes\FloatInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

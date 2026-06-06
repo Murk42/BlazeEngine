@@ -5,8 +5,8 @@ namespace Blaze
 	template<typename Char>
 	constexpr GenericStringCharIterator<Char>::GenericStringCharIterator(GenericStringIterator<const Char> it, GenericStringView<Char> string)
 		: ptr(it.Ptr()), begin(string.Begin()), end(string.End())
-	{
-		if (ptr < begin - 1 || ptr > end)
+	{		
+		if (begin != nullptr && (ptr < begin - 1 || ptr > end))
 		{
 			BLAZE_LOG_FATAL_BASIC("Invalid iterator");
 			return;

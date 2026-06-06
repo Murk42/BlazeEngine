@@ -4,7 +4,6 @@
 #include "BlazeEngine/Runtime/IO/Window.h"
 #include "BlazeEngine/UI/Core/Screen.h"
 #include "BlazeEngine/UI/Input/InputNode.h"
-
 #include "BlazeEngine/UI/Input/PointerData.h"
 
 namespace Blaze::UI
@@ -15,6 +14,8 @@ namespace Blaze::UI
 	{
 	public:
 		InputSubSystem();
+		InputSubSystem(const InputSubSystem&) = delete;
+		InputSubSystem(InputSubSystem&& other) = delete;
 		InputSubSystem(Screen& screen);
 		~InputSubSystem();
 
@@ -33,6 +34,9 @@ namespace Blaze::UI
 		Vec2f GetScreenMousePos(Input::MouseID mouseID) const;
 
 		const Map<Input::MouseID, PointerData>& GetPointerMap() const;
+
+		InputSubSystem& operator=(const InputSubSystem&) = delete;
+		InputSubSystem& operator=(InputSubSystem&&) = delete;
 	private:
 		Screen* screen;
 		Window* window;
